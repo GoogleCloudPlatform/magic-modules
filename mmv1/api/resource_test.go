@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -1399,12 +1400,13 @@ func TestResource_UseLegacyIdentityImportTest(t *testing.T) {
 	}
 }
 
-func TestResourceTimeoutsUnmarshalYAML(t *testing.T) {
+func TestResourceTimeoutsDefaults(t *testing.T) {
 	t.Parallel()
 
 	cases := []struct {
 		description string
 		yamlContent string
+		product     *api.Product
 		want        api.Timeouts
 	}{
 		{
@@ -1419,6 +1421,34 @@ timeouts:
 				InsertMinutes: 40,
 				UpdateMinutes: 20,
 				DeleteMinutes: 20,
+			},
+		},
+		{
+			description: "partial top-level timeouts with update_minutes only",
+			yamlContent: `
+name: TestResource
+base_url: test
+timeouts:
+  update_minutes: 35
+`,
+			want: api.Timeouts{
+				InsertMinutes: 20,
+				UpdateMinutes: 35,
+				DeleteMinutes: 20,
+			},
+		},
+		{
+			description: "partial top-level timeouts with delete_minutes only",
+			yamlContent: `
+name: TestResource
+base_url: test
+timeouts:
+  delete_minutes: 50
+`,
+			want: api.Timeouts{
+				InsertMinutes: 20,
+				UpdateMinutes: 20,
+				DeleteMinutes: 50,
 			},
 		},
 		{
@@ -1437,20 +1467,281 @@ async:
 				DeleteMinutes: 20,
 			},
 		},
+		{
+			description: "empty timeouts map",
+			yamlContent: `
+name: TestResource
+base_url: test
+timeouts: {}
+`,
+			want: api.Timeouts{
+				InsertMinutes: 20,
+				UpdateMinutes: 20,
+				DeleteMinutes: 20,
+			},
+		},
+		{
+			description: "null timeouts block",
+			yamlContent: `
+name: TestResource
+base_url: test
+timeouts:
+`,
+			want: api.Timeouts{
+				InsertMinutes: 20,
+				UpdateMinutes: 20,
+				DeleteMinutes: 20,
+			},
+		},
+		{
+			description: "partial top-level matching default falls back to async operation timeouts",
+			yamlContent: `
+name: TestResource
+base_url: test
+timeouts:
+  insert_minutes: 20
+async:
+  operation:
+    timeouts:
+      update_minutes: 45
+`,
+			want: api.Timeouts{
+				InsertMinutes: 20,
+				UpdateMinutes: 45,
+				DeleteMinutes: 20,
+			},
+		},
+		{
+			description: "product-level async operation timeouts inherited via SetDefault",
+			yamlContent: `
+name: TestResource
+base_url: test
+`,
+			product: &api.Product{
+				Name: "TestProduct",
+				Async: &api.Async{
+					Operation: &api.Operation{
+						Timeouts: &api.Timeouts{
+							DeleteMinutes: 55,
+						},
+					},
+				},
+			},
+			want: api.Timeouts{
+				InsertMinutes: 20,
+				UpdateMinutes: 20,
+				DeleteMinutes: 55,
+			},
+		},
 	}
 
 	for _, tc := range cases {
-		tc := tc
 		t.Run(tc.description, func(t *testing.T) {
 			t.Parallel()
 			var res api.Resource
 			if err := yaml.Unmarshal([]byte(tc.yamlContent), &res); err != nil {
 				t.Fatalf("yaml.Unmarshal() failed: %v", err)
 			}
+			if tc.product != nil {
+				res.SetDefault(tc.product)
+			}
 			got := res.GetTimeouts()
-			if *got != tc.want {
-				t.Errorf("GetTimeouts() = %+v, want %+v", *got, tc.want)
+			if diff := cmp.Diff(tc.want, *got); diff != "" {
+				t.Errorf("GetTimeouts() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
+}
+
+func TestResourceTimeoutsRejectsInvalidYAML(t *testing.T) {
+	t.Parallel()
+
+	strictDecode := func(raw string, out interface{}) error {
+		dec := yaml.NewDecoder(bytes.NewReader([]byte(raw)))
+		dec.KnownFields(true)
+		return dec.Decode(out)
+	}
+
+	cases := []struct {
+		description string
+		yamlContent string
+		wantErr     string
+	}{
+		{
+			description: "explicit zero insert_minutes",
+			yamlContent: "insert_minutes: 0\n",
+			wantErr:     "insert_minutes must be > 0",
+		},
+		{
+			description: "explicit zero update_minutes",
+			yamlContent: "update_minutes: 0\n",
+			wantErr:     "update_minutes must be > 0",
+		},
+		{
+			description: "explicit zero delete_minutes",
+			yamlContent: "delete_minutes: 0\n",
+			wantErr:     "delete_minutes must be > 0",
+		},
+		{
+			description: "negative insert_minutes",
+			yamlContent: "insert_minutes: -5\n",
+			wantErr:     "insert_minutes must be > 0",
+		},
+		{
+			description: "unknown field in timeouts",
+			yamlContent: "insert_minutes: 40\nbogus_minutes: 10\n",
+			wantErr:     "bogus_minutes",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			var timeouts api.Timeouts
+			err := strictDecode(tc.yamlContent, &timeouts)
+			if err == nil {
+				t.Fatalf("expected error containing %q, got nil", tc.wantErr)
+			}
+			if !strings.Contains(err.Error(), tc.wantErr) {
+				t.Errorf("error = %v, want substring %q", err, tc.wantErr)
+			}
+		})
+	}
+
+	t.Run("negative timeout rejected by Resource.Validate", func(t *testing.T) {
+		t.Parallel()
+		res := api.Resource{
+			Name:        "TestResource",
+			Description: "Test description",
+			Timeouts: &api.Timeouts{
+				InsertMinutes: -1,
+			},
+		}
+		errs := res.Validate()
+		found := false
+		for _, err := range errs {
+			if strings.Contains(err.Error(), "insert_minutes") && strings.Contains(err.Error(), "must be > 0") {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("expected validation error mentioning insert_minutes > 0, got %v", errs)
+		}
+	})
+}
+
+func TestResourceTimeoutsOverrideMerge(t *testing.T) {
+	t.Parallel()
+
+	t.Run("partial override timeouts does not clobber base non-default timeouts", func(t *testing.T) {
+		t.Parallel()
+		baseYAML := `
+name: TestResource
+base_url: test
+timeouts:
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 60
+`
+		overrideYAML := `
+name: TestResource
+timeouts:
+  insert_minutes: 90
+`
+		var base, override api.Resource
+		if err := yaml.Unmarshal([]byte(baseYAML), &base); err != nil {
+			t.Fatalf("unmarshal base failed: %v", err)
+		}
+		if err := yaml.Unmarshal([]byte(overrideYAML), &override); err != nil {
+			t.Fatalf("unmarshal override failed: %v", err)
+		}
+
+		api.Merge(reflect.ValueOf(&base).Elem(), reflect.ValueOf(override), "ga")
+		base.SetDefault(&api.Product{})
+
+		got := base.GetTimeouts()
+		want := api.Timeouts{
+			InsertMinutes: 90,
+			UpdateMinutes: 60,
+			DeleteMinutes: 60,
+		}
+		if diff := cmp.Diff(want, *got); diff != "" {
+			t.Errorf("merged timeouts mismatch (-want +got):\n%s", diff)
+		}
+	})
+
+	t.Run("partial override async operation timeouts does not clobber base", func(t *testing.T) {
+		t.Parallel()
+		baseYAML := `
+name: TestResource
+base_url: test
+async:
+  operation:
+    timeouts:
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 60
+`
+		overrideYAML := `
+name: TestResource
+async:
+  operation:
+    timeouts:
+      update_minutes: 90
+`
+		var base, override api.Resource
+		if err := yaml.Unmarshal([]byte(baseYAML), &base); err != nil {
+			t.Fatalf("unmarshal base failed: %v", err)
+		}
+		if err := yaml.Unmarshal([]byte(overrideYAML), &override); err != nil {
+			t.Fatalf("unmarshal override failed: %v", err)
+		}
+
+		api.Merge(reflect.ValueOf(&base).Elem(), reflect.ValueOf(override), "ga")
+		base.SetDefault(&api.Product{})
+
+		got := base.GetTimeouts()
+		want := api.Timeouts{
+			InsertMinutes: 60,
+			UpdateMinutes: 90,
+			DeleteMinutes: 60,
+		}
+		if diff := cmp.Diff(want, *got); diff != "" {
+			t.Errorf("merged async timeouts mismatch (-want +got):\n%s", diff)
+		}
+	})
+
+	t.Run("override timeouts on resource without base timeouts populates defaults for omitted", func(t *testing.T) {
+		t.Parallel()
+		baseYAML := `
+name: TestResource
+base_url: test
+`
+		overrideYAML := `
+name: TestResource
+timeouts:
+  delete_minutes: 45
+`
+		var base, override api.Resource
+		if err := yaml.Unmarshal([]byte(baseYAML), &base); err != nil {
+			t.Fatalf("unmarshal base failed: %v", err)
+		}
+		if err := yaml.Unmarshal([]byte(overrideYAML), &override); err != nil {
+			t.Fatalf("unmarshal override failed: %v", err)
+		}
+
+		api.Merge(reflect.ValueOf(&base).Elem(), reflect.ValueOf(override), "ga")
+		base.SetDefault(&api.Product{})
+
+		got := base.GetTimeouts()
+		want := api.Timeouts{
+			InsertMinutes: 20,
+			UpdateMinutes: 20,
+			DeleteMinutes: 45,
+		}
+		if diff := cmp.Diff(want, *got); diff != "" {
+			t.Errorf("merged timeouts mismatch (-want +got):\n%s", diff)
+		}
+	})
 }

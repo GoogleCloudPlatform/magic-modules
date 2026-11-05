@@ -565,7 +565,12 @@ func (r *Resource) setShallowDefaults() {
 		r.IamPolicy.MinVersion = r.MinVersion
 	}
 	if r.Timeouts == nil {
-		r.Timeouts = NewTimeouts() // This only sets defaults if Timeouts is nil
+		r.Timeouts = NewTimeouts()
+	} else {
+		r.Timeouts.SetDefault()
+	}
+	if r.Async != nil && r.Async.Operation != nil && r.Async.Operation.Timeouts != nil {
+		r.Async.Operation.Timeouts.SetDefault()
 	}
 	if !r.DeletionPolicyExclude {
 		if r.DeletionPolicyDefault == "" {
@@ -642,6 +647,13 @@ func (r *Resource) Validate() (es []error) {
 
 	for _, property := range google.Concat(r.AllProperties(), r.VirtualFields) {
 		es = append(es, property.Validate(r.Name)...)
+	}
+
+	if r.Timeouts != nil {
+		es = append(es, r.Timeouts.Validate(r.Name)...)
+	}
+	if r.Async != nil && r.Async.Operation != nil && r.Async.Operation.Timeouts != nil {
+		es = append(es, r.Async.Operation.Timeouts.Validate(r.Name)...)
 	}
 
 	if r.IamPolicy != nil {
@@ -1007,6 +1019,9 @@ func (r Resource) RootProperties() []*Type {
 func (r Resource) GetAsync() *Async {
 	if r.Async != nil {
 		return r.Async
+	}
+	if r.ProductMetadata == nil {
+		return nil
 	}
 
 	return r.ProductMetadata.Async
@@ -1504,10 +1519,10 @@ func (r Resource) PackageName() string {
 // In order of preference, use TF override,
 // general defined timeouts, or default Timeouts
 func (r Resource) GetTimeouts() *Timeouts {
-	timeoutsFiltered := r.Timeouts
+	timeoutsFiltered := r.Timeouts.withDefaults()
 	if timeoutsFiltered == nil || timeoutsFiltered.IsZero() {
 		if async := r.GetAsync(); async != nil && async.Operation != nil {
-			timeoutsFiltered = async.Operation.Timeouts
+			timeoutsFiltered = async.Operation.Timeouts.withDefaults()
 		}
 
 		if timeoutsFiltered == nil {
