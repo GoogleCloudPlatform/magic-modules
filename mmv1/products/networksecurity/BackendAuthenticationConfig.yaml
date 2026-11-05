@@ -32,6 +32,7 @@ async:
     base_url: '{{op_id}}'
   actions: [create, delete, update]
 autogen_async: true
+generate_list_resource: true
 samples:
   - name: network_security_backend_authentication_config_basic
     primary_resource_id: default
