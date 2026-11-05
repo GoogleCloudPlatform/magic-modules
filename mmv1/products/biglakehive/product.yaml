@@ -21,4 +21,3 @@ scopes:
 versions:
   - name: ga
     base_url: https://biglake.googleapis.com/
-legacy_identity_import_test: true

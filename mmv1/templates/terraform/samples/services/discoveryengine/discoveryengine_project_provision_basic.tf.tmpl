@@ -1,0 +1,26 @@
+resource "google_project" "project" {
+  project_id      = "{{index $.ResourceIdVars "project_id"}}"
+  name            = "{{index $.ResourceIdVars "project_id"}}"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_project_service" "discoveryengine" {
+  project            = google_project.project.project_id
+  service            = "discoveryengine.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "time_sleep" "wait_enable_service_api" {
+  depends_on      = [google_project_service.discoveryengine]
+  create_duration = "30s"
+}
+
+resource "google_discovery_engine_project_provision" "{{$.PrimaryResourceId}}" {
+  project                = google_project.project.project_id
+  accept_data_use_terms  = true
+  data_use_terms_version = "2022-11-23"
+
+  depends_on = [time_sleep.wait_enable_service_api]
+}

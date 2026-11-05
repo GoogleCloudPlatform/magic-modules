@@ -31,7 +31,6 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"github.com/otiai10/copy"
 )
 
 var testRegex = regexp.MustCompile("func (TestAcc[^(]+)")
@@ -313,15 +312,13 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 
 		srcDir := filepath.Join("third_party/tgc_next/pkg/services", tgc.Product.ApiName)
 		dstDir := filepath.Join(outputFolder, "pkg/services", tgc.Product.ApiName)
-		if err := copy.Copy(srcDir, dstDir); err != nil && !errors.Is(err, os.ErrNotExist) {
+		if err := copyDir(srcDir, dstDir, nil); err != nil && !errors.Is(err, os.ErrNotExist) {
 			log.Println(fmt.Errorf("error copying service directory %v: %v", srcDir, err))
 		}
 	} else {
 		// Shared copying
-		if err := copy.Copy("third_party/tgc_next", outputFolder, copy.Options{
-			Skip: func(srcinfo os.FileInfo, src, dest string) (bool, error) {
-				return strings.Contains(src, "pkg/services/"), nil
-			},
+		if err := copyDir("third_party/tgc_next", outputFolder, func(src string) bool {
+			return strings.Contains(src, "pkg/services/")
 		}); err != nil {
 			log.Println(fmt.Errorf("error copying directory %v: %v", outputFolder, err))
 		}

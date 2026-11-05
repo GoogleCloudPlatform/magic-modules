@@ -26,6 +26,17 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// Existing resources that combine default_from_api with output.
+// These are grandfathered to avoid breaking existing resource schemas.
+// Do not add new fields to this list; see:
+// https://github.com/hashicorp/terraform-provider-google/issues/18832
+var defaultFromApiConflictAllowlist = []string{
+	"DataPolicy.etag",
+	"EkmConnection.service_resolvers.server_certificates.subject_alternative_dns_names",
+	"LinkedDataset.bigquery_dataset",
+	"Rule.rule_id",
+}
+
 // Represents a property type
 type Type struct {
 	Name string `yaml:"name,omitempty"`
@@ -506,6 +517,18 @@ func (t *Type) Validate(rName string) (es []error) {
 
 	if t.Output && t.Required {
 		es = append(es, fmt.Errorf("property %s cannot be output and required at the same time in resource %s.", fullFieldPath, rName))
+	}
+
+	if t.Output && (t.IsA("Enum") || (t.IsA("Array") && t.ItemType != nil && t.ItemType.IsA("Enum"))) {
+		es = append(es, fmt.Errorf("property %s cannot be an output-only Enum in resource %s; use String instead", fullFieldPath, rName))
+	}
+
+	if t.DefaultFromApi && t.Required {
+		es = append(es, fmt.Errorf("property %s cannot set both default_from_api and required in resource %s", fullFieldPath, rName))
+	}
+
+	if t.DefaultFromApi && t.Output && !slices.Contains(defaultFromApiConflictAllowlist, fmt.Sprintf("%s.%s", rName, fullFieldPath)) {
+		es = append(es, fmt.Errorf("property %s cannot set both default_from_api and output in resource %s", fullFieldPath, rName))
 	}
 
 	if t.DefaultFromApi && t.DefaultValue != nil {

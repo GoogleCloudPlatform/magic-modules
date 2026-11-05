@@ -232,6 +232,7 @@ samples:
         min_version: 'beta'
         resource_id_vars:
           backend_service_name: 'backend-service'
+          authentication_name: 'authentication'
 parameters:
 properties:
   - name: 'affinityCookieTtlSec'

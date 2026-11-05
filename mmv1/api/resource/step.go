@@ -190,6 +190,9 @@ func (s *Step) TestDependencies(resourcePrefixPkgMap map[string]string) map[stri
 		if strings.HasPrefix(val, "kms.") {
 			deps["services/kms"] = ""
 		}
+		if strings.HasPrefix(val, "resourcemanager.") {
+			deps["services/resourcemanager"] = ""
+		}
 		if strings.HasPrefix(val, "servicenetworking.") {
 			deps["services/servicenetworking"] = ""
 		}

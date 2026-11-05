@@ -1221,6 +1221,15 @@ func testAccIntegrationConnectorsConnection_full(context map[string]interface{})
         }
       }
       enrichment_enabled = true
+      allowed_event_types = ["topic1", "topic2"]
+      global_event_filter = "has(event.id)"
+      dead_letter_config {
+        project_id = data.google_project.test_project.project_id
+        topic      = "test-topic"
+      }
+      enrichment_config {
+        append_acl = true
+      }
     }
   }
 `, context)
@@ -1431,6 +1440,15 @@ func testAccIntegrationConnectorsConnection_update(context map[string]interface{
         }
       }
       enrichment_enabled = false
+      allowed_event_types = ["topic1", "topic2"]
+      global_event_filter = "has(event.id)"
+      dead_letter_config {
+        project_id = data.google_project.test_project.project_id
+        topic      = "test-topic-updated"
+      }
+      enrichment_config {
+        append_acl = false
+      }
     }
   }
 `, context)

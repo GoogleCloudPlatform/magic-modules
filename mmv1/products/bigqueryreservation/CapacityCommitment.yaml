@@ -40,6 +40,7 @@ sweeper:
 custom_code:
   constants: templates/terraform/constants/bigquery_reservation_capacity_commitment.go.tmpl
   custom_import: templates/terraform/custom_import/bigquery_reservation_capacity_commitment_set_id.go.tmpl
+  post_read: templates/terraform/post_read/bigquery_reservation_capacity_commitment.go.tmpl
 samples:
   - name: bigquery_reservation_capacity_commitment_basic
     primary_resource_id: commitment
@@ -74,6 +75,7 @@ parameters:
       or merged.
     url_param_only: true
     immutable: true
+    default_from_api: true
   - name: location
     type: String
     description: |

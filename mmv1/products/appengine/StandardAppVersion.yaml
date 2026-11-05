@@ -86,7 +86,6 @@ samples:
         ignore_read_extra:
           - delete_service_on_destroy
   - name: app_engine_standard_app_version_vpc_access
-    min_version: beta
     primary_resource_id: gae-std-app-ver-vpc-access
     steps:
       - name: app_engine_standard_app_version_vpc_access
@@ -99,6 +98,7 @@ samples:
         ignore_read_extra:
           - delete_service_on_destroy
       - name: app_engine_standard_app_version_vpc_access_egress_setting
+        min_version: beta
         vars:
           egress_setting: PRIVATE_IP_RANGES
         resource_id_vars:
@@ -108,6 +108,7 @@ samples:
         ignore_read_extra:
           - delete_service_on_destroy
       - name: app_engine_standard_app_version_vpc_access_egress_setting
+        min_version: beta
         vars:
           egress_setting: ALL_TRAFFIC
         resource_id_vars:
@@ -392,7 +393,6 @@ properties:
           The egress setting for the connector, controlling what traffic is diverted through it.
   - name: vpcAccess
     type: NestedObject
-    min_version: beta
     description: |
       Direct VPC Access settings for standard apps.
     conflicts:
@@ -401,6 +401,7 @@ properties:
       - name: egressSetting
         api_name: vpcEgress
         type: String
+        min_version: beta
         default_from_api: true
         deprecation_message: '`egress_setting` is deprecated and will be removed in a future major release. Use `vpc_egress` instead.'
         conflicts:

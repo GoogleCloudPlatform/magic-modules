@@ -93,7 +93,6 @@ parameters:
     type: String
     description: The region for the resource. It should be the same as the featureonlinestore region.
     url_param_only: true
-    required: true
     immutable: true
     default_from_api: true
 properties:

@@ -68,7 +68,7 @@ func TestAccBiglakeHiveHiveCatalog_biglakeHiveCatalog_update(t *testing.T) {
 			},
 			{
 				ResourceName:       "google_biglake_hive_catalog.my_hive_catalog",
-				RefreshState:       true,
+				ImportState:        true,
 				ExpectNonEmptyPlan: true,
 				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},

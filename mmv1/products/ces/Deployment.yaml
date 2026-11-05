@@ -230,6 +230,41 @@ properties:
       - name: conversationProfileId
         type: String
         description: The Conversation Profile ID to use for the deployment.
+  - name: modality
+    type: Enum
+    description: |-
+      The modality of the deployment.
+    enum_values:
+      - MODALITY_TEXT
+      - MODALITY_VOICE
+      - MODALITY_VIDEO
+  - name: modelSettings
+    type: NestedObject
+    description: |-
+      Model settings for the deployment.
+      Overrides model settings configured at the app/agent levels.
+    properties:
+      - name: model
+        type: String
+        description: |-
+          The LLM model that the agent should use.
+          If not set, the agent will inherit the model from its parent agent.
+      - name: temperature
+        type: Double
+        description: |-
+          If set, this temperature will be used for the LLM model. Temperature
+          controls the randomness of the model's responses. Lower temperatures
+          produce responses that are more predictable. Higher temperatures produce
+          responses that are more creative.
+      - name: thinkingLevel
+        type: Enum
+        description: |-
+          The thinking level of the model.
+        enum_values:
+          - DEFAULT
+          - LOW
+          - MEDIUM
+          - HIGH
   - name: name
     type: String
     description: |-

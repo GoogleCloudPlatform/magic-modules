@@ -3,7 +3,6 @@ package logging
 import (
 	"fmt"
 
-	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -60,7 +59,7 @@ func BillingAccountLoggingExclusionIdParseFunc(d *schema.ResourceData, _ *transp
 func (u *BillingAccountLoggingExclusionUpdater) CreateLoggingExclusion(parent string, exclusion *logging.LogExclusion) error {
 	_, err := NewClient(u.Config, u.userAgent).BillingAccounts.Exclusions.Create(parent, exclusion).Do()
 	if err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Error creating logging exclusion for %s: {{err}}", u.DescribeResource()), err)
+		return fmt.Errorf("Error creating logging exclusion for %s: %w", u.DescribeResource(), err)
 	}
 
 	return nil
@@ -70,7 +69,7 @@ func (u *BillingAccountLoggingExclusionUpdater) ReadLoggingExclusion(id string) 
 	exclusion, err := NewClient(u.Config, u.userAgent).BillingAccounts.Exclusions.Get(id).Do()
 
 	if err != nil {
-		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving logging exclusion for %s: {{err}}", u.DescribeResource()), err)
+		return nil, fmt.Errorf("Error retrieving logging exclusion for %s: %w", u.DescribeResource(), err)
 	}
 
 	return exclusion, nil
@@ -79,7 +78,7 @@ func (u *BillingAccountLoggingExclusionUpdater) ReadLoggingExclusion(id string) 
 func (u *BillingAccountLoggingExclusionUpdater) UpdateLoggingExclusion(id string, exclusion *logging.LogExclusion, updateMask string) error {
 	_, err := NewClient(u.Config, u.userAgent).BillingAccounts.Exclusions.Patch(id, exclusion).UpdateMask(updateMask).Do()
 	if err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Error updating logging exclusion for %s: {{err}}", u.DescribeResource()), err)
+		return fmt.Errorf("Error updating logging exclusion for %s: %w", u.DescribeResource(), err)
 	}
 
 	return nil
@@ -88,7 +87,7 @@ func (u *BillingAccountLoggingExclusionUpdater) UpdateLoggingExclusion(id string
 func (u *BillingAccountLoggingExclusionUpdater) DeleteLoggingExclusion(id string) error {
 	_, err := NewClient(u.Config, u.userAgent).BillingAccounts.Exclusions.Delete(id).Do()
 	if err != nil {
-		return errwrap.Wrap(fmt.Errorf("Error deleting logging exclusion for %s.", u.DescribeResource()), err)
+		return fmt.Errorf("Error deleting logging exclusion for %s.: %w", u.DescribeResource(), err)
 	}
 
 	return nil

@@ -316,14 +316,10 @@ properties:
         description: |
           The maximum messages that can be written to a Cloud Storage file before a new file is created. Min 1000 messages.
       - name: state
-        type: Enum
+        type: String
         description: |
           An output-only field that indicates whether or not the subscription can receive messages.
         output: true
-        enum_values:
-          - ACTIVE
-          - PERMISSION_DENIED
-          - NOT_FOUND
       - name: avroConfig
         type: NestedObject
         description: |
@@ -446,18 +442,10 @@ properties:
                   (for example, `Iw==` for `#`). Must be specified if multiple key fields are used. The
                   delimiter must contain at least 1 character and at most 50 characters.
       - name: state
-        type: Enum
+        type: String
         description: |
           An output-only field that indicates whether or not the subscription can receive messages.
         output: true
-        enum_values:
-          - ACTIVE
-          - NOT_FOUND
-          - APP_PROFILE_MISCONFIGURED
-          - PERMISSION_DENIED
-          - SCHEMA_MISMATCH
-          - IN_TRANSIT_LOCATION_RESTRICTION
-          - VERTEX_AI_LOCATION_RESTRICTION
   - name: pushConfig
     type: NestedObject
     description: |

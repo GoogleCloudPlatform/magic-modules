@@ -79,6 +79,8 @@ parameters:
       The region of the Memcache instance. If it is not provided, the provider region is used.
     immutable: true
     url_param_only: true
+    # region is a URL parameter not returned as a top-level field by the API
+    ignore_read: true
     default_from_api: true
 properties:
   - name: name

@@ -52,7 +52,6 @@ parameters:
     type: String
     description: The parent of the quota preference. Allowed parents are "projects/[project-id / number]" or "folders/[folder-id / number]" or "organizations/[org-id / number]".
     url_param_only: true
-    required: true
     immutable: true
     default_from_api: true
   - name: 'ignore_safety_checks'
@@ -76,14 +75,12 @@ properties:
   - name: 'service'
     type: String
     description: The name of the service to which the quota preference is applied.
-    required: true
     default_from_api: true
   - name: 'quotaId'
     type: String
     description: |
       The id of the quota to which the quota preference is applied. A quota id is unique in the service.
       Example: `CPUS-per-project-region`.
-    required: true
     default_from_api: true
   - name: 'quotaConfig'
     type: NestedObject

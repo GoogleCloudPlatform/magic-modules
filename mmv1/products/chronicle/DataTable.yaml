@@ -207,16 +207,12 @@ properties:
         item_type:
           type: String
   - name: updateSource
-    type: Enum
+    type: String
     description: |-
       Possible values:
       USER
       RULE
       SEARCH
-    enum_values:
-      - USER
-      - RULE
-      - SEARCH
     output: true
   - name: updateTime
     type: String

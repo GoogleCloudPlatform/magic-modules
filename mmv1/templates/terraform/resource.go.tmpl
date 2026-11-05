@@ -35,7 +35,6 @@ import (
     "strings"
     "time"
 
-    "github.com/hashicorp/errwrap"
     "github.com/hashicorp/go-cty/cty"
     "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
@@ -76,7 +75,6 @@ var (
     _ = strconv.Atoi
     _ = strings.Trim
     _ = time.Now
-    _ = errwrap.Wrap
     _ = cty.BoolVal
     _ = diag.Diagnostic{}
     _ = customdiff.All
@@ -401,6 +399,9 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{ join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
+{{- if $.ApiVersion }}
+        ApiVersion: "{{ $.ApiVersion }}",
+{{- end}}
     })
     if err != nil {
 {{- if and ($.CustomCode.PostCreateFailure) (not $.GetAsync) -}}
@@ -555,7 +556,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 
 {{if and ($.GetAsync) ($.GetAsync.Allow "Create") -}}
 {{if $.GetAsync.IsA "PollAsync" -}}
-    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Creating {{ $.Name -}}", d.Timeout(schema.TimeoutCreate), {{ $.GetAsync.TargetOccurrences -}})
+    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Creating {{ $.Name -}}", d.Timeout(schema.TimeoutCreate), {{ $.GetAsync.TargetOccurrences -}}, config.SleepUnit)
     if err != nil {
 {{- if $.GetAsync.SuppressError -}}
 
@@ -666,6 +667,9 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
 {{- if $.ErrorAbortPredicates }}
             ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
+{{- if $.ApiVersion }}
+            ApiVersion: "{{ $.ApiVersion }}",
+{{- end}}
         })
         if err != nil {
             return res, err
@@ -768,6 +772,9 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 {{- end}}
 {{- if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
+{{- end}}
+{{- if $.ApiVersion }}
+        ApiVersion: "{{ $.ApiVersion }}",
 {{- end}}
     })
     if err != nil {
@@ -1070,6 +1077,9 @@ if len(updateMask) > 0 {
 {{-             if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{-             end}}
+{{-             if $.ApiVersion }}
+        ApiVersion: "{{ $.ApiVersion }}",
+{{-             end}}
     })
 
     if err != nil {
@@ -1101,7 +1111,7 @@ if len(updateMask) > 0 {
 {{""}}
 {{-             end}}
 {{-                  else if $.GetAsync.IsA "PollAsync" -}}
-    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Updating {{ $.Name -}}", d.Timeout(schema.TimeoutUpdate), {{ $.GetAsync.TargetOccurrences -}})
+    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Updating {{ $.Name -}}", d.Timeout(schema.TimeoutUpdate), {{ $.GetAsync.TargetOccurrences -}}, config.SleepUnit)
     if err != nil {
 {{                      if $.GetAsync.SuppressError -}}
         log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", d.Id(), err)
@@ -1179,6 +1189,9 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 {{-                     end}}
 {{		                if $.ErrorAbortPredicates -}}
         	ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{-                     end}}
+{{-                     if $.ApiVersion }}
+            ApiVersion: "{{ $.ApiVersion }}",
 {{-                     end}}
         })
         if err != nil {
@@ -1282,6 +1295,9 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 {{-                 if $.ErrorAbortPredicates -}}
         	ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{-                 end}}
+{{-                 if $.ApiVersion }}
+            ApiVersion: "{{ $.ApiVersion }}",
+{{-                 end}}
 			Headers:   headers,
         })
         if err != nil {
@@ -1309,7 +1325,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 	        return err
 	    }
 {{-                      else if $.GetAsync.IsA "PollAsync" -}}
-	    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Updating {{ $.Name -}}", d.Timeout(schema.TimeoutUpdate), {{ $.GetAsync.TargetOccurrences -}})
+	    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Updating {{ $.Name -}}", d.Timeout(schema.TimeoutUpdate), {{ $.GetAsync.TargetOccurrences -}}, config.SleepUnit)
 	    if err != nil {
 {{-                          if $.GetAsync.SuppressError -}}
 	        log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", d.Id(), err)
@@ -1457,6 +1473,9 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         {{- if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{- join $.ErrorAbortPredicates "," -}}{{"}"}},
         {{- end }}
+        {{- if $.ApiVersion }}
+        ApiVersion: "{{ $.ApiVersion }}",
+        {{- end}}
     })
     if err != nil {
 {{- if and ($.CustomCode.PostDeleteFailure) (not $.GetAsync) -}}
@@ -1466,7 +1485,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     }
     {{ if and $.GetAsync ($.GetAsync.Allow "Delete") -}}
         {{ if $.GetAsync.IsA "PollAsync" }}
-    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName }}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncAbsence }}, "Deleting {{ $.Name }}", d.Timeout(schema.TimeoutCreate), {{ $.Async.TargetOccurrences }})
+    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName }}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncAbsence }}, "Deleting {{ $.Name }}", d.Timeout(schema.TimeoutCreate), {{ $.Async.TargetOccurrences }}, config.SleepUnit)
     if err != nil {
             {{- if $.Async.SuppressError }}
         log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name }} %q finished updating: %q", d.Id(), err)

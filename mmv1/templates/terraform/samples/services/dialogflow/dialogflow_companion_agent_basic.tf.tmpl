@@ -1,0 +1,23 @@
+resource "google_dialogflow_companion_agent" "{{$.PrimaryResourceId}}" {
+  location           = "global"
+  companion_agent_id = "{{index $.ResourceIdVars "companion_agent_id"}}"
+  display_name       = "{{index $.ResourceIdVars "display_name"}}"
+  description        = "{{index $.Vars "description"}}"
+
+  skill_configs {
+    skill_triggering_event = "END_OF_UTTERANCE"
+    guidance_skill_config {
+      overarching_guidance = "Initial guidance"
+      guidance_instructions {
+        display_name            = "greeting"
+        display_details         = "Greeting for the customer"
+        condition               = "Customer starts conversation"
+        disable_suggested_reply = true
+        trigger_event           = "CUSTOMER_MESSAGE"
+        actions {
+          description = "Greet customer warmly"
+        }
+      }
+    }
+  }
+}

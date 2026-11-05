@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/dataproc"
@@ -92,6 +93,9 @@ const SharedTestFirewallPrefix = "tf-bootstrap-firewall-"
 func BootstrapFirewallForDataprocSharedNetwork(t *testing.T, firewallName string, networkName string) string {
 	project := envvar.GetTestProjectFromEnv()
 	firewallName = SharedTestFirewallPrefix + firewallName
+	if acctest.IsVcrReplaying() {
+		return firewallName
+	}
 
 	config := transport_tpg.BootstrapConfig(t)
 	if config == nil {

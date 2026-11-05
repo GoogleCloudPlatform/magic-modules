@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -86,7 +87,7 @@ func dataSourceGoogleIamTestablePermissionsRead(d *schema.ResourceData, meta int
 		stages = append(stages, "GA")
 	}
 	for {
-		url := "https://iam.googleapis.com/v1/permissions:queryTestablePermissions"
+		url := transport_tpg.BaseUrl(iambeta.Product, config) + "permissions:queryTestablePermissions"
 		body["fullResourceName"] = d.Get("full_resource_name").(string)
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,

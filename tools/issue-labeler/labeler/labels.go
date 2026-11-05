@@ -11,7 +11,7 @@ import (
 	_ "embed"
 
 	"github.com/google/go-github/v68/github"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 var sectionRegexp = regexp.MustCompile(`#+ ((New or )?Affected|Related) Resource\(s\)[^#]+`)
