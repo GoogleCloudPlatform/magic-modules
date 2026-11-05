@@ -61,6 +61,20 @@ samples:
         min_version: beta
         resource_id_vars:
           template_id: basic-template
+  - name: firebaseailogic_prompt_template_cmek
+    min_version: beta
+    primary_resource_id: cmek
+    bootstrap_iam:
+      - member: serviceAccount:service-{project_number}@gcp-sa-firebasevertexai.iam.gserviceaccount.com
+        role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    steps:
+      - name: firebaseailogic_prompt_template_cmek
+        min_version: beta
+        resource_id_vars:
+          template_id: cmek-template
+          kms_key_name: kms-key
+        test_vars_overrides:
+          kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
 parameters:
   - name: location
     type: String
@@ -90,6 +104,33 @@ properties:
   - name: displayName
     type: String
     description: The display name of the PromptTemplate.
+  - name: kmsKeyName
+    type: String
+    description: |-
+      The Cloud KMS key used to encrypt this PromptTemplate at rest
+      (customer-managed encryption key, or CMEK).
+      Format:
+      projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{cryptoKey}
+
+      Cloud KMS keys are regional resources and cannot be replicated across
+      regions, so a CMEK-encrypted PromptTemplate must use a regional
+      `location` that matches the key's location, and must set
+      `regional_propagation_disabled` to `true`. The `global` location is not
+      supported.
+
+      Before creating a CMEK-encrypted PromptTemplate, grant the Firebase AI
+      Logic service agent
+      (`service-{projectNumber}@gcp-sa-firebasevertexai.iam.gserviceaccount.com`)
+      the `roles/cloudkms.cryptoKeyEncrypterDecrypter` role on the key.
+
+      Changing this field re-encrypts the PromptTemplate with the new key.
+  - name: kmsKeyVersionName
+    type: String
+    description: |-
+      The Cloud KMS key version that this PromptTemplate is encrypted with.
+      Format:
+      projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{cryptoKey}/cryptoKeyVersions/{cryptoKeyVersion}
+    output: true
   - name: locked
     type: Boolean
     description: |-
