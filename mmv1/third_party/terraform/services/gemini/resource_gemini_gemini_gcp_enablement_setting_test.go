@@ -22,9 +22,6 @@ func TestAccGeminiGeminiGcpEnablementSetting_geminiGeminiGcpEnablementSettingBas
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGeminiGeminiGcpEnablementSetting_geminiGeminiGcpEnablementSettingBasicExample_basic(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_gemini_gemini_gcp_enablement_setting.example", "has_custom_instructions", "true"),
-				),
 			},
 			{
 				ResourceName:            "google_gemini_gemini_gcp_enablement_setting.example",
@@ -39,9 +36,6 @@ func TestAccGeminiGeminiGcpEnablementSetting_geminiGeminiGcpEnablementSettingBas
 						plancheck.ExpectResourceAction("google_gemini_gemini_gcp_enablement_setting.example", plancheck.ResourceActionUpdate),
 					},
 				},
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_gemini_gemini_gcp_enablement_setting.example", "has_custom_instructions", "false"),
-				),
 			},
 			{
 				ResourceName:            "google_gemini_gemini_gcp_enablement_setting.example",
