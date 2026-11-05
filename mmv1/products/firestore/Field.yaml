@@ -52,7 +52,7 @@ async:
   result:
     resource_inside_response: true
 error_retry_predicates:
-  - transport_tpg.FirestoreField409RetryUnderlyingDataChanged
+  - transport_tpg.FirestoreField409Retry
 autogen_async: true
 custom_code:
   custom_create: templates/terraform/custom_create/firestore_field.go.tmpl
