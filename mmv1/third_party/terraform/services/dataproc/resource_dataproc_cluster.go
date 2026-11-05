@@ -3922,6 +3922,14 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 		return []map[string]interface{}{}, nil
 	}
 
+	// For clusters created with secondary_worker_flexible_config, the API keeps
+	// returning SecondaryWorkerFlexibleConfig with its shape even at 0 instances
+	// (only numInstances and SecondaryWorkerConfig are omitted). After a
+	// post-create addition, the API may or may not echo
+	// SecondaryWorkerFlexibleConfig; when it is absent but secondary workers exist
+	// (or state already has the block), synthesize it so state stays stable. The
+	// API creates post-create secondaries with the worker_flexible_config shape;
+	// prefer shape values already in state, falling back to the worker shape.
 	secFlex := cfg.SecondaryWorkerFlexibleConfig
 	if secFlex == nil && cfg.WorkerFlexibleConfig != nil {
 		oldSecRaw := d.Get("cluster_config.0.secondary_worker_flexible_config")
@@ -4004,6 +4012,7 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 
 	if secFlex != nil {
 		numInstances := secFlex.NumInstances
+		// At 0 instances the API omits SecondaryWorkerConfig (and numInstances).
 		if cfg.SecondaryWorkerConfig == nil {
 			numInstances = 0
 		}
@@ -4710,9 +4719,12 @@ func secondaryWorkerFlexibleConfigCustomizeDiff(_ context.Context, diff *schema.
 	const prefix = "cluster_config.0.secondary_worker_flexible_config"
 
 	// Because secondary_worker_flexible_config is Optional+Computed, omitting the block
-	// in HCL retains prior state during schemaMap.diffList. When omitted in HCL while
-	// prior state has num_instances > 0 (and autoscaling_config is not active), set
-	// num_instances = 0 on the retained block to trigger an in-place scale down to 0.
+	// in HCL retains prior state during schemaMap.diffList. When the block is absent
+	// from HCL while prior state has num_instances > 0, and autoscaling_config is
+	// neither configured nor still present in prior state, plan num_instances = 0 on
+	// the retained block (keeping its shape) for an in-place scale down to 0. This
+	// also applies when the block was never in HCL, e.g. when secondary workers were
+	// added outside Terraform.
 	rawConfig := diff.GetRawConfig()
 	if secConfigured, hasRaw := isClusterConfigNestedBlockConfigured(rawConfig, "secondary_worker_flexible_config"); hasRaw && !secConfigured {
 		if autoConfigured, _ := isClusterConfigNestedBlockConfigured(rawConfig, "autoscaling_config"); autoConfigured {
@@ -4736,6 +4748,7 @@ func secondaryWorkerFlexibleConfigCustomizeDiff(_ context.Context, diff *schema.
 			oldCCList, _ := oldCCRaw.([]interface{})
 			newCCList, _ := newCCRaw.([]interface{})
 			if len(oldCCList) > 0 && len(newCCList) > 0 {
+				oldCCMap, _ := oldCCList[0].(map[string]interface{})
 				newCCMap, _ := newCCList[0].(map[string]interface{})
 				ccSchema := ResourceDataprocCluster().Schema["cluster_config"].Elem.(*schema.Resource).Schema
 				ccCopy := make(map[string]interface{}, len(newCCMap))
@@ -4743,8 +4756,16 @@ func secondaryWorkerFlexibleConfigCustomizeDiff(_ context.Context, diff *schema.
 					if k == "secondary_worker_flexible_config" {
 						continue
 					}
-					if s, ok := ccSchema[k]; ok && s.Computed && len(diff.GetChangedKeysPrefix("cluster_config.0."+k)) == 0 {
-						continue
+					if len(diff.GetChangedKeysPrefix("cluster_config.0."+k)) == 0 {
+						if s, ok := ccSchema[k]; ok && s.Computed {
+							continue
+						}
+						// SetNew re-diffs all of cluster_config without DiffSuppressFunc, and v
+						// holds raw config values. Reuse the prior state value for unchanged
+						// blocks so suppressed diffs (e.g. lifecycle_config timestamps) stay suppressed.
+						if ov, ok := oldCCMap[k]; ok {
+							v = ov
+						}
 					}
 					ccCopy[k] = v
 				}
@@ -4768,7 +4789,8 @@ func secondaryWorkerFlexibleConfigCustomizeDiff(_ context.Context, diff *schema.
 	oldCount, _ := oldCountRaw.(int)
 	newCount, _ := newCountRaw.(int)
 
-	// Block removed from HCL while num_instances > 0: scale N -> 0 in place.
+	// No block in the planned value (e.g. raw config unavailable): nothing to
+	// enforce. Removal of the block from HCL is handled above.
 	if newCount == 0 {
 		return nil
 	}
@@ -4789,8 +4811,9 @@ func secondaryWorkerFlexibleConfigCustomizeDiff(_ context.Context, diff *schema.
 	}
 
 	// Block newly added post-create (0 -> 1): Dataproc UpdateCluster only accepts
-	// updateMask="config.secondary_worker_flexible_config.num_instances" and synthesizes
-	// secondary_worker_flexible_config from worker_flexible_config when num_instances > 0.
+	// updateMask="config.secondary_worker_flexible_config.num_instances" and creates the
+	// secondary group with the worker_flexible_config shape, so the block can be added in
+	// place only with num_instances > 0 and a shape matching worker_flexible_config.
 	workerCount, _ := diff.Get("cluster_config.0.worker_flexible_config.#").(int)
 	numInstances, _ := diff.Get(prefix + ".0.num_instances").(int)
 	numInstancesKnown := diff.NewValueKnown(prefix + ".0.num_instances")

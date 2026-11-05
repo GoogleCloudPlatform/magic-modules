@@ -136,7 +136,6 @@ func TestDataprocSecondaryWorkerFlexibleConfigDiff(t *testing.T) {
 	t.Parallel()
 
 	res := dataproc.ResourceDataprocCluster()
-	schemaBlock := res.CoreConfigSchema()
 
 	flexType := cty.Object(map[string]cty.Type{
 		"num_instances":     cty.Number,
@@ -146,17 +145,6 @@ func TestDataprocSecondaryWorkerFlexibleConfigDiff(t *testing.T) {
 	})
 	autoType := cty.Object(map[string]cty.Type{
 		"policy_uri": cty.String,
-	})
-	clusterCfgElemType := cty.Object(map[string]cty.Type{
-		"master_flexible_config":           cty.List(flexType),
-		"worker_flexible_config":           cty.List(flexType),
-		"secondary_worker_flexible_config": cty.List(flexType),
-		"autoscaling_config":               cty.List(autoType),
-	})
-	rawRootType := cty.Object(map[string]cty.Type{
-		"name":           cty.String,
-		"region":         cty.String,
-		"cluster_config": cty.List(clusterCfgElemType),
 	})
 
 	makeRawConfig := func(sec []cty.Value, auto []cty.Value) cty.Value {
@@ -198,7 +186,6 @@ func TestDataprocSecondaryWorkerFlexibleConfigDiff(t *testing.T) {
 			}),
 		})
 	}
-	_ = rawRootType
 
 	baseStateAttrs := func() map[string]string {
 		return map[string]string{
@@ -310,7 +297,6 @@ func TestDataprocSecondaryWorkerFlexibleConfigDiff(t *testing.T) {
 			RawPlan:    rawCfg,
 		}
 		rc := terraform.NewResourceConfigRaw(cfgMap)
-		_ = schemaBlock
 		d, err := res.Diff(context.Background(), state, rc, &transport_tpg.Config{Project: "p", Region: "us-central1"})
 		if err != nil {
 			t.Fatalf("Diff returned unexpected error: %v", err)
@@ -526,4 +512,107 @@ func TestDataprocSecondaryWorkerFlexibleConfigDiff(t *testing.T) {
 			t.Fatalf("expected no secondary_worker_flexible_config diff when autoscaling_config is configured, got %#v", d.Attributes)
 		}
 	})
+}
+
+func TestDataprocSecondaryWorkerFlexibleConfigScaleDownKeepsDiffSuppress(t *testing.T) {
+	t.Parallel()
+
+	res := dataproc.ResourceDataprocCluster()
+
+	flexType := cty.Object(map[string]cty.Type{
+		"num_instances":     cty.Number,
+		"core_count":        cty.Number,
+		"hardware_class":    cty.String,
+		"boot_disk_size_gb": cty.Number,
+	})
+	rawCfg := cty.ObjectVal(map[string]cty.Value{
+		"name":            cty.StringVal("test-cluster"),
+		"project":         cty.StringVal("p"),
+		"region":          cty.StringVal("us-central1"),
+		"deletion_policy": cty.NullVal(cty.String),
+		"labels":          cty.NullVal(cty.Map(cty.String)),
+		"cluster_config": cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"secondary_worker_flexible_config": cty.ListValEmpty(flexType),
+				"autoscaling_config":               cty.ListValEmpty(cty.Object(map[string]cty.Type{"policy_uri": cty.String})),
+				"lifecycle_config": cty.ListVal([]cty.Value{
+					cty.ObjectVal(map[string]cty.Value{"auto_delete_time": cty.StringVal("2030-01-01T00:00:00Z")}),
+				}),
+			}),
+		}),
+	})
+
+	// Complete state for every block the test touches, as written by Read.
+	attrs := map[string]string{
+		"id":                                  "projects/p/regions/us-central1/clusters/test-cluster",
+		"name":                                "test-cluster",
+		"project":                             "p",
+		"region":                              "us-central1",
+		"cluster_config.#":                    "1",
+		"cluster_config.0.lifecycle_config.#": "1",
+		"cluster_config.0.lifecycle_config.0.idle_delete_ttl": "",
+		"cluster_config.0.lifecycle_config.0.idle_start_time": "",
+		// Same instant as the config value, in the API's format; suppressed by TimestampDiffSuppress.
+		"cluster_config.0.lifecycle_config.0.auto_delete_time": "2030-01-01T00:00:00.000Z",
+		"cluster_config.0.lifecycle_config.0.idle_stop_ttl":    "",
+		"cluster_config.0.lifecycle_config.0.auto_stop_time":   "",
+	}
+	for _, blk := range []struct {
+		name string
+		num  string
+		core string
+	}{
+		{"master_flexible_config", "1", "4"},
+		{"worker_flexible_config", "2", "8"},
+		{"secondary_worker_flexible_config", "2", "8"},
+	} {
+		p := "cluster_config.0." + blk.name
+		attrs[p+".#"] = "1"
+		attrs[p+".0.num_instances"] = blk.num
+		attrs[p+".0.core_count"] = blk.core
+		attrs[p+".0.hardware_class"] = "STANDARD"
+		attrs[p+".0.boot_disk_size_gb"] = "100"
+	}
+
+	flex := func(num, core int) []interface{} {
+		return []interface{}{map[string]interface{}{
+			"num_instances":     num,
+			"core_count":        core,
+			"hardware_class":    "STANDARD",
+			"boot_disk_size_gb": 100,
+		}}
+	}
+	cfg := map[string]interface{}{
+		"name":    "test-cluster",
+		"project": "p",
+		"region":  "us-central1",
+		"cluster_config": []interface{}{map[string]interface{}{
+			"master_flexible_config": flex(1, 4),
+			"worker_flexible_config": flex(2, 8),
+			"lifecycle_config": []interface{}{map[string]interface{}{
+				"auto_delete_time": "2030-01-01T00:00:00Z",
+			}},
+		}},
+	}
+
+	state := &terraform.InstanceState{ID: attrs["id"], Attributes: attrs, RawConfig: rawCfg, RawPlan: rawCfg}
+	d, err := res.Diff(context.Background(), state, terraform.NewResourceConfigRaw(cfg), &transport_tpg.Config{Project: "p", Region: "us-central1"})
+	if err != nil {
+		t.Fatalf("Diff returned unexpected error: %v", err)
+	}
+	if d == nil {
+		t.Fatalf("expected a scale-down diff, got none")
+	}
+	if d.RequiresNew() {
+		t.Fatalf("expected in-place update, got RequiresNew=true: %#v", d.Attributes)
+	}
+	numDiff := d.Attributes["cluster_config.0.secondary_worker_flexible_config.0.num_instances"]
+	if numDiff == nil || numDiff.Old != "2" || numDiff.New != "0" {
+		t.Fatalf("expected secondary_worker_flexible_config.0.num_instances diff 2 -> 0, got %#v", numDiff)
+	}
+	for k, v := range d.Attributes {
+		if strings.HasPrefix(k, "cluster_config.0.lifecycle_config") {
+			t.Errorf("expected lifecycle_config diff to stay suppressed during scale-down, got %s: %#v", k, v)
+		}
+	}
 }
