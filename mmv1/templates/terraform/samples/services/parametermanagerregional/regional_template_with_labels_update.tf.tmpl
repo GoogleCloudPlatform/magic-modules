@@ -1,0 +1,12 @@
+resource "google_parameter_manager_regional_template" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  location = "us-central1"
+  template_id = "{{index $.ResourceIdVars "template_id"}}"
+
+  labels = {
+    key1 = "val1"
+    key2 = "val2_update"
+    key4 = "val4"
+    key5 = "val5"
+  }
+}
