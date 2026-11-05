@@ -1,6 +1,60 @@
+resource "google_tags_tag_key" "boundary" {
+  parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
+  short_name  = "{{index $.ResourceIdVars "tag_key_short_name"}}"
+  description = "Partitioning tag key used by boundaries."
+}
+
+resource "google_tags_tag_value" "boundary_1" {
+  parent      = google_tags_tag_key.boundary.id
+  short_name  = "{{index $.ResourceIdVars "tag_value_short_name"}}-1"
+  description = "Tag value for the first boundary."
+}
+
+resource "google_tags_tag_value" "boundary_2" {
+  parent      = google_tags_tag_key.boundary.id
+  short_name  = "{{index $.ResourceIdVars "tag_value_short_name"}}-2"
+  description = "Tag value for the second boundary."
+}
+
+resource "google_resource_manager_boundary_config" "boundary" {
+  parent  = "organizations/{{index $.TestEnvVars "org_id"}}"
+  tag_key = google_tags_tag_key.boundary.namespaced_name
+}
+
+resource "google_resource_manager_boundary" "boundary_1" {
+  parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
+  boundary_id  = "{{index $.ResourceIdVars "boundary_id"}}-1"
+  display_name = "Boundary 1"
+
+  resource_filter {
+    tag_filter {
+      tag_key   = google_resource_manager_boundary_config.boundary.tag_key
+      tag_value = google_tags_tag_value.boundary_1.short_name
+    }
+  }
+}
+
+resource "google_resource_manager_boundary" "boundary_2" {
+  parent       = "organizations/{{index $.TestEnvVars "org_id"}}"
+  boundary_id  = "{{index $.ResourceIdVars "boundary_id"}}-2"
+  display_name = "Boundary 2"
+
+  resource_filter {
+    tag_filter {
+      tag_key   = google_resource_manager_boundary_config.boundary.tag_key
+      tag_value = google_tags_tag_value.boundary_2.short_name
+    }
+  }
+}
+
 resource "google_resource_manager_capability_config" "{{$.PrimaryResourceId}}" {
   parent               = "organizations/{{index $.TestEnvVars "org_id"}}"
   capability_config_id = "{{index $.ResourceIdVars "capability_config_id"}}"
   display_name         = "{{index $.Vars "display_name"}}"
   types                = ["AGENT_MANAGEMENT"]
+  boundaries           = {{index $.Vars "boundaries"}}
+  depends_on = [
+    google_resource_manager_boundary.boundary_1,
+    google_resource_manager_boundary.boundary_2,
+  ]
 }
