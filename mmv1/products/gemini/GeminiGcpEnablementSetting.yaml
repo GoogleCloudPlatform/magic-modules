@@ -98,3 +98,6 @@ properties:
     enum_values:
       - 'STABLE'
       - 'EXPERIMENTAL'
+  - name: hasCustomInstructions
+    type: Boolean
+    description: Indicates whether custom instructions are defined.
