@@ -15,9 +15,12 @@
  */
 package cloudstorage
 
+import "google.golang.org/api/option"
+
 type Client struct {
+	opts []option.ClientOption
 }
 
-func NewClient() *Client {
-	return &Client{}
+func NewClient(opts ...option.ClientOption) *Client {
+	return &Client{opts: opts}
 }

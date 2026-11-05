@@ -17,40 +17,41 @@ package cloudstorage
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"time"
 
-	"cloud.google.com/go/storage"
+	"google.golang.org/api/googleapi"
+	"google.golang.org/api/storage/v1"
 )
 
+// ErrObjectNotExist is returned when a requested GCS object does not exist.
+var ErrObjectNotExist = errors.New("storage: object doesn't exist")
+
 func (gcs *Client) WriteToGCSBucket(bucket, object, filePath string) error {
-	ctx := context.Background()
-
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		return fmt.Errorf("storage.NewClient: %w", err)
-	}
-	defer client.Close()
-
 	file, err := os.Open(filePath)
 	if err != nil {
 		return fmt.Errorf("os.Open: %w", err)
 	}
 	defer file.Close()
 
-	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 	defer cancel()
 
-	writer := client.Bucket(bucket).Object(object).NewWriter(ctx)
-	writer.ContentType = "application/json"
-
-	if _, err = io.Copy(writer, file); err != nil {
-		return fmt.Errorf("io.Copy: %w", err)
+	service, err := storage.NewService(ctx, gcs.opts...)
+	if err != nil {
+		return fmt.Errorf("storage.NewService: %w", err)
 	}
-	if err := writer.Close(); err != nil {
-		return fmt.Errorf("Writer.Close: %w", err)
+
+	obj := &storage.Object{
+		Name:        object,
+		ContentType: "application/json",
+	}
+	if _, err := service.Objects.Insert(bucket, obj).Media(file, googleapi.ContentType("application/json")).Context(ctx).Do(); err != nil {
+		return fmt.Errorf("Objects.Insert(%q): %w", object, err)
 	}
 
 	fmt.Printf("File uploaded to bucket %s as %s\n", bucket, object)
@@ -58,37 +59,40 @@ func (gcs *Client) WriteToGCSBucket(bucket, object, filePath string) error {
 }
 
 func (gcs *Client) DownloadFile(bucket, object, filePath string) error {
-	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		return fmt.Errorf("storage.NewClient: %w", err)
-	}
-	defer client.Close()
-
-	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 	defer cancel()
+
+	service, err := storage.NewService(ctx, gcs.opts...)
+	if err != nil {
+		return fmt.Errorf("storage.NewService: %w", err)
+	}
+
+	resp, err := service.Objects.Get(bucket, object).Context(ctx).Download()
+	if err != nil {
+		var apiErr *googleapi.Error
+		if errors.As(err, &apiErr) && apiErr.Code == http.StatusNotFound {
+			return fmt.Errorf("Objects.Get(%q): %w", object, ErrObjectNotExist)
+		}
+		return fmt.Errorf("Objects.Get(%q): %w", object, err)
+	}
+	defer resp.Body.Close()
 
 	file, err := os.Create(filePath)
 	if err != nil {
 		return fmt.Errorf("os.Create: %w", err)
 	}
 
-	reader, err := client.Bucket(bucket).Object(object).NewReader(ctx)
-	if err != nil {
-		return fmt.Errorf("Object(%q).NewReader: %w", object, err)
-	}
-	defer reader.Close()
-
-	if _, err := io.Copy(file, reader); err != nil {
+	if _, err := io.Copy(file, resp.Body); err != nil {
+		file.Close()
+		os.Remove(filePath)
 		return fmt.Errorf("io.Copy: %w", err)
 	}
 
-	if err = file.Close(); err != nil {
+	if err := file.Close(); err != nil {
+		os.Remove(filePath)
 		return fmt.Errorf("file.Close: %w", err)
 	}
 
-	fmt.Printf("Obcject %s downloaded from bucket %s as %s\n", object, bucket, filePath)
-
+	fmt.Printf("Object %s downloaded from bucket %s as %s\n", object, bucket, filePath)
 	return nil
-
 }
