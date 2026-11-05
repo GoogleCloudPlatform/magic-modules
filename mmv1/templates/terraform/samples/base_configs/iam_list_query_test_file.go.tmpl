@@ -46,7 +46,7 @@ func TestAcc{{ $.ResourceName }}IamMemberListQuery_generated(t *testing.T) {
 	acctest.SkipIfVcr(t)
 	{{- end }}
     {{- if $sample.BootstrapIam }}
-    acctest.BootstrapIamMembers(t, []acctest.IamMember{
+    resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
         {{- range $iam := $sample.BootstrapIam }}
         {Member: "{{ $iam.Member}}", Role: "{{ $iam.Role }}"},
         {{- end}}

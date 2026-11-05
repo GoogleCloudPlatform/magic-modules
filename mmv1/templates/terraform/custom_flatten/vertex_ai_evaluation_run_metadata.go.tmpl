@@ -1,0 +1,42 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	if m, ok := v.(map[string]interface{}); ok {
+		// The Vertex AI EvaluationRun API injects `pipeline_id` into `metadata` on read.
+		// Strip `pipeline_id` unless the user explicitly configured it to avoid perpetual drift.
+		hasUserMetadata := false
+		var userMap map[string]interface{}
+		if d != nil {
+			if raw, ok := d.GetOk("metadata"); ok {
+				if rawStr, ok := raw.(string); ok && rawStr != "" {
+					hasUserMetadata = true
+					_ = json.Unmarshal([]byte(rawStr), &userMap)
+				}
+			}
+		}
+		if _, userHasPipelineID := userMap["pipeline_id"]; !userHasPipelineID {
+			delete(m, "pipeline_id")
+		}
+		if len(m) == 0 && !hasUserMetadata {
+			return nil
+		}
+	}
+	b, err := json.Marshal(v)
+	if err != nil {
+		log.Printf("[ERROR] failed to marshal schema to JSON: %v", err)
+	}
+	return string(b)
+}
