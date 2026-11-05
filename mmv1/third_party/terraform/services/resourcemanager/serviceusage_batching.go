@@ -5,15 +5,18 @@ import (
 	"log"
 	"time"
 
+	rmClient "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager/client"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
 const (
 	batchKeyTmplServiceUsageEnableServices = "project/%s/services:batchEnable"
 	batchKeyTmplServiceUsageListServices   = "project/%s/services"
+	batchKeyTmplServiceUsageGetProject     = "project/%s/get"
 )
 
 // BatchRequestEnableServices can be used to batch requests to enable services
@@ -105,6 +108,37 @@ func BatchRequestReadServices(project string, d *schema.ResourceData, config *tr
 		d.Timeout(schema.TimeoutRead))
 }
 
+func BatchRequestReadProject(project string, d *schema.ResourceData, config *transport_tpg.Config) (*cloudresourcemanager.Project, error) {
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return nil, err
+	}
+
+	billingProject := project
+	// err == nil indicates that the billing_project value was found
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
+	req := &transport_tpg.BatchRequest{
+		ResourceName: project,
+		Body:         nil,
+		// Use empty CombineF since the request is exactly the same no matter how many callers ask for this project.
+		CombineF: func(body interface{}, toAdd interface{}) (interface{}, error) { return nil, nil },
+		SendF:    sendGetProject(config, billingProject, userAgent),
+		DebugId:  fmt.Sprintf("Get Project %s", project),
+	}
+
+	resp, err := config.RequestBatcherServiceUsage.SendRequestWithTimeout(
+		fmt.Sprintf(batchKeyTmplServiceUsageGetProject, project),
+		req,
+		d.Timeout(schema.TimeoutRead))
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*cloudresourcemanager.Project), nil
+}
+
 func combineServiceUsageServicesBatches(srvsRaw interface{}, toAddRaw interface{}) (interface{}, error) {
 	srvs, ok := srvsRaw.([]string)
 	if !ok {
@@ -131,5 +165,15 @@ func sendBatchFuncEnableServices(config *transport_tpg.Config, userAgent, billin
 func sendListServices(config *transport_tpg.Config, billingProject, userAgent string, timeout time.Duration) transport_tpg.BatcherSendFunc {
 	return func(project string, _ interface{}) (interface{}, error) {
 		return ListCurrentlyEnabledServices(project, billingProject, userAgent, config, timeout)
+	}
+}
+
+func sendGetProject(config *transport_tpg.Config, billingProject, userAgent string) transport_tpg.BatcherSendFunc {
+	return func(project string, _ interface{}) (interface{}, error) {
+		projectGetCall := rmClient.NewClient(config, userAgent).Projects.Get(project)
+		if config.UserProjectOverride {
+			projectGetCall.Header().Add("X-Goog-User-Project", billingProject)
+		}
+		return projectGetCall.Do()
 	}
 }
