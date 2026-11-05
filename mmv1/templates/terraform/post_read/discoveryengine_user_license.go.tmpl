@@ -1,0 +1,46 @@
+	targetPrincipal, _ := d.Get("user_principal").(string)
+	for {
+		foundTarget := false
+		if items, ok := res["userLicenses"].([]interface{}); ok && targetPrincipal != "" {
+			for _, raw := range items {
+				if m, ok := raw.(map[string]interface{}); ok {
+					if p, ok := m["userPrincipal"].(string); ok && p == targetPrincipal {
+						foundTarget = true
+						break
+					}
+				}
+			}
+		}
+		if foundTarget {
+			break
+		}
+		pageToken, ok := res["nextPageToken"].(string)
+		if !ok || pageToken == "" {
+			break
+		}
+		pageURL, pageErr := transport_tpg.AddQueryParams(url, map[string]string{
+			"pageToken": pageToken,
+		})
+		if pageErr != nil {
+			return pageErr
+		}
+		pageRes, pageErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    pageURL,
+			UserAgent: userAgent,
+			Headers:   headers,
+		})
+		if pageErr != nil {
+			return pageErr
+		}
+		var existing []interface{}
+		if v, ok := res["userLicenses"].([]interface{}); ok {
+			existing = v
+		}
+		if nextItems, ok := pageRes["userLicenses"].([]interface{}); ok {
+			res["userLicenses"] = append(existing, nextItems...)
+		}
+		res["nextPageToken"] = pageRes["nextPageToken"]
+	}

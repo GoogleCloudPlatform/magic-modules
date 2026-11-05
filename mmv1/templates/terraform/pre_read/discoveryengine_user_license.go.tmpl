@@ -1,0 +1,17 @@
+	// ListUserLicenses ConstructSingleFilterExpression splits filter expressions on
+	// ',' and '=', so use server-side exact filtering when user_principal does not
+	// contain those delimiters, and fall back to paginated listing otherwise.
+	if userPrincipal, ok := d.Get("user_principal").(string); ok && userPrincipal != "" {
+		if !strings.ContainsAny(userPrincipal, ",=") {
+			url, err = transport_tpg.AddQueryParams(url, map[string]string{
+				"filter": fmt.Sprintf("user_principal=%s", userPrincipal),
+			})
+		} else {
+			url, err = transport_tpg.AddQueryParams(url, map[string]string{
+				"pageSize": "1000",
+			})
+		}
+		if err != nil {
+			return err
+		}
+	}

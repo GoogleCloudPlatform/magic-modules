@@ -1,0 +1,32 @@
+	userLicense := make(map[string]interface{})
+
+	if v, ok := obj["userPrincipal"].(string); ok && v != "" {
+		userLicense["userPrincipal"] = v
+	} else if v, ok := d.Get("user_principal").(string); ok && v != "" {
+		userLicense["userPrincipal"] = v
+	}
+	if v, ok := obj["licenseConfig"].(string); ok && v != "" {
+		userLicense["licenseConfig"] = v
+	}
+	if v, ok := obj["userProfile"].(string); ok && v != "" {
+		userLicense["userProfile"] = v
+	}
+
+	// On Create and Update, if license_config is omitted or cleared, keep the
+	// unassigned user license record in the UserStore (NO_LICENSE) rather than
+	// deleting the row from Spanner. Row deletion is controlled by
+	// delete_unassigned_user_licenses during Delete.
+	deleteUnassigned := false
+	if lc, ok := userLicense["licenseConfig"].(string); ok && lc != "" {
+		if v, ok := d.Get("delete_unassigned_user_licenses").(bool); ok {
+			deleteUnassigned = v
+		}
+	}
+
+	req := map[string]interface{}{
+		"inlineSource": map[string]interface{}{
+			"userLicenses": []interface{}{userLicense},
+		},
+		"deleteUnassignedUserLicenses": deleteUnassigned,
+	}
+	return req, nil
