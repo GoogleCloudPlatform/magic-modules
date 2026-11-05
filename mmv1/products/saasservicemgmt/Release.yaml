@@ -24,6 +24,7 @@ import_format:
   - projects/{{project}}/locations/{{location}}/releases/{{release_id}}
 autogen_status: UmVsZWFzZQ==
 autogen_async: false
+exclude_sweeper: true
 # DeleteRelease returns before the resource is removed (no long-running
 # operation); poll until GET returns 404 so destroy completes only once the
 # Release is gone.

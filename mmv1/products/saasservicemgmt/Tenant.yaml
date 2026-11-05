@@ -37,6 +37,7 @@ samples:
           tenant_name: example-tenant
         test_env_vars:
           project: PROJECT_NAME
+exclude_sweeper: true
 parameters:
   - name: location
     type: String

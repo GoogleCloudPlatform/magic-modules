@@ -22,6 +22,7 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/units/{{unit_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/units/{{unit_id}}
+exclude_sweeper: true
 autogen_status: VW5pdA==
 autogen_async: false
 samples:

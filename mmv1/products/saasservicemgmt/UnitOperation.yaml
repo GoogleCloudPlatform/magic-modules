@@ -21,6 +21,7 @@ create_url: projects/{{project}}/locations/{{location}}/unitOperations?unitOpera
 import_format:
   - projects/{{project}}/locations/{{location}}/unitOperations/{{unit_operation_id}}
 autogen_status: VW5pdE9wZXJhdGlvbg==
+exclude_sweeper: true
 # DeleteUnitOperation returns before the resource is removed (no long-running
 # operation); poll until GET returns 404 so destroy completes only once the
 # UnitOperation is gone.
