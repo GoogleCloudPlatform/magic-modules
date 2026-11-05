@@ -6,7 +6,7 @@ resource "google_parameter_manager_template" "template-basic" {
 
 resource "google_parameter_manager_template_version" "{{$.PrimaryResourceId}}" {
   provider = google-beta
-  template = google_parameter_manager_template.template-basic.id
+  template = google_parameter_manager_template.template-basic.template_id
   template_version_id = "{{index $.ResourceIdVars "template_version_id"}}"
   payload {
     template_data = "{\"app\":\"my-app\",\"env\":\"{{"{{"}}.env{{"}}"}}\"}"

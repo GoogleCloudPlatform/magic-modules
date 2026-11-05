@@ -21,20 +21,17 @@ references:
   api: https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.templates.versions
 docs:
 min_version: beta
-base_url: '{{template}}/versions'
-self_link: '{{template}}/versions/{{template_version_id}}'
-create_url: '{{template}}/versions?template_version_id={{template_version_id}}'
+base_url: projects/{{project}}/locations/global/templates/{{template}}/versions
+self_link: projects/{{project}}/locations/global/templates/{{template}}/versions/{{template_version_id}}
+create_url: projects/{{project}}/locations/global/templates/{{template}}/versions?template_version_id={{template_version_id}}
 update_mask: true
 update_verb: PATCH
 import_format:
-  - projects/{{%project}}/locations/global/templates/{{%template_id}}/versions/{{%template_version_id}}
+  - projects/{{project}}/locations/global/templates/{{template}}/versions/{{template_version_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-exclude_identity_generation: true
-custom_code:
-  custom_import: templates/terraform/custom_import/parameter_manager_template_version.go.tmpl
 samples:
   - name: template_version_basic
     primary_resource_id: template-version-basic
@@ -44,6 +41,22 @@ samples:
         resource_id_vars:
           template_id: template
           template_version_id: template_version
+        vars:
+          disabled: null
+      - name: template_version_basic
+        resource_id_vars:
+          template_id: template
+          template_version_id: template_version
+        vars:
+          disabled: true
+        ignore_read_extra:
+          - payload
+      - name: template_version_basic
+        resource_id_vars:
+          template_id: template
+          template_version_id: template_version
+        vars:
+          disabled: false
   - name: template_version_with_json_format
     primary_resource_id: template-version-with-json-format
     min_version: beta
@@ -54,15 +67,13 @@ samples:
           template_version_id: template_version
 parameters:
   - name: template
-    type: ResourceRef
+    type: String
     description: |
-      Parameter Manager Template resource.
+      ID of the Parameter Manager Template resource.
     url_param_only: true
     required: true
     immutable: true
-    resource: Template
-    imports: name
-  - name: template_version_id
+  - name: templateVersionId
     type: String
     description: |
       Version ID of the Template Version Resource. This must be unique within the Template.
@@ -74,7 +85,7 @@ properties:
     type: String
     description: |
       The resource name of the Template Version. Format:
-      `projects/{{project}}/locations/global/templates/{{template_id}}/versions/{{template_version_id}}`
+      `projects/{{project}}/locations/global/templates/{{template}}/versions/{{template_version_id}}`
     output: true
   - name: createTime
     type: String
