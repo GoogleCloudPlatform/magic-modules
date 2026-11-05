@@ -24,6 +24,7 @@ base_url: projects/{{project}}/locations/{{location}}/serviceConnectionPolicies
 self_link: projects/{{project}}/locations/{{location}}/serviceConnectionPolicies/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/serviceConnectionPolicies?serviceConnectionPolicyId={{name}}
 update_mask: true
+generate_list_resource: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/serviceConnectionPolicies/{{name}}
