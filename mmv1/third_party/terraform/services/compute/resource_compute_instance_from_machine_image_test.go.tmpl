@@ -39,6 +39,8 @@ func TestAccComputeInstanceFromMachineImage_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "machine_type", "n1-standard-1"),
 					resource.TestCheckResourceAttr(resourceName, "attached_disk.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "scheduling.0.automatic_restart", "false"),
+					resource.TestCheckResourceAttr(resourceName, "retry_on_stockout", "true"),
+					resource.TestCheckResourceAttr(resourceName, "stockout_retry_timeout_seconds", "60"),
 				),
 			},
 		},
@@ -617,6 +619,9 @@ resource "google_compute_instance_from_machine_image" "foobar" {
   zone = "us-central1-a"
 
   source_machine_image = google_compute_machine_image.foobar.self_link
+
+  retry_on_stockout              = true
+  stockout_retry_timeout_seconds = 60
 
   // Overrides
   can_ip_forward = false
