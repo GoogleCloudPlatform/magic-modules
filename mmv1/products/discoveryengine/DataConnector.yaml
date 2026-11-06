@@ -35,6 +35,10 @@ import_format:
   - 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataConnector'
 custom_code:
   constants: "templates/terraform/constants/discoveryengine_data_connector.go.tmpl"
+# The connector stays INITIALIZING for a while after setUpDataConnectorV2
+# returns, and updates are rejected with FAILED_PRECONDITION until it is done.
+error_retry_predicates:
+  - 'transport_tpg.IsDiscoveryEngineDataConnectorInitializingError'
 state_upgraders: true
 schema_version: 1
 timeouts:
@@ -60,6 +64,25 @@ samples:
     primary_resource_id: 'jira-with-actions'
     steps:
       - name: 'discoveryengine_dataconnector_jira_with_actions'
+        resource_id_vars:
+          collection_id: 'collection-id'
+        ignore_read_extra:
+          - action_state
+          - errors
+          - state
+          - update_time
+  - name: 'discoveryengine_dataconnector_jira_with_json_action_params'
+    primary_resource_id: 'jira-with-json-action-params'
+    steps:
+      - name: 'discoveryengine_dataconnector_jira_with_json_action_params'
+        resource_id_vars:
+          collection_id: 'collection-id'
+        ignore_read_extra:
+          - action_state
+          - errors
+          - state
+          - update_time
+      - name: 'discoveryengine_dataconnector_jira_with_json_action_params_update'
         resource_id_vars:
           collection_id: 'collection-id'
         ignore_read_extra:
@@ -318,6 +341,20 @@ properties:
           String-to-String (Key, Value) pairs. Contains connection
           credentials and configuration for the action connector.
         ignore_read: true
+        conflicts:
+          - action_config.0.json_action_params
+      - name: 'jsonActionParams'
+        type: String
+        description: |
+          Params needed to configure the actions in the format of a json string.
+          Use this instead of `action_params` when some values must be sent as
+          non-string JSON types, for example booleans such as
+          `pkce_support_enabled` for custom MCP connectors.
+        ignore_read: true
+        validation:
+          function: 'validation.StringIsJSON'
+        conflicts:
+          - action_config.0.action_params
       - name: 'isActionConfigured'
         type: Boolean
         description: |
