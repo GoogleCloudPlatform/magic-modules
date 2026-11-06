@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -26,7 +25,7 @@ func DataSourceIAMBetaWorkloadIdentityPoolJwks() *schema.Resource {
 			"resource_name": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.IsURLWithHTTPorHTTPS,
+				ValidateFunc: validateWorkloadIdentityPoolURLSchema,
 				Description:  "The JWKS URI to retrieve the public keys from (e.g. from google_iam_workload_identity_pool_openid_config.jwks_uri).",
 			},
 			"jwks_json": {
@@ -85,6 +84,9 @@ func dataSourceIAMBetaWorkloadIdentityPoolJwksRead(d *schema.ResourceData, meta 
 	}
 
 	url := d.Get("resource_name").(string)
+	if err := validateWorkloadIdentityPoolURL(url); err != nil {
+		return err
+	}
 
 	ctx, cancel := context.WithTimeout(config.Context, d.Timeout(schema.TimeoutRead))
 	defer cancel()
