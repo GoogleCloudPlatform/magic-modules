@@ -143,7 +143,8 @@ func readTestFunc(testFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, va
 	// This is an exported test function.
 	var tests []*Test
 	var errs []error
-	vars := make(map[string]*ast.CompositeLit, len(testFunc.Body.List)) // map of variable names to composite literal values in function body
+	vars := make(map[string]*ast.CompositeLit, len(testFunc.Body.List))              // map of variable names to composite literal values in function body
+	contextVars := make(map[string]map[string]contextValue, len(testFunc.Body.List)) // map of variable names to context map values
 	for _, stmt := range testFunc.Body.List {
 		if exprStmt, ok := stmt.(*ast.ExprStmt); ok {
 			if callExpr, ok := exprStmt.X.(*ast.CallExpr); ok {
@@ -151,7 +152,7 @@ func readTestFunc(testFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, va
 				ident, isIdent := callExpr.Fun.(*ast.Ident)
 				selExpr, isSelExpr := callExpr.Fun.(*ast.SelectorExpr)
 				if isIdent && ident.Name == "VcrTest" || isSelExpr && selExpr.Sel.Name == "VcrTest" {
-					test, err := readVcrTestCall(callExpr, funcDecls, varDecls)
+					test, err := readVcrTestCallWithContext(callExpr, funcDecls, varDecls, contextVars)
 					if err != nil {
 						errs = append(errs, err)
 					}
@@ -161,11 +162,15 @@ func readTestFunc(testFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, va
 			}
 		} else if assignStmt, ok := stmt.(*ast.AssignStmt); ok {
 			if len(assignStmt.Lhs) == 1 && len(assignStmt.Rhs) == 1 {
-				// For now, only allow single assignment variables for serial test maps.
-				// e.g. testCases := map[string]func(t *testing.T) {...
+				// For now, only allow single assignment variables for serial test maps
+				// and local context maps.
 				if ident, ok := assignStmt.Lhs[0].(*ast.Ident); ok {
-					if rhsCompLit, ok := assignStmt.Rhs[0].(*ast.CompositeLit); ok && isSerialTestMap(rhsCompLit) {
-						vars[ident.Name] = rhsCompLit
+					if rhsCompLit, ok := assignStmt.Rhs[0].(*ast.CompositeLit); ok {
+						if isSerialTestMap(rhsCompLit) {
+							vars[ident.Name] = rhsCompLit
+						} else if ctxMap := parseContextMapCompLit(rhsCompLit); len(ctxMap) > 0 {
+							contextVars[ident.Name] = ctxMap
+						}
 					}
 				}
 			}
@@ -183,6 +188,84 @@ func readTestFunc(testFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, va
 		return tests, fmt.Errorf("errors reading test func %s: %v", testFunc.Name.Name, errs)
 	}
 	return tests, nil
+}
+
+type contextValue struct {
+	raw      string
+	isString bool
+}
+
+// Extract key-value pairs from a composite literal of type map[string]interface{} or map[string]any.
+func parseContextMapCompLit(compLit *ast.CompositeLit) map[string]contextValue {
+	mapType, ok := compLit.Type.(*ast.MapType)
+	if !ok {
+		return nil
+	}
+	keyIdent, ok := mapType.Key.(*ast.Ident)
+	if !ok || keyIdent.Name != "string" {
+		return nil
+	}
+	if _, isFunc := mapType.Value.(*ast.FuncType); isFunc {
+		return nil
+	}
+	result := make(map[string]contextValue)
+	for _, elt := range compLit.Elts {
+		kv, ok := elt.(*ast.KeyValueExpr)
+		if !ok {
+			continue
+		}
+		keyLit, ok := kv.Key.(*ast.BasicLit)
+		if !ok || keyLit.Kind != token.STRING {
+			continue
+		}
+		keyStr, err := strconv.Unquote(keyLit.Value)
+		if err != nil {
+			continue
+		}
+		if val, ok := extractLiteralContextValue(kv.Value); ok {
+			result[keyStr] = val
+		}
+	}
+	return result
+}
+
+func extractLiteralContextValue(expr ast.Expr) (contextValue, bool) {
+	switch v := expr.(type) {
+	case *ast.BasicLit:
+		switch v.Kind {
+		case token.STRING:
+			unquoted, err := strconv.Unquote(v.Value)
+			if err != nil {
+				return contextValue{}, false
+			}
+			return contextValue{raw: unquoted, isString: true}, true
+		case token.INT, token.FLOAT:
+			return contextValue{raw: v.Value, isString: false}, true
+		}
+	case *ast.Ident:
+		if v.Name == "true" || v.Name == "false" {
+			return contextValue{raw: v.Name, isString: false}, true
+		}
+	case *ast.UnaryExpr:
+		if v.Op == token.SUB {
+			if basicLit, ok := v.X.(*ast.BasicLit); ok && (basicLit.Kind == token.INT || basicLit.Kind == token.FLOAT) {
+				return contextValue{raw: "-" + basicLit.Value, isString: false}, true
+			}
+		}
+	}
+	return contextValue{}, false
+}
+
+func extractContextMapFromExpr(expr ast.Expr, contextVars map[string]map[string]contextValue) map[string]contextValue {
+	switch v := expr.(type) {
+	case *ast.Ident:
+		if contextVars != nil {
+			return contextVars[v.Name]
+		}
+	case *ast.CompositeLit:
+		return parseContextMapCompLit(v)
+	}
+	return nil
 }
 
 // Report whether a composite literal is a serial test map: a map from test
@@ -225,11 +308,15 @@ func readSerialTestEltKeyValueExpr(eltKeyValueExpr *ast.KeyValueExpr, funcDecls 
 }
 
 func readVcrTestCall(vcrTestCall *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (*Test, error) {
+	return readVcrTestCallWithContext(vcrTestCall, funcDecls, varDecls, nil)
+}
+
+func readVcrTestCallWithContext(vcrTestCall *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit, contextVars map[string]map[string]contextValue) (*Test, error) {
 	for _, arg := range vcrTestCall.Args {
 		if vcrTestArgCompLit, ok := arg.(*ast.CompositeLit); ok {
 			if selExpr, ok := vcrTestArgCompLit.Type.(*ast.SelectorExpr); ok {
 				if ident, ok := selExpr.X.(*ast.Ident); ok && ident.Name == "resource" && selExpr.Sel.Name == "TestCase" {
-					return readTestCaseCompLit(vcrTestArgCompLit, funcDecls, varDecls)
+					return readTestCaseCompLitWithContext(vcrTestArgCompLit, funcDecls, varDecls, contextVars)
 				}
 			}
 		}
@@ -238,11 +325,15 @@ func readVcrTestCall(vcrTestCall *ast.CallExpr, funcDecls map[string]*ast.FuncDe
 }
 
 func readTestCaseCompLit(testCaseCompLit *ast.CompositeLit, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (*Test, error) {
+	return readTestCaseCompLitWithContext(testCaseCompLit, funcDecls, varDecls, nil)
+}
+
+func readTestCaseCompLitWithContext(testCaseCompLit *ast.CompositeLit, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit, contextVars map[string]map[string]contextValue) (*Test, error) {
 	for _, elt := range testCaseCompLit.Elts {
 		if keyValueExpr, ok := elt.(*ast.KeyValueExpr); ok {
 			if ident, ok := keyValueExpr.Key.(*ast.Ident); ok && ident.Name == "Steps" {
 				if stepsCompLit, ok := keyValueExpr.Value.(*ast.CompositeLit); ok {
-					return readStepsCompLit(stepsCompLit, funcDecls, varDecls)
+					return readStepsCompLitWithContext(stepsCompLit, funcDecls, varDecls, contextVars)
 				}
 			}
 		}
@@ -251,6 +342,10 @@ func readTestCaseCompLit(testCaseCompLit *ast.CompositeLit, funcDecls map[string
 }
 
 func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (*Test, error) {
+	return readStepsCompLitWithContext(stepsCompLit, funcDecls, varDecls, nil)
+}
+
+func readStepsCompLitWithContext(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit, contextVars map[string]map[string]contextValue) (*Test, error) {
 	test := &Test{}
 	errs := make([]error, 0)
 	for _, elt := range stepsCompLit.Elts {
@@ -264,7 +359,7 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 						// A config is any expression that evaluates to a config
 						// string, and reads the same way here as it does in a
 						// config func's return statement.
-						configStr, err := readConfigFuncResult(keyValueExpr.Value, funcDecls, varDecls)
+						configStr, err := readConfigFuncResultWithContext(keyValueExpr.Value, funcDecls, varDecls, contextVars)
 						if err != nil {
 							errs = append(errs, err)
 						}
@@ -313,12 +408,16 @@ func shouldSkipStep(stepCompLit *ast.CompositeLit) bool {
 // The call is either to a config func declared in the same package, or to a
 // formatting function that builds a config out of its arguments.
 func readConfigCallExpr(configCallExpr *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (string, error) {
+	return readConfigCallExprWithContext(configCallExpr, funcDecls, varDecls, nil)
+}
+
+func readConfigCallExprWithContext(configCallExpr *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit, contextVars map[string]map[string]contextValue) (string, error) {
 	// Dispatch on the callee rather than on the shape of the arguments: a
 	// config func can take a string as its first argument, and that string is a
 	// value to interpolate, not a config.
 	if ident, ok := configCallExpr.Fun.(*ast.Ident); ok {
 		if configFunc, ok := funcDecls[ident.Name]; ok {
-			return readConfigFunc(configFunc, funcDecls, varDecls)
+			return readConfigFuncWithContext(configFunc, configCallExpr.Args, funcDecls, varDecls, contextVars)
 		}
 		return "", fmt.Errorf("failed to find function declaration %s", ident.Name)
 	}
@@ -337,18 +436,26 @@ func readConfigCallExpr(configCallExpr *ast.CallExpr, funcDecls map[string]*ast.
 		if len(configCallExpr.Args) == 0 {
 			return "", fmt.Errorf("failed to find a config template in call to %s.%s", selectorExpr.X, selectorExpr.Sel.Name)
 		}
-		configStr, err := readConfigFuncResult(configCallExpr.Args[0], funcDecls, varDecls)
-		if err != nil || selectorExpr.Sel.Name != "Sprintf" {
-			// Nprintf only replaces %{key}, so "%%" is not an escape there.
-			return configStr, err
+		configStr, err := readConfigFuncResultWithContext(configCallExpr.Args[0], funcDecls, varDecls, contextVars)
+		if err != nil {
+			return "", err
 		}
-		return markEscapedPercents(configStr), nil
+		if selectorExpr.Sel.Name == "Sprintf" {
+			return markEscapedPercents(configStr), nil
+		}
+		// Nprintf only replaces %{key}, so "%%" is not an escape there.
+		if len(configCallExpr.Args) >= 2 {
+			if ctxMap := extractContextMapFromExpr(configCallExpr.Args[1], contextVars); len(ctxMap) > 0 {
+				configStr = applyContextMap(configStr, ctxMap)
+			}
+		}
+		return configStr, nil
 	case "Sprint":
 		// Every argument is part of the config. This is used to join a shared
 		// setup config to the config under test.
 		var configStr strings.Builder
 		for _, arg := range configCallExpr.Args {
-			argConfigStr, err := readConfigFuncResult(arg, funcDecls, varDecls)
+			argConfigStr, err := readConfigFuncResultWithContext(arg, funcDecls, varDecls, contextVars)
 			if err != nil {
 				return "", err
 			}
@@ -360,10 +467,41 @@ func readConfigCallExpr(configCallExpr *ast.CallExpr, funcDecls map[string]*ast.
 }
 
 func readConfigFunc(configFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (string, error) {
+	return readConfigFuncWithContext(configFunc, nil, funcDecls, varDecls, nil)
+}
+
+func readConfigFuncWithContext(configFunc *ast.FuncDecl, callArgs []ast.Expr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit, callerContextVars map[string]map[string]contextValue) (string, error) {
+	calleeContextVars := make(map[string]map[string]contextValue)
+	for k, v := range callerContextVars {
+		calleeContextVars[k] = v
+	}
+	if configFunc.Type != nil && configFunc.Type.Params != nil {
+		argIdx := 0
+		for _, field := range configFunc.Type.Params.List {
+			for _, nameIdent := range field.Names {
+				if argIdx < len(callArgs) {
+					if ctxMap := extractContextMapFromExpr(callArgs[argIdx], callerContextVars); len(ctxMap) > 0 {
+						calleeContextVars[nameIdent.Name] = ctxMap
+					}
+				}
+				argIdx++
+			}
+		}
+	}
 	for _, stmt := range configFunc.Body.List {
-		if returnStmt, ok := stmt.(*ast.ReturnStmt); ok {
+		if assignStmt, ok := stmt.(*ast.AssignStmt); ok {
+			if len(assignStmt.Lhs) == 1 && len(assignStmt.Rhs) == 1 {
+				if ident, ok := assignStmt.Lhs[0].(*ast.Ident); ok {
+					if rhsCompLit, ok := assignStmt.Rhs[0].(*ast.CompositeLit); ok {
+						if ctxMap := parseContextMapCompLit(rhsCompLit); len(ctxMap) > 0 {
+							calleeContextVars[ident.Name] = ctxMap
+						}
+					}
+				}
+			}
+		} else if returnStmt, ok := stmt.(*ast.ReturnStmt); ok {
 			if len(returnStmt.Results) > 0 {
-				return readConfigFuncResult(returnStmt.Results[0], funcDecls, varDecls)
+				return readConfigFuncResultWithContext(returnStmt.Results[0], funcDecls, varDecls, calleeContextVars)
 			}
 			return "", fmt.Errorf("failed to find a config string in results %v", returnStmt.Results)
 		}
@@ -373,6 +511,10 @@ func readConfigFunc(configFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl
 
 // Read the return result of a config func and return the config string.
 func readConfigFuncResult(result ast.Expr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit) (string, error) {
+	return readConfigFuncResultWithContext(result, funcDecls, varDecls, nil)
+}
+
+func readConfigFuncResultWithContext(result ast.Expr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit, contextVars map[string]map[string]contextValue) (string, error) {
 	if basicLit, ok := result.(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
 		return strconv.Unquote(basicLit.Value)
 	} else if ident, ok := result.(*ast.Ident); ok {
@@ -383,19 +525,103 @@ func readConfigFuncResult(result ast.Expr, funcDecls map[string]*ast.FuncDecl, v
 		}
 		return "", fmt.Errorf("failed to find variable declaration %s", ident.Name)
 	} else if callExpr, ok := result.(*ast.CallExpr); ok {
-		return readConfigCallExpr(callExpr, funcDecls, varDecls)
+		return readConfigCallExprWithContext(callExpr, funcDecls, varDecls, contextVars)
 	} else if binaryExpr, ok := result.(*ast.BinaryExpr); ok {
-		xConfigStr, err := readConfigFuncResult(binaryExpr.X, funcDecls, varDecls)
+		xConfigStr, err := readConfigFuncResultWithContext(binaryExpr.X, funcDecls, varDecls, contextVars)
 		if err != nil {
 			return "", err
 		}
-		yConfigStr, err := readConfigFuncResult(binaryExpr.Y, funcDecls, varDecls)
+		yConfigStr, err := readConfigFuncResultWithContext(binaryExpr.Y, funcDecls, varDecls, contextVars)
 		if err != nil {
 			return "", err
 		}
 		return xConfigStr + yConfigStr, nil
 	}
 	return "", fmt.Errorf("unknown config func result %v (%T)", result, result)
+}
+
+var namedPlaceholderPattern = regexp.MustCompile("(?:%|" + escapedPercent + `)\{([^{}]+)\}`)
+var nprintfPlaceholderOrPercentPattern = regexp.MustCompile(`%\{[^{}]*\}|%`)
+
+func escapeLiteralPercents(s string) string {
+	return nprintfPlaceholderOrPercentPattern.ReplaceAllStringFunc(s, func(match string) string {
+		if match == "%" {
+			return escapedPercent
+		}
+		return match
+	})
+}
+
+func isValidHCLValueExpr(s string) bool {
+	trimmed := strings.TrimSpace(s)
+	if trimmed == "true" || trimmed == "false" {
+		return true
+	}
+	if _, err := strconv.ParseInt(trimmed, 10, 64); err == nil {
+		return true
+	}
+	if _, err := strconv.ParseFloat(trimmed, 64); err == nil {
+		return true
+	}
+	if strings.HasPrefix(trimmed, "\"") || strings.HasPrefix(trimmed, "[") || strings.HasPrefix(trimmed, "{") {
+		return true
+	}
+	return false
+}
+
+// Substitute known %{key} placeholders from ctxMap into templateStr.
+func applyContextMap(templateStr string, ctxMap map[string]contextValue) string {
+	matches := namedPlaceholderPattern.FindAllStringSubmatchIndex(templateStr, -1)
+	if len(matches) == 0 {
+		return templateStr
+	}
+	var out strings.Builder
+	lastEnd := 0
+	for _, m := range matches {
+		start, end := m[0], m[1]
+		key := templateStr[m[2]:m[3]]
+		cv, ok := ctxMap[key]
+		if !ok {
+			out.WriteString(templateStr[lastEnd:end])
+			lastEnd = end
+			continue
+		}
+		// If a literal '%' immediately precedes %{key} in an acctest.Nprintf
+		// template (e.g. "name-%%{suffix}"), protect that '%' from matching a
+		// fmt verb in subPattern once the substituted value follows it.
+		if start > lastEnd && templateStr[start-1] == '%' {
+			out.WriteString(templateStr[lastEnd : start-1])
+			out.WriteString(escapedPercent)
+		} else {
+			out.WriteString(templateStr[lastEnd:start])
+		}
+		lineStart := strings.LastIndexByte(templateStr[:start], '\n') + 1
+		inQuotes := false
+		for i := lineStart; i < start; i++ {
+			if templateStr[i] == '"' && (i == lineStart || templateStr[i-1] != '\\') {
+				inQuotes = !inQuotes
+			}
+		}
+		escapedRaw := escapeLiteralPercents(cv.raw)
+		if inQuotes {
+			out.WriteString(escapedRaw)
+		} else {
+			trimmedBefore := strings.TrimSpace(templateStr[lineStart:start])
+			if trimmedBefore == "" {
+				// Whole-line placeholder (e.g. injecting or omitting a nested HCL block).
+				out.WriteString(escapedRaw)
+			} else if cv.raw == "" {
+				out.WriteString(`""`)
+			} else if !cv.isString || isValidHCLValueExpr(cv.raw) {
+				out.WriteString(escapedRaw)
+			} else {
+				out.WriteString(strconv.Quote(escapedRaw))
+			}
+		}
+		lastEnd = end
+	}
+	out.WriteString(templateStr[lastEnd:])
+	return out.String()
 }
 
 // A substitution: an acctest.Nprintf key or a fmt verb. An Nprintf key may
@@ -480,7 +706,11 @@ func readConfigStr(configStr string) (Step, error) {
 		if err != nil {
 			errs = append(errs, err)
 		}
-		blockConfig = flattenBlock(blockConfig, "")
+		if blockType == ResourceBlock {
+			blockConfig = flattenBlockWithEmptyBlocks(blockConfig, "")
+		} else {
+			blockConfig = flattenBlock(blockConfig, "")
+		}
 		step[blockType][typeLabel][nameLabel] = blockConfig
 	}
 	if len(errs) > 0 {
@@ -530,6 +760,10 @@ func mergeBlocks(a, b Block) {
 				if bvr, ok := bv.(Block); ok {
 					mergeBlocks(avr, bvr)
 				}
+			} else if avStr, aOk := av.(string); aOk {
+				if bvStr, bOk := bv.(string); bOk {
+					a[k] = avStr + "\x00" + bvStr
+				}
 			}
 		} else {
 			a[k] = bv
@@ -541,6 +775,14 @@ func mergeBlocks(a, b Block) {
 // containing an initialize_params block containing an image attribute becomes
 // "boot_disk.initialize_params.image".
 func flattenBlock(b Block, parent string) Block {
+	return flattenBlockInternal(b, parent, false)
+}
+
+func flattenBlockWithEmptyBlocks(b Block, parent string) Block {
+	return flattenBlockInternal(b, parent, true)
+}
+
+func flattenBlockInternal(b Block, parent string, preserveEmptyBlocks bool) Block {
 	flattened := make(Block)
 
 	if parent != "" {
@@ -551,8 +793,12 @@ func flattenBlock(b Block, parent string) Block {
 		key := parent + fieldName
 		nestedObject, _ := fieldValue.(Block)
 		if nestedObject != nil {
-			for childKey, childField := range flattenBlock(nestedObject, key) {
-				flattened[childKey] = childField
+			if preserveEmptyBlocks && len(nestedObject) == 0 {
+				flattened[key] = "{}"
+			} else {
+				for childKey, childField := range flattenBlockInternal(nestedObject, key, preserveEmptyBlocks) {
+					flattened[childKey] = childField
+				}
 			}
 		} else {
 			flattened[key] = fieldValue
