@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 // ============================================================================
@@ -183,6 +184,98 @@ func TestAccAgentIdentityAuthProvider_switchAuthProviderType(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"auth_provider_type_params", "location", "auth_provider_id", "workload_ids", "labels", "terraform_labels", "effective_labels"},
+			},
+		},
+	})
+}
+
+// ============================================================================
+// 8. Connector Reference Auth Provider Tests
+// ============================================================================
+
+func TestAccAgentIdentityAuthProvider_connectorReference(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"project":       envvar.GetTestProjectFromEnv(),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAgentIdentityAuthProviderDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAgentIdentityAuthProvider_connectorReferenceStep1(context),
+			},
+			{
+				Config: testAccAgentIdentityAuthProvider_connectorReferenceStep2(context),
+			},
+			{
+				ResourceName:            "google_agent_identity_auth_provider.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"auth_provider_type_params", "location", "auth_provider_id", "workload_ids"},
+			},
+		},
+	})
+}
+
+// ============================================================================
+// 9. Cross-App Access (XAA) Auth Provider Tests
+// ============================================================================
+
+func TestAccAgentIdentityAuthProvider_xaaAuthProvider(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"project":       envvar.GetTestProjectFromEnv(),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAgentIdentityAuthProviderDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAgentIdentityAuthProvider_xaaStep1(context),
+			},
+			{
+				Config: testAccAgentIdentityAuthProvider_xaaStep2(context),
+			},
+			{
+				ResourceName:            "google_agent_identity_auth_provider.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"auth_provider_type_params", "location", "auth_provider_id", "workload_ids"},
+			},
+		},
+	})
+}
+
+func TestAccAgentIdentityAuthProvider_xaaClientAssertionJwt(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"project":       envvar.GetTestProjectFromEnv(),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAgentIdentityAuthProviderDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAgentIdentityAuthProvider_xaaClientAssertion(context),
+			},
+			{
+				ResourceName:            "google_agent_identity_auth_provider.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"auth_provider_type_params", "location", "auth_provider_id", "workload_ids"},
 			},
 		},
 	})
@@ -388,6 +481,144 @@ func testAccAgentIdentityAuthProvider_switchTypeStep2(context map[string]interfa
         default_continue_uri = "https://example.com/callback"
         enable_pkce          = true
         token_url            = "https://auth.example.com/token"
+      }
+    }
+  }
+  `, context)
+}
+
+func testAccAgentIdentityAuthProvider_connectorReferenceStep1(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+  resource "google_agent_identity_auth_provider" "default" {
+    location         = "us-central1"
+    auth_provider_id = "tf-test-connref-%{random_suffix}"
+    description      = "Test covering connector reference auth provider"
+
+    auth_provider_type_params {
+      connector_reference_auth_provider {
+        connector             = "salesforce-connector-prod"
+        authorization_details = jsonencode([
+          {
+            type     = "oauth_authorization"
+            resource = "https://example.com/api"
+          }
+        ])
+      }
+    }
+  }
+  `, context)
+}
+
+func testAccAgentIdentityAuthProvider_connectorReferenceStep2(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+  resource "google_agent_identity_auth_provider" "default" {
+    location         = "us-central1"
+    auth_provider_id = "tf-test-connref-%{random_suffix}"
+    description      = "Updated connector reference auth provider"
+
+    auth_provider_type_params {
+      connector_reference_auth_provider {
+        connector             = "salesforce-connector-prod"
+        authorization_details = jsonencode([
+          {
+            type     = "oauth_authorization"
+            resource = "https://example.com/api/v2"
+            actions  = ["read", "write"]
+          }
+        ])
+      }
+    }
+  }
+  `, context)
+}
+
+func testAccAgentIdentityAuthProvider_xaaStep1(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+  resource "google_agent_identity_auth_provider" "default" {
+    location         = "us-central1"
+    auth_provider_id = "tf-test-xaa-%{random_suffix}"
+    description      = "Test covering Cross-App Access auth provider"
+
+    auth_provider_type_params {
+      xaa_auth_provider {
+        additional_parameters = {
+          prompt = "consent"
+        }
+        client_secret_auth {
+          client_id                = "test-client-id"
+          client_secret            = "test-client-secret"
+        }
+        custom_issuer {
+          token_url = "https://auth.example.com/token"
+          issuer    = "https://auth.example.com"
+        }
+        id_token_input {
+          id_jag_auth_provider = "projects/%{project}/locations/us-central1/authProviders/idp-provider"
+          id_jag_additional_claims = jsonencode({
+            env = "test"
+          })
+        }
+      }
+    }
+  }
+  `, context)
+}
+
+func testAccAgentIdentityAuthProvider_xaaStep2(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+  resource "google_agent_identity_auth_provider" "default" {
+    location         = "us-central1"
+    auth_provider_id = "tf-test-xaa-%{random_suffix}"
+    description      = "Updated Cross-App Access auth provider"
+
+    auth_provider_type_params {
+      xaa_auth_provider {
+        additional_parameters = {
+          prompt     = "consent"
+          login_hint = "user@example.com"
+        }
+        client_secret_auth {
+          client_id                = "test-client-id-updated"
+          client_secret            = "test-client-secret-updated"
+        }
+        custom_issuer {
+          token_url = "https://auth.example.com/token/v2"
+          issuer    = "https://auth.example.com/v2"
+        }
+        id_token_input {
+          id_jag_auth_provider = "projects/%{project}/locations/us-central1/authProviders/idp-provider-v2"
+          id_jag_additional_claims = jsonencode({
+            env  = "prod"
+            role = "admin"
+          })
+        }
+      }
+    }
+  }
+  `, context)
+}
+
+func testAccAgentIdentityAuthProvider_xaaClientAssertion(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+  resource "google_agent_identity_auth_provider" "default" {
+    location         = "us-central1"
+    auth_provider_id = "tf-test-xaa-jwt-%{random_suffix}"
+    description      = "Test covering Cross-App Access with Client Assertion JWT"
+
+    auth_provider_type_params {
+      xaa_auth_provider {
+        client_assertion_jwt_auth {
+          client_id = "test-jwt-client-id"
+        }
+        custom_issuer {
+          token_url = "https://auth.example.com/token"
+        }
+        id_token_input {
+          id_jag_auth_provider = "projects/%{project}/locations/us-central1/authProviders/idp-provider"
+          id_jag_additional_claims = jsonencode({
+            env = "test"
+          })
+        }
       }
     }
   }
