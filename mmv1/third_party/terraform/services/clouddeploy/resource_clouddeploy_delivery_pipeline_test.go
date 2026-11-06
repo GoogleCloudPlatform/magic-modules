@@ -173,3 +173,237 @@ resource "google_clouddeploy_delivery_pipeline" "primary" {
 }
 `, context)
 }
+
+func TestAccClouddeployDeliveryPipeline_withCanaryDeployTasks(t *testing.T) {
+	t.Parallel()
+	context := map[string]interface{}{
+		"project_name":  envvar.GetTestProjectFromEnv(),
+		"region":        envvar.GetTestRegionFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckClouddeployDeliveryPipelineDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccClouddeployDeliveryPipeline_withCanaryDeployTasks(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.canary.0.canary_deployment.0.predeploy.0.tasks.0.container.0.image", "gcr.io/my-project/my-image"),
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.canary.0.canary_deployment.0.predeploy.0.tasks.0.container.0.command.0", "echo"),
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.canary.0.canary_deployment.0.postdeploy.0.tasks.0.container.0.image", "gcr.io/my-project/my-cleanup-image"),
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.1.strategy.0.canary.0.custom_canary_deployment.0.phase_configs.0.predeploy.0.tasks.0.container.0.image", "gcr.io/my-project/my-image"),
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.1.strategy.0.canary.0.custom_canary_deployment.0.phase_configs.0.predeploy.0.tasks.0.container.0.args.0", "hello"),
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.1.strategy.0.canary.0.custom_canary_deployment.0.phase_configs.1.postdeploy.0.tasks.0.container.0.image", "gcr.io/my-project/my-cleanup-image"),
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.canary.0.canary_deployment.0.predeploy.0.tasks.0.container.0.env.STAGE", "canary"),
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.canary.0.canary_deployment.0.postdeploy.0.tasks.0.container.0.env.STAGE", "canary"),
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.1.strategy.0.canary.0.custom_canary_deployment.0.phase_configs.0.predeploy.0.tasks.0.container.0.env.STAGE", "canary"),
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.1.strategy.0.canary.0.custom_canary_deployment.0.phase_configs.1.postdeploy.0.tasks.0.container.0.env.STAGE", "canary"),
+				),
+			},
+			{
+				ResourceName:            "google_clouddeploy_delivery_pipeline.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "annotations"},
+			},
+		},
+	})
+}
+
+func testAccClouddeployDeliveryPipeline_withCanaryDeployTasks(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_clouddeploy_delivery_pipeline" "primary" {
+  location = "%{region}"
+  name     = "tf-test-pipeline%{random_suffix}"
+
+  description = "test predeploy and postdeploy tasks on canary stages"
+
+  project = "%{project_name}"
+
+  serial_pipeline {
+    stages {
+      target_id = "my-target"
+      strategy {
+        canary {
+          runtime_config {
+            cloud_run {
+              automatic_traffic_control = true
+            }
+          }
+          canary_deployment {
+            percentages = [25]
+            predeploy {
+              tasks {
+                container {
+                  image   = "gcr.io/my-project/my-image"
+                  command = ["echo"]
+                  args    = ["hello"]
+                  env = {
+                    STAGE = "canary"
+                  }
+                }
+              }
+            }
+            postdeploy {
+              tasks {
+                container {
+                  image   = "gcr.io/my-project/my-cleanup-image"
+                  command = ["cleanup"]
+                  args    = ["--all"]
+                  env = {
+                    STAGE = "canary"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    stages {
+      target_id = "my-other-target"
+      strategy {
+        canary {
+          runtime_config {
+            cloud_run {
+              automatic_traffic_control = true
+            }
+          }
+          custom_canary_deployment {
+            phase_configs {
+              phase_id   = "first"
+              percentage = 50
+              predeploy {
+                tasks {
+                  container {
+                    image   = "gcr.io/my-project/my-image"
+                    command = ["echo"]
+                    args    = ["hello"]
+                    env = {
+                      STAGE = "canary"
+                    }
+                  }
+                }
+              }
+            }
+            phase_configs {
+              phase_id   = "stable"
+              percentage = 100
+              postdeploy {
+                tasks {
+                  container {
+                    image   = "gcr.io/my-project/my-cleanup-image"
+                    command = ["cleanup"]
+                    args    = ["--all"]
+                    env = {
+                      STAGE = "canary"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func TestAccClouddeployDeliveryPipeline_withCanaryDeployActions(t *testing.T) {
+	t.Parallel()
+	context := map[string]interface{}{
+		"project_name":  envvar.GetTestProjectFromEnv(),
+		"region":        envvar.GetTestRegionFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckClouddeployDeliveryPipelineDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccClouddeployDeliveryPipeline_withCanaryDeployActions(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.canary.0.canary_deployment.0.predeploy.0.actions.0", "db-migrate"),
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.1.strategy.0.canary.0.custom_canary_deployment.0.phase_configs.0.predeploy.0.actions.0", "db-migrate"),
+				),
+			},
+			{
+				ResourceName:            "google_clouddeploy_delivery_pipeline.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "annotations"},
+			},
+		},
+	})
+}
+
+func testAccClouddeployDeliveryPipeline_withCanaryDeployActions(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_clouddeploy_delivery_pipeline" "primary" {
+  location = "%{region}"
+  name     = "tf-test-pipeline%{random_suffix}"
+
+  description = "test predeploy and postdeploy actions on canary stages"
+
+  project = "%{project_name}"
+
+  serial_pipeline {
+    stages {
+      target_id = "my-target"
+      strategy {
+        canary {
+          runtime_config {
+            cloud_run {
+              automatic_traffic_control = true
+            }
+          }
+          canary_deployment {
+            percentages = [25]
+            predeploy {
+              actions = ["db-migrate"]
+            }
+            postdeploy {
+              actions = ["cleanup"]
+            }
+          }
+        }
+      }
+    }
+
+    stages {
+      target_id = "my-other-target"
+      strategy {
+        canary {
+          runtime_config {
+            cloud_run {
+              automatic_traffic_control = true
+            }
+          }
+          custom_canary_deployment {
+            phase_configs {
+              phase_id   = "first"
+              percentage = 50
+              predeploy {
+                actions = ["db-migrate"]
+              }
+            }
+            phase_configs {
+              phase_id   = "stable"
+              percentage = 100
+              postdeploy {
+                actions = ["cleanup"]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`, context)
+}

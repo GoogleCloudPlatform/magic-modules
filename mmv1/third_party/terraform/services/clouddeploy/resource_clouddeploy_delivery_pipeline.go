@@ -332,6 +332,12 @@ func ClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeployme
 				Description: "Optional. A sequence of skaffold custom actions to invoke during execution of the postdeploy job.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			"tasks": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Optional. The tasks that will run as a part of the postdeploy job. Only one of `actions` or `tasks` can be specified.",
+				Elem:        ClouddeployDeliveryPipelineTaskSchema(),
+			},
 		},
 	}
 }
@@ -344,6 +350,12 @@ func ClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeployme
 				Optional:    true,
 				Description: "Optional. A sequence of skaffold custom actions to invoke during execution of the predeploy job.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"tasks": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Optional. The tasks that will run as a part of the predeploy job. Only one of `actions` or `tasks` can be specified.",
+				Elem:        ClouddeployDeliveryPipelineTaskSchema(),
 			},
 		},
 	}
@@ -434,6 +446,12 @@ func ClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDe
 				Description: "Optional. A sequence of skaffold custom actions to invoke during execution of the postdeploy job.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
+			"tasks": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Optional. The tasks that will run as a part of the postdeploy job. Only one of `actions` or `tasks` can be specified.",
+				Elem:        ClouddeployDeliveryPipelineTaskSchema(),
+			},
 		},
 	}
 }
@@ -446,6 +464,12 @@ func ClouddeployDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDe
 				Optional:    true,
 				Description: "Optional. A sequence of skaffold custom actions to invoke during execution of the predeploy job.",
 				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"tasks": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Optional. The tasks that will run as a part of the predeploy job. Only one of `actions` or `tasks` can be specified.",
+				Elem:        ClouddeployDeliveryPipelineTaskSchema(),
 			},
 		},
 	}
