@@ -1,0 +1,11 @@
+resource "google_cloudbuild_git_lab_config" "{{$.PrimaryResourceId}}" {
+    config_id = "{{index $.Vars "config_id"}}"
+    location = "us-central1"
+    username = "test-user"
+    secrets {
+        webhook_secret_version = "projects/myProject/secrets/mysecret/versions/1"
+        api_key_version = "projects/myProject/secrets/mysecret/versions/1"
+        api_access_token_version = "projects/myProject/secrets/mysecret/versions/1"
+        read_access_token_version = "projects/myProject/secrets/mysecret/versions/1"
+    }
+}
