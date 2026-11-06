@@ -1,47 +1,34 @@
 // discoveryEngineDocumentImportParseCount parses an int64 count from
 // ImportDocumentsMetadata, where proto3 JSON serializes non-zero int64 values
-// as strings and omits zero values.
+// as strings and omits zero values. Metadata is decoded with UseNumber, so
+// unquoted numbers arrive as json.Number.
 func discoveryEngineDocumentImportParseCount(v interface{}) (int64, string, error) {
-	if v == nil {
+	var s string
+	switch c := v.(type) {
+	case nil:
+		return 0, "0", nil
+	case string:
+		s = c
+	case json.Number:
+		s = c.String()
+	default:
+		return 0, "", fmt.Errorf("unexpected type %T for count value %v", v, v)
+	}
+	if s == "" {
 		return 0, "0", nil
 	}
-	switch c := v.(type) {
-	case string:
-		if c == "" {
-			return 0, "0", nil
-		}
-		n, err := strconv.ParseInt(c, 10, 64)
-		if err != nil {
-			return 0, "", err
-		}
-		return n, strconv.FormatInt(n, 10), nil
-	case json.Number:
-		if c.String() == "" {
-			return 0, "0", nil
-		}
-		n, err := c.Int64()
-		if err != nil {
-			return 0, "", err
-		}
-		return n, strconv.FormatInt(n, 10), nil
-	case float64:
-		n := int64(c)
-		return n, strconv.FormatInt(n, 10), nil
-	default:
-		s := fmt.Sprintf("%v", v)
-		if s == "" {
-			return 0, "0", nil
-		}
-		n, err := strconv.ParseInt(s, 10, 64)
-		if err != nil {
-			return 0, "", err
-		}
-		return n, strconv.FormatInt(n, 10), nil
+	n, err := strconv.ParseInt(s, 10, 64)
+	if err != nil {
+		return 0, "", err
 	}
+	return n, strconv.FormatInt(n, 10), nil
 }
 
+// discoveryEngineDocumentImportFormatErrorSamples renders up to limit
+// ImportDocumentsResponse.errorSamples (google.rpc.Status) as a single
+// human-readable string, noting how many additional samples were omitted.
 func discoveryEngineDocumentImportFormatErrorSamples(samples []interface{}, limit int) string {
-	if len(samples) == 0 {
+	if len(samples) == 0 || limit <= 0 {
 		return ""
 	}
 	var formatted []string

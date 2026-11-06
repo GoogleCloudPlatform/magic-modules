@@ -42,7 +42,7 @@ func TestAccDiscoveryEngineDocumentImport_lifecycleAndPurgeOnDestroy(t *testing.
 			{
 				// Step 1: Import 2 documents with purge_on_destroy = false and verify
 				// both Terraform state counts and live ListDocuments count == 2.
-				Config: testAccDiscoveryEngineDocumentImport_withImport(context, "first-import", false),
+				Config: testAccDiscoveryEngineDocumentImport_withImport(context, "tf-test-first-import", false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_discovery_engine_document_import.test", "project", context["project"].(string)),
 					resource.TestCheckResourceAttr("google_discovery_engine_document_import.test", "success_count", "2"),
@@ -63,7 +63,7 @@ func TestAccDiscoveryEngineDocumentImport_lifecycleAndPurgeOnDestroy(t *testing.
 			{
 				// Step 3: Create a second DocumentImport on the same branch (starting with
 				// purge_on_destroy = false).
-				Config: testAccDiscoveryEngineDocumentImport_withImport(context, "second-import", false),
+				Config: testAccDiscoveryEngineDocumentImport_withImport(context, "tf-test-second-import", false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_discovery_engine_document_import.test", "success_count", "2"),
 					resource.TestCheckResourceAttr("google_discovery_engine_document_import.test", "failure_count", "0"),
@@ -72,7 +72,7 @@ func TestAccDiscoveryEngineDocumentImport_lifecycleAndPurgeOnDestroy(t *testing.
 			},
 			{
 				// Step 4: Update purge_on_destroy from false -> true in-place (must NOT trigger ForceNew).
-				Config: testAccDiscoveryEngineDocumentImport_withImport(context, "second-import", true),
+				Config: testAccDiscoveryEngineDocumentImport_withImport(context, "tf-test-second-import", true),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_discovery_engine_document_import.test", plancheck.ResourceActionUpdate),
@@ -262,7 +262,7 @@ resource "google_storage_bucket_object" "invalid_documents" {
 resource "google_discovery_engine_document_import" "invalid" {
   location      = google_discovery_engine_data_store.basic.location
   data_store_id = google_discovery_engine_data_store.basic.data_store_id
-  import_id     = "invalid-import"
+  import_id     = "tf-test-invalid-import"
 
   gcs_source {
     input_uris  = ["gs://${google_storage_bucket.import_bucket.name}/${google_storage_bucket_object.invalid_documents.name}"]
