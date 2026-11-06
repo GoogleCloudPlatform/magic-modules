@@ -1,0 +1,43 @@
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+	return err
+}
+endpoint := d.Get("endpoint").(string)
+endpointURL, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}VertexAIBasePath{{"}}"}}" + endpoint)
+if err != nil {
+	return err
+}
+readRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config: config,
+	Method: "GET",
+	Project: project,
+	RawURL: endpointURL,
+	UserAgent: userAgent,
+	Headers: make(http.Header),
+})
+if err != nil {
+	return err
+}
+deployedModels, ok := readRes["deployedModels"].([]interface{})
+if !ok {
+	return fmt.Errorf("Vertex AI endpoint response did not contain deployedModels")
+}
+modelName := d.Get("model").(string)
+for _, raw := range deployedModels {
+	model, ok := raw.(map[string]interface{})
+	if !ok {
+		continue
+	}
+	if model["model"] == modelName {
+		id, ok := model["id"].(string)
+		if !ok || id == "" {
+			return fmt.Errorf("Vertex AI deployed model response did not contain an id")
+		}
+		if err := d.Set("deployed_model_id", id); err != nil {
+			return err
+		}
+		d.SetId(endpoint + "/deployedModels/" + id)
+		return nil
+	}
+}
+return fmt.Errorf("deployed model %q was not found on endpoint %q", modelName, endpoint)
