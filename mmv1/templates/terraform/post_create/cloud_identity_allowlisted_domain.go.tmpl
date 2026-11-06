@@ -1,0 +1,63 @@
+// Create returns a google.longrunning.Operation that can't be polled. When the
+// operation is already done, the created AllowlistedDomain (including its
+// server-assigned name) is in `response`; otherwise look the name up by domain.
+if opErr, ok := res["error"]; ok && opErr != nil {
+	return fmt.Errorf("Error creating AllowlistedDomain: %v", opErr)
+}
+
+var name string
+if respBody, ok := res["response"].(map[string]interface{}); ok {
+	if v, ok := respBody["name"].(string); ok {
+		name = v
+	}
+}
+
+if name == "" {
+	// The server stores the domain normalized (lowercased).
+	domain := strings.ToLower(d.Get("domain").(string))
+	var listUrl string
+	listUrl, err = tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"allowlistedDomains")
+	if err != nil {
+		return err
+	}
+	listUrl, err = transport_tpg.AddQueryParams(listUrl, map[string]string{"filter": fmt.Sprintf("domain = '%s'", domain)})
+	if err != nil {
+		return err
+	}
+	err = retry.Retry(d.Timeout(schema.TimeoutCreate), func() *retry.RetryError {
+		listRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    listUrl,
+			UserAgent: userAgent,
+		})
+		if err != nil {
+			return retry.NonRetryableError(err)
+		}
+		if items, ok := listRes["allowlistedDomains"].([]interface{}); ok {
+			for _, item := range items {
+				m, ok := item.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				if v, ok := m["domain"].(string); ok && strings.EqualFold(v, domain) {
+					name, _ = m["name"].(string)
+					return nil
+				}
+			}
+		}
+		return retry.RetryableError(fmt.Errorf("allowlisted domain %q not listed yet", domain))
+	})
+	if err != nil {
+		return fmt.Errorf("Error looking up name of created AllowlistedDomain: %w", err)
+	}
+}
+
+if name == "" {
+	return fmt.Errorf("Create response didn't contain the AllowlistedDomain name. Create may not have succeeded.")
+}
+if err := d.Set("name", name); err != nil {
+	return fmt.Errorf("Error setting name: %w", err)
+}
+d.SetId(name)
