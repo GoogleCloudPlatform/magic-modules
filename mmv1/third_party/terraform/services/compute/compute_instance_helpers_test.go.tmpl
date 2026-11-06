@@ -1,0 +1,159 @@
+package compute
+
+import (
+	"reflect"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
+
+func TestHasTerminationTimeChanged(t *testing.T) {
+	t.Parallel()
+	cases := map[string]struct {
+		Old, New map[string]interface{}
+		Expect   bool
+	}{
+		"empty": {
+			Old:    map[string]interface{}{"termination_time": ""},
+			New:    map[string]interface{}{"termination_time": ""},
+			Expect: false,
+		},
+		"new": {
+			Old:    map[string]interface{}{"termination_time": ""},
+			New:    map[string]interface{}{"termination_time": "2025-01-31T15:04:05Z"},
+			Expect: true,
+		},
+		"changed": {
+			Old:    map[string]interface{}{"termination_time": "2025-01-30T15:04:05Z"},
+			New:    map[string]interface{}{"termination_time": "2025-01-31T15:04:05Z"},
+			Expect: true,
+		},
+		"same": {
+			Old:    map[string]interface{}{"termination_time": "2025-01-30T15:04:05Z"},
+			New:    map[string]interface{}{"termination_time": "2025-01-30T15:04:05Z"},
+			Expect: false,
+		},
+	}
+	for tn, tc := range cases {
+		if hasTerminationTimeChanged(tc.Old, tc.New) != tc.Expect {
+			t.Errorf("%s: expected %t for whether termination time matched for old = %q, new = %q", tn, tc.Expect, tc.Old, tc.New)
+		}
+	}
+}
+
+func TestExpandWorkloadIdentityConfig(t *testing.T) {
+	t.Parallel()
+
+	wicSchema := map[string]*schema.Schema{
+		"workload_identity_config": {
+			Type:     schema.TypeList,
+			Optional: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"identity": {
+						Type:     schema.TypeString,
+						Optional: true,
+						Computed: true,
+					},
+					"identity_certificate_enabled": {
+						Type:     schema.TypeBool,
+						Optional: true,
+						Computed: true,
+					},
+					{{- if ne $.TargetVersionName "ga" }}
+					"identity_type": {
+						Type:     schema.TypeString,
+						Optional: true,
+						Computed: true,
+					},
+					{{- end }}
+				},
+			},
+		},
+	}
+
+	cases := map[string]struct {
+		raw  map[string]interface{}
+		want map[string]interface{}
+	}{
+		"nil config": {
+			raw:  nil,
+			want: nil,
+		},
+		"empty list": {
+			raw: map[string]interface{}{
+				"workload_identity_config": []interface{}{},
+			},
+			want: nil,
+		},
+		{{- if ne $.TargetVersionName "ga" }}
+		"agent identity only": {
+			raw: map[string]interface{}{
+				"workload_identity_config": []interface{}{
+					map[string]interface{}{
+						"identity_type": "AGENT_IDENTITY",
+					},
+				},
+			},
+			want: map[string]interface{}{
+				"identityType": "AGENT_IDENTITY",
+			},
+		},
+		"service account with explicit certs false": {
+			raw: map[string]interface{}{
+				"workload_identity_config": []interface{}{
+					map[string]interface{}{
+						"identity_type":                "SERVICE_ACCOUNT",
+						"identity_certificate_enabled": false,
+					},
+				},
+			},
+			want: map[string]interface{}{
+				"identityType":               "SERVICE_ACCOUNT",
+				"identityCertificateEnabled": false,
+			},
+		},
+		"unspecified with full config": {
+			raw: map[string]interface{}{
+				"workload_identity_config": []interface{}{
+					map[string]interface{}{
+						"identity":                     "ns/test-ns/sa/test-sa",
+						"identity_certificate_enabled": true,
+						"identity_type":                "IDENTITY_TYPE_UNSPECIFIED",
+					},
+				},
+			},
+			want: map[string]interface{}{
+				"identity":                   "ns/test-ns/sa/test-sa",
+				"identityCertificateEnabled": true,
+				"identityType":               "IDENTITY_TYPE_UNSPECIFIED",
+			},
+		},
+		{{- else }}
+		"ga identity and certs": {
+			raw: map[string]interface{}{
+				"workload_identity_config": []interface{}{
+					map[string]interface{}{
+						"identity":                     "ns/test-ns/sa/test-sa",
+						"identity_certificate_enabled": true,
+					},
+				},
+			},
+			want: map[string]interface{}{
+				"identity":                   "ns/test-ns/sa/test-sa",
+				"identityCertificateEnabled": true,
+			},
+		},
+		{{- end }}
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			d := schema.TestResourceDataRaw(t, wicSchema, tc.raw)
+			got := expandWorkloadIdentityConfig(d)
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Fatalf("expandWorkloadIdentityConfig() = %#v, want %#v", got, tc.want)
+			}
+		})
+	}
+}
