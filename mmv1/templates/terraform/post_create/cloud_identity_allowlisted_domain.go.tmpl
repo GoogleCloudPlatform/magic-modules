@@ -16,7 +16,7 @@ if name == "" {
 	// The server stores the domain normalized (lowercased).
 	domain := strings.ToLower(d.Get("domain").(string))
 	var listUrl string
-	listUrl, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}CloudIdentityBasePath{{"}}"}}allowlistedDomains")
+	listUrl, err = tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"allowlistedDomains")
 	if err != nil {
 		return err
 	}
