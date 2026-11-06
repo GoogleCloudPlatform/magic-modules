@@ -343,6 +343,11 @@ type DeliveryPipelineTask struct {
 	Container *DeliveryPipelineContainer `json:"container"`
 }
 
+// This object is used to assert a desired state where this DeliveryPipelineTask is
+// empty. Go lacks global const objects, but this object should be treated
+// as one. Modifying this object will have undesirable results.
+var EmptyDeliveryPipelineTask *DeliveryPipelineTask = &DeliveryPipelineTask{empty: true}
+
 type DeliveryPipelineContainer struct {
 	empty   bool              `json:"-"`
 	Image   *string           `json:"image"`
@@ -350,6 +355,11 @@ type DeliveryPipelineContainer struct {
 	Args    []string          `json:"args"`
 	Env     map[string]string `json:"env"`
 }
+
+// This object is used to assert a desired state where this DeliveryPipelineContainer is
+// empty. Go lacks global const objects, but this object should be treated
+// as one. Modifying this object will have undesirable results.
+var EmptyDeliveryPipelineContainer *DeliveryPipelineContainer = &DeliveryPipelineContainer{empty: true}
 
 type DeliveryPipelineSerialPipelineStagesStrategyStandardVerifyConfig struct {
 	empty bool                   `json:"-"`
@@ -363,10 +373,20 @@ type DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis struct {
 	CustomChecks []DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks   `json:"customChecks"`
 }
 
+// This object is used to assert a desired state where this DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis is
+// empty. Go lacks global const objects, but this object should be treated
+// as one. Modifying this object will have undesirable results.
+var EmptyDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis *DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis = &DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis{empty: true}
+
 type DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisGoogleCloud struct {
 	empty             bool                                                                               `json:"-"`
 	AlertPolicyChecks []DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck `json:"alertPolicyChecks"`
 }
+
+// This object is used to assert a desired state where this DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisGoogleCloud is
+// empty. Go lacks global const objects, but this object should be treated
+// as one. Modifying this object will have undesirable results.
+var EmptyDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisGoogleCloud *DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisGoogleCloud = &DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisGoogleCloud{empty: true}
 
 type DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck struct {
 	empty         bool              `json:"-"`
@@ -375,12 +395,22 @@ type DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyChec
 	Labels        map[string]string `json:"labels"`
 }
 
+// This object is used to assert a desired state where this DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck is
+// empty. Go lacks global const objects, but this object should be treated
+// as one. Modifying this object will have undesirable results.
+var EmptyDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck *DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck = &DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck{empty: true}
+
 type DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks struct {
 	empty     bool                  `json:"-"`
 	Id        *string               `json:"id"`
 	Frequency *string               `json:"frequency"`
 	Task      *DeliveryPipelineTask `json:"task"`
 }
+
+// This object is used to assert a desired state where this DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks is
+// empty. Go lacks global const objects, but this object should be treated
+// as one. Modifying this object will have undesirable results.
+var EmptyDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks *DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks = &DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks{empty: true}
 
 type DeliveryPipelineSerialPipelineStagesStrategyCanary struct {
 	empty                  bool                                                                      `json:"-"`

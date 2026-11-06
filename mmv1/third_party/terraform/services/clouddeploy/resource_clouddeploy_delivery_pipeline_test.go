@@ -100,6 +100,200 @@ resource "google_clouddeploy_delivery_pipeline" "primary" {
 `, context)
 }
 
+func TestAccClouddeployDeliveryPipeline_withStandardAnalysis(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project_name":  envvar.GetTestProjectFromEnv(),
+		"region":        envvar.GetTestRegionFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckClouddeployDeliveryPipelineDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccClouddeployDeliveryPipeline_withStandardAnalysis(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.analysis.0.duration", "1200s"),
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.analysis.0.google_cloud.0.alert_policy_checks.0.id", "alert-check"),
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.analysis.0.custom_checks.0.task.0.container.0.image", "my-image"),
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.1.strategy.0.canary.0.custom_canary_deployment.0.phase_configs.0.analysis.0.duration", "600s"),
+				),
+			},
+			{
+				ResourceName:            "google_clouddeploy_delivery_pipeline.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "annotations"},
+			},
+			{
+				Config: testAccClouddeployDeliveryPipeline_withStandardAnalysisUpdate(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.analysis.0.duration", "1800s"),
+					resource.TestCheckResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.0.strategy.0.standard.0.analysis.0.google_cloud.0.alert_policy_checks.0.id", "alert-check-updated"),
+					resource.TestCheckNoResourceAttr("google_clouddeploy_delivery_pipeline.primary", "serial_pipeline.0.stages.1.strategy.0.canary.0.custom_canary_deployment.0.phase_configs.0.analysis.0.duration"),
+				),
+			},
+			{
+				ResourceName:            "google_clouddeploy_delivery_pipeline.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "annotations"},
+			},
+		},
+	})
+}
+
+func testAccClouddeployDeliveryPipeline_withStandardAnalysis(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_clouddeploy_delivery_pipeline" "primary" {
+  location = "%{region}"
+  name     = "tf-test-pipeline%{random_suffix}"
+
+  description = "standard and custom canary analysis"
+
+  project = "%{project_name}"
+
+  serial_pipeline {
+    stages {
+      target_id = "my-target"
+      strategy {
+        standard {
+          analysis {
+            duration = "1200s"
+            google_cloud {
+              alert_policy_checks {
+                id             = "alert-check"
+                alert_policies = ["projects/%{project_name}/alertPolicies/my-policy"]
+                labels = {
+                  env = "prod"
+                }
+              }
+            }
+            custom_checks {
+              id        = "custom-check"
+              frequency = "300s"
+              task {
+                container {
+                  image   = "my-image"
+                  command = ["echo"]
+                  args    = ["hello"]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    stages {
+      target_id = "my-other-target"
+      strategy {
+        canary {
+          custom_canary_deployment {
+            phase_configs {
+              phase_id   = "first"
+              percentage = 50
+              analysis {
+                duration = "600s"
+                google_cloud {
+                  alert_policy_checks {
+                    id             = "canary-alert-check"
+                    alert_policies = ["projects/%{project_name}/alertPolicies/my-policy"]
+                  }
+                }
+              }
+            }
+            phase_configs {
+              phase_id   = "stable"
+              percentage = 100
+            }
+          }
+          runtime_config {
+            cloud_run {
+              automatic_traffic_control = true
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccClouddeployDeliveryPipeline_withStandardAnalysisUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_clouddeploy_delivery_pipeline" "primary" {
+  location = "%{region}"
+  name     = "tf-test-pipeline%{random_suffix}"
+
+  description = "standard and custom canary analysis"
+
+  project = "%{project_name}"
+
+  serial_pipeline {
+    stages {
+      target_id = "my-target"
+      strategy {
+        standard {
+          analysis {
+            duration = "1800s"
+            google_cloud {
+              alert_policy_checks {
+                id             = "alert-check-updated"
+                alert_policies = ["projects/%{project_name}/alertPolicies/my-policy"]
+                labels = {
+                  env = "staging"
+                }
+              }
+            }
+            custom_checks {
+              id        = "custom-check"
+              frequency = "600s"
+              task {
+                container {
+                  image   = "my-image"
+                  command = ["echo"]
+                  args    = ["goodbye"]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    stages {
+      target_id = "my-other-target"
+      strategy {
+        canary {
+          custom_canary_deployment {
+            phase_configs {
+              phase_id   = "first"
+              percentage = 50
+            }
+            phase_configs {
+              phase_id   = "stable"
+              percentage = 100
+            }
+          }
+          runtime_config {
+            cloud_run {
+              automatic_traffic_control = true
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
 func TestAccClouddeployDeliveryPipeline_withPredeployTasks(t *testing.T) {
 	t.Parallel()
 	context := map[string]interface{}{
