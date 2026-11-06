@@ -4196,6 +4196,7 @@ func TestAccDataprocCluster_flexibleConfig(t *testing.T) {
 				Config: testAccDataprocCluster_flexibleConfig(rnd, 2, 1),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.flexible_cluster", &cluster),
+					testAccCheckDataprocClusterFlexibleSecondary(&cluster, 1, 100, "highmem-8"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.master_flexible_config.#", "1"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.master_flexible_config.0.num_instances", "1"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.master_flexible_config.0.core_count", "4"),
@@ -4222,6 +4223,7 @@ func TestAccDataprocCluster_flexibleConfig(t *testing.T) {
 				},
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.flexible_cluster", &cluster),
+					testAccCheckDataprocClusterFlexibleSecondary(&cluster, 2, 100, "highmem-8"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.worker_flexible_config.0.num_instances", "3"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.secondary_worker_flexible_config.0.num_instances", "2"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.preemptible_worker_config.0.num_instances", "2"),
@@ -4236,13 +4238,79 @@ func TestAccDataprocCluster_flexibleConfig(t *testing.T) {
 				},
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.flexible_cluster", &cluster),
+					testAccCheckDataprocClusterFlexibleSecondary(&cluster, 1, 100, "highmem-8"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.worker_flexible_config.0.num_instances", "3"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.secondary_worker_flexible_config.0.num_instances", "1"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.preemptible_worker_config.0.num_instances", "1"),
 				),
 			},
+			{
+				// Removing the secondary_worker_flexible_config block scales secondary workers down to 0 in place.
+				Config: testAccDataprocCluster_flexibleConfig_noSec(rnd, 3),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_dataproc_cluster.flexible_cluster", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.flexible_cluster", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.worker_flexible_config.0.num_instances", "3"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.secondary_worker_flexible_config.#", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.secondary_worker_flexible_config.0.num_instances", "0"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.preemptible_worker_config.0.num_instances", "0"),
+				),
+			},
+			{
+				// Re-adding secondary_worker_flexible_config with matching shape scales back up in place.
+				Config: testAccDataprocCluster_flexibleConfig(rnd, 3, 2),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_dataproc_cluster.flexible_cluster", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.flexible_cluster", &cluster),
+					testAccCheckDataprocClusterFlexibleSecondary(&cluster, 2, 100, "highmem-8"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.worker_flexible_config.0.num_instances", "3"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.secondary_worker_flexible_config.#", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.secondary_worker_flexible_config.0.num_instances", "2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.preemptible_worker_config.0.num_instances", "2"),
+				),
+			},
 		},
 	})
+}
+
+func testAccCheckDataprocClusterFlexibleSecondary(cluster *dataproc.Cluster, wantInstances, wantBootDiskGb int64, wantMachineTypeSubstr string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if cluster.Config == nil || cluster.Config.SecondaryWorkerConfig == nil {
+			return fmt.Errorf("expected cluster.Config.SecondaryWorkerConfig to be populated on GCP cluster, got nil")
+		}
+		sec := cluster.Config.SecondaryWorkerConfig
+		if sec.NumInstances != wantInstances {
+			return fmt.Errorf("expected SecondaryWorkerConfig.NumInstances = %d, got %d", wantInstances, sec.NumInstances)
+		}
+		if sec.DiskConfig == nil || sec.DiskConfig.BootDiskSizeGb != wantBootDiskGb {
+			var got int64
+			if sec.DiskConfig != nil {
+				got = sec.DiskConfig.BootDiskSizeGb
+			}
+			return fmt.Errorf("expected SecondaryWorkerConfig.DiskConfig.BootDiskSizeGb = %d, got %d", wantBootDiskGb, got)
+		}
+		if sec.InstanceFlexibilityPolicy == nil || len(sec.InstanceFlexibilityPolicy.InstanceSelectionList) == 0 {
+			return fmt.Errorf("expected SecondaryWorkerConfig.InstanceFlexibilityPolicy.InstanceSelectionList to be non-empty")
+		}
+		var machineTypes []string
+		for _, sel := range sec.InstanceFlexibilityPolicy.InstanceSelectionList {
+			for _, mt := range sel.MachineTypes {
+				machineTypes = append(machineTypes, mt)
+				if strings.Contains(mt, wantMachineTypeSubstr) {
+					return nil
+				}
+			}
+		}
+		return fmt.Errorf("expected SecondaryWorkerConfig machine types %v to contain %q", machineTypes, wantMachineTypeSubstr)
+	}
 }
 
 func testAccDataprocCluster_flexibleConfig(rnd string, workers, secWorkers int) string {
@@ -4278,6 +4346,32 @@ resource "google_dataproc_cluster" "flexible_cluster" {
 `, rnd, workers, secWorkers)
 }
 
+func testAccDataprocCluster_flexibleConfig_noSec(rnd string, workers int) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "flexible_cluster" {
+  name   = "tf-test-dproc-%s"
+  region = "us-central1"
+  graceful_decommission_timeout = "0.2s"
+
+  cluster_config {
+    master_flexible_config {
+      num_instances     = 1
+      core_count        = 4
+      hardware_class    = "STANDARD"
+      boot_disk_size_gb = 100
+    }
+
+    worker_flexible_config {
+      num_instances     = %d
+      core_count        = 8
+      hardware_class    = "STANDARD"
+      boot_disk_size_gb = 100
+    }
+  }
+}
+`, rnd, workers)
+}
+
 func TestAccDataprocCluster_flexibleConfigDefaults(t *testing.T) {
 	t.Parallel()
 
@@ -4302,6 +4396,96 @@ func TestAccDataprocCluster_flexibleConfigDefaults(t *testing.T) {
 					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_defaults", "cluster_config.0.worker_flexible_config.0.hardware_class", "STANDARD"),
 				),
 			},
+			{
+				// Post-create addition of secondary_worker_flexible_config matching worker_flexible_config (omitting boot_disk_size_gb) updates in place.
+				Config: testAccDataprocCluster_flexibleConfigDefaults_withSec(rnd, 1),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_dataproc_cluster.flexible_cluster_defaults", plancheck.ResourceActionUpdate),
+					},
+					PostApplyPostRefresh: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.flexible_cluster_defaults", &cluster),
+					testAccCheckDataprocClusterFlexibleSecondary(&cluster, 1, 1000, "standard-4"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_defaults", "cluster_config.0.secondary_worker_flexible_config.#", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_defaults", "cluster_config.0.secondary_worker_flexible_config.0.num_instances", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_defaults", "cluster_config.0.secondary_worker_flexible_config.0.core_count", "4"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_defaults", "cluster_config.0.secondary_worker_flexible_config.0.hardware_class", "STANDARD"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_defaults", "cluster_config.0.secondary_worker_flexible_config.0.boot_disk_size_gb", "1000"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_defaults", "cluster_config.0.preemptible_worker_config.0.num_instances", "1"),
+				),
+			},
+			{
+				// Removing secondary_worker_flexible_config scales secondary workers down to 0 in place.
+				Config: testAccDataprocCluster_flexibleConfigDefaults(rnd),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_dataproc_cluster.flexible_cluster_defaults", plancheck.ResourceActionUpdate),
+					},
+					PostApplyPostRefresh: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.flexible_cluster_defaults", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_defaults", "cluster_config.0.secondary_worker_flexible_config.#", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_defaults", "cluster_config.0.secondary_worker_flexible_config.0.num_instances", "0"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_defaults", "cluster_config.0.secondary_worker_flexible_config.0.boot_disk_size_gb", "1000"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_defaults", "cluster_config.0.preemptible_worker_config.0.num_instances", "0"),
+				),
+			},
+			{
+				Config: testAccDataprocCluster_flexibleConfigDefaults_bootDisk(rnd),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.flexible_cluster_boot_disk", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_boot_disk", "cluster_config.0.worker_flexible_config.0.boot_disk_size_gb", "100"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_boot_disk", "cluster_config.0.secondary_worker_flexible_config.#", "0"),
+				),
+			},
+			{
+				// Plan only (never applied): adding secondary_worker_flexible_config post-create with a
+				// num_instances unknown at plan time plans a replacement.
+				Config:             testAccDataprocCluster_flexibleConfigDefaults_bootDiskWithUnknownSec(rnd),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PostApplyPreRefresh: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_dataproc_cluster.flexible_cluster_boot_disk", plancheck.ResourceActionReplace),
+					},
+					PostApplyPostRefresh: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_dataproc_cluster.flexible_cluster_boot_disk", plancheck.ResourceActionReplace),
+					},
+				},
+			},
+			{
+				// Post-create addition of secondary_worker_flexible_config with explicit boot_disk_size_gb matching worker_flexible_config updates in place without drift.
+				Config: testAccDataprocCluster_flexibleConfigDefaults_bootDiskWithSec(rnd, 1),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_dataproc_cluster.flexible_cluster_boot_disk", plancheck.ResourceActionUpdate),
+					},
+					PostApplyPostRefresh: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.flexible_cluster_boot_disk", &cluster),
+					testAccCheckDataprocClusterFlexibleSecondary(&cluster, 1, 100, "standard-4"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_boot_disk", "cluster_config.0.secondary_worker_flexible_config.#", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_boot_disk", "cluster_config.0.secondary_worker_flexible_config.0.num_instances", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_boot_disk", "cluster_config.0.secondary_worker_flexible_config.0.core_count", "4"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_boot_disk", "cluster_config.0.secondary_worker_flexible_config.0.hardware_class", "STANDARD"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_boot_disk", "cluster_config.0.secondary_worker_flexible_config.0.boot_disk_size_gb", "100"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_boot_disk", "cluster_config.0.preemptible_worker_config.0.num_instances", "1"),
+				),
+			},
+			{
+				Config:   testAccDataprocCluster_flexibleConfigDefaults_bootDiskWithSec(rnd, 1),
+				PlanOnly: true,
+			},
 		},
 	})
 }
@@ -4325,4 +4509,115 @@ resource "google_dataproc_cluster" "flexible_cluster_defaults" {
   }
 }
 `, rnd)
+}
+
+func testAccDataprocCluster_flexibleConfigDefaults_withSec(rnd string, secWorkers int) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "flexible_cluster_defaults" {
+  name                          = "tf-test-dproc-%s"
+  region                        = "us-central1"
+  graceful_decommission_timeout = "0.2s"
+
+  cluster_config {
+    master_flexible_config {
+      core_count = 2
+    }
+
+    worker_flexible_config {
+      num_instances = 2
+      core_count    = 4
+    }
+
+    secondary_worker_flexible_config {
+      num_instances = %d
+      core_count    = 4
+    }
+  }
+}
+`, rnd, secWorkers)
+}
+
+func testAccDataprocCluster_flexibleConfigDefaults_bootDisk(rnd string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "flexible_cluster_boot_disk" {
+  name                          = "tf-test-dproc-bd-%s"
+  region                        = "us-central1"
+  graceful_decommission_timeout = "0.2s"
+
+  cluster_config {
+    master_flexible_config {
+      core_count        = 2
+      boot_disk_size_gb = 100
+    }
+
+    worker_flexible_config {
+      num_instances     = 2
+      core_count        = 4
+      boot_disk_size_gb = 100
+    }
+  }
+}
+`, rnd)
+}
+
+func testAccDataprocCluster_flexibleConfigDefaults_bootDiskWithUnknownSec(rnd string) string {
+	return fmt.Sprintf(`
+resource "terraform_data" "sec_count" {
+  input = 1
+}
+
+resource "google_dataproc_cluster" "flexible_cluster_boot_disk" {
+  name                          = "tf-test-dproc-bd-%s"
+  region                        = "us-central1"
+  graceful_decommission_timeout = "0.2s"
+
+  cluster_config {
+    master_flexible_config {
+      core_count        = 2
+      boot_disk_size_gb = 100
+    }
+
+    worker_flexible_config {
+      num_instances     = 2
+      core_count        = 4
+      boot_disk_size_gb = 100
+    }
+
+    secondary_worker_flexible_config {
+      num_instances     = terraform_data.sec_count.output
+      core_count        = 4
+      boot_disk_size_gb = 100
+    }
+  }
+}
+`, rnd)
+}
+
+func testAccDataprocCluster_flexibleConfigDefaults_bootDiskWithSec(rnd string, secWorkers int) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "flexible_cluster_boot_disk" {
+  name                          = "tf-test-dproc-bd-%s"
+  region                        = "us-central1"
+  graceful_decommission_timeout = "0.2s"
+
+  cluster_config {
+    master_flexible_config {
+      core_count        = 2
+      boot_disk_size_gb = 100
+    }
+
+    worker_flexible_config {
+      num_instances     = 2
+      core_count        = 4
+      boot_disk_size_gb = 100
+    }
+
+    secondary_worker_flexible_config {
+      num_instances     = %d
+      core_count        = 4
+      boot_disk_size_gb = 100
+    }
+  }
+}
+`, rnd, secWorkers)
 }

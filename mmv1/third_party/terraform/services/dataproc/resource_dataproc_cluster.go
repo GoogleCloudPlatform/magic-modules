@@ -1,6 +1,7 @@
 package dataproc
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -10,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -208,6 +210,7 @@ func ResourceDataprocCluster() *schema.Resource {
 			tpgresource.DefaultProviderProject,
 			// User labels are not supported in Dataproc Virtual Cluster
 			tpgresource.SetLabelsDiffWithoutAttributionLabel,
+			secondaryWorkerFlexibleConfigCustomizeDiff,
 		),
 
 		SchemaVersion: 1,
@@ -2546,23 +2549,21 @@ by Dataproc`,
 									"core_count": {
 										Type:         schema.TypeInt,
 										Required:     true,
-										ForceNew:     true,
 										ValidateFunc: validation.IntInSlice([]int{2, 4, 8, 16, 32}),
-										Description:  `The number of vCPUs per instance. Must be a power of 2: 2, 4, 8, 16, or 32. Changing this forces a new resource to be created.`,
+										Description:  `The number of vCPUs per instance. Must be a power of 2: 2, 4, 8, 16, or 32. Changing this on an existing block forces a new resource to be created.`,
 									},
 									"hardware_class": {
 										Type:         schema.TypeString,
 										Optional:     true,
-										ForceNew:     true,
 										Default:      "STANDARD",
 										ValidateFunc: validation.StringInSlice([]string{"STANDARD", "PERFORMANCE"}, false),
-										Description:  `The hardware class of instances. Allowed values are "STANDARD" and "PERFORMANCE". Defaults to "STANDARD". Changing this forces a new resource to be created.`,
+										Description:  `The hardware class of instances. Allowed values are "STANDARD" and "PERFORMANCE". Defaults to "STANDARD". Changing this on an existing block forces a new resource to be created.`,
 									},
 									"boot_disk_size_gb": {
 										Type:        schema.TypeInt,
 										Optional:    true,
-										ForceNew:    true,
-										Description: `The boot disk size in GB. Changing this forces a new resource to be created.`,
+										Computed:    true,
+										Description: `The boot disk size in GB. Changing this on an existing block forces a new resource to be created.`,
 									},
 								},
 							},
@@ -3922,6 +3923,57 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 		return []map[string]interface{}{}, nil
 	}
 
+	// For clusters created with secondary_worker_flexible_config, the API keeps
+	// returning SecondaryWorkerFlexibleConfig with its shape even at 0 instances
+	// (only numInstances and SecondaryWorkerConfig are omitted). After a
+	// post-create addition, the API may omit SecondaryWorkerFlexibleConfig or
+	// return it with bootDiskSizeGb omitted (0) while the real disk size is only on
+	// SecondaryWorkerConfig.DiskConfig. Synthesize the block when needed and fill
+	// any zero/empty shape fields from SecondaryWorkerConfig, prior state, or
+	// WorkerFlexibleConfig so state stays stable.
+	secFlex := cfg.SecondaryWorkerFlexibleConfig
+	oldSecRaw := d.Get("cluster_config.0.secondary_worker_flexible_config")
+	oldSecList, _ := oldSecRaw.([]interface{})
+	if secFlex == nil && cfg.WorkerFlexibleConfig != nil {
+		if (cfg.SecondaryWorkerConfig != nil && cfg.SecondaryWorkerConfig.NumInstances > 0) || len(oldSecList) > 0 {
+			secFlex = &dataproc.FlexibleInstanceGroupConfig{}
+			if cfg.SecondaryWorkerConfig != nil {
+				secFlex.NumInstances = cfg.SecondaryWorkerConfig.NumInstances
+			}
+		}
+	}
+	if secFlex != nil {
+		secFlexCopy := *secFlex
+		var oldSecMap map[string]interface{}
+		if len(oldSecList) > 0 {
+			oldSecMap, _ = oldSecList[0].(map[string]interface{})
+		}
+		if secFlexCopy.CoreCount == 0 {
+			if v, ok := oldSecMap["core_count"].(int); ok && v != 0 {
+				secFlexCopy.CoreCount = int64(v)
+			} else if cfg.WorkerFlexibleConfig != nil {
+				secFlexCopy.CoreCount = cfg.WorkerFlexibleConfig.CoreCount
+			}
+		}
+		if secFlexCopy.HardwareClass == "" {
+			if v, ok := oldSecMap["hardware_class"].(string); ok && v != "" {
+				secFlexCopy.HardwareClass = v
+			} else if cfg.WorkerFlexibleConfig != nil {
+				secFlexCopy.HardwareClass = cfg.WorkerFlexibleConfig.HardwareClass
+			}
+		}
+		if secFlexCopy.BootDiskSizeGb == 0 {
+			if cfg.SecondaryWorkerConfig != nil && cfg.SecondaryWorkerConfig.DiskConfig != nil && cfg.SecondaryWorkerConfig.DiskConfig.BootDiskSizeGb != 0 {
+				secFlexCopy.BootDiskSizeGb = cfg.SecondaryWorkerConfig.DiskConfig.BootDiskSizeGb
+			} else if v, ok := oldSecMap["boot_disk_size_gb"].(int); ok && v != 0 {
+				secFlexCopy.BootDiskSizeGb = int64(v)
+			} else if cfg.WorkerFlexibleConfig != nil {
+				secFlexCopy.BootDiskSizeGb = cfg.WorkerFlexibleConfig.BootDiskSizeGb
+			}
+		}
+		secFlex = &secFlexCopy
+	}
+
 	data := map[string]interface{}{
 		"staging_bucket":            d.Get("cluster_config.0.staging_bucket").(string),
 		"cluster_tier":              d.Get("cluster_config.0.cluster_tier").(string),
@@ -3936,7 +3988,7 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 		"encryption_config":         flattenEncryptionConfig(d, cfg.EncryptionConfig),
 		"autoscaling_config":        flattenAutoscalingConfig(d, cfg.AutoscalingConfig),
 		"security_config":           flattenSecurityConfig(d, cfg.SecurityConfig),
-		"preemptible_worker_config": flattenPreemptibleInstanceGroupConfig(d, cfg.SecondaryWorkerConfig, cfg.SecondaryWorkerFlexibleConfig),
+		"preemptible_worker_config": flattenPreemptibleInstanceGroupConfig(d, cfg.SecondaryWorkerConfig, secFlex),
 		"metastore_config":          flattenMetastoreConfig(d, cfg.MetastoreConfig),
 		"lifecycle_config":          flattenLifecycleConfig(d, cfg.LifecycleConfig),
 		"endpoint_config":           flattenEndpointConfig(d, cfg.EndpointConfig),
@@ -3965,13 +4017,18 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 		}
 	}
 
-	if cfg.SecondaryWorkerFlexibleConfig != nil {
+	if secFlex != nil {
+		numInstances := secFlex.NumInstances
+		// At 0 instances the API omits SecondaryWorkerConfig (and numInstances).
+		if cfg.SecondaryWorkerConfig == nil {
+			numInstances = 0
+		}
 		data["secondary_worker_flexible_config"] = []map[string]interface{}{
 			{
-				"num_instances":     cfg.SecondaryWorkerFlexibleConfig.NumInstances,
-				"core_count":        cfg.SecondaryWorkerFlexibleConfig.CoreCount,
-				"hardware_class":    cfg.SecondaryWorkerFlexibleConfig.HardwareClass,
-				"boot_disk_size_gb": cfg.SecondaryWorkerFlexibleConfig.BootDiskSizeGb,
+				"num_instances":     numInstances,
+				"core_count":        secFlex.CoreCount,
+				"hardware_class":    secFlex.HardwareClass,
+				"boot_disk_size_gb": secFlex.BootDiskSizeGb,
 			},
 		}
 	}
@@ -4643,4 +4700,206 @@ func flattenAttachedDiskConfig(configs []*dataproc.AttachedDiskConfig) []map[str
 		res = append(res, m)
 	}
 	return res
+}
+
+func isClusterConfigNestedBlockConfigured(rawConfig cty.Value, blockName string) (configured bool, ok bool) {
+	if rawConfig.IsNull() || !rawConfig.IsKnown() {
+		return false, false
+	}
+	block, err := cty.GetAttrPath("cluster_config").IndexInt(0).GetAttr(blockName).Apply(rawConfig)
+	if err != nil {
+		return false, false
+	}
+	if block.IsNull() {
+		return false, true
+	}
+	if !block.IsKnown() {
+		return true, true
+	}
+	return block.LengthInt() > 0, true
+}
+
+// isSecondaryWorkerFlexibleFieldNullInRawConfig reports whether a field inside
+// cluster_config[0].secondary_worker_flexible_config[0] is known and null (omitted) in HCL.
+func isSecondaryWorkerFlexibleFieldNullInRawConfig(rawConfig cty.Value, field string) bool {
+	if !rawConfig.IsKnown() || rawConfig.IsNull() {
+		return false
+	}
+	v, err := cty.GetAttrPath("cluster_config").IndexInt(0).GetAttr("secondary_worker_flexible_config").IndexInt(0).GetAttr(field).Apply(rawConfig)
+	if err != nil {
+		return false
+	}
+	return v.IsKnown() && v.IsNull()
+}
+
+// mergeUnchangedClusterConfigAttrs recursively copies a cluster_config map for SetNew
+// during scale-to-0. Because SetNew re-diffs cluster_config without DiffSuppressFunc,
+// any field or nested block with no changed keys after initial diff suppression reuses
+// its prior-state value (or is omitted when Computed), while changed fields keep their
+// planned values.
+func mergeUnchangedClusterConfigAttrs(
+	prefix string,
+	schemaMap map[string]*schema.Schema,
+	oldMap, newMap map[string]interface{},
+	diff *schema.ResourceDiff,
+) map[string]interface{} {
+	out := make(map[string]interface{}, len(newMap))
+	for k, v := range newMap {
+		if prefix == "cluster_config.0" && k == "secondary_worker_flexible_config" {
+			continue
+		}
+		path := prefix + "." + k
+		s := schemaMap[k]
+		if len(diff.GetChangedKeysPrefix(path)) == 0 {
+			if s != nil && s.Computed {
+				continue
+			}
+			if ov, ok := oldMap[k]; ok {
+				v = ov
+			}
+			out[k] = v
+			continue
+		}
+		if s != nil && s.Type == schema.TypeList {
+			if elemRes, ok := s.Elem.(*schema.Resource); ok {
+				oldList, oldOk := oldMap[k].([]interface{})
+				newList, newOk := v.([]interface{})
+				if oldOk && newOk && len(oldList) == len(newList) {
+					listCopy := make([]interface{}, len(newList))
+					for i := range newList {
+						oldElem, ok1 := oldList[i].(map[string]interface{})
+						newElem, ok2 := newList[i].(map[string]interface{})
+						if ok1 && ok2 {
+							listCopy[i] = mergeUnchangedClusterConfigAttrs(
+								fmt.Sprintf("%s.%d", path, i),
+								elemRes.Schema,
+								oldElem,
+								newElem,
+								diff,
+							)
+						} else {
+							listCopy[i] = newList[i]
+						}
+					}
+					v = listCopy
+				}
+			}
+		}
+		out[k] = v
+	}
+	return out
+}
+
+func secondaryWorkerFlexibleConfigCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+	if diff.Id() == "" {
+		return nil
+	}
+	const prefix = "cluster_config.0.secondary_worker_flexible_config"
+
+	// Because secondary_worker_flexible_config is Optional+Computed, omitting the block
+	// in HCL retains prior state during schemaMap.diffList. When the block is absent
+	// from HCL while prior state has num_instances > 0, and autoscaling_config is
+	// neither configured nor still present in prior state, plan num_instances = 0 on
+	// the retained block (keeping its shape) for an in-place scale down to 0. This
+	// also applies when the block was never in HCL, e.g. when secondary workers were
+	// added outside Terraform.
+	rawConfig := diff.GetRawConfig()
+	if secConfigured, hasRaw := isClusterConfigNestedBlockConfigured(rawConfig, "secondary_worker_flexible_config"); hasRaw && !secConfigured {
+		if autoConfigured, _ := isClusterConfigNestedBlockConfigured(rawConfig, "autoscaling_config"); autoConfigured {
+			return nil
+		}
+		oldPolicyRaw, _ := diff.GetChange("cluster_config.0.autoscaling_config.0.policy_uri")
+		if oldPolicy, _ := oldPolicyRaw.(string); oldPolicy != "" {
+			return nil
+		}
+		oldV, _ := diff.GetChange(prefix)
+		oldList, _ := oldV.([]interface{})
+		if len(oldList) == 0 {
+			return nil
+		}
+		oldMap, ok := oldList[0].(map[string]interface{})
+		if !ok {
+			return nil
+		}
+		if numInstances, _ := oldMap["num_instances"].(int); numInstances > 0 {
+			oldCCRaw, newCCRaw := diff.GetChange("cluster_config")
+			oldCCList, _ := oldCCRaw.([]interface{})
+			newCCList, _ := newCCRaw.([]interface{})
+			if len(oldCCList) > 0 && len(newCCList) > 0 {
+				oldCCMap, _ := oldCCList[0].(map[string]interface{})
+				newCCMap, _ := newCCList[0].(map[string]interface{})
+				ccSchema := ResourceDataprocCluster().Schema["cluster_config"].Elem.(*schema.Resource).Schema
+				ccCopy := mergeUnchangedClusterConfigAttrs("cluster_config.0", ccSchema, oldCCMap, newCCMap, diff)
+				secCopy := make(map[string]interface{}, len(oldMap))
+				for k, v := range oldMap {
+					secCopy[k] = v
+				}
+				secCopy["num_instances"] = 0
+				ccCopy["secondary_worker_flexible_config"] = []interface{}{secCopy}
+				return diff.SetNew("cluster_config", []interface{}{ccCopy})
+			}
+		}
+		return nil
+	}
+
+	if len(diff.GetChangedKeysPrefix(prefix)) == 0 {
+		return nil
+	}
+
+	oldCountRaw, newCountRaw := diff.GetChange(prefix + ".#")
+	oldCount, _ := oldCountRaw.(int)
+	newCount, _ := newCountRaw.(int)
+
+	// No block in the planned value (e.g. raw config unavailable): nothing to
+	// enforce. Removal of the block from HCL is handled above.
+	if newCount == 0 {
+		return nil
+	}
+
+	shapeFields := []string{"core_count", "hardware_class", "boot_disk_size_gb"}
+
+	// Existing secondary_worker_flexible_config in state: any shape change forces replacement.
+	if oldCount > 0 {
+		for _, field := range shapeFields {
+			key := prefix + ".0." + field
+			if diff.HasChange(key) {
+				if err := diff.ForceNew(key); err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	}
+
+	// Block newly added post-create (0 -> 1): Dataproc UpdateCluster only accepts
+	// updateMask="config.secondary_worker_flexible_config.num_instances" and creates the
+	// secondary group with the worker_flexible_config shape, so the block can be added in
+	// place only with num_instances > 0 and a shape matching worker_flexible_config.
+	// An unknown num_instances also forces replacement: CustomizeDiff must reach the
+	// same decision at plan time and at apply time, and a value that later resolves
+	// to 0 would otherwise flip the planned action from Update to replace at apply.
+	workerCount, _ := diff.Get("cluster_config.0.worker_flexible_config.#").(int)
+	numInstances, _ := diff.Get(prefix + ".0.num_instances").(int)
+	numInstancesKnown := diff.NewValueKnown(prefix + ".0.num_instances")
+	if workerCount == 0 || !numInstancesKnown || numInstances == 0 {
+		return diff.ForceNew(prefix)
+	}
+
+	for _, field := range shapeFields {
+		secKey := prefix + ".0." + field
+		wrkKey := "cluster_config.0.worker_flexible_config.0." + field
+		secOmitted := field == "boot_disk_size_gb" && isSecondaryWorkerFlexibleFieldNullInRawConfig(rawConfig, field)
+		secKnown := diff.NewValueKnown(secKey) || secOmitted
+		if !secKnown || diff.Get(secKey) != diff.Get(wrkKey) {
+			if diff.HasChange(secKey) {
+				if err := diff.ForceNew(secKey); err != nil {
+					return err
+				}
+			} else if err := diff.ForceNew(prefix); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
