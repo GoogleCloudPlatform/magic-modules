@@ -199,7 +199,7 @@ To add a field:
 
 1. Add the field to the handwritten resource's schema.
    - The new field(s) should mirror the API's structure to ease predictability and maintenance. However, if there is an existing related / similar field in the resource that uses a different convention, follow that convention instead.
-   - Enum fields in the API should be represented as `TypeString` in Terraform for forwards-compatibility. Link to the API documentation of allowed values in the field description.
+   - Enum fields in the API should be represented as `TypeString` in Terraform for forwards-compatibility. Link to the API documentation of allowed values in the field description. If using `validation.StringInSlice` on an `Optional: true, Computed: true` field without diff suppression, omit `*_UNSPECIFIED` unless the API persists it as a distinct user-settable value.
    - Terraform field names should always use [snake case ↗](https://en.wikipedia.org/wiki/Snake_case).
    - See [Schema Types ↗](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-types) and [Schema Behaviors ↗](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors) for more information about field schemas.
 2. Add handling for the new field in the resource's Create method and Update methods.
