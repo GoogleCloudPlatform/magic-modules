@@ -37,7 +37,7 @@ Use `custom_code.constants` to inject top-level code in a resource file. This is
   CustomizeDiff functions, and so on.
 - Methods
 
-Any custom functions added should have thorough [unit tests]({{< ref "/test/test#add-unit-tests" >}}).
+Custom functions with non-trivial logic (such as regexes, ID/URL parsers, state upgraders, or diff suppressors with custom normalization or branching) should have [unit tests]({{< ref "/test/test#add-unit-tests" >}}). Trivial wrappers or reuse of existing `tpgresource` helpers are covered by acceptance tests.
 
 ## Modify the API request or response
 
@@ -154,8 +154,8 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 
 The parameters the function receives are:
 
-- `v`: The value for the field
-- `d`:  Terraform resource data. Use `d.Get("field_name")` to get a field's current value.
+- `v`: The value for the field returned by the API. Populate readable fields unconditionally from `v` (never guard the flattener on `!d.GetOk(...)`), because `terraform import` (`ImportStatePassthrough`) begins with only `id` in state.
+- `d`: Terraform resource data. Read prior state via `d.Get("field_name")` inside a flattener only for [write-only or sensitive inputs omitted by `GET`]({{< ref "/develop/diffs#ignore_read" >}}) (such as `mmv1/templates/terraform/custom_flatten/alloydb_cluster_input_user_flatten.go.tmpl`, paired with `ImportStateVerifyIgnore`).
 - `config`: Config object. Can be used to make API calls.
 
 The function returns a final value that will be stored in Terraform state for the field, which will be compared with the user's configuration to determine if there is a diff.
@@ -281,6 +281,30 @@ docs:
 ```
 
 See [Add documentation (Handwritten)]({{< ref "/document/add-documentation" >}}) for more information about what to include in the field documentation.
+
+## Customize test destroy checks
+
+```yaml
+custom_code:
+  test_check_destroy: templates/terraform/custom_check_destroy/PRODUCT_RESOURCE.go.tmpl
+```
+
+Use `custom_code.test_check_destroy` only when generated `CheckDestroy` cannot verify deletion via HTTP `404` on `self_link` (for example, soft-deleted `200 OK` states or cleared singleton sub-resources). Because the template is injected inside `for name, rs := range s.RootModule().Resources`, uphold three invariants:
+
+1. **Confirm explicit deletion** via `transport_tpg.IsGoogleApiErrorWithCode(err, 404)` or the expected terminal state—never treat an arbitrary non-nil `err` (such as `400 Bad Request` from a malformed URL) as deleted.
+2. **Use `continue` (not `return nil`)** once a resource is confirmed deleted so remaining resources in state are also checked.
+3. **Return unexpected errors** and preserve eventual-consistency retry loops when deletion is asynchronous.
+
+## Template files in `mmv1/third_party/terraform/`
+
+Files ending in `.tmpl` under `mmv1/third_party/terraform/` must contain at least one Go template directive (`{{ ... }}`) to pass `TestTemplatesStillNeedToBeTemplates` in `mmv1/test/validate_third_party_test.go`. Pure static Go files with no template directives must use `.go`.
+
+## SDKv2 vs. Plugin Framework state and diff APIs
+
+Match helper calls to the resource's framework:
+
+- **SDKv2 (`github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema`)**: Use `d.GetOk`, `d.GetChange`, and `d.GetRawConfigAt(path)` on `*schema.ResourceData` (CRUD, expanders, flatteners), and `d.NewValueKnown("field")`, `d.GetRawConfig()`, or `d.GetRawPlan()` on `*schema.ResourceDiff` (`custom_diff`).
+- **Plugin Framework (`tpgframework`)**: Methods such as `.IsKnown()`, `.IsNull()`, and `basetypes.*` apply exclusively to Plugin Framework resources—do not call them on SDKv2 schema objects.
 
 ## What's next?
 

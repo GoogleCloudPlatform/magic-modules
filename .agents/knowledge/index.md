@@ -59,6 +59,7 @@ Read this index at decision points; open only the source the task needs. Format 
 ### Field (`field/`)
 
 - **enums-vs-strings** — Model an API enum as Enum (strict, plan-time) or String (forward-compatible): the deliberate trade-off. — [field/enums-vs-strings.md](field/enums-vs-strings.md)
+- **import-safe-flatteners** — Write import-safe flatteners and handle server-populated defaults on ForceNew fields without breaking terraform import. — [field/import-safe-flatteners.md](field/import-safe-flatteners.md)
 
 ### Template (`template/`)
 
