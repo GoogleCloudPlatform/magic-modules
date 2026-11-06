@@ -1,6 +1,7 @@
 package tpgresource
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"time"
@@ -16,7 +17,15 @@ type CommonOpError struct {
 }
 
 func (e *CommonOpError) Error() string {
-	return fmt.Sprintf("Error code %v, message: %s", e.Code, e.Message)
+	msg := fmt.Sprintf("Error code %v, message: %s", e.Code, e.Message)
+	if len(e.Details) == 0 {
+		return msg
+	}
+	details, err := json.MarshalIndent(e.Details, "", "  ")
+	if err != nil {
+		return msg
+	}
+	return fmt.Sprintf("%s\nDetails:\n%s", msg, details)
 }
 
 type Waiter interface {
