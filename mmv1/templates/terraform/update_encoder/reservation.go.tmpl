@@ -151,4 +151,16 @@
 		}
 	}
 
+	// Include other PATCH fields from the expanded update body (this encoder only
+	// handles share settings and specific reservation count).
+	for k, v := range obj {
+		if _, exists := newObj[k]; exists {
+			continue
+		}
+		if k == "specificReservation" && newObj["specificSkuCount"] != nil {
+			continue
+		}
+		newObj[k] = v
+	}
+
 	return newObj, nil
