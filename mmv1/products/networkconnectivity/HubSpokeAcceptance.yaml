@@ -1,0 +1,154 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: HubSpokeAcceptance
+description: |
+  Accepts a Network Connectivity Center spoke that was proposed to a hub from another project,
+  and accepts later proposals to update that spoke.
+
+  When a spoke is created against a hub in a different project, it stays `INACTIVE` until the hub
+  administrator accepts it. This resource calls `hubs.acceptSpoke` on create. Set `spoke_etag` to
+  the spoke's current etag to call `hubs.acceptSpokeUpdate` when the spoke administrator proposes
+  a change (for example export range filters). Destroy calls `hubs.rejectSpoke`. Same-project
+  spokes are accepted automatically and do not need this resource.
+
+  Accept one spoke per resource. Use `for_each` to accept multiple spokes.
+references:
+  guides:
+    Official Documentation: https://cloud.google.com/network-connectivity/docs/network-connectivity-center/how-to/vpc-review-proposed-spokes
+    Accept a spoke: https://docs.cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.global.hubs/acceptSpoke
+    Accept a spoke update: https://docs.cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.global.hubs/acceptSpokeUpdate
+  api: https://docs.cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.global.hubs/acceptSpoke
+docs:
+  note: |
+    Destroying this resource rejects the spoke (`rejectSpoke`), which disconnects it from the hub.
+    Use `deletion_policy = "ABANDON"` to remove the resource from Terraform state without rejecting
+    the spoke.
+
+    To accept a pending spoke update, set `spoke_etag` to `google_network_connectivity_spoke.this.etag`
+    (or the etag from `hubs.listSpokes`). The provider calls `acceptSpokeUpdate` only when that
+    spoke has a pending update.
+
+    Import this resource using
+    `projects/{project}/locations/global/hubs/{hub}/spokeAcceptances/{spoke_uri}`.
+    The spoke URI contains slashes, so shorter import IDs are not supported.
+base_url: projects/{{project}}/locations/global/hubs
+self_link: projects/{{project}}/locations/global/hubs/{{hub}}:listSpokes
+create_url: projects/{{project}}/locations/global/hubs/{{hub}}:acceptSpoke
+delete_url: projects/{{project}}/locations/global/hubs/{{hub}}:rejectSpoke
+delete_verb: POST
+read_query_params: '?pageSize=500'
+id_format: projects/{{project}}/locations/global/hubs/{{hub}}/spokeAcceptances/{{spoke}}
+import_format:
+  - projects/{{project}}/locations/global/hubs/{{hub}}/spokeAcceptances/{{spoke}}
+identity:
+  - hub
+  - spoke
+exclude_identity_generation: true
+exclude_sweeper: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, delete, update]
+  result:
+    resource_inside_response: false
+legacy_long_form_project: true
+mutex: networkconnectivity/hub/{{hub}}
+custom_code:
+  encoder: templates/terraform/encoders/network_connectivity_hub_spoke_acceptance.go.tmpl
+  decoder: templates/terraform/decoders/network_connectivity_hub_spoke_acceptance.go.tmpl
+  constants: templates/terraform/constants/network_connectivity_hub_spoke_acceptance.go.tmpl
+  custom_update: templates/terraform/custom_update/network_connectivity_hub_spoke_acceptance.go.tmpl
+  pre_delete: templates/terraform/pre_delete/network_connectivity_hub_spoke_acceptance.go.tmpl
+  post_create: templates/terraform/post_create/network_connectivity_hub_spoke_acceptance.go.tmpl
+  custom_import: templates/terraform/custom_import/network_connectivity_hub_spoke_acceptance.go.tmpl
+  test_check_destroy: templates/terraform/custom_check_destroy/network_connectivity_hub_spoke_acceptance.go.tmpl
+samples:
+  - name: network_connectivity_hub_spoke_acceptance_basic
+    primary_resource_id: acceptance
+    exclude_test: true
+    steps:
+      - name: network_connectivity_hub_spoke_acceptance_basic
+  - name: network_connectivity_hub_spoke_acceptance_full
+    primary_resource_id: acceptance
+    exclude_basic_doc: true
+    skip_vcr: true
+    external_providers: [time]
+    steps:
+      - name: network_connectivity_hub_spoke_acceptance_full
+        resource_id_vars:
+          spoke_project_id: nccspk
+          hub_name: hub
+          spoke_name: spoke
+          network_name: net
+        vars:
+          include_export_range: 10.0.0.0/8
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+        ignore_read_extra:
+          - deletion_policy
+      - name: network_connectivity_hub_spoke_acceptance_full
+        resource_id_vars:
+          spoke_project_id: nccspk
+          hub_name: hub
+          spoke_name: spoke
+          network_name: net
+        vars:
+          include_export_range: 10.1.0.0/16
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+        ignore_read_extra:
+          - deletion_policy
+parameters:
+  - name: hub
+    type: String
+    description: |
+      The hub that will accept the spoke. This can be the hub ID or the full hub URI
+      (`projects/{project}/locations/global/hubs/{hub}`).
+    required: true
+    immutable: true
+    url_param_only: true
+    # listSpokes returns a Spoke object; hub is only used to build the method URL.
+    ignore_read: true
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+properties:
+  - name: spoke
+    type: String
+    api_name: spokeUri
+    description: |
+      The URI of the spoke to accept, for example
+      `projects/{project}/locations/{location}/spokes/{spoke}`.
+    required: true
+    immutable: true
+    diff_suppress_func: tpgresource.CompareSelfLinkRelativePathsIgnoreProjectId
+  - name: spokeEtag
+    type: String
+    description: |
+      The etag of the spoke. Required to accept a pending spoke update (`acceptSpokeUpdate`).
+      Set this to `google_network_connectivity_spoke.this.etag` so Terraform accepts proposed
+      filter changes (for example `include_export_ranges`) after the spoke is already attached.
+    url_param_only: true
+    # Input for acceptSpokeUpdate. The spoke etag changes after accept, so it cannot be read back.
+    ignore_read: true
+  - name: state
+    type: String
+    description: Output only. The current lifecycle state of the accepted spoke.
+    output: true
