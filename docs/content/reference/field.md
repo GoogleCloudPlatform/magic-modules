@@ -35,7 +35,10 @@ be updatable in place by default. However, if the overall resource has
 [`immutable`]({{< ref "/reference/resource#immutable" >}}) set to true, all its
 fields are considered immutable.  Individual fields can override this for themselves
 and their subfields with [`update_url`]({{< ref "/reference/field#update_url" >}})
-if they have a custom update method in the API.
+if they have a custom update method in the API. On updatable resources, explicitly set
+`immutable: true` on each child inside an `immutable: true` `NestedObject` and on
+immutable `url_param_only: true` identity parameters (such as `location` or `*_id`) so
+each receives `ForceNew: true`.
 
 See [Best practices: Immutable fields]({{< ref "/best-practices/immutable-fields/" >}}) for more information.
 
@@ -158,6 +161,10 @@ frequently-changed API-side defaults, but provides less useful information at
 plan time than `default_value` and causes the provider to ignore user
 configurations that explicitly set the field to an "empty" value.
 
+Use `default_from_api: true` only when omitting the field on `Create` causes `GET`
+to return a populated value on the wire. If `GET` omits unset fields despite prose
+mentioning a backend default, leave the field pure `Optional` so users can clear it.
+
 Example:
 
 ```yaml
@@ -168,13 +175,15 @@ default_from_api: true
 If true, the provider sends "empty" values (such as zero, false, or empty
 strings) to the API if set explicitly in the user's configuration. If false,
 "empty" values cause the field to be omitted entirely from the API request.
-This attribute is useful for fields where the API would behave differently
-for an "empty" value vs no value for a particular field - for example,
-boolean fields that have an API-side default of true.
+This attribute is useful when the API treats an explicit zero value differently
+from an omitted field — for example, boolean fields with an API-side default of
+`true`, or updates where `?updateMask` alone does not clear a prior non-zero value.
 
-If true simulataneously with `default_from_api`, the provider will send empty values
-explicitly set in configuration. If the field is unset, the provider will
-accept API values as the default as usual with `default_from_api`.
+When combined with `default_from_api: true`, top-level fields send explicit empty
+values and omit unset fields automatically; nested fields inside objects require a
+[`custom_expand`]({{< ref "/develop/custom-code#custom_expand" >}}) using
+`rd.GetRawConfigAt` returning a pointer when set or `nil` when unset (see
+`.agents/knowledge/field/zero-value-clearing.md` for template examples).
 
 Due to a [bug](https://github.com/hashicorp/terraform-provider-google/issues/13201),
 NestedObject fields will currently be sent as `null` if unset (rather than being
@@ -366,7 +375,9 @@ Enum only. If the allowed values may change in the future, use a String field in
 stating the current allowed values in the String field's description. 
 See [Best practices: Validation]({{< ref "/best-practices/validation" >}}) for more information.
 
-Do not include UNSPECIFIED values in this list.
+Do not include `*_UNSPECIFIED` values on configurable (`Optional` / `Required`) fields; read-only (`output: true`) fields are exempt because no `ValidateFunc` is generated and APIs may return `*_UNSPECIFIED` while provisioning.
+
+Do not manually write `Possible values:` in `description` — Magic Modules appends `enum_values` automatically to schema and website docs.
 
 Enums will validate that the provided field is in the allowed list unless a
 custom [`validation`]({{<ref "#validation" >}}) is provided.
@@ -506,4 +517,15 @@ properties:
     type: String
     description: |
       MULTI_LINE_FIELD_DESCRIPTION
+```
+
+### `allow_empty_object`
+NestedObject only. If true, allows an empty block (`field_name {}`) when all child properties are optional or omitted instead of stripping it as empty. Pair with [`send_empty_value: true`]({{< ref "#send_empty_value" >}}) only when `{}` must be sent on the wire (note [tpg#13201](https://github.com/hashicorp/terraform-provider-google/issues/13201) on unset top-level objects).
+
+```yaml
+- name: 'featureEnabled'
+  type: NestedObject
+  allow_empty_object: true
+  properties:
+    ...
 ```

@@ -126,6 +126,8 @@ The deprecation message will automatically show up in the resource documentation
 {{< /tab >}}
 {{% /tabs %}}
 
+Keep existing acceptance tests exercising the deprecated field on `main` until major-release removal, and add separate test coverage for any replacement field.
+
 #### Resource deprecation (due to removal or rename)
 
 {{% tabs "Resource deprecations" %}}
