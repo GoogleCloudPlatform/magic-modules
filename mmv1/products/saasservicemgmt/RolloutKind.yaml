@@ -22,7 +22,6 @@ update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/rolloutKinds/{{rollout_kind_id}}
 autogen_status: Um9sbG91dEtpbmQ=
-exclude_sweeper: true
 # DeleteRolloutKind returns before the resource is removed (no long-running
 # operation); poll until GET returns 404 so destroy completes only once the
 # RolloutKind is gone.

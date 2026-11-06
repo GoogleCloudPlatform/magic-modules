@@ -84,7 +84,6 @@ async:
   check_response_func_absence: transport_tpg.PollCheckForAbsence
   suppress_error: false
 autogen_status: U2Fhcw==
-exclude_sweeper: true
 parameters:
   - name: location
     type: String

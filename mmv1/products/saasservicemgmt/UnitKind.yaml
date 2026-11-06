@@ -24,7 +24,6 @@ import_format:
   - projects/{{project}}/locations/{{location}}/unitKinds/{{unit_kind_id}}
 autogen_status: VW5pdEtpbmQ=
 autogen_async: false
-exclude_sweeper: true
 # DeleteUnitKind returns before the resource is removed (no long-running
 # operation); poll until GET returns 404 so destroy completes only once the
 # UnitKind is gone.
