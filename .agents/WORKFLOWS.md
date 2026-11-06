@@ -21,6 +21,7 @@ specific one.
 | `test-failure`, `test-failure-*` (e.g. `test-failure-0`, `test-failure-10`, `test-failure-50`, `test-failure-100`) | Acceptance Test Failure | `.agents/skills/workflows/test_fix/SKILL.md` |
 | `promote-to-ga` (takes precedence over `new-resource` / `enhancement`) | Beta → GA Promotion | `.agents/skills/workflows/promote_to_ga/SKILL.md` |
 | `new-resource` | New Resource Creation | `.agents/skills/workflows/new_resource/SKILL.md` |
+| `new-datasource`, `data-source` | Data Source Creation | `.agents/skills/workflows/add_data_source/SKILL.md` |
 | `list-resource` | List Resource Addition | `.agents/skills/workflows/add_list_resource/SKILL.md` |
 | `enhancement` (field additions) | New Field / Property Addition | `.agents/skills/workflows/add_fields/SKILL.md` |
 | `deprecation` | Deprecation Notice Addition | `.agents/skills/workflows/deprecate_resource_or_field/SKILL.md` |
@@ -32,6 +33,7 @@ specific one.
 *   **Default Workflow** (`.agents/skills/workflows/default/SKILL.md`): For tasks that do not involve creating a new resource (fallback for general tasks).
 *   **New Resource Workflow** (`.agents/skills/workflows/new_resource/SKILL.md`): Specifically for creating a new resource, supporting both autogen and manual generation.
 *   **Add Fields Workflow** (`.agents/skills/workflows/add_fields/SKILL.md`): Specifically for adding new fields to existing MMv1 or handwritten resources.
+*   **Add Data Source Workflow** (`.agents/skills/workflows/add_data_source/SKILL.md`): For checking if a corresponding data source exists and adding or updating a data source (also called by `new_resource` and `add_fields`).
 *   **Test Fix Workflow** (`.agents/skills/workflows/test_fix/SKILL.md`): Specifically for resolving failing acceptance tests from GitHub issues, direct prompts, or debug logs.
 *   **Add List Resource Workflow** (`.agents/skills/workflows/add_list_resource/SKILL.md`): Opts one product's eligible MMv1 resources into list-resource generation by setting `generate_list_resource: true`, and validates locally.
 *   **Prepare Release Workflow** (`.agents/skills/workflows/prepare_release/SKILL.md`): Prepares and cuts weekly releases for both `terraform-provider-google` (TPG) and `terraform-provider-google-beta` (TPGB) providers.
