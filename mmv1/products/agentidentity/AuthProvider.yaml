@@ -31,6 +31,7 @@ custom_code:
   post_update: "templates/terraform/post_create/sleep.go.tmpl"
   post_delete: "templates/terraform/post_delete/sleep.go.tmpl"
   test_check_destroy: "templates/terraform/custom_check_destroy/agent_identity_auth_provider.go.tmpl"
+  pre_update: "templates/terraform/pre_update/agent_identity_auth_provider.go.tmpl"
 iam_policy:
   method_name_separator: ':'
   allowed_iam_role: roles/agentidentity.viewer
@@ -81,14 +82,42 @@ properties:
         ignore_read: true
         exactly_one_of:
           - auth_provider_type_params.0.api_key
+          - auth_provider_type_params.0.connector_reference_auth_provider
           - auth_provider_type_params.0.three_legged_oauth
           - auth_provider_type_params.0.two_legged_oauth
+          - auth_provider_type_params.0.xaa_auth_provider
         properties:
           - name: apiKey
             type: String
             description: Input only. The API key for this auth_provider.
             sensitive: true
             ignore_read: true
+      - name: connectorReferenceAuthProvider
+        type: NestedObject
+        description: Parameters for Connector Reference authentication.
+        exactly_one_of:
+          - auth_provider_type_params.0.api_key
+          - auth_provider_type_params.0.connector_reference_auth_provider
+          - auth_provider_type_params.0.three_legged_oauth
+          - auth_provider_type_params.0.two_legged_oauth
+          - auth_provider_type_params.0.xaa_auth_provider
+        properties:
+          - name: authorizationDetails
+            type: String
+            description: |-
+              Optional. Rich Authorization Requests (RFC 9396) detailing targeted OAuth
+              resources/scopes, formatted as a JSON array of JSON objects.
+            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+            custom_expand: templates/terraform/custom_expand/json_value.tmpl
+            validation:
+              function: validation.StringIsJSON
+          - name: connector
+            type: String
+            required: true
+            description: |-
+              Required. The name of the referenced connector.
+              Format: projects/{project}/locations/{location}/connectors/{connector}
       - name: geAuthProvider
         type: NestedObject
         send_empty_value: true
@@ -104,8 +133,10 @@ properties:
         ignore_read: true
         exactly_one_of:
           - auth_provider_type_params.0.api_key
+          - auth_provider_type_params.0.connector_reference_auth_provider
           - auth_provider_type_params.0.three_legged_oauth
           - auth_provider_type_params.0.two_legged_oauth
+          - auth_provider_type_params.0.xaa_auth_provider
         properties:
           - name: authorizationUrl
             type: String
@@ -147,8 +178,10 @@ properties:
         ignore_read: true
         exactly_one_of:
           - auth_provider_type_params.0.api_key
+          - auth_provider_type_params.0.connector_reference_auth_provider
           - auth_provider_type_params.0.three_legged_oauth
           - auth_provider_type_params.0.two_legged_oauth
+          - auth_provider_type_params.0.xaa_auth_provider
         properties:
           - name: clientId
             type: String
@@ -160,6 +193,74 @@ properties:
           - name: tokenUrl
             type: String
             description: The token endpoint of the OAuth client.
+      - name: xaaAuthProvider
+        type: NestedObject
+        description: Parameters for Cross-App Access authentication.
+        exactly_one_of:
+          - auth_provider_type_params.0.api_key
+          - auth_provider_type_params.0.connector_reference_auth_provider
+          - auth_provider_type_params.0.three_legged_oauth
+          - auth_provider_type_params.0.two_legged_oauth
+          - auth_provider_type_params.0.xaa_auth_provider
+        properties:
+          - name: additionalParameters
+            type: KeyValuePairs
+            description: |-
+              Optional. Additional parameters to be passed to the token endpoint.
+          - name: clientAssertionJwtAuth
+            type: NestedObject
+            description: "Option 2: Authenticate using a standard `client_id` and a Client Assertion JWT."
+            conflicts:
+              - auth_provider_type_params.0.xaa_auth_provider.0.client_secret_auth
+            properties:
+              - name: clientId
+                type: String
+                required: true
+                description: Required. The client identifier.
+          - name: clientSecretAuth
+            type: NestedObject
+            description: "Option 1: Authenticate using a standard `client_id` and `client_secret`."
+            conflicts:
+              - auth_provider_type_params.0.xaa_auth_provider.0.client_assertion_jwt_auth
+            properties:
+              - name: clientId
+                type: String
+                required: true
+                description: Required. The client identifier.
+              - name: clientSecret
+                type: String
+                required: true
+                description: Required. Input only. The client secret.
+                sensitive: true
+                ignore_read: true
+          - name: customIssuer
+            type: NestedObject
+            description: Configuration for a custom or third-party authorization server issuer.
+            properties:
+              - name: issuer
+                type: String
+                description: Optional. The issuer identifier of the target Authorization Server.
+              - name: tokenUrl
+                type: String
+                required: true
+                description: Required. The token endpoint of the target OAuth authorization server to retrieve resource tokens.
+          - name: idTokenInput
+            type: NestedObject
+            description: Configuration for when the input is an ID token.
+            properties:
+              - name: idJagAdditionalClaims
+                type: String
+                description: |-
+                  Optional additional claims to include when fetching an ID-JAG, represented as a JSON-encoded string.
+                state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
+                custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
+                custom_expand: templates/terraform/custom_expand/json_value.tmpl
+                validation:
+                  function: validation.StringIsJSON
+              - name: idJagAuthProvider
+                type: String
+                description: |-
+                  The resource name of the ID-JAG auth provider. Format: "projects/{project}/locations/{location}/authProviders/{auth_provider}"
   - name: blockedScopes
     type: Array
     description: |-
