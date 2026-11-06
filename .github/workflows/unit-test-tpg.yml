@@ -74,6 +74,13 @@ jobs:
         run: |
           make lint
 
+      - name: Verify 32-bit (386) compilation
+        env:
+          GOOS: linux
+          GOARCH: 386
+        run: |
+          go build ./...
+
       - name: Documentation Check
         run: |
           make docscheck
