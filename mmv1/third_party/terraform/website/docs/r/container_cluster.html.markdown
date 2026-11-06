@@ -1851,6 +1851,8 @@ those in the Guaranteed QoS class, by influencing NUMA affinity. Structure is [d
 
 * `shutdown_grace_period_critical_pods_seconds` - (Optional) The grace period (in seconds) to use during a graceful node shutdown for critical pods. This value must be less than or equal to `shutdown_grace_period_seconds`. This field can only be configured if the node pool uses Spot VMs or Preemptible VMs.
 
+* `reserved_system_cpus` - (Optional) The `reserved_system_cpus` option specifies the CPU list reserved for the host system services. Format: a list of CPU IDs (e.g. `"0-3"`, `"0,1"`) that can be parsed as a cpuset.
+
 <a name="nested_eviction_soft"></a>The `eviction_soft` block supports:
 
 * `memory_available` - (Optional) Defines quantity of soft eviction threshold for memory.available. The value must be a quantity, such as `"100Mi"`. The value must be greater than or equal to the GKE default hard eviction threshold of `"100Mi"` and less than 50% of machine memory.

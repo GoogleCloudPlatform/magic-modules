@@ -371,6 +371,14 @@ cluster.
 
 * `host_maintenance_policy` - (Optional, [Beta](../guides/provider_versions.html.markdown)) The maintenance policy for the hosts on which the GKE VMs run on. Structure is [documented below](#nested_host_maintenance_policy).
 
+<a name="nested_kubelet_config"></a>The `kubelet_config` block supports:
+
+* `reserved_system_cpus` - (Optional) The `reserved_system_cpus` option specifies the CPU list reserved for the host system services. Format: a list of CPU IDs (e.g. `"0-3"`, `"0,1"`) that can be parsed as a cpuset.
+
+* `shutdown_grace_period_seconds` - (Optional) The grace period (in seconds) to use during a graceful node shutdown. This is the time allocated for all pods (critical and non-critical) to terminate. The value must be between 10 and 10000. This field can only be configured if the node pool uses Spot VMs or Preemptible VMs.
+
+* `shutdown_grace_period_critical_pods_seconds` - (Optional) The grace period (in seconds) to use during a graceful node shutdown for critical pods. This value must be less than or equal to `shutdown_grace_period_seconds`. This field can only be configured if the node pool uses Spot VMs or Preemptible VMs.
+
 <a name="nested_host_maintenance_policy"></a>The `host_maintenance_policy` block supports:
 
 * `maintenance_interval` (Required) - Specifies the frequency of planned maintenance events. Possible values are `MAINTENANCE_INTERVAL_UNSPECIFIED`, `AS_NEEDED`, and `PERIODIC`.
@@ -418,12 +426,6 @@ In addition to the arguments listed above, the following computed attributes are
 - `create` - (Default `2 hours`) Used for adding node pools
 - `update` - (Default `2 hours`) Used for updates to node pools
 - `delete` - (Default `2 hours`) Used for removing node pools.
-
-<a name="nested_kubelet_config"></a>The `kubelet_config` block supports:
-
-* `shutdown_grace_period_seconds` - (Optional) The grace period (in seconds) to use during a graceful node shutdown. This is the time allocated for all pods (critical and non-critical) to terminate. The value must be between 10 and 10000. This field can only be configured if the node pool uses Spot VMs or Preemptible VMs.
-
-* `shutdown_grace_period_critical_pods_seconds` - (Optional) The grace period (in seconds) to use during a graceful node shutdown for critical pods. This value must be less than or equal to `shutdown_grace_period_seconds`. This field can only be configured if the node pool uses Spot VMs or Preemptible VMs.
 
 ## Import
 

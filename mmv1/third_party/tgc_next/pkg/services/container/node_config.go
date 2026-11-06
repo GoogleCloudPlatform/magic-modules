@@ -745,6 +745,11 @@ func schemaNodeConfig() *schema.Schema {
 					Description: `Node kubelet configs.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
+							"reserved_system_cpus": {
+								Type:        schema.TypeString,
+								Optional:    true,
+								Description: `The reserved_system_cpus option specifies the CPU list reserved for the host system services. Format: a list of CPU IDs (e.g. "0-3", "0,1") that can be parsed as a cpuset.`,
+							},
 							"cpu_manager_policy": {
 								Type:         schema.TypeString,
 								Optional:     true,
@@ -1955,6 +1960,9 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 	kConfig := &container.NodeKubeletConfig{}
 	if cpuManagerPolicy, ok := cfg["cpu_manager_policy"]; ok {
 		kConfig.CpuManagerPolicy = cpuManagerPolicy.(string)
+	}
+	if reservedSystemCpus, ok := cfg["reserved_system_cpus"]; ok {
+		kConfig.ReservedSystemCpus = reservedSystemCpus.(string)
 	}
 	if cpuCfsQuota, ok := cfg["cpu_cfs_quota"]; ok {
 		kConfig.CpuCfsQuota = cpuCfsQuota.(bool)
@@ -3198,6 +3206,7 @@ func flattenKubeletConfig(v interface{}) []map[string]interface{} {
 	}
 	transformed := map[string]interface{}{
 		"cpu_cfs_quota":                               c["cpuCfsQuota"],
+		"reserved_system_cpus":                        c["reservedSystemCpus"],
 		"cpu_cfs_quota_period":                        c["cpuCfsQuotaPeriod"],
 		"cpu_manager_policy":                          c["cpuManagerPolicy"],
 		"memory_manager":                              flattenMemoryManager(c["memoryManager"]),

@@ -256,3 +256,27 @@ func TestUnitFlattenNodePool(t *testing.T) {
 		})
 	}
 }
+
+func TestExpandFlattenKubeletConfigReservedSystemCpus(t *testing.T) {
+	t.Parallel()
+
+	expanded := expandKubeletConfig([]interface{}{
+		map[string]interface{}{
+			"reserved_system_cpus": "0,1",
+		},
+	})
+	if expanded == nil {
+		t.Fatal("expandKubeletConfig returned nil")
+	}
+	if expanded.ReservedSystemCpus != "0,1" {
+		t.Fatalf("expandKubeletConfig ReservedSystemCpus = %q, want %q", expanded.ReservedSystemCpus, "0,1")
+	}
+
+	flattened := flattenKubeletConfig(expanded)
+	if len(flattened) != 1 {
+		t.Fatalf("flattenKubeletConfig len = %d, want 1", len(flattened))
+	}
+	if got := flattened[0]["reserved_system_cpus"]; got != "0,1" {
+		t.Fatalf("flattenKubeletConfig reserved_system_cpus = %v, want %q", got, "0,1")
+	}
+}
