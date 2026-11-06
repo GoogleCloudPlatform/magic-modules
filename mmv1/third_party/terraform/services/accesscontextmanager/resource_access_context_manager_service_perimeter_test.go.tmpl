@@ -146,36 +146,33 @@ func testAccAccessContextManagerServicePerimeter_deletedPrincipalsSupportTest(t 
 		CheckDestroy:             testAccCheckAccessContextManagerServicePerimeterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAccessContextManagerServicePerimeter_deletedPrincipalsSupport(org, "my policy", "tf_test_perimeter", "", "Perimeter"),
+				Config: testAccAccessContextManagerServicePerimeter_deletedPrincipalsSupport(org, "my policy", "tf_test_perimeter", "Perimeter"),
 				Check:  resource.TestCheckNoResourceAttr(resourceName, "deleted_principals_support"),
 			},
 			{
-				Config: testAccAccessContextManagerServicePerimeter_deletedPrincipalsSupport(org, "my policy", "tf_test_perimeter", "enable", "Perimeter enabled"),
+				Config: testAccAccessContextManagerServicePerimeter_deletedPrincipalsSupport_enable(org, "my policy", "tf_test_perimeter", "Perimeter enabled"),
 				Check:  resource.TestCheckResourceAttr(resourceName, "deleted_principals_support", "enable"),
 			},
 			{
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
+				// deleted_principals_support is a virtual field and is not stored in remote API state
 				ImportStateVerifyIgnore: []string{"deleted_principals_support"},
 			},
 			{
-				Config: testAccAccessContextManagerServicePerimeter_deletedPrincipalsSupport(org, "my policy", "tf_test_perimeter", "disable", "Perimeter disabled"),
+				Config: testAccAccessContextManagerServicePerimeter_deletedPrincipalsSupport_disable(org, "my policy", "tf_test_perimeter", "Perimeter disabled"),
 				Check:  resource.TestCheckResourceAttr(resourceName, "deleted_principals_support", "disable"),
 			},
 			{
-				Config: testAccAccessContextManagerServicePerimeter_deletedPrincipalsSupport(org, "my policy", "tf_test_perimeter", "", "Perimeter"),
+				Config: testAccAccessContextManagerServicePerimeter_deletedPrincipalsSupport(org, "my policy", "tf_test_perimeter", "Perimeter"),
 				Check:  resource.TestCheckNoResourceAttr(resourceName, "deleted_principals_support"),
 			},
 		},
 	})
 }
 
-func testAccAccessContextManagerServicePerimeter_deletedPrincipalsSupport(org, policyTitle, perimeterTitleName, deletedPrincipalsSupport, description string) string {
-	syntaxLine := ""
-	if deletedPrincipalsSupport != "" {
-		syntaxLine = fmt.Sprintf("deleted_principals_support = %q", deletedPrincipalsSupport)
-	}
+func testAccAccessContextManagerServicePerimeter_deletedPrincipalsSupport(org, policyTitle, perimeterTitleName, description string) string {
 	return fmt.Sprintf(`
 resource "google_access_context_manager_access_policy" "test-access" {
   parent = "organizations/%s"
@@ -190,9 +187,48 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
   status {
     restricted_services = ["storage.googleapis.com"]
   }
-  %s
 }
-`, org, policyTitle, perimeterTitleName, perimeterTitleName, description, syntaxLine)
+`, org, policyTitle, perimeterTitleName, perimeterTitleName, description)
+}
+
+func testAccAccessContextManagerServicePerimeter_deletedPrincipalsSupport_enable(org, policyTitle, perimeterTitleName, description string) string {
+	return fmt.Sprintf(`
+resource "google_access_context_manager_access_policy" "test-access" {
+  parent = "organizations/%s"
+  title  = "%s"
+}
+resource "google_access_context_manager_service_perimeter" "test-access" {
+  parent         = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
+  name           = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/servicePerimeters/%s"
+  title          = "%s"
+  description    = "%s"
+  perimeter_type = "PERIMETER_TYPE_REGULAR"
+  status {
+    restricted_services = ["storage.googleapis.com"]
+  }
+  deleted_principals_support = "enable"
+}
+`, org, policyTitle, perimeterTitleName, perimeterTitleName, description)
+}
+
+func testAccAccessContextManagerServicePerimeter_deletedPrincipalsSupport_disable(org, policyTitle, perimeterTitleName, description string) string {
+	return fmt.Sprintf(`
+resource "google_access_context_manager_access_policy" "test-access" {
+  parent = "organizations/%s"
+  title  = "%s"
+}
+resource "google_access_context_manager_service_perimeter" "test-access" {
+  parent         = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
+  name           = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/servicePerimeters/%s"
+  title          = "%s"
+  description    = "%s"
+  perimeter_type = "PERIMETER_TYPE_REGULAR"
+  status {
+    restricted_services = ["storage.googleapis.com"]
+  }
+  deleted_principals_support = "disable"
+}
+`, org, policyTitle, perimeterTitleName, perimeterTitleName, description)
 }
 
 func testAccCheckAccessContextManagerServicePerimeterDestroyProducer(t *testing.T) func(s *terraform.State) error {

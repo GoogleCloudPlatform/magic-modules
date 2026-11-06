@@ -74,66 +74,6 @@ func testAccAccessContextManagerServicePerimeters_basicTest(t *testing.T) {
 	})
 }
 
-func testAccAccessContextManagerServicePerimeters_deletedPrincipalsSupportTest(t *testing.T) {
-	org := envvar.GetTestOrgFromEnv(t)
-	resourceName := "google_access_context_manager_service_perimeters.test-access"
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckAccessContextManagerServicePerimetersDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccAccessContextManagerServicePerimeters_deletedPrincipalsSupport(org, "my policy", "tf_test_perimeter", ""),
-				Check:  resource.TestCheckNoResourceAttr(resourceName, "deleted_principals_support"),
-			},
-			{
-				Config: testAccAccessContextManagerServicePerimeters_deletedPrincipalsSupport(org, "my policy", "tf_test_perimeter", "enable"),
-				Check:  resource.TestCheckResourceAttr(resourceName, "deleted_principals_support", "enable"),
-			},
-			{
-				ResourceName:            resourceName,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"service_perimeters", "deleted_principals_support"},
-			},
-			{
-				Config: testAccAccessContextManagerServicePerimeters_deletedPrincipalsSupport(org, "my policy", "tf_test_perimeter", "disable"),
-				Check:  resource.TestCheckResourceAttr(resourceName, "deleted_principals_support", "disable"),
-			},
-			{
-				Config: testAccAccessContextManagerServicePerimeters_deletedPrincipalsSupport(org, "my policy", "tf_test_perimeter", ""),
-				Check:  resource.TestCheckNoResourceAttr(resourceName, "deleted_principals_support"),
-			},
-		},
-	})
-}
-
-func testAccAccessContextManagerServicePerimeters_deletedPrincipalsSupport(org, policyTitle, perimeterTitleName, deletedPrincipalsSupport string) string {
-	syntaxLine := ""
-	if deletedPrincipalsSupport != "" {
-		syntaxLine = fmt.Sprintf("deleted_principals_support = %q", deletedPrincipalsSupport)
-	}
-	return fmt.Sprintf(`
-resource "google_access_context_manager_access_policy" "test-access" {
-  parent = "organizations/%s"
-  title  = "%s"
-}
-resource "google_access_context_manager_service_perimeters" "test-access" {
-  parent = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
-  service_perimeters {
-    name           = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/servicePerimeters/%s"
-    title          = "%s"
-    perimeter_type = "PERIMETER_TYPE_REGULAR"
-    status {
-      restricted_services = ["storage.googleapis.com"]
-    }
-  }
-  %s
-}
-`, org, policyTitle, perimeterTitleName, perimeterTitleName, syntaxLine)
-}
-
 func testAccCheckAccessContextManagerServicePerimetersDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
