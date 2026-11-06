@@ -824,6 +824,35 @@ properties:
         - name: prompt
           type: String
           description: The custom prompt for the MCP agent.
+        - name: requestHeaders
+          type: Array
+          description: |-
+            Additional HTTP headers sent on every request to the MCP server, for
+            example a static header required by an API gateway. Headers managed by the
+            agent take precedence and cannot be set here. When empty, no additional
+            headers are sent.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: dynamicValue
+                type: String
+                description: |-
+                  A value the agent fills in for each request.
+                  Possible values:
+                  USER_ID
+              - name: headerName
+                type: String
+                required: true
+                description: |-
+                  The header name. Must be a valid HTTP field name (RFC 9110 token),
+                  unique ignoring case within the data source, and not a header managed
+                  by the agent (such as `Authorization`, `Content-Type`, `mcp-session-id`,
+                  or the configured API key, session ID, or task ID headers).
+              - name: value
+                type: String
+                description: |-
+                  A static value, sent as-is on every request. The value is stored and
+                  returned in plain text, so do not use it for credentials.
         - name: serverUrl
           type: String
           required: true

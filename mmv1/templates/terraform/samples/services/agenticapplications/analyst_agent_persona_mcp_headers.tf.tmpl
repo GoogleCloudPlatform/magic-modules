@@ -13,9 +13,17 @@ resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourc
     description       = "Sample MCP data source description"
     enabled           = true
     prompt            = "Use this server for queries"
-    api_key_name      = "x-api-key"
-    api_key_header    = "x-api-key-header"
     session_id_header = "X-Custom-Session-Id"
     task_id_header    = "X-Custom-Task-Id"
+
+    request_headers {
+      header_name = "X-Custom-Static"
+      value       = "initial-static-value"
+    }
+
+    request_headers {
+      header_name   = "X-Custom-User"
+      dynamic_value = "USER_ID"
+    }
   }
 }
