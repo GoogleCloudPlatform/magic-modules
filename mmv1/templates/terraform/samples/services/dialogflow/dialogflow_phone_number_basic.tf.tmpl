@@ -1,0 +1,10 @@
+resource "google_dialogflow_phone_number" "basic_phone_number" {
+  provider    = google-beta
+  location    = "us-central1"
+  description = "Basic Dialogflow phone number order"
+
+  phone_number_spec {
+    country_code         = 1
+    preferred_area_codes = ["256"]
+  }
+}
