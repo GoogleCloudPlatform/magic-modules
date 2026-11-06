@@ -1,0 +1,44 @@
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	original := v.(map[string]interface{})
+	if len(original) == 0 {
+		return nil
+	}
+	transformed := make(map[string]interface{})
+
+	// Hydrate non-secret actionParams from API on import; merge prior state secrets on read.
+	if apiParams, ok := original["actionParams"].(map[string]interface{}); ok {
+		merged := make(map[string]interface{}, len(apiParams))
+		for k, val := range apiParams {
+			merged[k] = val
+		}
+		if stateVal := d.Get("action_config.0.action_params"); stateVal != nil {
+			if stateMap, ok := stateVal.(map[string]interface{}); ok {
+				for k, val := range stateMap {
+					if _, existsInAPI := merged[k]; !existsInAPI {
+						merged[k] = val
+					}
+				}
+			}
+		}
+		transformed["action_params"] = merged
+	} else {
+		transformed["action_params"] = d.Get("action_config.0.action_params")
+	}
+
+	transformed["is_action_configured"] = original["isActionConfigured"]
+
+	createBap := original["createBapConnection"]
+	if createBap == nil {
+		if stateVal, ok := d.GetOkExists("action_config.0.create_bap_connection"); ok {
+			createBap = stateVal
+		} else if isConfigured, ok := original["isActionConfigured"].(bool); ok && isConfigured {
+			createBap = true
+		}
+	}
+	transformed["create_bap_connection"] = createBap
+
+	return []interface{}{transformed}
+}
