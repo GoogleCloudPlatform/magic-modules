@@ -1,0 +1,305 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'DocumentImport'
+description: |
+  Imports documents from Cloud Storage or BigQuery into a Discovery Engine
+  data store branch.
+
+  ~> **Note:** This resource represents an imperative `ImportDocuments`
+  operation rather than an individually addressable API resource. Once created,
+  Terraform does not poll or detect out-of-band modifications to the imported
+  documents in Discovery Engine. Changing any import configuration field
+  replaces the resource and triggers a new import operation.
+references:
+  guides:
+    'Prepare data for ingesting': 'https://cloud.google.com/generative-ai-app-builder/docs/prepare-data'
+  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.dataStores.branches.documents/import'
+base_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores/{{data_store_id}}/branches/{{branch_id}}/documents'
+self_link: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores/{{data_store_id}}/branches/{{branch_id}}/imports/{{import_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores/{{data_store_id}}/branches/{{branch_id}}/documents:import'
+delete_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores/{{data_store_id}}/branches/{{branch_id}}/documents:purge'
+delete_verb: 'POST'
+id_format: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores/{{data_store_id}}/branches/{{branch_id}}/imports/{{import_id}}'
+immutable: true
+exclude_read: true
+exclude_import: true
+exclude_sweeper: true
+exclude_tgc: true
+exclude_identity_generation: true
+deletion_policy_custom_docs: true
+timeouts:
+  insert_minutes: 60
+  delete_minutes: 60
+autogen_async: true
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+custom_code:
+  post_create: 'templates/terraform/post_create/discovery_engine_document_import.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/discovery_engine_document_import.go.tmpl'
+  test_check_destroy: 'templates/terraform/test_check_destroy/discovery_engine_document_import.go.tmpl'
+samples:
+  - name: 'discoveryengine_document_import_basic'
+    primary_resource_id: 'basic'
+    bootstrap_iam:
+      - member: 'serviceAccount:service-{project_number}@gcp-sa-discoveryengine.iam.gserviceaccount.com'
+        role: 'roles/storage.admin'
+    steps:
+      - name: 'discoveryengine_document_import_basic'
+        exclude_import_test: true
+        resource_id_vars:
+          data_store_id: 'data-store-id'
+          bucket_name: 'import-bucket'
+          import_id: 'initial-import'
+  - name: 'discoveryengine_document_import_full'
+    primary_resource_id: 'full'
+    bootstrap_iam:
+      - member: 'serviceAccount:service-{project_number}@gcp-sa-discoveryengine.iam.gserviceaccount.com'
+        role: 'roles/storage.admin'
+    steps:
+      - name: 'discoveryengine_document_import_full'
+        exclude_import_test: true
+        resource_id_vars:
+          data_store_id: 'data-store-id'
+          bucket_name: 'import-bucket-full'
+          import_id: 'full-import'
+  - name: 'discoveryengine_document_import_bigquery'
+    primary_resource_id: 'bigquery'
+    bootstrap_iam:
+      - member: 'serviceAccount:service-{project_number}@gcp-sa-discoveryengine.iam.gserviceaccount.com'
+        role: 'roles/storage.admin'
+      - member: 'serviceAccount:service-{project_number}@gcp-sa-discoveryengine.iam.gserviceaccount.com'
+        role: 'roles/bigquery.dataViewer'
+      - member: 'serviceAccount:service-{project_number}@gcp-sa-discoveryengine.iam.gserviceaccount.com'
+        role: 'roles/bigquery.jobUser'
+    steps:
+      - name: 'discoveryengine_document_import_bigquery'
+        exclude_import_test: true
+        resource_id_vars:
+          data_store_id: 'data-store-id'
+          bucket_name: 'import-bq-staging'
+          dataset_id: 'import_dataset'
+          table_id: 'import_table'
+          job_id: 'insert-bq-docs'
+          import_id: 'bq-import'
+virtual_fields:
+  - name: 'deletion_policy'
+    type: String
+    # excluded from generation due to Universal Deletion Policy
+    exclude: true
+    description: |
+      The deletion policy for the document import. Defaults to `DELETE`.
+
+      * `DELETE` or `ABANDON`: Removes the resource from Terraform state without
+        deleting imported documents from the Discovery Engine branch.
+      * `PREVENT`: Blocks `terraform destroy` or configuration changes that would
+        delete or replace the resource.
+      * `FORCE`: Invokes `DocumentService.PurgeDocuments` with `filter = "*"` and
+        `force = true` on the target branch before removing the resource from
+        Terraform state.
+
+      ~> **Warning:** Discovery Engine's `PurgeDocuments` API only supports branch-wide
+      purging (`filter = "*"`). When `deletion_policy = "FORCE"`, destroying or replacing
+      this resource (for example, due to changing an immutable import attribute) will
+      permanently delete **all documents in the target branch**, including documents
+      created outside this Terraform resource.
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The geographic location where the data store resides. The value can
+      only be one of "global", "us" and "eu".
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'collectionId'
+    type: String
+    description: |
+      The collection ID. Defaults to `default_collection`.
+    url_param_only: true
+    immutable: true
+    default_value: 'default_collection'
+  - name: 'dataStoreId'
+    type: String
+    description: |
+      The unique ID of the target data store.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'branchId'
+    type: String
+    description: |
+      The target branch ID within the data store. Defaults to `default_branch`.
+    url_param_only: true
+    immutable: true
+    default_value: 'default_branch'
+  - name: 'importId'
+    type: String
+    description: |
+      A client-assigned identifier used to distinguish multiple document import
+      resources targeting the same data store branch in Terraform state.
+      Must be 1-63 characters of alphanumeric characters, hyphens, or underscores,
+      starting with an alphanumeric character.
+    url_param_only: true
+    required: true
+    immutable: true
+    validation:
+      regex: '^[a-zA-Z0-9][a-zA-Z0-9_-]{0,62}$'
+properties:
+  - name: 'gcsSource'
+    type: NestedObject
+    description: |
+      Cloud Storage location for the input content.
+    exactly_one_of:
+      - gcs_source
+      - bigquery_source
+    properties:
+      - name: 'inputUris'
+        type: Array
+        required: true
+        description: |
+          Cloud Storage URIs to input files. Each URI can be up to 2000 characters
+          long. URIs can match the full object path (for example,
+          `gs://bucket/directory/object.json`) or a pattern matching one or more
+          files, such as `gs://bucket/directory/*.json`.
+        item_type:
+          type: String
+      - name: 'dataSchema'
+        type: String
+        description: |
+          The schema to use when parsing the data from the source.
+          Supported values for document imports:
+          * `document` (default): One JSON `Document` per line. Each document must
+            have a valid `Document.id`.
+          * `content`: Unstructured data (for example, PDF, HTML). Each file matched
+            by `input_uris` becomes a document.
+          * `custom`: One custom data JSON per row in arbitrary format that conforms
+            to the defined `Schema` of the data store. Can only be used by the
+            `GENERIC` Data Store vertical.
+          * `csv`: A CSV file with header conforming to the defined `Schema` of the
+            data store. Each entry after the header is imported as a Document. Can
+            only be used by the `GENERIC` Data Store vertical.
+  - name: 'bigquerySource'
+    type: NestedObject
+    description: |
+      BigQuery input source configuration.
+    exactly_one_of:
+      - gcs_source
+      - bigquery_source
+    properties:
+      - name: 'projectId'
+        type: String
+        description: |
+          The project ID or the project number that contains the BigQuery source.
+          If not specified, inherits the project ID from the parent request.
+      - name: 'datasetId'
+        type: String
+        required: true
+        description: |
+          The BigQuery dataset ID to copy the data from.
+      - name: 'tableId'
+        type: String
+        required: true
+        description: |
+          The BigQuery table ID to copy the data from.
+      - name: 'gcsStagingDir'
+        type: String
+        description: |
+          Intermediate Cloud Storage directory used for the import with a length
+          limit of 2,000 characters. Can be specified if one wants to have the
+          BigQuery export to a specific Cloud Storage directory.
+      - name: 'dataSchema'
+        type: String
+        description: |
+          The schema to use when parsing the data from the source.
+          Supported values for document imports:
+          * `document` (default): One `Document` format per row. Each document must
+            have a valid `Document.id` and one of `Document.json_data` or
+            `Document.struct_data`.
+          * `custom`: One custom data per row in arbitrary format that conforms to
+            the defined `Schema` of the data store. Can only be used by the
+            `GENERIC` Data Store vertical.
+      - name: 'partitionDate'
+        type: NestedObject
+        description: |
+          BigQuery ingestion-time partitioned table's `_PARTITIONDATE` in
+          `YYYY-MM-DD` format. Leave empty if the BigQuery table is not
+          ingestion-time partitioned.
+        properties:
+          - name: 'year'
+            type: Integer
+            required: true
+            description: |
+              Year of the date. Must be from 1 to 9999.
+          - name: 'month'
+            type: Integer
+            required: true
+            description: |
+              Month of a year. Must be from 1 to 12.
+          - name: 'day'
+            type: Integer
+            required: true
+            description: |
+              Day of a month. Must be from 1 to 31 and valid for the year and month.
+  - name: 'reconciliationMode'
+    type: Enum
+    description: |
+      The mode of reconciliation between existing documents and the documents to
+      be imported. Defaults to `INCREMENTAL`.
+    default_value: 'INCREMENTAL'
+    enum_values:
+      - 'INCREMENTAL'
+      - 'FULL'
+  - name: 'autoGenerateIds'
+    type: Boolean
+    description: |
+      Whether to automatically generate IDs for the documents if absent.
+      If set to `true`, `Document.id`s are automatically generated based on the
+      hash of the payload, where IDs may not be consistent during multiple imports.
+      Only supported when `data_schema` on `gcs_source` or `bigquery_source` is
+      `custom` or `csv`; otherwise, the API returns an `INVALID_ARGUMENT` error.
+  - name: 'idField'
+    type: String
+    description: |
+      The field or column name to be used as unique IDs of the documents.
+      For `gcs_source`, it is the key of the JSON field (for example, `my_id` for
+      JSON `{"my_id": "some_uuid"}`). For `bigquery_source`, it is the column name
+      of the table where the unique IDs are stored.
+      Only set this field when `auto_generate_ids` is unset or set to `false`, and
+      when `data_schema` is `custom` or `csv`. If unset, `_id` is used by default
+      for `custom` or `csv` schemas.
+  - name: 'forceRefreshContent'
+    type: Boolean
+    description: |
+      Whether to force refresh the unstructured content of the documents.
+      If set to `true`, the content part of the documents will be refreshed
+      regardless of the update status of the referencing content.
+  - name: 'errorConfig'
+    type: NestedObject
+    description: |
+      The desired location of errors incurred during the Import.
+    properties:
+      - name: 'gcsPrefix'
+        type: String
+        required: true
+        description: |
+          Cloud Storage prefix for import errors. This must be an empty,
+          existing Cloud Storage directory. Import errors are written to
+          sharded files in this directory, one per line, as a JSON-encoded
+          `google.rpc.Status` message.

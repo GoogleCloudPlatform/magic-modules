@@ -1,0 +1,53 @@
+data "google_project" "project" {}
+
+resource "google_discovery_engine_data_store" "basic" {
+  location                     = "global"
+  data_store_id                = "{{index $.ResourceIdVars "data_store_id"}}"
+  display_name                 = "tf-test-datastore-doc-import"
+  industry_vertical            = "GENERIC"
+  content_config               = "NO_CONTENT"
+  solution_types               = ["SOLUTION_TYPE_SEARCH"]
+  create_advanced_site_search  = false
+  skip_default_schema_creation = false
+}
+
+resource "google_storage_bucket" "import_bucket" {
+  name                        = "{{index $.ResourceIdVars "bucket_name"}}"
+  location                    = "US"
+  force_destroy               = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_iam_member" "discoveryengine_access" {
+  bucket     = google_storage_bucket.import_bucket.name
+  role       = "roles/storage.objectViewer"
+  member     = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-discoveryengine.iam.gserviceaccount.com"
+  depends_on = [google_discovery_engine_data_store.basic]
+}
+
+resource "google_storage_bucket_object" "documents" {
+  name    = "documents.jsonl"
+  bucket  = google_storage_bucket.import_bucket.name
+  content = <<-EOT
+    {"title":"Terraform Document 1","category":"guide"}
+    {"title":"Terraform Document 2","category":"reference"}
+  EOT
+}
+
+resource "google_discovery_engine_document_import" "{{$.PrimaryResourceId}}" {
+  location              = google_discovery_engine_data_store.basic.location
+  data_store_id         = google_discovery_engine_data_store.basic.data_store_id
+  branch_id             = "default_branch"
+  import_id             = "{{index $.ResourceIdVars "import_id"}}"
+  reconciliation_mode   = "INCREMENTAL"
+  auto_generate_ids     = true
+  force_refresh_content = false
+  deletion_policy       = "FORCE"
+
+  gcs_source {
+    input_uris  = ["gs://${google_storage_bucket.import_bucket.name}/${google_storage_bucket_object.documents.name}"]
+    data_schema = "custom"
+  }
+
+  depends_on = [google_storage_bucket_iam_member.discoveryengine_access]
+}

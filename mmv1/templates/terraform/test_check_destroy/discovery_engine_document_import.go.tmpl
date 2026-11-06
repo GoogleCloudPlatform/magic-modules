@@ -1,0 +1,35 @@
+if rs.Primary.Attributes["deletion_policy"] != "FORCE" {
+	continue
+}
+
+config := acctest.GoogleProviderConfig(t)
+url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(discoveryengine.Product, config)+"{{"projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores/{{data_store_id}}/branches/{{branch_id}}/documents"}}")
+if err != nil {
+	return err
+}
+if strings.Contains(url, "{{"{{location}}"}}") {
+	return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+}
+
+billingProject := ""
+if config.BillingProject != "" {
+	billingProject = config.BillingProject
+}
+
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	Project:   billingProject,
+	RawURL:    url,
+	UserAgent: config.UserAgent,
+})
+if err != nil {
+	if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		continue
+	}
+	return err
+}
+
+if docs, ok := res["documents"].([]interface{}); ok && len(docs) > 0 {
+	return fmt.Errorf("expected 0 documents remaining in branch after deletion_policy=FORCE at %s, found %d", url, len(docs))
+}
