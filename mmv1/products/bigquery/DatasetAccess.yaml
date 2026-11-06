@@ -32,14 +32,53 @@ docs:
     You must specify the role field using the legacy format `OWNER` instead of `roles/bigquery.dataOwner`.
     The API does accept both formats but it will always return the legacy format which results in Terraform
     showing permanent diff on each plan and apply operation.
+  note: |
+    The short `{{project}}/{{dataset_id}}/{{role}}/{{value}}` and `{{dataset_id}}/{{role}}/{{value}}` import ID
+    formats only work for `user_by_email` grants; the final segment is always interpreted as `user_by_email`
+    regardless of the grant's actual member type. To import a `group_by_email`, `domain`, `special_group`, or
+    `iam_member` grant, use one of the formats that spells out the member field name, e.g.
+    `{{dataset_id}}/roles/{{role}}/groupByEmail/{{value}}`.
 base_url: 'projects/{{project}}/datasets/{{dataset_id}}'
 id_format: 'projects/{{project}}/datasets/{{dataset_id}}'
+import_format:
+  - 'projects/{{project}}/datasets/{{dataset_id}}/roles/{{role}}/userByEmail/{{user_by_email}}'
+  - 'projects/{{project}}/datasets/{{dataset_id}}/roles/{{role}}/groupByEmail/{{group_by_email}}'
+  - 'projects/{{project}}/datasets/{{dataset_id}}/roles/{{role}}/domain/{{domain}}'
+  - 'projects/{{project}}/datasets/{{dataset_id}}/roles/{{role}}/specialGroup/{{special_group}}'
+  - 'projects/{{project}}/datasets/{{dataset_id}}/roles/{{role}}/iamMember/{{iam_member}}'
+  - '{{project}}/{{dataset_id}}/roles/{{role}}/userByEmail/{{user_by_email}}'
+  - '{{project}}/{{dataset_id}}/roles/{{role}}/groupByEmail/{{group_by_email}}'
+  - '{{project}}/{{dataset_id}}/roles/{{role}}/domain/{{domain}}'
+  - '{{project}}/{{dataset_id}}/roles/{{role}}/specialGroup/{{special_group}}'
+  - '{{project}}/{{dataset_id}}/roles/{{role}}/iamMember/{{iam_member}}'
+  - '{{dataset_id}}/roles/{{role}}/userByEmail/{{user_by_email}}'
+  - '{{dataset_id}}/roles/{{role}}/groupByEmail/{{group_by_email}}'
+  - '{{dataset_id}}/roles/{{role}}/domain/{{domain}}'
+  - '{{dataset_id}}/roles/{{role}}/specialGroup/{{special_group}}'
+  - '{{dataset_id}}/roles/{{role}}/iamMember/{{iam_member}}'
+  - 'projects/{{project}}/datasets/{{dataset_id}}/view/{{view_project_id}}/{{view_dataset_id}}/{{view_table_id}}'
+  - 'projects/{{project}}/datasets/{{dataset_id}}/roles/{{role}}/view/{{view_project_id}}/{{view_dataset_id}}/{{view_table_id}}'
+  - 'projects/{{project}}/datasets/{{dataset_id}}/dataset/{{dataset_project_id}}/{{dataset_dataset_id}}/{{target_types}}'
+  - 'projects/{{project}}/datasets/{{dataset_id}}/roles/{{role}}/dataset/{{dataset_project_id}}/{{dataset_dataset_id}}/{{target_types}}'
+  - 'projects/{{project}}/datasets/{{dataset_id}}/routine/{{routine_project_id}}/{{routine_dataset_id}}/{{routine_id}}'
+  - 'projects/{{project}}/datasets/{{dataset_id}}/roles/{{role}}/routine/{{routine_project_id}}/{{routine_dataset_id}}/{{routine_id}}'
+  - '{{project}}/{{dataset_id}}/view/{{view_project_id}}/{{view_dataset_id}}/{{view_table_id}}'
+  - '{{project}}/{{dataset_id}}/roles/{{role}}/view/{{view_project_id}}/{{view_dataset_id}}/{{view_table_id}}'
+  - '{{project}}/{{dataset_id}}/dataset/{{dataset_project_id}}/{{dataset_dataset_id}}/{{target_types}}'
+  - '{{project}}/{{dataset_id}}/roles/{{role}}/dataset/{{dataset_project_id}}/{{dataset_dataset_id}}/{{target_types}}'
+  - '{{project}}/{{dataset_id}}/routine/{{routine_project_id}}/{{routine_dataset_id}}/{{routine_id}}'
+  - '{{project}}/{{dataset_id}}/roles/{{role}}/routine/{{routine_project_id}}/{{routine_dataset_id}}/{{routine_id}}'
+  - '{{dataset_id}}/view/{{view_project_id}}/{{view_dataset_id}}/{{view_table_id}}'
+  - '{{dataset_id}}/roles/{{role}}/view/{{view_project_id}}/{{view_dataset_id}}/{{view_table_id}}'
+  - '{{dataset_id}}/dataset/{{dataset_project_id}}/{{dataset_dataset_id}}/{{target_types}}'
+  - '{{dataset_id}}/roles/{{role}}/dataset/{{dataset_project_id}}/{{dataset_dataset_id}}/{{target_types}}'
+  - '{{dataset_id}}/routine/{{routine_project_id}}/{{routine_dataset_id}}/{{routine_id}}'
+  - '{{dataset_id}}/roles/{{role}}/routine/{{routine_project_id}}/{{routine_dataset_id}}/{{routine_id}}'
 self_link: 'projects/{{project}}/datasets/{{dataset_id}}?accessPolicyVersion=3'
 create_verb: 'PATCH'
 delete_verb: 'PATCH'
 immutable: true
 mutex: '{{dataset_id}}'
-exclude_import: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -66,6 +105,7 @@ custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/bigquery_dataset_access.go.tmpl'
   constants: 'templates/terraform/constants/bigquery_dataset_access.go.tmpl'
   post_create: 'templates/terraform/post_create/bigquery_dataset_access.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/bigquery_dataset_access.go.tmpl'
 exclude_tgc: true
 exclude_sweeper: true
 error_retry_predicates:
