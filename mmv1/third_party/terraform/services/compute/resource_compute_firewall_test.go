@@ -103,6 +103,48 @@ func TestAccComputeFirewall_localRanges(t *testing.T) {
 	})
 }
 
+func TestAccComputeFirewall_sourceRangesReplaceDefault(t *testing.T) {
+	t.Parallel()
+
+	networkName := fmt.Sprintf("tf-test-firewall-%s", acctest.RandString(t, 10))
+	firewallName := fmt.Sprintf("tf-test-firewall-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeFirewallDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeFirewall_sourceRange(networkName, firewallName, "0.0.0.0/0"),
+			},
+			{
+				// Replacing 0.0.0.0/0 with a single different range must remove 0.0.0.0/0.
+				Config: testAccComputeFirewall_sourceRange(networkName, firewallName, "10.128.0.0/20"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_firewall.foobar", "source_ranges.#", "1"),
+					resource.TestCheckTypeSetElemAttr("google_compute_firewall.foobar", "source_ranges.*", "10.128.0.0/20"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_firewall.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeFirewall_sourceRange(networkName, firewallName, "0.0.0.0/0"),
+			},
+			{
+				// Unsetting source_ranges when it is 0.0.0.0/0 is still suppressed.
+				Config: testAccComputeFirewall_basic(networkName, firewallName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_firewall.foobar", "source_ranges.#", "1"),
+					resource.TestCheckTypeSetElemAttr("google_compute_firewall.foobar", "source_ranges.*", "0.0.0.0/0"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccComputeFirewall_priority(t *testing.T) {
 	t.Parallel()
 
@@ -437,6 +479,27 @@ resource "google_compute_firewall" "foobar" {
   }
 }
 `, network, firewall)
+}
+
+func testAccComputeFirewall_sourceRange(network, firewall, sourceRange string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_firewall" "foobar" {
+  name          = "%s"
+  description   = "Resource created for Terraform acceptance testing"
+  network       = google_compute_network.foobar.name
+  source_tags   = ["foo"]
+  source_ranges = ["%s"]
+
+  allow {
+    protocol = "icmp"
+  }
+}
+`, network, firewall, sourceRange)
 }
 
 func testAccComputeFirewall_localRanges(network, firewall string) string {

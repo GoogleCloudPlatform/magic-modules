@@ -101,13 +101,30 @@ func diffSuppressSourceRanges(k, old, new string, d *schema.ResourceData) bool {
 	// Diff suppress only should suppress removing the default range
 	// This should probably be newInt == 0, but due to Terraform core internals
 	// (bug?) values found via GetChange may not have the correct new value
-	// in some circumstances
+	// in some circumstances. A count of 1 -> 1 also matches replacing the
+	// default range with a different single range, so check the raw config
+	// to make sure source_ranges is actually unset.
 	if oldInt == 1 && newInt == 1 {
-		if old == "0.0.0.0/0" && new == "" {
+		if old == "0.0.0.0/0" && new == "" && sourceRangesUnsetInConfig(d) {
 			return true
 		}
 	}
 
 	// For any other source_ranges value diff, don't suppress
 	return false
+}
+
+// sourceRangesUnsetInConfig reports whether source_ranges is null or empty in
+// the user's configuration. If the configuration isn't available or the value
+// is unknown, it returns false so that real changes are never hidden.
+func sourceRangesUnsetInConfig(d *schema.ResourceData) bool {
+	rawConfig := d.GetRawConfig()
+	if rawConfig.IsNull() || !rawConfig.IsKnown() {
+		return false
+	}
+	v := rawConfig.GetAttr("source_ranges")
+	if v.IsNull() {
+		return true
+	}
+	return v.IsKnown() && v.LengthInt() == 0
 }
