@@ -79,6 +79,10 @@ var (
 					startDate: newDate(2026, 9, 17),
 					endDate:   newDate(2026, 9, 23),
 				},
+				{
+					startDate: newDate(2026, 11, 7),
+					endDate:   newDate(2026, 11, 15),
+				},
 			},
 		},
 		"melinath": {
