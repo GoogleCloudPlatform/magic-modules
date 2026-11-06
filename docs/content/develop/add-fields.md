@@ -187,6 +187,8 @@ For `key_name`, provide a domain-appropriate field name. For example, a map that
 {{< /tabs >}}
 
 2. Modify the field configuration according to the API documentation and behavior.
+   - Check the same product directory for a paired `<Resource>Version.yaml` schema. If the version API embeds the parent resource's configuration, mirror the new field matching that version schema's existing mutability pattern (for example, `output: true` under `snapshot` in `mmv1/products/ces/AppVersion.yaml`, or configurable properties under `tool` in `mmv1/products/dialogflowcx/ToolVersion.yaml`).
+   - If the resource sets `include_in_tgc_next: true` and the new field is not yet present in Cloud Asset Inventory's asset schema, set `is_missing_in_cai: true` on the field (see [Add TGC conversion]({{< ref "/convert/add-new-resource-tgc" >}})).
 
 > **Note:** The templates in this section only include the most commonly-used fields. For a comprehensive reference, see [MMv1 field reference]({{<ref "/reference/field" >}}). For information about modifying the values sent and received for a field, see [Modify the API request or response]({{<ref "/develop/custom-code#modify-the-api-request-or-response" >}}).
 {{< /tab >}}
