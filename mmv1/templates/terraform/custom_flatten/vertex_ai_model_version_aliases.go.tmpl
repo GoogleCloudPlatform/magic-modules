@@ -1,0 +1,21 @@
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	var keepDefault bool
+	if rawConfig := d.GetRawConfig(); rawConfig.IsNull() || !rawConfig.IsKnown() {
+		// Refresh has no raw configuration; retain the previous state's default-alias policy.
+		previous, exists := d.GetOkExists("version_aliases")
+		if !exists {
+			return v
+		}
+		keepDefault = previous.(*schema.Set).Contains("default")
+	} else {
+		configured := rawConfig.GetAttr("version_aliases")
+		if configured.IsNull() || !configured.IsWhollyKnown() {
+			return v
+		}
+		keepDefault = configured.HasElement(cty.StringVal("default")).True()
+	}
+	return vertexAiModelFilterVersionAliases(v.([]interface{}), keepDefault)
+}
