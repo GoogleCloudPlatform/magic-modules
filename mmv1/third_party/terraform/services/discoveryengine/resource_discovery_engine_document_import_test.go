@@ -16,7 +16,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func TestAccDiscoveryEngineDocumentImport_lifecycleAndPurgeOnDestroy(t *testing.T) {
+func TestAccDiscoveryEngineDocumentImport_lifecycleAndDeletionPolicy(t *testing.T) {
 	t.Parallel()
 
 	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
@@ -40,51 +40,76 @@ func TestAccDiscoveryEngineDocumentImport_lifecycleAndPurgeOnDestroy(t *testing.
 		CheckDestroy:             testAccCheckDiscoveryEngineDocumentImportDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				// Step 1: Import 2 documents with purge_on_destroy = false and verify
-				// both Terraform state counts and live ListDocuments count == 2.
-				Config: testAccDiscoveryEngineDocumentImport_withImport(context, "tf-test-first-import", false),
+				// Step 1: Import 2 documents with default deletion_policy ("DELETE") and
+				// verify project state and live ListDocuments count == 2.
+				Config: testAccDiscoveryEngineDocumentImport_withDefaultDeletionPolicy(context, "tf-test-first-import"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_discovery_engine_document_import.test", "project", context["project"].(string)),
-					resource.TestCheckResourceAttr("google_discovery_engine_document_import.test", "success_count", "2"),
-					resource.TestCheckResourceAttr("google_discovery_engine_document_import.test", "failure_count", "0"),
-					resource.TestCheckResourceAttr("google_discovery_engine_document_import.test", "total_count", "2"),
-					resource.TestCheckResourceAttrSet("google_discovery_engine_document_import.test", "operation"),
+					resource.TestCheckResourceAttr("google_discovery_engine_document_import.test", "deletion_policy", "DELETE"),
 					testAccCheckDiscoveryEngineBranchDocumentCount(t, "global", dataStoreID, 2),
 				),
 			},
 			{
-				// Step 2: Destroy only the DocumentImport resource while keeping the
-				// DataStore alive; purge_on_destroy = false must leave the 2 documents intact.
-				Config: testAccDiscoveryEngineDocumentImport_dataStoreOnly(context),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDiscoveryEngineBranchDocumentCount(t, "global", dataStoreID, 2),
-				),
-			},
-			{
-				// Step 3: Create a second DocumentImport on the same branch (starting with
-				// purge_on_destroy = false).
-				Config: testAccDiscoveryEngineDocumentImport_withImport(context, "tf-test-second-import", false),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_discovery_engine_document_import.test", "success_count", "2"),
-					resource.TestCheckResourceAttr("google_discovery_engine_document_import.test", "failure_count", "0"),
-					testAccCheckDiscoveryEngineBranchDocumentCount(t, "global", dataStoreID, 2),
-				),
-			},
-			{
-				// Step 4: Update purge_on_destroy from false -> true in-place (must NOT trigger ForceNew).
-				Config: testAccDiscoveryEngineDocumentImport_withImport(context, "tf-test-second-import", true),
+				// Step 2: Update deletion_policy to "PREVENT" in-place (must NOT trigger ForceNew).
+				Config: testAccDiscoveryEngineDocumentImport_withDeletionPolicy(context, "tf-test-first-import", "PREVENT"),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_discovery_engine_document_import.test", plancheck.ResourceActionUpdate),
 					},
 				},
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_discovery_engine_document_import.test", "purge_on_destroy", "true"),
+					resource.TestCheckResourceAttr("google_discovery_engine_document_import.test", "deletion_policy", "PREVENT"),
+				),
+			},
+			{
+				// Step 3: Attempting to destroy with deletion_policy = "PREVENT" must fail.
+				Config:      testAccDiscoveryEngineDocumentImport_dataStoreOnly(context),
+				ExpectError: regexp.MustCompile(`cannot destroy`),
+			},
+			{
+				// Step 4: Update deletion_policy from "PREVENT" -> "DELETE" in-place.
+				Config: testAccDiscoveryEngineDocumentImport_withDeletionPolicy(context, "tf-test-first-import", "DELETE"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_discovery_engine_document_import.test", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_discovery_engine_document_import.test", "deletion_policy", "DELETE"),
+				),
+			},
+			{
+				// Step 5: Destroy only the DocumentImport resource while keeping the DataStore
+				// alive; deletion_policy = "DELETE" removes from state without purging documents.
+				Config: testAccDiscoveryEngineDocumentImport_dataStoreOnly(context),
+				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDiscoveryEngineBranchDocumentCount(t, "global", dataStoreID, 2),
 				),
 			},
 			{
-				// Step 5: Destroy the DocumentImport resource with purge_on_destroy = true while
+				// Step 6: Create a second DocumentImport on the same branch with deletion_policy = "ABANDON",
+				// then update to "FORCE" in Step 7.
+				Config: testAccDiscoveryEngineDocumentImport_withDeletionPolicy(context, "tf-test-second-import", "ABANDON"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_discovery_engine_document_import.test", "deletion_policy", "ABANDON"),
+					testAccCheckDiscoveryEngineBranchDocumentCount(t, "global", dataStoreID, 2),
+				),
+			},
+			{
+				// Step 7: Update deletion_policy from "ABANDON" -> "FORCE" in-place (must NOT trigger ForceNew).
+				Config: testAccDiscoveryEngineDocumentImport_withDeletionPolicy(context, "tf-test-second-import", "FORCE"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_discovery_engine_document_import.test", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_discovery_engine_document_import.test", "deletion_policy", "FORCE"),
+					testAccCheckDiscoveryEngineBranchDocumentCount(t, "global", dataStoreID, 2),
+				),
+			},
+			{
+				// Step 8: Destroy the DocumentImport resource with deletion_policy = "FORCE" while
 				// keeping the DataStore alive; PurgeDocuments (force=true) must empty the branch.
 				Config: testAccDiscoveryEngineDocumentImport_dataStoreOnly(context),
 				Check: resource.ComposeTestCheckFunc(
@@ -95,7 +120,7 @@ func TestAccDiscoveryEngineDocumentImport_lifecycleAndPurgeOnDestroy(t *testing.
 	})
 }
 
-func TestAccDiscoveryEngineDocumentImport_createFailsOnDocumentError(t *testing.T) {
+func TestAccDiscoveryEngineDocumentImport_partialFailure(t *testing.T) {
 	t.Parallel()
 
 	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
@@ -106,9 +131,10 @@ func TestAccDiscoveryEngineDocumentImport_createFailsOnDocumentError(t *testing.
 	})
 
 	randomSuffix := acctest.RandString(t, 10)
+	dataStoreID := "tf-test-doc-import-pf-" + randomSuffix
 	context := map[string]interface{}{
-		"data_store_id": "tf-test-doc-import-err-" + randomSuffix,
-		"bucket_name":   "tf-test-doc-import-err-" + randomSuffix,
+		"data_store_id": dataStoreID,
+		"bucket_name":   "tf-test-doc-import-pf-" + randomSuffix,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -117,8 +143,39 @@ func TestAccDiscoveryEngineDocumentImport_createFailsOnDocumentError(t *testing.
 		CheckDestroy:             testAccCheckDiscoveryEngineDocumentImportDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccDiscoveryEngineDocumentImport_invalidDocument(context),
-				ExpectError: regexp.MustCompile(`1 document\(s\) failed out of 1 total`),
+				// Step 1: Import a batch with 1 valid document and 1 document missing the
+				// required id_field; LRO completes without top-level error, the 1 valid
+				// document is imported, and per-document errors are routed to error_config.
+				Config: testAccDiscoveryEngineDocumentImport_partialFailureStep1(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDiscoveryEngineBranchDocumentCount(t, "global", dataStoreID, 1),
+				),
+			},
+			{
+				// Step 2: Re-applying the unchanged configuration after a partial failure
+				// is a clean no-op and does not re-trigger or duplicate the import.
+				Config: testAccDiscoveryEngineDocumentImport_partialFailureStep1(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDiscoveryEngineBranchDocumentCount(t, "global", dataStoreID, 1),
+				),
+			},
+			{
+				// Step 3: Updating input_uris to a fixed batch replaces the resource
+				// (without purging under deletion_policy = "DELETE") and reconciles both documents.
+				Config: testAccDiscoveryEngineDocumentImport_partialFailureStep3Fixed(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_discovery_engine_document_import.partial", plancheck.ResourceActionDestroyBeforeCreate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDiscoveryEngineBranchDocumentCount(t, "global", dataStoreID, 2),
+				),
 			},
 		},
 	})
@@ -196,12 +253,11 @@ resource "google_storage_bucket_object" "documents" {
 `, context)
 }
 
-func testAccDiscoveryEngineDocumentImport_withImport(context map[string]interface{}, importID string, purgeOnDestroy bool) string {
+func testAccDiscoveryEngineDocumentImport_withDefaultDeletionPolicy(context map[string]interface{}, importID string) string {
 	stepContext := map[string]interface{}{
-		"data_store_id":    context["data_store_id"],
-		"bucket_name":      context["bucket_name"],
-		"import_id":        importID,
-		"purge_on_destroy": purgeOnDestroy,
+		"data_store_id": context["data_store_id"],
+		"bucket_name":   context["bucket_name"],
+		"import_id":     importID,
 	}
 	return testAccDiscoveryEngineDocumentImport_dataStoreOnly(stepContext) + acctest.Nprintf(`
 resource "google_discovery_engine_document_import" "test" {
@@ -212,7 +268,6 @@ resource "google_discovery_engine_document_import" "test" {
   reconciliation_mode = "INCREMENTAL"
   auto_generate_ids   = false
   id_field            = "doc_id"
-  purge_on_destroy    = %{purge_on_destroy}
 
   gcs_source {
     input_uris  = ["gs://${google_storage_bucket.import_bucket.name}/${google_storage_bucket_object.documents.name}"]
@@ -224,14 +279,42 @@ resource "google_discovery_engine_document_import" "test" {
 `, stepContext)
 }
 
-func testAccDiscoveryEngineDocumentImport_invalidDocument(context map[string]interface{}) string {
+func testAccDiscoveryEngineDocumentImport_withDeletionPolicy(context map[string]interface{}, importID, deletionPolicy string) string {
+	stepContext := map[string]interface{}{
+		"data_store_id":   context["data_store_id"],
+		"bucket_name":     context["bucket_name"],
+		"import_id":       importID,
+		"deletion_policy": deletionPolicy,
+	}
+	return testAccDiscoveryEngineDocumentImport_dataStoreOnly(stepContext) + acctest.Nprintf(`
+resource "google_discovery_engine_document_import" "test" {
+  location            = google_discovery_engine_data_store.basic.location
+  data_store_id       = google_discovery_engine_data_store.basic.data_store_id
+  branch_id           = "default_branch"
+  import_id           = "%{import_id}"
+  reconciliation_mode = "INCREMENTAL"
+  auto_generate_ids   = false
+  id_field            = "doc_id"
+  deletion_policy     = "%{deletion_policy}"
+
+  gcs_source {
+    input_uris  = ["gs://${google_storage_bucket.import_bucket.name}/${google_storage_bucket_object.documents.name}"]
+    data_schema = "custom"
+  }
+
+  depends_on = [google_storage_bucket_iam_member.discoveryengine_access]
+}
+`, stepContext)
+}
+
+func testAccDiscoveryEngineDocumentImport_partialFailureBase(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {}
 
 resource "google_discovery_engine_data_store" "basic" {
   location                     = "global"
   data_store_id                = "%{data_store_id}"
-  display_name                 = "tf-test-datastore-doc-import-err"
+  display_name                 = "tf-test-datastore-doc-import-pf"
   industry_vertical            = "GENERIC"
   content_config               = "NO_CONTENT"
   solution_types               = ["SOLUTION_TYPE_SEARCH"]
@@ -248,25 +331,74 @@ resource "google_storage_bucket" "import_bucket" {
 
 resource "google_storage_bucket_iam_member" "discoveryengine_access" {
   bucket     = google_storage_bucket.import_bucket.name
-  role       = "roles/storage.objectViewer"
+  role       = "roles/storage.admin"
   member     = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-discoveryengine.iam.gserviceaccount.com"
   depends_on = [google_discovery_engine_data_store.basic]
 }
 
-resource "google_storage_bucket_object" "invalid_documents" {
-  name    = "invalid.jsonl"
+resource "google_storage_bucket_object" "partial_documents" {
+  name    = "partial.jsonl"
   bucket  = google_storage_bucket.import_bucket.name
-  content = "not-valid-json-document\n"
+  content = <<-EOT
+    {"doc_id":"doc-1","title":"Valid Document 1"}
+    {"title":"Invalid Document Missing doc_id"}
+  EOT
 }
 
-resource "google_discovery_engine_document_import" "invalid" {
-  location      = google_discovery_engine_data_store.basic.location
-  data_store_id = google_discovery_engine_data_store.basic.data_store_id
-  import_id     = "tf-test-invalid-import"
+resource "google_storage_bucket_object" "fixed_documents" {
+  name    = "fixed.jsonl"
+  bucket  = google_storage_bucket.import_bucket.name
+  content = <<-EOT
+    {"doc_id":"doc-1","title":"Valid Document 1"}
+    {"doc_id":"doc-2","title":"Valid Document 2"}
+  EOT
+}
+`, context)
+}
+
+func testAccDiscoveryEngineDocumentImport_partialFailureStep1(context map[string]interface{}) string {
+	return testAccDiscoveryEngineDocumentImport_partialFailureBase(context) + acctest.Nprintf(`
+resource "google_discovery_engine_document_import" "partial" {
+  location            = google_discovery_engine_data_store.basic.location
+  data_store_id       = google_discovery_engine_data_store.basic.data_store_id
+  import_id           = "tf-test-partial-import"
+  reconciliation_mode = "INCREMENTAL"
+  auto_generate_ids   = false
+  id_field            = "doc_id"
+  deletion_policy     = "DELETE"
 
   gcs_source {
-    input_uris  = ["gs://${google_storage_bucket.import_bucket.name}/${google_storage_bucket_object.invalid_documents.name}"]
-    data_schema = "document"
+    input_uris  = ["gs://${google_storage_bucket.import_bucket.name}/${google_storage_bucket_object.partial_documents.name}"]
+    data_schema = "custom"
+  }
+
+  error_config {
+    gcs_prefix = "gs://${google_storage_bucket.import_bucket.name}/errors-step1"
+  }
+
+  depends_on = [google_storage_bucket_iam_member.discoveryengine_access]
+}
+`, context)
+}
+
+func testAccDiscoveryEngineDocumentImport_partialFailureStep3Fixed(context map[string]interface{}) string {
+	return testAccDiscoveryEngineDocumentImport_partialFailureBase(context) + acctest.Nprintf(`
+resource "google_discovery_engine_document_import" "partial" {
+  location            = google_discovery_engine_data_store.basic.location
+  data_store_id       = google_discovery_engine_data_store.basic.data_store_id
+  import_id           = "tf-test-partial-import"
+  reconciliation_mode = "INCREMENTAL"
+  auto_generate_ids   = false
+  id_field            = "doc_id"
+  deletion_policy     = "FORCE"
+
+  gcs_source {
+    input_uris  = ["gs://${google_storage_bucket.import_bucket.name}/${google_storage_bucket_object.fixed_documents.name}"]
+    data_schema = "custom"
+  }
+
+  error_config {
+    gcs_prefix = "gs://${google_storage_bucket.import_bucket.name}/errors-step3"
   }
 
   depends_on = [google_storage_bucket_iam_member.discoveryengine_access]

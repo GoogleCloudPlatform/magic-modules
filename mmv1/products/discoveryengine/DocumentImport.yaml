@@ -29,6 +29,8 @@ references:
 base_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores/{{data_store_id}}/branches/{{branch_id}}/documents'
 self_link: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores/{{data_store_id}}/branches/{{branch_id}}/imports/{{import_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores/{{data_store_id}}/branches/{{branch_id}}/documents:import'
+delete_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores/{{data_store_id}}/branches/{{branch_id}}/documents:purge'
+delete_verb: 'POST'
 id_format: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataStores/{{data_store_id}}/branches/{{branch_id}}/imports/{{import_id}}'
 immutable: true
 exclude_read: true
@@ -36,14 +38,21 @@ exclude_import: true
 exclude_sweeper: true
 exclude_tgc: true
 exclude_identity_generation: true
-deletion_policy_exclude: true
+deletion_policy_custom_docs: true
 timeouts:
   insert_minutes: 60
   delete_minutes: 60
+autogen_async: true
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
 custom_code:
-  constants: 'templates/terraform/constants/discovery_engine_document_import.go.tmpl'
   post_create: 'templates/terraform/post_create/discovery_engine_document_import.go.tmpl'
-  custom_delete: 'templates/terraform/custom_delete/discovery_engine_document_import.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/discovery_engine_document_import.go.tmpl'
   test_check_destroy: 'templates/terraform/test_check_destroy/discovery_engine_document_import.go.tmpl'
 samples:
   - name: 'discoveryengine_document_import_basic'
@@ -90,17 +99,23 @@ samples:
           job_id: 'insert-bq-docs'
           import_id: 'bq-import'
 virtual_fields:
-  - name: 'purge_on_destroy'
-    type: Boolean
-    default_value: false
+  - name: 'deletion_policy'
+    type: String
+    # excluded from generation due to Universal Deletion Policy
+    exclude: true
     description: |
-      If set to `true`, destroying this resource invokes `DocumentService.PurgeDocuments`
-      with `filter = "*"` and `force = true` on the target branch before removing the
-      resource from Terraform state. Defaults to `false`, which leaves imported documents
-      in Discovery Engine when the Terraform resource is destroyed.
+      The deletion policy for the document import. Defaults to `DELETE`.
+
+      * `DELETE` or `ABANDON`: Removes the resource from Terraform state without
+        deleting imported documents from the Discovery Engine branch.
+      * `PREVENT`: Blocks `terraform destroy` or configuration changes that would
+        delete or replace the resource.
+      * `FORCE`: Invokes `DocumentService.PurgeDocuments` with `filter = "*"` and
+        `force = true` on the target branch before removing the resource from
+        Terraform state.
 
       ~> **Warning:** Discovery Engine's `PurgeDocuments` API only supports branch-wide
-      purging (`filter = "*"`). When `purge_on_destroy = true`, destroying or replacing
+      purging (`filter = "*"`). When `deletion_policy = "FORCE"`, destroying or replacing
       this resource (for example, due to changing an immutable import attribute) will
       permanently delete **all documents in the target branch**, including documents
       created outside this Terraform resource.
@@ -288,27 +303,3 @@ properties:
           existing Cloud Storage directory. Import errors are written to
           sharded files in this directory, one per line, as a JSON-encoded
           `google.rpc.Status` message.
-  - name: 'operation'
-    type: String
-    output: true
-    description: |
-      The full resource name of the long-running `ImportDocuments` operation
-      executed when creating this resource.
-  - name: 'successCount'
-    type: String
-    output: true
-    description: |
-      Count of document entries that were processed successfully by the import
-      operation, as reported in `ImportDocumentsMetadata`.
-  - name: 'failureCount'
-    type: String
-    output: true
-    description: |
-      Count of document entries that encountered errors during the import
-      operation, as reported in `ImportDocumentsMetadata`.
-  - name: 'totalCount'
-    type: String
-    output: true
-    description: |
-      Total count of document entries that were processed by the import
-      operation, as reported in `ImportDocumentsMetadata`.

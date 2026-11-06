@@ -1,4 +1,4 @@
-if rs.Primary.Attributes["purge_on_destroy"] != "true" {
+if rs.Primary.Attributes["deletion_policy"] != "FORCE" {
 	continue
 }
 
@@ -31,5 +31,5 @@ if err != nil {
 }
 
 if docs, ok := res["documents"].([]interface{}); ok && len(docs) > 0 {
-	return fmt.Errorf("expected 0 documents remaining in branch after purge_on_destroy=true at %s, found %d", url, len(docs))
+	return fmt.Errorf("expected 0 documents remaining in branch after deletion_policy=FORCE at %s, found %d", url, len(docs))
 }

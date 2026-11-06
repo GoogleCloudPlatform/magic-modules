@@ -1,10 +1,3 @@
-endpointLocation := tpgresource.LocationFromId(d.Id())
-if err := discoveryEngineDocumentImportWaitForCreate(d, config, res, project, endpointLocation, userAgent, d.Timeout(schema.TimeoutCreate)); err != nil {
-	// The import reported failures; clear ID so Terraform does not record a failed import as created.
-	d.SetId("")
-	return err
-}
-
 if err := d.Set("project", project); err != nil {
 	return fmt.Errorf("Error setting project: %s", err)
 }

@@ -44,7 +44,7 @@ resource "google_discovery_engine_document_import" "{{$.PrimaryResourceId}}" {
   auto_generate_ids     = false
   id_field              = "doc_id"
   force_refresh_content = true
-  purge_on_destroy      = false
+  deletion_policy       = "DELETE"
 
   gcs_source {
     input_uris  = ["gs://${google_storage_bucket.import_bucket.name}/${google_storage_bucket_object.documents.name}"]

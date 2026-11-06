@@ -98,7 +98,6 @@ resource "google_discovery_engine_document_import" "{{$.PrimaryResourceId}}" {
   reconciliation_mode = "INCREMENTAL"
   auto_generate_ids   = false
   id_field            = "doc_id"
-  purge_on_destroy    = false
 
   bigquery_source {
     project_id      = data.google_project.project.project_id
