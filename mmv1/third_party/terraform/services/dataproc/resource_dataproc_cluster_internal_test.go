@@ -391,6 +391,33 @@ func TestDataprocSecondaryWorkerFlexibleConfigDiff(t *testing.T) {
 		}
 	})
 
+	t.Run("post_create_add_unknown_num_instances_forces_new", func(t *testing.T) {
+		attrs := baseStateAttrs()
+		// hcl2shim.UnknownVariableValue: how the legacy ResourceConfig represents an
+		// unknown value (e.g. num_instances from a resource not yet created).
+		const unknown = "74D93920-ED26-11E3-AC10-0800200C9A66"
+		secCfg := []interface{}{
+			map[string]interface{}{
+				"num_instances":     unknown,
+				"core_count":        8,
+				"hardware_class":    "STANDARD",
+				"boot_disk_size_gb": 100,
+			},
+		}
+		rawCfg := makeRawConfig([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"num_instances":     cty.UnknownVal(cty.Number),
+				"core_count":        cty.NumberIntVal(8),
+				"hardware_class":    cty.StringVal("STANDARD"),
+				"boot_disk_size_gb": cty.NumberIntVal(100),
+			}),
+		}, nil)
+		d := runDiff(t, attrs, baseConfigMap(secCfg, nil, true), rawCfg)
+		if !d.RequiresNew() {
+			t.Fatalf("expected RequiresNew=true when num_instances is unknown on initial post-create addition, got %#v", d.Attributes)
+		}
+	})
+
 	t.Run("post_create_add_without_worker_flexible_config_forces_new", func(t *testing.T) {
 		attrs := baseStateAttrs()
 		delete(attrs, "cluster_config.0.worker_flexible_config.#")
@@ -615,4 +642,69 @@ func TestDataprocSecondaryWorkerFlexibleConfigScaleDownKeepsDiffSuppress(t *test
 			t.Errorf("expected lifecycle_config diff to stay suppressed during scale-down, got %s: %#v", k, v)
 		}
 	}
+
+	t.Run("changed_block_preserves_nested_diff_suppress", func(t *testing.T) {
+		nestedRawCfg := cty.ObjectVal(map[string]cty.Value{
+			"name":            cty.StringVal("test-cluster"),
+			"project":         cty.StringVal("p"),
+			"region":          cty.StringVal("us-central1"),
+			"deletion_policy": cty.NullVal(cty.String),
+			"labels":          cty.NullVal(cty.Map(cty.String)),
+			"cluster_config": cty.ListVal([]cty.Value{
+				cty.ObjectVal(map[string]cty.Value{
+					"secondary_worker_flexible_config": cty.ListValEmpty(flexType),
+					"autoscaling_config":               cty.ListValEmpty(cty.Object(map[string]cty.Type{"policy_uri": cty.String})),
+					"lifecycle_config": cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							"idle_delete_ttl":  cty.StringVal("1200s"),
+							"auto_delete_time": cty.StringVal("2030-01-01T00:00:00Z"),
+						}),
+					}),
+				}),
+			}),
+		})
+
+		nestedAttrs := make(map[string]string, len(attrs))
+		for k, v := range attrs {
+			nestedAttrs[k] = v
+		}
+		nestedAttrs["cluster_config.0.lifecycle_config.0.idle_delete_ttl"] = "600s"
+
+		nestedCfg := map[string]interface{}{
+			"name":    "test-cluster",
+			"project": "p",
+			"region":  "us-central1",
+			"cluster_config": []interface{}{map[string]interface{}{
+				"master_flexible_config": flex(1, 4),
+				"worker_flexible_config": flex(2, 8),
+				"lifecycle_config": []interface{}{map[string]interface{}{
+					"idle_delete_ttl":  "1200s",
+					"auto_delete_time": "2030-01-01T00:00:00Z",
+				}},
+			}},
+		}
+
+		nestedState := &terraform.InstanceState{ID: nestedAttrs["id"], Attributes: nestedAttrs, RawConfig: nestedRawCfg, RawPlan: nestedRawCfg}
+		nd, err := res.Diff(context.Background(), nestedState, terraform.NewResourceConfigRaw(nestedCfg), &transport_tpg.Config{Project: "p", Region: "us-central1"})
+		if err != nil {
+			t.Fatalf("Diff returned unexpected error: %v", err)
+		}
+		if nd == nil {
+			t.Fatalf("expected a diff, got none")
+		}
+		if nd.RequiresNew() {
+			t.Fatalf("expected in-place update, got RequiresNew=true: %#v", nd.Attributes)
+		}
+		secDiff := nd.Attributes["cluster_config.0.secondary_worker_flexible_config.0.num_instances"]
+		if secDiff == nil || secDiff.Old != "2" || secDiff.New != "0" {
+			t.Fatalf("expected secondary_worker_flexible_config.0.num_instances diff 2 -> 0, got %#v", secDiff)
+		}
+		ttlDiff := nd.Attributes["cluster_config.0.lifecycle_config.0.idle_delete_ttl"]
+		if ttlDiff == nil || ttlDiff.Old != "600s" || ttlDiff.New != "1200s" {
+			t.Fatalf("expected lifecycle_config.0.idle_delete_ttl diff 600s -> 1200s, got %#v", ttlDiff)
+		}
+		if autoDiff, ok := nd.Attributes["cluster_config.0.lifecycle_config.0.auto_delete_time"]; ok {
+			t.Errorf("expected lifecycle_config.0.auto_delete_time diff to stay suppressed during scale-down, got %#v", autoDiff)
+		}
+	})
 }

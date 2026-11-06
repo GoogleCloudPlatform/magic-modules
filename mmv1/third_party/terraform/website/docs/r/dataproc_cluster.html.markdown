@@ -928,7 +928,8 @@ cluster_config {
 * `num_instances` - (Optional) Specifies the number of secondary worker instances to create.
    Defaults to `0`; can be scaled down to `0`; updatable in place. Removing the
    `secondary_worker_flexible_config` block scales `num_instances` down to `0` in place (unless
-   managed by `autoscaling_config`).
+   managed by `autoscaling_config`). When adding this block after cluster creation, a `num_instances`
+   value that is unknown at plan time forces a new resource to be created.
 
 * `core_count` - (Required) The number of vCPUs per instance. Must be a power of 2
    (2, 4, 8, 16, or 32). Changing this on an existing block forces a new resource to be created.
