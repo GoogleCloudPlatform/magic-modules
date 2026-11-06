@@ -321,6 +321,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Databasemigrationservice",
         "path" to "./google/services/databasemigrationservice"
     ),
+    "designcenter" to mapOf(
+        "name" to "designcenter",
+        "displayName" to "Designcenter",
+        "path" to "./google/services/designcenter"
+    ),
     "datacatalog" to mapOf(
         "name" to "datacatalog",
         "displayName" to "Datacatalog",

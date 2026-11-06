@@ -1,0 +1,17 @@
+resource "google_design_center_application" "example" {
+  project           = "{{index $.Vars "project"}}"
+  location          = "us-central1"
+  space             = "{{index $.Vars "space"}}"
+  application_id    = "{{index $.ResourceIdVars "application_id"}}"
+  display_name      = "Updated Example Application"
+  description       = "Updated Managed by Terraform"
+  deployment_region = "us-central1"
+
+  source {
+    application_template_revision = "{{index $.Vars "application_template_revision_uri"}}"
+  }
+
+  scope {
+    type = "REGIONAL"
+  }
+}
