@@ -23,6 +23,7 @@ references:
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/routers'
 has_self_link: true
+generate_list_resource: true
 # Since Terraform has separate resources for router, router interface, and
 # router peer, calling PUT on the router will delete the interface and peer.
 # Use patch instead.

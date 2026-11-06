@@ -15,6 +15,7 @@
 name: 'ZoneVmExtensionPolicy'
 description: 'A Zone VM Extension Policy.'
 base_url: 'projects/{{project}}/zones/{{zone}}/vmExtensionPolicies'
+generate_list_resource: true
 self_link: 'projects/{{project}}/zones/{{zone}}/vmExtensionPolicies/{{name}}'
 update_verb: 'PATCH'
 custom_code:
