@@ -84,6 +84,7 @@ samples:
           billing_account: 'BILLING_ACCT'
   - name: 'shared_future_reservation'
     primary_resource_id: 'gce_future_reservation'
+    external_providers: ["time"]
     exclude_basic_doc: true
     # Skip in VCR until the test issue is resolved
     # https://github.com/hashicorp/terraform-provider-google/issues/25063
