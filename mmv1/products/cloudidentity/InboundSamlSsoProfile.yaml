@@ -1,0 +1,136 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: InboundSamlSsoProfile
+description: |
+  A SAML 2.0 federation between a Google enterprise customer and a SAML identity provider.
+references:
+  guides:
+    Assign SSO profiles: https://cloud.google.com/identity/docs/how-to/assign-sso-profiles
+    Set up SSO with a third party IdP: https://support.google.com/a/answer/12032922
+  api: https://cloud.google.com/identity/docs/reference/rest/v1/inboundSamlSsoProfiles
+docs:
+  warning: |
+    The caller must be a Google Workspace / Cloud Identity administrator of the
+    customer with the SSO settings privilege (for example a super admin);
+    Google Cloud IAM roles are not sufficient.
+
+    If you are using User ADCs (Application Default Credentials) with this resource,
+    you must specify a `billing_project` and set `user_project_override` to true
+    in the provider configuration. Otherwise the Cloud Identity API will return a 403 error.
+    Your account must have the `serviceusage.services.use` permission on the
+    `billing_project` you defined.
+base_url: inboundSamlSsoProfiles
+self_link: '{{name}}'
+create_url: inboundSamlSsoProfiles
+update_url: '{{name}}'
+update_verb: PATCH
+update_mask: true
+delete_url: '{{name}}'
+id_format: '{{name}}'
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+exclude_sweeper: true
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, delete, update]
+  result:
+    resource_inside_response: true
+autogen_async: true
+custom_code:
+  custom_import: templates/terraform/custom_import/set_id_name_with_slashes.go.tmpl
+samples:
+  - name: cloud_identity_inbound_saml_sso_profile_basic
+    primary_resource_id: saml_profile
+    # Tests require Google Workspace admin privileges (INBOUND_SSO_SETTINGS) not held by
+    # the CI service account. Run locally via resource_cloud_identity_inbound_saml_sso_profile_test.go.
+    exclude_test: true
+    steps:
+      - name: cloud_identity_inbound_saml_sso_profile_basic
+        resource_id_vars:
+          display_name: saml-profile
+        test_env_vars:
+          cust_id: CUST_ID
+properties:
+  - name: name
+    type: String
+    description: |
+      Resource name of the SAML SSO profile, in the format `inboundSamlSsoProfiles/{inbound_saml_sso_profile}`.
+    output: true
+  - name: customer
+    type: String
+    description: |
+      The customer. For example: `customers/C0123abc`. If omitted, the customer of the caller is used.
+    immutable: true
+    default_from_api: true
+  - name: displayName
+    type: String
+    description: |
+      Human-readable name of the SAML SSO profile.
+  - name: idpConfig
+    type: NestedObject
+    description: |
+      SAML identity provider configuration.
+    required: true
+    properties:
+      - name: entityId
+        type: String
+        description: |
+          The SAML **Entity ID** of the identity provider.
+        required: true
+      - name: singleSignOnServiceUri
+        type: String
+        description: |
+          The `SingleSignOnService` endpoint location (sign-in page URL) of the identity provider.
+          This is the URL where the `AuthnRequest` will be sent. Must use `HTTPS`.
+          Assumed to accept the `HTTP-Redirect` binding.
+        required: true
+      - name: logoutRedirectUri
+        type: String
+        description: |
+          The **Logout Redirect URL** (sign-out page URL) of the identity provider. When a user
+          clicks the sign-out link on a Google page, they will be redirected to this URL. This is
+          a pure redirect with no attached SAML `LogoutRequest` i.e. SAML single logout is not
+          supported. Must use `HTTPS`.
+      - name: changePasswordUri
+        type: String
+        description: |
+          The **Change Password URL** of the identity provider. Users will be sent to this URL
+          when changing their passwords at `myaccount.google.com`. This takes precedence over
+          the change password URL configured at customer-level. Must use `HTTPS`.
+  - name: spConfig
+    type: NestedObject
+    description: |
+      SAML service provider configuration for this SAML SSO profile. These are the service
+      provider details provided by Google that should be configured on the corresponding
+      identity provider.
+    output: true
+    properties:
+      - name: entityId
+        type: String
+        description: |
+          The SAML **Entity ID** for this service provider.
+        output: true
+      - name: assertionConsumerServiceUri
+        type: String
+        description: |
+          The SAML **Assertion Consumer Service (ACS) URL** to be used for the IDP-initiated
+          login. Assumed to accept response messages via the `HTTP-POST` binding.
+        output: true
