@@ -179,6 +179,7 @@ properties:
             type: String
             description: |
               The password for HTTP Basic authentication.
+            sensitive: true
           - name: requestHeaders
             type: KeyValuePairs
             description: |
