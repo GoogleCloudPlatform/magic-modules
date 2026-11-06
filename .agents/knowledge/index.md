@@ -24,6 +24,7 @@ Read this index at decision points; open only the source the task needs. Format 
 - Fix diffs and permadiffs — `docs/content/develop/diffs.md`
 - Client-side fields — `docs/content/develop/client-side-fields.md`
 - Promote beta → GA — `docs/content/develop/promote-to-ga.md`
+- Add TGC conversion (`include_in_tgc_next`, `is_missing_in_cai`) — `docs/content/convert/add-new-resource-tgc.md`
 - Update provider dependencies (`go.mod` / `go.sum`) — `docs/content/develop/update-dependencies.md`
 - Generate the providers / set up the environment — `docs/content/develop/generate-providers.md`, `docs/content/develop/set-up-dev-environment.md`
 
@@ -58,6 +59,7 @@ Read this index at decision points; open only the source the task needs. Format 
 
 ### Field (`field/`)
 
+- **cross-schema-field-sync** — Keep paired `*Version.yaml` schemas and TGC `is_missing_in_cai` flags synchronized when adding fields. — [field/cross-schema-field-sync.md](field/cross-schema-field-sync.md)
 - **enums-vs-strings** — Model an API enum as Enum (strict, plan-time) or String (forward-compatible): the deliberate trade-off. — [field/enums-vs-strings.md](field/enums-vs-strings.md)
 
 ### Template (`template/`)

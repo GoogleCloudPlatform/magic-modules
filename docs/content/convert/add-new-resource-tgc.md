@@ -43,6 +43,7 @@ Magic Modules uses a shared code base to generate terraform-google-conversion an
 Most Terraform resources are represented as [yaml files which are grouped by product](https://github.com/GoogleCloudPlatform/magic-modules/tree/master/mmv1/products).
 Each product has a `product.yaml` file (which defines the basic product information) and  Resource.yaml files (which defines any resource-specific information).
 A Resource.yaml file can specify `include_in_tgc_next: true` to enable converters autogeneration, or `exclude_resource: true` to skip autogeneration for both converters and the providers.
+When adding new fields to an MMv1 resource that already sets `include_in_tgc_next: true`, set `is_missing_in_cai: true` on any field not yet present in the upstream Cloud Asset Inventory (CAI) schema so TGC converter generation skips that field cleanly.
 
 Auto-generating converters code based on yaml files is strongly preferred.
 
