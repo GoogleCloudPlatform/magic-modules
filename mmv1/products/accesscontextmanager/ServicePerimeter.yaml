@@ -103,6 +103,7 @@ samples:
 virtual_fields:
   - name: deleted_principals_support
     type: Enum
+    min_version: beta
     description: |
       Sets the `deletedPrincipalSyntax` query parameter on `servicePerimeters.patch`
       and `servicePerimeters.get` requests, which enables or disables deleted IAM
