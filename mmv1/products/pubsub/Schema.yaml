@@ -54,10 +54,7 @@ samples:
     steps:
       - name: pubsub_schema_protobuf
         resource_id_vars:
-          schema_name: example
-        test_vars_overrides:
-          # for backward compatible
-          schema_name: '"example" + randomSuffix'
+          schema_name: example-schema
         test_env_vars:
           project_name: PROJECT_NAME
 parameters:
