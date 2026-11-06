@@ -812,6 +812,14 @@ The `specific_reservation` block supports:
 
 * `confidential_instance_type` (Optional) Defines the confidential computing technology the instance uses. SEV is an AMD feature. TDX is an Intel feature. One of the following values is required: `SEV`, `SEV_SNP`, `TDX`. [`on_host_maintenance`](#on_host_maintenance) can be set to MIGRATE if [`confidential_instance_type`](#confidential_instance_type) is set to `SEV` and [`min_cpu_platform`](#min_cpu_platform) is set to `"AMD Milan"` or `"AMD Genoa"`. Otherwise, [`on_host_maintenance`](#on_host_maintenance) has to be set to TERMINATE or this will fail to create the VM. If `SEV_SNP`, currently [`min_cpu_platform`](#min_cpu_platform) has to be set to `"AMD Milan"` or this will fail to create the VM.
 
+* `confidential_paravisor_config` (Optional) Configuration for the paravisor (SVSM) in a confidential VM. Only applicable when `confidential_instance_type` is `SEV_SNP`. Structure is [documented below](#nested_confidential_paravisor_config).
+
+<a name="nested_confidential_paravisor_config"></a>The `confidential_paravisor_config` block supports:
+
+* `confidential_tpm_type` (Optional) Defines the confidential TPM type used by the paravisor. Possible values are: `EPHEMERAL`, `NO_CC_TPM`.
+
+* `sev_snp_irq_mode` (Optional) Defines the interrupt mode for AMD SEV-SNP with paravisor. Possible values are: `UNRESTRICTED`, `RESTRICTED`.
+
 <a name="nested_network_performance_config"></a>The `network_performance_config` block supports:
 
 * `total_egress_bandwidth_tier` - (Optional) The egress bandwidth tier to enable. Possible values: TIER_1, DEFAULT
