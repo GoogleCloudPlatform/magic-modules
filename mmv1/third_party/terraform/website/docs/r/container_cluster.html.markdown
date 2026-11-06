@@ -1623,7 +1623,7 @@ The `control_plane_endpoints_config.dns_endpoint_config` block supports:
 
 * `endpoint` - (Output) The cluster's DNS endpoint.
 
-* `allow_external_traffic` - (Optional) Controls whether user traffic is allowed over this endpoint. Note that GCP-managed services may still use the endpoint even if this is false.
+* `allow_external_traffic` - (Optional) Controls whether user traffic is allowed over this endpoint. Note that GCP-managed services may still use the endpoint even if this is false. If unset when the cluster is created, GKE chooses the default based on the cluster version and other settings.
 
 * `enable_k8s_tokens_via_dns` - (Optional) Controls whether the k8s token auth is allowed via Dns.
 
@@ -1631,7 +1631,7 @@ The `control_plane_endpoints_config.dns_endpoint_config` block supports:
 
 The `control_plane_endpoints_config.ip_endpoints_config` block supports:
 
-* `enabled` - (Optional) Controls whether to allow direct IP access. Defaults to `true`.
+* `enabled` - (Optional) Controls whether to allow direct IP access. If `ip_endpoints_config` is unset when the cluster is created, GKE chooses the default based on the cluster version and other settings (for example, newer GKE versions disable direct IP access by default unless IP-specific settings such as `master_authorized_networks_config` are configured).
 
 <a name="nested_private_cluster_config"></a>The `private_cluster_config` block supports:
 

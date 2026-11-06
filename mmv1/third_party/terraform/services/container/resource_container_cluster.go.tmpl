@@ -7,10 +7,12 @@ import (
 	"reflect"
 	"regexp"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/errwrap"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
@@ -3269,7 +3271,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		Name:                           clusterName,
 		InitialNodeCount:               int64(d.Get("initial_node_count").(int)),
 		MaintenancePolicy:              expandMaintenancePolicy(d, meta),
-		ControlPlaneEndpointsConfig:    expandControlPlaneEndpointsConfig(d),
+		ControlPlaneEndpointsConfig:    expandControlPlaneEndpointsConfig(d, true),
 		InitialClusterVersion:          d.Get("min_master_version").(string),
 		ClusterIpv4Cidr:                d.Get("cluster_ipv4_cidr").(string),
 		Description:                    d.Get("description").(string),
@@ -4243,7 +4245,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		d.HasChange("private_cluster_config.0.master_global_access_config") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
-				DesiredControlPlaneEndpointsConfig: expandControlPlaneEndpointsConfig(d),
+				DesiredControlPlaneEndpointsConfig: expandControlPlaneEndpointsConfig(d, false),
 			},
 		}
 
@@ -6799,7 +6801,13 @@ func expandMasterAuthorizedNetworksConfig(d *schema.ResourceData) *container.Mas
 	if v, ok := d.GetOk("master_authorized_networks_config.0.cidr_blocks"); ok {
 		result.CidrBlocks = expandManCidrBlocks(v)
 	}
-	if v, ok := d.GetOkExists("master_authorized_networks_config.0.gcp_public_cidrs_access_enabled"); ok {
+	// gcp_public_cidrs_access_enabled is Optional+Computed, so d.GetOkExists also returns the value
+	// read back from state when it is omitted from config, which is false when GKE left the field
+	// unset. GKE treats an explicit false as an opt-out and, on PSC clusters, starts enforcing
+	// reserved-range validation that rejects non-internet-routable CIDRs, so only send the field
+	// when it is set in config and otherwise let GKE keep or default its value.
+	if v, ok := d.GetOkExists("master_authorized_networks_config.0.gcp_public_cidrs_access_enabled"); ok &&
+		containerClusterRawConfigAttrSet(d.GetRawConfig(), "master_authorized_networks_config.0.gcp_public_cidrs_access_enabled") {
 		result.GcpPublicCidrsAccessEnabled = v.(bool)
 		result.ForceSendFields = append(result.ForceSendFields, "GcpPublicCidrsAccessEnabled")
 	}
@@ -6980,11 +6988,26 @@ func expandDefaultEnablePrivateNodes(d *schema.ResourceData) bool {
 	return false
 }
 
-func expandControlPlaneEndpointsConfig(d *schema.ResourceData) *container.ControlPlaneEndpointsConfig {
+// expandControlPlaneEndpointsConfig builds the control plane endpoints config for cluster
+// create (isCreate = true) and update requests.
+//
+// On create, direct IP access (ip_endpoints_config.enabled) and DNS external traffic
+// (dns_endpoint_config.allow_external_traffic) are only sent when set in config, so GKE
+// applies its own defaults when they are omitted (for example, DNS-based access with direct
+// IP access disabled on newer GKE versions). Sending fixed provider defaults instead would be
+// treated by GKE as an explicit choice and opt the cluster out of those server defaults.
+//
+// On update, omitted blocks are read from state (control_plane_endpoints_config is
+// Optional+Computed), so the cluster's current settings are sent back unchanged.
+func expandControlPlaneEndpointsConfig(d *schema.ResourceData, isCreate bool) *container.ControlPlaneEndpointsConfig {
 	dns := &container.DNSEndpointConfig{}
 	if v := d.Get("control_plane_endpoints_config.0.dns_endpoint_config.0.allow_external_traffic"); v != nil {
 		dns.AllowExternalTraffic = v.(bool)
-		dns.ForceSendFields = append(dns.ForceSendFields, "AllowExternalTraffic")
+		// The API client drops false bools unless they are force-sent, so an explicit
+		// allow_external_traffic = false must still be force-sent on create.
+		if !isCreate || containerClusterRawConfigAttrSet(d.GetRawConfig(), "control_plane_endpoints_config.0.dns_endpoint_config.0.allow_external_traffic") {
+			dns.ForceSendFields = append(dns.ForceSendFields, "AllowExternalTraffic")
+		}
 	}
 
 	if v := d.Get("control_plane_endpoints_config.0.dns_endpoint_config.0.enable_k8s_tokens_via_dns"); v != nil {
@@ -6997,12 +7020,10 @@ func expandControlPlaneEndpointsConfig(d *schema.ResourceData) *container.Contro
 		dns.ForceSendFields = append(dns.ForceSendFields, "EnableK8sCertsViaDns")
 	}
 
-	ip := &container.IPEndpointsConfig{
-		Enabled:         true,
-		ForceSendFields: []string{"Enabled"},
-	}
+	ip := &container.IPEndpointsConfig{}
 	if v := d.Get("control_plane_endpoints_config.0.ip_endpoints_config.#"); v != 0 {
 		ip.Enabled = d.Get("control_plane_endpoints_config.0.ip_endpoints_config.0.enabled").(bool)
+		ip.ForceSendFields = []string{"Enabled"}
 
 		if !ip.Enabled {
 			return &container.ControlPlaneEndpointsConfig{
@@ -7010,7 +7031,11 @@ func expandControlPlaneEndpointsConfig(d *schema.ResourceData) *container.Contro
 				IpEndpointsConfig: ip,
 			}
 		}
+	} else if !isCreate {
+		ip.Enabled = true
+		ip.ForceSendFields = []string{"Enabled"}
 	}
+	// On create with ip_endpoints_config omitted, Enabled is left unset so GKE picks the default.
 	if v := d.Get("private_cluster_config.0.enable_private_endpoint"); v != nil {
 		ip.EnablePublicEndpoint = !v.(bool)
 		ip.ForceSendFields = append(ip.ForceSendFields, "EnablePublicEndpoint")
@@ -7029,6 +7054,35 @@ func expandControlPlaneEndpointsConfig(d *schema.ResourceData) *container.Contro
 		DnsEndpointConfig: dns,
 		IpEndpointsConfig: ip,
 	}
+}
+
+// containerClusterRawConfigAttrSet reports whether the field at path is set in the raw config.
+// path uses the same dotted format as d.Get, for example
+// "control_plane_endpoints_config.0.dns_endpoint_config.0.allow_external_traffic".
+// It returns false if any block along the path is omitted, or if the path does not exist in
+// the schema.
+// d.Get and d.GetOkExists cannot distinguish an omitted value from an explicit false, and for
+// Optional+Computed fields they return the value from state when it is omitted from config.
+func containerClusterRawConfigAttrSet(rawConfig cty.Value, path string) bool {
+	v := rawConfig
+	for _, step := range strings.Split(path, ".") {
+		if v.IsNull() || !v.IsKnown() {
+			return false
+		}
+		if idx, err := strconv.Atoi(step); err == nil {
+			// List index, for example the "0" in "dns_endpoint_config.0".
+			if !v.CanIterateElements() || idx < 0 || idx >= v.LengthInt() {
+				return false
+			}
+			v = v.AsValueSlice()[idx]
+			continue
+		}
+		if !v.Type().IsObjectType() || !v.Type().HasAttribute(step) {
+			return false
+		}
+		v = v.GetAttr(step)
+	}
+	return !v.IsNull()
 }
 
 func expandVerticalPodAutoscaling(configured interface{}) *container.VerticalPodAutoscaling {

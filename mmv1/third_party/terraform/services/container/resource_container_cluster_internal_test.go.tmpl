@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -1294,6 +1295,132 @@ func TestUnitContainerCluster_dnsConfigPlan(t *testing.T) {
 			}
 			if string(b) != tc.wantRequest {
 				t.Errorf("request = %s, want %s", b, tc.wantRequest)
+			}
+		})
+	}
+}
+
+func TestContainerClusterRawConfigAttrSet(t *testing.T) {
+	t.Parallel()
+
+	dnsPath := "control_plane_endpoints_config.0.dns_endpoint_config.0.allow_external_traffic"
+	manPath := "master_authorized_networks_config.0.gcp_public_cidrs_access_enabled"
+
+	dnsBlock := func(attrs map[string]cty.Value) cty.Value {
+		return cty.ObjectVal(map[string]cty.Value{
+			"control_plane_endpoints_config": cty.ListVal([]cty.Value{
+				cty.ObjectVal(map[string]cty.Value{
+					"dns_endpoint_config": cty.ListVal([]cty.Value{cty.ObjectVal(attrs)}),
+				}),
+			}),
+		})
+	}
+	manBlock := func(attrs map[string]cty.Value) cty.Value {
+		return cty.ObjectVal(map[string]cty.Value{
+			"master_authorized_networks_config": cty.ListVal([]cty.Value{cty.ObjectVal(attrs)}),
+		})
+	}
+
+	cases := map[string]struct {
+		rawConfig cty.Value
+		path      string
+		expected  bool
+	}{
+		// An explicit false must be detected so it is still force-sent on create
+		// (equivalent to gcloud --no-enable-dns-access).
+		"allow_external_traffic explicit false": {
+			rawConfig: dnsBlock(map[string]cty.Value{
+				"allow_external_traffic":    cty.False,
+				"enable_k8s_tokens_via_dns": cty.NullVal(cty.Bool),
+			}),
+			path:     dnsPath,
+			expected: true,
+		},
+		"allow_external_traffic explicit true": {
+			rawConfig: dnsBlock(map[string]cty.Value{
+				"allow_external_traffic":    cty.True,
+				"enable_k8s_tokens_via_dns": cty.NullVal(cty.Bool),
+			}),
+			path:     dnsPath,
+			expected: true,
+		},
+		// dns_endpoint_config is written but allow_external_traffic is omitted, so
+		// GKE should choose the default.
+		"allow_external_traffic omitted in partial dns_endpoint_config": {
+			rawConfig: dnsBlock(map[string]cty.Value{
+				"allow_external_traffic":    cty.NullVal(cty.Bool),
+				"enable_k8s_tokens_via_dns": cty.True,
+			}),
+			path:     dnsPath,
+			expected: false,
+		},
+		"empty dns_endpoint_config list": {
+			rawConfig: cty.ObjectVal(map[string]cty.Value{
+				"control_plane_endpoints_config": cty.ListVal([]cty.Value{
+					cty.ObjectVal(map[string]cty.Value{
+						"dns_endpoint_config": cty.ListValEmpty(cty.Object(map[string]cty.Type{
+							"allow_external_traffic": cty.Bool,
+						})),
+					}),
+				}),
+			}),
+			path:     dnsPath,
+			expected: false,
+		},
+		"control_plane_endpoints_config omitted": {
+			rawConfig: cty.ObjectVal(map[string]cty.Value{
+				"control_plane_endpoints_config": cty.NullVal(cty.List(cty.Object(map[string]cty.Type{
+					"dns_endpoint_config": cty.List(cty.Object(map[string]cty.Type{
+						"allow_external_traffic": cty.Bool,
+					})),
+				}))),
+			}),
+			path:     dnsPath,
+			expected: false,
+		},
+		// An explicit false is the user's opt-out and must still be sent.
+		"gcp_public_cidrs_access_enabled explicit false": {
+			rawConfig: manBlock(map[string]cty.Value{
+				"gcp_public_cidrs_access_enabled": cty.False,
+			}),
+			path:     manPath,
+			expected: true,
+		},
+		// Omitted from config: the false read back from state must not be sent, or
+		// GKE would treat it as an explicit opt-out.
+		"gcp_public_cidrs_access_enabled omitted": {
+			rawConfig: manBlock(map[string]cty.Value{
+				"gcp_public_cidrs_access_enabled": cty.NullVal(cty.Bool),
+			}),
+			path:     manPath,
+			expected: false,
+		},
+		"null raw config": {
+			rawConfig: cty.NullVal(cty.EmptyObject),
+			path:      dnsPath,
+			expected:  false,
+		},
+		// Blocks must be listed outermost first, as in d.Get paths.
+		"path in wrong order": {
+			rawConfig: dnsBlock(map[string]cty.Value{
+				"allow_external_traffic": cty.False,
+			}),
+			path:     "dns_endpoint_config.0.control_plane_endpoints_config.0.allow_external_traffic",
+			expected: false,
+		},
+		"list index out of range": {
+			rawConfig: dnsBlock(map[string]cty.Value{
+				"allow_external_traffic": cty.False,
+			}),
+			path:     "control_plane_endpoints_config.1.dns_endpoint_config.0.allow_external_traffic",
+			expected: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			if got := containerClusterRawConfigAttrSet(tc.rawConfig, tc.path); got != tc.expected {
+				t.Errorf("%s: expected %v, but was %v", tn, tc.expected, got)
 			}
 		})
 	}
