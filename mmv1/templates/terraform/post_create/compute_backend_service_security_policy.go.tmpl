@@ -24,6 +24,9 @@ if o, n := d.GetChange("security_policy"); o.(string) != n.(string) {
     UserAgent: userAgent,
     Body:      sBody,
     Headers:   headers,
+    {{- if $.ApiVersion }}
+    ApiVersion: "{{ $.ApiVersion }}",
+    {{- end }}
   })
 
   if err != nil {
@@ -61,6 +64,9 @@ if o, n := d.GetChange("edge_security_policy"); o.(string) != n.(string) {
     UserAgent: userAgent,
     Body:      eBody,
     Headers:   headers,
+    {{- if $.ApiVersion }}
+    ApiVersion: "{{ $.ApiVersion }}",
+    {{- end }}
   })
   if err != nil {
     return fmt.Errorf("Error setting Backend Service edge security policy: %w", err)

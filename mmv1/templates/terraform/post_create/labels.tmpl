@@ -36,6 +36,9 @@ if v, ok := d.GetOkExists("effective_labels"); !tpgresource.IsEmptyValue(reflect
 		{{- if $.ErrorAbortPredicates }}
 		ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{- join $.ErrorAbortPredicates "," -}} },
 		{{- end }}
+		{{- if $.ApiVersion }}
+		ApiVersion: "{{ $.ApiVersion }}",
+		{{- end }}
 	})
 	if err != nil {
 		return fmt.Errorf("Error adding labels to {{$.ResourceName}} %q: %s", d.Id(), err)

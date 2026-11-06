@@ -52,6 +52,8 @@ include_in_tgc_next: true
 tgc_tests:
   - name: 'TestAccComputeBackendService_backendServiceCustomMetrics_update'
     skip: 'Test framework problem with single vs multiple block parsing of custom_metrics'
+api_version:
+  ga: '2026-11-01'
 custom_code:
   constants: 'templates/terraform/constants/backend_service.go.tmpl'
   encoder: 'templates/terraform/encoders/backend_service.go.tmpl'
@@ -1006,6 +1008,7 @@ properties:
       - 'INTERNAL_SELF_MANAGED'
       - 'INTERNAL_MANAGED'
       - 'EXTERNAL_MANAGED'
+      - 'EXTERNAL_PASSTHROUGH'
   - name: 'externalManagedMigrationState'
     type: Enum
     description: |
