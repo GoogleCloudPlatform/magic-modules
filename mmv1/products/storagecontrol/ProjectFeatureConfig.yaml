@@ -20,7 +20,6 @@ description: |
   A feature configuration manages a Cloud Storage Smart Storage feature, such as Auto Annotate,
   for a project. It defines the buckets that the feature applies to and the feature-specific
   settings, such as the AI models used to generate annotations for objects.
-min_version: beta
 base_url: projects/{{project}}/locations/global/featureConfigs
 self_link: projects/{{project}}/locations/global/featureConfigs/{{feature_config_id}}
 create_url: projects/{{project}}/locations/global/featureConfigs?featureConfigId={{feature_config_id}}
@@ -36,21 +35,15 @@ async:
     base_url: '{{op_id}}'
 datasource_experimental:
   generate: true
-  # The generated data source test doesn't set `provider = google-beta` on the data
-  # block, which this beta-only resource requires. The data source is covered by the
-  # handwritten data_source_storage_control_project_feature_config_test.go.tmpl.
-  exclude_test: true
 samples:
   - name: storage_control_project_feature_config_basic
     primary_resource_id: example
-    min_version: beta
     steps:
       - name: storage_control_project_feature_config_basic
         resource_id_vars:
           feature_config_id: feature-config
   - name: storage_control_project_feature_config_full
     primary_resource_id: example
-    min_version: beta
     steps:
       - name: storage_control_project_feature_config_full
         resource_id_vars:
