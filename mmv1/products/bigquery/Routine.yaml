@@ -70,6 +70,21 @@ samples:
         resource_id_vars:
           dataset_id: 'dataset_id'
           routine_id: 'routine_id'
+  - name: 'bigquery_routine_any_table'
+    primary_resource_id: 'sproc'
+    steps:
+      - name: 'bigquery_routine_any_table'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          routine_id: 'routine_id'
+      - name: 'bigquery_routine_table_type'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          routine_id: 'routine_id'
+      - name: 'bigquery_routine_any_table'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          routine_id: 'routine_id'
   - name: 'bigquery_routine_pyspark'
     primary_resource_id: 'pyspark'
     steps:
@@ -187,6 +202,7 @@ properties:
             - 'FIXED_TYPE'
             - 'ANY_TYPE'
             - 'FIXED_TABLE'
+            - 'ANY_TABLE'
         - name: 'mode'
           type: Enum
           description: |
@@ -201,7 +217,7 @@ properties:
         - name: 'dataType'
           type: String
           description: |
-            A JSON schema for the data type. Required unless argumentKind = ANY_TYPE.
+            A JSON schema for the data type. Required if argumentKind = FIXED_TYPE.
             ~>**NOTE**: Because this field expects a JSON string, any changes to the string
             will create a diff, even if the JSON itself hasn't changed. If the API returns
             a different value for the same schema, e.g. it switched the order of values
