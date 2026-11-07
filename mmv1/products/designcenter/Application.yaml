@@ -61,11 +61,13 @@ properties:
   - name: 'scope'
     type: NestedObject
     required: true
+    immutable: true
     description: |
       AppHub Scope for the application.
     properties:
       - name: 'type'
         type: String
+        immutable: true
         description: |
           Scope type.
   - name: 'displayName'
@@ -225,10 +227,12 @@ properties:
                 Email address of the contact.
   - name: 'deploymentRegion'
     type: String
+    immutable: true
     description: |
       Deployment region.
   - name: 'deploymentProject'
     type: String
+    immutable: true
     description: |
       Deployment project.
   - name: 'connectionConfigs'
