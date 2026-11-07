@@ -270,3 +270,67 @@ resource "google_iam_workload_identity_pool" "my_pool" {
 }
 `, context)
 }
+
+func TestAccIAMWorkloadIdentityPool_meshCaCompatibilityLifecycle(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckIAMBetaWorkloadIdentityPoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Step 1: BACKWARD COMPATIBILITY
+				// Create the resource completely WITHOUT your new field.
+				// This ensures existing Terraform manifests do not break after your code change.
+				Config: testAccIAMWorkloadIdentityPool_withoutMeshCa(context),
+				Check: resource.ComposeTestCheckFunc(
+					// Assert that the pool creates successfully and the field defaults to false.
+					resource.TestCheckResourceAttr("google_iam_workload_identity_pool.example", "enable_mesh_ca_compatibility", "false"),
+				),
+			},
+			{
+				// Step 2: ENABLE THE FIELD
+				// Apply an update configuration where the field is explicitly set to true.
+				Config: testAccIAMWorkloadIdentityPool_withMeshCa(context, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_iam_workload_identity_pool.example", "enable_mesh_ca_compatibility", "true"),
+				),
+			},
+			{
+				// Step 3: DISABLE THE FIELD
+				// Apply another update configuration turning the field back to false.
+				Config: testAccIAMWorkloadIdentityPool_withMeshCa(context, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_iam_workload_identity_pool.example", "enable_mesh_ca_compatibility", "false"),
+				),
+			},
+		},
+	})
+}
+
+// Config 1: Simulates an existing / legacy resource configuration
+func testAccIAMWorkloadIdentityPool_withoutMeshCa(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_iam_workload_identity_pool" "example" {
+  workload_identity_pool_id = "tf-test-pool-%{random_suffix}"
+  display_name              = "Mesh CA Lifecycle Pool"
+}
+`, context)
+}
+
+// Config 2 & 3: Simulates explicitly interacting with the new field
+func testAccIAMWorkloadIdentityPool_withMeshCa(context map[string]interface{}, enabled bool) string {
+	context["enabled"] = enabled
+	return acctest.Nprintf(`
+resource "google_iam_workload_identity_pool" "example" {
+  workload_identity_pool_id = "tf-test-pool-%{random_suffix}"
+  display_name              = "Mesh CA Lifecycle Pool"
+  enable_mesh_ca_compatibility = %{enabled}
+}
+`, context)
+}
