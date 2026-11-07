@@ -1,0 +1,11 @@
+resource "google_vertex_ai_evaluation_set" "{{$.PrimaryResourceId}}" {
+  region           = "us-central1"
+  display_name     = "example-evaluation-set"
+  evaluation_items = [
+    "projects/example-project/locations/us-central1/evaluationItems/item-1",
+  ]
+
+  encryption_spec {
+    kms_key_name = "projects/example-project/locations/us-central1/keyRings/example-keyring/cryptoKeys/example-key"
+  }
+}

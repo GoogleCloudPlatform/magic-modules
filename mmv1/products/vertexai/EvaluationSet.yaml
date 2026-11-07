@@ -1,0 +1,107 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: EvaluationSet
+description: |
+  An EvaluationSet is a collection of related EvaluationItems that are evaluated together
+  in Vertex AI.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/generative-ai/docs/evaluation/overview'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.evaluationSets'
+docs:
+base_url: projects/{{project}}/locations/{{region}}/evaluationSets
+self_link: projects/{{project}}/locations/{{region}}/evaluationSets/{{name}}
+create_url: projects/{{project}}/locations/{{region}}/evaluationSets
+id_format: projects/{{project}}/locations/{{region}}/evaluationSets/{{name}}
+import_format:
+  - projects/{{project}}/locations/{{region}}/evaluationSets/{{name}}
+update_verb: PATCH
+update_mask: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: ['delete']
+custom_code:
+samples:
+  - name: vertex_ai_evaluation_set
+    primary_resource_id: example
+    exclude_test: true
+    steps:
+      - name: vertex_ai_evaluation_set
+  - name: vertex_ai_evaluation_set_encryption
+    primary_resource_id: example
+    exclude_test: true
+    steps:
+      - name: vertex_ai_evaluation_set_encryption
+parameters:
+  - name: region
+    type: String
+    description: The region of the EvaluationSet. eg us-central1
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: name
+    type: String
+    description: |
+      The short name of the EvaluationSet (the final component of the resource name).
+    output: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: displayName
+    type: String
+    description: |
+      The user-friendly display name for the EvaluationSet.
+    required: true
+    immutable: true
+  - name: evaluationItems
+    type: Array
+    description: |
+      The EvaluationItems that are part of this dataset.
+      Format: `projects/{project}/locations/{location}/evaluationItems/{evaluationItem}`.
+    required: true
+    item_type:
+      type: String
+  - name: createTime
+    type: String
+    description: |
+      The timestamp of when the EvaluationSet was created in RFC3339 UTC "Zulu" format,
+      with nanosecond resolution and up to nine fractional digits.
+    output: true
+  - name: updateTime
+    type: String
+    description: |
+      The timestamp of when the EvaluationSet was last updated in RFC3339 UTC "Zulu" format,
+      with nanosecond resolution and up to nine fractional digits.
+    output: true
+  - name: encryptionSpec
+    type: NestedObject
+    description: |
+      Customer-managed encryption key spec for this EvaluationSet. If set,
+      this EvaluationSet and its sub-resources will be secured by this key.
+    immutable: true
+    properties:
+      - name: kmsKeyName
+        type: String
+        description: |
+          Required. The Cloud KMS resource identifier of the customer managed encryption key
+          used to protect a resource. Has the form:
+          `projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key`.
+          The key needs to be in the same region as where the resource is created.
+        immutable: true
