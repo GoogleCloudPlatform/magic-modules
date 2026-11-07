@@ -1,0 +1,119 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: RapidCache
+description: |
+  The Google Cloud Storage (GCS) Rapid Cache feature allows users to
+  create SSD backed zonal read cache for their buckets. These zonal
+  caches are co-located with the customers compute engines to provide
+  cost efficiency.
+base_url: b/{{bucket}}/anywhereCaches
+min_version: beta
+self_link: b/{{bucket}}/anywhereCaches/{{rapid_cache_id}}
+create_url: b/{{bucket}}/anywhereCaches/
+delete_url: b/{{bucket}}/anywhereCaches/{{rapid_cache_id}}/disable
+update_verb: PATCH
+delete_verb: POST
+identity:
+  - bucket
+  - rapidCacheId
+kind: storage#anywhereCache
+id_format: '{{bucket}}/{{rapid_cache_id}}'
+import_format: ['b/{{bucket}}/anywhereCaches/{{rapid_cache_id}}']
+timeouts:
+  insert_minutes: 240
+  update_minutes: 240
+  delete_minutes: 20
+async:
+  type: OpAsync
+  actions:
+    - create
+    - update
+  result:
+    resource_inside_response: true
+autogen_async: false
+custom_code:
+  custom_create: templates/terraform/custom_create/storage_rapid_cache.go.tmpl
+  custom_update: templates/terraform/custom_update/storage_rapid_cache.go.tmpl
+samples:
+  - name: storage_rapid_cache_basic
+    min_version: beta
+    primary_resource_id: cache
+    external_providers: [time]
+    steps:
+      - name: storage_rapid_cache_basic
+        min_version: beta
+        resource_id_vars:
+          bucket_name: bucket-name
+        ignore_read_extra:
+          - update_time
+parameters:
+  - name: bucket
+    type: ResourceRef
+    required: true
+    immutable: true
+    url_param_only: true
+    resource: Bucket
+    imports: name
+properties:
+  - name: zone
+    type: String
+    required: true
+    immutable: true
+    description: The zone in which the cache instance needs to be created. For example, `us-central1-a.`
+  - name: ttl
+    type: String
+    default_value: 86400s
+    description: The TTL of all cache entries in whole seconds. e.g., "7200s". It defaults to `86400s`
+  - name: rapidCacheId
+    type: String
+    api_name: anywhereCacheId
+    output: true
+    description: The ID of the Rapid cache instance.
+  - name: createTime
+    type: Time
+    output: true
+    description: The creation time of the cache instance in RFC 3339 format.
+  - name: updateTime
+    type: Time
+    output: true
+    description: The modification time of the cache instance metadata in RFC 3339 format.
+  - name: pendingUpdate
+    type: Boolean
+    output: true
+    description: True if the cache instance has an active Update long-running operation.
+  - name: state
+    type: String
+    output: true
+    description: The current state of the cache instance.
+  - name: ingestOnWrite
+    type: Boolean
+    description: Whether or not the cache ingests data as the data is written to the bucket.
+  - name: admissionPolicy
+    type: Enum
+    enum_values:
+      - admit-on-first-miss
+      - no-read-admission
+    default_value: admit-on-first-miss
+    description: The cache admission policy dictates whether a block should be inserted upon a cache miss.
+  - name: cacheType
+    type: String
+    immutable: true
+    ignore_read: true
+    validation:
+      function: 'validation.StringInSlice([]string{"rapid-cache", "rapid-cache-ultra"}, false)'
+    default_value: rapid-cache
+    description: |
+      The type of Rapid Cache this represents.
+      Changing this forces a new resource to be created.
