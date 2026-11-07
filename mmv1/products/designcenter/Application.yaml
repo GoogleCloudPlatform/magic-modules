@@ -77,21 +77,150 @@ properties:
     description: |
       Description of the application.
   - name: 'appParameters'
-    type: KeyValuePairs
+    type: Array
     description: |
-      Application parameters.
+      A list of parameters to attach to the deployment source object, which is
+      a catalog entry or an application template snapshot.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'key'
+          type: String
+          required: true
+          description: |
+            The key of the parameter.
+        - name: 'value'
+          type: String
+          description: |
+            The value of the parameter, as a JSON-encoded string. Use
+            `jsonencode()` to set it.
+          send_empty_value: true
+          state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+          custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+          validation:
+            function: 'validation.StringIsJSON'
   - name: 'componentParameters'
-    type: KeyValuePairs
+    type: Array
+    default_from_api: true
     description: |
-      Component parameters.
+      A list of component parameters to associate with the application. When
+      unset, the API fills these in from the application template.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'component'
+          type: String
+          required: true
+          description: |
+            The URI of the component that the parameters belong to.
+        - name: 'parameters'
+          type: Array
+          description: |
+            A list of parameters associated with the component.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'key'
+                type: String
+                required: true
+                description: |
+                  The key of the parameter.
+              - name: 'value'
+                type: String
+                description: |
+                  The value of the parameter, as a JSON-encoded string. Use
+                  `jsonencode()` to set it.
+                send_empty_value: true
+                state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                validation:
+                  function: 'validation.StringIsJSON'
+        - name: 'state'
+          type: String
+          output: true
+          description: |
+            The deployment state of the component.
   - name: 'serviceAccount'
     type: String
     description: |
       Service account for deployment.
   - name: 'attributes'
-    type: KeyValuePairs
+    type: NestedObject
     description: |
-      Attributes of the application.
+      Attributes of the App Hub application.
+    properties:
+      - name: 'criticality'
+        type: NestedObject
+        description: |
+          Criticality of the application.
+        properties:
+          - name: 'type'
+            type: String
+            required: true
+            description: |
+              Criticality type. Possible values are `MISSION_CRITICAL`, `HIGH`,
+              `MEDIUM` and `LOW`.
+      - name: 'environment'
+        type: NestedObject
+        description: |
+          Environment of the application.
+        properties:
+          - name: 'type'
+            type: String
+            required: true
+            description: |
+              Environment type. Possible values are `PRODUCTION`, `STAGING`,
+              `TEST` and `DEVELOPMENT`.
+      - name: 'developerOwners'
+        type: Array
+        description: |
+          Developer team that owns development and coding.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'displayName'
+              type: String
+              description: |
+                Contact's name.
+            - name: 'email'
+              type: String
+              required: true
+              description: |
+                Email address of the contact.
+      - name: 'operatorOwners'
+        type: Array
+        description: |
+          Operator team that ensures runtime and operations.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'displayName'
+              type: String
+              description: |
+                Contact's name.
+            - name: 'email'
+              type: String
+              required: true
+              description: |
+                Email address of the contact.
+      - name: 'businessOwners'
+        type: Array
+        description: |
+          Business team that ensures user needs are met and value is delivered.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'displayName'
+              type: String
+              description: |
+                Contact's name.
+            - name: 'email'
+              type: String
+              required: true
+              description: |
+                Email address of the contact.
   - name: 'deploymentRegion'
     type: String
     description: |
@@ -103,43 +232,161 @@ properties:
   - name: 'connectionConfigs'
     type: Array
     description: |
-      Connection configurations.
+      Connection configurations for the application.
     item_type:
       type: NestedObject
       properties:
-        - name: 'connectionId'
+        - name: 'connectionUri'
           type: String
+          required: true
           description: |
-            Connection ID.
-        - name: 'destinationUri'
-          type: String
+            The URI of the connection.
+        - name: 'sourceComponentParameters'
+          type: Array
           description: |
-            Destination URI.
+            The parameters of the connection associated with the source
+            component.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'key'
+                type: String
+                required: true
+                description: |
+                  The key of the parameter.
+              - name: 'value'
+                type: String
+                description: |
+                  The value of the parameter, as a JSON-encoded string. Use
+                  `jsonencode()` to set it.
+                send_empty_value: true
+                state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                validation:
+                  function: 'validation.StringIsJSON'
+        - name: 'destinationComponentParameters'
+          type: Array
+          description: |
+            The parameters of the connection associated with the destination
+            component.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'key'
+                type: String
+                required: true
+                description: |
+                  The key of the parameter.
+              - name: 'value'
+                type: String
+                description: |
+                  The value of the parameter, as a JSON-encoded string. Use
+                  `jsonencode()` to set it.
+                send_empty_value: true
+                state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                validation:
+                  function: 'validation.StringIsJSON'
   - name: 'deploymentTarget'
-    type: String
-    description: |
-      Deployment target.
-  - name: 'compositeApplicationParameters'
-    type: KeyValuePairs
-    description: |
-      Composite application parameters.
-  - name: 'rolesApisConfig'
     type: NestedObject
     description: |
-      Roles and APIs configuration.
+      The deployment target of the application.
     properties:
-      - name: 'roles'
-        type: Array
+      - name: 'gkeDeploymentTarget'
+        type: NestedObject
         description: |
-          List of roles.
-        item_type:
-          type: String
-      - name: 'apis'
-        type: Array
+          The GKE deployment target.
+        properties:
+          - name: 'clusterSelfLink'
+            type: String
+            required: true
+            description: |
+              The self link of the cluster where the GKE based application is
+              deployed.
+          - name: 'namespace'
+            type: String
+            required: true
+            description: |
+              The namespace where the application is deployed.
+          - name: 'kubernetesServiceAccount'
+            type: String
+            required: true
+            description: |
+              The Kubernetes service account in the namespace, such as
+              `default`.
+          - name: 'kubernetesServiceAccountCreation'
+            type: Boolean
+            description: |
+              Whether to create the Kubernetes service account. If `true`, the
+              service account is created in the namespace. If `false`, the
+              service account must already exist in the namespace.
+  - name: 'compositeApplicationParameters'
+    type: NestedObject
+    default_from_api: true
+    description: |
+      Parameters that are required for composite applications.
+    properties:
+      - name: 'serviceAccountMap'
+        type: KeyValuePairs
         description: |
-          List of APIs.
-        item_type:
+          A map from a component URI to the service account that deploys the
+          component. Keys use the format
+          `projects/{project}/locations/{location}/spaces/{space}/applicationTemplates/{application_template}/components/{component}`
+          and values use the format
+          `projects/{project}/serviceAccounts/{email_address}`.
+  - name: 'rolesApisConfig'
+    type: Array
+    default_from_api: true
+    description: |
+      Project-specific configurations required to deploy the application,
+      including IAM roles and APIs. When unset, the API fills in the roles and
+      APIs that the deployment needs.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'projectId'
           type: String
+          required: true
+          description: |
+            The project ID to which these configurations apply.
+        - name: 'roles'
+          type: Array
+          description: |
+            IAM roles that the deployment service account needs to deploy the
+            application within this project.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'role'
+                type: String
+                required: true
+                description: |
+                  IAM role name, such as `roles/editor`.
+              - name: 'systemProvided'
+                type: Boolean
+                output: true
+                description: |
+                  Whether Application Design Center added the role.
+        - name: 'apis'
+          type: Array
+          description: |
+            APIs that must be enabled in this project before the application is
+            deployed, in the form of `*.googleapis.com`.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'api'
+                type: String
+                required: true
+                description: |
+                  API name, such as `compute.googleapis.com`.
+              - name: 'systemProvided'
+                type: Boolean
+                output: true
+                description: |
+                  Whether Application Design Center added the API.
   - name: 'name'
     type: String
     output: true
@@ -151,10 +398,91 @@ properties:
     description: |
       State of the application.
   - name: 'deploymentMetadata'
-    type: KeyValuePairs
+    type: NestedObject
     output: true
     description: |
-      Deployment metadata.
+      Deployment metadata of the application.
+    properties:
+      - name: 'revision'
+        type: String
+        output: true
+        description: |
+          The revision of the deployment associated with the application.
+      - name: 'componentOutputParameters'
+        type: Array
+        output: true
+        description: |
+          The component output parameters of the deployment.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'component'
+              type: String
+              output: true
+              description: |
+                The name of the component that the output parameters belong to.
+            - name: 'parameters'
+              type: Array
+              output: true
+              description: |
+                The output parameters of the component.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'key'
+                    type: String
+                    output: true
+                    description: |
+                      The key of the parameter.
+                  - name: 'value'
+                    type: String
+                    output: true
+                    description: |
+                      The value of the parameter, as a JSON-encoded string.
+                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+      - name: 'error'
+        type: NestedObject
+        output: true
+        description: |
+          The error associated with the deployment.
+        properties:
+          - name: 'type'
+            type: String
+            output: true
+            description: |
+              The error type based on the deployment error code.
+          - name: 'code'
+            type: String
+            output: true
+            description: |
+              The deployment error code, based on the Infrastructure Manager
+              error codes.
+          - name: 'detail'
+            type: String
+            output: true
+            description: |
+              A human-readable summary of the deployment error.
+          - name: 'errorMessage'
+            type: String
+            output: true
+            description: |
+              The errors generated by Infrastructure Manager, and any
+              non-internal errors that occurred before the deployment started.
+      - name: 'build'
+        type: String
+        output: true
+        description: |
+          The Cloud Build instance UUID associated with the deployment.
+      - name: 'workerPool'
+        type: String
+        output: true
+        description: |
+          The Cloud Build worker pool used to deploy the application.
+      - name: 'retryAttempts'
+        type: Integer
+        output: true
+        description: |
+          The number of deployment retries attempted.
   - name: 'apphubApplication'
     type: String
     output: true
