@@ -1,0 +1,6 @@
+// Instance is a URL parameter only, so replace self-link/path with resource name only.
+if err := d.Set("instance", tpgresource.GetResourceNameFromSelfLink(d.Get("instance").(string))); err != nil {
+	return nil, fmt.Errorf("Error setting instance: %w", err)
+}
+obj["memoryConfig"] = make(map[string]interface{})
+return obj, nil

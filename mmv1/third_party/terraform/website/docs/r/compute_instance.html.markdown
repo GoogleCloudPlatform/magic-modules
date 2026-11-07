@@ -344,18 +344,17 @@ is desired, you will need to modify your state file manually using
 * `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
     This sets the number of I/O operations per second that the disk can handle.
     For more details,see the [Hyperdisk documentation](https://cloud.google.com/compute/docs/disks/hyperdisks).
-    Note: Updating currently is only supported for hyperdisk skus via disk update
-    api/gcloud without the need to delete and recreate the disk, hyperdisk allows
-    for an update of IOPS every 4 hours. To update your hyperdisk more frequently,
-    you'll need to manually delete and recreate it.
+    Note: Updating in place is only supported for hyperdisk skus; changing this
+    value on other disk types (e.g. pd-extreme) will force recreation of the instance.
+    Hyperdisk allows for an update of IOPS every 4 hours; to update more
+    frequently than that, you'll need to manually delete and recreate the disk.
 
 * `provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk.
     This sets the number of throughput mb per second that the disk can handle.
     For more details,see the [Hyperdisk documentation](https://cloud.google.com/compute/docs/disks/hyperdisks).
-    Note: Updating currently is only supported for hyperdisk skus via disk update
-    api/gcloud without the need to delete and recreate the disk, hyperdisk allows
-    for an update of throughput every 4 hours. To update your hyperdisk more
-    frequently, you'll need to manually delete and recreate it.
+    Note: This is only supported for hyperdisk skus, and can be updated in place.
+    Hyperdisk allows for an update of throughput every 4 hours; to update more
+    frequently than that, you'll need to manually delete and recreate the disk.
 
 * `enable_confidential_compute` - (Optional) Whether this disk is using confidential compute mode.
     Note: Only supported on hyperdisk skus, disk_encryption_key is required when setting to true.
@@ -401,6 +400,10 @@ is desired, you will need to modify your state file manually using
 
 * `disk_encryption_service_account` - (Optional) The service account being used for the encryption request for the given KMS key. If absent, the Compute Engine default service account is used.
 
+* `force_attach` - (Optional) boolean field that determines whether to force attach the regional
+    disk even if it's currently attached to another instance. If you try to force attach a zonal
+    disk to an instance, you will receive an error. Setting this parameter cause VM recreation.
+
 <a name="nested_source_image_encryption_key"></a>The `source_snapshot_encryption_key` block supports:
 
 * `raw_key` - (Optional)  A 256-bit [customer-supplied encryption key]
@@ -436,10 +439,6 @@ is desired, you will need to modify your state file manually using
     may be set.
 
 * `kms_key_service_account` - (Optional) The service account being used for the encryption request for the given KMS key. If absent, the Compute Engine default service account is used.
-
-* `force_attach` - (Optional) boolean field that determines whether to force attach the regional
-    disk even if it's currently attached to another instance. If you try to force attach a zonal
-    disk to an instance, you will receive an error. Setting this parameter cause VM recreation.
 
 <a name="nested_network_performance_config"></a>The `network_performance_config` block supports:
 
@@ -489,6 +488,10 @@ is desired, you will need to modify your state file manually using
 * `nic_type` - (Optional) The type of vNIC to be used on this interface. Possible values: GVNIC, VIRTIO_NET, IDPF, MRDMA, IRDMA, IDPF
 
 * `network_attachment` - (Optional) The URL of the network attachment that this interface should connect to in the following format: `projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}`.
+
+* `enable_vpc_scoped_dns` - (Optional) If true, DNS resolution will be enabled over this interface. Only valid with `network_attachment`.
+
+* `service_class_id` - (Optional) Producer Service's Service class Id for the region of this network interface. Can only be used with `network_attachment`. It is not possible to use on its own; however, `network_attachment` can be used without `service_class_id`.
 
 * `vlan` - (Optional) VLAN tag of a dynamic network interface, must be an integer in the range from 2 to 255 inclusively.
 
@@ -615,7 +618,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `skip_guest_os_shutdown` - (Optional) [Beta](../guides/provider_versions.html.markdown) Boolean parameter. Default is false and there will be 120 seconds between GCE ACPI G2 Soft Off and ACPI G3 Mechanical Off for Standard VMs and 30 seconds for Spot VMs.
 
-* `preemption_notice_duration` - (Optional) [Beta](../guides/provider_versions.html.markdown) Specifies the Metadata Service preemption notice duration before the GCE ACPI G2 Soft Off signal is triggered for Spot VMs only. If not specified, there will be no wait before the G2 Soft Off signal is triggered. Structure is [documented below](#nested_preemption_notice_duration).
+* `preemption_notice_duration` - (Optional) Specifies the Metadata Service preemption notice duration before the GCE ACPI G2 Soft Off signal is triggered for Spot VMs only. If not specified, there will be no wait before the G2 Soft Off signal is triggered. Structure is [documented below](#nested_preemption_notice_duration).
 
 <a name="nested_graceful_shutdown"></a>The `graceful_shutdown` block supports:
 
@@ -623,15 +626,17 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `max_duration` (Optional) The time allotted for the instance to gracefully shut down.
     If the graceful shutdown isn't complete after this time, then the instance
-    transitions to the STOPPING state. Structure is documented below:
+    transitions to the STOPPING state. Structure is [documented below](#nested_max_duration).
 
-    * `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
-        resolution. Durations less than one second are represented with a 0
-        `seconds` field and a positive `nanos` field. Must be from 0 to
-        999,999,999 inclusive.
+<a name="nested_max_duration"></a>The `max_duration` block supports:
 
-    * `seconds` - (Required) Span of time at a resolution of a second.
-        The value must be between 1 and 3600, which is 3,600 seconds (one hour).`
+* `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
+    resolution. Durations less than one second are represented with a 0
+    `seconds` field and a positive `nanos` field. Must be from 0 to
+    999,999,999 inclusive.
+
+* `seconds` - (Required) Span of time at a resolution of a second.
+    The value must be between 1 and 3600, which is 3,600 seconds (one hour).
 
 <a name="nested_preemption_notice_duration"></a>The `preemption_notice_duration` block supports:
 
@@ -718,6 +723,8 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `performance_monitoring_unit` - (Optional) [The PMU](https://cloud.google.com/compute/docs/pmu-overview) is a hardware component within the CPU core that monitors how the processor runs code. Valid values for the level of PMU are `STANDARD`, `ENHANCED`, and `ARCHITECTURAL`.
 
+    ~> **Note:** Early 8.X.0 provider versions dropped an explicitly configured `STANDARD` value when creating the resource. On affected resources the diff stays suppressed, so Terraform reports no changes. For `google_compute_instance`, apply once with another level (`ENHANCED` or `ARCHITECTURAL`) and then again with `STANDARD`; this requires `allow_stopping_for_update`. For instance templates the field is `ForceNew`, so use `terraform apply -replace=...` instead.
+
 * `enable_uefi_networking` - (Optional) Whether to enable UEFI networking for instance creation.
 
 <a name="nested_reservation_affinity"></a>The `reservation_affinity` block supports:
@@ -760,7 +767,7 @@ exported:
 
 * `cpu_platform` - The CPU platform used by this instance.
 
-* `ipv6_access_type` - One of EXTERNAL, INTERNAL to indicate whether the IP can be accessed from the Internet.
+* `network_interface.0.ipv6_access_type` - One of EXTERNAL, INTERNAL to indicate whether the IP can be accessed from the Internet.
 This field is always inherited from its subnetwork.
 
 * `current_status` - The current status of the instance. This could be one of the following values: PROVISIONING, STAGING, RUNNING, STOPPING, SUSPENDING, SUSPENDED, REPAIRING, and TERMINATED. For more information about the status of the instance, see [Instance life cycle](https://cloud.google.com/compute/docs/instances/instance-life-cycle).

@@ -16,15 +16,26 @@ package api
 import (
 	"fmt"
 	"log"
+	"slices"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v3"
 )
+
+// Existing resources that combine default_from_api with output.
+// These are grandfathered to avoid breaking existing resource schemas.
+// Do not add new fields to this list; see:
+// https://github.com/hashicorp/terraform-provider-google/issues/18832
+var defaultFromApiConflictAllowlist = []string{
+	"DataPolicy.etag",
+	"EkmConnection.service_resolvers.server_certificates.subject_alternative_dns_names",
+	"LinkedDataset.bigquery_dataset",
+	"Rule.rule_id",
+}
 
 // Represents a property type
 type Type struct {
@@ -508,6 +519,18 @@ func (t *Type) Validate(rName string) (es []error) {
 		es = append(es, fmt.Errorf("property %s cannot be output and required at the same time in resource %s.", fullFieldPath, rName))
 	}
 
+	if t.Output && (t.IsA("Enum") || (t.IsA("Array") && t.ItemType != nil && t.ItemType.IsA("Enum"))) {
+		es = append(es, fmt.Errorf("property %s cannot be an output-only Enum in resource %s; use String instead", fullFieldPath, rName))
+	}
+
+	if t.DefaultFromApi && t.Required {
+		es = append(es, fmt.Errorf("property %s cannot set both default_from_api and required in resource %s", fullFieldPath, rName))
+	}
+
+	if t.DefaultFromApi && t.Output && !slices.Contains(defaultFromApiConflictAllowlist, fmt.Sprintf("%s.%s", rName, fullFieldPath)) {
+		es = append(es, fmt.Errorf("property %s cannot set both default_from_api and output in resource %s", fullFieldPath, rName))
+	}
+
 	if t.DefaultFromApi && t.DefaultValue != nil {
 		es = append(es, fmt.Errorf("property %s 'default_value' and 'default_from_api' cannot be both set in resource %s ", fullFieldPath, rName))
 	}
@@ -547,17 +570,73 @@ func (t *Type) Validate(rName string) (es []error) {
 		es = append(es, fmt.Errorf("property %s cannot set update_mask_fields because it is nested in resource %s", fullFieldPath, rName))
 	}
 
+	if !t.isExcluded() {
+		es = append(es, t.validateSchemaPathConstraint(fullFieldPath, rName, "conflicts", "ConflictsWith", &t.Conflicts, &t.ConflictsGroup, Type.Conflicting)...)
+		es = append(es, t.validateSchemaPathConstraint(fullFieldPath, rName, "at_least_one_of", "AtLeastOneOf", &t.AtLeastOneOf, &t.AtLeastOneOfGroup, Type.AtLeastOneOfList)...)
+		es = append(es, t.validateSchemaPathConstraint(fullFieldPath, rName, "exactly_one_of", "ExactlyOneOf", &t.ExactlyOneOf, &t.ExactlyOneOfGroup, Type.ExactlyOneOfList)...)
+		es = append(es, t.validateSchemaPathConstraint(fullFieldPath, rName, "required_with", "RequiredWith", &t.RequiredWith, &t.RequiredWithGroup, Type.RequiredWithList)...)
+	}
+
 	return es
+}
+
+// Validate a schema-path constraint list (`conflicts`, `at_least_one_of`,
+// `exactly_one_of`, or `required_with`), first culling entries that are valid
+// in the maximum schema version for the run (e.g. beta) when generating a
+// lower version (e.g. GA).
+func (t *Type) validateSchemaPathConstraint(
+	fullFieldPath, rName, yamlAttr, schemaAttr string,
+	rawField *[]string,
+	groupField **[]string,
+	getter func(Type) []string,
+) []error {
+	raw := getter(*t)
+	if len(raw) == 0 {
+		return nil
+	}
+
+	filtered := make([]string, 0, len(raw))
+	for _, entry := range raw {
+		_, resolved := t.ResourceMetadata.resolvePropertySchemaPath(entry)
+		if resolved == "" && t.isValidHigherVersionConstraint(entry, getter) {
+			continue
+		}
+		filtered = append(filtered, entry)
+	}
+	if len(filtered) != len(raw) {
+		*rawField = filtered
+		if *groupField != nil {
+			*groupField = &filtered
+		}
+	}
+
+	var es []error
+	for _, entry := range getter(*t) {
+		if _, path := t.ResourceMetadata.resolvePropertySchemaPath(entry); path == "" {
+			es = append(es, fmt.Errorf("property %s has `%s` entry %q that resolved to an empty %s in resource %s", fullFieldPath, yamlAttr, entry, schemaAttr, rName))
+		}
+	}
+	return es
+}
+
+// Hierarchical exclusion check against self, parent (if nested), resource
+func (t *Type) isExcluded() bool {
+	if t.Exclude {
+		return true
+	}
+	if t.ParentMetadata != nil {
+		return t.ParentMetadata.isExcluded()
+	}
+	if t.ResourceMetadata != nil {
+		return t.ResourceMetadata.IsExcluded()
+	}
+	return false
 }
 
 // TODO rewrite: add validations
 // check :description, required: true
 // check :update_verb, allowed: %i[POST PUT PATCH NONE],
 // check_default_value_property
-// check_conflicts
-// check_at_least_one_of
-// check_exactly_one_of
-// check_required_with
 // check the allowed fields for each type, for example, KeyName is only allowed for Map
 
 // Returns a slice of Terraform field names representing where the field is nested within the parent resource.
@@ -784,6 +863,8 @@ func (t *Type) ExcludeIfNotInVersion(version *product.Version) {
 		}
 	} else if t.IsA("Array") && t.ItemType.IsA("NestedObject") {
 		t.ItemType.ExcludeIfNotInVersion(version)
+	} else if t.IsA("Map") && t.ValueType != nil {
+		t.ValueType.ExcludeIfNotInVersion(version)
 	}
 }
 
@@ -1462,78 +1543,76 @@ func (t *Type) ProviderOnly() bool {
 	return parent != nil && parent.ProviderOnly()
 }
 
-// Returns an updated path for a given Terraform field path (e.g.
-// 'a_field', 'parent_field.0.child_name'). Returns nil if the property
-// is not included in the resource's properties and removes keys that have
-// been flattened
-// FYI: Fields that have been renamed should use the new name, however, flattened
-// fields still need to be included, ie:
-// flattenedField > newParent > renameMe should be passed to this function as
-// flattened_field.0.new_parent.0.im_renamed
-// TODO: Change format of input for
-// exactly_one_of/at_least_one_of/etc to use camelcase, MM properities and
-// convert to snake in this method
-func (t *Type) GetPropertySchemaPath(schemaPath string) string {
-	nestedProps := t.ResourceMetadata.UserProperites()
-
-	pathSegments := strings.Split(schemaPath, ".0.")
-	var pathTkns []string
-	for i, pname := range pathSegments {
-		camelPname := google.Camelize(pname, "lower")
-		prop := findPropByNameInFlattenedList(nestedProps, camelPname)
-
-		// if we couldn't find it, see if it was renamed at the top level
-		if prop == nil {
-			prop = findPropByNameInFlattenedList(nestedProps, schemaPath)
-		}
-
-		if prop == nil {
-			return ""
-		}
-
-		// Terraform SDK rejects ExactlyOneOf/ConflictsWith/etc. paths that
-		// traverse an unbounded TypeList (TypeArray without MaxSize:1) as an
-		// intermediate segment. The terminal segment itself may be any type, so
-		// only apply this guard to non-final path tokens.
-		isIntermediate := i < len(pathSegments)-1
-		if isIntermediate && prop.IsA("Array") && (prop.MaxSize == nil || *prop.MaxSize != 1) {
-			return ""
-		}
-
-		nestedProps = prop.NestedProperties()
-		if !prop.FlattenObject {
-			pathTkns = append(pathTkns, google.Underscore(pname))
-		}
+func (t *Type) isValidHigherVersionConstraint(targetPath string, getter func(Type) []string) bool {
+	if t.ResourceMetadata == nil || t.ResourceMetadata.maxVersionSchema == nil {
+		return false
+	}
+	highSchema := t.ResourceMetadata.maxVersionSchema
+	_, highSelfPath := highSchema.resolvePropertySchemaPath(strings.Join(t.Lineage(), ".0."))
+	if highSelfPath == "" {
+		return false
 	}
 
-	if len(pathTkns) == 0 || pathTkns[len(pathTkns)-1] == "" {
-		return ""
+	highTarget, highTargetPath := highSchema.resolvePropertySchemaPath(targetPath)
+	if highTarget == nil || highTargetPath == "" {
+		return false
 	}
 
-	return strings.Join(pathTkns[:], ".0.")
+	for _, rev := range getter(*highTarget) {
+		if _, revPath := highSchema.resolvePropertySchemaPath(rev); revPath == highSelfPath {
+			return true
+		}
+	}
+	return false
 }
 
-// findPropByNameInFlattenedList searches for a property by camelCase name in a
-// list of properties. It also searches recursively inside any FlattenObject
-// nested objects, since those appear as top-level fields in the Terraform schema.
-func findPropByNameInFlattenedList(props []*Type, name string) *Type {
-	for _, p := range props {
-		if p.Name == name {
-			return p
-		}
-		if p.FlattenObject {
-			if found := findPropByNameInFlattenedList(p.UserProperties(), name); found != nil {
-				return found
-			}
+// Deep clone Type for Resource.maxVersionSchema referencing copied Resource and Type values
+func (t *Type) cloneForMaxSchema(res *Resource, parent *Type) *Type {
+	if t == nil {
+		return nil
+	}
+	c := *t
+	c.ResourceMetadata = res
+	c.ParentMetadata = parent
+	c.Conflicts = slices.Clone(t.Conflicts)
+	if t.ConflictsGroup != nil {
+		cg := slices.Clone(*t.ConflictsGroup)
+		c.ConflictsGroup = &cg
+	}
+	c.AtLeastOneOf = slices.Clone(t.AtLeastOneOf)
+	if t.AtLeastOneOfGroup != nil {
+		ag := slices.Clone(*t.AtLeastOneOfGroup)
+		c.AtLeastOneOfGroup = &ag
+	}
+	c.ExactlyOneOf = slices.Clone(t.ExactlyOneOf)
+	if t.ExactlyOneOfGroup != nil {
+		eg := slices.Clone(*t.ExactlyOneOfGroup)
+		c.ExactlyOneOfGroup = &eg
+	}
+	c.RequiredWith = slices.Clone(t.RequiredWith)
+	if t.RequiredWithGroup != nil {
+		rg := slices.Clone(*t.RequiredWithGroup)
+		c.RequiredWithGroup = &rg
+	}
+	if t.Properties != nil {
+		c.Properties = make([]*Type, len(t.Properties))
+		for i, p := range t.Properties {
+			c.Properties[i] = p.cloneForMaxSchema(res, &c)
 		}
 	}
-	return nil
+	if t.ItemType != nil {
+		c.ItemType = t.ItemType.cloneForMaxSchema(res, &c)
+	}
+	if t.ValueType != nil {
+		c.ValueType = t.ValueType.cloneForMaxSchema(res, &c)
+	}
+	return &c
 }
 
 func (t Type) GetPropertySchemaPathList(propertyList []string) []string {
 	var list []string
 	for _, path := range propertyList {
-		path = t.GetPropertySchemaPath(path)
+		_, path = t.ResourceMetadata.resolvePropertySchemaPath(path)
 		if path != "" {
 			list = append(list, path)
 		}

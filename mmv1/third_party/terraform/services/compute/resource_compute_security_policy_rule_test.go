@@ -247,6 +247,14 @@ func TestAccComputeSecurityPolicyRule_withRateLimitOption_withMultipleEnforceOnK
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccComputeSecurityPolicyRule_withRateLimitOption_withMultipleEnforceOnKeyConfigs4(spName),
+			},
+			{
+				ResourceName:      "google_compute_security_policy_rule.policy_rule",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -686,7 +694,7 @@ resource "google_compute_security_policy" "policy" {
 resource "google_compute_security_policy_rule" "policy_rule" {
   security_policy = google_compute_security_policy.policy.name
   description     = "Rule with preconfiguredWafConfig - create"
-  action   = "deny"
+  action   = "deny(403)"
   priority = "1000"
   match {
     expr {
@@ -743,7 +751,7 @@ resource "google_compute_security_policy" "policy" {
 resource "google_compute_security_policy_rule" "policy_rule" {
   security_policy = google_compute_security_policy.policy.name
   description     = "Rule with preconfiguredWafConfig - update"
-  action   = "deny"
+  action   = "deny(403)"
   priority = "1000"
   match {
     expr {
@@ -797,7 +805,7 @@ resource "google_compute_security_policy" "policy" {
 resource "google_compute_security_policy_rule" "policy_rule" {
   security_policy = google_compute_security_policy.policy.name
   description     = "Rule with preconfiguredWafConfig - clear"
-  action   = "deny"
+  action   = "deny(403)"
   priority = "1000"
   match {
     expr {
@@ -1105,6 +1113,50 @@ resource "google_compute_security_policy_rule" "policy_rule" {
 
     enforce_on_key_configs {
       enforce_on_key_type = "USER_IP"
+    }
+  }
+}
+
+`, spName)
+}
+
+func testAccComputeSecurityPolicyRule_withRateLimitOption_withMultipleEnforceOnKeyConfigs4(spName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_security_policy" "policy" {
+  name        = "%s"
+  description = "basic policy base"
+}
+
+resource "google_compute_security_policy_rule" "policy_rule" {
+  security_policy = google_compute_security_policy.policy.name
+  description     = "throttle rule withMultipleEnforceOnKeyConfigs4"
+  action          = "throttle"
+  priority        = "100"
+
+  match {
+    versioned_expr = "SRC_IPS_V1"
+    config {
+      src_ip_ranges = ["*"]
+    }
+  }
+
+  rate_limit_options {
+    conform_action = "allow"
+    exceed_action = "deny(429)"
+
+    rate_limit_threshold {
+      count = 10
+      interval_sec = 60
+    }
+
+    enforce_on_key = ""
+
+    enforce_on_key_configs {
+      enforce_on_key_type = "ASN"
+    }
+
+    enforce_on_key_configs {
+      enforce_on_key_type = "TLS_JA4_FINGERPRINT"
     }
   }
 }

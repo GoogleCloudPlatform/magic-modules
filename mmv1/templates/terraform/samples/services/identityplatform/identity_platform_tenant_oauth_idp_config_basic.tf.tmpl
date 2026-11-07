@@ -1,5 +1,5 @@
 resource "google_identity_platform_tenant" "tenant" {
-  display_name  = "tenant"
+  display_name  = "{{index $.Vars "display_name"}}"
 }
 
 resource "google_identity_platform_tenant_oauth_idp_config" "{{$.PrimaryResourceId}}" {
@@ -10,4 +10,8 @@ resource "google_identity_platform_tenant_oauth_idp_config" "{{$.PrimaryResource
   issuer        = "issuer"
   enabled       = true
   client_secret = "secret"
+  response_type {
+    id_token = true
+    code = false
+  }
 }

@@ -29,6 +29,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+sweeper:
+  query_string: "?force=true&ignoreBackupPlanReferences=true"
 async:
   type: OpAsync
   operation:
@@ -99,8 +101,6 @@ parameters:
     url_param_only: true
     default_value: false
     deprecation_message: '`force_delete` is deprecated and will be removed in a future major release. Use `ignore_inactive_datasources` instead.'
-    conflicts:
-      - ignore_inactive_datasources
   - name: ignore_inactive_datasources
     type: Boolean
     description: |
@@ -108,8 +108,6 @@ parameters:
          * deletion of a backup vault instance containing no backups, but still containing empty datasources.
     url_param_only: true
     default_value: false
-    conflicts:
-      - force_delete
   - name: ignore_backup_plan_references
     type: Boolean
     description: |

@@ -29,7 +29,7 @@ func testAccAccessContextManagerServicePerimeterEgressPolicy_basicTest(t *testin
 
 	//projects := BootstrapServicePerimeterProjects(t, 1)
 	policyTitle := acctest.RandString(t, 10)
-	perimeterTitle := "perimeter"
+	perimeterTitle := "tf_test_perimeter"
 	projectNumber := envvar.GetTestProjectNumberFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -116,7 +116,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
 
 resource "google_access_context_manager_access_level" "test-access" {
   parent      = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
-  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/level"
+  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/tf_test_level"
   title       = "level"
   description = "hello"
   basic {
@@ -178,7 +178,7 @@ func testAccAccessContextManagerServicePerimeterEgressPolicy_updateTest(t *testi
 	org := envvar.GetTestOrgFromEnv(t)
 
 	policyTitle := acctest.RandString(t, 10)
-	perimeterTitle := "perimeter"
+	perimeterTitle := "tf_test_perimeter"
 	projectNumber := envvar.GetTestProjectNumberFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -223,6 +223,12 @@ func testAccAccessContextManagerServicePerimeterEgressPolicy_egressPolicyUpdate_
 	return fmt.Sprintf(`
 %s
 
+resource "google_folder" "test-folder" {
+  parent              = "organizations/%s"
+  display_name        = "tf-test-%s"
+  deletion_protection = false
+}
+
 resource "google_access_context_manager_service_perimeter_egress_policy" "test-access1" {
   perimeter = google_access_context_manager_service_perimeter.test-access.name
   title     = "egress policy update test"
@@ -238,13 +244,19 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
     }
   }
 }
-`, testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitleName))
+`, testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitleName), org, policyTitle)
 }
 
 // step 2: update identity_type, add source_restriction/sources/roles/resources
 func testAccAccessContextManagerServicePerimeterEgressPolicy_egressPolicyUpdate_step2(org, policyTitle, perimeterTitleName, projectNumber string) string {
 	return fmt.Sprintf(`
 %s
+
+resource "google_folder" "test-folder" {
+  parent              = "organizations/%s"
+  display_name        = "tf-test-%s"
+  deletion_protection = false
+}
 
 resource "google_access_context_manager_service_perimeter_egress_policy" "test-access1" {
   perimeter = google_access_context_manager_service_perimeter.test-access.name
@@ -254,14 +266,20 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
     sources {
       resource = "projects/%s"
     }
+    sources {
+      resource = google_folder.test-folder.name
+    }
+    sources {
+      resource = "organizations/%s"
+    }
     source_restriction = "SOURCE_RESTRICTION_ENABLED"
   }
   egress_to {
-    resources = ["*"]
+    resources = ["projects/%s", google_folder.test-folder.name, "organizations/%s"]
     roles     = ["roles/bigquery.admin"]
   }
 }
-`, testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitleName), projectNumber)
+`, testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitleName), org, policyTitle, projectNumber, org, projectNumber, org)
 }
 
 // step 3: switch to access_level source, external_resources, permission selector
@@ -269,9 +287,15 @@ func testAccAccessContextManagerServicePerimeterEgressPolicy_egressPolicyUpdate_
 	return fmt.Sprintf(`
 %s
 
+resource "google_folder" "test-folder" {
+  parent              = "organizations/%s"
+  display_name        = "tf-test-%s"
+  deletion_protection = false
+}
+
 resource "google_access_context_manager_access_level" "update-test" {
   parent      = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
-  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/egressupdlevel"
+  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/tf_test_egressupdlevel"
   title       = "egressupdlevel"
   description = "Access level for egress update test"
   basic {
@@ -302,7 +326,7 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
     }
   }
 }
-`, testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitleName))
+`, testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitleName), org, policyTitle)
 }
 
 func testAccAccessContextManagerServicePerimeterEgressPolicy_destroy(org, policyTitle, perimeterTitleName string) string {
@@ -336,7 +360,7 @@ func testAccAccessContextManagerServicePerimeterEgressPolicy_pscEndpointTest(t *
 	}
 
 	policyTitle := acctest.RandString(t, 10)
-	perimeterTitle := "perimeter"
+	perimeterTitle := "tf_test_perimeter"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -412,7 +436,7 @@ func testAccAccessContextManagerServicePerimeterEgressPolicy_parentPerimeterUpda
 	projects := BootstrapServicePerimeterProjects(t, 7)
 
 	policyTitle := acctest.RandString(t, 10)
-	perimeterTitle := "perimeter"
+	perimeterTitle := "tf_test_perimeter"
 
 	perimeterProject := projects[0].ProjectNumber
 	var egressProjects []int64

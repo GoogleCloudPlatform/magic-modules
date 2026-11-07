@@ -24,15 +24,17 @@ create_url: projects/{{project}}/locations/{{location}}/runtimeProjectAttachment
 id_format: projects/{{project}}/locations/{{location}}/runtimeProjectAttachments/{{runtime_project_attachment_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/runtimeProjectAttachments/{{runtime_project_attachment_id}}
-examples:
+samples:
   - name: apihub_runtime_project_attachment_basic
     primary_resource_id: apihub_runtime_project_attachment
-    vars:
-      project_id: 'ah-proj'
-    test_env_vars:
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
     external_providers: ["time"]
+    steps:
+      - name: apihub_runtime_project_attachment_basic
+        resource_id_vars:
+          project_id: 'ah-proj'
+        test_env_vars:
+          org_id: 'ORG_ID'
+          billing_account: 'BILLING_ACCT'
 autogen_status: UnVudGltZVByb2plY3RBdHRhY2htZW50
 parameters:
   - name: location

@@ -1,0 +1,13 @@
+resource "google_compute_subnetwork" "subnetwork-purpose-custom-hardware-link" {
+  provider      = google-beta
+  name          = "{{index $.ResourceIdVars "subnetwork_name"}}"
+  region        = "us-central1"
+  ip_cidr_range = "192.168.2.0/24"
+  purpose       = "CUSTOM_HARDWARE_LINK"
+  network       = google_compute_network.custom-test.id
+}
+resource "google_compute_network" "custom-test" {
+  provider                = google-beta
+  name                    = "{{index $.ResourceIdVars "network_name"}}"
+  auto_create_subnetworks = false
+}

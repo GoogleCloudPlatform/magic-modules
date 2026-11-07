@@ -187,13 +187,13 @@ func TestAccComputeRegionNetworkEndpoint_regionNetworkEndpointPortmapExample(t *
 func testAccComputeRegionNetworkEndpoint_regionNetworkEndpointPortmapNoEndpointExample(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "default" {
-  name                    = "network%{random_suffix}"
+  name                    = "tf-test-network%{random_suffix}"
   auto_create_subnetworks = false
   provider           = google-beta
 }
 
 resource "google_compute_subnetwork" "default" {
-  name          = "subnetwork%{random_suffix}"
+  name          = "tf-test-subnetwork%{random_suffix}"
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
   network       = google_compute_network.default.id
@@ -217,7 +217,7 @@ data "google_compute_image" "my_image" {
 }
 
 resource "google_compute_instance" "default" {
-  name         = "instance%{random_suffix}"
+  name         = "tf-test-instance%{random_suffix}"
   machine_type = "e2-medium"
   zone = "us-central1-a"
 

@@ -27,9 +27,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-sweeper:
-  url_substitutions:
-    - region: us-central1-a
+deprecation_message: '`google_parallelstore_instance` is deprecated and will be removed in a future major release. Use `google_lustre_instance` instead.'
+exclude_sweeper: true
 async:
   type: OpAsync
   operation:
@@ -43,6 +42,7 @@ custom_code:
 samples:
   - name: parallelstore_instance_basic_beta
     primary_resource_id: instance
+    exclude_test: true
     min_version: beta
     steps:
       - name: parallelstore_instance_basic_beta
@@ -51,30 +51,17 @@ samples:
           name: instance
           network_name: network
           address_name: address
-        test_vars_overrides:
-          # for backward compatible
-          name: '"instance" + randomSuffix'
-          # for backward compatible
-          network_name: '"network" + randomSuffix'
-          # for backward compatible
-          address_name: '"address" + randomSuffix'
         ignore_read_extra:
           - update_time
   - name: parallelstore_instance_basic
     primary_resource_id: instance
+    exclude_test: true
     steps:
       - name: parallelstore_instance_basic
         resource_id_vars:
           name: instance
           network_name: network
           address_name: address
-        test_vars_overrides:
-          # for backward compatible
-          name: '"instance" + randomSuffix'
-          # for backward compatible
-          network_name: '"network" + randomSuffix'
-          # for backward compatible
-          address_name: '"address" + randomSuffix'
         ignore_read_extra:
           - update_time
 parameters:

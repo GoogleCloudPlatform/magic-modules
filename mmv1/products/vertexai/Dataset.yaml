@@ -47,9 +47,6 @@ samples:
       - name: vertex_ai_dataset
         resource_id_vars:
           display_name: terraform
-        test_vars_overrides:
-          # for backward compatible
-          display_name: '"terraform" + randomSuffix'
         exclude_import_test: true
 parameters:
   - name: region

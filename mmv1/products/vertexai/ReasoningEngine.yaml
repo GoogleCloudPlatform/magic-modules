@@ -31,6 +31,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 60
+sweeper:
+  query_string: "?force=true"
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -44,8 +46,13 @@ samples:
     exclude_basic_doc: true
     steps:
       - name: 'vertex_ai_reasoning_engine_deletion_policy'
+        config_path: 'templates/terraform/samples/services/vertexai/vertex_ai_reasoning_engine_basic.tf.tmpl'
         resource_id_vars:
           name: 'reasoning-engine'
+        vars:
+          description: 'A reasoning engine with deletion policy'
+          labels: null
+          deletion_policy: 'FORCE'
         ignore_read_extra:
           - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_basic'
@@ -55,6 +62,10 @@ samples:
       - name: 'vertex_ai_reasoning_engine_basic'
         resource_id_vars:
           name: 'reasoning-engine'
+        vars:
+          description: 'A basic reasoning engine'
+          labels: '{"key" = "value"}'
+          deletion_policy: null
         ignore_read_extra:
           - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_source_based_deployment'
@@ -109,11 +120,6 @@ samples:
           network_name: 'network'
           network_attachment_name: 'network-attachment'
           subnetwork_name: 'subnetwork'
-        test_vars_overrides:
-          # for backward compatible
-          network_name: '"network" + randomSuffix'
-          # for backward compatible
-          subnetwork_name: '"subnetwork" + randomSuffix'
         ignore_read_extra:
           - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_full'
@@ -132,10 +138,6 @@ samples:
           service_account_id: 'sa'
         test_vars_overrides:
           'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name'
-          # for backward compatible
-          secret_name: '"secret" + randomSuffix'
-          # for backward compatible
-          service_account_id: '"sa" + randomSuffix'
         ignore_read_extra:
           - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_context_spec'
@@ -1016,9 +1018,6 @@ properties:
             properties:
               - name: 'defaultTtl'
                 type: String
-                exactly_one_of:
-                  - defaultTtl
-                  - granularTtlConfig
                 description: |-
                   The default TTL duration of the memories in the Memory Bank.
               - name: 'granularTtlConfig'
@@ -1069,9 +1068,6 @@ properties:
                       - name: 'managedMemoryTopic'
                         type: NestedObject
                         # Note: exactly_one_of within array elements is not enforced client-side by MM; relies on backend API server validation.
-                        exactly_one_of:
-                          - managedMemoryTopic
-                          - customMemoryTopic
                         description: |-
                           Optional. Managed memory topic.
                         properties:
@@ -1315,6 +1311,19 @@ properties:
                                                       description: |-
                                                         Transcript of the word.
                                                       required: true
+                                          - name: 'speechMetadata'
+                                            type: NestedObject
+                                            description: |-
+                                              Turn-level metadata for speech generation. May be set alongside `text` to attach speaker and style information to a text part.
+                                            properties:
+                                              - name: 'speaker'
+                                                type: String
+                                                description: |-
+                                                  Identifies which speaker is speaking this turn.
+                                              - name: 'style'
+                                                type: String
+                                                description: |-
+                                                  Natural language description of the vocal style (e.g., "cheerful").
                       - name: 'generatedMemories'
                         type: Array
                         description: |-

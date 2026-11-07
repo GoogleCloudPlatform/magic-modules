@@ -1,0 +1,39 @@
+resource "google_network_services_telemetry_policy" "{{$.PrimaryResourceId}}" {
+  provider     = google-beta
+  name         = "{{index $.ResourceIdVars "resource_name"}}"
+  location     = "us-central1"
+  display_name = "Updated Telemetry Policy Sample"
+  labels       = {
+    foo = "baz"
+    env = "test"
+  }
+
+  telemetry_target {
+    resources = [
+      "//run.googleapis.com/projects/{{index $.TestEnvVars "project"}}/locations/us-central1/services/my-service-updated"
+    ]
+  }
+
+  tracing_configuration {
+    sampling_rate = 0.25
+
+    custom_span_attributes {
+      attribute_name = "env-updated"
+      literal_value  = "staging"
+    }
+
+    custom_span_attributes {
+      attribute_name    = "request-id"
+      from_header_value = "x-request-id"
+    }
+
+    parent_based_sampling {
+      enabled       = false
+      sampling_rate = 0.5
+    }
+  }
+
+  metrics_configuration {
+    enabled = false
+  }
+}

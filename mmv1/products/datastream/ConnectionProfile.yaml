@@ -112,11 +112,7 @@ samples:
         test_vars_overrides:
           deletion_protection: "false"
           # for backward compatible
-          database_name: '"db" + randomSuffix'
-          # for backward compatible
           database_password: '"password" + randomSuffix'
-          # for backward compatible
-          database_user: '"user" + randomSuffix'
   - name: datastream_stream_postgresql_sslconfig_server_and_client_verification
     primary_resource_id: default
     external_providers: [random]
@@ -435,9 +431,6 @@ properties:
             description: |
               If this field is set, the communication will be encrypted with TLS encryption
               and the server identity will be authenticated.
-            exactly_one_of:
-              - ssl_config.0.server_verification
-              - ssl_config.0.server_and_client_verification
             properties:
               - name: caCertificate
                 type: String
@@ -451,9 +444,6 @@ properties:
             description: |
               If this field is set, the communication will be encrypted with TLS encryption
               and both the server identity and the client identity will be authenticated.
-            exactly_one_of:
-              - ssl_config.0.server_verification
-              - ssl_config.0.server_and_client_verification
             ignore_read: true
             properties:
               - name: clientCertificate
@@ -512,9 +502,6 @@ properties:
         type: NestedObject
         description: |
           User credentials to use for Salesforce authentication.
-        exactly_one_of:
-          - user_credentials
-          - oauth2_client_credentials
         properties:
           - name: username
             type: String
@@ -540,9 +527,6 @@ properties:
         type: NestedObject
         description: |
           OAuth credentials to use for Salesforce authentication.
-        exactly_one_of:
-          - user_credentials
-          - oauth2_client_credentials
         properties:
           - name: clientId
             type: String
@@ -676,11 +660,16 @@ properties:
           secretManagerStoredPassword.
         sensitive: true
         is_missing_in_cai: true
+        # The Datastream API does not return password on read.
+        ignore_read: true
       - name: secretManagerStoredPassword
         type: String
         description: |
           A reference to a Secret Manager resource name storing the MongoDB
           connection password. Mutually exclusive with password.
+        sensitive: true
+        # The Datastream API does not return secretManagerStoredPassword on read.
+        ignore_read: true
       - name: sslConfig
         type: NestedObject
         description: |

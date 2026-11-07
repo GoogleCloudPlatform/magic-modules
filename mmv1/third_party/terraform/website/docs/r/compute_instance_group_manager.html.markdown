@@ -258,12 +258,15 @@ group. You can specify only one value. Structure is [documented below](#nested_a
 
 * `target_size_policy` - (Optional) The policy that specifies how the MIG creates its VMs to achieve the target size. Structure is [documented below](#nested_target_size_policy).
 
+* `instance_lifecycle_policy` - (Optional) The instance lifecycle policy for this managed instance group. Structure is [documented below](#nested_instance_lifecycle_policy).
+
 * `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
     When a 'terraform destroy' or 'terraform apply' would delete the resource,
     the command will fail if this field is set to "PREVENT" in Terraform state.
     When set to "ABANDON", the command will remove the resource from Terraform
     management without updating or deleting the resource in the API.
-    When set to "DELETE", deleting the resource is allowed.
+    When set to "DELETE", deleting the resource is allowed. If graceful shutdown is configured, the MIG waits for all instances to shut down gracefully before deletion.
+    When set to "FORCE", deleting the resource is allowed, and graceful shutdown is skipped for instance deletion even if it's configured for the instances.
 
 - - -
 
@@ -480,7 +483,7 @@ The `status` block holds:
 
 The `version_target` block holds:
 
-* `version_target` - A bit indicating whether version target has been reached in this managed instance group, i.e. all instances are in their target version. Instances' target version are specified by version field on Instance Group Manager.
+* `is_reached` - A bit indicating whether version target has been reached in this managed instance group, i.e. all instances are in their target version. Instances' target version are specified by version field on Instance Group Manager.
 
 The `all_instances_config` block holds:
 
@@ -505,7 +508,7 @@ This resource provides the following
 
 - `create` - Default is 15 minutes.
 - `update` - Default is 15 minutes.
-- `delete` - Default is 15 minutes.
+- `delete` - Default is 15 minutes. Note if graceful shutdown is configured on the instance template and not skipped with `deletion_policy = "FORCE"` it can take up to 6 hours.
 
 
 ## Import

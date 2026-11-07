@@ -33,6 +33,11 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+# The API requires this resource's name to start with `oidc.`, so test resources
+# cannot use the standard tf-test prefix. Sweep on the name the tests use instead.
+sweeper:
+  prefixes:
+    - oidc.oauth-idp-config
 generate_list_resource: true
 custom_code:
 samples:

@@ -89,6 +89,11 @@ samples:
     skip_vcr: true
     steps:
       - name: 'managed_ssl_certificate_recreation'
+        resource_id_vars:
+          proxy_name: 'https-proxy'
+          url_map_name: 'url-map'
+          backend_service_name: 'backend-service'
+          http_health_check_name: 'http-health-check'
 parameters:
 properties:
   - name: 'creationTimestamp'

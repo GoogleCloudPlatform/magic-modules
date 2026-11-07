@@ -25,6 +25,7 @@ iam_policy:
   exclude_import_test: true
   method_name_separator: ':'
   parent_resource_attribute: aspect_type_id
+  max_backoff_timeout_seconds: 1200
   import_format:
     - projects/{{project}}/locations/{{location}}/aspectTypes/{{aspect_type_id}}
     - '{{aspect_type_id}}'
@@ -120,15 +121,11 @@ properties:
     validation:
       function: validation.StringIsJSON
   - name: transferStatus
-    type: Enum
+    type: String
     description: |
       Denotes the transfer status of the Aspect Type. It is unspecified
       for Aspect Type created from Dataplex API.
     output: true
-    enum_values:
-      - TRANSFER_STATUS_UNSPECIFIED
-      - TRANSFER_STATUS_MIGRATED
-      - TRANSFER_STATUS_TRANSFERRED
   - name: dataClassification
     type: Enum
     description: |

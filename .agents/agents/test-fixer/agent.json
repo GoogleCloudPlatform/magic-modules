@@ -1,5 +1,6 @@
 {
   "name": "test-fixer",
+  "description": "Senior Provider Engineer that classifies acceptance test failures, modifies Magic Modules source, generates code, and verifies fixes.",
   "configPath": {
     "relativePathToConfig": "config.yaml"
   }

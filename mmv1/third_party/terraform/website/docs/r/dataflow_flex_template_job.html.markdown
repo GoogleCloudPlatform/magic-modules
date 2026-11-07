@@ -11,14 +11,10 @@ job on Dataflow, which is an implementation of Apache Beam running on Google
 Compute Engine. For more information see the official documentation for [Beam](https://beam.apache.org)
 and [Dataflow](https://cloud.google.com/dataflow/).
 
-~> **Warning:** This resource is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](../guides/provider_versions.html.markdown) for more details on beta resources.
-
 ## Example Usage
 
 ```hcl
 resource "google_dataflow_flex_template_job" "big_data_job" {
-  provider                = google-beta
   name                    = "dataflow-flextemplates-job"
   container_spec_gcs_path = "gs://my-bucket/templates/template.json"
   parameters = {
@@ -69,7 +65,6 @@ resource "random_id" "big_data_job_name_suffix" {
   }
 }
 resource "google_dataflow_flex_template_job" "big_data_job" {
-  provider                      = google-beta
   name                          = "dataflow-flextemplates-job-${random_id.big_data_job_name_suffix.dec}"
   region                        = var.region
   container_spec_gcs_path       = "gs://my-bucket/templates/template.json"

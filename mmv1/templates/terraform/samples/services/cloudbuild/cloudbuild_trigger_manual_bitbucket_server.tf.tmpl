@@ -1,5 +1,5 @@
 resource "google_cloudbuild_trigger" "{{$.PrimaryResourceId}}" {
-  name        = "terraform-manual-bbs-trigger"
+  name        = "{{index $.ResourceIdVars "cloudbuild_trigger_name"}}"
 
   source_to_build {
     uri       = "https://bbs.com/scm/stag/test-repo.git"

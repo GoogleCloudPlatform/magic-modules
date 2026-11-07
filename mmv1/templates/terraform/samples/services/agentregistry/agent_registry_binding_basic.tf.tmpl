@@ -13,24 +13,26 @@ resource "google_agent_registry_binding" "{{$.PrimaryResourceId}}" {
   }
 
   auth_provider_binding {
-    auth_provider = google_iam_connectors_connector.default.id
+    auth_provider = google_agent_identity_auth_provider.default.id
     scopes        = ["https://www.googleapis.com/auth/cloud-platform"]
     continue_uri  = "https://example.com/continue"
   }
 
-  depends_on = [google_iam_connectors_connector.default]
+  depends_on = [google_agent_identity_auth_provider.default]
 }
 
 data "google_agent_registry_agent" "default" {
-  location = "global"
+  location = "us-central1"
   filter   = "displayName:Workspace Agent"
 }
 
-resource "google_iam_connectors_connector" "default" {
-  location       = "us-central1"
-  connector_id   = "{{index $.ResourceIdVars "binding"}}"
+resource "google_agent_identity_auth_provider" "default" {
+  location         = "us-central1"
+  auth_provider_id = "{{index $.ResourceIdVars "binding"}}"
 
-  connector_type_params {
-    connector_version = "projects/{{index $.TestEnvVars "project"}}/locations/global/providers/gcp/connectors/pubsub/versions/1"
+  auth_provider_type_params {
+    api_key {
+      api_key = "test-api-key-value"
+    }
   }
 }

@@ -386,6 +386,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Deploymentmanager",
         "path" to "./google/services/deploymentmanager"
     ),
+    "designcenter" to mapOf(
+        "name" to "designcenter",
+        "displayName" to "Designcenter",
+        "path" to "./google/services/designcenter"
+    ),
     "developerconnect" to mapOf(
         "name" to "developerconnect",
         "displayName" to "Developerconnect",
@@ -480,6 +485,11 @@ var ServicesListGa = mapOf(
         "name" to "gemini",
         "displayName" to "Gemini",
         "path" to "./google/services/gemini"
+    ),
+    "geminidataanalytics" to mapOf(
+        "name" to "geminidataanalytics",
+        "displayName" to "Gemini Data Analytics",
+        "path" to "./google/services/geminidataanalytics"
     ),
     "gkebackup" to mapOf(
         "name" to "gkebackup",
@@ -740,6 +750,11 @@ var ServicesListGa = mapOf(
         "name" to "resourcemanagerv3",
         "displayName" to "Resourcemanagerv3",
         "path" to "./google/services/resourcemanagerv3"
+    ),
+    "saasruntime" to mapOf(
+        "name" to "saasruntime",
+        "displayName" to "SaaS Runtime",
+        "path" to "./google/services/saasruntime"
     ),
     "secretmanager" to mapOf(
         "name" to "secretmanager",

@@ -104,7 +104,7 @@ properties:
     required: true
   - name: 'userCredentials'
     type: Array
-    max_size: 1
+    max_size: 10
     description: |
       The credentials associated with the user.
     item_type:
@@ -127,3 +127,13 @@ properties:
     type: KeyValueLabels
     description: |
       Resource labels that can contain user-provided metadata.
+  - name: 'username'
+    type: String
+    description: |
+      The SFTP login username for the user.
+    output: true
+  - name: 'state'
+    type: String
+    description: |
+      The provisioning status of the user.
+    output: true

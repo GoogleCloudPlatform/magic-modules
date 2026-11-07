@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/dataproc"
@@ -69,6 +70,8 @@ func TestCloudDataprocBatchRuntimeConfigVersionDiffSuppress(t *testing.T) {
 func BootstrapSubnetForDataprocBatches(t *testing.T, subnetName string, networkName string) string {
 	subnetOptions := map[string]interface{}{
 		"privateIpGoogleAccess": true,
+		"region":                "us-east1",
+		"ipCidrRange":           "10.79.0.0/20",
 	}
 	return tpgcompute.BootstrapSubnetWithOverrides(t, subnetName, networkName, subnetOptions)
 }
@@ -90,6 +93,9 @@ const SharedTestFirewallPrefix = "tf-bootstrap-firewall-"
 func BootstrapFirewallForDataprocSharedNetwork(t *testing.T, firewallName string, networkName string) string {
 	project := envvar.GetTestProjectFromEnv()
 	firewallName = SharedTestFirewallPrefix + firewallName
+	if acctest.IsVcrReplaying() {
+		return firewallName
+	}
 
 	config := transport_tpg.BootstrapConfig(t)
 	if config == nil {
@@ -97,7 +103,14 @@ func BootstrapFirewallForDataprocSharedNetwork(t *testing.T, firewallName string
 	}
 
 	log.Printf("[DEBUG] Getting Firewall %q for Network %q", firewallName, networkName)
-	_, err := tpgcompute.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).Firewalls.Get(project, firewallName).Do()
+	firewallUrl := fmt.Sprintf("%sprojects/%s/global/firewalls/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), project, firewallName)
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    firewallUrl,
+		UserAgent: config.UserAgent,
+	})
 	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 		log.Printf("[DEBUG] firewallName %q not found, bootstrapping", firewallName)
 		url := fmt.Sprintf("%sprojects/%s/global/firewalls", transport_tpg.BaseUrl(tpgcompute.Product, config), project)
@@ -143,12 +156,18 @@ func BootstrapFirewallForDataprocSharedNetwork(t *testing.T, firewallName string
 		}
 	}
 
-	firewall, err := tpgcompute.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).Firewalls.Get(project, firewallName).Do()
+	firewall, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    firewallUrl,
+		UserAgent: config.UserAgent,
+	})
 	if err != nil {
 		t.Errorf("Error getting Firewall %q: %s", firewallName, err)
 	}
 	if firewall == nil {
 		t.Fatalf("Error getting Firewall %q: is nil", firewallName)
 	}
-	return firewall.Name
+	return firewall["name"].(string)
 }

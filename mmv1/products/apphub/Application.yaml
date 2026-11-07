@@ -221,11 +221,6 @@ properties:
     description: Output only. A universally unique identifier (in UUID4 format) for the `Application`.
     output: true
   - name: state
-    type: Enum
+    type: String
     description: "Output only. Application state. \n Possible values:\n STATE_UNSPECIFIED\nCREATING\nACTIVE\nDELETING"
     output: true
-    enum_values:
-      - STATE_UNSPECIFIED
-      - CREATING
-      - ACTIVE
-      - DELETING

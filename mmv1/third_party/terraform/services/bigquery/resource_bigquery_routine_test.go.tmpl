@@ -18,8 +18,8 @@ import (
 func TestAccBigQueryRoutine_bigQueryRoutine_Update(t *testing.T) {
 	t.Parallel()
 
-	dataset := fmt.Sprintf("tfmanualdataset%s", acctest.RandString(t, 10))
-	routine := fmt.Sprintf("tfmanualroutine%s", acctest.RandString(t, 10))
+	dataset := fmt.Sprintf("tf_test_manualdataset%s", acctest.RandString(t, 10))
+	routine := fmt.Sprintf("tf_test_manualroutine%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -361,6 +361,9 @@ func TestAccBigQueryRoutine_bigqueryRoutinePythonFunction_update(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		CheckDestroy:             testAccCheckBigQueryRoutineDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -384,6 +387,19 @@ func TestAccBigQueryRoutine_bigqueryRoutinePythonFunction_update(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccBigQueryRoutine_bigqueryRoutinePythonFunction_updateVolumeMounts(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_bigquery_routine.python_function", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_bigquery_routine.python_function",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -393,6 +409,35 @@ func testAccBigQueryRoutine_bigqueryRoutinePythonFunction_basic(context map[stri
 resource "google_bigquery_dataset" "test" {
   provider = google-beta
   dataset_id = "tf_test_dataset_id%{random_suffix}"
+}
+
+resource "google_bigquery_connection" "test" {
+  provider = google-beta
+  connection_id = "tf_test_connection_id%{random_suffix}"
+  location      = "US"
+  cloud_resource {}
+}
+
+resource "google_storage_bucket" "test" {
+  provider = google-beta
+  name                        = "tf-test-bucket-%{random_suffix}"
+  location                    = "US"
+  force_destroy               = true
+  uniform_bucket_level_access = true
+}
+
+
+resource "time_sleep" "wait_60_seconds" {
+  depends_on = [google_bigquery_connection.test]
+  create_duration = "60s"
+}
+
+resource "google_storage_bucket_iam_member" "test" {
+  depends_on = [time_sleep.wait_60_seconds]
+  provider = google-beta
+  bucket = google_storage_bucket.test.name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${google_bigquery_connection.test.cloud_resource[0].service_account_id}"
 }
 
 resource "google_bigquery_routine" "python_function" {
@@ -439,6 +484,28 @@ resource "google_bigquery_connection" "test" {
   cloud_resource {}
 }
 
+resource "google_storage_bucket" "test" {
+  provider = google-beta
+  name                        = "tf-test-bucket-%{random_suffix}"
+  location                    = "US"
+  force_destroy               = true
+  uniform_bucket_level_access = true
+}
+
+
+resource "time_sleep" "wait_60_seconds" {
+  depends_on = [google_bigquery_connection.test]
+  create_duration = "60s"
+}
+
+resource "google_storage_bucket_iam_member" "test" {
+  depends_on = [time_sleep.wait_60_seconds]
+  provider = google-beta
+  bucket = google_storage_bucket.test.name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${google_bigquery_connection.test.cloud_resource[0].service_account_id}"
+}
+
 resource "google_bigquery_routine" "python_function" {
   provider = google-beta
   dataset_id = google_bigquery_dataset.test.dataset_id
@@ -464,12 +531,96 @@ resource "google_bigquery_routine" "python_function" {
   }
   external_runtime_options {
     container_memory = "512Mi"
-    container_cpu = 0.5
+    container_cpu = 1
     runtime_connection = "${google_bigquery_connection.test.name}"
     runtime_version = "python-3.11"
     max_batching_rows = "10"
     container_request_concurrency = "1"
+    volume_mounts {
+      source_path = "gs://${google_storage_bucket.test.name}"
+      mount_path  = "/mnt/data"
+    }
   }
+
+  depends_on = [google_storage_bucket_iam_member.test]
+
+}
+`, context)
+}
+
+func testAccBigQueryRoutine_bigqueryRoutinePythonFunction_updateVolumeMounts(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_bigquery_dataset" "test" {
+  provider = google-beta
+  dataset_id = "tf_test_dataset_id%{random_suffix}"
+}
+
+resource "google_bigquery_connection" "test" {
+  provider = google-beta
+  connection_id = "tf_test_connection_id%{random_suffix}"
+  location      = "US"
+  cloud_resource {}
+}
+
+resource "google_storage_bucket" "test" {
+  provider = google-beta
+  name                        = "tf-test-bucket-%{random_suffix}"
+  location                    = "US"
+  force_destroy               = true
+  uniform_bucket_level_access = true
+}
+
+
+resource "time_sleep" "wait_60_seconds" {
+  depends_on = [google_bigquery_connection.test]
+  create_duration = "60s"
+}
+
+resource "google_storage_bucket_iam_member" "test" {
+  depends_on = [time_sleep.wait_60_seconds]
+  provider = google-beta
+  bucket = google_storage_bucket.test.name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${google_bigquery_connection.test.cloud_resource[0].service_account_id}"
+}
+
+resource "google_bigquery_routine" "python_function" {
+  provider = google-beta
+  dataset_id = google_bigquery_dataset.test.dataset_id
+  routine_id = "tf_test_routine_id%{random_suffix}"
+  routine_type = "SCALAR_FUNCTION"
+  language = "PYTHON"
+  arguments {
+    name = "x"
+    data_type = "{\"typeKind\" :  \"FLOAT64\"}"
+  }
+  arguments {
+    name = "y"
+    data_type = "{\"typeKind\" :  \"FLOAT64\"}"
+  }
+  definition_body = <<-EOS
+    def multiply(x, y):
+      return x * y
+  EOS
+  return_type = "{\"typeKind\" :  \"FLOAT64\"}"
+  python_options {
+    entry_point = "multiply"
+    packages = ["requests"]
+  }
+  external_runtime_options {
+    container_memory = "512Mi"
+    container_cpu = 1
+    runtime_connection = "${google_bigquery_connection.test.name}"
+    runtime_version = "python-3.11"
+    max_batching_rows = "10"
+    container_request_concurrency = "1"
+    volume_mounts {
+      source_path = "gs://${google_storage_bucket.test.name}/subfolder"
+      mount_path  = "/mnt/data_updated"
+    }
+  }
+
+  depends_on = [google_storage_bucket_iam_member.test]
 
 }
 `, context)

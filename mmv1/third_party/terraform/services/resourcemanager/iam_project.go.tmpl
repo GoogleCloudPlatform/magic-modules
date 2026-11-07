@@ -3,7 +3,6 @@ package resourcemanager
 import (
 	"fmt"
 
-	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	{{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
 	"github.com/hashicorp/terraform-provider-google/google/registry"
@@ -70,6 +69,30 @@ func ProjectIamMemberResource() *schema.Resource {
 		)
 	}
 
+func ProjectIamBindingResource() *schema.Resource {
+	return tpgiamresource.ResourceIamBinding(
+		IamProjectSchema,
+		NewProjectIamUpdater,
+		ProjectIdParseFunc,
+		tpgiamresource.IamWithBatching,
+		tpgiamresource.IamWithParentResourceIdentity(ProjectIamParentResourceIdentityParser),
+	)
+}
+
+// NewProjectIamBindingListResource returns the list implementation for google_project_iam_binding.
+func NewProjectIamBindingListResource() list.ListResource {
+	return tpgiamresource.NewIamBindingListResource(
+		"google_project_iam_binding",
+		ProjectIamBindingResource(),
+		NewProjectIamUpdater,
+		tpgiamresource.IamListCallConfig{
+			ParentResourceField: "project",
+			EnableRoleFilter:   true,
+			EnableMemberFilter: true,
+		},
+	)
+}
+
 // NewProjectIamMemberListResource returns the list implementation for google_project_iam_member.
 func NewProjectIamMemberListResource() list.ListResource {
 	return tpgiamresource.NewIamMemberListResource(
@@ -100,7 +123,7 @@ func (u *ProjectIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy
 		}).Do()
 
 	if err != nil {
-		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{"{{"}}err{{"}}"}}", u.DescribeResource()), err)
+		return nil, fmt.Errorf("Error retrieving IAM policy for %s: %w", u.DescribeResource(), err)
 	}
 
 	return p, nil
@@ -121,7 +144,7 @@ func (u *ProjectIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Po
 		}).Do()
 
 	if err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Error setting IAM policy for %s: {{"{{"}}err{{"}}"}}", u.DescribeResource()), err)
+		return fmt.Errorf("Error setting IAM policy for %s: %w", u.DescribeResource(), err)
 	}
 
 	return nil
@@ -173,7 +196,12 @@ func init() {
 		Name:        "google_project_iam_binding",
 		ProductName: "resourcemanager",
 		Type:        registry.SchemaTypeIAMResource,
-		Schema:      tpgiamresource.ResourceIamBinding(IamProjectSchema, NewProjectIamUpdater, ProjectIdParseFunc, tpgiamresource.IamWithBatching, tpgiamresource.IamWithParentResourceIdentity(ProjectIamParentResourceIdentityParser)),
+		Schema:      ProjectIamBindingResource(),
+	}.Register()
+	registry.FrameworkListResource{
+		Name:        "google_project_iam_binding",
+		ProductName: "resourcemanager",
+		Func: 		 NewProjectIamBindingListResource,
 	}.Register()
 	registry.Schema{
 		Name:        "google_project_iam_policy",

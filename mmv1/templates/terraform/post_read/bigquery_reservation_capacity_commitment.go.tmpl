@@ -1,0 +1,5 @@
+if name, ok := res["name"].(string); ok && name != "" {
+	if err := d.Set("capacity_commitment_id", tpgresource.GetResourceNameFromSelfLink(name)); err != nil {
+		return fmt.Errorf("Error setting capacity_commitment_id: %s", err)
+	}
+}

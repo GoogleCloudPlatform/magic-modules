@@ -44,6 +44,20 @@ func TestAccCESDeployment_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"app", "app_version", "location"},
 			},
+			{
+				Config: testAccCESDeployment_cesDeploymentBasicExample_modelSettingsWithoutModel(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_ces_deployment.my-deployment", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_ces_deployment.my-deployment",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app", "app_version", "location"},
+			},
 		},
 	})
 }
@@ -90,6 +104,12 @@ resource "google_ces_deployment" "my-deployment" {
             }
         }
     }
+    modality = "MODALITY_TEXT"
+    model_settings {
+        model          = "gemini-3.0-flash-001"
+        temperature    = 0.5
+        thinking_level = "LOW"
+    }
 }
 `, context)
 }
@@ -135,6 +155,12 @@ resource "google_ces_deployment" "my-deployment" {
                 enable_recaptcha = false
             }
         }
+    }
+    modality = "MODALITY_VOICE"
+    model_settings {
+        model          = "gemini-2.5-flash-001"
+        temperature    = 0.8
+        thinking_level = "HIGH"
     }
 }
 `, context)
@@ -422,6 +448,166 @@ resource "google_ces_deployment" "my-deployment" {
         pin_wo = "123456"
         pin_wo_version = "1"
         waba_id = "test-waba-id"
+    }
+}
+`, context)
+}
+
+func TestAccCESDeployment_whatsappConfig(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCESDeploymentDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCESDeployment_whatsappConfig(context),
+			},
+			{
+				ResourceName:            "google_ces_deployment.my-deployment",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app", "app_version", "location"},
+			},
+			{
+				Config: testAccCESDeployment_whatsappConfig_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_ces_deployment.my-deployment", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_ces_deployment.my-deployment",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app", "app_version", "location"},
+			},
+		},
+	})
+}
+
+func testAccCESDeployment_whatsappConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_ces_app" "my-app" {
+    location     = "us"
+    display_name = "tf-test-my-app%{random_suffix}"
+    app_id       = "tf-test-app-id%{random_suffix}"
+    time_zone_settings {
+        time_zone = "America/Los_Angeles"
+    }
+}
+resource "google_ces_app_version" "my-app-version" {
+    location       = "us"
+    display_name   = "tf-test-my-app-version%{random_suffix}"
+    app            = google_ces_app.my-app.name
+    app_version_id = "tf-test-app-version-id%{random_suffix}"
+    description    = "example-app-version"
+}
+resource "google_ces_deployment" "my-deployment" {
+    location     = "us"
+    display_name = "tf-test-my-deployment%{random_suffix}"
+    app          = google_ces_app.my-app.name
+    app_version  = google_ces_app_version.my-app-version.id
+    channel_profile {
+        channel_type = "API"
+        profile_id = "temp_profile_id"
+        whatsapp_config {
+            phone_number = "+15551234567"
+            phone_number_id = "1234567890"
+            waba_id = "9876543210"
+        }
+    }
+}
+`, context)
+}
+
+func testAccCESDeployment_whatsappConfig_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_ces_app" "my-app" {
+    location     = "us"
+    display_name = "tf-test-my-app%{random_suffix}"
+    app_id       = "tf-test-app-id%{random_suffix}"
+    time_zone_settings {
+        time_zone = "America/Los_Angeles"
+    }
+}
+resource "google_ces_app_version" "my-app-version" {
+    location       = "us"
+    display_name   = "tf-test-my-app-version%{random_suffix}"
+    app            = google_ces_app.my-app.name
+    app_version_id = "tf-test-app-version-id%{random_suffix}"
+    description    = "example-app-version"
+}
+resource "google_ces_deployment" "my-deployment" {
+    location     = "us"
+    display_name = "tf-test-my-deployment%{random_suffix}"
+    app          = google_ces_app.my-app.name
+    app_version  = google_ces_app_version.my-app-version.id
+    channel_profile {
+        channel_type = "API"
+        profile_id = "temp_profile_id"
+        whatsapp_config {
+            phone_number = "+15559876543"
+            phone_number_id = "2345678901"
+            waba_id = "8765432109"
+        }
+    }
+}
+`, context)
+}
+
+func testAccCESDeployment_cesDeploymentBasicExample_modelSettingsWithoutModel(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_ces_app" "my-app" {
+    location     = "us"
+    display_name = "tf-test-my-app%{random_suffix}"
+    app_id       = "tf-test-app-id%{random_suffix}"
+    time_zone_settings {   
+        time_zone = "America/Los_Angeles"
+    }
+}
+resource "google_ces_app_version" "my-app-version" {
+    location       = "us"
+    display_name   = "tf-test-my-app-version%{random_suffix}"
+    app            = google_ces_app.my-app.name
+    app_version_id = "tf-test-app-version-id%{random_suffix}"
+    description    = "example-app-version"
+}
+resource "google_ces_deployment" "my-deployment" {
+    location     = "us"
+    display_name = "tf-test-my-deployment%{random_suffix}"
+    app          = google_ces_app.my-app.name
+    app_version  = google_ces_app_version.my-app-version.id
+    channel_profile {
+        channel_type = "WEB_UI"
+        disable_barge_in_control = true
+        disable_dtmf = true
+        persona_property {
+            persona = "CONCISE"
+        }
+        profile_id = "temp_profile_id"
+        web_widget_config {
+            modality = "CHAT_ONLY"
+            theme = "LIGHT"
+            web_widget_title = "temp_webwidget_title"
+            security_settings {
+                enable_public_access = false
+                enable_origin_check = false
+                allowed_origins = ["https://updated.com"]
+                enable_recaptcha = false
+            }
+        }
+    }
+    modality = "MODALITY_VOICE"
+    model_settings {
+        temperature    = 0.8
+        thinking_level = "HIGH"
     }
 }
 `, context)

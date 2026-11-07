@@ -144,7 +144,6 @@ properties:
     properties:
       - name: mode
         type: Enum
-        required: true
         description: |
           The autoscaling mode. Set to one of the following:
             - OFF: Disables the autoscaler.
@@ -165,7 +164,6 @@ properties:
         default_from_api: true
       - name: maxNodes
         type: Integer
-        required: true
         description: |
           Maximum size of the node group. Set to a value less than or equal
           to 100 and greater than or equal to min-nodes.

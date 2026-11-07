@@ -1,6 +1,8 @@
 package detector
 
 import (
+	"os"
+	"path/filepath"
 	"reflect"
 	"sort"
 	"testing"
@@ -234,6 +236,31 @@ func TestGetMissingTestsForChanges(t *testing.T) {
 			},
 		},
 		{
+			// block_types_test.go declares block_types_resource as a managed
+			// resource, a data source, an ephemeral resource and a list
+			// resource. Only field_one, on the managed resource, is coverage
+			// for the managed resource's schema; the fields of the same-named
+			// blocks of other kinds belong to different schemas.
+			name: "other-block-kinds-are-not-managed-resource-coverage",
+			changedFields: map[string]ResourceChanges{
+				"block_types_resource": {
+					"field_one":   &Field{Added: true},
+					"field_two":   &Field{Added: true},
+					"field_three": &Field{Added: true},
+				},
+			},
+			expectedMissingTests: map[string]MissingTestInfo{
+				"block_types_resource": {
+					UntestedFields: []string{"field_three", "field_two"},
+					SuggestedTest: `resource "block_types_resource" "primary" {
+  field_three = # value needed
+  field_two   = # value needed
+}
+`,
+				},
+			},
+		},
+		{
 			name: "multiple-resources-missing-tests",
 			changedFields: map[string]ResourceChanges{
 				"no_test": {
@@ -262,6 +289,26 @@ func TestGetMissingTestsForChanges(t *testing.T) {
     }
   }
   field_one = # value needed
+}
+`,
+				},
+			},
+		},
+		{
+			name: "expect-error-and-non-applying-steps-are-not-coverage",
+			changedFields: map[string]ResourceChanges{
+				"expect_error_resource": {
+					"field_one":   &Field{Added: true},
+					"field_two":   &Field{Added: true},
+					"field_three": &Field{Added: true},
+				},
+			},
+			expectedMissingTests: map[string]MissingTestInfo{
+				"expect_error_resource": {
+					UntestedFields: []string{"field_three", "field_two"},
+					SuggestedTest: `resource "expect_error_resource" "primary" {
+  field_three = # value needed
+  field_two   = # value needed
 }
 `,
 				},
@@ -537,6 +584,34 @@ func TestDetectMissingDocsForDatasource(t *testing.T) {
 			}
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("got unexpected added fields: %v, expected %v", got, test.want)
+			}
+		})
+	}
+}
+
+func TestDataSourceToDocFile(t *testing.T) {
+	repo := t.TempDir()
+	docDir := filepath.Join(repo, "website", "docs", "d")
+	if err := os.MkdirAll(docDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	want := filepath.Join(docDir, "project_iam_policy.html.markdown")
+	if err := os.WriteFile(want, []byte("# google_project_iam_policy\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	for _, dataSource := range []string{
+		"google_project_iam_policy",
+		"google_project_iam_binding",
+		"google_project_iam_member",
+		"google_project_iam_audit_config",
+	} {
+		t.Run(dataSource, func(t *testing.T) {
+			got, err := dataSourceToDocFile(dataSource, repo)
+			if err != nil {
+				t.Fatalf("dataSourceToDocFile(%q) = %v, want nil error", dataSource, err)
+			}
+			if got != want {
+				t.Errorf("dataSourceToDocFile(%q) = %q, want %q", dataSource, got, want)
 			}
 		})
 	}

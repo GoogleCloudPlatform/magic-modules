@@ -1,9 +1,13 @@
 package sql
 
 import (
+	"context"
+	"strings"
 	"testing"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestMaintenanceVersionDiffSuppress(t *testing.T) {
@@ -221,5 +225,279 @@ func TestDatabaseVersionDiffSuppress(t *testing.T) {
 				t.Fatalf("%q => %q expect DiffSuppress to return %t", testCase.oldVersion, testCase.newVersion, testCase.shouldSuppressDiff)
 			}
 		})
+	}
+}
+
+func TestDatabaseCenterIntegrationDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New       string
+		AppData        map[string]interface{}
+		ShouldSuppress bool
+	}{
+		"replica with unset configuration should suppress diff against inherited state": {
+			Old: "DISABLED",
+			New: "",
+			AppData: map[string]interface{}{
+				"master_instance_name": "primary-instance",
+			},
+			ShouldSuppress: true,
+		},
+		"replica with explicit configuration should not suppress diff": {
+			Old: "DISABLED",
+			New: "ENABLED",
+			AppData: map[string]interface{}{
+				"master_instance_name": "primary-instance",
+			},
+			ShouldSuppress: false,
+		},
+		"primary instance with unset configuration should not suppress diff": {
+			Old:            "DISABLED",
+			New:            "",
+			AppData:        map[string]interface{}{},
+			ShouldSuppress: false,
+		},
+		"primary instance with explicit configuration should not suppress diff": {
+			Old:            "DISABLED",
+			New:            "ENABLED",
+			AppData:        map[string]interface{}{},
+			ShouldSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		tc := tc
+		t.Run(tn, func(t *testing.T) {
+			t.Parallel()
+			rd := schema.TestResourceDataRaw(t, map[string]*schema.Schema{
+				"master_instance_name": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+			}, tc.AppData)
+			if databaseCenterIntegrationDiffSuppress("database_center_integration", tc.Old, tc.New, rd) != tc.ShouldSuppress {
+				t.Fatalf("%q => %q (AppData=%v) expect DiffSuppress to return %t", tc.Old, tc.New, tc.AppData, tc.ShouldSuppress)
+			}
+		})
+	}
+}
+
+func TestDenyMaintenancePeriodDateDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New       string
+		ShouldSuppress bool
+	}{
+		"recurring two-digit month and day with leading zero year should suppress diff": {
+			Old:            "0-12-20",
+			New:            "12-20",
+			ShouldSuppress: true,
+		},
+		"recurring single-digit month with zero-padding and leading zero year should suppress diff": {
+			Old:            "0-1-10",
+			New:            "01-10",
+			ShouldSuppress: true,
+		},
+		"recurring single-digit month and day with zero-padding and leading zero year should suppress diff": {
+			Old:            "0-1-5",
+			New:            "01-05",
+			ShouldSuppress: true,
+		},
+		"full date with zero-padded month and day should suppress diff against unpadded API value": {
+			Old:            "2026-1-5",
+			New:            "2026-01-05",
+			ShouldSuppress: true,
+		},
+		"identical full dates should suppress diff": {
+			Old:            "2026-11-01",
+			New:            "2026-11-01",
+			ShouldSuppress: true,
+		},
+		"different recurring dates should not suppress diff": {
+			Old:            "0-12-20",
+			New:            "12-25",
+			ShouldSuppress: false,
+		},
+		"recurring date vs full date with same month and day should not suppress diff": {
+			Old:            "0-12-20",
+			New:            "2026-12-20",
+			ShouldSuppress: false,
+		},
+		"different full dates should not suppress diff": {
+			Old:            "2026-1-5",
+			New:            "2026-01-06",
+			ShouldSuppress: false,
+		},
+		"empty old value on creation should not suppress diff": {
+			Old:            "",
+			New:            "12-20",
+			ShouldSuppress: false,
+		},
+		"invalid date format should not suppress diff": {
+			Old:            "0-1-10",
+			New:            "invalid",
+			ShouldSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		tc := tc
+		t.Run(tn, func(t *testing.T) {
+			t.Parallel()
+			if denyMaintenancePeriodDateDiffSuppress("settings.0.deny_maintenance_period.0.start_date", tc.Old, tc.New, nil) != tc.ShouldSuppress {
+				t.Fatalf("%q => %q expect DiffSuppress to return %t", tc.Old, tc.New, tc.ShouldSuppress)
+			}
+		})
+	}
+}
+
+func TestBlueGreenDeployment_SkipGreenComparisonFields(t *testing.T) {
+	requiredSkipFields := []string{
+		"root_password",
+		"root_password_wo_version",
+		"name",
+		"blue_green_deployment",
+		"instance_type",
+		"master_instance_name",
+		"replica_configuration",
+		"replica_names",
+		"replication_cluster",
+	}
+
+	for _, field := range requiredSkipFields {
+		if !skipGreenComparisonFields[field] {
+			t.Errorf("expected skipGreenComparisonFields[%q] to be true, got false", field)
+		}
+	}
+}
+
+func TestBlueGreenDeployment_CompareConfiguredField_SensitiveRedaction(t *testing.T) {
+	testSchema := map[string]*schema.Schema{
+		"root_password": {
+			Type:      schema.TypeString,
+			Optional:  true,
+			Sensitive: true,
+		},
+		"root_password_wo_version": {
+			Type:     schema.TypeInt,
+			Optional: true,
+		},
+		"secret_token": {
+			Type:      schema.TypeString,
+			Optional:  true,
+			Sensitive: true,
+		},
+		"nested_secret_block": {
+			Type:     schema.TypeList,
+			Optional: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"nested_secret": {
+						Type:      schema.TypeString,
+						Optional:  true,
+						Sensitive: true,
+					},
+				},
+			},
+		},
+	}
+
+	var capturedDiff *schema.ResourceDiff
+	res := &schema.Resource{
+		Schema: testSchema,
+		CustomizeDiff: func(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+			capturedDiff = d
+			return nil
+		},
+	}
+
+	schemaBlock := res.CoreConfigSchema()
+	impliedType := schemaBlock.ImpliedType()
+
+	configuredPassword := "super-secret-new-password"
+	configuredToken := "confidential-token-abc"
+	configuredNestedSecret := "nested-classified-xyz"
+
+	proposedNewStateVal := cty.ObjectVal(map[string]cty.Value{
+		"root_password":            cty.StringVal(configuredPassword),
+		"root_password_wo_version": cty.NumberIntVal(2),
+		"secret_token":             cty.StringVal(configuredToken),
+		"nested_secret_block": cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"nested_secret": cty.StringVal(configuredNestedSecret),
+			}),
+		}),
+	})
+
+	priorState, err := res.ShimInstanceStateFromValue(cty.NullVal(impliedType))
+	if err != nil {
+		t.Fatalf("ShimInstanceStateFromValue failed: %v", err)
+	}
+	priorState.RawState = cty.NullVal(impliedType)
+	priorState.RawPlan = proposedNewStateVal
+	priorState.RawConfig = proposedNewStateVal
+
+	cfg := terraform.NewResourceConfigShimmed(proposedNewStateVal, schemaBlock)
+	_, err = res.SimpleDiff(context.Background(), priorState, cfg, nil)
+	if err != nil {
+		t.Fatalf("SimpleDiff failed: %v", err)
+	}
+
+	if capturedDiff == nil {
+		t.Fatal("expected CustomizeDiff to capture ResourceDiff, got nil")
+	}
+
+	greenData := res.Data(nil)
+	_ = greenData.Set("root_password", "old-blue-password")
+	_ = greenData.Set("root_password_wo_version", 1)
+	_ = greenData.Set("secret_token", "green-token-different")
+	_ = greenData.Set("nested_secret_block", []interface{}{
+		map[string]interface{}{
+			"nested_secret": "green-nested-different",
+		},
+	})
+
+	var mismatches []string
+
+	// 1. root_password and root_password_wo_version should be skipped and produce 0 mismatches
+	compareConfiguredField("root_password", proposedNewStateVal.GetAttr("root_password"), testSchema["root_password"], capturedDiff, greenData, &mismatches)
+	compareConfiguredField("root_password_wo_version", proposedNewStateVal.GetAttr("root_password_wo_version"), testSchema["root_password_wo_version"], capturedDiff, greenData, &mismatches)
+
+	if len(mismatches) != 0 {
+		t.Errorf("expected 0 mismatches for skipped password fields, got: %v", mismatches)
+	}
+
+	// 2. Sensitive top-level field should be redacted in mismatches
+	compareConfiguredField("secret_token", proposedNewStateVal.GetAttr("secret_token"), testSchema["secret_token"], capturedDiff, greenData, &mismatches)
+	// 3. Sensitive nested field should be redacted in mismatches
+	compareConfiguredField("nested_secret_block", proposedNewStateVal.GetAttr("nested_secret_block"), testSchema["nested_secret_block"], capturedDiff, greenData, &mismatches)
+
+	expectedMismatches := []string{
+		"secret_token (configured: (sensitive), green instance: (sensitive))",
+		"nested_secret_block.0.nested_secret (configured: (sensitive), green instance: (sensitive))",
+	}
+
+	if len(mismatches) != len(expectedMismatches) {
+		t.Fatalf("expected %d mismatches, got %d: %v", len(expectedMismatches), len(mismatches), mismatches)
+	}
+
+	for i, exp := range expectedMismatches {
+		if mismatches[i] != exp {
+			t.Errorf("mismatch[%d] = %q; want %q", i, mismatches[i], exp)
+		}
+	}
+
+	// 4. Verify that plaintext secret values NEVER appear in any mismatch message
+	joinedMismatches := strings.Join(mismatches, " ")
+	sensitiveValues := []string{
+		configuredPassword,
+		"old-blue-password",
+		configuredToken,
+		"green-token-different",
+		configuredNestedSecret,
+		"green-nested-different",
+	}
+	for _, secret := range sensitiveValues {
+		if strings.Contains(joinedMismatches, secret) {
+			t.Errorf("security violation: plaintext secret %q leaked in mismatches: %s", secret, joinedMismatches)
+		}
 	}
 }

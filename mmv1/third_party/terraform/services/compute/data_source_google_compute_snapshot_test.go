@@ -79,7 +79,7 @@ func testAccSnapshot_name(project, suffix string) string {
 		project = "debian-cloud"
 	}
 	resource "google_compute_disk" "tf-test-disk" {
-		name  = "debian-disk-%{suffix}"
+		name  = "tf-test-debian-disk-%{suffix}"
 		image = data.google_compute_image.tf-test-image.self_link
 		size  = 10
 		type  = "pd-ssd"
@@ -111,7 +111,7 @@ func testAccSnapshot_filter(project, suffix string) string {
 		project = "debian-cloud"
 	}
 	resource "google_compute_disk" "tf-test-disk" {
-		name  = "debian-disk-%{suffix}"
+		name  = "tf-test-debian-disk-%{suffix}"
 		image = data.google_compute_image.tf-test-image.self_link
 		size  = 10
 		type  = "pd-ssd"
@@ -162,7 +162,7 @@ func testAccSnapshot_filter_mostRecent(project, suffix string) string {
 		project = "debian-cloud"
 	}
 	resource "google_compute_disk" "tf-test-disk" {
-		name  = "debian-disk-%{suffix}"
+		name  = "tf-test-debian-disk-%{suffix}"
 		image = data.google_compute_image.tf-test-image.self_link
 		size  = 10
 		type  = "pd-ssd"

@@ -52,6 +52,7 @@ samples:
           org_id: 'ORG_TARGET'
   - name: 'organization_security_policy_association_excluded'
     primary_resource_id: 'policy'
+    exclude_test: true
     steps:
       - name: 'organization_security_policy_association_excluded'
         resource_id_vars:

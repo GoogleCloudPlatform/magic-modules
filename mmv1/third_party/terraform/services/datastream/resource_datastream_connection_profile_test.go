@@ -171,7 +171,7 @@ QC3v6moZVb2wrgGkfwAAAAR1c2VyAQIDBAU=
 			{
 				PreConfig: func() {
 					fmt.Println("Waiting before proceeding to the next step...")
-					time.Sleep(150 * time.Second) // Delay before the next step
+					acctest.Sleep(150 * time.Second) // Delay before the next step
 				},
 				Config: testAccDatastreamConnectionProfile_sshKey_update(context, true, randomPrivKey2, randomPubKey2),
 			},
@@ -184,7 +184,7 @@ QC3v6moZVb2wrgGkfwAAAAR1c2VyAQIDBAU=
 			{
 				PreConfig: func() {
 					fmt.Println("Waiting before proceeding to the next step...")
-					time.Sleep(150 * time.Second) // Delay before the next step
+					acctest.Sleep(150 * time.Second) // Delay before the next step
 				},
 				Config: testAccDatastreamConnectionProfile_sshKey_update(context, false, randomPrivKey2, randomPubKey2),
 			},
@@ -473,7 +473,7 @@ resource "google_compute_firewall" "ssh" {
 }
 
 resource "google_compute_firewall" "datastream_sql_access" {
-    name    	= "datastream-to-cloudsql-%{random_suffix}"
+    name    	= "tf-test-datastream-to-cloudsql-%{random_suffix}"
     network 	=  google_compute_network.default.name
 
     allow {
@@ -540,6 +540,8 @@ func TestAccDatastreamConnectionProfile_mongoDb(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
 					"create_without_validation",
+					// The Datastream API does not return secretManagerStoredPassword on read.
+					"mongodb_profile.0.secret_manager_stored_password",
 					"mongodb_profile.0.ssl_config.0.ca_certificate",
 					"mongodb_profile.0.ssl_config.0.client_certificate",
 					"mongodb_profile.0.ssl_config.0.secret_manager_stored_client_key",
@@ -559,6 +561,8 @@ func TestAccDatastreamConnectionProfile_mongoDb(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
 					"create_without_validation",
+					// The Datastream API does not return secretManagerStoredPassword on read.
+					"mongodb_profile.0.secret_manager_stored_password",
 					"mongodb_profile.0.ssl_config.0.ca_certificate",
 					"mongodb_profile.0.ssl_config.0.client_certificate",
 					"mongodb_profile.0.ssl_config.0.secret_manager_stored_client_key",
@@ -573,6 +577,8 @@ func TestAccDatastreamConnectionProfile_mongoDb(t *testing.T) {
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
 					"create_without_validation",
+					// The Datastream API does not return password on read.
+					"mongodb_profile.0.password",
 					"mongodb_profile.0.ssl_config.0.client_key",
 					"mongodb_profile.0.ssl_config.0.ca_certificate",
 					"mongodb_profile.0.ssl_config.0.client_certificate",
@@ -589,7 +595,7 @@ data "google_project" "project" {}
 
 resource "google_secret_manager_secret" "password_secret" {
   project   = data.google_project.project.project_id
-  secret_id = "tf-mongo-pw-secret-%{random_suffix}"
+  secret_id = "tf-test-mongo-pw-secret-%{random_suffix}"
   replication {
     auto {}
   }
@@ -602,7 +608,7 @@ resource "google_secret_manager_secret_version" "password_secret_version" {
 
 resource "google_secret_manager_secret" "client_key_secret" {
   project   = data.google_project.project.project_id
-  secret_id = "tf-mongo-key-secret-%{random_suffix}"
+  secret_id = "tf-test-mongo-key-secret-%{random_suffix}"
   replication {
     auto {}
   }
@@ -618,7 +624,7 @@ resource "google_datastream_connection_profile" "default" {
   project                 = data.google_project.project.project_id
   display_name            = "tf-mongodb-profile"
   location                = "us-central1"
-  connection_profile_id   = "tf-mongo-cp-%{random_suffix}"
+  connection_profile_id   = "tf-test-mongo-cp-%{random_suffix}"
   create_without_validation = true // Set to true for tests to bypass actual connectivity checks.
 
   mongodb_profile {
@@ -658,7 +664,7 @@ resource "google_datastream_connection_profile" "default2" {
 	project                 = data.google_project.project.project_id
 	display_name            = "tf-mongodb-profile"
 	location                = "us-central1"
-	connection_profile_id   = "tf-mongo-cp-%{random_suffix}-2"
+	connection_profile_id   = "tf-test-mongo-cp-%{random_suffix}-2"
 	create_without_validation = true // Set to true for tests to bypass actual connectivity checks.
 
 	mongodb_profile {
@@ -684,7 +690,7 @@ data "google_project" "project" {}
 
 resource "google_secret_manager_secret" "password_secret" {
   project   = data.google_project.project.project_id
-  secret_id = "tf-mongo-pw-secret-%{random_suffix}"
+  secret_id = "tf-test-mongo-pw-secret-%{random_suffix}"
   replication {
     auto {}
   }
@@ -697,7 +703,7 @@ resource "google_secret_manager_secret_version" "password_secret_version" {
 
 resource "google_secret_manager_secret" "client_key_secret" {
   project   = data.google_project.project.project_id
-  secret_id = "tf-mongo-key-secret-%{random_suffix}"
+  secret_id = "tf-test-mongo-key-secret-%{random_suffix}"
   replication {
     auto {}
   }
@@ -713,7 +719,7 @@ resource "google_datastream_connection_profile" "default" {
   project                 = data.google_project.project.project_id
   display_name            = "tf-mongodb-profile-updated" // <-- Changed
   location                = "us-central1"
-  connection_profile_id   = "tf-mongo-cp-%{random_suffix}"
+  connection_profile_id   = "tf-test-mongo-cp-%{random_suffix}"
   create_without_validation = true // Set to true for tests to bypass actual connectivity checks.
 
   mongodb_profile {

@@ -50,7 +50,7 @@ func TestAccDeveloperConnectInsightsConfig_update(t *testing.T) {
 				ResourceName:            "google_developer_connect_insights_config.insights_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"insights_config_id", "labels", "location", "terraform_labels", "workload"},
+				ImportStateVerifyIgnore: []string{"insights_config_id", "labels", "location", "terraform_labels", "update_time", "workload"},
 			},
 			{
 				Config: testAccDeveloperConnectInsightsConfig_update(context),
@@ -64,7 +64,7 @@ func TestAccDeveloperConnectInsightsConfig_update(t *testing.T) {
 				ResourceName:            "google_developer_connect_insights_config.insights_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"insights_config_id", "location", "labels", "terraform_labels", "workload"},
+				ImportStateVerifyIgnore: []string{"insights_config_id", "location", "labels", "terraform_labels", "update_time", "workload"},
 			},
 		},
 	})

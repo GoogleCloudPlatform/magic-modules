@@ -3,10 +3,9 @@ resource "google_discovery_engine_data_connector" "jira-with-actions" {
   collection_id                = "{{index $.ResourceIdVars "collection_id"}}"
   collection_display_name      = "Jira Federated"
   data_source                  = "jira"
-  data_source_version          = 3
   params = {
     instance_uri               = "https://example.atlassian.net"
-    instance_id                = "SECRET_MANAGER_RESOURCE_NAME"
+    instance_id                = "12345678-1234-1234-1234-123456789abc"
     client_id                  = "SECRET_MANAGER_RESOURCE_NAME"
     client_secret              = "SECRET_MANAGER_RESOURCE_NAME"
     refresh_token              = "SECRET_MANAGER_RESOURCE_NAME"
@@ -43,7 +42,7 @@ resource "google_discovery_engine_data_connector" "jira-with-actions" {
   action_config {
     action_params = {
       instance_uri             = "https://example.atlassian.net"
-      instance_id              = "SECRET_MANAGER_RESOURCE_NAME"
+      instance_id              = "12345678-1234-1234-1234-123456789abc"
       client_id                = "SECRET_MANAGER_RESOURCE_NAME"
       client_secret            = "SECRET_MANAGER_RESOURCE_NAME"
       auth_type                = "OAUTH"
@@ -60,5 +59,13 @@ resource "google_discovery_engine_data_connector" "jira-with-actions" {
       "update_comment",
       "upload_attachment",
     ]
+  }
+  tag                          = "sample-tag"
+  metadata {
+    title             = "Jira Connector"
+    description       = "Jira Connector Description"
+    short_description = "Jira Connector Short Description"
+    author            = "Google"
+    note              = "Sample Note"
   }
 }

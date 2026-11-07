@@ -72,10 +72,13 @@ samples:
       - name: vertex_ai_endpoint_private_service_connect
         resource_id_vars:
           network_name: psc-network
+          endpoint_name: endpoint-name
   - name: vertex_ai_endpoint_dedicated_endpoint
     primary_resource_id: endpoint
     steps:
       - name: vertex_ai_endpoint_dedicated_endpoint
+        resource_id_vars:
+          endpoint_name: endpoint-name
 parameters:
   - name: location
     type: String
@@ -320,12 +323,9 @@ properties:
               output: true
               description: Forwarding rule created by the PSC service automation.
             - name: state
-              type: Enum
+              type: String
               output: true
               description: The state of the PSC service automation.
-              enum_values:
-                - PSC_AUTOMATION_STATE_FAILED
-                - PSC_AUTOMATION_STATE_SUCCESSFUL
             - name: errorMessage
               type: String
               output: true

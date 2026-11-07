@@ -29,7 +29,7 @@ func TestAccLoggingFolderExclusion(t *testing.T) {
 		// yet, we don't have a race condition
 		// see https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
 		tc := tc
-		t.Run(name, func(t *testing.T) {
+		acctest.RunVcrSubtest(t, name, func(t *testing.T) {
 			tc(t)
 		})
 	}
@@ -261,23 +261,41 @@ resource "google_folder" "my-folder" {
 }
 
 func testAccLoggingFolderExclusion_multipleCfg(folderName, folderParent, exclusionName string) string {
-	s := fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_folder" "my-folder" {
 	display_name = "%s"
 	parent       = "%s"
 	deletion_protection = false
 }
-`, folderName, folderParent)
 
-	for i := 0; i < 3; i++ {
-		s += fmt.Sprintf(`
-resource "google_logging_folder_exclusion" "basic%d" {
-  name        = "%s%d"
+resource "google_logging_folder_exclusion" "basic0" {
+  name        = "%s0"
   folder      = element(split("/", google_folder.my-folder.name), 1)
   description = "Basic Folder Logging Exclusion"
   filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
 }
-`, i, exclusionName, i, envvar.GetTestProjectFromEnv())
-	}
-	return s
+
+resource "google_logging_folder_exclusion" "basic1" {
+  name        = "%s1"
+  folder      = element(split("/", google_folder.my-folder.name), 1)
+  description = "Basic Folder Logging Exclusion"
+  filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
+}
+
+resource "google_logging_folder_exclusion" "basic2" {
+  name        = "%s2"
+  folder      = element(split("/", google_folder.my-folder.name), 1)
+  description = "Basic Folder Logging Exclusion"
+  filter      = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
+}
+`,
+		folderName,
+		folderParent,
+		exclusionName,
+		envvar.GetTestProjectFromEnv(),
+		exclusionName,
+		envvar.GetTestProjectFromEnv(),
+		exclusionName,
+		envvar.GetTestProjectFromEnv(),
+	)
 }

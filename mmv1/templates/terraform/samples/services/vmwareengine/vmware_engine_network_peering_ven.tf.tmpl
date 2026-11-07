@@ -1,10 +1,10 @@
 resource "google_vmwareengine_network" "network-peering-nw" {
-   name              = "default-np-nw"
+   name              = "{{index $.ResourceIdVars "network_name"}}"
    location          = "global"
    type              = "STANDARD"
 }
 resource "google_vmwareengine_network" "network-peering-peer-nw" {
-   name              = "peer-np-nw"
+   name              = "{{index $.ResourceIdVars "peer_network_name"}}"
    location          = "global"
    type              = "STANDARD"
 }

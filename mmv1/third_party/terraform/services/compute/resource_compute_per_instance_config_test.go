@@ -22,10 +22,10 @@ func TestAccComputePerInstanceConfig_statefulBasic(t *testing.T) {
 	context := map[string]interface{}{
 		"igm_name":      igmName,
 		"random_suffix": suffix,
-		"config_name":   fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
-		"config_name2":  fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
-		"config_name3":  fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
-		"config_name4":  fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
+		"config_name":   fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10)),
+		"config_name2":  fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10)),
+		"config_name3":  fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10)),
+		"config_name4":  fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10)),
 	}
 	igmId := fmt.Sprintf("projects/%s/zones/%s/instanceGroupManagers/%s",
 		envvar.GetTestProjectFromEnv(), envvar.GetTestZoneFromEnv(), igmName)
@@ -98,7 +98,7 @@ func TestAccComputePerInstanceConfig_update(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"igm_name":      fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10)),
-		"config_name":   fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
+		"config_name":   fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10)),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -135,7 +135,7 @@ func TestAccComputePerInstanceConfig_statefulIps(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"igm_name":      fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10)),
-		"config_name":   fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
+		"config_name":   fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10)),
 		"network":       fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10)),
 		"subnetwork":    fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10)),
 		"address1":      fmt.Sprintf("tf-test-igm-address%s", acctest.RandString(t, 10)),
@@ -177,8 +177,8 @@ func TestAccComputePerInstanceConfig_removeInstanceOnDestroy(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"igm_name":      igmName,
-		"config_name":   fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
-		"config_name2":  fmt.Sprintf("instance-%s", acctest.RandString(t, 10)),
+		"config_name":   fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10)),
+		"config_name2":  fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10)),
 		"network":       fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10)),
 		"subnetwork":    fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10)),
 		"address1":      fmt.Sprintf("tf-test-igm-address%s", acctest.RandString(t, 10)),
@@ -333,7 +333,7 @@ resource "google_compute_per_instance_config" "add2" {
 }
 
 resource "google_compute_disk" "disk" {
-  name  = "test-disk-%{random_suffix}"
+  name  = "tf-test-test-disk-%{random_suffix}"
   type  = "pd-ssd"
   zone  = google_compute_instance_group_manager.igm.zone
   image = "debian-8-jessie-v20170523"
@@ -341,7 +341,7 @@ resource "google_compute_disk" "disk" {
 }
 
 resource "google_compute_disk" "disk1" {
-  name  = "test-disk2-%{random_suffix}"
+  name  = "tf-test-test-disk2-%{random_suffix}"
   type  = "pd-ssd"
   zone  = google_compute_instance_group_manager.igm.zone
   image = "debian-cloud/debian-13"
@@ -349,7 +349,7 @@ resource "google_compute_disk" "disk1" {
 }
 
 resource "google_compute_disk" "disk2" {
-  name  = "test-disk3-%{random_suffix}"
+  name  = "tf-test-test-disk3-%{random_suffix}"
   type  = "pd-ssd"
   zone  = google_compute_instance_group_manager.igm.zone
   image = "https://www.googleapis.com/compute/v1/projects/centos-cloud/global/images/centos-7-v20210217"
@@ -459,7 +459,7 @@ resource "google_compute_per_instance_config" "config_one" {
 }
 
 resource "google_compute_disk" "disk" {
-  name  = "test-disk-%{random_suffix}"
+  name  = "tf-test-test-disk-%{random_suffix}"
   type  = "pd-ssd"
   zone  = google_compute_instance_group_manager.igm.zone
   image = "debian-8-jessie-v20170523"
@@ -467,7 +467,7 @@ resource "google_compute_disk" "disk" {
 }
 
 resource "google_compute_disk" "disk1" {
-  name  = "test-disk2-%{random_suffix}"
+  name  = "tf-test-test-disk2-%{random_suffix}"
   type  = "pd-ssd"
   zone  = google_compute_instance_group_manager.igm.zone
   image = "debian-cloud/debian-13"
@@ -562,7 +562,7 @@ resource "google_compute_per_instance_config" "default" {
 }
 
 resource "google_compute_disk" "disk" {
-  name  = "test-disk-%{random_suffix}"
+  name  = "tf-test-test-disk-%{random_suffix}"
   type  = "pd-ssd"
   zone  = google_compute_instance_group_manager.igm.zone
   image = "debian-8-jessie-v20170523"
@@ -570,7 +570,7 @@ resource "google_compute_disk" "disk" {
 }
 
 resource "google_compute_disk" "disk1" {
-  name  = "test-disk2-%{random_suffix}"
+  name  = "tf-test-test-disk2-%{random_suffix}"
   type  = "pd-ssd"
   zone  = google_compute_instance_group_manager.igm.zone
   image = "debian-cloud/debian-13"
@@ -637,7 +637,7 @@ resource "google_compute_per_instance_config" "default" {
 }
 
 resource "google_compute_disk" "disk" {
-  name  = "test-disk-%{random_suffix}"
+  name  = "tf-test-test-disk-%{random_suffix}"
   type  = "pd-ssd"
   zone  = google_compute_instance_group_manager.igm.zone
   image = "debian-8-jessie-v20170523"
@@ -645,7 +645,7 @@ resource "google_compute_disk" "disk" {
 }
 
 resource "google_compute_disk" "disk1" {
-  name  = "test-disk2-%{random_suffix}"
+  name  = "tf-test-test-disk2-%{random_suffix}"
   type  = "pd-ssd"
   zone  = google_compute_instance_group_manager.igm.zone
   image = "debian-cloud/debian-13"

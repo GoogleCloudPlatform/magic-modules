@@ -1,11 +1,9 @@
 resource "google_compute_target_tcp_proxy" "{{$.PrimaryResourceId}}" {
-  provider              = google-beta
   name                  = "{{index $.ResourceIdVars "target_tcp_proxy_name"}}"
   load_balancing_scheme = "INTERNAL_MANAGED"
 }
 
 resource "google_compute_backend_service" "{{$.PrimaryResourceId}}" {
-  provider              = google-beta
   name                  = "{{index $.ResourceIdVars "backend_service_name"}}"
   load_balancing_scheme = "INTERNAL_MANAGED"
   protocol              = "TCP"
@@ -13,7 +11,6 @@ resource "google_compute_backend_service" "{{$.PrimaryResourceId}}" {
 }
 
 resource "google_compute_health_check" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   name     = "{{index $.ResourceIdVars "health_check_name"}}"
 
   https_health_check {
@@ -22,7 +19,6 @@ resource "google_compute_health_check" "{{$.PrimaryResourceId}}" {
 }
 
 resource "google_network_services_tls_route" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   name     = "{{index $.ResourceIdVars "tls_route_name"}}"
 
   target_proxies = [

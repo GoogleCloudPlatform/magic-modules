@@ -120,6 +120,8 @@ func TestAccComputeServiceAttachment_serviceAttachmentConnectedEndpointsOutput(t
 						"google_compute_service_attachment.psc_ilb_service_attachment", "connected_endpoints.0.psc_connection_id"),
 					resource.TestCheckResourceAttrSet(
 						"google_compute_service_attachment.psc_ilb_service_attachment", "connected_endpoints.0.propagated_connection_count"),
+					resource.TestCheckResourceAttrSet(
+						"google_compute_service_attachment.psc_ilb_service_attachment", "service_attachment_id"),
 				),
 			},
 			{
@@ -246,13 +248,13 @@ resource "google_compute_region_backend_service" "producer_l7_ilb_backend_servic
 }
 
 resource "google_compute_region_url_map" "producer_url_map" {
-  name            = "producer-l7-ilb-url-map-%{random_suffix}"
+  name            = "tf-test-producer-l7-ilb-url-map-%{random_suffix}"
   default_service = google_compute_region_backend_service.producer_l7_ilb_backend_service.id
   region          = "us-west2"
 }
 
 resource "google_compute_region_target_http_proxy" "producer_proxy" {
-  name    = "producer-l7-ilb-proxy-%{random_suffix}"
+  name    = "tf-test-producer-l7-ilb-proxy-%{random_suffix}"
   url_map = google_compute_region_url_map.producer_url_map.id
   region  = "us-west2"
 }

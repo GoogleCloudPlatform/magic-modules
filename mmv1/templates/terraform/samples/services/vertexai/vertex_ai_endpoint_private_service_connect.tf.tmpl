@@ -3,7 +3,7 @@ resource "google_compute_network" "default" {
 }
 
 resource "google_vertex_ai_endpoint" "{{$.PrimaryResourceId}}" {
-  name         = "endpoint-name%{random_suffix}"
+  name         = "{{index $.ResourceIdVars "endpoint_name"}}"
   display_name = "sample-endpoint"
   description  = "A sample vertex endpoint"
   location     = "us-central1"

@@ -43,6 +43,7 @@ async:
     resource_inside_response: false
 autogen_async: true
 custom_code:
+  constants: templates/terraform/constants/internal_range.go.tmpl
   custom_delete: templates/terraform/custom_delete/internal_range_retry.go.tmpl
 samples:
   - name: network_connectivity_internal_ranges_basic
@@ -52,9 +53,6 @@ samples:
         resource_id_vars:
           internal_range_name: basic
           network_name: internal-ranges
-        test_vars_overrides:
-          # for backward compatible
-          internal_range_name: '"basic" + randomSuffix'
   - name: network_connectivity_internal_ranges_automatic_reservation
     primary_resource_id: default
     steps:
@@ -76,6 +74,7 @@ samples:
         resource_id_vars:
           internal_range_name: overlap-range
           network_name: internal-ranges
+          subnetwork_name: overlapping-subnet
   - name: network_connectivity_internal_ranges_migration
     primary_resource_id: default
     steps:
@@ -84,9 +83,6 @@ samples:
           internal_range_name: migration
           network_name: internal-ranges
           source_subnet_name: source-subnet
-        test_vars_overrides:
-          # for backward compatible
-          internal_range_name: '"migration" + randomSuffix'
   - name: network_connectivity_internal_ranges_allocation_algoritms
     primary_resource_id: default
     steps:

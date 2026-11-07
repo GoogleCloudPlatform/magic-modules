@@ -1,17 +1,23 @@
 resource "google_secure_source_manager_instance" "instance" {
-    location = "us-central1"
+    location = "asia-east1"
     instance_id = "{{index $.ResourceIdVars "instance_id"}}"
 
     # Prevent accidental deletions.
     deletion_policy = "{{index $.ResourceIdVars "deletion_policy"}}"
 }
 
+resource "google_service_account" "sa" {
+    account_id   = "{{index $.ResourceIdVars "sa_id"}}"
+    display_name = "Test Service Account"
+}
+
 resource "google_secure_source_manager_repository" "{{$.PrimaryResourceId}}" {
-    location = "us-central1"
+    location = "asia-east1"
     repository_id = "{{index $.ResourceIdVars "repository_id"}}"
     instance = google_secure_source_manager_instance.instance.name
 
     description = "This is a test repository"
+    service_account = google_service_account.sa.email
     initial_config {
       default_branch = "main"
       gitignores = ["python"]
