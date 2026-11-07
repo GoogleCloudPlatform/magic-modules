@@ -28,6 +28,8 @@ update_verb: POST
 id_format: '{{env_id}}'
 import_format:
   - '{{env_id}}'
+generate_list_resource: true
+
 timeouts:
   insert_minutes: 5
   update_minutes: 5
