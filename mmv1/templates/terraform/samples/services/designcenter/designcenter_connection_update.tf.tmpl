@@ -8,7 +8,13 @@ resource "google_design_center_connection" "example" {
   destination_component_uri = "{{index $.Vars "destination_component_uri"}}"
 
   destination_component_parameters {
-    key   = "iam_users"
-    value = jsonencode([])
+    key = "iam_users"
+    value = jsonencode([
+      {
+        id    = "example-sa"
+        email = "example-sa@{{index $.Vars "project"}}.iam.gserviceaccount.com"
+        type  = "CLOUD_IAM_SERVICE_ACCOUNT"
+      },
+    ])
   }
 }
