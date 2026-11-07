@@ -78,9 +78,11 @@ properties:
       Description of the application.
   - name: 'appParameters'
     type: Array
+    default_from_api: true
     description: |
       A list of parameters to attach to the deployment source object, which is
-      a catalog entry or an application template snapshot.
+      a catalog entry or an application template snapshot. When unset, the API
+      fills these in from the application template.
     item_type:
       type: NestedObject
       properties:
@@ -231,8 +233,11 @@ properties:
       Deployment project.
   - name: 'connectionConfigs'
     type: Array
+    default_from_api: true
     description: |
-      Connection configurations for the application.
+      Connection configurations for the application. When the application is
+      created or its source changes, the API sets these from the connections
+      in the application template.
     item_type:
       type: NestedObject
       properties:
