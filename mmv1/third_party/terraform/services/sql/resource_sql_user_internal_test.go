@@ -344,49 +344,50 @@ func TestSqlUser_entraidUserLifecycle(t *testing.T) {
 	}
 }
 
-func TestSqlUser_readRemovesUserWhenInstanceIsGone(t *testing.T) {
+func TestSqlUser_readParentNotFound(t *testing.T) {
 	t.Parallel()
-
-	const (
-		project      = "tf-test-project"
-		instanceName = "tf-test-deleted-instance"
-		userName     = "tf-test-user"
-	)
-
-	for _, code := range []int{http.StatusNotFound, http.StatusForbidden} {
-		t.Run(fmt.Sprintf("instance get returns %d", code), func(t *testing.T) {
+	for _, tc := range []struct {
+		name         string
+		instanceCode int
+		wantError    bool
+	}{{"missing instance", 404, false}, {"forbidden instance", 403, true}} {
+		t.Run(tc.name, func(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(code)
-				_, _ = fmt.Fprintf(w, `{"error":{"code":%d,"message":"instance gone"}}`, code)
+				if r.URL.Path == "/sql/v1beta4/projects/test-project/instances/test-instance" {
+					if tc.instanceCode == 200 {
+						fmt.Fprint(w, `{"name":"test-instance","settings":{"activationPolicy":"ALWAYS"}}`)
+						return
+					}
+					w.WriteHeader(tc.instanceCode)
+					fmt.Fprintf(w, `{"error":{"code":%d,"message":"instance lookup failed"}}`, tc.instanceCode)
+					return
+				}
+
+				t.Errorf("unexpected request: %s", r.URL.Path)
+				w.WriteHeader(http.StatusForbidden)
 			}))
 			defer server.Close()
-
-			cfg := &transport_tpg.Config{
-				Context:      context.Background(),
-				Client:       server.Client(),
-				Project:      project,
-				PollInterval: time.Millisecond,
-				CustomEndpoints: map[string]string{
-					"sql_custom_endpoint": server.URL + "/sql/v1beta4/",
-				},
-			}
-
+			cfg := &transport_tpg.Config{Context: context.Background(), Client: server.Client(), Project: "test-project", CustomEndpoints: map[string]string{"sql_custom_endpoint": server.URL + "/sql/v1beta4/"}}
 			res := ResourceSqlUser()
 			d := res.Data(nil)
-			d.SetId(fmt.Sprintf("%s//%s", userName, instanceName))
-			if err := d.Set("instance", instanceName); err != nil {
-				t.Fatal(err)
+			const id = "projects/test-project/instances/test-instance/child"
+			d.SetId(id)
+			for key, value := range map[string]interface{}{"project": "test-project", "instance": "test-instance", "name": "child"} {
+				if err := d.Set(key, value); err != nil {
+					t.Fatal(err)
+				}
 			}
-			if err := d.Set("name", userName); err != nil {
-				t.Fatal(err)
+			err := res.Read(d, cfg)
+			if (err != nil) != tc.wantError {
+				t.Fatalf("Read error = %v, wantError = %v", err, tc.wantError)
 			}
-
-			if err := res.Read(d, cfg); err != nil {
-				t.Fatalf("Read returned an error for a deleted instance: %v", err)
+			wantID := ""
+			if tc.wantError {
+				wantID = id
 			}
-			if d.Id() != "" {
-				t.Fatalf("expected the user to be removed from state, got ID %q", d.Id())
+			if d.Id() != wantID {
+				t.Fatalf("ID = %q, want %q", d.Id(), wantID)
 			}
 		})
 	}
