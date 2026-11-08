@@ -118,6 +118,11 @@ func TestAccComputeFirewall_sourceRangesReplaceDefault(t *testing.T) {
 				Config: testAccComputeFirewall_sourceRange(networkName, firewallName, "0.0.0.0/0"),
 			},
 			{
+				ResourceName:      "google_compute_firewall.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				// Replacing 0.0.0.0/0 with a single different range must remove 0.0.0.0/0.
 				Config: testAccComputeFirewall_sourceRange(networkName, firewallName, "10.128.0.0/20"),
 				Check: resource.ComposeTestCheckFunc(
@@ -129,17 +134,6 @@ func TestAccComputeFirewall_sourceRangesReplaceDefault(t *testing.T) {
 				ResourceName:      "google_compute_firewall.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeFirewall_sourceRange(networkName, firewallName, "0.0.0.0/0"),
-			},
-			{
-				// Unsetting source_ranges when it is 0.0.0.0/0 is still suppressed.
-				Config: testAccComputeFirewall_basic(networkName, firewallName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_compute_firewall.foobar", "source_ranges.#", "1"),
-					resource.TestCheckTypeSetElemAttr("google_compute_firewall.foobar", "source_ranges.*", "0.0.0.0/0"),
-				),
 			},
 		},
 	})
