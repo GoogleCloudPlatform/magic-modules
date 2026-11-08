@@ -343,3 +343,51 @@ func TestSqlUser_entraidUserLifecycle(t *testing.T) {
 		})
 	}
 }
+
+func TestSqlUser_readRemovesUserWhenInstanceIsGone(t *testing.T) {
+	t.Parallel()
+
+	const (
+		project      = "tf-test-project"
+		instanceName = "tf-test-deleted-instance"
+		userName     = "tf-test-user"
+	)
+
+	for _, code := range []int{http.StatusNotFound, http.StatusForbidden} {
+		t.Run(fmt.Sprintf("instance get returns %d", code), func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(code)
+				_, _ = fmt.Fprintf(w, `{"error":{"code":%d,"message":"instance gone"}}`, code)
+			}))
+			defer server.Close()
+
+			cfg := &transport_tpg.Config{
+				Context:      context.Background(),
+				Client:       server.Client(),
+				Project:      project,
+				PollInterval: time.Millisecond,
+				CustomEndpoints: map[string]string{
+					"sql_custom_endpoint": server.URL + "/sql/v1beta4/",
+				},
+			}
+
+			res := ResourceSqlUser()
+			d := res.Data(nil)
+			d.SetId(fmt.Sprintf("%s//%s", userName, instanceName))
+			if err := d.Set("instance", instanceName); err != nil {
+				t.Fatal(err)
+			}
+			if err := d.Set("name", userName); err != nil {
+				t.Fatal(err)
+			}
+
+			if err := res.Read(d, cfg); err != nil {
+				t.Fatalf("Read returned an error for a deleted instance: %v", err)
+			}
+			if d.Id() != "" {
+				t.Fatalf("expected the user to be removed from state, got ID %q", d.Id())
+			}
+		})
+	}
+}
