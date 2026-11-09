@@ -116,8 +116,12 @@ properties:
             type: String
             required: true
             description: |-
-              Required. The name of the referenced connector.
-              Format: projects/{project}/locations/{location}/connectors/{connector}
+              Required. The name of the referenced connector. For Gemini Enterprise, this
+              is either a Data Connector name
+              (`projects/{{project}}/locations/{{location}}/collections/{{collection}}/dataConnector`),
+              an Authorization name
+              (`projects/{{project}}/locations/{{location}}/authorizations/{{authorization}}`),
+              or a connector ID (e.g. `salesforce-connector-prod`).
       - name: geAuthProvider
         type: NestedObject
         send_empty_value: true
@@ -260,7 +264,7 @@ properties:
               - name: idJagAuthProvider
                 type: String
                 description: |-
-                  The resource name of the ID-JAG auth provider. Format: "projects/{project}/locations/{location}/authProviders/{auth_provider}"
+                  The resource name of the ID-JAG auth provider. Format: `projects/{{project}}/locations/{{location}}/authProviders/{{auth_provider}}`
   - name: blockedScopes
     type: Array
     description: |-
@@ -327,3 +331,38 @@ samples:
           auth_provider_id: "example-provider"
         ignore_read_extra:
           - "auth_provider_type_params"
+  - name: "agent_identity_auth_provider_connector_reference"
+    primary_resource_id: "default"
+    steps:
+      - name: "agent_identity_auth_provider_connector_reference"
+        resource_id_vars:
+          auth_provider_id: "connref-provider"
+      - name: "agent_identity_auth_provider_connector_reference_update"
+        resource_id_vars:
+          auth_provider_id: "connref-provider"
+  - name: "agent_identity_auth_provider_xaa"
+    primary_resource_id: "default"
+    steps:
+      - name: "agent_identity_auth_provider_xaa"
+        resource_id_vars:
+          auth_provider_id: "xaa-provider"
+        test_env_vars:
+          project: "PROJECT_NAME"
+      - name: "agent_identity_auth_provider_xaa_update"
+        resource_id_vars:
+          auth_provider_id: "xaa-provider"
+        test_env_vars:
+          project: "PROJECT_NAME"
+  - name: "agent_identity_auth_provider_xaa_jwt"
+    primary_resource_id: "default"
+    steps:
+      - name: "agent_identity_auth_provider_xaa_jwt"
+        resource_id_vars:
+          auth_provider_id: "xaa-jwt-provider"
+        test_env_vars:
+          project: "PROJECT_NAME"
+      - name: "agent_identity_auth_provider_xaa_jwt_update"
+        resource_id_vars:
+          auth_provider_id: "xaa-jwt-provider"
+        test_env_vars:
+          project: "PROJECT_NAME"
