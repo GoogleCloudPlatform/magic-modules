@@ -816,6 +816,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Serviceusage",
         "path" to "./google/services/serviceusage"
     ),
+    "serviceusagev2" to mapOf(
+        "name" to "serviceusagev2",
+        "displayName" to "ServiceUsageV2",
+        "path" to "./google/services/serviceusagev2"
+    ),
     "siteverification" to mapOf(
         "name" to "siteverification",
         "displayName" to "Siteverification",

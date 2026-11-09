@@ -14,6 +14,8 @@
 name: ServiceUsageV2
 display_name: Service Usage v2
 versions:
+  - name: ga
+    base_url: https://serviceusage.googleapis.com/v2/
   - name: beta
     base_url: https://serviceusage.googleapis.com/v2beta/
 scopes:
