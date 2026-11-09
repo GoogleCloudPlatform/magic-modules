@@ -136,7 +136,7 @@ The following arguments are supported:
   management without updating or deleting the resource in the API.
   When set to "DELETE", deleting the resource is allowed.
 
-* <a name="schema"></a>`schema` - (Optional) A JSON schema for the table.
+* `schema` - (Optional) A JSON schema for the table.
 
     ~>**NOTE:** Because this field expects a JSON string, any changes to the
     string will create a diff, even if the JSON itself hasn't changed.
@@ -220,8 +220,7 @@ The following arguments are supported:
     or `projects/{{project}}/locations/{{location}}/connections/{{connection_id}}`.
 
     ~>**NOTE:** If you set `external_data_configuration.connection_id`, the
-    table schema must be specified using the top-level `schema` field
-    [documented above](#schema).
+    table schema must be specified using the top-level `schema` field.
 
 * `csv_options` - (Optional) Additional properties to set if
     `source_format` is set to "CSV". Structure is [documented below](#nested_csv_options).
@@ -272,8 +271,7 @@ The following arguments are supported:
     `google_bigquery_table.schema`
 
     ~>**NOTE:** If you set `external_data_configuration.connection_id`, the
-    table schema must be specified using the top-level `schema` field
-    [documented above](#schema).
+    table schema must be specified using the top-level `schema` field.
 
 * `source_format` - (Optional) The data format. Please see sourceFormat under
     [ExternalDataConfiguration](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#externaldataconfiguration)
@@ -608,7 +606,7 @@ exported:
 
 * `etag` - A hash of the resource.
 
-* `kms_key_version` - The self link or full name of the kms key version used to encrypt this table.
+* `encryption_configuration.0.kms_key_version` - The self link or full name of the kms key version used to encrypt this table.
 
 * `last_modified_time` - The time when this table was last modified, in milliseconds since the epoch.
 

@@ -31,7 +31,6 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-exclude_sweeper: true
 async:
   type: OpAsync
   operation:
@@ -41,6 +40,12 @@ async:
     resource_inside_response: true
 autogen_async: true
 include_in_tgc_next: true
+sweeper:
+  # Cloud IDS endpoints are zonal, so the sweeper's default region-shaped
+  # location ("us-central1") would list nothing. Pin it to the zone the
+  # acceptance tests actually create endpoints in.
+  url_substitutions:
+    - location: us-central1-f
 custom_code:
 samples:
   - name: cloudids_endpoint

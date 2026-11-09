@@ -309,9 +309,6 @@ func runMake(downstreamRepo *source.Repo, command string, rnr ExecRunner) error 
 			if _, err := rnr.Run("go", []string{"mod", "tidy"}, nil); err != nil {
 				return err
 			}
-			if _, err := rnr.Run("make", []string{"build"}, nil); err != nil {
-				fmt.Println("Error building tgc: ", err)
-			}
 			if err := rnr.PopDir(); err != nil {
 				return err
 			}
@@ -321,11 +318,6 @@ func runMake(downstreamRepo *source.Repo, command string, rnr ExecRunner) error 
 			return err
 		}
 	case "terraform":
-		// --- legacy -- can be cleaned up after go/mm-pull/13722 is submitted
-		if _, err := rnr.Run("make", []string{"clean-provider", "OUTPUT_PATH=" + downstreamRepo.Path}, nil); err != nil {
-			return err
-		}
-		// -------------------------------------------------------------------
 		if _, err := rnr.Run("make", []string{"provider", "OUTPUT_PATH=" + downstreamRepo.Path, fmt.Sprintf("VERSION=%s", downstreamRepo.Version)}, nil); err != nil {
 			return err
 		}
@@ -334,6 +326,13 @@ func runMake(downstreamRepo *source.Repo, command string, rnr ExecRunner) error 
 }
 
 func getPullRequest(baseBranch, ref string, gh GithubClient) (*github.PullRequest, error) {
+	if message, err := gh.GetCommitMessage("GoogleCloudPlatform", "magic-modules", ref); err == nil {
+		if prNumber := parsePRNumberFromCommitMessage(message); prNumber != "" {
+			if pr, err := gh.GetPullRequest(prNumber); err == nil && pr.MergeCommitSha == ref {
+				return &pr, nil
+			}
+		}
+	}
 	prs, err := gh.GetPullRequests("closed", baseBranch, "updated", "desc")
 	if err != nil {
 		return nil, err

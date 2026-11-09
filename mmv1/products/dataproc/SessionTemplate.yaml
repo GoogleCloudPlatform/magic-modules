@@ -36,6 +36,8 @@ sweeper:
     - region: us-west1
     - region: us-east1
 autogen_async: true
+error_retry_predicates:
+  - transport_tpg.DataprocResourceNotReady
 custom_code:
   custom_import: templates/terraform/custom_import/set_id_name_with_slashes.go.tmpl
 samples:

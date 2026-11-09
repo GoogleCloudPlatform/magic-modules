@@ -165,16 +165,10 @@ properties:
       System-generated unique identifier for the resource.
     output: true
   - name: state
-    type: Enum
+    type: String
     description: |
       State of the Cluster.
     output: true
-    enum_values:
-      - ACTIVE
-      - CREATING
-      - UPDATING
-      - DELETING
-      - REPAIRING
   - name: nodeTypeConfigs
     type: Map
     description: |

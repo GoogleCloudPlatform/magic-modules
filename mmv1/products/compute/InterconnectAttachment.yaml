@@ -29,6 +29,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+# Sweeper skipped because pre_delete must wait for attachment provisioning to finish before deletion.
+exclude_sweeper: true
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -216,17 +218,10 @@ properties:
       - 'PARTNER_PROVIDER'
       - 'L2_DEDICATED'
   - name: 'state'
-    type: Enum
+    type: String
     description: |
       [Output Only] The current state of this attachment's functionality.
     output: true
-    enum_values:
-      - 'ACTIVE'
-      - 'DEFUNCT'
-      - 'PARTNER_REQUEST_RECEIVED'
-      - 'PENDING_CUSTOMER'
-      - 'PENDING_PARTNER'
-      - 'STATE_UNSPECIFIED'
   - name: 'googleReferenceId'
     type: String
     description: |

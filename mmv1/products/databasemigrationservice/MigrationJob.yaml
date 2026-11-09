@@ -83,6 +83,9 @@ samples:
           source_sqldb_user: username
   - name: database_migration_service_migration_job_postgres_to_alloydb
     primary_resource_id: psqltoalloydb
+    # Destination AlloyDB instance in us-central1 experiences resource pool stockouts in CI
+    # https://github.com/hashicorp/terraform-provider-google/issues/29342
+    skip_vcr: true
     steps:
       - name: database_migration_service_migration_job_postgres_to_alloydb
         resource_id_vars:
@@ -137,17 +140,10 @@ properties:
     client_side: true
     default_value: true
   - name: state
-    type: Enum
+    type: String
     description: |
       The current migration job state.
     output: true
-    enum_values:
-      - DRAFT
-      - NOT_STARTED
-      - RUNNING
-      - COMPLETED
-      - STOPPED
-      - FAILED
   - name: desiredState
     type: Enum
     api_name: state
@@ -160,17 +156,10 @@ properties:
       - NOT_STARTED
       - RUNNING
   - name: phase
-    type: Enum
+    type: String
     description: |
       The current migration job phase.
     output: true
-    enum_values:
-      - FULL_DUMP
-      - CDC
-      - PROMOTE_IN_PROGRESS
-      - WAITING_FOR_SOURCE_WRITES_TO_STOP
-      - PREPARING_THE_DUMP
-      - READY_FOR_PROMOTE
   - name: error
     type: NestedObject
     description: |

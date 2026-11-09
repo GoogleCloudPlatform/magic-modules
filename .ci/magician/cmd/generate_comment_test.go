@@ -44,6 +44,7 @@ func TestExecGenerateComment(t *testing.T) {
 		"terraform-provider-google",
 		"terraform-provider-google-beta",
 		"terraform-google-conversion",
+		"docs-examples",
 	} {
 		variablePathOld := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repo)
 		variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repo)
@@ -86,14 +87,8 @@ func TestExecGenerateComment(t *testing.T) {
 		"Run": {
 			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/terraform-provider-google", "/mock/dir/tpg"}, map[string]string(nil)},
 			{"/mock/dir/tpg", "git", []string{"fetch", "origin", "auto-pr-123456-old"}, map[string]string(nil)},
-			{"/mock/dir/tpg", "git", []string{"checkout", "auto-pr-123456-old"}, map[string]string(nil)},
-			{"/mock/dir/tpg", "make", []string{"build"}, map[string]string(nil)},
-			{"/mock/dir/tpg", "git", []string{"checkout", "auto-pr-123456"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/terraform-provider-google-beta", "/mock/dir/tpgb"}, map[string]string(nil)},
 			{"/mock/dir/tpgb", "git", []string{"fetch", "origin", "auto-pr-123456-old"}, map[string]string(nil)},
-			{"/mock/dir/tpgb", "git", []string{"checkout", "auto-pr-123456-old"}, map[string]string(nil)},
-			{"/mock/dir/tpgb", "make", []string{"build"}, map[string]string(nil)},
-			{"/mock/dir/tpgb", "git", []string{"checkout", "auto-pr-123456"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/terraform-google-conversion", "/mock/dir/tgc"}, map[string]string(nil)},
 			{"/mock/dir/tgc", "git", []string{"fetch", "origin", "auto-pr-123456-old"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/docs-examples", "/mock/dir/tfoics"}, map[string]string(nil)},
@@ -111,6 +106,7 @@ func TestExecGenerateComment(t *testing.T) {
 			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, diffProcessorEnv},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-tests", "/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-unreadable-tests", "/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-docs", "/mock/dir/tpgb"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-identity", "/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"schema-diff"}, map[string]string(nil)},
@@ -152,6 +148,182 @@ func TestExecGenerateComment(t *testing.T) {
 	}
 }
 
+func TestExecGenerateComment_SkipUnchangedRepos(t *testing.T) {
+	t.Run("all repos unchanged skips all clones", func(t *testing.T) {
+		mr := NewMockRunner()
+		gh := &mockGithub{
+			calledMethods: make(map[string][][]any),
+		}
+		ctlr := source.NewController("/mock/dir/go", "modular-magician", "*******", mr)
+		for _, repo := range []string{
+			"terraform-provider-google",
+			"terraform-provider-google-beta",
+			"terraform-google-conversion",
+			"docs-examples",
+		} {
+			variablePathOld := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repo)
+			variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repo)
+			if err := mr.WriteFile(variablePathOld, "1a2a3a4a\n"); err != nil {
+				t.Fatalf("Error writing file: %s", err)
+			}
+			if err := mr.WriteFile(variablePath, "1a2a3a4a"); err != nil {
+				t.Fatalf("Error writing file: %s", err)
+			}
+		}
+
+		err := execGenerateComment(
+			123456,
+			"*******",
+			"build1",
+			"17",
+			"project1",
+			"sha1",
+			gh,
+			mr,
+			ctlr,
+		)
+		assert.NoError(t, err)
+
+		for _, method := range []string{"Run", "Copy", "RemoveAll"} {
+			if actualCalls, ok := mr.Calls(method); ok {
+				t.Fatalf("Expected no calls for %s when all SHAs match, got %v", method, actualCalls)
+			}
+		}
+
+		for method, expectedCalls := range map[string][][]any{
+			"PostBuildStatus": {
+				{"123456", "terraform-provider-multiple-resources", "success", "https://console.cloud.google.com/cloud-build/builds;region=global/build1;step=17?project=project1", "sha1"},
+				{"123456", "terraform-provider-breaking-change-test", "success", "https://console.cloud.google.com/cloud-build/builds;region=global/build1;step=17?project=project1", "sha1"},
+				{"123456", "terraform-provider-missing-service-labels", "success", "https://console.cloud.google.com/cloud-build/builds;region=global/build1;step=17?project=project1", "sha1"},
+			},
+			"PostComment": {{"123456", "Hi there, I'm the Modular magician. I've detected the following information about your changes for commit sha1:\n\n## Diff report\n\nYour PR hasn't generated any diffs, but I'll let you know if a future commit does.\n\n\n\n\n"}},
+		} {
+			if actualCalls, ok := gh.calledMethods[method]; !ok {
+				t.Fatalf("Found no calls for %s", method)
+			} else if !reflect.DeepEqual(actualCalls, expectedCalls) {
+				t.Fatalf("Wrong calls for %s, got %v, expected %v", method, actualCalls, expectedCalls)
+			}
+		}
+	})
+
+	t.Run("only changed repos are cloned", func(t *testing.T) {
+		mr := NewMockRunner()
+		gh := &mockGithub{
+			calledMethods: make(map[string][][]any),
+		}
+		ctlr := source.NewController("/mock/dir/go", "modular-magician", "*******", mr)
+		diffProcessorEnv := map[string]string{
+			"NEW_REF": "auto-pr-123456",
+			"OLD_REF": "auto-pr-123456-old",
+			"PATH":    os.Getenv("PATH"),
+			"GOPATH":  os.Getenv("GOPATH"),
+			"HOME":    os.Getenv("HOME"),
+		}
+		for _, repo := range []string{
+			"terraform-provider-google",
+			"terraform-google-conversion",
+			"docs-examples",
+		} {
+			if err := mr.WriteFile(fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repo), "1a2a3a4a"); err != nil {
+				t.Fatalf("Error writing file: %s", err)
+			}
+			if err := mr.WriteFile(fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repo), "1a2a3a4a"); err != nil {
+				t.Fatalf("Error writing file: %s", err)
+			}
+		}
+		if err := mr.WriteFile("/workspace/commitSHA_modular-magician_terraform-provider-google-beta-old.txt", "1a2a3a4a"); err != nil {
+			t.Fatalf("Error writing file: %s", err)
+		}
+		if err := mr.WriteFile("/workspace/commitSHA_modular-magician_terraform-provider-google-beta.txt", "1a2a3a4b"); err != nil {
+			t.Fatalf("Error writing file: %s", err)
+		}
+
+		err := execGenerateComment(
+			123456,
+			"*******",
+			"build1",
+			"17",
+			"project1",
+			"sha1",
+			gh,
+			mr,
+			ctlr,
+		)
+		assert.NoError(t, err)
+
+		expectedRunCalls := []ParameterList{
+			{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "-b", "auto-pr-123456", "https://modular-magician:*******@github.com/modular-magician/terraform-provider-google-beta", "/mock/dir/tpgb"}, map[string]string(nil)},
+			{"/mock/dir/tpgb", "git", []string{"fetch", "origin", "auto-pr-123456-old"}, map[string]string(nil)},
+			{"/mock/dir/tpgb", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--shortstat"}, map[string]string(nil)},
+			{"/mock/dir/tpgb", "git", []string{"diff", "origin/auto-pr-123456-old", "origin/auto-pr-123456", "--name-only"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, diffProcessorEnv},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-tests", "/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-unreadable-tests", "/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-docs", "/mock/dir/tpgb"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-identity", "/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"schema-diff"}, map[string]string(nil)},
+		}
+		actualRunCalls, ok := mr.Calls("Run")
+		if !ok {
+			t.Fatalf("Found no calls for Run")
+		}
+		assert.Equal(t, expectedRunCalls, actualRunCalls)
+	})
+
+	t.Run("missing commit SHA file skips clone and records error", func(t *testing.T) {
+		mr := NewMockRunner()
+		gh := &mockGithub{
+			calledMethods: make(map[string][][]any),
+		}
+		ctlr := source.NewController("/mock/dir/go", "modular-magician", "*******", mr)
+		// terraform-provider-google is missing commitSHA .txt file.
+		// terraform-provider-google-beta has .txt file but is missing -old.txt file.
+		if err := mr.WriteFile("/workspace/commitSHA_modular-magician_terraform-provider-google-beta.txt", "1a2a3a4a"); err != nil {
+			t.Fatalf("Error writing file: %s", err)
+		}
+		for _, repo := range []string{
+			"terraform-google-conversion",
+			"docs-examples",
+		} {
+			if err := mr.WriteFile(fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repo), "1a2a3a4a"); err != nil {
+				t.Fatalf("Error writing file: %s", err)
+			}
+			if err := mr.WriteFile(fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repo), "1a2a3a4a"); err != nil {
+				t.Fatalf("Error writing file: %s", err)
+			}
+		}
+
+		err := execGenerateComment(
+			123456,
+			"*******",
+			"build1",
+			"17",
+			"project1",
+			"sha1",
+			gh,
+			mr,
+			ctlr,
+		)
+		assert.NoError(t, err)
+
+		for _, method := range []string{"Run", "Copy", "RemoveAll"} {
+			if actualCalls, ok := mr.Calls(method); ok {
+				t.Fatalf("Expected no calls for %s when SHA files are missing or unchanged, got %v", method, actualCalls)
+			}
+		}
+
+		postCommentCalls, ok := gh.calledMethods["PostComment"]
+		if !ok || len(postCommentCalls) != 1 {
+			t.Fatalf("Expected 1 call to PostComment, got %v", postCommentCalls)
+		}
+		comment, _ := postCommentCalls[0][1].(string)
+		assert.Contains(t, comment, "## Errors")
+		assert.Contains(t, comment, "`google` provider:\n- Failed to read commit sha from file")
+		assert.Contains(t, comment, "`google-beta` provider:\n- Failed to read old commit sha from file")
+	})
+}
+
 func TestFormatDiffComment(t *testing.T) {
 	cases := map[string]struct {
 		data               diffCommentData
@@ -166,6 +338,7 @@ func TestFormatDiffComment(t *testing.T) {
 				"## Breaking Change(s) Detected",
 				"## Errors",
 				"## Missing test report",
+				"## Unreadable test report",
 			},
 		},
 		"errors are displayed": {
@@ -283,6 +456,54 @@ func TestFormatDiffComment(t *testing.T) {
 				"generated some diffs",
 				"## Breaking Change(s) Detected",
 				"## Errors",
+			},
+		},
+		"new unreadable tests are displayed": {
+			data: diffCommentData{
+				UnreadableTests: &UnreadableTestsReport{
+					NewUnreadableTests: map[string]string{
+						"TestAccB": "failed to find variable declaration config",
+						"TestAccA": "errors parsing hcl",
+					},
+					StaleUnreadableTests: []string{},
+				},
+			},
+			expectedStrings: []string{
+				"## Unreadable test report",
+				"Missing test detection may be incomplete",
+				"- `TestAccA`: errors parsing hcl\n- `TestAccB`: failed to find variable declaration config",
+			},
+			notExpectedStrings: []string{
+				"These tests can now be read",
+				"## Errors",
+			},
+		},
+		"stale unreadable tests are displayed": {
+			data: diffCommentData{
+				UnreadableTests: &UnreadableTestsReport{
+					NewUnreadableTests:   map[string]string{},
+					StaleUnreadableTests: []string{"TestAccA", "TestAccB"},
+				},
+			},
+			expectedStrings: []string{
+				"## Unreadable test report",
+				"`KnownUnreadableTests` in `tools/diff-processor/detector/unreadable_tests.go`",
+				"`tools/diff-processor/detector/unreadable_tests.go`.\n\n- `TestAccA`\n- `TestAccB`",
+			},
+			notExpectedStrings: []string{
+				"Missing test detection may be incomplete",
+				"## Errors",
+			},
+		},
+		"empty unreadable test report is not displayed": {
+			data: diffCommentData{
+				UnreadableTests: &UnreadableTestsReport{
+					NewUnreadableTests:   map[string]string{},
+					StaleUnreadableTests: []string{},
+				},
+			},
+			notExpectedStrings: []string{
+				"## Unreadable test report",
 			},
 		},
 		"missing docs are displayed": {
@@ -603,6 +824,24 @@ func TestFileToResource(t *testing.T) {
 	}
 }
 
+func TestChangedServices(t *testing.T) {
+	got := changedServices([]string{
+		"google-beta/services/compute/resource_compute_instance.go",
+		"google-beta/services/container/resource_container_cluster_test.go",
+		"google-beta/services/compute/resource_compute_disk_test.go",
+		"google-beta/provider/provider.go",
+		"website/docs/r/compute_instance.html.markdown",
+		"google-beta/services/README.md",
+		"",
+	})
+	if want := []string{"compute", "container"}; !reflect.DeepEqual(got, want) {
+		t.Errorf("changedServices() = %v, want %v", got, want)
+	}
+	if got := changedServices(nil); len(got) != 0 {
+		t.Errorf("changedServices(nil) = %v, want no services", got)
+	}
+}
+
 func TestPathChanged(t *testing.T) {
 	cases := map[string]struct {
 		path         string
@@ -664,6 +903,16 @@ func TestCheckDocumentFrontmatter(t *testing.T) {
 subcategory: Example Subcategory
 ---	
 `,
+		"missingclosing.markdown": `
+---
+subcategory: Example Subcategory
+`,
+		"invalidyaml.markdown": `
+---
+subcategory: [unclosed
+---
+`,
+		"crlf.markdown": "\r\n---\r\nsubcategory: Example Subcategory\r\n--- \t\r\n",
 		"sample.markdown": `
 ---
 subcategory: Example Subcategory
@@ -714,6 +963,16 @@ random: Example Subcategory
 			wantErr:      true,
 		},
 		{
+			name:         "missing closing delimiter",
+			changedFiles: []string{"website/docs/r/missingclosing.markdown"},
+			wantErr:      true,
+		},
+		{
+			name:         "invalid yaml frontmatter",
+			changedFiles: []string{"website/docs/r/invalidyaml.markdown"},
+			wantErr:      true,
+		},
+		{
 			name:         "markdown not exist",
 			changedFiles: []string{"website/docs/d/sample.markdown"},
 			wantErr:      true,
@@ -721,6 +980,11 @@ random: Example Subcategory
 		{
 			name:         "correct format",
 			changedFiles: []string{"website/docs/r/sample.markdown"},
+			wantErr:      false,
+		},
+		{
+			name:         "correct format with CRLF",
+			changedFiles: []string{"website/docs/r/crlf.markdown"},
 			wantErr:      false,
 		},
 	}

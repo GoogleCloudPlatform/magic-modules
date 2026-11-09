@@ -9,5 +9,9 @@ resource "google_oracle_database_cloud_exadata_infrastructure" "{{$.PrimaryResou
     storage_count= "3"
   }
 
+  labels = {
+    "label-one" = "{{index $.Vars "label_value"}}"
+  }
+
   deletion_protection = "{{index $.ResourceIdVars "deletion_protection"}}"
 }

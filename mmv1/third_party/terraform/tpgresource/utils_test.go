@@ -6,8 +6,9 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
-	"github.com/hashicorp/errwrap"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/hashicorp/terraform-provider-google/google/services/cloudrun"
@@ -976,9 +977,6 @@ func TestConflictError(t *testing.T) {
 	if !tpgresource.IsConflictError(confErr) {
 		t.Error("did not find that a 409 was a conflict error.")
 	}
-	if !tpgresource.IsConflictError(errwrap.Wrapf("wrap", confErr)) {
-		t.Error("did not find that a wrapped (errwrap) 409 was a conflict error.")
-	}
 	if !tpgresource.IsConflictError(fmt.Errorf("wrap: %w", confErr)) {
 		t.Error("did not find that a wrapped (fmt.Errorf) 409 was a conflict error.")
 	}
@@ -987,9 +985,6 @@ func TestConflictError(t *testing.T) {
 	}
 	if !tpgresource.IsConflictError(confErr) {
 		t.Error("did not find that a 412 was a conflict error.")
-	}
-	if !tpgresource.IsConflictError(errwrap.Wrapf("wrap", confErr)) {
-		t.Error("did not find that a wrapped 412 was a conflict error.")
 	}
 	if !tpgresource.IsConflictError(fmt.Errorf("wrap: %w", confErr)) {
 		t.Error("did not find that a wrapped (fmt.Errorf) 412 was a conflict error.")
@@ -1268,6 +1263,49 @@ func TestNormalizeIamPrincipalCasing(t *testing.T) {
 	}
 }
 
+func TestCanonicalizeIp(t *testing.T) {
+	cases := map[string]struct {
+		Input    interface{}
+		Expected interface{}
+	}{
+		"nil": {
+			Input:    nil,
+			Expected: nil,
+		},
+		"empty string": {
+			Input:    "",
+			Expected: "",
+		},
+		"IPv4": {
+			Input:    "10.0.0.1",
+			Expected: "10.0.0.1",
+		},
+		"IPv6 full": {
+			Input:    "2600:1900:4000:90ae:0:0:0:0",
+			Expected: "2600:1900:4000:90ae::",
+		},
+		"IPv6 compressed": {
+			Input:    "2600:1900:4000:90ae::",
+			Expected: "2600:1900:4000:90ae::",
+		},
+		"non-ip string": {
+			Input:    "not-an-ip",
+			Expected: "not-an-ip",
+		},
+		"integer": {
+			Input:    80,
+			Expected: 80,
+		},
+	}
+
+	for tn, tc := range cases {
+		actual := tpgresource.CanonicalizeIp(tc.Input)
+		if !reflect.DeepEqual(actual, tc.Expected) {
+			t.Errorf("%s failed: expected %#v, got %#v", tn, tc.Expected, actual)
+		}
+	}
+}
+
 func TestReducedPrefixedUniqueId(t *testing.T) {
 	prefix := "gh29660-cbd-replace-probe-name-prefix-long-ab"
 	suffixRegex := regexp.MustCompile(`^[0-9a-z]+$`)
@@ -1288,5 +1326,26 @@ func TestReducedPrefixedUniqueId(t *testing.T) {
 			t.Fatalf("ReducedPrefixedUniqueId(%q) returned duplicate %q after %d calls", prefix, got, i)
 		}
 		seen[got] = true
+	}
+}
+
+func TestRetry_VcrReplaying(t *testing.T) {
+	attempts := 0
+	start := time.Now()
+	err := tpgresource.Retry(5*time.Second, time.Millisecond, func() *retry.RetryError {
+		attempts++
+		if attempts < 3 {
+			return retry.RetryableError(fmt.Errorf("transient error %d", attempts))
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("Unexpected error from tpgresource.Retry: %v", err)
+	}
+	if attempts != 3 {
+		t.Fatalf("Expected 3 attempts, got %d", attempts)
+	}
+	if elapsed := time.Since(start); elapsed > 100*time.Millisecond {
+		t.Fatalf("Expected tpgresource.Retry to poll at 1ms in REPLAYING mode, took %v", elapsed)
 	}
 }

@@ -297,6 +297,10 @@ type Resource struct {
 	// resource's service package (for example, from custom_code.constants).
 	ErrorAbortPredicates []string `yaml:"error_abort_predicates,omitempty"`
 
+	// If true, retries the Create and Update requests when the async operation
+	// fails with a retryable error matching ErrorRetryPredicates.
+	ErrorRetryOnAsync bool `yaml:"error_retry_on_async,omitempty"`
+
 	// Optional attributes for declaring a resource's current version and generating
 	// state_upgrader code to the output .go file from files stored at
 	// mmv1/templates/terraform/state_migrations/
@@ -450,6 +454,10 @@ type Resource struct {
 
 	// Runtime contains information about the currently-running generation process.
 	Runtime Runtime `yaml:"-"`
+
+	// Map of provider version (e.g. ga, beta, nightly) to the MV API version
+	// string to be attached in all request headers.
+	ApiVersions map[string]string `yaml:"api_version,omitempty"`
 }
 
 type TestConfig struct {
@@ -631,6 +639,12 @@ func (r *Resource) Validate() (es []error) {
 		es = append(es, fmt.Errorf("value on `update_verb` should be one of %#v", allowed))
 	}
 
+	for k := range r.ApiVersions {
+		if !slices.Contains(product.ORDER, k) {
+			es = append(es, fmt.Errorf("invalid provider version %q in `api_version` for resource %s; must be one of %v", k, r.Name, product.ORDER))
+		}
+	}
+
 	for _, property := range google.Concat(r.AllProperties(), r.VirtualFields) {
 		es = append(es, property.Validate(r.Name)...)
 	}
@@ -697,6 +711,27 @@ func (r Resource) ServiceVersion() string {
 		return extractVersionFromBaseUrl(r.CaiBaseUrl)
 	}
 	return extractVersionFromBaseUrl(r.BaseUrl)
+}
+
+// ApiVersion returns the MV API version for TargetVersionName, falling back
+// to the closest lower version in product.ORDER (matching VersionObjOrClosest).
+func (r Resource) ApiVersion() string {
+	if len(r.ApiVersions) == 0 {
+		return ""
+	}
+	name := r.TargetVersionName
+	if name == "" {
+		name = product.ORDER[0]
+	}
+	if v, ok := r.ApiVersions[name]; ok {
+		return v
+	}
+	for i := slices.Index(product.ORDER, name) - 1; i >= 0; i-- {
+		if v, ok := r.ApiVersions[product.ORDER[i]]; ok {
+			return v
+		}
+	}
+	return ""
 }
 
 func extractVersionFromBaseUrl(baseUrl string) string {
@@ -1177,7 +1212,11 @@ func (r *Resource) addLabelsFields(props []*Type, parent *Type, labels *Type) []
 			r.CustomDiff = append(r.CustomDiff, "tpgresource.SetLabelsDiff")
 		}
 	} else if parent.Name == "metadata" {
-		r.CustomDiff = append(r.CustomDiff, "tpgresource.SetMetadataLabelsDiff")
+		if idx := slices.Index(r.CustomDiff, "tpgresource.SetMetadataAnnotationsDiff"); idx != -1 {
+			r.CustomDiff[idx] = "tpgresource.SetMetadataLabelsAndAnnotationsDiff"
+		} else {
+			r.CustomDiff = append(r.CustomDiff, "tpgresource.SetMetadataLabelsDiff")
+		}
 	}
 
 	terraformLabelsField := buildTerraformLabelsField("labels", parent, labels)
@@ -1214,7 +1253,11 @@ func (r *Resource) addAnnotationsFields(props []*Type, parent *Type, annotations
 	if parent == nil {
 		r.CustomDiff = append(r.CustomDiff, "tpgresource.SetAnnotationsDiff")
 	} else if parent.Name == "metadata" {
-		r.CustomDiff = append(r.CustomDiff, "tpgresource.SetMetadataAnnotationsDiff")
+		if idx := slices.Index(r.CustomDiff, "tpgresource.SetMetadataLabelsDiff"); idx != -1 {
+			r.CustomDiff[idx] = "tpgresource.SetMetadataLabelsAndAnnotationsDiff"
+		} else {
+			r.CustomDiff = append(r.CustomDiff, "tpgresource.SetMetadataAnnotationsDiff")
+		}
 	}
 
 	effectiveAnnotationsField := buildEffectiveLabelsField("annotations", annotations)
@@ -1912,7 +1955,7 @@ func (r Resource) IamSelfLinkIdentifiers() []string {
 func (r Resource) IamResourceProperties() []*Type {
 	urlProperties := make([]*Type, 0)
 	for _, param := range r.IamResourceParams() {
-		if param == "project" || param == "organization" {
+		if param == "project" {
 			continue
 		}
 
@@ -2687,7 +2730,7 @@ func (r Resource) ShouldGenerateSweepers() bool {
 	if !urlContainsOnlyAllowedKeys(r.ListUrlTemplate(), allowedKeys) {
 		return false
 	}
-	if r.ExcludeSweeper || r.CustomCode.CustomDelete != "" || r.CustomCode.PreDelete != "" || r.CustomCode.PostDelete != "" || r.ExcludeDelete {
+	if r.ExcludeSweeper || r.CustomCode.CustomDelete != "" || r.CustomCode.PostDelete != "" || r.ExcludeDelete || (r.DeleteVerb != "" && strings.ToUpper(r.DeleteVerb) != "DELETE") {
 		return false
 	}
 	return true

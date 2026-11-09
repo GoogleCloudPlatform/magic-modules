@@ -1,0 +1,29 @@
+resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourceId}}" {
+  project                  = "{{index $.TestEnvVars "project_number"}}"
+  location                 = "us"
+  analyst_agent_persona_id = "{{index $.ResourceIdVars "persona_id"}}"
+  display_name             = "Test Analyst Persona MCP Headers"
+  display_description      = "Sample analyst agent persona description"
+  model_description        = "Sample model description"
+  role                     = "ANALYST_ROLE_GENERIC_FINANCE_ANALYST"
+
+  mcp_data_sources {
+    server_url        = "https://mcp.example.com"
+    display_name      = "Sample MCP Source"
+    description       = "Sample MCP data source description"
+    enabled           = true
+    prompt            = "Use this server for queries"
+    session_id_header = "X-Custom-Session-Id"
+    task_id_header    = "X-Custom-Task-Id"
+
+    request_headers {
+      header_name = "X-Custom-Static"
+      value       = "initial-static-value"
+    }
+
+    request_headers {
+      header_name   = "X-Custom-User"
+      dynamic_value = "USER_ID"
+    }
+  }
+}

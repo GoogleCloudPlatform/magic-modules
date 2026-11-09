@@ -269,3 +269,26 @@ func TestMergePullRequest(t *testing.T) {
 		}
 	})
 }
+
+func TestPostBuildStatus_OmitsEmptyTargetURL(t *testing.T) {
+	client := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost && r.URL.Path == "/repos/GoogleCloudPlatform/magic-modules/statuses/abc1234" {
+			var body map[string]any
+			if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+				t.Fatalf("failed to decode request body: %v", err)
+			}
+			if _, exists := body["target_url"]; exists {
+				t.Errorf("expected target_url to be omitted when empty, got: %v", body["target_url"])
+			}
+			w.WriteHeader(http.StatusCreated)
+			w.Write([]byte(`{"state":"success"}`))
+			return
+		}
+		t.Errorf("unexpected request: %s %s", r.Method, r.URL.Path)
+		w.WriteHeader(http.StatusNotFound)
+	})
+
+	if err := client.PostBuildStatus("12345", "pr-type-classifier", "success", "", "abc1234"); err != nil {
+		t.Fatalf("expected no error, got: %v", err)
+	}
+}

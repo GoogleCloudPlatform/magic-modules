@@ -57,11 +57,14 @@ samples:
         resource_id_vars:
           bucket_id: my-bucket
           link_id: mylink
+        vars:
+          project: my-project-name
         test_vars_overrides:
           # for backward compatible
           link_id: '"mylink" + randomSuffix'
+          project: 'resourcemanager.BootstrapProject(t, "tf-boot-loglink1-", envvar.GetTestBillingAccountFromEnv(t), []string{"logging.googleapis.com", "bigquery.googleapis.com"}).ProjectId'
         test_env_vars:
-          project: PROJECT_NAME
+          billing_account: BILLING_ACCT
   - name: logging_linked_dataset_all_params
     primary_resource_id: logging_linked_dataset
     steps:
@@ -69,11 +72,14 @@ samples:
         resource_id_vars:
           bucket_id: my-bucket
           link_id: mylink
+        vars:
+          project: my-project-name
         test_vars_overrides:
           # for backward compatible
           link_id: '"mylink" + randomSuffix'
+          project: 'resourcemanager.BootstrapProject(t, "tf-boot-loglink2-", envvar.GetTestBillingAccountFromEnv(t), []string{"logging.googleapis.com", "bigquery.googleapis.com"}).ProjectId'
         test_env_vars:
-          project: PROJECT_NAME
+          billing_account: BILLING_ACCT
 parameters:
   - name: linkId
     type: String
@@ -121,17 +127,10 @@ properties:
       and "2014-10-02T15:01:23.045123456Z".
     output: true
   - name: lifecycleState
-    type: Enum
+    type: String
     description: |
       Output only. The linked dataset lifecycle state.
     output: true
-    enum_values:
-      - LIFECYCLE_STATE_UNSPECIFIED
-      - ACTIVE
-      - DELETE_REQUESTED
-      - UPDATING
-      - CREATING
-      - FAILED
   - name: bigqueryDataset
     type: NestedObject
     description: |

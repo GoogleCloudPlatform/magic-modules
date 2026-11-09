@@ -1,3 +1,13 @@
+resource "google_tags_tag_key" "tag_key1" {
+  parent     = "organizations/{{index $.ResourceIdVars "org_id"}}"
+  short_name = "{{index $.ResourceIdVars "key_short_name"}}"
+}
+
+resource "google_tags_tag_value" "tag_value1" {
+  parent     = google_tags_tag_key.tag_key1.id
+  short_name = "{{index $.ResourceIdVars "value_short_name"}}"
+}
+
 resource "google_compute_network" "default" {
   name                    = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
   auto_create_subnetworks = false
@@ -6,7 +16,7 @@ resource "google_compute_network" "default" {
 resource "google_compute_subnetwork" "default" {
   name          = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
   ip_cidr_range = "10.0.0.0/24"
-  region        = "us-central1"
+  region        = "us-west4"
   network       = google_compute_network.default.name
 }
 
@@ -14,8 +24,8 @@ resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
   workstation_cluster_id = "{{index $.ResourceIdVars "workstation_cluster_name"}}"
   network                = google_compute_network.default.id
   subnetwork             = google_compute_subnetwork.default.id
-  location               = "us-central1"
-  
+  location               = "us-west4"
+
   labels = {
     "label" = "key"
   }
@@ -25,19 +35,36 @@ resource "google_workstations_workstation_cluster" "{{$.PrimaryResourceId}}" {
   }
 }
 
+resource "google_service_account" "default" {
+  account_id   = "{{index $.ResourceIdVars "account_id"}}"
+  display_name = "Service Account"
+}
+
 resource "google_workstations_workstation_config" "{{$.PrimaryResourceId}}" {
   workstation_config_id  = "{{index $.ResourceIdVars "workstation_config_name"}}"
   workstation_cluster_id = google_workstations_workstation_cluster.{{$.PrimaryResourceId}}.workstation_cluster_id
-  location   		         = "us-central1"
+  location               = "us-west4"
+
+  enable_audit_agent = {{index $.Vars "enable_audit_agent"}}
 
   host {
     gce_instance {
-      machine_type                = "e2-standard-4"
+      machine_type                = "n2d-standard-2"
       boot_disk_size_gb           = 35
-      disable_public_ip_addresses = true
+      pool_size                   = 1
+      service_account             = google_service_account.default.email
+      service_account_scopes      = ["https://www.googleapis.com/auth/cloud-platform"]
+      disable_public_ip_addresses = false
+      tags                        = ["foo", "bar"]
+
       shielded_instance_config {
-        enable_secure_boot = true
-        enable_vtpm        = true
+        enable_secure_boot          = {{index $.Vars "enable_secure_boot"}}
+        enable_vtpm                 = {{index $.Vars "enable_vtpm"}}
+        enable_integrity_monitoring = {{index $.Vars "enable_integrity_monitoring"}}
+      }
+
+      confidential_instance_config {
+        enable_confidential_compute = {{index $.Vars "enable_confidential_compute"}}
       }
     }
   }

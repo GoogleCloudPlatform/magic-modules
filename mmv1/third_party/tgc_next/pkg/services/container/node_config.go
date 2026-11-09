@@ -1526,7 +1526,7 @@ func expandNodeConfig(d tpgresource.TerraformResourceData, prefix string, v inte
 		// Defaults can't be set on a list/set in the schema, so set the default on create here.
 		OauthScopes: defaultOauthScopes,
 	}
-	if len(nodeConfigs) == 0 {
+	if len(nodeConfigs) == 0 || nodeConfigs[0] == nil {
 		return nc
 	}
 
@@ -1876,7 +1876,7 @@ func expandBootDiskConfig(v interface{}) *container.BootDisk {
 		return nil
 	}
 	ls := v.([]interface{})
-	if len(ls) == 0 {
+	if len(ls) == 0 || ls[0] == nil {
 		return nil
 	}
 	cfg := ls[0].(map[string]interface{})
@@ -1922,7 +1922,7 @@ func expandWorkloadMetadataConfig(v interface{}) *container.WorkloadMetadataConf
 		return nil
 	}
 	ls := v.([]interface{})
-	if len(ls) == 0 {
+	if len(ls) == 0 || ls[0] == nil {
 		return nil
 	}
 	wmc := &container.WorkloadMetadataConfig{}
@@ -1948,7 +1948,7 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 		return nil
 	}
 	ls := v.([]interface{})
-	if len(ls) == 0 {
+	if len(ls) == 0 || ls[0] == nil {
 		return nil
 	}
 	cfg := ls[0].(map[string]interface{})
@@ -2011,7 +2011,7 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 		kConfig.ShutdownGracePeriodCriticalPodsSeconds = int64(shutdownGracePeriodCriticalPodsSeconds.(int))
 		kConfig.ForceSendFields = append(kConfig.ForceSendFields, "ShutdownGracePeriodCriticalPodsSeconds")
 	}
-	if v, ok := cfg["eviction_soft"]; ok && len(v.([]interface{})) > 0 {
+	if v, ok := cfg["eviction_soft"]; ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 		es := v.([]interface{})[0].(map[string]interface{})
 		evictionSoft := &container.EvictionSignals{}
 		if val, ok := es["memory_available"]; ok {
@@ -2042,7 +2042,7 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 		kConfig.TopologyManager = expandTopologyManager(v)
 	}
 
-	if v, ok := cfg["eviction_soft_grace_period"]; ok && len(v.([]interface{})) > 0 {
+	if v, ok := cfg["eviction_soft_grace_period"]; ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 		es := v.([]interface{})[0].(map[string]interface{})
 		periods := &container.EvictionGracePeriod{}
 		if val, ok := es["memory_available"]; ok {
@@ -2065,7 +2065,7 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 		}
 		kConfig.EvictionSoftGracePeriod = periods
 	}
-	if v, ok := cfg["eviction_minimum_reclaim"]; ok && len(v.([]interface{})) > 0 {
+	if v, ok := cfg["eviction_minimum_reclaim"]; ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 		es := v.([]interface{})[0].(map[string]interface{})
 		reclaim := &container.EvictionMinimumReclaim{}
 		if val, ok := es["memory_available"]; ok {
@@ -2099,7 +2099,7 @@ func expandCrashLoopBackOffConfig(v interface{}) *container.CrashLoopBackOffConf
 		return nil
 	}
 	ls := v.([]interface{})
-	if len(ls) == 0 {
+	if len(ls) == 0 || ls[0] == nil {
 		return nil
 	}
 	cfg := ls[0].(map[string]interface{})
@@ -2301,7 +2301,7 @@ func expandWindowsNodeConfig(v interface{}) *container.WindowsNodeConfig {
 		return nil
 	}
 	ls := v.([]interface{})
-	if len(ls) == 0 {
+	if len(ls) == 0 || ls[0] == nil {
 		return nil
 	}
 	cfg := ls[0].(map[string]interface{})
@@ -2634,7 +2634,7 @@ func expandSoleTenantConfig(v interface{}) *container.SoleTenantConfig {
 		return nil
 	}
 	ls := v.([]interface{})
-	if len(ls) == 0 {
+	if len(ls) == 0 || ls[0] == nil {
 		return nil
 	}
 	stConfig := &container.SoleTenantConfig{}

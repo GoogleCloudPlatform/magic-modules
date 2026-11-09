@@ -43,7 +43,16 @@ samples:
         resource_id_vars:
           app_id: app-id
           display_name: my-app
-          secret_id: 1
+          secret_id: fake-pk-secret-app-tf
+        vars:
+          required_recording_consent: 'true'
+      - name: ces_app_basic
+        resource_id_vars:
+          app_id: app-id
+          display_name: my-app
+          secret_id: fake-pk-secret-app-tf
+        vars:
+          required_recording_consent: 'false'
   - name: ces_app_ambient_sound_gcs_uri
     primary_resource_id: ces_app_ambient_sound_gcs_uri
     steps:
@@ -552,6 +561,17 @@ properties:
               detection of sensitive data types.
               Format:
               `projects/{project}/locations/{location}/inspectTemplates/{inspect_template}`
+      - name: requiredRecordingConsent
+        type: Boolean
+        send_empty_value: true
+        description: |-
+          Whether the app has to say what may be recorded before anything is kept.
+          When true, a session starts with recording off and stays off until the
+          client sends SessionInput.recording_control, which then decides every turn
+          from that point on. This covers audio recording as well as conversation
+          history, BigQuery export and Cloud Logging.
+          When `false`, the default, the settings above decide on their own and the
+          client does not have to send anything.
   - name: locked
     type: Boolean
     description: |-

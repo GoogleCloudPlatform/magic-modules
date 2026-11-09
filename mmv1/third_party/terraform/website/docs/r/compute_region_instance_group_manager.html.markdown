@@ -300,8 +300,8 @@ instance_flexibility_policy {
     name = "instance_selection_name"
     rank = 1
     machine_types = ["n1-standard-16"]
-    min_cpu_platform = "Intel Skylake"      //google-beta only
-    disks {                                 //google-beta only
+    min_cpu_platform = "Intel Skylake"
+    disks {
         auto_delete = true
         boot        = true
         device_name = "boot-disk"
@@ -322,8 +322,8 @@ instance_selections {
   name = "instance_selection_name"
   rank = 1
   machine_types = ["n1-standard-1", "n1-standard-16"]
-  min_cpu_platform = "Intel Skylake"      //google-beta only
-  disks {                                 //google-beta only
+  min_cpu_platform = "Intel Skylake"
+  disks {
     auto_delete = true
     boot        = true
     device_name = "boot-disk"
@@ -337,8 +337,8 @@ instance_selections {
 * `name` - (Required), Name of the instance selection, e.g. instance_selection_with_n1_machines_types. Instance selection names must be unique within the flexibility policy.
 * `rank` - (Optional), Preference of this instance selection. Lower number means higher preference. Managed instance group will first try to create a VM based on the machine-type with lowest rank and fallback to next rank based on availability. Machine types and instance selections with the same rank have the same preference.
 * `machine_types` - (Required), A list of full machine-type names, e.g. "n1-standard-16".
-* `min_cpu_platform` - (Optional [Beta](../guides/provider_versions.html.markdown)), Name of the minimum CPU platform to be used by this instance selection. e.g. "Intel Ice Lake".
-* `disks` - (Optional [Beta](../guides/provider_versions.html.markdown)), List of disks to be attached to the instances created from this selection. Structure is [documented below](#nested_disks).
+* `min_cpu_platform` - (Optional), Name of the minimum CPU platform to be used by this instance selection. e.g. "Intel Ice Lake".
+* `disks` - (Optional), List of disks to be attached to the instances created from this selection. Structure is [documented below](#nested_disks).
 
 - - -
 
@@ -631,6 +631,8 @@ exported:
 
 * `self_link` - The URL of the created resource.
 
+* `status` - The status of this managed instance group.
+
 The `status` block holds:
 
 * `is_stable` - A bit indicating whether the managed instance group is in a stable state. A stable state means that: none of the instances in the managed instance group is currently undergoing any type of change (for example, creation, restart, or deletion); no future changes are scheduled for instances in the managed instance group; and the managed instance group itself is not being modified.
@@ -643,7 +645,7 @@ The `status` block holds:
 
 The `version_target` block holds:
 
-* `version_target` - A bit indicating whether version target has been reached in this managed instance group, i.e. all instances are in their target version. Instances' target version are specified by version field on Instance Group Manager.
+* `is_reached` - A bit indicating whether version target has been reached in this managed instance group, i.e. all instances are in their target version. Instances' target version are specified by version field on Instance Group Manager.
 
 The `all_instances_config` block holds:
 

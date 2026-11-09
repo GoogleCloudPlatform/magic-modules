@@ -1,24 +1,56 @@
 package transport_test
 
 import (
+	"bytes"
 	"context"
+	"errors"
 	"fmt"
-	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"github.com/hashicorp/terraform-provider-google/google/provider"
-	compute_tpg "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	googleoauth "golang.org/x/oauth2/google"
+	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 const testOauthScope = "https://www.googleapis.com/auth/compute"
+
+var testHandleSDKDefaultsSchema = map[string]*schema.Schema{
+	"impersonate_service_account": {
+		Type:     schema.TypeString,
+		Optional: true,
+	},
+	"project": {
+		Type:     schema.TypeString,
+		Optional: true,
+	},
+	"billing_project": {
+		Type:     schema.TypeString,
+		Optional: true,
+	},
+	"region": {
+		Type:     schema.TypeString,
+		Optional: true,
+	},
+	"zone": {
+		Type:     schema.TypeString,
+		Optional: true,
+	},
+	"user_project_override": {
+		Type:     schema.TypeBool,
+		Optional: true,
+	},
+	"request_reason": {
+		Type:     schema.TypeString,
+		Optional: true,
+	},
+}
 
 func TestHandleSDKDefaults_BillingProject(t *testing.T) {
 	cases := map[string]struct {
@@ -53,9 +85,9 @@ func TestHandleSDKDefaults_BillingProject(t *testing.T) {
 		t.Run(tn, func(t *testing.T) {
 
 			// Arrange
-			// Create empty schema.ResourceData using the SDK Provider schema
+			// Create empty schema.ResourceData using the SDK Provider schema fields read by HandleSDKDefaults
 			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, provider.Provider().Schema, emptyConfigMap)
+			d := schema.TestResourceDataRaw(t, testHandleSDKDefaultsSchema, emptyConfigMap)
 
 			// Set config value(s)
 			if tc.ConfigValue != "" {
@@ -156,9 +188,9 @@ func TestHandleSDKDefaults_UserProjectOverride(t *testing.T) {
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
 			// Arrange
-			// Create empty schema.ResourceData using the SDK Provider schema
+			// Create empty schema.ResourceData using the SDK Provider schema fields read by HandleSDKDefaults
 			emptyConfigMap := map[string]interface{}{}
-			d := schema.TestResourceDataRaw(t, provider.Provider().Schema, emptyConfigMap)
+			d := schema.TestResourceDataRaw(t, testHandleSDKDefaultsSchema, emptyConfigMap)
 
 			// Set config value(s)
 			if tc.SetViaConfig {
@@ -212,7 +244,7 @@ func TestConfigLoadAndValidate_accountFilePath(t *testing.T) {
 }
 
 func TestConfigLoadAndValidate_accountFileJSON(t *testing.T) {
-	contents, err := ioutil.ReadFile(transport_tpg.TestFakeCredentialsPath)
+	contents, err := os.ReadFile(transport_tpg.TestFakeCredentialsPath)
 	if err != nil {
 		t.Fatalf("error: %v", err)
 	}
@@ -267,7 +299,7 @@ func TestAccConfigLoadValidate_credentials(t *testing.T) {
 	if os.Getenv(envvar.TestEnvVar) == "" {
 		t.Skipf("Network access not allowed; use %s=1 to enable", envvar.TestEnvVar)
 	}
-	acctest.AccTestPreCheck(t)
+	envvar.AccTestPreCheck(t)
 
 	creds := envvar.GetTestCredsFromEnv()
 	proj := envvar.GetTestProjectFromEnv()
@@ -283,7 +315,13 @@ func TestAccConfigLoadValidate_credentials(t *testing.T) {
 		t.Fatalf("error: %v", err)
 	}
 
-	_, err = compute_tpg.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   proj,
+		RawURL:    fmt.Sprintf("https://compute.googleapis.com/compute/v1/projects/%s/zones/us-central1-a", proj),
+		UserAgent: config.UserAgent,
+	})
 	if err != nil {
 		t.Fatalf("expected call with loaded config client to work, got error: %s", err)
 	}
@@ -293,7 +331,7 @@ func TestAccConfigLoadValidate_impersonated(t *testing.T) {
 	if os.Getenv(envvar.TestEnvVar) == "" {
 		t.Skipf("Network access not allowed; use %s=1 to enable", envvar.TestEnvVar)
 	}
-	acctest.AccTestPreCheck(t)
+	envvar.AccTestPreCheck(t)
 
 	serviceaccount := envvar.MultiEnvSearch([]string{"IMPERSONATE_SERVICE_ACCOUNT_ACCTEST"})
 	creds := envvar.GetTestCredsFromEnv()
@@ -311,7 +349,13 @@ func TestAccConfigLoadValidate_impersonated(t *testing.T) {
 		t.Fatalf("error: %v", err)
 	}
 
-	_, err = compute_tpg.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   proj,
+		RawURL:    fmt.Sprintf("https://compute.googleapis.com/compute/v1/projects/%s/zones/us-central1-a", proj),
+		UserAgent: config.UserAgent,
+	})
 	if err != nil {
 		t.Fatalf("expected API call with loaded config to work, got error: %s", err)
 	}
@@ -321,7 +365,7 @@ func TestAccConfigLoadValidate_accessTokenImpersonated(t *testing.T) {
 	if os.Getenv(envvar.TestEnvVar) == "" {
 		t.Skipf("Network access not allowed; use %s=1 to enable", envvar.TestEnvVar)
 	}
-	acctest.AccTestPreCheck(t)
+	envvar.AccTestPreCheck(t)
 
 	creds := envvar.GetTestCredsFromEnv()
 	proj := envvar.GetTestProjectFromEnv()
@@ -349,7 +393,13 @@ func TestAccConfigLoadValidate_accessTokenImpersonated(t *testing.T) {
 		t.Fatalf("error: %v", err)
 	}
 
-	_, err = compute_tpg.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   proj,
+		RawURL:    fmt.Sprintf("https://compute.googleapis.com/compute/v1/projects/%s/zones/us-central1-a", proj),
+		UserAgent: config.UserAgent,
+	})
 	if err != nil {
 		t.Fatalf("expected API call with loaded config to work, got error: %s", err)
 	}
@@ -359,7 +409,7 @@ func TestAccConfigLoadValidate_accessToken(t *testing.T) {
 	if os.Getenv(envvar.TestEnvVar) == "" {
 		t.Skipf("Network access not allowed; use %s=1 to enable", envvar.TestEnvVar)
 	}
-	acctest.AccTestPreCheck(t)
+	envvar.AccTestPreCheck(t)
 
 	creds := envvar.GetTestCredsFromEnv()
 	proj := envvar.GetTestProjectFromEnv()
@@ -385,7 +435,13 @@ func TestAccConfigLoadValidate_accessToken(t *testing.T) {
 		t.Fatalf("error: %v", err)
 	}
 
-	_, err = compute_tpg.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).Zones.Get(proj, "us-central1-a").Do()
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   proj,
+		RawURL:    fmt.Sprintf("https://compute.googleapis.com/compute/v1/projects/%s/zones/us-central1-a", proj),
+		UserAgent: config.UserAgent,
+	})
 	if err != nil {
 		t.Fatalf("expected API call with loaded config to work, got error: %s", err)
 	}
@@ -530,4 +586,81 @@ func TestGetRegionFromRegionSelfLink(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGRPCPayloadUnaryClientInterceptor(t *testing.T) {
+	t.Run("logs proto request and response when TF_LOG is DEBUG", func(t *testing.T) {
+		t.Setenv("TF_LOG", "DEBUG")
+		origOut := log.Writer()
+		var buf bytes.Buffer
+		log.SetOutput(&buf)
+		t.Cleanup(func() { log.SetOutput(origOut) })
+
+		req := wrapperspb.String("hello-req")
+		reply := wrapperspb.String("")
+		err := transport_tpg.PayloadUnaryClientInterceptor(context.Background(), "/test.Service/UnaryCall", req, reply, nil, func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, opts ...grpc.CallOption) error {
+			reply.(*wrapperspb.StringValue).Value = "hello-resp"
+			return nil
+		})
+		log.SetOutput(origOut)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		out := buf.String()
+		if !strings.Contains(out, `[DEBUG] gRPC request for /test.Service/UnaryCall: "hello-req"`) {
+			t.Fatalf("expected request payload in log output, got: %s", out)
+		}
+		if !strings.Contains(out, `[DEBUG] gRPC response for /test.Service/UnaryCall: "hello-resp"`) {
+			t.Fatalf("expected response payload in log output, got: %s", out)
+		}
+	})
+
+	t.Run("suppresses response log on invoker error", func(t *testing.T) {
+		t.Setenv("TF_LOG", "DEBUG")
+		origOut := log.Writer()
+		var buf bytes.Buffer
+		log.SetOutput(&buf)
+		t.Cleanup(func() { log.SetOutput(origOut) })
+
+		req := wrapperspb.String("fail-req")
+		reply := wrapperspb.String("ignored")
+		wantErr := errors.New("rpc failed")
+		err := transport_tpg.PayloadUnaryClientInterceptor(context.Background(), "/test.Service/FailCall", req, reply, nil, func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, opts ...grpc.CallOption) error {
+			return wantErr
+		})
+		log.SetOutput(origOut)
+		if !errors.Is(err, wantErr) {
+			t.Fatalf("expected error %v, got %v", wantErr, err)
+		}
+
+		out := buf.String()
+		if !strings.Contains(out, `[DEBUG] gRPC request for /test.Service/FailCall: "fail-req"`) {
+			t.Fatalf("expected request payload in log output, got: %s", out)
+		}
+		if strings.Contains(out, "gRPC response") {
+			t.Fatalf("expected no response log on error, got: %s", out)
+		}
+	})
+
+	t.Run("suppresses logs when TF_LOG is not debug or trace", func(t *testing.T) {
+		t.Setenv("TF_LOG", "")
+		origOut := log.Writer()
+		var buf bytes.Buffer
+		log.SetOutput(&buf)
+		t.Cleanup(func() { log.SetOutput(origOut) })
+
+		req := wrapperspb.String("quiet-req")
+		reply := wrapperspb.String("quiet-resp")
+		err := transport_tpg.PayloadUnaryClientInterceptor(context.Background(), "/test.Service/QuietCall", req, reply, nil, func(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn, opts ...grpc.CallOption) error {
+			return nil
+		})
+		log.SetOutput(origOut)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if buf.Len() != 0 {
+			t.Fatalf("expected no log output when TF_LOG is unset, got: %s", buf.String())
+		}
+	})
 }

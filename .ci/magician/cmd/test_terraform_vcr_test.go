@@ -68,6 +68,23 @@ func TestModifiedPackagesFromDiffs(t *testing.T) {
 			packages: map[string]struct{}{},
 			all:      false,
 		},
+		{
+			name: "ignore-provider-resource-registration-files",
+			diffs: []string{
+				"google-beta/provider/provider_mmv1_resources.go",
+				"google-beta/provider/provider_dcl_resources.go",
+				"google-beta/provider/provider_register_services.go",
+				"google-beta/services/servicename/resource.go",
+			},
+			packages: map[string]struct{}{"servicename": struct{}{}},
+			all:      false,
+		},
+		{
+			name:     "only-provider-register-services",
+			diffs:    []string{"google-beta/provider/provider_register_services.go"},
+			packages: map[string]struct{}{},
+			all:      false,
+		},
 	} {
 		if packages, all := modifiedPackages(tc.diffs, provider.Beta); !reflect.DeepEqual(packages, tc.packages) {
 			t.Errorf("Unexpected packages found for test %s: %v, expected %v", tc.name, packages, tc.packages)
@@ -836,6 +853,7 @@ func TestExecTestTerraformVCR_OutdatedCommit(t *testing.T) {
 	cases := map[string]struct {
 		// Head SHAs returned by successive pull request lookups.
 		headShas           []string
+		fallbackHeadSha    string
 		diffCommentBody    string
 		tpgbNewSha         string
 		tpgbOldSha         string
@@ -847,6 +865,15 @@ func TestExecTestTerraformVCR_OutdatedCommit(t *testing.T) {
 		wantComment        string
 		wantErr            bool
 	}{
+		"current commit without diffs in comment": {
+			fallbackHeadSha: "mm-sha",
+			diffCommentBody: "Your PR hasn't generated any diffs, but I'll let you know if a future commit does.",
+		},
+		"current commit without downstream commits": {
+			fallbackHeadSha: "mm-sha",
+			tpgbNewSha:      "same-downstream-sha",
+			tpgbOldSha:      "same-downstream-sha",
+		},
 		"superseded before replaying": {
 			headShas:        []string{"new-sha"},
 			wantStatuses:    []string{"failure"},
@@ -854,13 +881,13 @@ func TestExecTestTerraformVCR_OutdatedCommit(t *testing.T) {
 			wantComment:     "## Test report\n\n**Step 1: Replaying Mode**\n\nSkipped REPLAYING mode because a newer commit (new-sha) was pushed to the PR.",
 		},
 		"superseded before replaying without diffs in comment": {
-			headShas:        []string{"new-sha"},
+			fallbackHeadSha: "new-sha",
 			diffCommentBody: "Your PR hasn't generated any diffs, but I'll let you know if a future commit does.",
 		},
 		"superseded before replaying without downstream commits": {
-			headShas:   []string{"new-sha"},
-			tpgbNewSha: "same-downstream-sha",
-			tpgbOldSha: "same-downstream-sha",
+			fallbackHeadSha: "new-sha",
+			tpgbNewSha:      "same-downstream-sha",
+			tpgbOldSha:      "same-downstream-sha",
 		},
 		"superseded before recording": {
 			headShas:        []string{"mm-sha", "new-sha"},
@@ -947,6 +974,7 @@ exit 0`, sb.Dir))
 			}
 			gh := &mockGithub{
 				calledMethods:       make(map[string][][]any),
+				pullRequest:         github.PullRequest{HeadSha: tc.fallbackHeadSha},
 				pullRequests:        pullRequests,
 				pullRequestComments: []github.PullRequestComment{{ID: 456, Body: commentBody}},
 				updateCommentErr:    tc.updateCommentErr,
@@ -989,6 +1017,79 @@ exit 0`, sb.Dir))
 				}
 			}
 			assert.Empty(t, gh.calledMethods["PostComment"])
+		})
+	}
+}
+
+func TestHasVCRDiffs(t *testing.T) {
+	cases := map[string]struct {
+		tpgbNewSha      string
+		tpgbOldSha      string
+		writeNewSha     bool
+		writeOldSha     bool
+		diffCommentID   string
+		diffCommentBody string
+		want            bool
+	}{
+		"matching beta SHAs": {
+			tpgbNewSha:  "abc123\n",
+			tpgbOldSha:  "abc123",
+			writeNewSha: true,
+			writeOldSha: true,
+			want:        false,
+		},
+		"differing beta SHAs with diffs in comment": {
+			tpgbNewSha:      "abc123",
+			tpgbOldSha:      "def456",
+			writeNewSha:     true,
+			writeOldSha:     true,
+			diffCommentID:   "456",
+			diffCommentBody: "Diff report",
+			want:            true,
+		},
+		"differing beta SHAs without diffs in comment": {
+			tpgbNewSha:      "abc123",
+			tpgbOldSha:      "def456",
+			writeNewSha:     true,
+			writeOldSha:     true,
+			diffCommentID:   "456",
+			diffCommentBody: "Your PR hasn't generated any diffs, but I'll let you know if a future commit does.",
+			want:            false,
+		},
+		"empty beta SHAs falls open": {
+			tpgbNewSha:  "  \n",
+			tpgbOldSha:  "",
+			writeNewSha: true,
+			writeOldSha: true,
+			want:        true,
+		},
+		"missing old beta SHA falls open": {
+			tpgbNewSha:  "abc123",
+			writeNewSha: true,
+			want:        true,
+		},
+		"no SHA files or comment falls open": {
+			want: true,
+		},
+	}
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			sb := newSandbox(t)
+			sb.RequireAllowlist()
+			if tc.writeNewSha {
+				sb.Runner.WriteFile("commitSHA_modular-magician_terraform-provider-google-beta.txt", tc.tpgbNewSha)
+			}
+			if tc.writeOldSha {
+				sb.Runner.WriteFile("commitSHA_modular-magician_terraform-provider-google-beta-old.txt", tc.tpgbOldSha)
+			}
+			if tc.diffCommentID != "" {
+				sb.Runner.WriteFile("diff_comment_id.txt", tc.diffCommentID)
+			}
+			gh := &mockGithub{
+				calledMethods:       make(map[string][][]any),
+				pullRequestComments: []github.PullRequestComment{{ID: 456, Body: tc.diffCommentBody}},
+			}
+			assert.Equal(t, tc.want, hasVCRDiffs(sb.Dir, gh, sb.Runner))
 		})
 	}
 }

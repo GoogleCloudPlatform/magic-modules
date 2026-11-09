@@ -102,3 +102,35 @@ properties:
     description: |
       The metadata generation of the managed folder.
     output: true
+  - name: rapidCacheConfig
+    type: NestedObject
+    description: |
+      Configuration options for the rapid cache of a managed folder.
+    properties:
+      - name: policies
+        type: Array
+        description: |
+          A map of rapid cache IDs to the corresponding RapidCachePolicy
+          configurations for a managed folder.
+        is_set: true
+        required: true
+        # Custom expand and flatten are needed to convert between Terraform's TypeSet of policies
+        # blocks and the GCS JSON v1 API's map<string, RapidCachePolicy> keyed by rapidCacheId.
+        custom_expand: 'templates/terraform/custom_expand/storage_managed_folder_rapid_cache_policies.go.tmpl'
+        custom_flatten: 'templates/terraform/custom_flatten/storage_managed_folder_rapid_cache_policies.go.tmpl'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: rapidCacheId
+              type: String
+              description: |
+                The unique identifier of the rapid cache.
+              required: true
+            - name: ingestOnWrite
+              type: String
+              description: |
+                The ingest-on-write policy for objects in the managed folder. When
+                set to `enabled`, objects are automatically ingested into the cache
+                when they are written to the managed folder.
+                Possible values: ["enabled", "unspecified"]
+              default_value: unspecified

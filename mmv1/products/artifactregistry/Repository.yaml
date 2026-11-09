@@ -820,14 +820,44 @@ properties:
           - INHERITED
           - DISABLED
       - name: enablementState
-        type: Enum
+        type: String
         description: This field returns whether scanning is active for this repository.
         output: true
-        enum_values:
-          - SCANNING_UNSUPPORTED
-          - SCANNING_DISABLED
-          - SCANNING_ACTIVE
       - name: enablementStateReason
         type: String
         description: This provides an explanation for the state of scanning on this repository.
         output: true
+  - name: disallowUnspecifiedMode
+    type: Boolean
+    description: |-
+      If this is true, an unspecified repo type will be treated as error rather
+      than defaulting to standard.
+    # Request-time validation flag; not persisted by the API or returned on GET.
+    is_missing_in_cai: true
+    ignore_read: true
+  - name: platformLogsConfig
+    type: NestedObject
+    description: |-
+      Configuration for platform logs.
+    properties:
+      - name: loggingState
+        type: Enum
+        description: |-
+          The state of the platform logs: enabled or disabled.
+        enum_values:
+          - ENABLED
+          - DISABLED
+      - name: severityLevel
+        type: Enum
+        description: |-
+          The severity level for the logs. Logs will be generated if their
+          severity level is >= than the value of the severity level mentioned here.
+        enum_values:
+          - DEBUG
+          - INFO
+          - NOTICE
+          - WARNING
+          - ERROR
+          - CRITICAL
+          - ALERT
+          - EMERGENCY

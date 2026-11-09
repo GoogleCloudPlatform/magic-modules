@@ -92,6 +92,9 @@ func (c *Client) GetPullRequests(state, base, sort, direction string) ([]PullReq
 		Base:      base,
 		Sort:      sort,
 		Direction: direction,
+		ListOptions: gh.ListOptions{
+			PerPage: 100,
+		},
 	}
 
 	prs, _, err := c.gh.PullRequests.List(c.ctx, defaultOwner, defaultRepo, opts)

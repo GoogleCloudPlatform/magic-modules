@@ -23,15 +23,18 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 			continue
 		}
 		item := map[string]interface{}{
-			"api_key_header":  original["apiKeyHeader"],
-			"api_key_name":    original["apiKeyName"],
-			"client_id":       original["clientId"],
-			"description":     original["description"],
-			"display_name":    original["displayName"],
-			"enabled":         original["enabled"],
-			"oauth_token_url": original["oauthTokenUrl"],
-			"prompt":          original["prompt"],
-			"server_url":      original["serverUrl"],
+			"api_key_header":    original["apiKeyHeader"],
+			"api_key_name":      original["apiKeyName"],
+			"client_id":         original["clientId"],
+			"description":       original["description"],
+			"display_name":      original["displayName"],
+			"enabled":           original["enabled"],
+			"oauth_token_url":   original["oauthTokenUrl"],
+			"prompt":            original["prompt"],
+			"request_headers":   flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}RequestHeaders(original["requestHeaders"], d, config),
+			"server_url":        original["serverUrl"],
+			"session_id_header": original["sessionIdHeader"],
+			"task_id_header":    original["taskIdHeader"],
 		}
 		if apiKey, ok := d.GetOk(fmt.Sprintf("mcp_data_sources.%d.api_key", i)); ok {
 			item["api_key"] = apiKey
@@ -40,6 +43,27 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 			item["client_secret"] = clientSecret
 		}
 		transformed = append(transformed, item)
+	}
+	return transformed
+}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}RequestHeaders(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return v
+	}
+	l := v.([]interface{})
+	transformed := make([]interface{}, 0, len(l))
+	for _, raw := range l {
+		original := raw.(map[string]interface{})
+		if len(original) < 1 {
+			// Do not include empty json objects coming back from the api
+			continue
+		}
+		transformed = append(transformed, map[string]interface{}{
+			"dynamic_value": original["dynamicValue"],
+			"header_name":   original["headerName"],
+			"value":         original["value"],
+		})
 	}
 	return transformed
 }

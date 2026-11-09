@@ -349,7 +349,7 @@ func testAccNetappVolume_volumeBasicExample_updatesnapshot(context map[string]in
         depends_on = [google_netapp_volume.test_volume]
         location = google_netapp_volume.test_volume.location
         volume_name = google_netapp_volume.test_volume.name
-        name = "test-snapshot"
+        name = "tf-test-snapshot%{random_suffix}"
     }
 
     data "google_compute_network" "default" {
@@ -408,7 +408,7 @@ func testAccNetappVolume_volumeBasicExample_createclonevolume(context map[string
         depends_on = [google_netapp_volume.test_volume]
         location = google_netapp_volume.test_volume.location
         volume_name = google_netapp_volume.test_volume.name
-        name = "test-snapshot"
+        name = "tf-test-snapshot%{random_suffix}"
     }
 
     resource "google_netapp_volume" "test_volume_clone" {
@@ -799,7 +799,7 @@ func testAccNetappVolume_flexAutoTierVolume_default(context map[string]interface
 	return acctest.Nprintf(`
     resource "google_netapp_storage_pool" "default" {
         name = "tf-test-pool%{random_suffix}"
-        location = "us-south1-a"
+        location = "us-east4-c"
         service_level = "FLEX"
         capacity_gib = "2048"
         network = data.google_compute_network.default.id
@@ -811,7 +811,7 @@ func testAccNetappVolume_flexAutoTierVolume_default(context map[string]interface
         enable_hot_tier_auto_resize = true
     }
     resource "google_netapp_volume" "test_volume" {
-        location = "us-south1-a"
+        location = "us-east4-c"
         name = "tf-test-volume%{random_suffix}"
         capacity_gib = "100"
         share_name = "tf-test-volume%{random_suffix}"
@@ -833,7 +833,7 @@ func testAccNetappVolume_flexAutoTierVolume_update(context map[string]interface{
 	return acctest.Nprintf(`
     resource "google_netapp_storage_pool" "default" {
         name = "tf-test-pool%{random_suffix}"
-        location = "us-south1-a"
+        location = "us-east4-c"
         service_level = "FLEX"
         capacity_gib = "2048"
         network = data.google_compute_network.default.id
@@ -845,7 +845,7 @@ func testAccNetappVolume_flexAutoTierVolume_update(context map[string]interface{
         enable_hot_tier_auto_resize = true
     }
     resource "google_netapp_volume" "test_volume" {
-        location = "us-south1-a"
+        location = "us-east4-c"
         name = "tf-test-volume%{random_suffix}"
         capacity_gib = "100"
         share_name = "tf-test-volume%{random_suffix}"
@@ -1343,18 +1343,20 @@ func TestAccNetappVolume_NetappVolumeNfsv4Example_update(t *testing.T) {
 				Config: testAccNetappVolume_volumeNfsv4BasicExample_basic(context),
 			},
 			{
-				ResourceName:            "google_netapp_volume.test_volume",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_netapp_volume.test_volume",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// restore_parameters is create-only (ignore_read); location/name are url_param_only; deletion_policy is a client-side virtual field; labels/terraform_labels use standard label import ignore.
 				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccNetappVolume_volumeNfsv4BasicExample_update(context),
 			},
 			{
-				ResourceName:            "google_netapp_volume.test_volume",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_netapp_volume.test_volume",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// restore_parameters is create-only (ignore_read); location/name are url_param_only; deletion_policy is a client-side virtual field; labels/terraform_labels use standard label import ignore.
 				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
 			},
 		},
@@ -1378,6 +1380,7 @@ func testAccNetappVolume_volumeNfsv4BasicExample_basic(context map[string]interf
         share_name = "tf-test-test-volume%{random_suffix}"
         storage_pool = google_netapp_storage_pool.default.name
         protocols = ["NFSV4"]
+        snap_reserve = 10
         export_policy {
             rules {
             access_type     = "READ_WRITE"
@@ -1411,6 +1414,7 @@ func testAccNetappVolume_volumeNfsv4BasicExample_update(context map[string]inter
         share_name = "tf-test-test-volume%{random_suffix}"
         storage_pool = google_netapp_storage_pool.default.name
         protocols = ["NFSV4"]
+        snap_reserve = 20
         export_policy {
             rules {
             access_type     = "READ_WRITE"

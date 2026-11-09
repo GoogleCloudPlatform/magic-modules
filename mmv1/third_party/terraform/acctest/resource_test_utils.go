@@ -10,11 +10,9 @@ import (
 	"mime/multipart"
 	"net/textproto"
 	"os"
-	"slices"
 	"testing"
 	"time"
 
-	tfjson "github.com/hashicorp/terraform-json"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -30,7 +28,7 @@ type expectNoDelete struct{}
 func (e expectNoDelete) CheckPlan(ctx context.Context, req plancheck.CheckPlanRequest, resp *plancheck.CheckPlanResponse) {
 	var result error
 	for _, rc := range req.Plan.ResourceChanges {
-		if slices.Contains(rc.Change.Actions, tfjson.ActionDelete) {
+		if rc.Change.Actions.Delete() || rc.Change.Actions.Replace() {
 			result = errors.Join(result, fmt.Errorf("expected no deletion of resources, but %s has planned deletion", rc.Address))
 		}
 	}
@@ -96,10 +94,22 @@ func SkipIfVcr(t *testing.T) {
 
 func Sleep(d time.Duration) {
 	// Assume we never want to sleep when we're in replaying mode.
-	if IsVcrEnabled() && os.Getenv("VCR_MODE") == "REPLAYING" {
+	if IsVcrReplaying() {
 		return
 	}
 	time.Sleep(d)
+}
+
+// RunVcrSubtest runs a subtest via t.Run and enables parallel execution during VCR replay,
+// avoiding quota or concurrency conflicts during live testing.
+func RunVcrSubtest(t *testing.T, name string, f func(t *testing.T)) bool {
+	t.Helper()
+	return t.Run(name, func(t *testing.T) {
+		if IsVcrReplaying() {
+			t.Parallel()
+		}
+		f(t)
+	})
 }
 
 func SleepTestCheckFunc(d time.Duration) resource.TestCheckFunc {

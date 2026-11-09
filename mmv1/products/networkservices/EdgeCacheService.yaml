@@ -930,7 +930,6 @@ properties:
         type: Boolean
         description: |
           Specifies whether to enable logging for traffic served by this service.
-        required: true
         default_from_api: true
       - name: sampleRate
         type: Double

@@ -40,6 +40,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func IsVcrEnabled() bool {
@@ -48,12 +49,135 @@ func IsVcrEnabled() bool {
 	return envPath != "" && vcrMode != ""
 }
 
+// IsVcrReplaying returns true if VCR is enabled and running in REPLAYING mode.
+func IsVcrReplaying() bool {
+	return IsVcrEnabled() && os.Getenv("VCR_MODE") == "REPLAYING"
+}
+
 var configsLock = sync.RWMutex{}
 var sourcesLock = sync.RWMutex{}
+var requestWatchersLock = sync.RWMutex{}
 
 var configs map[string]*transport_tpg.Config
 
 var sources map[string]VcrSource
+
+var requestWatchers = make(map[string][]func(req *http.Request))
+var mmUrlPlaceholderRe = regexp.MustCompile(`\{\{[^}]+\}\}`)
+
+// WatchRequests registers a callback that is invoked for every outgoing HTTP
+// request made by the test provider (or GoogleProviderConfig) during t.
+func WatchRequests(t *testing.T, fn func(req *http.Request)) {
+	t.Helper()
+	testName := t.Name()
+	requestWatchersLock.Lock()
+	_, alreadyRegistered := requestWatchers[testName]
+	requestWatchers[testName] = append(requestWatchers[testName], fn)
+	requestWatchersLock.Unlock()
+
+	if !alreadyRegistered {
+		t.Cleanup(func() {
+			requestWatchersLock.Lock()
+			delete(requestWatchers, testName)
+			requestWatchersLock.Unlock()
+		})
+	}
+}
+
+func hasRequestWatcher(testName string) bool {
+	requestWatchersLock.RLock()
+	watchers := requestWatchers[testName]
+	requestWatchersLock.RUnlock()
+	return len(watchers) > 0
+}
+
+type requestWatcherRoundTripper struct {
+	base     http.RoundTripper
+	testName string
+}
+
+func (w *requestWatcherRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	requestWatchersLock.RLock()
+	watchers := slices.Clone(requestWatchers[w.testName])
+	requestWatchersLock.RUnlock()
+	for _, fn := range watchers {
+		fn(req)
+	}
+	base := w.base
+	if base == nil {
+		base = http.DefaultTransport
+	}
+	return base.RoundTrip(req)
+}
+
+func wrapWithRequestWatcher(testName string, rt http.RoundTripper) http.RoundTripper {
+	if !hasRequestWatcher(testName) {
+		return rt
+	}
+	if existing, ok := rt.(*requestWatcherRoundTripper); ok && existing.testName == testName {
+		return rt
+	}
+	return &requestWatcherRoundTripper{
+		base:     rt,
+		testName: testName,
+	}
+}
+
+func urlPatternToRegex(urlPattern string) (*regexp.Regexp, error) {
+	trimmed := strings.Trim(urlPattern, "/")
+	parts := mmUrlPlaceholderRe.Split(trimmed, -1)
+	quoted := make([]string, len(parts))
+	for i, part := range parts {
+		quoted[i] = regexp.QuoteMeta(part)
+	}
+	expr := `(?:^|/)` + strings.Join(quoted, `[^/]+`) + `(?:/|$)`
+	return regexp.Compile(expr)
+}
+
+// AssertRequestApiVersion registers a request watcher for t that verifies every
+// outgoing HTTP request matching urlPattern (where MMv1 placeholders like
+// {{project}} match any single path segment) carries the expected
+// X-Goog-Api-Version header, and asserts in t.Cleanup that at least 1 matching
+// request was observed (unless the test failed or was skipped).
+func AssertRequestApiVersion(t *testing.T, urlPattern string, expectedApiVersion string) {
+	t.Helper()
+	re, err := urlPatternToRegex(urlPattern)
+	if err != nil {
+		t.Fatalf("AssertRequestApiVersion: invalid urlPattern %q: %v", urlPattern, err)
+	}
+
+	var mu sync.Mutex
+	matchCount := 0
+
+	WatchRequests(t, func(req *http.Request) {
+		if req == nil || req.URL == nil {
+			return
+		}
+		if !re.MatchString(req.URL.Path) {
+			return
+		}
+		mu.Lock()
+		matchCount++
+		mu.Unlock()
+
+		got := req.Header.Get("X-Goog-Api-Version")
+		if got != expectedApiVersion {
+			t.Errorf("request %s %s had X-Goog-Api-Version=%q, want %q", req.Method, req.URL.Path, got, expectedApiVersion)
+		}
+	})
+
+	t.Cleanup(func() {
+		if t.Failed() || t.Skipped() {
+			return
+		}
+		mu.Lock()
+		count := matchCount
+		mu.Unlock()
+		if count == 0 {
+			t.Errorf("AssertRequestApiVersion(%q, %q): expected at least 1 matching request, observed 0", urlPattern, expectedApiVersion)
+		}
+	})
+}
 
 // VcrSource is a source for a given VCR test with the value that seeded it
 type VcrSource struct {
@@ -140,6 +264,9 @@ func vcrFileName(name string) string {
 	return strings.ReplaceAll(name, "/", "_")
 }
 
+var createDurationRegex = regexp.MustCompile(`create_duration\s*=\s*"\d+[smh]"`)
+var destroyDurationRegex = regexp.MustCompile(`destroy_duration\s*=\s*"\d+[smh]"`)
+
 // VcrTest is a wrapper for resource.Test to swap out providers for VCR providers and handle VCR specific things
 // Can be called when VCR is not enabled, and it will behave as normal
 func VcrTest(t *testing.T, c resource.TestCase) {
@@ -159,7 +286,9 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 		c = initializeReleaseDiffTest(c, t.Name(), tempOutputFile)
 	}
 
-	c = extendWithTGCData(t, c)
+	if !(IsVcrEnabled() && os.Getenv("VCR_MODE") == "REPLAYING") {
+		c = extendWithTGCData(t, c)
+	}
 
 	// terraform_labels is a computed field to which "goog-terraform-provisioned": "true" is always
 	// added by the provider. ImportStateVerify "checks for strict equality and does not respect
@@ -170,11 +299,16 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 		if s.ImportStateVerify && !slices.Contains(s.ImportStateVerifyIgnore, "terraform_labels") {
 			s.ImportStateVerifyIgnore = append(s.ImportStateVerifyIgnore, "terraform_labels")
 		}
-		if IsVcrEnabled() && os.Getenv("VCR_MODE") == "REPLAYING" {
-			re := regexp.MustCompile(`create_duration = "\d+[sm]"`)
-			s.Config = re.ReplaceAllString(s.Config, `create_duration = "1s"`)
-			re = regexp.MustCompile(`destroy_duration = "\d+[sm]"`)
-			s.Config = re.ReplaceAllString(s.Config, `destroy_duration = "1s"`)
+		if IsVcrReplaying() {
+			s.Config = createDurationRegex.ReplaceAllString(s.Config, `create_duration = "1ms"`)
+			s.Config = destroyDurationRegex.ReplaceAllString(s.Config, `destroy_duration = "1ms"`)
+			// During RECORDING, extendWithTGCData attaches a non-nil Check function to steps
+			// containing resources, which causes terraform-plugin-testing to run a pre-destroy
+			// refresh on Destroy: true steps. Since extendWithTGCData is skipped in REPLAYING
+			// mode, set a no-op Check to preserve the recorded pre-destroy refresh behavior.
+			if s.Destroy && s.Config != "" && !s.PlanOnly && s.Check == nil && strings.Contains(s.Config, "resource \"") {
+				s.Check = func(*terraform.State) error { return nil }
+			}
 		}
 		// deletion_policy is a universal virtual attribute for managing the behavior of resources when a delete is attempted
 		// in Terraform. Because it is a virtual attribute, it needs to be excluded from these ImportStateVerifys.
@@ -205,9 +339,13 @@ func closeRecorder(t *testing.T) {
 	configsLock.RUnlock()
 	if ok {
 		// We did not cache the config if it does not use VCR
-		if !t.Failed() && IsVcrEnabled() {
+		if !t.Failed() && IsVcrEnabled() && os.Getenv("VCR_MODE") == "RECORDING" {
 			// If a test succeeds, write new seed/yaml to files
-			err := config.Client.Transport.(*recorder.Recorder).Stop()
+			rt := config.Client.Transport
+			if w, ok := rt.(*requestWatcherRoundTripper); ok {
+				rt = w.base
+			}
+			err := rt.(*recorder.Recorder).Stop()
 			if err != nil {
 				t.Error(err)
 			}
@@ -239,7 +377,7 @@ func closeRecorder(t *testing.T) {
 //   - Setting the recording/replaying mode
 //   - Determining the path to the file API interactions will be recorded to/read from
 //   - Determining the logic used to match requests against recorded HTTP interactions (see rec.SetMatcher)
-func HandleVCRConfiguration(ctx context.Context, testName string, rndTripper http.RoundTripper, pollInterval time.Duration) (time.Duration, http.RoundTripper, fwDiags.Diagnostics) {
+func HandleVCRConfiguration(ctx context.Context, testName string, rndTripper http.RoundTripper, pollInterval time.Duration, sleepUnit time.Duration) (time.Duration, time.Duration, http.RoundTripper, fwDiags.Diagnostics) {
 	var diags fwDiags.Diagnostics
 	var vcrMode recorder.Mode
 	switch vcrEnv := os.Getenv("VCR_MODE"); vcrEnv {
@@ -247,29 +385,30 @@ func HandleVCRConfiguration(ctx context.Context, testName string, rndTripper htt
 		vcrMode = recorder.ModeRecording
 	case "REPLAYING":
 		vcrMode = recorder.ModeReplaying
-		// When replaying, set the poll interval low to speed up tests
-		pollInterval = 10 * time.Millisecond
+		// When replaying, set the poll interval and sleep unit low to speed up tests
+		sleepUnit = time.Millisecond
+		pollInterval = sleepUnit
 	default:
 		tflog.Debug(ctx, fmt.Sprintf("No valid environment var set for VCR_MODE, expected RECORDING or REPLAYING, skipping VCR. VCR_MODE: %s", vcrEnv))
-		return pollInterval, rndTripper, diags
+		return pollInterval, sleepUnit, rndTripper, diags
 	}
 
 	envPath := os.Getenv("VCR_PATH")
 	if envPath == "" {
 		tflog.Debug(ctx, "No environment var set for VCR_PATH, skipping VCR")
-		return pollInterval, rndTripper, diags
+		return pollInterval, sleepUnit, rndTripper, diags
 	}
 	path := filepath.Join(envPath, vcrFileName(testName))
 
 	rec, err := recorder.NewAsMode(path, vcrMode, rndTripper)
 	if err != nil {
 		diags.AddError("error creating record as new mode", err.Error())
-		return pollInterval, rndTripper, diags
+		return pollInterval, sleepUnit, rndTripper, diags
 	}
 	// Defines how VCR will match requests to responses.
 	rec.SetMatcher(NewVcrMatcherFunc(ctx))
 
-	return pollInterval, rec, diags
+	return pollInterval, sleepUnit, rec, diags
 }
 
 // NewVcrMatcherFunc returns a function used for matching HTTP requests with data recorded in VCR cassettes
@@ -282,6 +421,9 @@ func NewVcrMatcherFunc(ctx context.Context) func(r *http.Request, i cassette.Req
 			return false
 		}
 		if stripStandardQueryParams(r.URL.String()) != stripStandardQueryParams(i.URL) {
+			return false
+		}
+		if r.Header.Get("X-Goog-Api-Version") != i.Headers.Get("X-Goog-Api-Version") {
 			return false
 		}
 		if r.Body == nil {
@@ -403,6 +545,18 @@ func GetSDKProvider(testName string) *schema.Provider {
 		}
 	} else {
 		log.Print("[DEBUG] VCR_PATH or VCR_MODE not set, skipping VCR")
+		old := prov.ConfigureContextFunc
+		prov.ConfigureContextFunc = func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+			c, diags := old(ctx, d)
+			if diags.HasError() {
+				return nil, diags
+			}
+			config := c.(*transport_tpg.Config)
+			if config != nil && config.Client != nil {
+				config.Client.Transport = wrapWithRequestWatcher(testName, config.Client.Transport)
+			}
+			return config, diags
+		}
 	}
 	return prov
 }
@@ -418,6 +572,9 @@ func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc 
 	v, ok := configs[testName]
 	configsLock.RUnlock()
 	if ok {
+		if v != nil && v.Client != nil {
+			v.Client.Transport = wrapWithRequestWatcher(testName, v.Client.Transport)
+		}
 		return v, nil
 	}
 	c, diags := configureFunc(ctx, d)
@@ -427,10 +584,13 @@ func getCachedConfig(ctx context.Context, d *schema.ResourceData, configureFunc 
 
 	var fwD fwDiags.Diagnostics
 	config := c.(*transport_tpg.Config)
-	config.PollInterval, config.Client.Transport, fwD = HandleVCRConfiguration(ctx, testName, config.Client.Transport, config.PollInterval)
+	config.PollInterval, config.SleepUnit, config.Client.Transport, fwD = HandleVCRConfiguration(ctx, testName, config.Client.Transport, config.PollInterval, config.SleepUnit)
 	if fwD.HasError() {
 		diags = append(diags, *tpgresource.FrameworkDiagsToSdkDiags(fwD)...)
 		return nil, diags
+	}
+	if config.Client != nil {
+		config.Client.Transport = wrapWithRequestWatcher(testName, config.Client.Transport)
 	}
 
 	configsLock.Lock()

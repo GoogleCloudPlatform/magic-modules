@@ -15,16 +15,16 @@ resource "google_secure_source_manager_repository" "repository" {
     deletion_policy = "{{index $.ResourceIdVars "deletion_policy"}}"
 }
 
-resource "google_secure_source_manager_branch_rule" "default" {
+resource "google_secure_source_manager_branch_rule" "{{$.PrimaryResourceId}}" {
     branch_rule_id = "{{index $.ResourceIdVars "branch_rule_id"}}"
     location = google_secure_source_manager_repository.repository.location
     repository_id = google_secure_source_manager_repository.repository.repository_id
     include_pattern = "test"
-    minimum_approvals_count   = 2
-    minimum_reviews_count     = 2
-    require_comments_resolved = true
-    require_linear_history    = true
-    require_pull_request      = true
-    disabled = false
-    allow_stale_reviews = false
+    minimum_approvals_count   = {{index $.Vars "minimum_approvals_count"}}
+    minimum_reviews_count     = {{index $.Vars "minimum_reviews_count"}}
+    require_comments_resolved = {{index $.Vars "require_comments_resolved"}}
+    require_linear_history    = {{index $.Vars "require_linear_history"}}
+    require_pull_request      = {{index $.Vars "require_pull_request"}}
+    disabled = {{index $.Vars "disabled"}}
+    allow_stale_reviews = {{index $.Vars "allow_stale_reviews"}}
 }

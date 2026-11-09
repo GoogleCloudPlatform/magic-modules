@@ -2,6 +2,9 @@ package provider
 
 import (
 	"fmt"
+	"io/fs"
+	"os"
+	"path/filepath"
 	"reflect"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
@@ -42,4 +45,38 @@ func ImportPathFromVersion(v string) string {
 		dir = "google-" + v
 	}
 	return fmt.Sprintf("%s/%s", tpg, dir)
+}
+
+func copyDir(srcDir, dstDir string, skip func(src string) bool) error {
+	return filepath.WalkDir(srcDir, func(src string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if skip != nil && skip(src) {
+			if d.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		rel, err := filepath.Rel(srcDir, src)
+		if err != nil {
+			return err
+		}
+		dst := filepath.Join(dstDir, rel)
+		info, err := d.Info()
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return os.MkdirAll(dst, info.Mode().Perm())
+		}
+		if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+			return err
+		}
+		data, err := os.ReadFile(src)
+		if err != nil {
+			return err
+		}
+		return os.WriteFile(dst, data, info.Mode().Perm())
+	})
 }

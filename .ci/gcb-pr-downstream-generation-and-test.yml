@@ -48,12 +48,12 @@ steps:
           - --no-ff
           - head/$_HEAD_BRANCH
 
-    - name: 'gcr.io/graphite-docker-images/build-environment'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: build-magician-binary
       waitFor: ["merged"]
 
-    - name: 'gcr.io/graphite-docker-images/build-environment'
+    - name: 'gcr.io/graphite-docker-images/go-plus'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
       id: remove-label
       secretEnv: ["GITHUB_TOKEN_MAGIC_MODULES"]

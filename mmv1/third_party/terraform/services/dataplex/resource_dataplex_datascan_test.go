@@ -64,14 +64,14 @@ data "google_project" "project" {
 
 resource "google_dataplex_entry_group" "test_group" {
   location       = "us-central1"
-  entry_group_id = "test-group-%{random_suffix}"
+  entry_group_id = "tf-test-group-%{random_suffix}"
   project        = data.google_project.project.project_id
 }
 
 resource "google_dataplex_entry" "test_entry" {
   location       = "us-central1"
   entry_group_id = google_dataplex_entry_group.test_group.entry_group_id
-  entry_id       = "test-entry-%{random_suffix}"
+  entry_id       = "tf-test-entry-%{random_suffix}"
   entry_type     = "projects/655216118709/locations/global/entryTypes/data-quality-rule-template"
   project        = data.google_project.project.number
   aspects {
@@ -197,6 +197,10 @@ resource "google_dataplex_datascan" "full_quality" {
         priority = "high"
       }
       non_null_expectation {}
+      debug_queries {
+        description = "test debug query description"
+        sql_statement = "select * from $${data()} where address is null"
+      }
     }
 
     rules {
@@ -309,14 +313,14 @@ data "google_project" "project" {
 
 resource "google_dataplex_entry_group" "test_group" {
   location       = "us-central1"
-  entry_group_id = "test-group-%{random_suffix}"
+  entry_group_id = "tf-test-group-%{random_suffix}"
   project        = data.google_project.project.project_id
 }
 
 resource "google_dataplex_entry" "test_entry" {
   location       = "us-central1"
   entry_group_id = google_dataplex_entry_group.test_group.entry_group_id
-  entry_id       = "test-entry-%{random_suffix}"
+  entry_id       = "tf-test-entry-%{random_suffix}"
   entry_type     = "projects/655216118709/locations/global/entryTypes/data-quality-rule-template"
   project        = data.google_project.project.number
   aspects {
@@ -440,6 +444,10 @@ resource "google_dataplex_datascan" "full_quality" {
         priority = "low"
       }
       non_null_expectation {}
+      debug_queries {
+        description = "updated debug query description"
+        sql_statement = "select address from $${data()} where address is null"
+      }
     }
 
     rules {
@@ -579,6 +587,20 @@ func TestAccDataplexDatascan_dataplexDatascanFullProfile_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"data_scan_id", "labels", "location", "terraform_labels"},
 			},
+			{
+				Config: testAccDataplexDatascan_dataplexDatascanFullProfile_lightweight(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_dataplex_datascan.full_profile", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_dataplex_datascan.full_profile",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"data_scan_id", "labels", "location", "terraform_labels"},
+			},
 		},
 	})
 }
@@ -656,6 +678,7 @@ resource "google_dataplex_datascan" "full_profile" {
         results_table = "//bigquery.googleapis.com/projects/%{project_name}/datasets/${google_bigquery_dataset.tf_test_dataset.dataset_id}/tables/profile_export_%{random_suffix}"
       }
     }
+    mode = "STANDARD"
   }
 
   project = "%{project_name}"
@@ -741,6 +764,85 @@ resource "google_dataplex_datascan" "full_profile" {
       }
     }
     catalog_publishing_enabled = true
+    mode = "STANDARD"
+  }
+
+  project = "%{project_name}"
+
+  depends_on = [
+    google_bigquery_dataset.tf_test_dataset
+  ]
+}
+`, context)
+}
+
+func testAccDataplexDatascan_dataplexDatascanFullProfile_lightweight(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_bigquery_dataset" "tf_test_dataset" {
+  dataset_id = "tf_test_dataset_id_%{random_suffix}"
+  default_table_expiration_ms = 3600000
+  delete_contents_on_destroy = true
+}
+
+resource "google_bigquery_table" "tf_test_table" {
+  dataset_id          = google_bigquery_dataset.tf_test_dataset.dataset_id
+  table_id            = "tf_test_table_id_%{random_suffix}"
+  deletion_protection = false
+  schema              = <<EOF
+    [
+      {
+        "name": "word",
+        "type": "STRING",
+        "mode": "REQUIRED"
+      },
+      {
+        "name": "word_count",
+        "type": "INTEGER",
+        "mode": "REQUIRED"
+      },
+      {
+        "name": "corpus",
+        "type": "STRING",
+        "mode": "REQUIRED"
+      },
+      {
+        "name": "corpus_date",
+        "type": "INTEGER",
+        "mode": "REQUIRED"
+      }
+    ]
+  EOF
+}
+
+resource "google_dataplex_datascan" "full_profile" {
+  location = "us-central1"
+  display_name = "Full Datascan Quality Publishing"
+  data_scan_id = "tf-test-dataprofile-full-test%{random_suffix}"
+  description = "Example resource - Full Datascan Quality with Publishing enabled"
+  labels = {
+    author = "billing"
+  }
+
+  data {
+      resource = "//bigquery.googleapis.com/projects/%{project_name}/datasets/${google_bigquery_dataset.tf_test_dataset.dataset_id}/tables/${google_bigquery_table.tf_test_table.table_id}"
+  }
+
+  execution_spec {
+      trigger {
+      schedule {
+          cron = "TZ=America/New_York 1 1 * * *"
+      }
+      }
+  }
+
+  data_profile_spec {
+    post_scan_actions {
+      bigquery_export {
+        results_table = "//bigquery.googleapis.com/projects/%{project_name}/datasets/${google_bigquery_dataset.tf_test_dataset.dataset_id}/tables/profile_export_%{random_suffix}"
+      }
+    }
+    catalog_publishing_enabled = true
+    mode = "LIGHTWEIGHT"
   }
 
   project = "%{project_name}"
@@ -866,14 +968,14 @@ resource "google_bigquery_table" "tf_test_table" {
 
 resource "google_dataplex_entry_group" "test_group" {
   location       = "us-central1"
-  entry_group_id = "test-group-%{random_suffix}"
+  entry_group_id = "tf-test-group-%{random_suffix}"
   project        = "%{project_name}"
 }
 
 resource "google_dataplex_entry" "test_entry" {
   location       = "us-central1"
   entry_group_id = google_dataplex_entry_group.test_group.entry_group_id
-  entry_id       = "test-entry-%{random_suffix}"
+  entry_id       = "tf-test-entry-%{random_suffix}"
   entry_type     = "projects/655216118709/locations/global/entryTypes/data-quality-rule-template"
   project        = data.google_project.project.number
   aspects {
@@ -1058,14 +1160,14 @@ resource "google_bigquery_table" "tf_test_table" {
 
 resource "google_dataplex_entry_group" "test_group" {
   location       = "us-central1"
-  entry_group_id = "test-group-%{random_suffix}"
+  entry_group_id = "tf-test-group-%{random_suffix}"
   project        = "%{project_name}"
 }
 
 resource "google_dataplex_entry" "test_entry" {
   location       = "us-central1"
   entry_group_id = google_dataplex_entry_group.test_group.entry_group_id
-  entry_id       = "test-entry-%{random_suffix}"
+  entry_id       = "tf-test-entry-%{random_suffix}"
   entry_type     = "projects/655216118709/locations/global/entryTypes/data-quality-rule-template"
   project        = data.google_project.project.number
   aspects {
@@ -1279,14 +1381,14 @@ resource "google_project_iam_member" "sa_bq_job_user" {
 
 resource "google_dataplex_entry_group" "test_group" {
   location       = "us-central1"
-  entry_group_id = "test-group-%{random_suffix}"
+  entry_group_id = "tf-test-group-%{random_suffix}"
   project        = data.google_project.project.project_id
 }
 
 resource "google_dataplex_entry" "test_entry" {
   location       = "us-central1"
   entry_group_id = google_dataplex_entry_group.test_group.entry_group_id
-  entry_id       = "test-entry-%{random_suffix}"
+  entry_id       = "tf-test-entry-%{random_suffix}"
   entry_type     = "projects/655216118709/locations/global/entryTypes/data-quality-rule-template"
   project        = data.google_project.project.number
   aspects {
@@ -1307,7 +1409,7 @@ resource "google_dataplex_entry" "test_entry" {
 resource "google_dataplex_entry" "test_entry_2" {
   location       = "us-central1"
   entry_group_id = google_dataplex_entry_group.test_group.entry_group_id
-  entry_id       = "test-entry-2-%{random_suffix}"
+  entry_id       = "tf-test-entry-2-%{random_suffix}"
   entry_type     = "projects/655216118709/locations/global/entryTypes/data-quality-rule-template"
   project        = data.google_project.project.number
   aspects {
@@ -1438,14 +1540,14 @@ resource "google_project_iam_member" "sa_bq_job_user" {
 
 resource "google_dataplex_entry_group" "test_group" {
   location       = "us-central1"
-  entry_group_id = "test-group-%{random_suffix}"
+  entry_group_id = "tf-test-group-%{random_suffix}"
   project        = data.google_project.project.project_id
 }
 
 resource "google_dataplex_entry" "test_entry" {
   location       = "us-central1"
   entry_group_id = google_dataplex_entry_group.test_group.entry_group_id
-  entry_id       = "test-entry-%{random_suffix}"
+  entry_id       = "tf-test-entry-%{random_suffix}"
   entry_type     = "projects/655216118709/locations/global/entryTypes/data-quality-rule-template"
   project        = data.google_project.project.number
   aspects {
@@ -1466,7 +1568,7 @@ resource "google_dataplex_entry" "test_entry" {
 resource "google_dataplex_entry" "test_entry_2" {
   location       = "us-central1"
   entry_group_id = google_dataplex_entry_group.test_group.entry_group_id
-  entry_id       = "test-entry-2-%{random_suffix}"
+  entry_id       = "tf-test-entry-2-%{random_suffix}"
   entry_type     = "projects/655216118709/locations/global/entryTypes/data-quality-rule-template"
   project        = data.google_project.project.number
   aspects {

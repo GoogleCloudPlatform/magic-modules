@@ -88,7 +88,7 @@ func testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_basicTest(t *
 	serviceAccount := iambeta.BootstrapServiceAccount(t, "acm-egress-1", initialServiceAccount)
 
 	policyTitle := acctest.RandString(t, 10)
-	perimeterTitle := "perimeter"
+	perimeterTitle := "tf_test_perimeter"
 	projectNumber := envvar.GetTestProjectNumberFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -159,7 +159,7 @@ func testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_basic(org, po
 
 resource "google_access_context_manager_access_level" "test-access" {
   parent      = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
-  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/level"
+  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/tf_test_level"
   title       = "level"
   description = "hello"
   basic {
@@ -261,7 +261,8 @@ func testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_updateTest(t 
 	org := envvar.GetTestOrgFromEnv(t)
 
 	policyTitle := acctest.RandString(t, 10)
-	perimeterTitle := "perimeter"
+	perimeterTitle := "tf_test_perimeter"
+	projectNumber := envvar.GetTestProjectNumberFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -271,7 +272,7 @@ func testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_updateTest(t 
 				Config: testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_egressPolicyUpdate_step1(org, policyTitle, perimeterTitle),
 			},
 			{
-				Config: testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_egressPolicyUpdate_step2(org, policyTitle, perimeterTitle),
+				Config: testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_egressPolicyUpdate_step2(org, policyTitle, perimeterTitle, projectNumber),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction(
@@ -305,6 +306,12 @@ func testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_egressPolicyU
 	return fmt.Sprintf(`
 %s
 
+resource "google_folder" "test-folder" {
+  parent              = "organizations/%s"
+  display_name        = "tf-test-%s"
+  deletion_protection = false
+}
+
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "test-access1" {
   perimeter = google_access_context_manager_service_perimeter.test-access.name
   title     = "dry run egress policy update test"
@@ -320,17 +327,23 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
     }
   }
 }
-`, testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_destroy(org, policyTitle, perimeterTitleName))
+`, testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_destroy(org, policyTitle, perimeterTitleName), org, policyTitle)
 }
 
 // step 2: update identity_type, add source_restriction/sources/roles/resources
-func testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_egressPolicyUpdate_step2(org, policyTitle, perimeterTitleName string) string {
+func testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_egressPolicyUpdate_step2(org, policyTitle, perimeterTitleName, projectNumber string) string {
 	return fmt.Sprintf(`
 %s
 
+resource "google_folder" "test-folder" {
+  parent              = "organizations/%s"
+  display_name        = "tf-test-%s"
+  deletion_protection = false
+}
+
 resource "google_access_context_manager_access_level" "update-test" {
   parent      = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
-  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/dryrunegressupdlevel"
+  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/tf_test_dryrunegressupdlevel"
   title       = "dryrunegressupdlevel"
   description = "Access level for dry run egress update test"
   basic {
@@ -348,14 +361,23 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
     sources {
       access_level = google_access_context_manager_access_level.update-test.name
     }
+    sources {
+      resource = "projects/%s"
+    }
+    sources {
+      resource = google_folder.test-folder.name
+    }
+    sources {
+      resource = "organizations/%s"
+    }
     source_restriction = "SOURCE_RESTRICTION_ENABLED"
   }
   egress_to {
-    resources = ["*"]
+    resources = ["projects/%s", google_folder.test-folder.name, "organizations/%s"]
     roles     = ["roles/bigquery.admin"]
   }
 }
-`, testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_destroy(org, policyTitle, perimeterTitleName))
+`, testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_destroy(org, policyTitle, perimeterTitleName), org, policyTitle, projectNumber, org, projectNumber, org)
 }
 
 // step 3: switch to ANY_USER_ACCOUNT, external_resources, permission selector
@@ -363,9 +385,15 @@ func testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_egressPolicyU
 	return fmt.Sprintf(`
 %s
 
+resource "google_folder" "test-folder" {
+  parent              = "organizations/%s"
+  display_name        = "tf-test-%s"
+  deletion_protection = false
+}
+
 resource "google_access_context_manager_access_level" "update-test" {
   parent      = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
-  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/dryrunegressupdlevel"
+  name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/tf_test_dryrunegressupdlevel"
   title       = "dryrunegressupdlevel"
   description = "Access level for dry run egress update test"
   basic {
@@ -396,5 +424,5 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
     }
   }
 }
-`, testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_destroy(org, policyTitle, perimeterTitleName))
+`, testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_destroy(org, policyTitle, perimeterTitleName), org, policyTitle)
 }

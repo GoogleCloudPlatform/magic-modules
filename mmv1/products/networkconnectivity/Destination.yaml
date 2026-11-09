@@ -116,11 +116,8 @@ properties:
           description: |
             The CSP of the remote IP prefix.
         - name: state
-          type: Enum
+          type: String
           output: true
-          enum_values:
-            - VALID
-            - INVALID
           description: |
             The state of the DestinationEndpoint resource.
         - name: updateTime
@@ -144,14 +141,8 @@ properties:
           type: NestedObject
           properties:
             - name: state
-              type: Enum
+              type: String
               output: true
-              enum_values:
-                - ADDING
-                - ACTIVE
-                - DELETING
-                - SUSPENDING
-                - SUSPENDED
               description: The state of the resource.
             - name: effectiveTime
               type: Time

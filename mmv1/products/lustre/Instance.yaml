@@ -34,6 +34,8 @@ sweeper:
   url_substitutions:
     - location: us-central1-a
     - location: us-central1-c
+    - location: us-east4-a
+    - location: us-east4-b
 async:
   type: OpAsync
   operation:

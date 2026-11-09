@@ -3,12 +3,12 @@ package labeler
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"sort"
 	"strings"
 	"time"
 
-	"github.com/golang/glog"
 	"github.com/google/go-github/v68/github"
 )
 
@@ -187,7 +187,7 @@ func UpdateIssues(repository string, issueUpdates []IssueUpdate, dryRun bool) er
 		})
 
 		if err != nil {
-			glog.Errorf("Error updating issue %d: %v", update.Number, err)
+			log.Printf("Error updating issue %d: %v", update.Number, err)
 			failed++
 			continue
 		}
