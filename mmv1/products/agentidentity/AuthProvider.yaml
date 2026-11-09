@@ -31,7 +31,6 @@ custom_code:
   post_update: "templates/terraform/post_create/sleep.go.tmpl"
   post_delete: "templates/terraform/post_delete/sleep.go.tmpl"
   test_check_destroy: "templates/terraform/custom_check_destroy/agent_identity_auth_provider.go.tmpl"
-  pre_update: "templates/terraform/pre_update/agent_identity_auth_provider.go.tmpl"
 iam_policy:
   method_name_separator: ':'
   allowed_iam_role: roles/agentidentity.viewer
@@ -75,6 +74,13 @@ properties:
     description: |-
       AuthProvider type specific parameters.
       Required when creating an auth_provider.
+    update_mask_fields:
+      - authProviderTypeParams.apiKey
+      - authProviderTypeParams.connectorReferenceAuthProvider.authorizationDetails
+      - authProviderTypeParams.connectorReferenceAuthProvider.connector
+      - authProviderTypeParams.threeLeggedOauth
+      - authProviderTypeParams.twoLeggedOauth
+      - authProviderTypeParams.xaaAuthProvider
     properties:
       - name: apiKey
         type: NestedObject
