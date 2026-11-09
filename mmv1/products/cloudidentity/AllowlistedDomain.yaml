@@ -51,7 +51,7 @@ async:
   check_response_func_absence: transport_tpg.PollCheckForAbsence
   suppress_error: false
   target_occurrences: 1
-# This resource has unusual authentication requirements that mean we can't currently test it or sweep it.
+# This resource has unusual authentication requirements that mean we can't currently test it or sweep it in CI
 exclude_sweeper: true
 custom_code:
   post_create: templates/terraform/post_create/cloud_identity_allowlisted_domain.go.tmpl
@@ -84,7 +84,8 @@ properties:
     type: String
     description: |
       The domain to add to the allowlist, e.g. `example.com`. The domain must not
-      be one of the customer's own (primary or alias) domains.
+      be one of the customer's own (primary or alias) domains. This should be
+      lowercase.
     required: true
     immutable: true
     diff_suppress_func: 'tpgresource.CaseDiffSuppress'
