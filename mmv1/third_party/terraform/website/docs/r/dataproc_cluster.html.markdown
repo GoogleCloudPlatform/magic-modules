@@ -420,8 +420,10 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
    instance group in High Obtainability (HO) mode. Mutually exclusive with `preemptible_worker_config` and
    `gce_cluster_config.zone`. Requires `master_flexible_config`. Adding this block after cluster creation
    updates in place when `worker_flexible_config` is present, `num_instances > 0`, and `core_count`,
-   `hardware_class`, and `boot_disk_size_gb` match `worker_flexible_config`; removing this block scales
-   `num_instances` down to `0` in place (unless managed by `autoscaling_config`).
+   `hardware_class`, and `boot_disk_size_gb` (if set) match `worker_flexible_config`; adding it with
+   `num_instances = 0` or without `worker_flexible_config` forces a new resource to be created.
+   Removing this block scales `num_instances` down to `0` in place (unless managed by `autoscaling_config`);
+   removing it in the same change as `cluster_config` values that are unknown until apply produces a plan-time error.
    Structure [defined below](#nested_secondary_worker_flexible_config).
 
 * `software_config` (Optional) The config settings for software inside the cluster.
@@ -928,24 +930,24 @@ cluster_config {
 * `num_instances` - (Optional) Specifies the number of secondary worker instances to create.
    Defaults to `0`; can be scaled down to `0`; updatable in place. Removing the
    `secondary_worker_flexible_config` block scales `num_instances` down to `0` in place (unless
-   managed by `autoscaling_config`). When adding this block after cluster creation, a `num_instances`
-   value that is unknown at plan time forces a new resource to be created.
+   managed by `autoscaling_config`). Adding the block after cluster creation with `num_instances = 0`
+   forces a new resource to be created.
 
 * `core_count` - (Required) The number of vCPUs per instance. Must be a power of 2
    (2, 4, 8, 16, or 32). Changing this on an existing block forces a new resource to be created.
    Adding `secondary_worker_flexible_config` after cluster creation updates in place when `num_instances > 0`
-   and `core_count`, `hardware_class`, and `boot_disk_size_gb` match `worker_flexible_config`.
+   and `core_count`, `hardware_class`, and `boot_disk_size_gb` (if set) match `worker_flexible_config`.
 
 * `hardware_class` - (Optional) Controls the hardware class for the flexible instance group.
    Allowed values are `"STANDARD"` and `"PERFORMANCE"`. Defaults to `"STANDARD"`.
    Changing this on an existing block forces a new resource to be created.
    Adding `secondary_worker_flexible_config` after cluster creation updates in place when `num_instances > 0`
-   and `core_count`, `hardware_class`, and `boot_disk_size_gb` match `worker_flexible_config`.
+   and `core_count`, `hardware_class`, and `boot_disk_size_gb` (if set) match `worker_flexible_config`.
 
 * `boot_disk_size_gb` - (Optional) The boot disk size in GB.
    Changing this on an existing block forces a new resource to be created.
    Adding `secondary_worker_flexible_config` after cluster creation updates in place when `num_instances > 0`
-   and `core_count`, `hardware_class`, and `boot_disk_size_gb` match `worker_flexible_config`.
+   and `core_count`, `hardware_class`, and `boot_disk_size_gb` (if set) match `worker_flexible_config`.
 - - -
 
 <a name="nested_software_config"></a>The `cluster_config.software_config` block supports:

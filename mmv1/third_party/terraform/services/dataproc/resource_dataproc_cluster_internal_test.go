@@ -147,7 +147,7 @@ func TestDataprocSecondaryWorkerFlexibleConfigDiff(t *testing.T) {
 		"policy_uri": cty.String,
 	})
 
-	makeRawConfig := func(sec []cty.Value, auto []cty.Value) cty.Value {
+	makeRawConfigWorkerNum := func(sec []cty.Value, auto []cty.Value, workerNum cty.Value) cty.Value {
 		secList := cty.ListValEmpty(flexType)
 		if len(sec) > 0 {
 			secList = cty.ListVal(sec)
@@ -174,7 +174,7 @@ func TestDataprocSecondaryWorkerFlexibleConfigDiff(t *testing.T) {
 					}),
 					"worker_flexible_config": cty.ListVal([]cty.Value{
 						cty.ObjectVal(map[string]cty.Value{
-							"num_instances":     cty.NumberIntVal(2),
+							"num_instances":     workerNum,
 							"core_count":        cty.NumberIntVal(8),
 							"hardware_class":    cty.StringVal("STANDARD"),
 							"boot_disk_size_gb": cty.NumberIntVal(100),
@@ -185,6 +185,9 @@ func TestDataprocSecondaryWorkerFlexibleConfigDiff(t *testing.T) {
 				}),
 			}),
 		})
+	}
+	makeRawConfig := func(sec []cty.Value, auto []cty.Value) cty.Value {
+		return makeRawConfigWorkerNum(sec, auto, cty.NumberIntVal(2))
 	}
 
 	baseStateAttrs := func() map[string]string {
@@ -391,7 +394,7 @@ func TestDataprocSecondaryWorkerFlexibleConfigDiff(t *testing.T) {
 		}
 	})
 
-	t.Run("post_create_add_unknown_num_instances_forces_new", func(t *testing.T) {
+	t.Run("post_create_add_unknown_num_instances_updates_in_place", func(t *testing.T) {
 		attrs := baseStateAttrs()
 		// hcl2shim.UnknownVariableValue: how the legacy ResourceConfig represents an
 		// unknown value (e.g. num_instances from a resource not yet created).
@@ -413,8 +416,61 @@ func TestDataprocSecondaryWorkerFlexibleConfigDiff(t *testing.T) {
 			}),
 		}, nil)
 		d := runDiff(t, attrs, baseConfigMap(secCfg, nil, true), rawCfg)
+		if !hasSecDiff(d) {
+			t.Fatalf("expected secondary_worker_flexible_config diff, got none")
+		}
+		if d.RequiresNew() {
+			t.Fatalf("expected in-place update when num_instances is unknown on initial post-create addition, got RequiresNew=true: %#v", d.Attributes)
+		}
+	})
+
+	t.Run("post_create_add_omitted_boot_disk_with_worker_set_updates_in_place", func(t *testing.T) {
+		attrs := baseStateAttrs()
+		secCfg := []interface{}{
+			map[string]interface{}{
+				"num_instances":  2,
+				"core_count":     8,
+				"hardware_class": "STANDARD",
+			},
+		}
+		rawCfg := makeRawConfig([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"num_instances":     cty.NumberIntVal(2),
+				"core_count":        cty.NumberIntVal(8),
+				"hardware_class":    cty.StringVal("STANDARD"),
+				"boot_disk_size_gb": cty.NullVal(cty.Number),
+			}),
+		}, nil)
+		d := runDiff(t, attrs, baseConfigMap(secCfg, nil, true), rawCfg)
+		if !hasSecDiff(d) {
+			t.Fatalf("expected secondary_worker_flexible_config diff, got none")
+		}
+		if d.RequiresNew() {
+			t.Fatalf("expected in-place update when boot_disk_size_gb is omitted and worker_flexible_config sets it, got RequiresNew=true: %#v", d.Attributes)
+		}
+	})
+
+	t.Run("post_create_add_mismatched_boot_disk_forces_new", func(t *testing.T) {
+		attrs := baseStateAttrs()
+		secCfg := []interface{}{
+			map[string]interface{}{
+				"num_instances":     2,
+				"core_count":        8,
+				"hardware_class":    "STANDARD",
+				"boot_disk_size_gb": 200,
+			},
+		}
+		rawCfg := makeRawConfig([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"num_instances":     cty.NumberIntVal(2),
+				"core_count":        cty.NumberIntVal(8),
+				"hardware_class":    cty.StringVal("STANDARD"),
+				"boot_disk_size_gb": cty.NumberIntVal(200),
+			}),
+		}, nil)
+		d := runDiff(t, attrs, baseConfigMap(secCfg, nil, true), rawCfg)
 		if !d.RequiresNew() {
-			t.Fatalf("expected RequiresNew=true when num_instances is unknown on initial post-create addition, got %#v", d.Attributes)
+			t.Fatalf("expected RequiresNew=true when boot_disk_size_gb is set and differs from worker_flexible_config")
 		}
 	})
 
@@ -496,6 +552,78 @@ func TestDataprocSecondaryWorkerFlexibleConfigDiff(t *testing.T) {
 		numDiff := d.Attributes["cluster_config.0.secondary_worker_flexible_config.0.num_instances"]
 		if numDiff == nil || numDiff.Old != "2" || numDiff.New != "0" {
 			t.Fatalf("expected secondary_worker_flexible_config.0.num_instances diff 2 -> 0, got %#v", numDiff)
+		}
+	})
+
+	// Legacy config map with worker_flexible_config.0.num_instances unknown
+	// (hcl2shim.UnknownVariableValue).
+	withUnknownWorkerNum := func(cfg map[string]interface{}) map[string]interface{} {
+		cc := cfg["cluster_config"].([]interface{})[0].(map[string]interface{})
+		wrk := cc["worker_flexible_config"].([]interface{})[0].(map[string]interface{})
+		wrk["num_instances"] = "74D93920-ED26-11E3-AC10-0800200C9A66"
+		return cfg
+	}
+	secStateAttrs := func() map[string]string {
+		attrs := baseStateAttrs()
+		attrs["cluster_config.0.secondary_worker_flexible_config.#"] = "1"
+		attrs["cluster_config.0.secondary_worker_flexible_config.0.num_instances"] = "2"
+		attrs["cluster_config.0.secondary_worker_flexible_config.0.core_count"] = "8"
+		attrs["cluster_config.0.secondary_worker_flexible_config.0.hardware_class"] = "STANDARD"
+		attrs["cluster_config.0.secondary_worker_flexible_config.0.boot_disk_size_gb"] = "100"
+		return attrs
+	}
+
+	t.Run("block_removed_with_unknown_sibling_errors", func(t *testing.T) {
+		rawCfg := makeRawConfigWorkerNum(nil, nil, cty.UnknownVal(cty.Number))
+		state := &terraform.InstanceState{ID: "projects/p/regions/us-central1/clusters/test-cluster", Attributes: secStateAttrs(), RawConfig: rawCfg, RawPlan: rawCfg}
+		cfg := withUnknownWorkerNum(baseConfigMap(nil, nil, true))
+		_, err := res.Diff(context.Background(), state, terraform.NewResourceConfigRaw(cfg), &transport_tpg.Config{Project: "p", Region: "us-central1"})
+		if err == nil {
+			t.Fatalf("expected a plan-time error when the block is removed alongside an unknown cluster_config value")
+		}
+		for _, want := range []string{
+			"cluster_config.secondary_worker_flexible_config was removed in the same change as other cluster_config values that are unknown until apply",
+			"cluster_config.0.worker_flexible_config.0.num_instances",
+			"keep the block with num_instances = 0",
+		} {
+			if !strings.Contains(err.Error(), want) {
+				t.Errorf("expected error to contain %q, got: %v", want, err)
+			}
+		}
+	})
+
+	t.Run("block_present_with_unknown_sibling_no_error", func(t *testing.T) {
+		secCfg := []interface{}{
+			map[string]interface{}{
+				"num_instances":     0,
+				"core_count":        8,
+				"hardware_class":    "STANDARD",
+				"boot_disk_size_gb": 100,
+			},
+		}
+		rawCfg := makeRawConfigWorkerNum([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"num_instances":     cty.NumberIntVal(0),
+				"core_count":        cty.NumberIntVal(8),
+				"hardware_class":    cty.StringVal("STANDARD"),
+				"boot_disk_size_gb": cty.NumberIntVal(100),
+			}),
+		}, nil, cty.UnknownVal(cty.Number))
+		state := &terraform.InstanceState{ID: "projects/p/regions/us-central1/clusters/test-cluster", Attributes: secStateAttrs(), RawConfig: rawCfg, RawPlan: rawCfg}
+		cfg := withUnknownWorkerNum(baseConfigMap(secCfg, nil, true))
+		d, err := res.Diff(context.Background(), state, terraform.NewResourceConfigRaw(cfg), &transport_tpg.Config{Project: "p", Region: "us-central1"})
+		if err != nil {
+			t.Fatalf("expected no error when the block is present (explicit num_instances = 0), got: %v", err)
+		}
+		if d.RequiresNew() {
+			t.Fatalf("expected in-place update, got RequiresNew=true: %#v", d.Attributes)
+		}
+		numDiff := d.Attributes["cluster_config.0.secondary_worker_flexible_config.0.num_instances"]
+		if numDiff == nil || numDiff.Old != "2" || numDiff.New != "0" {
+			t.Fatalf("expected secondary_worker_flexible_config.0.num_instances diff 2 -> 0, got %#v", numDiff)
+		}
+		if wrk := d.Attributes["cluster_config.0.worker_flexible_config.0.num_instances"]; wrk == nil || !wrk.NewComputed {
+			t.Fatalf("expected worker_flexible_config.0.num_instances to stay unknown, got %#v", wrk)
 		}
 	})
 

@@ -4719,6 +4719,42 @@ func isClusterConfigNestedBlockConfigured(rawConfig cty.Value, blockName string)
 	return block.LengthInt() > 0, true
 }
 
+// unknownClusterConfigPaths returns up to max paths (e.g.
+// "cluster_config.0.worker_flexible_config.0.num_instances") of values in
+// cluster_config that are unknown in the raw config, including unknown blocks.
+func unknownClusterConfigPaths(rawConfig cty.Value, max int) []string {
+	if rawConfig.IsNull() || !rawConfig.IsKnown() || !rawConfig.Type().IsObjectType() || !rawConfig.Type().HasAttribute("cluster_config") {
+		return nil
+	}
+	var out []string
+	_ = cty.Walk(rawConfig.GetAttr("cluster_config"), func(p cty.Path, v cty.Value) (bool, error) {
+		if len(out) >= max {
+			return false, nil
+		}
+		if v.IsKnown() {
+			return true, nil
+		}
+		name := "cluster_config"
+		for _, step := range p {
+			switch s := step.(type) {
+			case cty.GetAttrStep:
+				name += "." + s.Name
+			case cty.IndexStep:
+				if s.Key.Type() == cty.Number {
+					bf := s.Key.AsBigFloat()
+					i, _ := bf.Int64()
+					name += fmt.Sprintf(".%d", i)
+				} else if s.Key.Type() == cty.String {
+					name += "." + s.Key.AsString()
+				}
+			}
+		}
+		out = append(out, name)
+		return false, nil
+	})
+	return out
+}
+
 // isSecondaryWorkerFlexibleFieldNullInRawConfig reports whether a field inside
 // cluster_config[0].secondary_worker_flexible_config[0] is known and null (omitted) in HCL.
 func isSecondaryWorkerFlexibleFieldNullInRawConfig(rawConfig cty.Value, field string) bool {
@@ -4822,6 +4858,13 @@ func secondaryWorkerFlexibleConfigCustomizeDiff(_ context.Context, diff *schema.
 			return nil
 		}
 		if numInstances, _ := oldMap["num_instances"].(int); numInstances > 0 {
+			// SetNew below rewrites all of cluster_config and would turn values that are
+			// unknown until apply into known zeros, so reject that combination at plan time.
+			// Apply-time plan expansion never reaches this with unknowns left, and plan fails
+			// first, so the outcome can't flip mid-apply.
+			if unknown := unknownClusterConfigPaths(rawConfig, 3); len(unknown) > 0 {
+				return fmt.Errorf("cluster_config.secondary_worker_flexible_config was removed in the same change as other cluster_config values that are unknown until apply (%s). Removing the block scales secondary workers to 0, which requires the other cluster_config values to be known at plan time. Apply the other changes first, or keep the block with num_instances = 0", strings.Join(unknown, ", "))
+			}
 			oldCCRaw, newCCRaw := diff.GetChange("cluster_config")
 			oldCCList, _ := oldCCRaw.([]interface{})
 			newCCList, _ := newCCRaw.([]interface{})
@@ -4875,22 +4918,24 @@ func secondaryWorkerFlexibleConfigCustomizeDiff(_ context.Context, diff *schema.
 	// updateMask="config.secondary_worker_flexible_config.num_instances" and creates the
 	// secondary group with the worker_flexible_config shape, so the block can be added in
 	// place only with num_instances > 0 and a shape matching worker_flexible_config.
-	// An unknown num_instances also forces replacement: CustomizeDiff must reach the
-	// same decision at plan time and at apply time, and a value that later resolves
-	// to 0 would otherwise flip the planned action from Update to replace at apply.
+	// A num_instances that is unknown at plan time is planned as an in-place update;
+	// if it resolves to 0 during apply, Terraform rejects the changed final plan.
 	workerCount, _ := diff.Get("cluster_config.0.worker_flexible_config.#").(int)
 	numInstances, _ := diff.Get(prefix + ".0.num_instances").(int)
 	numInstancesKnown := diff.NewValueKnown(prefix + ".0.num_instances")
-	if workerCount == 0 || !numInstancesKnown || numInstances == 0 {
+	if workerCount == 0 || (numInstancesKnown && numInstances == 0) {
 		return diff.ForceNew(prefix)
 	}
 
 	for _, field := range shapeFields {
 		secKey := prefix + ".0." + field
 		wrkKey := "cluster_config.0.worker_flexible_config.0." + field
-		secOmitted := field == "boot_disk_size_gb" && isSecondaryWorkerFlexibleFieldNullInRawConfig(rawConfig, field)
-		secKnown := diff.NewValueKnown(secKey) || secOmitted
-		if !secKnown || diff.Get(secKey) != diff.Get(wrkKey) {
+		// The API creates the added group with the worker boot disk size, so an
+		// omitted (null) boot_disk_size_gb always matches and is read back after apply.
+		if field == "boot_disk_size_gb" && isSecondaryWorkerFlexibleFieldNullInRawConfig(rawConfig, field) {
+			continue
+		}
+		if !diff.NewValueKnown(secKey) || diff.Get(secKey) != diff.Get(wrkKey) {
 			if diff.HasChange(secKey) {
 				if err := diff.ForceNew(secKey); err != nil {
 					return err

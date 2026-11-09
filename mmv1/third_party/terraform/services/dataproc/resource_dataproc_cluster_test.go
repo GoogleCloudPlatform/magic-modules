@@ -4261,7 +4261,10 @@ func TestAccDataprocCluster_flexibleConfig(t *testing.T) {
 				),
 			},
 			{
-				// Re-adding secondary_worker_flexible_config with matching shape scales back up in place.
+				// Re-adding the block to HCL. State still holds secondary_worker_flexible_config at
+				// num_instances = 0 with its original PERFORMANCE shape, so this is an in-place
+				// 0 -> 2 scale of the existing block, not the post-create add path (that path is
+				// covered by TestAccDataprocCluster_flexibleConfigDefaults).
 				Config: testAccDataprocCluster_flexibleConfig(rnd, 3, 2),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
@@ -4446,17 +4449,18 @@ func TestAccDataprocCluster_flexibleConfigDefaults(t *testing.T) {
 				),
 			},
 			{
-				// Plan only (never applied): adding secondary_worker_flexible_config post-create with a
-				// num_instances unknown at plan time plans a replacement.
-				Config:             testAccDataprocCluster_flexibleConfigDefaults_bootDiskWithUnknownSec(rnd),
+				// Plan only (never applied): adding secondary_worker_flexible_config post-create
+				// without boot_disk_size_gb, while worker_flexible_config sets it, plans an
+				// in-place update because the API uses the worker boot disk size.
+				Config:             testAccDataprocCluster_flexibleConfigDefaults_bootDiskWithSecOmittedDisk(rnd),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PostApplyPreRefresh: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_dataproc_cluster.flexible_cluster_boot_disk", plancheck.ResourceActionReplace),
+						plancheck.ExpectResourceAction("google_dataproc_cluster.flexible_cluster_boot_disk", plancheck.ResourceActionUpdate),
 					},
 					PostApplyPostRefresh: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_dataproc_cluster.flexible_cluster_boot_disk", plancheck.ResourceActionReplace),
+						plancheck.ExpectResourceAction("google_dataproc_cluster.flexible_cluster_boot_disk", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
@@ -4560,12 +4564,8 @@ resource "google_dataproc_cluster" "flexible_cluster_boot_disk" {
 `, rnd)
 }
 
-func testAccDataprocCluster_flexibleConfigDefaults_bootDiskWithUnknownSec(rnd string) string {
+func testAccDataprocCluster_flexibleConfigDefaults_bootDiskWithSecOmittedDisk(rnd string) string {
 	return fmt.Sprintf(`
-resource "terraform_data" "sec_count" {
-  input = 1
-}
-
 resource "google_dataproc_cluster" "flexible_cluster_boot_disk" {
   name                          = "tf-test-dproc-bd-%s"
   region                        = "us-central1"
@@ -4584,9 +4584,8 @@ resource "google_dataproc_cluster" "flexible_cluster_boot_disk" {
     }
 
     secondary_worker_flexible_config {
-      num_instances     = terraform_data.sec_count.output
-      core_count        = 4
-      boot_disk_size_gb = 100
+      num_instances = 1
+      core_count    = 4
     }
   }
 }
