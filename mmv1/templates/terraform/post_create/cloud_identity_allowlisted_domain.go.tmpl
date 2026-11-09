@@ -1,3 +1,7 @@
+// Clear the incorrect partial ID set by the generated code, so that any error returns
+// track the resource as not being created properly.
+d.SetId("")
+
 // Create returns a google.longrunning.Operation that can't be polled. When the
 // operation is already done, the created AllowlistedDomain (including its
 // server-assigned name) is in `response`; otherwise look the name up by domain.
@@ -7,9 +11,7 @@ if opErr, ok := res["error"]; ok && opErr != nil {
 
 var name string
 if respBody, ok := res["response"].(map[string]interface{}); ok {
-	if v, ok := respBody["name"].(string); ok {
-		name = v
-	}
+	name, _ = respBody["name"].(string)
 }
 
 if name == "" {
@@ -60,4 +62,11 @@ if name == "" {
 if err := d.Set("name", name); err != nil {
 	return fmt.Errorf("Error setting name: %w", err)
 }
-d.SetId(name)
+if err := d.Set("allowlisted_domain_id", tpgresource.GetResourceNameFromSelfLink(name)); err != nil {
+	return fmt.Errorf("Error setting allowlisted_domain_id: %w", err)
+}
+id, err = tpgresource.ReplaceVars(d, config, "{{$.IdFormat}}")
+if err != nil {
+	return fmt.Errorf("Error constructing id: %w", err)
+}
+d.SetId(id)

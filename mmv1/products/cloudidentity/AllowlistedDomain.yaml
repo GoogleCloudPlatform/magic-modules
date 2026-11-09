@@ -16,36 +16,34 @@ name: AllowlistedDomain
 description: |
   A domain on the external sharing allowlist (trusted domains) of the Google
   Workspace or Cloud Identity customer that the caller belongs to.
+
+  The Allowlisted Domains API only accepts the
+  `https://www.googleapis.com/auth/cloud-identity.allowlisteddomains` or
+  `https://www.googleapis.com/auth/cloud-identity` OAuth scopes; the provider's
+  default `https://www.googleapis.com/auth/cloud-platform` scope is rejected.
+  Set `scopes` in the provider configuration accordingly.
+
+  The API operates on the customer of the calling user, and the caller must be
+  a Google Workspace / Cloud Identity administrator with the allowlisted domain
+  management privilege (for example, a super admin). Service accounts must use
+  domain-wide delegation to act as such an administrator.
 references:
   guides:
     Allowlisted Domains API overview: https://cloud.google.com/identity/docs/concepts/overview-allowlisted-domains
     Setting up the Allowlisted Domains API: https://cloud.google.com/identity/docs/how-to/setup-allowlisted-domains
   api: https://cloud.google.com/identity/docs/reference/rest/v1/allowlistedDomains
-docs:
-  warning: |
-    The Allowlisted Domains API only accepts the
-    `https://www.googleapis.com/auth/cloud-identity.allowlisteddomains` or
-    `https://www.googleapis.com/auth/cloud-identity` OAuth scopes; the provider's
-    default `https://www.googleapis.com/auth/cloud-platform` scope is rejected.
-    Set `scopes` in the provider configuration accordingly.
-    The API operates on the customer of the calling user, and the caller must be
-    a Google Workspace / Cloud Identity administrator with the allowlisted domain
-    management privilege (for example, a super admin). Service accounts must use
-    domain-wide delegation to act as such an administrator.
 base_url: allowlistedDomains
 immutable: true
-self_link: '{{name}}'
+self_link: 'allowlistedDomains/{{allowlisted_domain_id}}'
 create_url: allowlistedDomains
-delete_url: '{{name}}'
+delete_url: 'allowlistedDomains/{{allowlisted_domain_id}}'
 delete_verb: DELETE
-id_format: '{{name}}'
+id_format: 'allowlistedDomains/{{allowlisted_domain_id}}'
 import_format:
-  - '{{name}}'
+  - 'allowlistedDomains/{{allowlisted_domain_id}}'
 # The whole allowlist of a customer is rewritten on every create/delete, and the
 # API rejects a mutation while another one is still pending.
 mutex: 'cloudidentity/allowlistedDomains'
-# Create/Delete return a google.longrunning.Operation, but the Operations service
-# is not public, so wait for the resource itself to appear / disappear instead.
 async:
   type: PollAsync
   actions: [create, delete]
@@ -53,27 +51,35 @@ async:
   check_response_func_absence: transport_tpg.PollCheckForAbsence
   suppress_error: false
   target_occurrences: 1
-# Resource names are opaque and can't be matched against a test prefix.
+# This resource has unusual authentication requirements that mean we can't currently test it or sweep it.
 exclude_sweeper: true
 custom_code:
   post_create: templates/terraform/post_create/cloud_identity_allowlisted_domain.go.tmpl
-  custom_import: templates/terraform/custom_import/cloud_identity_allowlisted_domain.go.tmpl
 samples:
   - name: cloud_identity_allowlisted_domain_basic
     primary_resource_id: allowlisted_domain
-    # Has a handwritten test, as the test needs to override the provider scopes.
-    exclude_test: true
+    skip_test: acceptance test requires Google Workspace admin privileges (allowlisted domain management) not held by the CI service account
     steps:
       - name: cloud_identity_allowlisted_domain_basic
         resource_id_vars:
           domain: example.com
+        test_vars_overrides:
+          domain: '"tf-test-example" + randomSuffix + ".com"'
 properties:
   - name: name
     type: String
     description: |
       The resource name of the allowlisted domain, assigned by the server.
-      Format: `allowlistedDomains/{allowlisted_domain}`.
+      Format: `allowlistedDomains/{allowlisted_domain_id}`.
     output: true
+  - name: allowlistedDomainId
+    api_name: name
+    type: String
+    description: |
+      The server-assigned ID of the allowlisted domain (the last segment of
+      `name`).
+    output: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
   - name: domain
     type: String
     description: |
