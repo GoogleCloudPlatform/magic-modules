@@ -7,6 +7,10 @@ resource "google_vertex_ai_custom_job" "{{.PrimaryResourceId}}" {
   }
 
   job_spec {
+    persistent_resource_id = "{{index $.ResourceIdVars "persistent_resource_id"}}"
+    experiment             = "{{index $.ResourceIdVars "experiment"}}"
+    experiment_run         = "{{index $.ResourceIdVars "experiment_run"}}"
+
     worker_pool_specs {
       replica_count = 1
 
@@ -20,7 +24,7 @@ resource "google_vertex_ai_custom_job" "{{.PrimaryResourceId}}" {
       }
 
       container_spec {
-        image_uri = "us-docker.pkg.dev/vertex-ai/training/tf-cpu.2-8.py310:latest"
+        image_uri = "us-docker.pkg.dev/vertex-ai/training/tf-cpu.2-12.py310:latest"
         command   = ["echo", "test"]
         args      = ["--epochs=1"]
 
@@ -44,8 +48,8 @@ resource "google_vertex_ai_custom_job" "{{.PrimaryResourceId}}" {
 }
 
 resource "google_storage_bucket" "job_bucket" {
-  name     = "{{index $.ResourceIdVars "bucket_name"}}"
-  location = "US-CENTRAL1"
-  force_destroy = true
+  name                        = "{{index $.ResourceIdVars "bucket_name"}}"
+  location                    = "US-CENTRAL1"
+  force_destroy               = true
   uniform_bucket_level_access = true
 }
