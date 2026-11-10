@@ -4,8 +4,8 @@ resource "google_cloud_identity_inbound_saml_sso_profile" "{{$.PrimaryResourceId
 
   idp_config {
     entity_id                  = "https://idp.example.com/{{index $.ResourceIdVars "display_name"}}"
-    single_sign_on_service_uri = "https://idp.example.com/sso"
-    logout_redirect_uri        = "https://idp.example.com/logout"
-    change_password_uri        = "https://idp.example.com/change-password"
+    single_sign_on_service_uri = "{{index $.Vars "sso_uri"}}"
+    logout_redirect_uri        = "{{index $.Vars "logout_uri"}}"
+    change_password_uri        = "{{index $.Vars "change_password_uri"}}"
   }
 }

@@ -14,33 +14,32 @@
 ---
 name: InboundSamlSsoProfile
 description: |
-  A SAML 2.0 federation between a Google enterprise customer and a SAML identity provider.
+  A SAML federation between a Google enterprise customer and a SAML identity provider.
+
+  The caller must be a Google Workspace / Cloud Identity administrator of the
+  customer with the SSO settings privilege (for example a super admin);
+  Google Cloud IAM roles are not sufficient.
+
+  If you are using User ADCs (Application Default Credentials) with this resource,
+  you must specify a `billing_project` and set `user_project_override` to true
+  in the provider configuration. Otherwise the Cloud Identity API will return a 403 error.
+  Your account must have the `serviceusage.services.use` permission on the
+  `billing_project` you defined.
 references:
   guides:
     Assign SSO profiles: https://cloud.google.com/identity/docs/how-to/assign-sso-profiles
     Set up SSO with a third party IdP: https://support.google.com/a/answer/12032922
   api: https://cloud.google.com/identity/docs/reference/rest/v1/inboundSamlSsoProfiles
-docs:
-  warning: |
-    The caller must be a Google Workspace / Cloud Identity administrator of the
-    customer with the SSO settings privilege (for example a super admin);
-    Google Cloud IAM roles are not sufficient.
-
-    If you are using User ADCs (Application Default Credentials) with this resource,
-    you must specify a `billing_project` and set `user_project_override` to true
-    in the provider configuration. Otherwise the Cloud Identity API will return a 403 error.
-    Your account must have the `serviceusage.services.use` permission on the
-    `billing_project` you defined.
 base_url: inboundSamlSsoProfiles
-self_link: '{{name}}'
+self_link: 'inboundSamlSsoProfiles/{{inbound_saml_sso_profile_id}}'
 create_url: inboundSamlSsoProfiles
-update_url: '{{name}}'
+update_url: 'inboundSamlSsoProfiles/{{inbound_saml_sso_profile_id}}'
 update_verb: PATCH
 update_mask: true
-delete_url: '{{name}}'
-id_format: '{{name}}'
+delete_url: 'inboundSamlSsoProfiles/{{inbound_saml_sso_profile_id}}'
+id_format: 'inboundSamlSsoProfiles/{{inbound_saml_sso_profile_id}}'
 import_format:
-  - '{{name}}'
+  - 'inboundSamlSsoProfiles/{{inbound_saml_sso_profile_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -54,26 +53,44 @@ async:
   result:
     resource_inside_response: true
 autogen_async: true
-custom_code:
-  custom_import: templates/terraform/custom_import/set_id_name_with_slashes.go.tmpl
 samples:
   - name: cloud_identity_inbound_saml_sso_profile_basic
     primary_resource_id: saml_profile
-    # Tests require Google Workspace admin privileges (INBOUND_SSO_SETTINGS) not held by
-    # the CI service account. Run locally via resource_cloud_identity_inbound_saml_sso_profile_test.go.
-    exclude_test: true
+    skip_test: acceptance test requires Google Workspace admin privileges (SSO settings) not held by the CI service account
     steps:
       - name: cloud_identity_inbound_saml_sso_profile_basic
         resource_id_vars:
           display_name: saml-profile
         test_env_vars:
           cust_id: CUST_ID
+        vars:
+          sso_uri: https://idp.example.com/sso
+          logout_uri: https://idp.example.com/logout
+          change_password_uri: https://idp.example.com/change-password
+      - name: cloud_identity_inbound_saml_sso_profile_basic
+        resource_id_vars:
+          display_name: saml-profile-updated
+        test_env_vars:
+          cust_id: CUST_ID
+        vars:
+          sso_uri: https://idp.example.com/sso-updated
+          logout_uri: https://idp.example.com/logout-updated
+          change_password_uri: https://idp.example.com/change-password-updated
 properties:
   - name: name
     type: String
     description: |
-      Resource name of the SAML SSO profile, in the format `inboundSamlSsoProfiles/{inbound_saml_sso_profile}`.
+      Resource name of the SAML SSO profile, assigned by the server.
+      Format: `inboundSamlSsoProfiles/{inbound_saml_sso_profile_id}`.
     output: true
+  - name: inboundSamlSsoProfileId
+    api_name: name
+    type: String
+    description: |
+      The server-assigned ID of the SAML SSO profile (the last segment of
+      `name`).
+    output: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
   - name: customer
     type: String
     description: |
