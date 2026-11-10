@@ -74,6 +74,15 @@ properties:
     description: |-
       AuthProvider type specific parameters.
       Required when creating an auth_provider.
+    update_mask_fields:
+      - authProviderTypeParams.apiKey
+      - authProviderTypeParams.threeLeggedOauth.authorizationUrl
+      - authProviderTypeParams.threeLeggedOauth.clientId
+      - authProviderTypeParams.threeLeggedOauth.clientSecret
+      - authProviderTypeParams.threeLeggedOauth.defaultContinueUri
+      - authProviderTypeParams.threeLeggedOauth.enablePkce
+      - authProviderTypeParams.threeLeggedOauth.tokenUrl
+      - authProviderTypeParams.twoLeggedOauth
     properties:
       - name: apiKey
         type: NestedObject
@@ -101,7 +110,6 @@ properties:
       - name: threeLeggedOauth
         type: NestedObject
         description: Message describing ThreeLeggedOAuth object.
-        ignore_read: true
         exactly_one_of:
           - auth_provider_type_params.0.api_key
           - auth_provider_type_params.0.three_legged_oauth
@@ -119,6 +127,8 @@ properties:
           - name: clientSecret
             type: String
             description: Input only. The client secret of the OAuth client.
+            # client_secret is input-only in the API and not returned on read.
+            ignore_read: true
             write_only: true
           - name: defaultContinueUri
             type: String
@@ -144,7 +154,6 @@ properties:
       - name: twoLeggedOauth
         type: NestedObject
         description: Message describing TwoLeggedOAuth object.
-        ignore_read: true
         exactly_one_of:
           - auth_provider_type_params.0.api_key
           - auth_provider_type_params.0.three_legged_oauth
@@ -156,6 +165,8 @@ properties:
           - name: clientSecret
             type: String
             description: Input only. The client secret of the OAuth client.
+            # client_secret is input-only in the API and not returned on read.
+            ignore_read: true
             write_only: true
           - name: tokenUrl
             type: String
