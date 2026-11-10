@@ -855,11 +855,10 @@ func ResourceDataprocCluster() *schema.Resource {
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"target_shape": {
-													Type:         schema.TypeString,
-													Required:     true,
-													ForceNew:     true,
-													ValidateFunc: validation.StringInSlice([]string{"ANY"}, false),
-													Description:  `The distribution shape of the nodes in the multi-zonal cluster. Valid values are "ANY".`,
+													Type:        schema.TypeString,
+													Required:    true,
+													ForceNew:    true,
+													Description: `The distribution shape of the nodes in the multi-zonal cluster. Valid values are "ANY".`,
 												},
 											},
 										},
