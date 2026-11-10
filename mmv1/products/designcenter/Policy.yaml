@@ -24,6 +24,33 @@ async:
 import_format:
   - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/policies/{{policy_id}}'
 
+samples:
+  - name: 'designcenter_policy_basic'
+    primary_resource_id: 'example'
+    steps:
+      - name: 'designcenter_policy_basic'
+        resource_id_vars:
+          policy_id: 'example-policy'
+        vars:
+          project: 'my-project-name'
+          space: 'example-space'
+          application_template: 'example-template'
+        test_vars_overrides:
+          project: 'BootstrapDesignCenterProject(t)'
+          space: 'BootstrapDesignCenterSpace(t)'
+          application_template: 'BootstrapDesignCenterApplicationTemplate(t)'
+      - name: 'designcenter_policy_update'
+        resource_id_vars:
+          policy_id: 'example-policy'
+        vars:
+          project: 'my-project-name'
+          space: 'example-space'
+          application_template: 'example-template'
+        test_vars_overrides:
+          project: 'BootstrapDesignCenterProject(t)'
+          space: 'BootstrapDesignCenterSpace(t)'
+          application_template: 'BootstrapDesignCenterApplicationTemplate(t)'
+
 parameters:
   - name: 'location'
     type: 'String'
@@ -142,30 +169,3 @@ properties:
     type: 'Time'
     description: 'Output only. The time the policy was last updated.'
     output: true
-
-samples:
-  - name: 'designcenter_policy_basic'
-    primary_resource_id: 'example'
-    steps:
-      - name: 'designcenter_policy_basic'
-        resource_id_vars:
-          policy_id: 'example-policy'
-        vars:
-          project: 'my-project-name'
-          space: 'example-space'
-          application_template: 'example-template'
-        test_vars_overrides:
-          project: 'BootstrapDesignCenterProject(t)'
-          space: 'BootstrapDesignCenterSpace(t)'
-          application_template: 'BootstrapDesignCenterApplicationTemplate(t)'
-      - name: 'designcenter_policy_update'
-        resource_id_vars:
-          policy_id: 'example-policy'
-        vars:
-          project: 'my-project-name'
-          space: 'example-space'
-          application_template: 'example-template'
-        test_vars_overrides:
-          project: 'BootstrapDesignCenterProject(t)'
-          space: 'BootstrapDesignCenterSpace(t)'
-          application_template: 'BootstrapDesignCenterApplicationTemplate(t)'
