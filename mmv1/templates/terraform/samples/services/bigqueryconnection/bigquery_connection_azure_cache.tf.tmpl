@@ -1,0 +1,12 @@
+resource "google_bigquery_connection" "{{$.PrimaryResourceId}}" {
+  connection_id = "{{index $.ResourceIdVars "connection_id"}}"
+  location      = "azure-eastus2"
+
+  azure {
+    customer_tenant_id              = "customer-tenant-id"
+    federated_application_client_id = "b43eeeee-eeee-eeee-eeee-a480155501ce"
+    cross_cloud_cache_options {
+      enabled = {{index $.Vars "cache_enabled"}}
+    }
+  }
+}
