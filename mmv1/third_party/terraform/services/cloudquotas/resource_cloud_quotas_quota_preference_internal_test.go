@@ -1,0 +1,32 @@
+package cloudquotas
+
+import (
+	"testing"
+)
+
+func TestValidateQuotaPreferenceIgnoreSafetyChecks(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		value   string
+		wantErr bool
+	}{
+		"empty":                    {value: ""},
+		"unspecified":              {value: "QUOTA_SAFETY_CHECK_UNSPECIFIED"},
+		"single":                   {value: "QUOTA_DECREASE_BELOW_USAGE"},
+		"multiple":                 {value: "QUOTA_DECREASE_BELOW_USAGE,QUOTA_DECREASE_PERCENTAGE_TOO_HIGH"},
+		"multiple with spaces":     {value: "QUOTA_DECREASE_BELOW_USAGE, QUOTA_DECREASE_PERCENTAGE_TOO_HIGH"},
+		"invalid value":            {value: "QUOTA_DECREASE_BELOW_USAGE,NOT_A_CHECK", wantErr: true},
+		"trailing comma":           {value: "QUOTA_DECREASE_BELOW_USAGE,", wantErr: true},
+		"unspecified with another": {value: "QUOTA_SAFETY_CHECK_UNSPECIFIED,QUOTA_DECREASE_BELOW_USAGE", wantErr: true},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			_, errs := validateQuotaPreferenceIgnoreSafetyChecks(tc.value, "ignore_safety_checks")
+			if gotErr := len(errs) > 0; gotErr != tc.wantErr {
+				t.Errorf("validateQuotaPreferenceIgnoreSafetyChecks(%q) errors = %v, wantErr %v", tc.value, errs, tc.wantErr)
+			}
+		})
+	}
+}

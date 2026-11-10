@@ -1,10 +1,9 @@
-if v, ok := d.GetOk("ignore_safety_checks"); ok && v.(string) != "QUOTA_SAFETY_CHECK_UNSPECIFIED" {
-	url, err = transport_tpg.AddQueryParams(url, map[string]string{"ignoreSafetyChecks": v.(string)})
-	if err != nil {
-		return err
+if v, ok := d.GetOk("ignore_safety_checks"); ok && !strings.Contains(v.(string), "QUOTA_SAFETY_CHECK_UNSPECIFIED") {
+	var checks []interface{}
+	for _, check := range splitQuotaPreferenceIgnoreSafetyChecks(v.(string)) {
+		checks = append(checks, check)
 	}
-} else if v, ok := d.GetOk("ignore_safety_checks_set"); ok {
-	url, err = transport_tpg.AddArrayQueryParams(url, "ignoreSafetyChecks", v.(*schema.Set).List())
+	url, err = transport_tpg.AddArrayQueryParams(url, "ignoreSafetyChecks", checks)
 	if err != nil {
 		return err
 	}
