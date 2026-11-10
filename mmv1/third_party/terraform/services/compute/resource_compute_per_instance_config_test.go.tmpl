@@ -2,6 +2,9 @@ package compute_test
 
 import (
 	"fmt"
+{{- if ne $.TargetVersionName "ga" }}
+	"regexp"
+{{- end }}
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/compute"
@@ -737,3 +740,182 @@ func testAccComputePerInstanceConfigListNames(t *testing.T, igmId string) (map[s
 	}
 	return instanceConfigs, nil
 }
+
+{{- if ne $.TargetVersionName "ga" }}
+func TestAccComputePerInstanceConfig_allowedActions(t *testing.T) {
+	t.Parallel()
+
+	suffix := acctest.RandString(t, 10)
+	igmName := fmt.Sprintf("tf-test-igm-%s", suffix)
+	context := map[string]interface{}{
+		"igm_name":      igmName,
+		"random_suffix": suffix,
+		"config_name":   fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10)),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputePerInstanceConfig_allowedActionsCreate(context),
+			},
+			{
+				ResourceName:            "google_compute_per_instance_config.with_allowed_actions",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"remove_instance_on_destroy", "zone", "allowed_actions"},
+			},
+			{
+				Config: testAccComputePerInstanceConfig_allowedActionsUpdate1(context),
+			},
+			{
+				ResourceName:            "google_compute_per_instance_config.with_allowed_actions",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"remove_instance_on_destroy", "zone", "allowed_actions"},
+			},
+			{
+				Config: testAccComputePerInstanceConfig_allowedActionsUpdate2(context),
+			},
+			{
+				ResourceName:            "google_compute_per_instance_config.with_allowed_actions",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"remove_instance_on_destroy", "zone", "allowed_actions"},
+			},
+		},
+	})
+}
+
+func TestAccComputePerInstanceConfig_allowedActionsValidation(t *testing.T) {
+	t.Parallel()
+
+	suffix := acctest.RandString(t, 10)
+	context := map[string]interface{}{
+		"igm_name":      fmt.Sprintf("tf-test-igm-%s", suffix),
+		"random_suffix": suffix,
+		"config_name":   fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10)),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccComputePerInstanceConfig_allowedActionsConflict(context),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`Conflicting configuration arguments`),
+			},
+		},
+	})
+}
+
+func testAccComputePerInstanceConfig_igmBeta(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  provider = google-beta
+  family   = "debian-13"
+  project  = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-basic" {
+  provider     = google-beta
+  name         = "tf-test-it-%{random_suffix}"
+  machine_type = "e2-medium"
+
+  network_interface {
+    network = "default"
+  }
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+}
+
+resource "google_compute_instance_group_manager" "igm" {
+  provider = google-beta
+  name     = "%{igm_name}"
+  zone     = "us-central1-c"
+  version {
+    instance_template = google_compute_instance_template.igm-basic.id
+    name              = "primary"
+  }
+  base_instance_name = "tf-test-igm"
+}
+`, context)
+}
+
+func testAccComputePerInstanceConfig_allowedActionsCreate(context map[string]interface{}) string {
+	return testAccComputePerInstanceConfig_igmBeta(context) + acctest.Nprintf(`
+resource "google_compute_per_instance_config" "with_allowed_actions" {
+  provider                   = google-beta
+  zone                       = google_compute_instance_group_manager.igm.zone
+  instance_group_manager     = google_compute_instance_group_manager.igm.name
+  name                       = "%{config_name}"
+  remove_instance_on_destroy = true
+  preserved_state {
+    metadata = {
+      foo = "bar"
+    }
+  }
+}
+`, context)
+}
+
+func testAccComputePerInstanceConfig_allowedActionsUpdate1(context map[string]interface{}) string {
+	return testAccComputePerInstanceConfig_igmBeta(context) + acctest.Nprintf(`
+resource "google_compute_per_instance_config" "with_allowed_actions" {
+  provider                   = google-beta
+  zone                       = google_compute_instance_group_manager.igm.zone
+  instance_group_manager     = google_compute_instance_group_manager.igm.name
+  name                       = "%{config_name}"
+  remove_instance_on_destroy = true
+  allowed_actions            = ["REFRESH", "RESTART_IN_PLACE"]
+  preserved_state {
+    metadata = {
+      foo = "baz"
+    }
+  }
+}
+`, context)
+}
+
+func testAccComputePerInstanceConfig_allowedActionsUpdate2(context map[string]interface{}) string {
+	return testAccComputePerInstanceConfig_igmBeta(context) + acctest.Nprintf(`
+resource "google_compute_per_instance_config" "with_allowed_actions" {
+  provider                   = google-beta
+  zone                       = google_compute_instance_group_manager.igm.zone
+  instance_group_manager     = google_compute_instance_group_manager.igm.name
+  name                       = "%{config_name}"
+  remove_instance_on_destroy = true
+  allowed_actions            = ["REFRESH", "REPLACE"]
+  preserved_state {
+    metadata = {
+      foo = "qux"
+    }
+  }
+}
+`, context)
+}
+
+func testAccComputePerInstanceConfig_allowedActionsConflict(context map[string]interface{}) string {
+	return testAccComputePerInstanceConfig_igmBeta(context) + acctest.Nprintf(`
+resource "google_compute_per_instance_config" "with_allowed_actions" {
+  provider               = google-beta
+  zone                   = google_compute_instance_group_manager.igm.zone
+  instance_group_manager = google_compute_instance_group_manager.igm.name
+  name                   = "%{config_name}"
+  minimal_action         = "REFRESH"
+  allowed_actions        = ["REFRESH", "RESTART_IN_PLACE"]
+  preserved_state {
+    metadata = {
+      foo = "bar"
+    }
+  }
+}
+`, context)
+}
+{{- end }}

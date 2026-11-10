@@ -75,6 +75,8 @@ fields:
   - api_field: 'updatePolicy.maxUnavailable.percent'
     field: 'update_policy.max_unavailable_percent'
 {{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'updatePolicy.allowedActions'
+    field: 'update_policy.allowed_actions'
   - api_field: 'updatePolicy.minReadySec'
 {{- end }}
   - api_field: 'updatePolicy.minimalAction'

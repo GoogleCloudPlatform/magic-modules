@@ -682,9 +682,29 @@ When set to "FORCE", deleting the resource is allowed, and graceful shutdown is 
 				Description: `The update policy for this managed instance group.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+{{- if ne $.TargetVersionName "ga" }}
+						"allowed_actions": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type:         schema.TypeString,
+								ValidateFunc: validation.StringInSlice([]string{"NONE", "REFRESH", "RESTART_IN_PLACE", "RESTART", "REPLACE"}, false),
+							},
+							ExactlyOneOf:  []string{"update_policy.0.minimal_action", "update_policy.0.allowed_actions"},
+							ConflictsWith: []string{"update_policy.0.minimal_action", "update_policy.0.most_disruptive_allowed_action"},
+							Description:   `Specifies the allowed actions list for this update. Valid values are: "NONE", "REFRESH", "RESTART_IN_PLACE", "RESTART", "REPLACE". allowed_actions is the only way to request RESTART_IN_PLACE. Conflicts with minimal_action and most_disruptive_allowed_action.`,
+						},
+
+{{- end }}
 						"minimal_action": {
 							Type:         schema.TypeString,
+{{- if ne $.TargetVersionName "ga" }}
+							Optional:      true,
+							ExactlyOneOf:  []string{"update_policy.0.minimal_action", "update_policy.0.allowed_actions"},
+							ConflictsWith: []string{"update_policy.0.allowed_actions"},
+{{- else }}
 							Required:     true,
+{{- end }}
 							ValidateFunc: validation.StringInSlice([]string{"NONE", "REFRESH", "RESTART", "REPLACE"}, false),
 							Description:  `Minimal action to be taken on an instance. You can specify either NONE to forbid any actions, REFRESH to update without stopping instances, RESTART to restart existing instances or REPLACE to delete and create new instances from the target template. If you specify a REFRESH, the Updater will attempt to perform that action only. However, if the Updater determines that the minimal action you specify is not enough to perform the update, it might perform a more disruptive action.`,
 						},
@@ -692,6 +712,9 @@ When set to "FORCE", deleting the resource is allowed, and graceful shutdown is 
 						"most_disruptive_allowed_action": {
 							Type:         schema.TypeString,
 							Optional:     true,
+{{- if ne $.TargetVersionName "ga" }}
+							ConflictsWith: []string{"update_policy.0.allowed_actions"},
+{{- end }}
 							ValidateFunc: validation.StringInSlice([]string{"NONE", "REFRESH", "RESTART", "REPLACE"}, false),
 							Description:  `Most disruptive action that is allowed to be taken on an instance. You can specify either NONE to forbid any actions, REFRESH to allow actions that do not need instance restart, RESTART to allow actions that can be applied without instance replacing or REPLACE to allow all possible actions. If the Updater determines that the minimal update action needed is more disruptive than most disruptive allowed action you specify it will not perform the update at all.`,
 						},
@@ -1608,6 +1631,25 @@ func expandRegionUpdatePolicy(configured []interface{}) map[string]interface{} {
 	for _, raw := range configured {
 		data := raw.(map[string]interface{})
 
+{{- if ne $.TargetVersionName "ga" }}
+		if allowedActions, ok := data["allowed_actions"].([]interface{}); ok && len(allowedActions) > 0 {
+			updatePolicy["allowedActions"] = allowedActions
+			updatePolicy["minimalAction"] = nil
+			updatePolicy["mostDisruptiveAllowedAction"] = nil
+		} else {
+			updatePolicy["allowedActions"] = nil
+			if minimalAction := data["minimal_action"].(string); minimalAction != "" {
+				updatePolicy["minimalAction"] = minimalAction
+			} else {
+				updatePolicy["minimalAction"] = nil
+			}
+			if mostDisruptiveAllowedAction := data["most_disruptive_allowed_action"].(string); mostDisruptiveAllowedAction != "" {
+				updatePolicy["mostDisruptiveAllowedAction"] = mostDisruptiveAllowedAction
+			} else {
+				updatePolicy["mostDisruptiveAllowedAction"] = nil
+			}
+		}
+{{- else }}
 		updatePolicy["minimalAction"] = data["minimal_action"].(string)
 		mostDisruptiveAllowedAction := data["most_disruptive_allowed_action"].(string)
 		if mostDisruptiveAllowedAction != "" {
@@ -1615,6 +1657,7 @@ func expandRegionUpdatePolicy(configured []interface{}) map[string]interface{} {
 		} else {
 			updatePolicy["mostDisruptiveAllowedAction"] = nil
 		}
+{{- end }}
 		updatePolicy["type"] = data["type"].(string)
 		updatePolicy["instanceRedistributionType"] = data["instance_redistribution_type"].(string)
 		if rm := data["replacement_method"].(string); rm != "" {
@@ -1676,9 +1719,18 @@ func flattenRegionUpdatePolicy(updatePolicyRaw interface{}) []map[string]interfa
 	}
 {{- if ne $.TargetVersionName "ga" }}
 	up["min_ready_sec"] = getInt(updatePolicy["minReadySec"])
-{{- end }}
+	if allowedActions, ok := updatePolicy["allowedActions"].([]interface{}); ok && len(allowedActions) > 0 {
+		up["allowed_actions"] = allowedActions
+		up["minimal_action"] = ""
+		up["most_disruptive_allowed_action"] = ""
+	} else {
+		up["minimal_action"] = updatePolicy["minimalAction"]
+		up["most_disruptive_allowed_action"] = updatePolicy["mostDisruptiveAllowedAction"]
+	}
+{{- else }}
 	up["minimal_action"] = updatePolicy["minimalAction"]
 	up["most_disruptive_allowed_action"] = updatePolicy["mostDisruptiveAllowedAction"]
+{{- end }}
 	up["type"] = updatePolicy["type"]
 	up["instance_redistribution_type"] = updatePolicy["instanceRedistributionType"]
 	up["replacement_method"] = updatePolicy["replacementMethod"]

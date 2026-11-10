@@ -1364,9 +1364,9 @@ func (r Resource) NotInVersion(version *product.Version) bool {
 	return version.CompareTo(r.MinVersionObj()) < 0
 }
 
-// Recurses through all nested properties and parameters and changes their
-// 'exclude' instance variable if the property is at a version below the
-// one that is passed in.
+// Recurses through all nested properties, parameters, and virtual fields and
+// changes their 'exclude' instance variable if the property is at a version
+// below the one that is passed in.
 func (r *Resource) ExcludeIfNotInVersion(version *product.Version) {
 	r.populateMaxVersionSchema() // set before filtering exclusions out of schema
 
@@ -1385,9 +1385,18 @@ func (r *Resource) ExcludeIfNotInVersion(version *product.Version) {
 			p.ExcludeIfNotInVersion(version)
 		}
 	}
+
+	if r.VirtualFields != nil {
+		for _, p := range r.VirtualFields {
+			p.ExcludeIfNotInVersion(version)
+		}
+	}
 }
 
 func (r *Resource) populateMaxVersionSchema() {
+	if r.maxVersionSchema != nil {
+		return
+	}
 	maxSchemaResource := &Resource{
 		Name:            r.Name,
 		MinVersion:      r.MinVersion,
