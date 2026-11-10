@@ -60,10 +60,27 @@ properties:
     name: 'description'
     description: |
       Optional. User-defined description.
-  - type: String
+  - type: Array
     name: 'applicationParameters'
     description: |
-      Optional. Application parameters.
+      Optional. Parameters to apply to all components in an application, such
+      as the project ID and region.
+    item_type:
+      type: NestedObject
+      properties:
+        - type: String
+          name: 'key'
+          description: 'The key of the parameter.'
+          required: true
+        - type: String
+          name: 'value'
+          description: 'The value of the parameter, as a JSON-encoded string. Use `jsonencode()` to set it.'
+          send_empty_value: true
+          state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+          custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+          validation:
+            function: 'validation.StringIsJSON'
   - type: Enum
     name: 'compositionType'
     default_from_api: true
@@ -75,20 +92,50 @@ properties:
       - 'COMPOSITE'
   - type: Array
     name: 'rootInputVariables'
+    default_from_api: true
     description: |
-      Optional. Root input variables.
+      Optional. Root level input variables of the application template. For
+      `STANDARD` templates, the API fills these in from the components.
     item_type:
-      type: String
+      type: NestedObject
+      properties:
+        - type: String
+          name: 'variable'
+          description: 'The name of the variable.'
+          required: true
+        - type: String
+          name: 'componentUri'
+          description: 'The URI of the component that the variable belongs to.'
+          required: true
   - type: Array
     name: 'rootOutputVariables'
+    default_from_api: true
     description: |
-      Optional. Root output variables.
+      Optional. Root level output variables of the application template. For
+      `STANDARD` templates, the API fills these in from the components.
     item_type:
-      type: String
-  - type: String
+      type: NestedObject
+      properties:
+        - type: String
+          name: 'variable'
+          description: 'The name of the variable.'
+          required: true
+        - type: String
+          name: 'componentUri'
+          description: 'The URI of the component that the variable belongs to.'
+          required: true
+  - type: NestedObject
     name: 'saasRuntimeContext'
     description: |
-      Optional. SaaS runtime context.
+      Optional. SaaS runtime context for the application template.
+    properties:
+      - type: Array
+        name: 'saasNames'
+        description: |
+          The SaaS names, in the format
+          `projects/{project}/locations/{location}/saas/{saas}`.
+        item_type:
+          type: String
   - type: Boolean
     name: 'inputsAsRootModuleVariables'
     default_from_api: true

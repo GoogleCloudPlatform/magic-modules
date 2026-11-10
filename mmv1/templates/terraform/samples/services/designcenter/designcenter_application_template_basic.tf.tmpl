@@ -1,8 +1,36 @@
 resource "google_design_center_application_template" "example" {
-  project                 = "{{index $.Vars "project"}}"
-  location                = "us-central1"
-  space                   = "{{index $.Vars "space"}}"
-  application_template_id = "{{index $.ResourceIdVars "application_template_id"}}"
-  display_name            = "Example Application Template"
-  description             = "Managed by Terraform"
+  project                         = "{{index $.Vars "project"}}"
+  location                        = "us-central1"
+  space                           = "{{index $.Vars "space"}}"
+  application_template_id         = "{{index $.ResourceIdVars "application_template_id"}}"
+  display_name                    = "Example Application Template"
+  description                     = "Managed by Terraform"
+  composition_type                = "COMPOSITE"
+  inputs_as_root_module_variables = false
+
+  application_parameters {
+    key   = "project_id"
+    value = jsonencode("{{index $.Vars "project"}}")
+  }
+
+  application_parameters {
+    key   = "region"
+    value = jsonencode("us-central1")
+  }
+
+  root_input_variables {
+    variable      = "service_name"
+    component_uri = "projects/{{index $.Vars "project"}}/locations/us-central1/spaces/{{index $.Vars "space"}}/applicationTemplates/{{index $.ResourceIdVars "application_template_id"}}/components/example-component"
+  }
+
+  root_output_variables {
+    variable      = "service_uri"
+    component_uri = "projects/{{index $.Vars "project"}}/locations/us-central1/spaces/{{index $.Vars "space"}}/applicationTemplates/{{index $.ResourceIdVars "application_template_id"}}/components/example-component"
+  }
+
+  saas_runtime_context {
+    saas_names = [
+      "projects/{{index $.Vars "project"}}/locations/us-central1/saas/example-saas",
+    ]
+  }
 }
