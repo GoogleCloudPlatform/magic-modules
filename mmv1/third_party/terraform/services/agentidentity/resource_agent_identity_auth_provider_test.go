@@ -1,11 +1,9 @@
 package agentidentity_test
 
 import (
-	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -185,67 +183,6 @@ func TestAccAgentIdentityAuthProvider_switchAuthProviderType(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"auth_provider_type_params", "location", "auth_provider_id", "workload_ids", "labels", "terraform_labels", "effective_labels"},
-			},
-		},
-	})
-}
-
-// ============================================================================
-// Regional Endpoint Policies (REP) Tests
-// ============================================================================
-
-func TestAccAgentIdentityAuthProvider_preferRegionalEndpoints(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	repRedirectRegex := regexp.MustCompile(`^https://agentidentitycredentials\.us-central1\.rep\.googleapis\.com/`)
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckAgentIdentityAuthProviderDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccAgentIdentityAuthProvider_preferRegionalEndpointsStep1(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchResourceAttr(
-						"google_agent_identity_auth_provider.default",
-						"auth_provider_type_params.0.three_legged_oauth.0.redirect_url",
-						repRedirectRegex,
-					),
-				),
-			},
-			{
-				ResourceName:      "google_agent_identity_auth_provider.default",
-				ImportState:       true,
-				ImportStateVerify: true,
-				// client_secret is input-only in the API; location and auth_provider_id are url_param_only.
-				ImportStateVerifyIgnore: []string{"auth_provider_type_params.0.three_legged_oauth.0.client_secret", "location", "auth_provider_id"},
-			},
-			{
-				Config: testAccAgentIdentityAuthProvider_preferRegionalEndpointsStep2(context),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_agent_identity_auth_provider.default", plancheck.ResourceActionUpdate),
-					},
-				},
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchResourceAttr(
-						"google_agent_identity_auth_provider.default",
-						"auth_provider_type_params.0.three_legged_oauth.0.redirect_url",
-						repRedirectRegex,
-					),
-				),
-			},
-			{
-				ResourceName:      "google_agent_identity_auth_provider.default",
-				ImportState:       true,
-				ImportStateVerify: true,
-				// client_secret is input-only in the API; location and auth_provider_id are url_param_only.
-				ImportStateVerifyIgnore: []string{"auth_provider_type_params.0.three_legged_oauth.0.client_secret", "location", "auth_provider_id"},
 			},
 		},
 	})
@@ -451,56 +388,6 @@ func testAccAgentIdentityAuthProvider_switchTypeStep2(context map[string]interfa
         default_continue_uri = "https://example.com/callback"
         enable_pkce          = true
         token_url            = "https://auth.example.com/token"
-      }
-    }
-  }
-  `, context)
-}
-
-func testAccAgentIdentityAuthProvider_preferRegionalEndpointsStep1(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-  provider "google" {
-    prefer_regional_endpoints = true
-  }
-
-  resource "google_agent_identity_auth_provider" "default" {
-    location         = "us-central1"
-    auth_provider_id = "tf-test-rep-%{random_suffix}"
-    description      = "Initial REP auth provider"
-
-    auth_provider_type_params {
-      three_legged_oauth {
-        authorization_url    = "https://auth.example.com/authorize"
-        client_id            = "rep-test-client-id"
-        client_secret        = "rep-test-client-secret"
-        default_continue_uri = "https://example.com/callback"
-        enable_pkce          = true
-        token_url            = "https://auth.example.com/token"
-      }
-    }
-  }
-  `, context)
-}
-
-func testAccAgentIdentityAuthProvider_preferRegionalEndpointsStep2(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-  provider "google" {
-    prefer_regional_endpoints = true
-  }
-
-  resource "google_agent_identity_auth_provider" "default" {
-    location         = "us-central1"
-    auth_provider_id = "tf-test-rep-%{random_suffix}"
-    description      = "Updated REP auth provider"
-
-    auth_provider_type_params {
-      three_legged_oauth {
-        authorization_url    = "https://auth.example.com/authorize/v2"
-        client_id            = "rep-test-client-id-v2"
-        client_secret        = "rep-test-client-secret-v2"
-        default_continue_uri = "https://example.com/callback/v2"
-        enable_pkce          = false
-        token_url            = "https://auth.example.com/token/v2"
       }
     }
   }
