@@ -68,9 +68,12 @@ properties:
   - name: 'sharedTemplateRevisionUri'
     type: 'String'
     description: |
-      The URI of the shared template revision.
-    required: true
+      The URI of the shared template revision that the component is built
+      from.
     immutable: true
+    exactly_one_of:
+      - 'shared_template_revision_uri'
+      - 'application_template_revision_uri'
 
   - name: 'displayName'
     type: 'String'
@@ -78,29 +81,174 @@ properties:
       The display name of the component.
 
   - name: 'parameters'
-    type: 'KeyValuePairs'
+    type: 'Array'
     description: |
       The parameters of the component.
+    item_type:
+      type: 'NestedObject'
+      properties:
+        - name: 'key'
+          type: 'String'
+          description: |
+            The key of the parameter.
+          required: true
+        - name: 'value'
+          type: 'String'
+          description: |
+            The value of the parameter, as a JSON-encoded string. Use
+            `jsonencode()` to set it.
+          send_empty_value: true
+          state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+          custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+          validation:
+            function: 'validation.StringIsJSON'
 
   - name: 'applicationInfo'
-    type: 'KeyValuePairs'
+    type: 'NestedObject'
     description: |
-      The application info of the component.
+      The App Hub application associated with the component. Only supported for
+      components in `COMPOSITE` application templates. The API ignores this
+      field when it creates a component from an application template revision,
+      so set it in a later update for such components.
+    properties:
+      - name: 'apphubApplicationId'
+        type: 'String'
+        description: |
+          The ID of the App Hub application.
+        required: true
+      - name: 'displayName'
+        type: 'String'
+        description: |
+          The display name of the App Hub application.
+      - name: 'scope'
+        type: 'NestedObject'
+        description: |
+          The scope of the App Hub application.
+        properties:
+          - name: 'type'
+            type: 'String'
+            required: true
+            description: |
+              Scope type. Possible values are `REGIONAL` and `GLOBAL`.
+      - name: 'attributes'
+        type: 'NestedObject'
+        description: |
+          Attributes of the App Hub application.
+        properties:
+          - name: 'criticality'
+            type: 'NestedObject'
+            description: |
+              Criticality of the application.
+            properties:
+              - name: 'type'
+                type: 'String'
+                required: true
+                description: |
+                  Criticality type. Possible values are `MISSION_CRITICAL`,
+                  `HIGH`, `MEDIUM` and `LOW`.
+          - name: 'environment'
+            type: 'NestedObject'
+            description: |
+              Environment of the application.
+            properties:
+              - name: 'type'
+                type: 'String'
+                required: true
+                description: |
+                  Environment type. Possible values are `PRODUCTION`, `STAGING`,
+                  `TEST` and `DEVELOPMENT`.
+          - name: 'developerOwners'
+            type: 'Array'
+            description: |
+              Developer team that owns development and coding.
+            item_type:
+              type: 'NestedObject'
+              properties:
+                - name: 'displayName'
+                  type: 'String'
+                  description: |
+                    Contact's name.
+                - name: 'email'
+                  type: 'String'
+                  required: true
+                  description: |
+                    Email address of the contact.
+          - name: 'operatorOwners'
+            type: 'Array'
+            description: |
+              Operator team that ensures runtime and operations.
+            item_type:
+              type: 'NestedObject'
+              properties:
+                - name: 'displayName'
+                  type: 'String'
+                  description: |
+                    Contact's name.
+                - name: 'email'
+                  type: 'String'
+                  required: true
+                  description: |
+                    Email address of the contact.
+          - name: 'businessOwners'
+            type: 'Array'
+            description: |
+              Business team that ensures user needs are met and value is
+              delivered.
+            item_type:
+              type: 'NestedObject'
+              properties:
+                - name: 'displayName'
+                  type: 'String'
+                  description: |
+                    Contact's name.
+                - name: 'email'
+                  type: 'String'
+                  required: true
+                  description: |
+                    Email address of the contact.
+      - name: 'deploymentRegion'
+        type: 'String'
+        description: |
+          The deployment region of the component. For `REGIONAL` scope, the App
+          Hub application is created in this region, such as `us-central1`.
 
   - name: 'useAsRootModule'
     type: 'Boolean'
     description: |
-      Whether to use as root module.
+      Whether the component is exported as a separate Terraform root module in
+      a `COMPOSITE` application template.
 
   - name: 'inputVariableAliases'
-    type: 'KeyValuePairs'
+    type: 'Array'
     description: |
-      The input variable aliases.
+      Aliases that expose input variables of the component at the root level of
+      a `COMPOSITE` application template.
+    item_type:
+      type: 'NestedObject'
+      properties:
+        - name: 'variable'
+          type: 'String'
+          description: |
+            The name of the input variable in the template or module that the
+            component is built from.
+          required: true
+        - name: 'alias'
+          type: 'String'
+          description: |
+            The alias for the variable at the root level of the composite
+            template.
+          required: true
 
   - name: 'applicationTemplateRevisionUri'
     type: 'String'
     description: |
-      The application template revision URI.
+      The URI of the application template revision that the component is built
+      from. Only supported in `COMPOSITE` application templates.
+    immutable: true
+    exactly_one_of:
+      - 'shared_template_revision_uri'
+      - 'application_template_revision_uri'
 
   - name: 'roles'
     type: 'Array'
@@ -119,10 +267,37 @@ properties:
     output: true
 
   - name: 'connectionsParameters'
-    type: 'KeyValuePairs'
+    type: 'Array'
     description: |
-      The connections parameters of the component.
+      The parameters of the connections of the component.
     output: true
+    item_type:
+      type: 'NestedObject'
+      properties:
+        - name: 'connection'
+          type: 'String'
+          description: |
+            The URI of the connection.
+          output: true
+        - name: 'parameters'
+          type: 'Array'
+          description: |
+            The parameters of the connection.
+          output: true
+          item_type:
+            type: 'NestedObject'
+            properties:
+              - name: 'key'
+                type: 'String'
+                description: |
+                  The key of the parameter.
+                output: true
+              - name: 'value'
+                type: 'String'
+                description: |
+                  The value of the parameter, as a JSON-encoded string.
+                output: true
+                custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
 
   - name: 'componentParameterSchema'
     type: 'Array'
@@ -193,3 +368,32 @@ samples:
           project: BootstrapDesignCenterProject(t)
           space: BootstrapDesignCenterSpace(t)
           application_template: BootstrapDesignCenterApplicationTemplate(t)
+  - name: designcenter_component_composite
+    primary_resource_id: example
+    steps:
+      - name: designcenter_component_composite
+        resource_id_vars:
+          component_id: example-composite-component
+        vars:
+          project: my-project-name
+          space: my-space
+          composite_application_template: my-composite-application-template
+          application_template_revision_uri: projects/my-project-name/locations/us-central1/spaces/my-space/applicationTemplates/my-application-template/revisions/r-1
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          composite_application_template: BootstrapDesignCenterCompositeApplicationTemplate(t)
+          application_template_revision_uri: BootstrapDesignCenterSourceApplicationTemplateRevisionURI(t)
+      - name: designcenter_component_composite_update
+        resource_id_vars:
+          component_id: example-composite-component
+        vars:
+          project: my-project-name
+          space: my-space
+          composite_application_template: my-composite-application-template
+          application_template_revision_uri: projects/my-project-name/locations/us-central1/spaces/my-space/applicationTemplates/my-application-template/revisions/r-1
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          composite_application_template: BootstrapDesignCenterCompositeApplicationTemplate(t)
+          application_template_revision_uri: BootstrapDesignCenterSourceApplicationTemplateRevisionURI(t)
