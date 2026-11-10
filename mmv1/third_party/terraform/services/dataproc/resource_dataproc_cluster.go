@@ -2546,23 +2546,21 @@ by Dataproc`,
 									"core_count": {
 										Type:         schema.TypeInt,
 										Required:     true,
-										ForceNew:     true,
 										ValidateFunc: validation.IntInSlice([]int{2, 4, 8, 16, 32}),
-										Description:  `The number of vCPUs per instance. Must be a power of 2: 2, 4, 8, 16, or 32. Changing this forces a new resource to be created.`,
+										Description:  `The number of vCPUs per instance. Must be a power of 2: 2, 4, 8, 16, or 32. Cannot be changed after the secondary worker group exists; Dataproc rejects the update.`,
 									},
 									"hardware_class": {
 										Type:         schema.TypeString,
 										Optional:     true,
-										ForceNew:     true,
 										Default:      "STANDARD",
 										ValidateFunc: validation.StringInSlice([]string{"STANDARD", "PERFORMANCE"}, false),
-										Description:  `The hardware class of instances. Allowed values are "STANDARD" and "PERFORMANCE". Defaults to "STANDARD". Changing this forces a new resource to be created.`,
+										Description:  `The hardware class of instances. Allowed values are "STANDARD" and "PERFORMANCE". Defaults to "STANDARD". Cannot be changed after the secondary worker group exists; Dataproc rejects the update.`,
 									},
 									"boot_disk_size_gb": {
 										Type:        schema.TypeInt,
 										Optional:    true,
-										ForceNew:    true,
-										Description: `The boot disk size in GB. Changing this forces a new resource to be created.`,
+										Computed:    true,
+										Description: `The boot disk size in GB. Cannot be changed after the secondary worker group exists; Dataproc rejects the update.`,
 									},
 								},
 							},
@@ -3640,14 +3638,39 @@ func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) err
 		updMask = append(updMask, "config.worker_flexible_config.num_instances")
 	}
 
-	if d.HasChange("cluster_config.0.secondary_worker_flexible_config.0.num_instances") {
-		desiredNumWorks := d.Get("cluster_config.0.secondary_worker_flexible_config.0.num_instances").(int)
-		cluster.Config.SecondaryWorkerFlexibleConfig = &dataproc.FlexibleInstanceGroupConfig{
-			NumInstances:    int64(desiredNumWorks),
+	if d.HasChange("cluster_config.0.secondary_worker_flexible_config") {
+		const secPrefix = "cluster_config.0.secondary_worker_flexible_config.0."
+		sec := &dataproc.FlexibleInstanceGroupConfig{
+			NumInstances:    int64(d.Get(secPrefix + "num_instances").(int)),
 			ForceSendFields: []string{"NumInstances"},
 		}
-
 		updMask = append(updMask, "config.secondary_worker_flexible_config.num_instances")
+
+		// Dataproc only updates num_instances in place, and a secondary group added
+		// after creation gets the worker_flexible_config shape. Send any shape field
+		// that differs from that so the API rejects the update rather than ignoring it.
+		oldSec, _ := d.GetChange("cluster_config.0.secondary_worker_flexible_config")
+		current := func(field string) interface{} {
+			if len(oldSec.([]interface{})) == 0 {
+				return d.Get("cluster_config.0.worker_flexible_config.0." + field)
+			}
+			old, _ := d.GetChange(secPrefix + field)
+			return old
+		}
+		if v := d.Get(secPrefix + "core_count").(int); v != current("core_count").(int) {
+			sec.CoreCount = int64(v)
+			updMask = append(updMask, "config.secondary_worker_flexible_config.core_count")
+		}
+		if v := d.Get(secPrefix + "hardware_class").(string); v != current("hardware_class").(string) {
+			sec.HardwareClass = v
+			updMask = append(updMask, "config.secondary_worker_flexible_config.hardware_class")
+		}
+		// boot_disk_size_gb is Optional+Computed: 0 means unset.
+		if v := d.Get(secPrefix + "boot_disk_size_gb").(int); v != 0 && v != current("boot_disk_size_gb").(int) {
+			sec.BootDiskSizeGb = int64(v)
+			updMask = append(updMask, "config.secondary_worker_flexible_config.boot_disk_size_gb")
+		}
+		cluster.Config.SecondaryWorkerFlexibleConfig = sec
 	}
 
 	if d.HasChange("cluster_config.0.autoscaling_config") {
@@ -3712,6 +3735,8 @@ func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) err
 		patch.UpdateMask(strings.Join(updMask, ","))
 		op, err := patch.Do()
 		if err != nil {
+			// Nothing was changed, so keep the prior state instead of the planned values.
+			d.Partial(true)
 			return err
 		}
 
@@ -3966,14 +3991,29 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 	}
 
 	if cfg.SecondaryWorkerFlexibleConfig != nil {
+		bootDiskSizeGb := cfg.SecondaryWorkerFlexibleConfig.BootDiskSizeGb
+		// For a secondary group added after creation, the API reports the boot disk
+		// size only in secondaryWorkerConfig.diskConfig.
+		if bootDiskSizeGb == 0 && cfg.SecondaryWorkerConfig != nil && cfg.SecondaryWorkerConfig.DiskConfig != nil {
+			bootDiskSizeGb = cfg.SecondaryWorkerConfig.DiskConfig.BootDiskSizeGb
+		}
 		data["secondary_worker_flexible_config"] = []map[string]interface{}{
 			{
 				"num_instances":     cfg.SecondaryWorkerFlexibleConfig.NumInstances,
 				"core_count":        cfg.SecondaryWorkerFlexibleConfig.CoreCount,
 				"hardware_class":    cfg.SecondaryWorkerFlexibleConfig.HardwareClass,
-				"boot_disk_size_gb": cfg.SecondaryWorkerFlexibleConfig.BootDiskSizeGb,
+				"boot_disk_size_gb": bootDiskSizeGb,
 			},
 		}
+	} else if old, ok := d.Get("cluster_config.0.secondary_worker_flexible_config").([]interface{}); ok && len(old) > 0 && old[0] != nil {
+		// A secondary group added after creation is omitted from the API response
+		// once it is scaled to 0. Keep the block in state with 0 instances.
+		sec := map[string]interface{}{}
+		for k, v := range old[0].(map[string]interface{}) {
+			sec[k] = v
+		}
+		sec["num_instances"] = 0
+		data["secondary_worker_flexible_config"] = []interface{}{sec}
 	}
 
 	if len(cfg.InitializationActions) > 0 {
