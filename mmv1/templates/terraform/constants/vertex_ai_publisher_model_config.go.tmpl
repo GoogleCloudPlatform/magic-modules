@@ -136,7 +136,50 @@ func vertexAIPublisherModelConfigSet(d *schema.ResourceData, config *transport_t
 		return fmt.Errorf("Error %s PublisherModelConfig: %s", strings.ToLower(activity), err)
 	}
 
-	return VertexAIOperationWaitTime(config, res, project, d.Get("location").(string), activity+" PublisherModelConfig", userAgent, timeout)
+	return vertexAIPublisherModelConfigOperationWaitTime(config, res, project, d.Get("location").(string), activity+" PublisherModelConfig", userAgent, timeout)
+}
+
+// vertexAIPublisherModelConfigOperationWaiter polls setPublisherModelConfig operations. The
+// operation name always lives under `locations/global` (also for regional and REP models), so
+// the generic Vertex AI waiter would derive a non-existent `global-aiplatform` host; this waiter
+// polls on the same endpoint the write was sent to instead.
+type vertexAIPublisherModelConfigOperationWaiter struct {
+	Config    *transport_tpg.Config
+	UserAgent string
+	Project   string
+	Location  string
+	tpgresource.CommonOperationWaiter
+}
+
+func (w *vertexAIPublisherModelConfigOperationWaiter) QueryOp() (interface{}, error) {
+	if w == nil {
+		return nil, fmt.Errorf("Cannot query operation, it's unset or nil.")
+	}
+	url := vertexAIPublisherModelConfigBaseUrl(w.Location, w.Config) + w.CommonOperationWaiter.Op.Name
+	return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    w.Config,
+		Method:    "GET",
+		Project:   w.Project,
+		RawURL:    url,
+		UserAgent: w.UserAgent,
+	})
+}
+
+func vertexAIPublisherModelConfigOperationWaitTime(config *transport_tpg.Config, op map[string]interface{}, project, location, activity, userAgent string, timeout time.Duration) error {
+	if val, ok := op["name"]; !ok || val == "" {
+		// This was a synchronous call - there is no operation to wait for.
+		return nil
+	}
+	w := &vertexAIPublisherModelConfigOperationWaiter{
+		Config:    config,
+		UserAgent: userAgent,
+		Project:   project,
+		Location:  location,
+	}
+	if err := w.CommonOperationWaiter.SetOp(op); err != nil {
+		return err
+	}
+	return tpgresource.OperationWait(w, activity, timeout, config.PollInterval)
 }
 
 // vertexAIPublisherModelConfigBuildRequest expands the Terraform configuration into the

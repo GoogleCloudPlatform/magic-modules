@@ -72,6 +72,7 @@ custom_code:
   custom_delete: 'templates/terraform/custom_delete/vertex_ai_publisher_model_config.go.tmpl'
   custom_import: 'templates/terraform/custom_import/vertex_ai_publisher_model_config.go.tmpl'
   pre_read: 'templates/terraform/pre_read/vertex_ai_publisher_model_config.go.tmpl'
+  post_read: 'templates/terraform/post_read/vertex_ai_publisher_model_config.go.tmpl'
 samples:
   - name: 'vertex_ai_publisher_model_config_project'
     primary_resource_id: 'project_default'
@@ -110,7 +111,7 @@ parameters:
   - name: 'model'
     type: String
     description: |
-      The model ID, for example `gemini-2.5-flash`.
+      The model ID, for example `gemini-3.5-flash`.
       Required together with `location` and `publisher` for a per-model configuration.
     url_param_only: true
     immutable: true

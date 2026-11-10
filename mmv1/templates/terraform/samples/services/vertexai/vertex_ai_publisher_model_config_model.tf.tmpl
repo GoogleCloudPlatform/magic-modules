@@ -1,9 +1,9 @@
 resource "google_vertex_ai_publisher_model_config" "{{$.PrimaryResourceId}}" {
   provider = google-beta
 
-  location  = "us-central1"
+  location  = "global"
   publisher = "google"
-  model     = "gemini-2.5-flash"
+  model     = "gemini-3.5-flash"
 
   # Structured per-request metadata in Cloud Logging
   # (aiplatform.googleapis.com/inference_request).

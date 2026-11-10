@@ -144,9 +144,9 @@ resource "google_vertex_ai_publisher_model_config" "gemini_flash" {
   provider = google-beta
   project  = "%{project}"
 
-  location  = "us-central1"
+  location  = "global"
   publisher = "google"
-  model     = "gemini-2.5-flash"
+  model     = "gemini-3.5-flash"
 
   inference_event_logging_config {
     state = "%{state}"

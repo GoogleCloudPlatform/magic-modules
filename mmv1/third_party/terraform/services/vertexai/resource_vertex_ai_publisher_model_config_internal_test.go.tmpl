@@ -106,9 +106,9 @@ func TestVertexAIPublisherModelConfigValidateScope(t *testing.T) {
 		ExpectError                bool
 	}{
 		"project-wide":         {"", "", "", false},
-		"per-model":            {"us-central1", "google", "gemini-2.5-flash", false},
+		"per-model":            {"global", "google", "gemini-3.5-flash", false},
 		"missing model":        {"us-central1", "google", "", true},
-		"missing location":     {"", "google", "gemini-2.5-flash", true},
+		"missing location":     {"", "google", "gemini-3.5-flash", true},
 		"only location":        {"global", "", "", true},
 	}
 
