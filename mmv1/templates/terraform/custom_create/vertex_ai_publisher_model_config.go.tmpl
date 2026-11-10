@@ -18,6 +18,9 @@ if err != nil {
 if err := vertexAIPublisherModelConfigValidateScope(d); err != nil {
 	return err
 }
+if err := vertexAIPublisherModelConfigSetRegion(d); err != nil {
+	return fmt.Errorf("Error setting region: %s", err)
+}
 
 obj, updateMask, err := vertexAIPublisherModelConfigBuildRequest(d, config)
 if err != nil {

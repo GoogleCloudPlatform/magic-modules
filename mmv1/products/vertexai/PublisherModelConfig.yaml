@@ -33,8 +33,16 @@ description: |
   `logging_config.enabled = false`) and removes the resource from state. Previously created
   BigQuery datasets and tables are not deleted.
 
-  ~> **Note:** Writes are partial updates: only the blocks present in the configuration are sent
-  (using an `updateMask`), so other publisher model settings managed outside Terraform are preserved.
+  ~> **Note:** Terraform owns both logging settings of the configured scope: a block that is
+  removed from the configuration is disabled on the next apply, and changes made outside
+  Terraform to these two settings are reverted. Other publisher model settings that are not part
+  of this resource (for example data sharing or CMEK settings) are never sent, thanks to the
+  `updateMask` used on every write, and are therefore left untouched.
+
+  ~> **Note:** The project-wide configuration only supports `enabled`, `sampling_rate`,
+  `error_sampling_rate` and `bigquery_destination` within `logging_config`;
+  `enable_otel_logging` is rejected for that scope because the API ignores it. Logging
+  configuration changes can take a few minutes to take effect on the serving path.
 references:
   guides:
     'Inference request metadata logging': 'https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/capabilities/inference-metadata-logging'
@@ -66,6 +74,7 @@ async:
   result:
     resource_inside_response: true
 custom_code:
+  extra_schema_entry: 'templates/terraform/extra_schema_entry/vertex_ai_publisher_model_config.go.tmpl'
   constants: 'templates/terraform/constants/vertex_ai_publisher_model_config.go.tmpl'
   custom_create: 'templates/terraform/custom_create/vertex_ai_publisher_model_config.go.tmpl'
   custom_update: 'templates/terraform/custom_update/vertex_ai_publisher_model_config.go.tmpl'
@@ -152,11 +161,14 @@ properties:
         description: |
           Percentage of failed requests to be logged, expressed as a fraction in range [0,1].
           Only non-transient errors will be logged (currently `500/Internal errors`).
+          For the project-wide configuration this value is stored but not returned by the API;
+          Terraform keeps the configured value in state.
       - name: 'enableOtelLogging'
         type: Boolean
         description: |
           If true, in addition to the original large model logs, logs will be converted to
           OpenTelemetry schema format and saved in the `otel_log` column.
+          Not supported for the project-wide configuration.
       - name: 'bigqueryDestination'
         type: NestedObject
         description: |

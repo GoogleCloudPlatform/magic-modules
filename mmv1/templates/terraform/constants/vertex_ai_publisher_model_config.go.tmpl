@@ -32,6 +32,14 @@ func vertexAIPublisherModelConfigValidateScope(d tpgresource.TerraformResourceDa
 	if !allSet && !noneSet {
 		return fmt.Errorf("`location`, `publisher` and `model` must either all be set (per-model configuration) or all be unset (project-wide configuration); got location=%q publisher=%q model=%q", location, publisher, model)
 	}
+	// The project-wide configuration only stores enabled, sampling_rate, error_sampling_rate and
+	// bigquery_destination; enable_otel_logging is silently dropped by the API, so reject it rather
+	// than letting it look applied.
+	if noneSet {
+		if otel, ok := d.GetOk("logging_config.0.enable_otel_logging"); ok && otel.(bool) {
+			return fmt.Errorf("`logging_config.enable_otel_logging` is not supported for the project-wide configuration; set it on a per-model configuration instead")
+		}
+	}
 	return nil
 }
 
@@ -59,6 +67,17 @@ func vertexAIPublisherModelConfigId(d tpgresource.TerraformResourceData, config 
 		return "", err
 	}
 	return name + "/publisherModelConfig", nil
+}
+
+// vertexAIPublisherModelConfigSetRegion records the computed `region` attribute so the generated
+// read URL template (which contains the product-level {{"{{"}}region{{"}}"}} placeholder) never depends on a
+// provider-level region. The host is always rewritten from `location` before the request is sent.
+func vertexAIPublisherModelConfigSetRegion(d *schema.ResourceData) error {
+	region := d.Get("location").(string)
+	if region == "" {
+		region = "global"
+	}
+	return d.Set("region", region)
 }
 
 // vertexAIPublisherModelConfigBaseUrl resolves the Vertex AI base URL for a location.

@@ -15,6 +15,10 @@ if err != nil {
 	return err
 }
 
+if err := vertexAIPublisherModelConfigValidateScope(d); err != nil {
+	return err
+}
+
 obj, updateMask, err := vertexAIPublisherModelConfigBuildRequest(d, config)
 if err != nil {
 	return err

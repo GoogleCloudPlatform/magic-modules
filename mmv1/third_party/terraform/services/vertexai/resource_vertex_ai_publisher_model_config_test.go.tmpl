@@ -2,6 +2,7 @@ package vertexai_test
 {{- if ne $.TargetVersionName "ga" }}
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -60,6 +61,61 @@ func TestAccVertexAIPublisherModelConfig_projectWide(t *testing.T) {
 				ResourceName:      "google_vertex_ai_publisher_model_config.project_default",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				// Project-wide BigQuery request/response logging. The API stores but does not
+				// return error_sampling_rate on this binding and canonicalizes nothing, so a
+				// clean follow-up plan proves the read-side handling.
+				Config: testAccVertexAIPublisherModelConfig_projectWideLogging(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_publisher_model_config.project_default", "logging_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_publisher_model_config.project_default", "logging_config.0.sampling_rate", "0.25"),
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_publisher_model_config.project_default", "logging_config.0.error_sampling_rate", "1"),
+				),
+			},
+			{
+				Config: testAccVertexAIPublisherModelConfig_projectWideLogging(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_vertex_ai_publisher_model_config.project_default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// error_sampling_rate is write-only on the project-wide binding (see post_read),
+				// so a fresh import cannot recover it.
+				ImportStateVerifyIgnore: []string{"logging_config.0.error_sampling_rate"},
+			},
+			{
+				// Removing the block disables request/response logging again.
+				Config: testAccVertexAIPublisherModelConfig_projectWide(context, "DISABLED"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr(
+						"google_vertex_ai_publisher_model_config.project_default", "logging_config.0.enabled"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccVertexAIPublisherModelConfig_projectWideRejectsOtel(t *testing.T) {
+	context := map[string]interface{}{
+		"project": envvar.GetTestProjectFromEnv(),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccVertexAIPublisherModelConfig_projectWideOtel(context),
+				ExpectError: regexp.MustCompile("enable_otel_logging.*not supported for the project-wide configuration"),
 			},
 		},
 	})
@@ -131,6 +187,47 @@ resource "google_vertex_ai_publisher_model_config" "project_default" {
 
   inference_event_logging_config {
     state = "%{state}"
+  }
+}
+`, context)
+}
+
+func testAccVertexAIPublisherModelConfig_projectWideLogging(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_publisher_model_config" "project_default" {
+  provider = google-beta
+  project  = "%{project}"
+
+  inference_event_logging_config {
+    state = "ENABLED"
+  }
+
+  logging_config {
+    enabled             = true
+    sampling_rate       = 0.25
+    error_sampling_rate = 1
+
+    bigquery_destination {
+      output_uri = "bq://%{project}"
+    }
+  }
+}
+`, context)
+}
+
+func testAccVertexAIPublisherModelConfig_projectWideOtel(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_publisher_model_config" "project_default" {
+  provider = google-beta
+  project  = "%{project}"
+
+  logging_config {
+    enabled             = true
+    enable_otel_logging = true
+
+    bigquery_destination {
+      output_uri = "bq://%{project}"
+    }
   }
 }
 `, context)

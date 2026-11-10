@@ -15,10 +15,18 @@
 // for a project that only enabled inference request metadata logging). Only surface
 // `logging_config` when it is managed in the configuration or actually enabled, so an
 // unmanaged, disabled setting does not produce a permanent diff.
-if _, managed := d.GetOk("logging_config"); !managed {
-	if loggingConfig, ok := res["loggingConfig"].(map[string]interface{}); ok {
-		if enabled, _ := loggingConfig["enabled"].(bool); !enabled {
-			delete(res, "loggingConfig")
+if loggingConfig, ok := res["loggingConfig"].(map[string]interface{}); ok {
+	_, managed := d.GetOk("logging_config")
+	if enabled, _ := loggingConfig["enabled"].(bool); !enabled && !managed {
+		delete(res, "loggingConfig")
+	} else if vertexAIPublisherModelConfigIsProjectLevel(d) {
+		// The project-wide read omits errorSamplingRate (it is stored but write-only on this
+		// binding) and never carries enableOtelLogging (rejected at plan time). Carry the
+		// configured error_sampling_rate forward so it does not show as a perpetual diff.
+		if _, present := loggingConfig["errorSamplingRate"]; !present {
+			if v, ok := d.GetOk("logging_config.0.error_sampling_rate"); ok {
+				loggingConfig["errorSamplingRate"] = v
+			}
 		}
 	}
 }

@@ -25,5 +25,8 @@ if err != nil {
 	return nil, fmt.Errorf("Error constructing id: %s", err)
 }
 d.SetId(id)
+if err := vertexAIPublisherModelConfigSetRegion(d); err != nil {
+	return nil, fmt.Errorf("Error setting region: %s", err)
+}
 
 return []*schema.ResourceData{d}, nil
