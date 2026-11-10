@@ -1,0 +1,22 @@
+func checkCloudIdentityInboundOidcSsoProfileOperation(res map[string]interface{}, activity string) (map[string]interface{}, error) {
+	if opErr, ok := res["error"]; ok && opErr != nil {
+		return nil, fmt.Errorf("error %s InboundOidcSsoProfile: %v", activity, opErr)
+	}
+
+	done, _ := res["done"].(bool)
+	if !done {
+		var state string
+		if meta, ok := res["metadata"].(map[string]interface{}); ok {
+			if s, ok := meta["state"].(string); ok {
+				state = s
+			}
+		}
+		if state == "awaiting-multi-party-approval" {
+			return nil, fmt.Errorf("error %s InboundOidcSsoProfile: operation is awaiting-multi-party-approval. The request must be approved in Google Admin Console before it can be managed by Terraform", activity)
+		}
+		return nil, fmt.Errorf("error %s InboundOidcSsoProfile: operation is not done (state: %s)", activity, state)
+	}
+
+	respBody, _ := res["response"].(map[string]interface{})
+	return respBody, nil
+}
