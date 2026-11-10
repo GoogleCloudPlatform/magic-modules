@@ -46,11 +46,9 @@ custom_code:
 samples:
   - name: cloudidentity_policy_basic
     primary_resource_id: primary
-    # Created a handwritten test as otherwise example will have to override scopes causing confusion for end users.
-    exclude_test: true
+    skip_test: Acceptance test requires Google Workspace admin privileges not held by the CI service account
     steps:
       - name: cloudidentity_policy_basic
-        resource_id_vars:
 properties:
   - name: name
     description: |

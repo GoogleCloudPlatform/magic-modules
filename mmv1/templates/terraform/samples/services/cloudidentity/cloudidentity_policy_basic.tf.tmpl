@@ -1,3 +1,11 @@
+provider "google" {
+  scopes = [
+    "https://www.googleapis.com/auth/cloud-identity.policies",
+    "https://www.googleapis.com/auth/cloud-platform",
+    "https://www.googleapis.com/auth/userinfo.email",
+  ]
+}
+
 resource "google_cloud_identity_policy" "{{$.PrimaryResourceId}}" {
   customer = "customers/C01234567"
 
