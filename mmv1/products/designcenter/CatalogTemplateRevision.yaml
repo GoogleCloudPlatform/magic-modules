@@ -144,3 +144,21 @@ samples:
           space: BootstrapDesignCenterSpace(t)
           catalog: BootstrapDesignCenterCatalog(t)
           catalog_template: BootstrapDesignCenterCatalogTemplate(t)
+  - name: designcenter_catalog_template_revision_application_template
+    primary_resource_id: example
+    steps:
+      - name: designcenter_catalog_template_revision_application_template
+        resource_id_vars:
+          revision_id: example-app-revision
+        vars:
+          project: my-project-name
+          space: example-space
+          catalog: example-catalog
+          catalog_template: example-application-catalog-template
+          application_template_revision: projects/my-project-name/locations/us-central1/spaces/example-space/applicationTemplates/example-template/revisions/r-1
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          catalog: BootstrapDesignCenterCatalog(t)
+          catalog_template: BootstrapDesignCenterApplicationCatalogTemplate(t)
+          application_template_revision: BootstrapDesignCenterApplicationTemplateRevisionURI(t)
