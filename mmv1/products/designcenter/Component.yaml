@@ -25,6 +25,62 @@ async:
 import_format:
   - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component_id}}'
 
+samples:
+  - name: designcenter_component_basic
+    primary_resource_id: example
+    steps:
+      - name: designcenter_component_basic
+        resource_id_vars:
+          component_id: example-component
+        vars:
+          project: my-project-name
+          space: my-space
+          application_template: my-application-template
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          application_template: BootstrapDesignCenterApplicationTemplate(t)
+      - name: designcenter_component_update
+        resource_id_vars:
+          component_id: example-component
+        vars:
+          project: my-project-name
+          space: my-space
+          application_template: my-application-template
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          application_template: BootstrapDesignCenterApplicationTemplate(t)
+  - name: designcenter_component_composite
+    primary_resource_id: example
+    steps:
+      - name: designcenter_component_composite
+        resource_id_vars:
+          component_id: example-composite-component
+        vars:
+          project: my-project-name
+          space: my-space
+          composite_application_template: my-composite-application-template
+          application_template_revision_uri: projects/my-project-name/locations/us-central1/spaces/my-space/applicationTemplates/my-application-template/revisions/r-1
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          composite_application_template: BootstrapDesignCenterCompositeApplicationTemplate(t)
+          application_template_revision_uri: BootstrapDesignCenterSourceApplicationTemplateRevisionURI(t)
+      - name: designcenter_component_composite_update
+        resource_id_vars:
+          component_id: example-composite-component
+        vars:
+          project: my-project-name
+          space: my-space
+          composite_application_template: my-composite-application-template
+          application_template_revision_uri: projects/my-project-name/locations/us-central1/spaces/my-space/applicationTemplates/my-application-template/revisions/r-1
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          composite_application_template: BootstrapDesignCenterCompositeApplicationTemplate(t)
+          application_template_revision_uri: BootstrapDesignCenterSourceApplicationTemplateRevisionURI(t)
+
 parameters:
   - name: 'location'
     type: 'String'
@@ -219,27 +275,6 @@ properties:
       Whether the component is exported as a separate Terraform root module in
       a `COMPOSITE` application template.
 
-  - name: 'inputVariableAliases'
-    type: 'Array'
-    description: |
-      Aliases that expose input variables of the component at the root level of
-      a `COMPOSITE` application template.
-    item_type:
-      type: 'NestedObject'
-      properties:
-        - name: 'variable'
-          type: 'String'
-          description: |
-            The name of the input variable in the template or module that the
-            component is built from.
-          required: true
-        - name: 'alias'
-          type: 'String'
-          description: |
-            The alias for the variable at the root level of the composite
-            template.
-          required: true
-
   - name: 'applicationTemplateRevisionUri'
     type: 'String'
     description: |
@@ -342,58 +377,3 @@ properties:
     description: |
       [Output only] Update time stamp.
     output: true
-samples:
-  - name: designcenter_component_basic
-    primary_resource_id: example
-    steps:
-      - name: designcenter_component_basic
-        resource_id_vars:
-          component_id: example-component
-        vars:
-          project: my-project-name
-          space: my-space
-          application_template: my-application-template
-        test_vars_overrides:
-          project: BootstrapDesignCenterProject(t)
-          space: BootstrapDesignCenterSpace(t)
-          application_template: BootstrapDesignCenterApplicationTemplate(t)
-      - name: designcenter_component_update
-        resource_id_vars:
-          component_id: example-component
-        vars:
-          project: my-project-name
-          space: my-space
-          application_template: my-application-template
-        test_vars_overrides:
-          project: BootstrapDesignCenterProject(t)
-          space: BootstrapDesignCenterSpace(t)
-          application_template: BootstrapDesignCenterApplicationTemplate(t)
-  - name: designcenter_component_composite
-    primary_resource_id: example
-    steps:
-      - name: designcenter_component_composite
-        resource_id_vars:
-          component_id: example-composite-component
-        vars:
-          project: my-project-name
-          space: my-space
-          composite_application_template: my-composite-application-template
-          application_template_revision_uri: projects/my-project-name/locations/us-central1/spaces/my-space/applicationTemplates/my-application-template/revisions/r-1
-        test_vars_overrides:
-          project: BootstrapDesignCenterProject(t)
-          space: BootstrapDesignCenterSpace(t)
-          composite_application_template: BootstrapDesignCenterCompositeApplicationTemplate(t)
-          application_template_revision_uri: BootstrapDesignCenterSourceApplicationTemplateRevisionURI(t)
-      - name: designcenter_component_composite_update
-        resource_id_vars:
-          component_id: example-composite-component
-        vars:
-          project: my-project-name
-          space: my-space
-          composite_application_template: my-composite-application-template
-          application_template_revision_uri: projects/my-project-name/locations/us-central1/spaces/my-space/applicationTemplates/my-application-template/revisions/r-1
-        test_vars_overrides:
-          project: BootstrapDesignCenterProject(t)
-          space: BootstrapDesignCenterSpace(t)
-          composite_application_template: BootstrapDesignCenterCompositeApplicationTemplate(t)
-          application_template_revision_uri: BootstrapDesignCenterSourceApplicationTemplateRevisionURI(t)
