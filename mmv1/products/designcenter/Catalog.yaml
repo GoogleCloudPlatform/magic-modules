@@ -31,6 +31,29 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+samples:
+  - name: designcenter_catalog_basic
+    primary_resource_id: example
+    steps:
+      - name: designcenter_catalog_basic
+        resource_id_vars:
+          catalog_id: example-catalog
+        vars:
+          project: my-project-name
+          space: example-space
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+      - name: designcenter_catalog_update
+        resource_id_vars:
+          catalog_id: example-catalog
+        vars:
+          project: my-project-name
+          space: example-space
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+
 parameters:
   - type: String
     name: 'location'
@@ -78,25 +101,3 @@ properties:
     description: |
       Output only. [Output only] Update time stamp.
     output: true
-samples:
-  - name: designcenter_catalog_basic
-    primary_resource_id: example
-    steps:
-      - name: designcenter_catalog_basic
-        resource_id_vars:
-          catalog_id: example-catalog
-        vars:
-          project: my-project-name
-          space: example-space
-        test_vars_overrides:
-          project: BootstrapDesignCenterProject(t)
-          space: BootstrapDesignCenterSpace(t)
-      - name: designcenter_catalog_update
-        resource_id_vars:
-          catalog_id: example-catalog
-        vars:
-          project: my-project-name
-          space: example-space
-        test_vars_overrides:
-          project: BootstrapDesignCenterProject(t)
-          space: BootstrapDesignCenterSpace(t)
