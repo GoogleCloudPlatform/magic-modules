@@ -1,0 +1,202 @@
+{{- /*
+	The license inside this block applies to this file
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+
+// vertexAIPublisherModelConfigRegionPlaceholder is the regional host placeholder used in the
+// Vertex AI product base URL (https://{{"{{"}}region{{"}}"}}-aiplatform.googleapis.com/...).
+const vertexAIPublisherModelConfigRegionPlaceholder = "{{"{{"}}region{{"}}"}}"
+
+// vertexAIPublisherModelConfigIsProjectLevel reports whether the resource manages the
+// project-wide default configuration (no location/publisher/model set).
+func vertexAIPublisherModelConfigIsProjectLevel(d tpgresource.TerraformResourceData) bool {
+	return d.Get("model").(string) == "" && d.Get("publisher").(string) == "" && d.Get("location").(string) == ""
+}
+
+// vertexAIPublisherModelConfigValidateScope ensures that location, publisher and model are
+// either all set (per-model binding) or all unset (project-wide binding).
+func vertexAIPublisherModelConfigValidateScope(d tpgresource.TerraformResourceData) error {
+	location := d.Get("location").(string)
+	publisher := d.Get("publisher").(string)
+	model := d.Get("model").(string)
+	allSet := location != "" && publisher != "" && model != ""
+	noneSet := location == "" && publisher == "" && model == ""
+	if !allSet && !noneSet {
+		return fmt.Errorf("`location`, `publisher` and `model` must either all be set (per-model configuration) or all be unset (project-wide configuration); got location=%q publisher=%q model=%q", location, publisher, model)
+	}
+	return nil
+}
+
+// vertexAIPublisherModelConfigResourceName returns the API resource name used by
+// setPublisherModelConfig / fetchPublisherModelConfig for the configured scope.
+func vertexAIPublisherModelConfigResourceName(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (string, error) {
+	if err := vertexAIPublisherModelConfigValidateScope(d); err != nil {
+		return "", err
+	}
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return "", fmt.Errorf("Error fetching project for PublisherModelConfig: %s", err)
+	}
+	if vertexAIPublisherModelConfigIsProjectLevel(d) {
+		return fmt.Sprintf("projects/%s", project), nil
+	}
+	return fmt.Sprintf("projects/%s/locations/%s/publishers/%s/models/%s",
+		project, d.Get("location").(string), d.Get("publisher").(string), d.Get("model").(string)), nil
+}
+
+// vertexAIPublisherModelConfigId returns the Terraform resource ID for the configured scope.
+func vertexAIPublisherModelConfigId(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (string, error) {
+	name, err := vertexAIPublisherModelConfigResourceName(d, config)
+	if err != nil {
+		return "", err
+	}
+	return name + "/publisherModelConfig", nil
+}
+
+// vertexAIPublisherModelConfigBaseUrl resolves the Vertex AI base URL for a location.
+// The project-wide binding and `global` use the global endpoint, `us`/`eu` use the
+// regional endpoint (REP) hosts and any other value uses the regional host.
+func vertexAIPublisherModelConfigBaseUrl(location string, config *transport_tpg.Config) string {
+	baseUrl := transport_tpg.BaseUrl(Product, config)
+	if !strings.Contains(baseUrl, vertexAIPublisherModelConfigRegionPlaceholder) {
+		// Custom endpoint without a regional placeholder: use it as-is.
+		return baseUrl
+	}
+	regionalHost := vertexAIPublisherModelConfigRegionPlaceholder + "-aiplatform."
+	switch location {
+	case "", "global":
+		return strings.Replace(baseUrl, regionalHost, "aiplatform.", 1)
+	case "us", "eu":
+		return strings.Replace(baseUrl, regionalHost, "aiplatform."+location+".rep.", 1)
+	default:
+		return strings.Replace(baseUrl, vertexAIPublisherModelConfigRegionPlaceholder, location, 1)
+	}
+}
+
+// vertexAIPublisherModelConfigUrl builds the full URL for a custom method (for example
+// ":setPublisherModelConfig" or ":fetchPublisherModelConfig") on the configured scope.
+func vertexAIPublisherModelConfigUrl(d tpgresource.TerraformResourceData, config *transport_tpg.Config, method string) (string, error) {
+	name, err := vertexAIPublisherModelConfigResourceName(d, config)
+	if err != nil {
+		return "", err
+	}
+	return vertexAIPublisherModelConfigBaseUrl(d.Get("location").(string), config) + name + method, nil
+}
+
+// vertexAIPublisherModelConfigSet calls setPublisherModelConfig with the given config and
+// update mask and waits for the resulting long-running operation. The API returns
+// 409 ALREADY_EXISTS when the requested configuration matches the stored one; that is treated
+// as success because the desired state is already in place.
+func vertexAIPublisherModelConfigSet(d *schema.ResourceData, config *transport_tpg.Config, userAgent string, publisherModelConfig map[string]interface{}, updateMask []string, activity string, timeout time.Duration) error {
+	url, err := vertexAIPublisherModelConfigUrl(d, config, ":setPublisherModelConfig")
+	if err != nil {
+		return err
+	}
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return fmt.Errorf("Error fetching project for PublisherModelConfig: %s", err)
+	}
+	billingProject := project
+	// err == nil indicates that the billing_project value was found
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
+	body := map[string]interface{}{
+		"publisherModelConfig": publisherModelConfig,
+	}
+	if len(updateMask) > 0 {
+		body["updateMask"] = strings.Join(updateMask, ",")
+	}
+	log.Printf("[DEBUG] %s PublisherModelConfig %q: %#v", activity, url, body)
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      body,
+		Timeout:   timeout,
+		Headers:   make(http.Header),
+	})
+	if err != nil {
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
+			log.Printf("[DEBUG] PublisherModelConfig %q already matches the requested configuration (409 ALREADY_EXISTS); nothing to do", url)
+			return nil
+		}
+		return fmt.Errorf("Error %s PublisherModelConfig: %s", strings.ToLower(activity), err)
+	}
+
+	return VertexAIOperationWaitTime(config, res, project, d.Get("location").(string), activity+" PublisherModelConfig", userAgent, timeout)
+}
+
+// vertexAIPublisherModelConfigBuildRequest expands the Terraform configuration into the
+// publisherModelConfig request body and the matching update mask. Only blocks present in the
+// configuration are sent so settings managed outside Terraform are preserved.
+func vertexAIPublisherModelConfigBuildRequest(d *schema.ResourceData, config *transport_tpg.Config) (map[string]interface{}, []string, error) {
+	obj := make(map[string]interface{})
+	updateMask := []string{}
+
+	inferenceEventLoggingConfigProp, err := expandVertexAIPublisherModelConfigInferenceEventLoggingConfig(d.Get("inference_event_logging_config"), d, config)
+	if err != nil {
+		return nil, nil, err
+	}
+	if _, ok := d.GetOk("inference_event_logging_config"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(inferenceEventLoggingConfigProp)) {
+		obj["inferenceEventLoggingConfig"] = inferenceEventLoggingConfigProp
+		updateMask = append(updateMask, "inferenceEventLoggingConfig")
+	}
+
+	loggingConfigProp, err := expandVertexAIPublisherModelConfigLoggingConfig(d.Get("logging_config"), d, config)
+	if err != nil {
+		return nil, nil, err
+	}
+	if _, ok := d.GetOk("logging_config"); ok && !tpgresource.IsEmptyValue(reflect.ValueOf(loggingConfigProp)) {
+		obj["loggingConfig"] = loggingConfigProp
+		updateMask = append(updateMask, "loggingConfig")
+	}
+
+	return obj, updateMask, nil
+}
+
+func vertexAIPublisherModelConfigBigqueryDestinationOutputUriDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	return vertexAIPublisherModelConfigBigqueryDestinationOutputUriDiffSuppressLogic(old, new)
+}
+
+var vertexAIPublisherModelConfigAutoDatasetRe = regexp.MustCompile(`^publishers_[a-z0-9_]+_models_[a-z0-9_]+$`)
+
+const vertexAIPublisherModelConfigDefaultTableId = "request_response_logging"
+
+// The API canonicalizes the BigQuery destination to bq://project.dataset.table, auto-creating
+// a dataset named publishers_<publisher>_models_<model> and/or a table named
+// request_response_logging when the configuration only names a project or dataset.
+func vertexAIPublisherModelConfigBigqueryDestinationOutputUriDiffSuppressLogic(old, new string) bool {
+	if old == new {
+		return true
+	}
+
+	o := strings.Split(old, ".")
+	n := strings.Split(new, ".")
+
+	// API always returns bq://project.dataset.table format path
+	if len(o) != 3 || o[2] != vertexAIPublisherModelConfigDefaultTableId || o[0] != n[0] {
+		return false
+	}
+
+	switch len(n) {
+	case 1: // config has bq://project format path: dataset ID matches auto-generated format.
+		return vertexAIPublisherModelConfigAutoDatasetRe.MatchString(o[1])
+	case 2: // config has bq://project.dataset format path: compare dataset ID.
+		return o[1] == n[1]
+	default:
+		return false
+	}
+}

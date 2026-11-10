@@ -1,0 +1,127 @@
+package vertexai
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func TestVertexAIPublisherModelConfigBigqueryDestinationOutputUriDiffSuppressLogic(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"same full path": {
+			Old:                "bq://project_id.dataset_id.table_id",
+			New:                "bq://project_id.dataset_id.table_id",
+			ExpectDiffSuppress: true,
+		},
+		"different full path": {
+			Old:                "bq://project_id.dataset_id.table_id",
+			New:                "bq://project_id.dataset_id.table_id2",
+			ExpectDiffSuppress: false,
+		},
+		"auto table created": {
+			Old:                "bq://project_id.dataset_id.request_response_logging",
+			New:                "bq://project_id.dataset_id",
+			ExpectDiffSuppress: true,
+		},
+		"manual table id unmatch": {
+			Old:                "bq://project_id.dataset_id.table_id",
+			New:                "bq://project_id.dataset_id",
+			ExpectDiffSuppress: false,
+		},
+		"auto dataset and table created": {
+			Old:                "bq://project_id.publishers_google_models_gemini_2_5_flash_1234567890123456789.request_response_logging",
+			New:                "bq://project_id",
+			ExpectDiffSuppress: true,
+		},
+		"dataset unmatch": {
+			Old:                "bq://project_id.dataset_id.request_response_logging",
+			New:                "bq://project_id",
+			ExpectDiffSuppress: false,
+		},
+		"different project": {
+			Old:                "bq://project_a.dataset_id.request_response_logging",
+			New:                "bq://project_b.dataset_id",
+			ExpectDiffSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		if vertexAIPublisherModelConfigBigqueryDestinationOutputUriDiffSuppressLogic(tc.Old, tc.New) != tc.ExpectDiffSuppress {
+			t.Errorf("bad: %s, %q => %q expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
+}
+
+func TestVertexAIPublisherModelConfigBaseUrl(t *testing.T) {
+	t.Parallel()
+
+	// An empty config has no custom endpoints, so BaseUrl falls back to the product default.
+	config := &transport_tpg.Config{}
+
+	cases := map[string]struct {
+		Location string
+		Expected string
+	}{
+		"project-wide uses the global endpoint": {
+			Location: "",
+			Expected: "https://aiplatform.googleapis.com/v1beta1/",
+		},
+		"global": {
+			Location: "global",
+			Expected: "https://aiplatform.googleapis.com/v1beta1/",
+		},
+		"us REP": {
+			Location: "us",
+			Expected: "https://aiplatform.us.rep.googleapis.com/v1beta1/",
+		},
+		"eu REP": {
+			Location: "eu",
+			Expected: "https://aiplatform.eu.rep.googleapis.com/v1beta1/",
+		},
+		"regional": {
+			Location: "us-central1",
+			Expected: "https://us-central1-aiplatform.googleapis.com/v1beta1/",
+		},
+	}
+
+	for tn, tc := range cases {
+		if got := vertexAIPublisherModelConfigBaseUrl(tc.Location, config); got != tc.Expected {
+			t.Errorf("bad: %s, location %q => got %q, want %q", tn, tc.Location, got, tc.Expected)
+		}
+	}
+}
+
+func TestVertexAIPublisherModelConfigValidateScope(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		Location, Publisher, Model string
+		ExpectError                bool
+	}{
+		"project-wide":         {"", "", "", false},
+		"per-model":            {"us-central1", "google", "gemini-2.5-flash", false},
+		"missing model":        {"us-central1", "google", "", true},
+		"missing location":     {"", "google", "gemini-2.5-flash", true},
+		"only location":        {"global", "", "", true},
+	}
+
+	for tn, tc := range cases {
+		d := schema.TestResourceDataRaw(t, ResourceVertexAIPublisherModelConfig().Schema, map[string]interface{}{
+			"location":  tc.Location,
+			"publisher": tc.Publisher,
+			"model":     tc.Model,
+		})
+		err := vertexAIPublisherModelConfigValidateScope(d)
+		if (err != nil) != tc.ExpectError {
+			t.Errorf("bad: %s, expected error=%t, got %v", tn, tc.ExpectError, err)
+		}
+	}
+}
+{{- end }}

@@ -1,0 +1,9 @@
+resource "google_vertex_ai_publisher_model_config" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+
+  # Project-wide default: applies to all publisher models in the project unless a
+  # per-model configuration overrides it.
+  inference_event_logging_config {
+    state = "ENABLED"
+  }
+}

@@ -1,0 +1,45 @@
+{{- /*
+	The license inside this block applies to this file
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+	return err
+}
+
+obj, updateMask, err := vertexAIPublisherModelConfigBuildRequest(d, config)
+if err != nil {
+	return err
+}
+
+// A block removed from the configuration is disabled rather than left untouched, so that
+// `terraform apply` converges on the configuration.
+if _, ok := d.GetOk("inference_event_logging_config"); !ok && d.HasChange("inference_event_logging_config") {
+	obj["inferenceEventLoggingConfig"] = map[string]interface{}{"state": "DISABLED"}
+	updateMask = append(updateMask, "inferenceEventLoggingConfig")
+}
+if _, ok := d.GetOk("logging_config"); !ok && d.HasChange("logging_config") {
+	obj["loggingConfig"] = map[string]interface{}{"enabled": false}
+	updateMask = append(updateMask, "loggingConfig")
+}
+
+if len(updateMask) == 0 {
+	log.Printf("[DEBUG] No PublisherModelConfig changes to apply for %q", d.Id())
+	return resourceVertexAIPublisherModelConfigRead(d, meta)
+}
+
+if err := vertexAIPublisherModelConfigSet(d, config, userAgent, obj, updateMask, "Updating", d.Timeout(schema.TimeoutUpdate)); err != nil {
+	return err
+}
+
+log.Printf("[DEBUG] Finished updating PublisherModelConfig %q", d.Id())
+
+return resourceVertexAIPublisherModelConfigRead(d, meta)

@@ -1,0 +1,178 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'PublisherModelConfig'
+api_resource_type_kind: PublisherModelConfig
+description: |
+  Manages the configuration of a Vertex AI publisher model (for example a Gemini or
+  partner model served through `publishers/{publisher}/models/{model}`) via the
+  `setPublisherModelConfig` / `fetchPublisherModelConfig` methods. The configuration
+  covers inference request metadata logging to Cloud Logging
+  (`inference_event_logging_config`) and request/response payload logging to BigQuery
+  (`logging_config`).
+
+  The configuration can be bound at two scopes:
+
+  * **Project-wide default** (`projects/{project}`): omit `location`, `publisher` and `model`.
+  * **Per model and location** (`projects/{project}/locations/{location}/publishers/{publisher}/models/{model}`):
+    set `location`, `publisher` and `model`. Per-model settings take precedence over the project-wide default.
+
+  ~> **Note:** The underlying API has no delete method. Destroying this resource disables the
+  logging settings that were managed by Terraform (`inference_event_logging_config.state = "DISABLED"`,
+  `logging_config.enabled = false`) and removes the resource from state. Previously created
+  BigQuery datasets and tables are not deleted.
+
+  ~> **Note:** Writes are partial updates: only the blocks present in the configuration are sent
+  (using an `updateMask`), so other publisher model settings managed outside Terraform are preserved.
+references:
+  guides:
+    'Inference request metadata logging': 'https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/capabilities/inference-metadata-logging'
+    'Log and share requests and responses': 'https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/capabilities/request-response-logging'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.publishers.models/setPublisherModelConfig'
+docs:
+min_version: beta
+base_url: 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}'
+self_link: 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}'
+create_url: 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}:setPublisherModelConfig'
+update_url: 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}:setPublisherModelConfig'
+update_verb: 'POST'
+read_query_params: ':fetchPublisherModelConfig'
+id_format: 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}/publisherModelConfig'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}/publisherModelConfig'
+  - 'projects/{{project}}/publisherModelConfig'
+exclude_identity_generation: true
+exclude_sweeper: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  actions: ['create', 'update', 'delete']
+  result:
+    resource_inside_response: true
+custom_code:
+  constants: 'templates/terraform/constants/vertex_ai_publisher_model_config.go.tmpl'
+  custom_create: 'templates/terraform/custom_create/vertex_ai_publisher_model_config.go.tmpl'
+  custom_update: 'templates/terraform/custom_update/vertex_ai_publisher_model_config.go.tmpl'
+  custom_delete: 'templates/terraform/custom_delete/vertex_ai_publisher_model_config.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/vertex_ai_publisher_model_config.go.tmpl'
+  pre_read: 'templates/terraform/pre_read/vertex_ai_publisher_model_config.go.tmpl'
+samples:
+  - name: 'vertex_ai_publisher_model_config_project'
+    primary_resource_id: 'project_default'
+    min_version: 'beta'
+    # The project-wide config is a singleton shared with the per-model test, so both
+    # are exercised serially in the handwritten
+    # resource_vertex_ai_publisher_model_config_test.go.tmpl instead of generated tests.
+    exclude_test: true
+    steps:
+      - name: 'vertex_ai_publisher_model_config_project'
+        min_version: 'beta'
+  - name: 'vertex_ai_publisher_model_config_model'
+    primary_resource_id: 'gemini_flash'
+    min_version: 'beta'
+    exclude_test: true
+    steps:
+      - name: 'vertex_ai_publisher_model_config_model'
+        min_version: 'beta'
+        resource_id_vars:
+          dataset_id: 'vertex_ai_request_logs'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The location of the publisher model, for example `us-central1`, `us`, `eu` or `global`.
+      Leave `location`, `publisher` and `model` unset to manage the project-wide default configuration.
+    url_param_only: true
+    immutable: true
+  - name: 'publisher'
+    type: String
+    description: |
+      The publisher of the model, for example `google` or `anthropic`.
+      Required together with `location` and `model` for a per-model configuration.
+    url_param_only: true
+    immutable: true
+  - name: 'model'
+    type: String
+    description: |
+      The model ID, for example `gemini-2.5-flash`.
+      Required together with `location` and `publisher` for a per-model configuration.
+    url_param_only: true
+    immutable: true
+properties:
+  - name: 'inferenceEventLoggingConfig'
+    type: NestedObject
+    description: |
+      Controls the per-request `aiplatform.googleapis.com/inference_request` Cloud Logging log, which
+      records structured per-request metadata such as the calling principal, traffic type
+      (Provisioned Throughput or on-demand) and token usage. This is distinct from `logging_config`,
+      which logs raw request and response payloads to BigQuery.
+    custom_flatten: 'templates/terraform/custom_flatten/vertex_ai_publisher_model_config_inference_event_logging_config.go.tmpl'
+    properties:
+      - name: 'state'
+        type: Enum
+        description: |
+          Whether inference request metadata logging is enabled.
+        required: true
+        enum_values:
+          - 'ENABLED'
+          - 'DISABLED'
+  - name: 'loggingConfig'
+    type: NestedObject
+    description: |
+      The request/response payload logging configuration. Logged payloads are written to BigQuery.
+    properties:
+      - name: 'enabled'
+        type: Boolean
+        description: |
+          Whether request/response logging is enabled.
+        send_empty_value: true
+      - name: 'samplingRate'
+        type: Double
+        description: |
+          Percentage of requests to be logged, expressed as a fraction in range (0,1].
+      - name: 'errorSamplingRate'
+        type: Double
+        description: |
+          Percentage of failed requests to be logged, expressed as a fraction in range [0,1].
+          Only non-transient errors will be logged (currently `500/Internal errors`).
+      - name: 'enableOtelLogging'
+        type: Boolean
+        description: |
+          If true, in addition to the original large model logs, logs will be converted to
+          OpenTelemetry schema format and saved in the `otel_log` column.
+      - name: 'bigqueryDestination'
+        type: NestedObject
+        description: |
+          BigQuery destination for the logged requests and responses.
+        properties:
+          - name: 'outputUri'
+            type: String
+            description: |
+              BigQuery URI to a project, dataset or table. Accepted forms: `bq://projectId`,
+              `bq://projectId.bqDatasetId` or `bq://projectId.bqDatasetId.bqTableId`.
+              If only a project is given, a new dataset named `publishers_<publisher>_models_<model>`
+              is created; if no table is given, a new table named `request_response_logging` is created.
+              When the full table reference is specified, the dataset must exist and the table must not.
+            required: true
+            diff_suppress_func: 'vertexAIPublisherModelConfigBigqueryDestinationOutputUriDiffSuppress'
+      - name: 'requestResponseLoggingSchemaVersion'
+        type: String
+        description: |
+          The schema version used in creating the BigQuery table for the request response logging.
+        output: true
