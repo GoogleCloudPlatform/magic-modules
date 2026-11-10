@@ -54,8 +54,8 @@ func TestMapType(t *testing.T) {
 	}
 	if secondRecursivePet == nil {
 		t.Error("Failed to find second-level recursivePet property")
-	} else if secondRecursivePet.Type != "String" || secondRecursivePet.CustomExpand == "" {
-		t.Errorf("Expected second-level recursivePet to be a JSON field (String with templates), found Type: %s", secondRecursivePet.Type)
+	} else if secondRecursivePet.Type != "JsonValue" {
+		t.Errorf("Expected second-level recursivePet to be a JSON field (JsonValue), found Type: %s", secondRecursivePet.Type)
 	}
 }
 

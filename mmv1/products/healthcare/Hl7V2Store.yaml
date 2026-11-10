@@ -120,7 +120,7 @@ properties:
         validation:
           function: verify.ValidateBase64String
       - name: schema
-        type: String
+        type: JsonValue
         description: |
           JSON encoded string for schemas used to parse messages in this
           store if schematized parsing is desired.
@@ -129,11 +129,6 @@ properties:
           - parser_config.0.segment_terminator
           - parser_config.0.schema
           - parser_config.0.version
-        state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-        custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-        validation:
-          function: validation.StringIsJSON
       - name: version
         type: Enum
         description: |

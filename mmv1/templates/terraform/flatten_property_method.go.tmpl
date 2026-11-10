@@ -137,6 +137,41 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     return v
   }
   return tpgresource.ConvertSelfLinkToV1(v.(string))
+  {{- else if $.IsA "JsonValue" }}
+  if v == nil {
+    return nil
+  }
+  b, err := json.Marshal(v)
+  if err != nil {
+    // TODO: return error once https://github.com/GoogleCloudPlatform/magic-modules/issues/3257 is fixed.
+    log.Printf("[ERROR] failed to marshal schema to JSON: %v", err)
+  }
+  return string(b)
+  {{- else if and ($.IsA "Array") ($.ItemType.IsA "JsonValue") }}
+  if v == nil {
+    return v
+  }
+  l := v.([]interface{})
+  transformed := make([]interface{}, 0, len(l))
+  for _, raw := range l {
+    if raw == nil {
+      continue
+    }
+    b, err := json.Marshal(raw)
+    if err != nil {
+      log.Printf("[ERROR] failed to marshal schema to JSON: %v", err)
+    }
+    transformed = append(transformed, string(b))
+  }
+  {{- if $.IsSet }}
+    {{- if $.SetHashFunc }}
+  return schema.NewSet({{- $.SetHashFunc }}, transformed)
+    {{- else }}
+  return schema.NewSet(schema.HashString, transformed)
+    {{- end }}
+  {{- else }}
+  return transformed
+  {{- end }}
   {{- else if $.IsSet }}
   if v == nil {
     return v

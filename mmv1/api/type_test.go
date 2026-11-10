@@ -1251,3 +1251,91 @@ func TestTypeValidateOutputOnlyEnum(t *testing.T) {
 		})
 	}
 }
+
+func TestTypeJsonValue(t *testing.T) {
+	t.Parallel()
+
+	p := &Product{
+		Name: "TestProduct",
+		Versions: []*product.Version{
+			{Name: "ga", BaseUrl: "ga_url"},
+		},
+	}
+
+	prop := &Type{
+		Name: "payload",
+		Type: "JsonValue",
+	}
+	res := &Resource{
+		Name:       "TestResource",
+		Properties: []*Type{prop},
+	}
+	res.SetDefault(p)
+
+	if errs := prop.Validate(res.Name); len(errs) > 0 {
+		t.Fatalf("expected no errors for JsonValue, got: %v", errs)
+	}
+	if got := prop.TFType(prop.Type); got != "schema.TypeString" {
+		t.Errorf("TFType(JsonValue) = %q, want %q", got, "schema.TypeString")
+	}
+	if got := prop.GetFWType(); got != "String" {
+		t.Errorf("GetFWType() = %q, want %q", got, "String")
+	}
+	if !prop.IsJsonField() {
+		t.Errorf("IsJsonField() = false, want true")
+	}
+
+	disallowCases := []struct {
+		description string
+		prop        *Type
+	}{
+		{
+			description: "custom_expand json_value.tmpl disallowed",
+			prop: &Type{
+				Name:         "payload",
+				Type:         "String",
+				CustomExpand: "templates/terraform/custom_expand/json_value.tmpl",
+			},
+		},
+		{
+			description: "custom_expand json_schema.tmpl disallowed",
+			prop: &Type{
+				Name:         "payload",
+				Type:         "String",
+				CustomExpand: "templates/terraform/custom_expand/json_schema.tmpl",
+			},
+		},
+		{
+			description: "custom_flatten json_schema.tmpl disallowed",
+			prop: &Type{
+				Name:          "payload",
+				Type:          "String",
+				Output:        true,
+				CustomFlatten: "templates/terraform/custom_flatten/json_schema.tmpl",
+			},
+		},
+	}
+
+	for _, tc := range disallowCases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			r := &Resource{
+				Name:       "TestResource",
+				Properties: []*Type{tc.prop},
+			}
+			r.SetDefault(p)
+			errs := tc.prop.Validate(r.Name)
+			found := false
+			for _, err := range errs {
+				if strings.Contains(err.Error(), "use type JsonValue instead") {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Fatalf("expected error containing %q, got: %v", "use type JsonValue instead", errs)
+			}
+		})
+	}
+}

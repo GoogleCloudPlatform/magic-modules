@@ -300,25 +300,15 @@ properties:
       This field is part of a union field `specification`: Only one of `openApiSpec`, `dataStoreSpec`, or `functionSpec` may be set.
     properties:
       - name: inputSchema
-        type: String
+        type: JsonValue
         description: |
           Optional. The JSON schema is encapsulated in a [google.protobuf.Struct](https://protobuf.dev/reference/protobuf/google.protobuf/#struct) to describe the input of the function.
           This input is a JSON object that contains the function's parameters as properties of the object
-        state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-        custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-        validation:
-          function: validation.StringIsJSON
       - name: outputSchema
-        type: String
+        type: JsonValue
         description: |
           Optional. The JSON schema is encapsulated in a [google.protobuf.Struct](https://protobuf.dev/reference/protobuf/google.protobuf/#struct) to describe the output of the function.
           This output is a JSON object that contains the function's parameters as properties of the object
-        state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-        custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-        validation:
-          function: validation.StringIsJSON
   - name: connectorSpec
     type: NestedObject
     description: |

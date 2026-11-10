@@ -107,17 +107,12 @@ properties:
     # This is a string instead of a NestedObject because schemas contain ColumnSchemas, which can contain nested ColumnSchemas.
     # We'll have people provide the json blob for the schema instead.
   - name: schema
-    type: String
+    type: JsonValue
     description: |
       Schema of the entry (e.g. BigQuery, GoogleSQL, Avro schema), as a json string. An entry might not have any schema
       attached to it. See
       https://cloud.google.com/data-catalog/docs/reference/rest/v1/projects.locations.entryGroups.entries#schema
       for what fields this schema can contain.
-    state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-    custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-    validation:
-      function: validation.StringIsJSON
   - name: type
     type: Enum
     description: |

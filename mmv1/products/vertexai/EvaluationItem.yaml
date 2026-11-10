@@ -91,14 +91,9 @@ properties:
     description: |
       Labels for the EvaluationItem.
   - name: metadata
-    type: String
+    type: JsonValue
     description: |
       User-defined metadata for this evaluation item as a JSON string.
-    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-    custom_expand: templates/terraform/custom_expand/json_value.tmpl
-    validation:
-      function: validation.StringIsJSON
   - name: gcsUri
     type: String
     description: |
@@ -132,7 +127,7 @@ properties:
               - evaluation_request.0.prompt.0.agent_data
               - evaluation_request.0.prompt.0.user_scenario
           - name: value
-            type: String
+            type: JsonValue
             description: |
               Fields and values that can be used to populate the prompt template, as a JSON string.
               At most one of `text`, `value`, `prompt_template_data`, `agent_data`, or `user_scenario` can be set.
@@ -141,11 +136,6 @@ properties:
               - evaluation_request.0.prompt.0.prompt_template_data
               - evaluation_request.0.prompt.0.agent_data
               - evaluation_request.0.prompt.0.user_scenario
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-            custom_expand: templates/terraform/custom_expand/json_value.tmpl
-            validation:
-              function: validation.StringIsJSON
           - name: promptTemplateData
             type: NestedObject
             description: |
@@ -158,17 +148,12 @@ properties:
               - evaluation_request.0.prompt.0.user_scenario
             properties:
               - name: values
-                type: String
+                type: JsonValue
                 description: |
                   The values for fields in the prompt template, as a JSON string mapping
                   field names to Content objects.
-                state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-                validation:
-                  function: validation.StringIsJSON
           - name: agentData
-            type: String
+            type: JsonValue
             description: |
               Represents the complete execution trace of a multi-turn conversation,
               which can involve single or multiple agents, as a JSON string. This
@@ -179,11 +164,6 @@ properties:
               - evaluation_request.0.prompt.0.value
               - evaluation_request.0.prompt.0.prompt_template_data
               - evaluation_request.0.prompt.0.user_scenario
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-            custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-            validation:
-              function: validation.StringIsJSON
           - name: userScenario
             type: NestedObject
             description: |
@@ -226,20 +206,15 @@ properties:
               - evaluation_request.0.golden_response.0.value
               - evaluation_request.0.golden_response.0.agent_data
           - name: value
-            type: String
+            type: JsonValue
             description: |
               Fields and values that can be used to populate the response template, as a JSON string.
               At most one of `text`, `value`, or `agent_data` can be set.
             conflicts:
               - evaluation_request.0.golden_response.0.text
               - evaluation_request.0.golden_response.0.agent_data
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-            custom_expand: templates/terraform/custom_expand/json_value.tmpl
-            validation:
-              function: validation.StringIsJSON
           - name: agentData
-            type: String
+            type: JsonValue
             description: |
               Represents the complete execution trace of a multi-turn conversation,
               which can involve single or multiple agents, as a JSON string. This
@@ -249,11 +224,6 @@ properties:
             conflicts:
               - evaluation_request.0.golden_response.0.text
               - evaluation_request.0.golden_response.0.value
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-            custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-            validation:
-              function: validation.StringIsJSON
           - name: error
             type: NestedObject
             description: |
@@ -286,28 +256,18 @@ properties:
                 Text response.
                 At most one of `text`, `value`, or `agent_data` can be set.
             - name: value
-              type: String
+              type: JsonValue
               description: |
                 Fields and values that can be used to populate the response template, as a JSON string.
                 At most one of `text`, `value`, or `agent_data` can be set.
-              state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-              custom_expand: templates/terraform/custom_expand/json_value.tmpl
-              validation:
-                function: validation.StringIsJSON
             - name: agentData
-              type: String
+              type: JsonValue
               description: |
                 Represents the complete execution trace of a multi-turn conversation,
                 which can involve single or multiple agents, as a JSON string. This
                 field is used to provide the full output of an agent's run, including
                 all turns and events, for direct evaluation.
                 At most one of `text`, `value`, or `agent_data` can be set.
-              state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-              custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-              validation:
-                function: validation.StringIsJSON
             - name: error
               type: NestedObject
               description: |
@@ -391,15 +351,13 @@ properties:
         output: true
         description: The metric that was evaluated.
       - name: metadata
-        type: String
+        type: JsonValue
         output: true
         description: Metadata about the evaluation result, as a JSON string.
-        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
       - name: request
-        type: String
+        type: JsonValue
         output: true
         description: The request that was evaluated, as a JSON string.
-        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
       - name: candidateResults
         type: Array
         output: true
@@ -424,10 +382,9 @@ properties:
               output: true
               description: The explanation for the metric.
             - name: additionalResults
-              type: String
+              type: JsonValue
               output: true
               description: Additional results for the metric, as a JSON string.
-              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
             - name: error
               type: NestedObject
               output: true
@@ -457,10 +414,9 @@ properties:
                     output: true
                     description: Human-readable reasoning for the verdict.
                   - name: evaluatedRubric
-                    type: String
+                    type: JsonValue
                     output: true
                     description: The full rubric definition that was evaluated, as a JSON string.
-                    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
   - name: error
     type: NestedObject
     description: |
