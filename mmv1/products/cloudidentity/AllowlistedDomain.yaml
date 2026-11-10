@@ -45,12 +45,11 @@ import_format:
 # API rejects a mutation while another one is still pending.
 mutex: 'cloudidentity/allowlistedDomains'
 async:
-  type: PollAsync
+  operation:
+    base_url: '{{op_id}}'
   actions: [create, delete]
-  check_response_func_existence: transport_tpg.PollCheckForExistence
-  check_response_func_absence: transport_tpg.PollCheckForAbsence
-  suppress_error: false
-  target_occurrences: 1
+  result:
+    resource_inside_response: true
 # This resource has unusual authentication requirements that mean we can't currently test it or sweep it in CI
 exclude_sweeper: true
 custom_code:
