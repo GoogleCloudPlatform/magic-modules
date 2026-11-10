@@ -81,14 +81,59 @@ properties:
     description: 'Optional. A description of the policy.'
   - name: 'applyConditions'
     type: 'Array'
-    description: 'Optional. Conditions under which this policy applies.'
+    description: |
+      Optional. Conditions under which this policy applies. A condition uses
+      the `criticality` and `environment` parameters of the application
+      template.
     item_type:
-      type: 'String'
+      type: 'NestedObject'
+      properties:
+        - name: 'conditionKey'
+          type: 'String'
+          description: 'The key of the parameter for the condition.'
+          required: true
+        - name: 'conditionValue'
+          type: 'String'
+          description: 'The value of the parameter for the condition.'
+          required: true
   - name: 'cloudControlConfigs'
     type: 'Array'
-    description: 'Optional. Cloud control configs for the policy.'
+    description: |
+      Optional. Input only. Parameter values for the cloud controls of the
+      policy's framework, grouped by cloud control. The API only honors them
+      when framework parameter support is enabled for the project, and then
+      validates them with Compliance Manager. The API doesn't return them, so
+      Terraform can't detect drift on this field.
+    ignore_read: true
     item_type:
-      type: 'String'
+      type: 'NestedObject'
+      properties:
+        - name: 'cloudControl'
+          type: 'String'
+          description: |
+            The resource name of the cloud control that these parameter values
+            apply to, in the format
+            `organizations/{organization}/locations/{location}/cloudControls/{cloud_control}`
+            or `projects/{project_number}/locations/{location}/cloudControls/{cloud_control}`.
+          required: true
+        - name: 'parameters'
+          type: 'Array'
+          description: 'Parameter values for this cloud control.'
+          item_type:
+            type: 'NestedObject'
+            properties:
+              - name: 'key'
+                type: 'String'
+                description: 'The key of the parameter.'
+                required: true
+              - name: 'value'
+                type: 'String'
+                description: 'The value of the parameter, as a JSON-encoded string. Use `jsonencode()` to set it.'
+                send_empty_value: true
+                state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                validation:
+                  function: 'validation.StringIsJSON'
   - name: 'createTime'
     type: 'Time'
     description: 'Output only. The time the policy was created.'
