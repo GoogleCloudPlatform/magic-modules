@@ -1,29 +1,25 @@
 config := meta.(*transport_tpg.Config)
 
-if d.Id() == "" {
-	if err := tpgresource.ParseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
-		return nil, err
+if err := tpgresource.ParseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
+	return nil, err
+}
+
+name := d.Get("name").(string)
+
+if !strings.HasPrefix(name, "policies/") {
+	name = fmt.Sprintf("policies/%s", name)
+}
+
+if err := d.Set("name", name); err != nil {
+	return nil, fmt.Errorf("Error setting name: %w", err)
+}
+
+if identity, err := d.Identity(); err == nil && identity != nil {
+	if err := identity.Set("name", name); err != nil {
+		return nil, fmt.Errorf("Error setting identity name: %w", err)
 	}
 }
 
-// 1. Get the ID the user typed (e.g., "policies/12345" or just "12345")
-id := d.Id()
+d.SetId(name)
 
-// 2. Normalize: Ensure the ID strictly starts with "policies/"
-// This protects against users (or tests) who might import just the number.
-if !strings.HasPrefix(id, "policies/") {
-	id = fmt.Sprintf("policies/%s", id)
-}
-
-// 3. Set the corrected ID back into the Terraform state
-d.SetId(id)
-
-// 4. The 'Read' function uses name to build the URL. 
-// If we don't set this, the URL will be empty.
-if err := d.Set("name", id); err != nil {
-        return nil, fmt.Errorf("Error setting name: %s", err)
-}
-
-// 5. Return success. Terraform will now call Read() automatically.
-// Since d.Id() is now "policies/12345", the Read URL will be correct.
 return []*schema.ResourceData{d}, nil
