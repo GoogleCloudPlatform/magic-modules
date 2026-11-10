@@ -7,6 +7,11 @@ resource "google_design_center_connection" "example" {
   connection_id             = "{{index $.ResourceIdVars "connection_id"}}"
   destination_component_uri = "{{index $.Vars "destination_component_uri"}}"
 
+  source_component_parameters {
+    key   = "service_account_project_roles"
+    value = jsonencode(["roles/cloudsql.client"])
+  }
+
   destination_component_parameters {
     key = "iam_users"
     value = jsonencode([
