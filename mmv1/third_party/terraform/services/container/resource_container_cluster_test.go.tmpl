@@ -21728,6 +21728,20 @@ func TestAccContainerCluster_kubeletConfigReservedSystemCpus(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
 			},
 			{
+				Config: testAccContainerCluster_kubeletConfigReservedSystemCpus(cluster, "0,1,2", networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.with_reserved_system_cpus", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_container_cluster.with_reserved_system_cpus",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
+			},
+			{
 				Config: testAccContainerCluster_kubeletConfigReservedSystemCpusOmitted(cluster, networkName, subnetworkName),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{

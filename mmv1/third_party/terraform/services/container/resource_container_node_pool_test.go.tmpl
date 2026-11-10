@@ -8605,6 +8605,19 @@ func TestAccContainerNodePool_kubeletConfigReservedSystemCpus(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
+				Config: testAccContainerNodePool_kubeletConfigReservedSystemCpus(cluster, np, "0,1,2", networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_node_pool.with_reserved_system_cpus", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_container_node_pool.with_reserved_system_cpus",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: testAccContainerNodePool_kubeletConfigReservedSystemCpusOmitted(cluster, np, networkName, subnetworkName),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
