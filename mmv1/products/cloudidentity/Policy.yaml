@@ -49,6 +49,7 @@ samples:
     skip_test: Acceptance test requires Google Workspace admin privileges not held by the CI service account
     steps:
       - name: cloudidentity_policy_basic
+      - name: cloudidentity_policy_basic_update
 properties:
   - name: name
     description: |
