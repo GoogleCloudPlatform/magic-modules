@@ -25,6 +25,12 @@ description: |
   in the provider configuration. Otherwise the Cloud Identity API will return a 403 error.
   Your account must have the `serviceusage.services.use` permission on the
   `billing_project` you defined.
+docs:
+  warning: |
+    If the customer has Multi-Party Approval (MPA) enabled for sensitive actions,
+    creating or updating a profile returns an error (`awaiting-multi-party-approval`) while
+    the change awaits second-admin approval in Google Admin Console. Once approved,
+    a newly created profile can be imported and an updated profile can be refreshed.
 references:
   guides:
     Assign SSO profiles: https://cloud.google.com/identity/docs/how-to/assign-sso-profiles
@@ -35,7 +41,6 @@ self_link: 'inboundSamlSsoProfiles/{{inbound_saml_sso_profile_id}}'
 create_url: inboundSamlSsoProfiles
 update_url: 'inboundSamlSsoProfiles/{{inbound_saml_sso_profile_id}}'
 update_verb: PATCH
-update_mask: true
 delete_url: 'inboundSamlSsoProfiles/{{inbound_saml_sso_profile_id}}'
 id_format: 'inboundSamlSsoProfiles/{{inbound_saml_sso_profile_id}}'
 import_format:
@@ -45,14 +50,12 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 exclude_sweeper: true
-async:
-  type: OpAsync
-  operation:
-    base_url: '{{op_id}}'
-  actions: [create, delete, update]
-  result:
-    resource_inside_response: true
-autogen_async: true
+custom_code:
+  constants: templates/terraform/constants/cloud_identity_inbound_saml_sso_profile.go.tmpl
+  post_create: templates/terraform/post_create/cloud_identity_inbound_saml_sso_profile.go.tmpl
+  pre_update: templates/terraform/pre_update/cloud_identity_inbound_saml_sso_profile.go.tmpl
+  post_update: templates/terraform/post_update/cloud_identity_inbound_saml_sso_profile.go.tmpl
+  post_delete: templates/terraform/post_delete/cloud_identity_inbound_saml_sso_profile.go.tmpl
 samples:
   - name: cloud_identity_inbound_saml_sso_profile_basic
     primary_resource_id: saml_profile

@@ -1,0 +1,21 @@
+// Build updateMask here instead of setting update_mask: true in YAML so that
+// SendRequest is not wrapped in `if len(updateMask) > 0 { ... }`, keeping `res`
+// in scope for post_update to check the returned Operation.
+updateMask := []string{}
+
+if d.HasChange("display_name") {
+	updateMask = append(updateMask, "displayName")
+}
+if d.HasChange("idp_config") {
+	updateMask = append(updateMask, "idpConfig")
+}
+
+if len(updateMask) == 0 {
+	log.Printf("[DEBUG] No changes for InboundSamlSsoProfile %q", d.Id())
+	return resourceCloudIdentityInboundSamlSsoProfileRead(d, meta)
+}
+
+url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+if err != nil {
+	return err
+}
