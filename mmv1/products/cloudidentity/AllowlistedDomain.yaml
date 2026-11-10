@@ -52,8 +52,6 @@ async:
     resource_inside_response: true
 # This resource has unusual authentication requirements that mean we can't currently test it or sweep it in CI
 exclude_sweeper: true
-custom_code:
-  post_create: templates/terraform/post_create/cloud_identity_allowlisted_domain.go.tmpl
 samples:
   - name: cloud_identity_allowlisted_domain_basic
     primary_resource_id: allowlisted_domain
