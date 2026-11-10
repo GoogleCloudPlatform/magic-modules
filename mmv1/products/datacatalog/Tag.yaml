@@ -49,6 +49,7 @@ custom_code:
 samples:
   - name: data_catalog_entry_tag_basic
     primary_resource_id: basic_tag
+    skip_test: 'Data Catalog has been deprecated and shut down'
     steps:
       - name: data_catalog_entry_tag_basic
         resource_id_vars:
@@ -62,6 +63,7 @@ samples:
           force_delete: "true"
   - name: data_catalog_entry_group_tag
     primary_resource_id: entry_group_tag
+    skip_test: 'Data Catalog has been deprecated and shut down'
     steps:
       - name: data_catalog_entry_group_tag
         resource_id_vars:
@@ -78,6 +80,7 @@ samples:
     primary_resource_id: basic_tag
     # Multiple fine-grained resources
     skip_vcr: true
+    skip_test: 'Data Catalog has been deprecated and shut down'
     steps:
       - name: data_catalog_entry_tag_full
         resource_id_vars:
@@ -93,6 +96,7 @@ samples:
     primary_resource_id: basic_tag
     # omitting doc as it is almost identical to the case of data_catalog_entry_tag_basic
     exclude_basic_doc: true
+    skip_test: 'Data Catalog has been deprecated and shut down'
     steps:
       - name: data_catalog_entry_tag_false
         resource_id_vars:
