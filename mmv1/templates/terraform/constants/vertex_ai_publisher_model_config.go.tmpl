@@ -145,7 +145,6 @@ func vertexAIPublisherModelConfigSet(d *schema.ResourceData, config *transport_t
 		UserAgent: userAgent,
 		Body:      body,
 		Timeout:   timeout,
-		Headers:   make(http.Header),
 	})
 	if err != nil {
 		if transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
