@@ -791,11 +791,11 @@ func TestAccComputePerInstanceConfig_allowedActions(t *testing.T) {
 func TestAccComputePerInstanceConfig_allowedActionsValidation(t *testing.T) {
 	t.Parallel()
 
-	suffix := acctest.RandString(t, 10)
+	suffix := "val"
 	context := map[string]interface{}{
 		"igm_name":      fmt.Sprintf("tf-test-igm-%s", suffix),
 		"random_suffix": suffix,
-		"config_name":   fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10)),
+		"config_name":   "tf-test-instance-val",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

@@ -2650,8 +2650,8 @@ func TestAccComputeInstanceGroupManager_updatePolicyAllowedActions(t *testing.T)
 func TestAccComputeInstanceGroupManager_updatePolicyAllowedActionsValidation(t *testing.T) {
 	t.Parallel()
 
-	igmName := fmt.Sprintf("tf-test-igm-%s", acctest.RandString(t, 10))
-	instanceTemplateName := fmt.Sprintf("tf-test-it-%s", acctest.RandString(t, 10))
+	igmName := "tf-test-igm-val"
+	instanceTemplateName := "tf-test-it-val"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },

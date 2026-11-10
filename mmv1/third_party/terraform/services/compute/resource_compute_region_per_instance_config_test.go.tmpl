@@ -747,11 +747,11 @@ func TestAccComputeRegionPerInstanceConfig_allowedActions(t *testing.T) {
 func TestAccComputeRegionPerInstanceConfig_allowedActionsValidation(t *testing.T) {
 	t.Parallel()
 
-	suffix := acctest.RandString(t, 10)
+	suffix := "val"
 	context := map[string]interface{}{
 		"rigm_name":     fmt.Sprintf("tf-test-rigm-%s", suffix),
 		"random_suffix": suffix,
-		"config_name":   fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10)),
+		"config_name":   "tf-test-instance-val",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
