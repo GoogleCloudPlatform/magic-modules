@@ -7,10 +7,10 @@ provider "google" {
 }
 
 resource "google_cloud_identity_policy" "{{$.PrimaryResourceId}}" {
-  customer = "customers/C01234567"
+  customer = "customers/{{index $.TestEnvVars "cust_id"}}"
 
   policy_query {
-    org_unit = "orgUnits/03abcxyz"
+    org_unit = "orgUnits/{{index $.TestEnvVars "org_unit_id"}}"
   }
 
   setting {
