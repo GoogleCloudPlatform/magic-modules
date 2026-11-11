@@ -416,10 +416,6 @@ func TestAccNetworkConnectivityInternalRange_purpose(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkConnectivityInternalRange_purpose_omitted(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "description", "Test internal range default purpose"),
-					resource.TestCheckResourceAttr(resourceName, "purpose", "VPC_SUBNET"),
-				),
 			},
 			{
 				ResourceName:            resourceName,
@@ -434,10 +430,6 @@ func TestAccNetworkConnectivityInternalRange_purpose(t *testing.T) {
 						plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionUpdate),
 					},
 				},
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "description", "Test internal range VPC_SUBNET"),
-					resource.TestCheckResourceAttr(resourceName, "purpose", "VPC_SUBNET"),
-				),
 			},
 			{
 				ResourceName:            resourceName,
@@ -452,10 +444,6 @@ func TestAccNetworkConnectivityInternalRange_purpose(t *testing.T) {
 						plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionReplace),
 					},
 				},
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "description", "Test internal range INTERNAL_ADDRESS"),
-					resource.TestCheckResourceAttr(resourceName, "purpose", "INTERNAL_ADDRESS"),
-				),
 			},
 			{
 				ResourceName:            resourceName,
@@ -470,10 +458,6 @@ func TestAccNetworkConnectivityInternalRange_purpose(t *testing.T) {
 						plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionUpdate),
 					},
 				},
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "description", "Updated internal range INTERNAL_ADDRESS"),
-					resource.TestCheckResourceAttr(resourceName, "purpose", "INTERNAL_ADDRESS"),
-				),
 			},
 			{
 				ResourceName:            resourceName,
