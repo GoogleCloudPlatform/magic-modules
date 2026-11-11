@@ -127,6 +127,35 @@ properties:
               that the user hasn't heard the full preceding agent message.
               This should not be used in scenarios where agent responses are displayed
               visually.
+      - name: customVoiceSamples
+        type: Array
+        description: |-
+          Configures custom voice samples for voice cloning.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: consentAudioGcsUri
+              type: String
+              description: |-
+                Consent audio for voice cloning.
+            - name: name
+              type: String
+              description: |-
+                The user-defined name for the custom voice sample.
+            - name: previewText
+              type: String
+              description: |-
+                Text for synthesizing preview audio for custom voice.
+            - name: voiceInstruction
+              type: String
+              description: |-
+                Natural language instructions for voice style, tone, pacing, or
+                pronunciation.
+            - name: voiceSampleGcsUri
+              type: String
+              description: |-
+                The Cloud Storage URI to the audio sample for voice cloning. The
+                audio sample should be a mono-channel, 24kHz WAV file.
       - name: inactivityTimeout
         type: String
         description: |-
