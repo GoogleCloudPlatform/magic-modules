@@ -53,11 +53,17 @@ samples:
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
         role: "roles/logging.configWriter"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     steps:
       - name: 'vertex_ai_agent_anomaly_detection_scope_basic'
         resource_id_vars:
           scope_id: 'agent-anomaly-detection-scope'
           log_bucket_id: 'aad-log-bucket'
+        vars:
+          kms_key_name: 'projects/keys-project/locations/us/keyRings/key-ring/cryptoKeys/crypto-key'
+        test_vars_overrides:
+          kms_key_name: 'kms.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
 parameters:
   - name: 'region'
     type: String
@@ -109,3 +115,28 @@ properties:
     description: |-
       The lifecycle state of the scope.
     output: true
+  - name: 'autoEnroll'
+    type: Boolean
+    description: |-
+      When true, newly discovered agents that share log and observability
+      buckets with this scope are automatically enrolled as ACTIVE monitored
+      agents, up to the project's monitored agent quota. When false, newly
+      discovered agents are added as DISABLED monitored agents and must be
+      enabled explicitly.
+    immutable: true
+  - name: 'encryptionSpec'
+    type: NestedObject
+    description: |-
+      Customer-managed encryption key spec for the scope. If set, this scope
+      and all sub-resources are secured by this key. The key must be a Cloud
+      KMS key co-located with the scope location (for example, `us` for a `us`
+      scope, `europe` for an `eu` scope, or matching single region).
+    immutable: true
+    properties:
+      - name: 'kmsKeyName'
+        type: String
+        description: |-
+          Resource name of the Cloud KMS key used to protect the resource.
+          Format: projects/{{project}}/locations/{{location}}/keyRings/{{key_ring}}/cryptoKeys/{{crypto_key}}.
+        required: true
+        immutable: true
