@@ -103,11 +103,9 @@ var IdentityUserEnvVars = []string{
 	"GOOGLE_IDENTITY_USER",
 }
 
-// This value is the obfuscated ID of an organizational unit within the GOOGLE_ORG_DOMAIN workspace,
-// without the "orgUnits/" prefix (for example "03abcxyz" as returned in policyQuery.orgUnit
-// or the Admin SDK Directory orgunits.list API).
-// This must be the obfuscated org unit ID, not the org unit display name or domain name shown
-// in the Admin Console UI. Note that detector policies always resolve to the customer's root org unit ID.
+// This value is the obfuscated ID of an organizational unit within the GOOGLE_ORG_DOMAIN
+// workspace, without the "orgUnits/" prefix (for example "03abcxyz"). It can be obtained from
+// the orgUnitId returned by the Admin SDK Directory API, with the "id:" prefix removed.
 var OrgUnitIdEnvVars = []string{
 	"GOOGLE_ORG_UNIT_ID",
 }
