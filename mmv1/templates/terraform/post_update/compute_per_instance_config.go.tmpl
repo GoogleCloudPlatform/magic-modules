@@ -8,8 +8,8 @@ obj = make(map[string]interface{})
 obj["instances"] = []string{instanceName}
 
 {{- if ne $.TargetVersionName "ga" }}
-if allowedActions, ok := d.GetOk("allowed_actions"); ok && len(allowedActions.([]interface{})) > 0 {
-	obj["allowedActions"] = allowedActions.([]interface{})
+if allowedActions, ok := d.GetOk("allowed_actions"); ok && allowedActions.(*schema.Set).Len() > 0 {
+	obj["allowedActions"] = allowedActions.(*schema.Set).List()
 } else {
 	minAction := d.Get("minimal_action")
 	if minAction == "" {

@@ -85,8 +85,18 @@ virtual_fields:
       * REFRESH
       * NONE
     type: 'Array'
+    is_set: true
+    min_size: 1
     item_type:
-      type: 'String'
+      type: 'Enum'
+      description: 'The allowed action to perform on the instance during an update.'
+      enum_values:
+        - 'REPLACE'
+        - 'RESTART'
+        - 'RESTART_IN_PLACE'
+        - 'REFRESH'
+        - 'NONE'
+      exclude_docs_values: true
     min_version: 'beta'
     conflicts:
       - minimal_action

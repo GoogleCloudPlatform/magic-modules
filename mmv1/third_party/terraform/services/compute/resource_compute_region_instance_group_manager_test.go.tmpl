@@ -3112,9 +3112,9 @@ func TestAccComputeRegionInstanceGroupManager_updatePolicyAllowedActions(t *test
 				Config: testAccComputeRegionInstanceGroupManager_updatePolicyAllowedActionsStart(igmName, instanceTemplateName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.#", "3"),
-					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.0", "REFRESH"),
-					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.1", "RESTART_IN_PLACE"),
-					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.2", "RESTART"),
+					resource.TestCheckTypeSetElemAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.*", "REFRESH"),
+					resource.TestCheckTypeSetElemAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.*", "RESTART_IN_PLACE"),
+					resource.TestCheckTypeSetElemAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.*", "RESTART"),
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.minimal_action", ""),
 				),
 			},
@@ -3128,8 +3128,8 @@ func TestAccComputeRegionInstanceGroupManager_updatePolicyAllowedActions(t *test
 				Config: testAccComputeRegionInstanceGroupManager_updatePolicyAllowedActionsUpdate(igmName, instanceTemplateName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.#", "2"),
-					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.0", "REFRESH"),
-					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.1", "REPLACE"),
+					resource.TestCheckTypeSetElemAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.*", "REFRESH"),
+					resource.TestCheckTypeSetElemAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.*", "REPLACE"),
 				),
 			},
 			{
@@ -3144,6 +3144,21 @@ func TestAccComputeRegionInstanceGroupManager_updatePolicyAllowedActions(t *test
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.#", "0"),
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.minimal_action", "RESTART"),
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.most_disruptive_allowed_action", "REPLACE"),
+				),
+			},
+			{
+				ResourceName:            "google_compute_region_instance_group_manager.igm",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
+			},
+			{
+				Config: testAccComputeRegionInstanceGroupManager_updatePolicyAllowedActionsUpdate(igmName, instanceTemplateName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.#", "2"),
+					resource.TestCheckTypeSetElemAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.*", "REFRESH"),
+					resource.TestCheckTypeSetElemAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.*", "REPLACE"),
+					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.minimal_action", ""),
 				),
 			},
 			{

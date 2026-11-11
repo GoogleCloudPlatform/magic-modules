@@ -287,12 +287,14 @@ When set to "FORCE", deleting the resource is allowed, and graceful shutdown is 
 					Schema: map[string]*schema.Schema{
 {{- if ne $.TargetVersionName "ga" }}
 						"allowed_actions": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Optional: true,
+							MinItems: 1,
 							Elem: &schema.Schema{
 								Type:         schema.TypeString,
 								ValidateFunc: validation.StringInSlice([]string{"NONE", "REFRESH", "RESTART_IN_PLACE", "RESTART", "REPLACE"}, false),
 							},
+							Set: schema.HashString,
 							ExactlyOneOf:  []string{"update_policy.0.minimal_action", "update_policy.0.allowed_actions"},
 							ConflictsWith: []string{"update_policy.0.minimal_action", "update_policy.0.most_disruptive_allowed_action"},
 							Description:   `Specifies the allowed actions list for this update. Valid values are: "NONE", "REFRESH", "RESTART_IN_PLACE", "RESTART", "REPLACE". allowed_actions is the only way to request RESTART_IN_PLACE. Conflicts with minimal_action and most_disruptive_allowed_action.`,
@@ -1940,8 +1942,8 @@ func expandUpdatePolicy(configured []interface{}) map[string]interface{} {
 		data := raw.(map[string]interface{})
 
 {{- if ne $.TargetVersionName "ga" }}
-		if allowedActions, ok := data["allowed_actions"].([]interface{}); ok && len(allowedActions) > 0 {
-			updatePolicy["allowedActions"] = allowedActions
+		if v, ok := data["allowed_actions"]; ok && v.(*schema.Set).Len() > 0 {
+			updatePolicy["allowedActions"] = v.(*schema.Set).List()
 			updatePolicy["minimalAction"] = nil
 			updatePolicy["mostDisruptiveAllowedAction"] = nil
 		} else {
@@ -2176,7 +2178,7 @@ func flattenUpdatePolicy(raw interface{}) []map[string]interface{} {
 {{- if ne $.TargetVersionName "ga" }}
 		up["min_ready_sec"] = int64FromInterface(updatePolicy["minReadySec"])
 		if allowedActions := sliceFromInterface(updatePolicy["allowedActions"]); len(allowedActions) > 0 {
-			up["allowed_actions"] = allowedActions
+			up["allowed_actions"] = schema.NewSet(schema.HashString, allowedActions)
 			up["minimal_action"] = ""
 			up["most_disruptive_allowed_action"] = ""
 		} else {
