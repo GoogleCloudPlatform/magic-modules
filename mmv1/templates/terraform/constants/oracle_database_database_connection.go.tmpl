@@ -1,18 +1,12 @@
 {{- if not $.ProductMetadata.IsTgcCompiler }}
 // Retry when the Oracle Database API returns a transient 400 FAILED_PRECONDITION
 // DATABASE_NETWORK_UNREACHABLE timeout while validating connectivity over PSC-I.
-func IsOracleDatabaseConnectionNetworkUnreachableError(maxAttempts int) transport_tpg.RetryErrorPredicateFunc {
-	attempts := 0
-	return func(err error) (bool, string) {
-		if gerr, ok := err.(*googleapi.Error); ok {
-			if gerr.Code == 400 && strings.Contains(gerr.Body, "DATABASE_NETWORK_UNREACHABLE") && strings.Contains(gerr.Message, "Cannot reach the database host or network: the connection attempt timed out") {
-				attempts++
-				if attempts <= maxAttempts {
-					return true, "Waiting for Oracle database connection to be reachable"
-				}
-			}
+func IsOracleDatabaseConnectionNetworkUnreachableError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 400 && strings.Contains(gerr.Body, "DATABASE_NETWORK_UNREACHABLE") && strings.Contains(gerr.Message, "Cannot reach the database host or network: the connection attempt timed out") {
+			return true, "Waiting for Oracle database connection to be reachable"
 		}
-		return false, ""
 	}
+	return false, ""
 }
 {{- end }}

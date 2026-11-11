@@ -76,33 +76,10 @@ func TestIsOracleDatabaseConnectionNetworkUnreachableError(t *testing.T) {
 
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
-			predicate := IsOracleDatabaseConnectionNetworkUnreachableError(5)
-			isRetryable, reason := predicate(tc.err)
+			isRetryable, reason := IsOracleDatabaseConnectionNetworkUnreachableError(tc.err)
 			if isRetryable != tc.expected || reason != tc.expectedReason {
-				t.Errorf("IsOracleDatabaseConnectionNetworkUnreachableError(5)(%v) = (%v, %q), want (%v, %q)", tc.err, isRetryable, reason, tc.expected, tc.expectedReason)
+				t.Errorf("IsOracleDatabaseConnectionNetworkUnreachableError(%v) = (%v, %q), want (%v, %q)", tc.err, isRetryable, reason, tc.expected, tc.expectedReason)
 			}
 		})
 	}
-
-	t.Run("exhaustion after maxAttempts", func(t *testing.T) {
-		predicate := IsOracleDatabaseConnectionNetworkUnreachableError(3)
-		for i := 1; i <= 3; i++ {
-			isRetryable, reason := predicate(retryableErr)
-			if !isRetryable || reason != expectedReason {
-				t.Fatalf("attempt %d: got (%v, %q), want (true, %q)", i, isRetryable, reason, expectedReason)
-			}
-		}
-		isRetryable, reason := predicate(retryableErr)
-		if isRetryable || reason != "" {
-			t.Fatalf("attempt 4: got (%v, %q), want (false, \"\")", isRetryable, reason)
-		}
-	})
-
-	t.Run("maxAttempts <= 0", func(t *testing.T) {
-		predicate := IsOracleDatabaseConnectionNetworkUnreachableError(0)
-		isRetryable, reason := predicate(retryableErr)
-		if isRetryable || reason != "" {
-			t.Fatalf("attempt 1 with maxAttempts 0: got (%v, %q), want (false, \"\")", isRetryable, reason)
-		}
-	})
 }

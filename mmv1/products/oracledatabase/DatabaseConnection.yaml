@@ -49,7 +49,7 @@ async:
 autogen_status: RGF0YWJhc2VDb25uZWN0aW9uQXV0b2dlblYyQWdlbnQ=
 autogen_async: true
 error_retry_predicates:
-  - IsOracleDatabaseConnectionNetworkUnreachableError(5)
+  - IsOracleDatabaseConnectionNetworkUnreachableError
 custom_code:
   constants: templates/terraform/constants/oracle_database_database_connection.go.tmpl
 
@@ -139,7 +139,8 @@ parameters:
   - name: location
     type: String
     required: true
-    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    description: |-
+      Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
     immutable: true
     url_param_only: true
   - name: databaseConnectionId
@@ -162,19 +163,23 @@ properties:
     immutable: true
   - name: createTime
     type: String
-    description: The create time of the resource.
+    description: |-
+      The create time of the resource.
     output: true
   - name: displayName
     type: String
-    description: User-friendly display name for the connection.
+    description: |-
+      User-friendly display name for the connection.
     immutable: true
     default_from_api: true
   - name: labels
     type: KeyValueLabels
-    description: 'Labels as key-value pairs to organize the resource.'
+    description: |-
+      Labels as key-value pairs to organize the resource.
   - name: lifecycleDetails
     type: String
-    description: Additional information about the current state of the connection.
+    description: |-
+      Additional information about the current state of the connection.
     output: true
   - name: name
     type: String
@@ -208,11 +213,13 @@ properties:
     output: true
   - name: updateTime
     type: String
-    description: The update time of the resource.
+    description: |-
+      The update time of the resource.
     output: true
   - name: username
     type: String
-    description: The default database username to use for connections.
+    description: |-
+      The default database username to use for connections.
     immutable: true
   - name: walletSecretVersion
     type: String
