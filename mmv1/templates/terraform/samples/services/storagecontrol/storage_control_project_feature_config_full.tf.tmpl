@@ -1,5 +1,4 @@
 resource "google_storage_bucket" "bucket" {
-  provider                    = google-beta
   name                        = "{{index $.ResourceIdVars "bucket_name"}}"
   location                    = "US"
   uniform_bucket_level_access = true
@@ -7,7 +6,6 @@ resource "google_storage_bucket" "bucket" {
 }
 
 resource "google_storage_control_project_feature_config" "{{$.PrimaryResourceId}}" {
-  provider          = google-beta
   feature_config_id = "{{index $.ResourceIdVars "feature_config_id"}}"
   description       = "Annotates images in a single bucket"
 
