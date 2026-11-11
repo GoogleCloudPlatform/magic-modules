@@ -526,7 +526,7 @@ func TestReadConfigCallExpr(t *testing.T) {
 			if !ok {
 				t.Fatalf("%s is not a call expression", tc.expr)
 			}
-			configStr, err := readConfigCallExpr(callExpr, map[string]*ast.FuncDecl{}, map[string]*ast.BasicLit{})
+			configStr, err := readConfigCallExpr(callExpr, map[string]*ast.FuncDecl{}, map[string]*ast.BasicLit{}, nil)
 			if tc.wantErr != "" {
 				if err == nil {
 					t.Errorf("expected an error containing %q reading %s, read %q", tc.wantErr, tc.expr, configStr)
@@ -619,6 +619,23 @@ func TestAccContextMapSteps(t *testing.T) {
 		"random_suffix":  randomSuffix,
 	}
 
+	context_2 := map[string]interface{}{
+		"str_field":      nil,
+		"int_field":      nil,
+		"bool_field":     "null",
+		"optional_block": "",
+		"random_suffix":  randomSuffix,
+	}
+
+	// All values are non-literal; callee parameter "context" must not inherit
+	// Step 0's local "context" variable from the caller.
+	context_3 := map[string]interface{}{
+		"str_field":     randomSuffix,
+		"int_field":     randomSuffix,
+		"bool_field":    randomSuffix,
+		"random_suffix": randomSuffix,
+	}
+
 	acctest.VcrTest(t, resource.TestCase{
 		Steps: []resource.TestStep{
 			{
@@ -626,6 +643,12 @@ func TestAccContextMapSteps(t *testing.T) {
 			},
 			{
 				Config: testAccContextMapConfig(context_1),
+			},
+			{
+				Config: testAccContextMapConfig(context_2),
+			},
+			{
+				Config: testAccContextMapConfig(context_3),
 			},
 		},
 	})
@@ -636,6 +659,7 @@ func testAccContextMapConfig(context map[string]interface{}) string {
 resource "my_resource" "primary" {
   name       = "tf-test-%{random_suffix}"
   str_field  = "%{str_field}"
+  prefixed   = "pfx-%{str_field}"
   int_field  = %{int_field}
   bool_field = %{bool_field}
   %{optional_block}
@@ -650,12 +674,13 @@ resource "my_resource" "primary" {
 	if len(errs) > 0 {
 		t.Fatalf("unexpected errors reading context map test file: %v", errs)
 	}
-	if len(tests) != 1 || len(tests[0].Steps) != 2 {
-		t.Fatalf("expected 1 test with 2 steps, got %#v", tests)
+	if len(tests) != 1 || len(tests[0].Steps) != 4 {
+		t.Fatalf("expected 1 test with 4 steps, got %#v", tests)
 	}
 	expectedStep0 := Block{
 		"name":         "\"tf-test-true\"",
 		"str_field":    "\"val-one\"",
+		"prefixed":     "\"pfx-val-one\"",
 		"int_field":    "10",
 		"bool_field":   "false",
 		"nested.child": "\"c1\"",
@@ -666,11 +691,36 @@ resource "my_resource" "primary" {
 	expectedStep1 := Block{
 		"name":       "\"tf-test-true\"",
 		"str_field":  "\"val-two\"",
+		"prefixed":   "\"pfx-val-two\"",
 		"int_field":  "20",
 		"bool_field": "true",
 	}
 	if got1 := tests[0].Steps[1][ResourceBlock]["my_resource"]["primary"]; !reflect.DeepEqual(got1, expectedStep1) {
 		t.Errorf("step 1 mismatch: got %#v, expected %#v", got1, expectedStep1)
+	}
+	expectedStep2 := Block{
+		"name":       "\"tf-test-true\"",
+		"str_field":  "null",
+		"prefixed":   "\"pfx-null\"",
+		"int_field":  "null",
+		"bool_field": "null",
+	}
+	got2 := tests[0].Steps[2][ResourceBlock]["my_resource"]["primary"]
+	if !reflect.DeepEqual(got2, expectedStep2) {
+		t.Errorf("step 2 mismatch: got %#v, expected %#v", got2, expectedStep2)
+	}
+	if !IsNullValue(got2["str_field"]) || IsNullValue(got2["prefixed"]) || !IsNullValue("null\x00null") || IsNullValue("\"a\"\x00null") {
+		t.Errorf("unexpected IsNullValue results on step 2: %#v", got2)
+	}
+	expectedStep3 := Block{
+		"name":       "\"tf-test-true\"",
+		"str_field":  "\"true\"",
+		"prefixed":   "\"pfx-true\"",
+		"int_field":  "true",
+		"bool_field": "true",
+	}
+	if got3 := tests[0].Steps[3][ResourceBlock]["my_resource"]["primary"]; !reflect.DeepEqual(got3, expectedStep3) {
+		t.Errorf("step 3 mismatch: got %#v, expected %#v", got3, expectedStep3)
 	}
 }
 
