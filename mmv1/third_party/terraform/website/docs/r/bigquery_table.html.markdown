@@ -153,10 +153,11 @@ The following arguments are supported:
     specified with this top-level field.
 
 * `ignore_schema_changes` - (Optional)  A list of fields which would act non-authoritative for each column in schema.
-    **NOTE:** Right now only `dataPolicies` field is supported(others might be supported in the future). It means that any `dataPolicies` updated outside terraform will be ignored if this option is used.
+    **NOTE:** Right now only `dataPolicies` and `dataPolicyList` fields are supported (others might be supported in the future). It means that any `dataPolicies` or `dataPolicyList` updated outside terraform will be ignored if this option is used.
     If there is no policy in config for a column but there are in live state, the policy will persist.
+    To explicitly clear all policies from a column when `ignore_schema_changes` is enabled, set `"dataPolicyList": {}` (or `"dataPolicyList": {"dataPolicies": []}`) on that column in `schema`.
     If the policy in config is updated, it will override the policy in the live state. Other fields
-    like `description` for a column will keep behaving as they are(authoritatively).
+    like `description` for a column will keep behaving as they are (authoritatively).
 
 * `ignore_auto_generated_schema` - (Optional)  If true, Terraform will prevent columns added by the server(e.g. hive partitioned columns) in schema from showing diff.
 
