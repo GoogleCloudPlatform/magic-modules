@@ -42,8 +42,8 @@ var (
 	_ action.ActionWithConfigure      = &computeUrlMapInvalidateCacheAction{}
 	_ action.ActionWithValidateConfig = &computeUrlMapInvalidateCacheAction{}
 
-	computeUrlMapFullRefRegex    = regexp.MustCompile(fmt.Sprintf(tpgresource.GlobalLinkBasePattern, "urlMaps"))
-	computeUrlMapPartialRefRegex = regexp.MustCompile("^global/urlMaps/(.+)$")
+	computeUrlMapFullRefRegexp    = regexp.MustCompile(fmt.Sprintf(tpgresource.GlobalLinkBasePattern, "urlMaps"))
+	computeUrlMapPartialRefRegexp = regexp.MustCompile("^global/urlMaps/(.+)$")
 )
 
 func init() {
@@ -78,7 +78,7 @@ func (a *computeUrlMapInvalidateCacheAction) Metadata(_ context.Context, req act
 	resp.TypeName = req.ProviderTypeName + "_compute_url_map_invalidate_cache"
 }
 
-func (a *computeUrlMapInvalidateCacheAction) Schema(_ context.Context, _ action.ConfigureRequest, resp *action.ConfigureResponse) {
+func (a *computeUrlMapInvalidateCacheAction) Schema(_ context.Context, _ action.SchemaRequest, resp *action.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "Invalidates Cloud CDN cached content for a global Url map.",
 		MarkdownDescription: "Invalidates Cloud CDN cached content for a global Url map." +
@@ -135,17 +135,17 @@ func (a *computeUrlMapInvalidateCacheAction) Schema(_ context.Context, _ action.
 	}
 }
 
-func (a *computeUrlMapInvalidateCacheAction) Configure(_ context.Context, req action.ValidateRequest, resp *action.ValidateResponse) {
+func (a *computeUrlMapInvalidateCacheAction) Configure(_ context.Context, req action.ConfigureRequest, resp *action.ConfigureResponse) {
 	// ProviderData is nil when the provider has not been configured yet (e.g. during validate).
-	if req.Provider == nil {
+	if req.ProviderData == nil {
 		return
 	}
 
-	config, ok := req.Provider.Data.(*transport_tpg.Config)
+	config, ok := req.ProviderData.(*transport_tpg.Config)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"unexpected Action Configure Type",
-			fmt.Sprintf("Expected *transport_tpg.Config, got %T. please report this issue to the provider developers", req.Provider.Data),
+			"Unexpected Action Configure Type",
+			fmt.Sprintf("Expected *transport_tpg.Config, got %T. please report this issue to the provider developers.", req.ProviderData),
 		)
 		return
 	}
@@ -154,7 +154,7 @@ func (a *computeUrlMapInvalidateCacheAction) Configure(_ context.Context, req ac
 
 // ValidateConfig runs offline, so it only checks the shape of the configuration. Whether the URL map exists
 // is checked at the invoke time, because the URL map may be created in the same run that triggers this action.
-func (a *computeUrlMapInvalidateCacheAction) ValidateConfig(ctx context.Context, req action.ValidateRequest, resp *action.ValidateResponse) {
+func (a *computeUrlMapInvalidateCacheAction) ValidateConfig(ctx context.Context, req action.ValidateConfigRequest, resp *action.ValidateConfigResponse) {
 	var data computeUrlMapInvalidateCacheActionModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
@@ -167,11 +167,11 @@ func (a *computeUrlMapInvalidateCacheAction) ValidateConfig(ctx context.Context,
 		}
 	}
 
-	if data.UrlMap.Isunknown() || data.project.IsUnknown() {
+	if data.UrlMap.IsUnknown() || data.Project.IsUnknown() {
 		return
 	}
 
-	if _, err := parseComputeUrlMapRef(data.UrlMap.ValueString(), data.project.ValueString()); err != nil {
+	if _, err := parseComputeUrlMapRef(data.UrlMap.ValueString(), data.Project.ValueString()); err != nil {
 		resp.Diagnostics.AddAttributeError(path.Root("url_map"), "Invalid URL map", err.Error())
 	}
 }
@@ -200,7 +200,7 @@ func (a *computeUrlMapInvalidateCacheAction) Invoke(ctx context.Context, req act
 		return
 	}
 
-	if ref.project == "" {
+	if ref.Project == "" {
 		ref.Project = a.config.Project
 	}
 	if ref.Project == "" {
@@ -213,7 +213,7 @@ func (a *computeUrlMapInvalidateCacheAction) Invoke(ctx context.Context, req act
 
 	timeout := computeUrlMapInvalidateCacheDefaultTimeout
 	if !data.Timeout.IsNull() {
-		timeout, err := time.ParseDuration(data.Timeout.ValueString())
+		timeout, err = time.ParseDuration(data.Timeout.ValueString())
 		if err != nil {
 			resp.Diagnostics.AddAttributeError(path.Root("timeout"), "Invalid timeout", err.Error())
 			return
@@ -223,6 +223,9 @@ func (a *computeUrlMapInvalidateCacheAction) Invoke(ctx context.Context, req act
 		"path": data.Path.ValueString(),
 	}
 	if !data.Host.IsNull() {
+		body["host"] = data.Host.ValueString()
+	}
+	if !data.CacheTags.IsNull() {
 		var tags []string
 		resp.Diagnostics.Append(data.CacheTags.ElementsAs(ctx, &tags, false)...)
 		if resp.Diagnostics.HasError() {
@@ -239,8 +242,8 @@ func (a *computeUrlMapInvalidateCacheAction) Invoke(ctx context.Context, req act
 		billingProject = a.config.BillingProject
 	}
 
-	urlMapID := fmt.Sprintf("projects/%s/global/urlMaps/%s", ref.project, ref.Name)
-	invalidateURL := fmt.Sprintf("%sprojects/%s/global/urlMaps/%s/invalidateCache", transport_tpg.BaseUrl(Product, a.config), ref.project, ref.Name)
+	urlMapID := fmt.Sprintf("projects/%s/global/urlMaps/%s", ref.Project, ref.Name)
+	invalidateURL := fmt.Sprintf("%sprojects/%s/global/urlMaps/%s/invalidateCache", transport_tpg.BaseUrl(Product, a.config), ref.Project, ref.Name)
 
 	// SendRequest and ComputeOperationWaitTime take per-call timeouts rather than a request context, so the
 	// overall budget is carried as a deadline on ctx and each call receives the time remaining untill it.
@@ -290,6 +293,13 @@ func (a *computeUrlMapInvalidateCacheAction) Invoke(ctx context.Context, req act
 	})
 }
 
+// computeUrlMapref identifies a global URL map. Project is empty when neither the reference nor the
+// project attribute sets it; the caller fills it from the  provider configuration.
+type computeUrlMapRef struct {
+	Project string
+	Name    string
+}
+
 // parseComputeUrlMapRef resolves the URL map reference against the optional project attribute. Accepted forms:
 //   - {name}
 //   - global/urlMaps/{name}
@@ -306,7 +316,7 @@ func parseComputeUrlMapRef(urlMap, project string) (*computeUrlMapRef, error) {
 		ref.Project, ref.Name = parts[1], parts[2]
 	case computeUrlMapPartialRefRegexp.MatchString(urlMap):
 		ref.Name = computeUrlMapPartialRefRegexp.FindStringSubmatch(urlMap)[1]
-	case string.Contains(urlMap, "/"):
+	case strings.Contains(urlMap, "/"):
 		return nil, fmt.Errorf("%q is not a valid global URL map reference; expected a name, global/urlMaps/{name}, "+
 			"projects/{project}/global/urlMaps/{name} or full URL map reference", urlMap)
 	default:

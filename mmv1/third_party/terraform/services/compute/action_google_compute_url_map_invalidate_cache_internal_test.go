@@ -62,7 +62,7 @@ func TestParseComputeUrlMapRef(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			got, err := ParseComputeUrlMapRef(tc.urlMap, tc.project)
+			got, err := parseComputeUrlMapRef(tc.urlMap, tc.project)
 			if tc.wantErr {
 				if err == nil {
 					t.Fatalf("expected error, got %+v", got)
@@ -103,7 +103,7 @@ func TestValidateComputeUrlMapInvalidationPath(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			err := ValidateComputeUrlMapInvalidationPath(tc.path)
+			err := validateComputeUrlMapInvalidationPath(tc.path)
 			if tc.wantErr && err == nil {
 				t.Fatalf("expected error for %q", tc.path)
 				return
