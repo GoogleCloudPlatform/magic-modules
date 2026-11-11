@@ -198,7 +198,6 @@ properties:
       The resource name of the GCP Secret Manager secret version
       containing the password for the specified username.
       Format: projects/{project}/secrets/{secret_id}/versions/{version_id}
-      or projects/{project}/locations/{location}/secrets/{secret_id}/versions/{version_id}
       The service's Per-Product Per-Project Service Account (P4SA)
       (service-{project_number}@gcp-sa-oci.iam.gserviceaccount.com)
       must have the 'secretmanager.secretAccessor' permission on this secret.
@@ -222,7 +221,6 @@ properties:
       containing base64 encoded content of the Oracle Wallet ZIP file required
       for mTLS/TLS connections. Format:
       projects/{project}/secrets/{secret_id}/versions/{version_id}
-      or projects/{project}/locations/{location}/secrets/{secret_id}/versions/{version_id}
       The service's Per-Product Per-Project Service Account (P4SA)
       (service-{project_number}@gcp-sa-oci.iam.gserviceaccount.com) must have the
       'secretmanager.secretAccessor' permission on this secret.
