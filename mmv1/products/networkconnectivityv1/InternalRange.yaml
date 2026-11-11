@@ -23,6 +23,7 @@ base_url: projects/{{project}}/locations/global/internalRanges
 self_link: projects/{{project}}/locations/global/internalRanges/{{name}}
 create_url: projects/{{project}}/locations/global/internalRanges?internalRangeId={{name}}
 update_mask: true
+generate_list_resource: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/global/internalRanges/{{name}}
