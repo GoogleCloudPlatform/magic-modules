@@ -526,9 +526,7 @@ func WriteObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		if seenRefs[obj.Ref] {
 			var field api.Type
 			field.Name = name
-			field.Type = "String"
-			field.CustomExpand = "templates/terraform/custom_expand/json_schema.tmpl"
-			field.CustomFlatten = "templates/terraform/custom_flatten/json_schema.tmpl"
+			field.Type = "JsonValue"
 			field.Description = "Recursive field represented as JSON"
 			return field
 		}
@@ -545,9 +543,7 @@ func WriteObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		if seenPointers[obj.Value] {
 			var field api.Type
 			field.Name = name
-			field.Type = "String"
-			field.CustomExpand = "templates/terraform/custom_expand/json_schema.tmpl"
-			field.CustomFlatten = "templates/terraform/custom_flatten/json_schema.tmpl"
+			field.Type = "JsonValue"
 			field.Description = "Recursive field represented as JSON"
 			return field
 		}

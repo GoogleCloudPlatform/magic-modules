@@ -511,8 +511,14 @@ func (t *Type) Validate(rName string) (es []error) {
 	}
 
 	// Check type is valid. Also allow empty as it's currently used in unit tests.
-	if !slices.Contains([]string{"Boolean", "Double", "Integer", "String", "Time", "Enum", "ResourceRef", "NestedObject", "Array", "KeyValuePairs", "KeyValueLabels", "KeyValueTerraformLabels", "KeyValueEffectiveLabels", "KeyValueAnnotations", "Map", "Fingerprint"}, t.Type) {
+	if !slices.Contains([]string{"Boolean", "Double", "Integer", "String", "Time", "Enum", "ResourceRef", "NestedObject", "Array", "KeyValuePairs", "KeyValueLabels", "KeyValueTerraformLabels", "KeyValueEffectiveLabels", "KeyValueAnnotations", "Map", "Fingerprint", "JsonValue"}, t.Type) {
 		es = append(es, fmt.Errorf("property %s unknown type %q in resource %s", fullFieldPath, t.Type, rName))
+	}
+
+	if t.CustomExpand == "templates/terraform/custom_expand/json_schema.tmpl" ||
+		t.CustomExpand == "templates/terraform/custom_expand/json_value.tmpl" ||
+		t.CustomFlatten == "templates/terraform/custom_flatten/json_schema.tmpl" {
+		es = append(es, fmt.Errorf("property %s cannot use json_schema.tmpl or json_value.tmpl in resource %s; use type JsonValue instead", fullFieldPath, rName))
 	}
 
 	if t.Output && t.Required {
@@ -1038,6 +1044,8 @@ func (t Type) TFType(s string) string {
 		return "schema.TypeSet"
 	case "Fingerprint":
 		return "schema.TypeString"
+	case "JsonValue":
+		return "schema.TypeString"
 	}
 
 	return "schema.TypeString"
@@ -1076,6 +1084,8 @@ func (t Type) GetFWType() string {
 	case "Map":
 		return "Map"
 	case "Fingerprint":
+		return "String"
+	case "JsonValue":
 		return "String"
 	}
 
@@ -1621,13 +1631,7 @@ func (t Type) GetPropertySchemaPathList(propertyList []string) []string {
 }
 
 func (t Type) IsJsonField() bool {
-	if t.CustomFlatten == "templates/terraform/custom_flatten/json_schema.tmpl" {
-		return true
-	}
-	if t.CustomExpand == "templates/terraform/custom_expand/json_schema.tmpl" || t.CustomExpand == "templates/terraform/custom_expand/json_value.tmpl" {
-		return true
-	}
-	return false
+	return t.IsA("JsonValue")
 }
 
 // Checks if the empty value should be set in CAI assets during tfplan2cai conversion

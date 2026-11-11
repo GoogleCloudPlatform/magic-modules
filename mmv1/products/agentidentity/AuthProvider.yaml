@@ -114,15 +114,10 @@ properties:
           - auth_provider_type_params.0.xaa_auth_provider
         properties:
           - name: authorizationDetails
-            type: String
+            type: JsonValue
             description: |-
               Optional. Rich Authorization Requests (RFC 9396) detailing targeted OAuth
               resources/scopes, formatted as a JSON array of JSON objects.
-            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-            custom_expand: templates/terraform/custom_expand/json_value.tmpl
-            validation:
-              function: validation.StringIsJSON
           - name: connector
             type: String
             required: true
@@ -266,14 +261,9 @@ properties:
             description: Configuration for when the input is an ID token.
             properties:
               - name: idJagAdditionalClaims
-                type: String
+                type: JsonValue
                 description: |-
                   Optional additional claims to include when fetching an ID-JAG, represented as a JSON-encoded string.
-                state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                custom_expand: templates/terraform/custom_expand/json_value.tmpl
-                validation:
-                  function: validation.StringIsJSON
               - name: idJagAuthProvider
                 type: String
                 description: |-

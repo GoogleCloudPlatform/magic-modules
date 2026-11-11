@@ -215,7 +215,7 @@ properties:
         # which can contain nested StandardSqlDataType.
         # We'll have people provide the json blob for the schema instead.
         - name: 'dataType'
-          type: String
+          type: JsonValue
           description: |
             A JSON schema for the data type. Required if argumentKind = FIXED_TYPE.
             ~>**NOTE**: Because this field expects a JSON string, any changes to the string
@@ -224,11 +224,6 @@ properties:
             or replaced STRUCT field type with RECORD field type, we currently cannot
             suppress the recurring diff this causes. As a workaround, we recommend using
             the schema as returned by the API.
-          state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-          custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-          custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
-          validation:
-            function: 'validation.StringIsJSON'
         - name: 'tableType'
           type: NestedObject
           description: |
@@ -246,7 +241,7 @@ properties:
                     description: |
                       The name of the column.
                   - name: 'type'
-                    type: String
+                    type: JsonValue
                     description: |
                       A JSON schema for the data type of the column. Required unless argumentKind = ANY_TYPE.
                       ~>**NOTE**: Because this field expects a JSON string, any changes to the string
@@ -255,13 +250,8 @@ properties:
                       or replaced STRUCT field type with RECORD field type, we currently cannot
                       suppress the recurring diff this causes. As a workaround, we recommend using
                       the schema as returned by the API.
-                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
-                    validation:
-                      function: 'validation.StringIsJSON'
   - name: 'returnType'
-    type: String
+    type: JsonValue
     description: |
       A JSON schema for the return type. Optional if language = "SQL"; required otherwise.
       If absent, the return type is inferred from definitionBody at query time in each query
@@ -272,24 +262,14 @@ properties:
       d the order of values or replaced STRUCT field type with RECORD field type, we currently
       cannot suppress the recurring diff this causes. As a workaround, we recommend using
       the schema as returned by the API.
-    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
-    validation:
-      function: 'validation.StringIsJSON'
   - name: 'returnTableType'
-    type: String
+    type: JsonValue
     description: |
       Optional. Can be set only if routineType = "TABLE_VALUED_FUNCTION".
 
       If absent, the return table type is inferred from definitionBody at query time in each query
       that references this routine. If present, then the columns in the evaluated table result will
       be cast to match the column types specificed in return table type, at query time.
-    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
-    validation:
-      function: 'validation.StringIsJSON'
   - name: 'importedLibraries'
     type: Array
     description: |

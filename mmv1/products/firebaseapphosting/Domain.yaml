@@ -170,14 +170,10 @@ properties:
                           user-facing error message should be localized and sent in the
                           google.rpc.Status.details field, or localized by the client.
                       - name: details
-                        type: String
+                        type: JsonValue
                         output: true
                         description: |
                           A list of messages that carry the error details.
-                        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                        custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-                        validation:
-                          function: validation.StringIsJSON
                   - name: records
                     type: Array
                     description: Records on the domain.
@@ -267,14 +263,10 @@ properties:
                           user-facing error message should be localized and sent in the
                           google.rpc.Status.details field, or localized by the client.
                       - name: details
-                        type: String
+                        type: JsonValue
                         output: true
                         description: |
                           A list of messages that carry the error details.
-                        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                        custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-                        validation:
-                          function: validation.StringIsJSON
                   - name: records
                     type: Array
                     description: Records on the domain.
@@ -352,14 +344,10 @@ properties:
                 user-facing error message should be localized and sent in the
                 google.rpc.Status.details field, or localized by the client.
             - name: details
-              type: String
+              type: JsonValue
               output: true
               description: |
                 A list of messages that carry the error details.
-              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-              custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-              validation:
-                function: validation.StringIsJSON
       - name: hostState
         type: String
         output: true

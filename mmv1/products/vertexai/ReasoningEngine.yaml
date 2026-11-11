@@ -259,7 +259,7 @@ properties:
         description: |
           Optional. The OSS agent framework used to develop the agent.
       - name: 'classMethods'
-        type: String
+        type: JsonValue
         description: |
           Optional. Declarations for object class methods in OpenAPI
           specification format.
@@ -509,11 +509,6 @@ properties:
             }
           ])
           ```
-        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-        custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-        validation:
-          function: 'validation.StringIsJSON'
       - name: 'deploymentSpec'
         type: NestedObject
         default_from_api: true
@@ -877,15 +872,10 @@ properties:
                   Required. Configuration for the Agent Development Kit (ADK).
                 properties:
                   - name: 'jsonConfig'
-                    type: String
+                    type: JsonValue
                     required: true
                     description: |-
                       Required. The value of the ADK config in JSON format.
-                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                    custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-                    validation:
-                      function: 'validation.StringIsJSON'
               - name: 'inlineSource'
                 type: NestedObject
                 description: |-
@@ -927,15 +917,10 @@ properties:
         description: |-
           Optional. The resource name of the linked ExampleStore.
       - name: 'agentCard'
-        type: String
+        type: JsonValue
         min_version: 'beta'
         description: |-
           Optional. The A2A Agent Card for the agent (if available).
-        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-        custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-        validation:
-          function: 'validation.StringIsJSON'
       - name: 'buildSpec'
         type: NestedObject
         description: |-
@@ -1194,14 +1179,9 @@ properties:
                                                 description: |-
                                                   The name of the function to call.
                                               - name: 'args'
-                                                type: String
+                                                type: JsonValue
                                                 description: |-
                                                   The function parameters and values in JSON object format.
-                                                state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                                                custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                                                custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-                                                validation:
-                                                  function: 'validation.StringIsJSON'
                                           - name: 'functionResponse'
                                             type: NestedObject
                                             description: |-
@@ -1217,14 +1197,9 @@ properties:
                                                   The name of the function to call.
                                                 required: true
                                               - name: 'response'
-                                                type: String
+                                                type: JsonValue
                                                 description: |-
                                                   The function response in JSON object format.
-                                                state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                                                custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                                                custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-                                                validation:
-                                                  function: 'validation.StringIsJSON'
                                           - name: 'executableCode'
                                             type: NestedObject
                                             description: |-
@@ -1377,15 +1352,10 @@ properties:
                           Required. Unique ID identifying the memory schema.
                         required: true
                       - name: 'memorySchema'
-                        type: String
+                        type: JsonValue
                         api_name: 'schema'
                         description: |-
                           Optional. The memory schema defined as an OpenAPI Schema Object JSON string.
-                        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                        custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-                        validation:
-                          function: 'validation.StringIsJSON'
       - name: 'exampleStoreConfig'
         type: NestedObject
         min_version: 'beta'

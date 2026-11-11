@@ -112,14 +112,9 @@ properties:
     description: |
       User-defined labels for the AspectType.
   - name: metadataTemplate
-    type: String
+    type: JsonValue
     description: |
       MetadataTemplate of the Aspect.
-    state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-    custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-    validation:
-      function: validation.StringIsJSON
   - name: transferStatus
     type: String
     description: |
