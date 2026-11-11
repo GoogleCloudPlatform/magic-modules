@@ -4,8 +4,8 @@ description: Model an API enum as Enum (strict, plan-time) or String (forward-co
 topics: [field]
 task_types: [field-add, new-resource]
 source: docs/content/best-practices/validation.md + the schema-review skill's original trade-off note
-status: draft
-last_verified: 2026-07-09
+status: approved
+last_verified: 2026-11-06
 ---
 
 # Enum vs. String
@@ -27,11 +27,11 @@ last_verified: 2026-07-09
     - 'HIGH'
 ```
 
-**Rules for Enum:**
-- Omit the `FIELD_NAME_UNSPECIFIED` value from `enum_values` — it is the proto convention's first enum
-  value, representing 0/unset, not a real choice.
-- Enums validate against the list automatically; a custom `validation` **overrides** that default — if you
-  add one, it must re-verify the enum values itself.
+**Rules for `Enum` (MMv1 YAML):**
+- Omit `*_UNSPECIFIED` on configurable (`Optional` / `Required`) fields — it represents proto `0`/unset, not a user choice. **Exception:** `output: true` (read-only) fields may retain `*_UNSPECIFIED` because MMv1 omits `ValidateFunc` on `output: true` fields and APIs often return `*_UNSPECIFIED` while provisioning.
+- Do **not** list `Possible values:` in `description:` on `Enum` (or `Array` of `Enum`) — MMv1 auto-appends `enum_values` to schema and website docs.
+- Custom `validation` **overrides** the generated enum check and must re-validate allowed values itself.
 
-**Rule for String-instead-of-enum:** list the allowed values in the field description with a link to the
-API docs — otherwise users only discover an invalid value when the API rejects it mid-apply.
+**Rule for `String`-instead-of-enum (MMv1 YAML):** Name allowed values and link the API docs in `description:` (MMv1 does not auto-append values for `String`).
+
+**Rule for Handwritten Go (`validation.StringInSlice`):** On `Optional: true, Computed: true` `TypeString` fields without diff suppression, omit `*_UNSPECIFIED` unless the API persists it as a distinct user-settable value—otherwise unset vs. `"FOO_UNSPECIFIED"` causes permadiffs. Read-only `Computed` fields omit `ValidateFunc`.
