@@ -45,7 +45,7 @@ timeouts:
   delete_minutes: 20
 docs:
   warning: |
-    If the customer has Multi-Party Approval (MPA) enabled for sensitive actions, creating or updating an SSO profile returns an operation awaiting second-admin approval (`awaiting-multi-party-approval`) and Terraform will return an error until the request is approved in Google Admin Console (after approval, a newly created profile can be imported or an updated profile refreshed).
+    If the customer has Multi-Party Approval (MPA) enabled for sensitive actions, creating, updating, or deleting an SSO profile returns an operation awaiting second-admin approval (`awaiting-multi-party-approval`) and Terraform will return an error until the request is approved in Google Admin Console (after approval, a newly created profile can be imported or an updated profile refreshed).
 # This resource has unusual authentication requirements that mean we can't currently test it or sweep it in CI
 exclude_sweeper: true
 samples:
@@ -77,6 +77,7 @@ custom_code:
   pre_update: templates/terraform/pre_update/cloud_identity_inbound_oidc_sso_profile.go.tmpl
   post_update: templates/terraform/post_update/cloud_identity_inbound_oidc_sso_profile.go.tmpl
   post_create: templates/terraform/post_create/cloud_identity_inbound_oidc_sso_profile.go.tmpl
+  post_delete: templates/terraform/post_delete/cloud_identity_inbound_oidc_sso_profile.go.tmpl
   constants: templates/terraform/constants/cloud_identity_inbound_oidc_sso_profile.go.tmpl
 properties:
   - name: inboundOidcSsoProfileId

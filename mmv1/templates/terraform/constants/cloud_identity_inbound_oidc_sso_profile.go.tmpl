@@ -1,3 +1,4 @@
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 func checkCloudIdentityInboundOidcSsoProfileOperation(res map[string]interface{}, activity string) (map[string]interface{}, error) {
 	if opErr, ok := res["error"]; ok && opErr != nil {
 		return nil, fmt.Errorf("error %s InboundOidcSsoProfile: %v", activity, opErr)
@@ -20,3 +21,4 @@ func checkCloudIdentityInboundOidcSsoProfileOperation(res map[string]interface{}
 	respBody, _ := res["response"].(map[string]interface{})
 	return respBody, nil
 }
+{{- end }}

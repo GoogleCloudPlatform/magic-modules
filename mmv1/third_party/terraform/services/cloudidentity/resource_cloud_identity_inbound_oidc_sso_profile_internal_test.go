@@ -80,3 +80,35 @@ func TestCheckCloudIdentityInboundOidcSsoProfileOperation_Error(t *testing.T) {
 		t.Fatalf("expected error, got nil")
 	}
 }
+
+func TestCheckCloudIdentityInboundOidcSsoProfileOperation_Delete_MPA_DoneFalse(t *testing.T) {
+	res := map[string]interface{}{
+		"done": false,
+		"metadata": map[string]interface{}{
+			"state": "awaiting-multi-party-approval",
+		},
+	}
+	_, err := checkCloudIdentityInboundOidcSsoProfileOperation(res, "deleting")
+	if err == nil {
+		t.Fatalf("expected error for MPA awaiting approval on delete, got nil")
+	}
+	if !strings.Contains(err.Error(), "awaiting-multi-party-approval") {
+		t.Fatalf("expected error to contain awaiting-multi-party-approval, got: %v", err)
+	}
+}
+
+func TestCheckCloudIdentityInboundOidcSsoProfileOperation_Delete_DoneTrue(t *testing.T) {
+	res := map[string]interface{}{
+		"done": true,
+		"response": map[string]interface{}{
+			"name": "inboundOidcSsoProfiles/profile-123",
+		},
+	}
+	respBody, err := checkCloudIdentityInboundOidcSsoProfileOperation(res, "deleting")
+	if err != nil {
+		t.Fatalf("expected no error on delete, got %v", err)
+	}
+	if respBody["name"] != "inboundOidcSsoProfiles/profile-123" {
+		t.Fatalf("expected name inboundOidcSsoProfiles/profile-123, got %v", respBody["name"])
+	}
+}
