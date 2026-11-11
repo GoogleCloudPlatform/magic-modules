@@ -195,6 +195,8 @@ func (s Sweeper) EnvVarInterpolate(value string) string {
 		return "envvar.GetTestVmwareengineProjectFromEnv(t)"
 	case "ZONE":
 		return "envvar.GetTestZoneFromEnv()"
+	case "ORG_UNIT_ID":
+		return "envvar.GetTestOrgUnitIdFromEnv(t)"
 	}
 
 	// Check if the string contains any patterns that need to be replaced
@@ -205,6 +207,7 @@ func (s Sweeper) EnvVarInterpolate(value string) string {
 		"${SERVICE_ACCT}", "${PROJECT_NAME}", "${PROJECT_NUMBER}",
 		"${CUST_ID}", "${IDENTITY_USER}", "${PAP_DESCRIPTION}",
 		"${CHRONICLE_ID}", "${VMWAREENGINE_PROJECT}", "${ZONE}",
+		"${ORG_UNIT_ID}",
 	} {
 		if strings.Contains(value, pattern) {
 			hasPattern = true
@@ -238,6 +241,7 @@ func (s Sweeper) EnvVarInterpolate(value string) string {
 		"${CHRONICLE_ID}":         "\" + envvar.GetTestChronicleInstanceIdFromEnv(t) + \"",
 		"${VMWAREENGINE_PROJECT}": "\" + envvar.GetTestVmwareengineProjectFromEnv(t) + \"",
 		"${ZONE}":                 "\" + envvar.GetTestZoneFromEnv() + \"",
+		"${ORG_UNIT_ID}":          "\" + envvar.GetTestOrgUnitIdFromEnv(t) + \"",
 	}
 
 	for pattern, replacement := range replacements {
