@@ -2,6 +2,9 @@ package compute_test
 
 import (
 	"fmt"
+{{- if ne $.TargetVersionName "ga" }}
+	"regexp"
+{{- end }}
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
@@ -693,3 +696,191 @@ func testAccCheckComputeRegionPerInstanceConfigInstanceDestroyed(t *testing.T, r
 		return nil
 	}
 }
+
+{{- if ne $.TargetVersionName "ga" }}
+func TestAccComputeRegionPerInstanceConfig_allowedActions(t *testing.T) {
+	t.Parallel()
+
+	suffix := acctest.RandString(t, 10)
+	rigmName := fmt.Sprintf("tf-test-rigm-%s", suffix)
+	context := map[string]interface{}{
+		"rigm_name":     rigmName,
+		"random_suffix": suffix,
+		"config_name":   fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10)),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionPerInstanceConfig_allowedActionsCreate(context),
+			},
+			{
+				ResourceName:            "google_compute_region_per_instance_config.with_allowed_actions",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"remove_instance_on_destroy", "region", "allowed_actions"},
+			},
+			{
+				Config: testAccComputeRegionPerInstanceConfig_allowedActionsUpdate1(context),
+			},
+			{
+				ResourceName:            "google_compute_region_per_instance_config.with_allowed_actions",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"remove_instance_on_destroy", "region", "allowed_actions"},
+			},
+			{
+				Config: testAccComputeRegionPerInstanceConfig_allowedActionsUpdate2(context),
+			},
+			{
+				ResourceName:            "google_compute_region_per_instance_config.with_allowed_actions",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"remove_instance_on_destroy", "region", "allowed_actions"},
+			},
+		},
+	})
+}
+
+func TestAccComputeRegionPerInstanceConfig_allowedActionsValidation(t *testing.T) {
+	t.Parallel()
+
+	suffix := "val"
+	context := map[string]interface{}{
+		"rigm_name":     fmt.Sprintf("tf-test-rigm-%s", suffix),
+		"random_suffix": suffix,
+		"config_name":   "tf-test-instance-val",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccComputeRegionPerInstanceConfig_allowedActionsConflict(context),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`Conflicting configuration arguments`),
+			},
+		},
+	})
+}
+
+func testAccComputeRegionPerInstanceConfig_rigmBeta(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  provider = google-beta
+  family   = "debian-13"
+  project  = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "rigm-basic" {
+  provider     = google-beta
+  name         = "tf-test-it-%{random_suffix}"
+  machine_type = "e2-medium"
+
+  network_interface {
+    network = "default"
+  }
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+}
+
+resource "google_compute_region_instance_group_manager" "rigm" {
+  provider           = google-beta
+  name               = "%{rigm_name}"
+  region             = "us-central1"
+  base_instance_name = "tf-test-rigm"
+
+  version {
+    instance_template = google_compute_instance_template.rigm-basic.id
+    name              = "primary"
+  }
+
+  update_policy {
+    instance_redistribution_type = "NONE"
+    type                         = "OPPORTUNISTIC"
+    allowed_actions              = ["REFRESH", "RESTART_IN_PLACE", "REPLACE"]
+    max_surge_fixed              = 0
+    max_unavailable_fixed        = 6
+  }
+}
+`, context)
+}
+
+func testAccComputeRegionPerInstanceConfig_allowedActionsCreate(context map[string]interface{}) string {
+	return testAccComputeRegionPerInstanceConfig_rigmBeta(context) + acctest.Nprintf(`
+resource "google_compute_region_per_instance_config" "with_allowed_actions" {
+  provider                      = google-beta
+  region                        = google_compute_region_instance_group_manager.rigm.region
+  region_instance_group_manager = google_compute_region_instance_group_manager.rigm.name
+  name                          = "%{config_name}"
+  remove_instance_on_destroy    = true
+  preserved_state {
+    metadata = {
+      foo = "bar"
+    }
+  }
+}
+`, context)
+}
+
+func testAccComputeRegionPerInstanceConfig_allowedActionsUpdate1(context map[string]interface{}) string {
+	return testAccComputeRegionPerInstanceConfig_rigmBeta(context) + acctest.Nprintf(`
+resource "google_compute_region_per_instance_config" "with_allowed_actions" {
+  provider                      = google-beta
+  region                        = google_compute_region_instance_group_manager.rigm.region
+  region_instance_group_manager = google_compute_region_instance_group_manager.rigm.name
+  name                          = "%{config_name}"
+  remove_instance_on_destroy    = true
+  allowed_actions               = ["REFRESH", "RESTART_IN_PLACE"]
+  preserved_state {
+    metadata = {
+      foo = "baz"
+    }
+  }
+}
+`, context)
+}
+
+func testAccComputeRegionPerInstanceConfig_allowedActionsUpdate2(context map[string]interface{}) string {
+	return testAccComputeRegionPerInstanceConfig_rigmBeta(context) + acctest.Nprintf(`
+resource "google_compute_region_per_instance_config" "with_allowed_actions" {
+  provider                      = google-beta
+  region                        = google_compute_region_instance_group_manager.rigm.region
+  region_instance_group_manager = google_compute_region_instance_group_manager.rigm.name
+  name                          = "%{config_name}"
+  remove_instance_on_destroy    = true
+  allowed_actions               = ["REFRESH", "REPLACE"]
+  preserved_state {
+    metadata = {
+      foo = "qux"
+    }
+  }
+}
+`, context)
+}
+
+func testAccComputeRegionPerInstanceConfig_allowedActionsConflict(context map[string]interface{}) string {
+	return testAccComputeRegionPerInstanceConfig_rigmBeta(context) + acctest.Nprintf(`
+resource "google_compute_region_per_instance_config" "with_allowed_actions" {
+  provider                      = google-beta
+  region                        = google_compute_region_instance_group_manager.rigm.region
+  region_instance_group_manager = google_compute_region_instance_group_manager.rigm.name
+  name                          = "%{config_name}"
+  minimal_action                = "REFRESH"
+  allowed_actions               = ["REFRESH", "RESTART_IN_PLACE"]
+  preserved_state {
+    metadata = {
+      foo = "bar"
+    }
+  }
+}
+`, context)
+}
+{{- end }}
