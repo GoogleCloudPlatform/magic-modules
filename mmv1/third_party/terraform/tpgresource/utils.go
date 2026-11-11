@@ -87,6 +87,18 @@ func GetRegion(d TerraformResourceData, config *transport_tpg.Config) (string, e
 	return GetRegionFromSchema("region", "zone", d, config)
 }
 
+// getRegionForUrl is like GetRegion, but uses the resource's `location`
+// before the provider-level region. Some products (e.g. Vertex AI) put
+// {{region}} in the host, and resources with only `location` must use it.
+func getRegionForUrl(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
+	_, hasRegion := d.GetOk("region")
+	_, hasZone := d.GetOk("zone")
+	if v, ok := d.GetOk("location"); ok && !hasRegion && !hasZone {
+		return GetResourceNameFromSelfLink(v.(string)), nil
+	}
+	return GetRegion(d, config)
+}
+
 // GetProject reads the "project" field from the given resource data and falls
 // back to the provider's value if not given. If the provider's value is not
 // given, an error is returned.
@@ -831,7 +843,7 @@ func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *tr
 	}
 
 	if strings.Contains(linkTmpl, "{{region}}") {
-		region, err = GetRegion(d, config)
+		region, err = getRegionForUrl(d, config)
 		if err != nil {
 			return nil, err
 		}

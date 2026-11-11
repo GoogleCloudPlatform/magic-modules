@@ -1130,6 +1130,44 @@ func TestReplaceVars(t *testing.T) {
 			},
 			Expected: "projects/project1/zones/wrapperinnerwrapper/instances/instance1",
 		},
+		"regional host from location": {
+			Template: "https://{{region}}-aiplatform.googleapis.com/v1/projects/{{project}}/locations/{{location}}/endpoints/{{name}}",
+			Config: &transport_tpg.Config{
+				Project: "default-project",
+				Region:  "default-region",
+			},
+			SchemaValues: map[string]interface{}{
+				"location": "location1",
+				"name":     "endpoint1",
+			},
+			Expected: "https://location1-aiplatform.googleapis.com/v1/projects/default-project/locations/location1/endpoints/endpoint1",
+		},
+		"regional host region wins over location": {
+			Template: "https://{{region}}-aiplatform.googleapis.com/v1/projects/{{project}}/locations/{{location}}/endpoints/{{name}}",
+			Config: &transport_tpg.Config{
+				Project: "default-project",
+				Region:  "default-region",
+			},
+			SchemaValues: map[string]interface{}{
+				"region":   "region1",
+				"location": "location1",
+				"name":     "endpoint1",
+			},
+			Expected: "https://region1-aiplatform.googleapis.com/v1/projects/default-project/locations/location1/endpoints/endpoint1",
+		},
+		"regional zone wins over location": {
+			Template: "projects/{{project}}/regions/{{region}}/things/{{name}}",
+			Config: &transport_tpg.Config{
+				Project: "default-project",
+				Region:  "default-region",
+			},
+			SchemaValues: map[string]interface{}{
+				"zone":     "us-central1-a",
+				"location": "location1",
+				"name":     "thing1",
+			},
+			Expected: "projects/default-project/regions/us-central1/things/thing1",
+		},
 		"base path recursive replacement": {
 			Template: "{{CloudRunBasePath}}namespaces/{{project}}/services",
 			Config: &transport_tpg.Config{
