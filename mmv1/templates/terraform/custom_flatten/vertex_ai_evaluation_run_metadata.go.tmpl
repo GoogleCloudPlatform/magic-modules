@@ -19,12 +19,10 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 		// Strip `pipeline_id` unless the user explicitly configured it to avoid perpetual drift.
 		hasUserMetadata := false
 		var userMap map[string]interface{}
-		if d != nil {
-			if raw, ok := d.GetOk("metadata"); ok {
-				if rawStr, ok := raw.(string); ok && rawStr != "" {
-					hasUserMetadata = true
-					_ = json.Unmarshal([]byte(rawStr), &userMap)
-				}
+		if raw, ok := d.GetOk("metadata"); ok {
+			if rawStr, ok := raw.(string); ok && rawStr != "" {
+				hasUserMetadata = true
+				_ = json.Unmarshal([]byte(rawStr), &userMap)
 			}
 		}
 		if _, userHasPipelineID := userMap["pipeline_id"]; !userHasPipelineID {

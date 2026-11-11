@@ -67,6 +67,7 @@ samples:
           - error
           - evaluation_results
   - name: vertex_ai_evaluation_run_gcs
+    exclude_basic_doc: true
     primary_resource_id: tf_test_evaluation_run
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
