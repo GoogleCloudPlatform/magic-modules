@@ -120,8 +120,7 @@ properties:
       The Gemini Enterprise experience that the project is provisioned for.
       `PROVISION_INTENT_SOBI` provisions the project for the new Gemini Enterprise
       experience, and `PROVISION_INTENT_LEGACY` provisions it for the classic
-      Gemini Enterprise experience. If unset, the API chooses the experience based
-      on `saas_params.is_biz` and server-side configuration.
+      Gemini Enterprise experience. If unset, the API chooses the experience.
 
       Changing this field forces a new resource, which calls the provisioning API
       again with the new value. Provisioning doesn't remove an experience that the
