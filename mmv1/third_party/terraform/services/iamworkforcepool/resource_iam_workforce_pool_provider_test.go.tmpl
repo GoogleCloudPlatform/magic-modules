@@ -583,10 +583,11 @@ resource "google_iam_workforce_pool_provider" "my_provider" {
       additional_scopes         = ["groups", "roles"]
     }
   }
-  display_name        = "Display name"
-  description         = "A sample OIDC workforce pool provider."
-  disabled            = false
-  attribute_condition = "true"
+  display_name            = "Display name"
+  description             = "A sample OIDC workforce pool provider."
+  disabled                = false
+  attribute_condition     = "true"
+  attribute_sync_interval = "3600s"
 }
 `, context)
 }
@@ -944,10 +945,11 @@ resource "google_iam_workforce_pool_provider" "my_provider" {
         filter      = "mail:gcp"
     }
   }
-  display_name        = "Display name"
-  description         = "A sample OIDC workforce pool provider."
-  disabled            = false
-  attribute_condition = "true"
+  display_name            = "Display name"
+  description             = "A sample OIDC workforce pool provider."
+  disabled                = false
+  attribute_condition     = "true"
+  attribute_sync_interval = "3600s"
 }
 `, context)
 }
@@ -1044,10 +1046,11 @@ resource "google_iam_workforce_pool_provider" "my_provider" {
         filter      = "displayName:gcp"
     }
   }
-  display_name        = "New Display name"
-  description         = "A sample OIDC workforce pool provider with updated description."
-  disabled            = true
-  attribute_condition = "false"
+  display_name            = "New Display name"
+  description             = "A sample OIDC workforce pool provider with updated description."
+  disabled                = true
+  attribute_condition     = "false"
+  attribute_sync_interval = "7200s"
 }
 `, context)
 }
