@@ -5763,6 +5763,13 @@ func TestAccSqlDatabaseInstance_blueGreenDeployment_description(t *testing.T) {
 					resource.TestCheckResourceAttr("google_sql_database_instance.instance", "blue_green_deployment.0.active_environment", "SOURCE"),
 				),
 			},
+			// Verify ImportState preserves description
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "blue_green_deployment.0.delete_old_source_on_destroy"},
+			},
 			// Step 2: Attempt to modify description (immutable)
 			{
 				Config:      testGoogleSqlDatabaseInstance_blueGreenDeployment_withDescription(instanceName, "MYSQL_8_0", deploymentName, "SOURCE", "Modified BGD description"),
