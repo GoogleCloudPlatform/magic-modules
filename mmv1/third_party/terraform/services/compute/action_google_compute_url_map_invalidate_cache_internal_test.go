@@ -24,27 +24,27 @@ func TestParseComputeUrlMapRef(t *testing.T) {
 			wantName:    "my-map",
 		},
 		"global partial URI": {
-			urlMap:   "global/urlMap/my-map",
+			urlMap:   "global/urlMaps/my-map",
 			wantName: "my-map",
 		},
 		"project partial URI": {
-			urlMap:      "projects/p/global/urlMap/my-map",
+			urlMap:      "projects/p/global/urlMaps/my-map",
 			wantProject: "p",
 			wantName:    "my-map",
 		},
 		"self link with matching project": {
-			urlMap:      "https://www.googleapis.com/compute/v1/projects/p/global/urlMap/my-map",
+			urlMap:      "https://www.googleapis.com/compute/v1/projects/p/global/urlMaps/my-map",
 			project:     "p",
 			wantProject: "p",
 			wantName:    "my-map",
 		},
 		"conflicting project": {
-			urlMap:  "projects/p/global/urlMap/my-map",
+			urlMap:  "projects/p/global/urlMaps/my-map",
 			project: "other",
 			wantErr: true,
 		},
 		"regional URL map": {
-			urlMap:  "projects/p/regions/us-central1/urlMap/my-map",
+			urlMap:  "projects/p/regions/us-central1/urlMaps/my-map",
 			wantErr: true,
 		},
 		"wrong resource type": {
@@ -52,7 +52,7 @@ func TestParseComputeUrlMapRef(t *testing.T) {
 			wantErr: true,
 		},
 		"trailing path segments": {
-			urlMap:  "projects/p/global/urlMap/my-map/extra",
+			urlMap:  "projects/p/global/urlMaps/my-map/extra",
 			wantErr: true,
 		},
 	}
