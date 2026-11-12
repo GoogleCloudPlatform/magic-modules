@@ -28,10 +28,16 @@ To get more information about cache invalidation, see:
 ## Example Usage - Invoke from CLI
 
 ```hcl
+resource "google_storage_bucket" "static" {
+  name                        = "my-static-site-bucket"
+  location                    = "US"
+  uniform_bucket_level_access = true
+}
+
 resource "google_compute_backend_bucket" "static" {
   name         = "static-backend"
   bucket_name  = google_storage_bucket.static.name
-  enable_cdn.  + true
+  enable_cdn   = true
 }
 
 resource "google_compute_url_map" "static" {
@@ -39,7 +45,7 @@ resource "google_compute_url_map" "static" {
     default_service = google_compute_backend_bucket.static.id
 }
 
-action "google_compute_iurl_map_invalidate_cache" "example" {
+action "google_compute_url_map_invalidate_cache" "example" {
   config {
     url_map = google_compute_url_map.static.id
     path    = "/*"
@@ -50,7 +56,7 @@ action "google_compute_iurl_map_invalidate_cache" "example" {
 Run the following command to invalidate all cached content:
 
 ```shell
-terraform apply -invoke=action.google_compute_url_map_invalidate_cache.all
+terraform apply -invoke=action.google_compute_url_map_invalidate_cache.example
 ```
 
 ## Example Usage - Invalidate when content changes
@@ -61,11 +67,11 @@ from the previous example.
 ```hcl
 resource "google_storage_bucket_object" "index" {
   name   = "index.html"
-  bucket = google_compute_backend_bucket.static.id
+  bucket = google_compute_backend_bucket.static.name
   source = "${path.module}/site/index.html"
 }
 
-action "google_compute_iurl_map_invalidate_cache" "index" {
+action "google_compute_url_map_invalidate_cache" "index" {
   config {
     url_map = google_compute_url_map.static.id
     path    = "/index.html"
@@ -73,7 +79,7 @@ action "google_compute_iurl_map_invalidate_cache" "index" {
 }
 
 resource "terraform_data" "index_version" {
-    input =. google_storate_bucket_object.index.md5hash
+    input = google_storage_bucket_object.index.md5hash
 
     lifecycle {
         action_trigger {
@@ -87,7 +93,7 @@ resource "terraform_data" "index_version" {
 ## Example Usage - Invalidate by host and cache tags
 
 ```hcl
-action "google_compute_iurl_map_invalidate_cache" "product_images" {
+action "google_compute_url_map_invalidate_cache" "product_images" {
   config {
     url_map    = "projects/my-project/global/urlMaps/static-url-map"
     path       = "/images/*"
@@ -102,7 +108,7 @@ action "google_compute_iurl_map_invalidate_cache" "product_images" {
 
 The following arguments are supported in the `config` block:
 
-* `url_map` - (Required) The global URL map whose chache to invalidate. Accepts any of the following formats:
+* `url_map` - (Required) The global URL map whose cache to invalidate. Accepts any of the following formats:
     * The URL map name, for example `static-url-map`.
     * A partial URI: `global/urlMaps/{name}` or `projects/{project}/global/urlMaps/{name}`.
     * A self link, such as the value of `google_compute_url_map.static.self_link`.
@@ -110,7 +116,7 @@ The following arguments are supported in the `config` block:
   Regional URL maps are not supported.
   
 * `path` - (Required) The path to invalidate. The path must start with `/` and must not contain `?` or `#`,
- because query strings and fragments are not matched. A `*` is allowed but as the final character and
+ because query strings and fragments are not matched. A `*` is allowed only as the final character and
  matches every path with the prefix: `/images/*` invalidates everything under `/images/`, and `/*`
  invalidates all content.
 
@@ -119,7 +125,7 @@ The following arguments are supported in the `config` block:
  for all hosts.
 
 * `cache_tags` - (Optional) Up to 10 cache tags, each up to 120 characters. Only cached objects that have at
- least one of these tags, and that alos match `path` (and `host`, if set), are invalidated. Tags are set by 
+ least one of these tags, and that also match `path` (and `host`, if set), are invalidated. Tags are set by 
  the origin with the `Cache-Tag` response header. To invalidate by tag alone, set `path` to `/*`.
 
 * `project` - (Optional) The ID of the project that contains the url map. If it is not provided,
@@ -135,7 +141,7 @@ The following arguments are supported in the `config` block:
  takes effect in about 10 seconds. In rare cases, Cloud CDN reports an invalidation as complete before
  every cache has processed it.
 * If the URL map does not exist, the action returns an error.
-* Each invocation submits a new invalidation. Cloud CDN limitshow many invalidation requests a project can
- submit: see [Cache invalidation obverview](https://cloud.google.com/cdn/docs/cache-invalidation-overview).
+* Each invocation submits a new invalidation. Cloud CDN limits how many invalidation requests a project can
+ submit: see [Cache invalidation overview](https://cloud.google.com/cdn/docs/cache-invalidation-overview).
  Attach `action trigger` to a resource that changes only when content changes, rather than to one that is
  updated on every apply.
