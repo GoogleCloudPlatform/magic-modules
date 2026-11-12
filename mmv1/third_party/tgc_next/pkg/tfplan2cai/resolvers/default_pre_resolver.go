@@ -45,8 +45,8 @@ func (r *DefaultPreResolver) AddResourceChanges(changes []*tfjson.ResourceChange
 	resourceDataMap := make(map[string][]*models.FakeResourceDataWithMeta, 0)
 
 	for _, rc := range changes {
-		// Silently skip non-google resources
-		if !strings.HasPrefix(rc.Type, "google_") {
+		// Silently skip data sources and non-google resources
+		if rc.Mode == tfjson.DataResourceMode || !strings.HasPrefix(rc.Type, "google_") {
 			continue
 		}
 
@@ -58,7 +58,7 @@ func (r *DefaultPreResolver) AddResourceChanges(changes []*tfjson.ResourceChange
 
 		var resourceData *models.FakeResourceDataWithMeta
 		resource := r.schema.ResourcesMap[rc.Type]
-		if tfplan.IsCreate(rc) || tfplan.IsUpdate(rc) || tfplan.IsDeleteCreate(rc) {
+		if tfplan.IsCreate(rc) || tfplan.IsUpdate(rc) || tfplan.IsReplace(rc) {
 			resourceData = models.NewFakeResourceDataWithMeta(
 				rc.Type,
 				resource.Schema,

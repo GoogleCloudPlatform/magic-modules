@@ -104,8 +104,8 @@ type Converter struct {
 func (c *Converter) AddResourceChanges(changes []*tfjson.ResourceChange) error {
 	var createOrUpdateOrNoops []*tfjson.ResourceChange
 	for _, rc := range changes {
-		// Silently skip non-google resources
-		if !strings.HasPrefix(rc.Type, "google_") {
+		// Silently skip data sources and non-google resources
+		if rc.Mode == tfjson.DataResourceMode || !strings.HasPrefix(rc.Type, "google_") {
 			continue
 		}
 
@@ -126,12 +126,14 @@ func (c *Converter) AddResourceChanges(changes []*tfjson.ResourceChange) error {
 			continue
 		}
 
-		if tfplan.IsCreate(rc) || tfplan.IsUpdate(rc) || tfplan.IsDeleteCreate(rc) || (c.convertUnchanged && tfplan.IsNoOp(rc)) {
+		if tfplan.IsCreate(rc) || tfplan.IsUpdate(rc) || tfplan.IsReplace(rc) || (c.convertUnchanged && tfplan.IsNoOp(rc)) {
 			createOrUpdateOrNoops = append(createOrUpdateOrNoops, rc)
 		} else if tfplan.IsDelete(rc) {
 			if err := c.addDelete(rc); err != nil {
 				return fmt.Errorf("%s: converting deleted TF resource to CAI: %w", rc.Address, err)
 			}
+		} else if !tfplan.IsNoOp(rc) && !rc.Change.Actions.Read() && !rc.Change.Actions.Forget() {
+			c.errorLogger.Warn(fmt.Sprintf("%s: unhandled plan actions %v", rc.Address, rc.Change.Actions))
 		}
 	}
 
