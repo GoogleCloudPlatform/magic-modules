@@ -1,0 +1,75 @@
+{{/*
+	Copyright 2026 Google LLC. All Rights Reserved.
+
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+			http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+if dataSource, ok := res["dataSource"].(string); ok && dataSource == "gcs_asp" {
+	return res, nil
+}
+
+entitiesRaw, ok := res["entities"].([]interface{})
+if !ok || len(entitiesRaw) == 0 {
+	return res, nil
+}
+
+configuredEntities := make(map[string]bool)
+hasConfiguredEntities := false
+if d != nil {
+	if cfgRaw, ok := d.GetOk("entities"); ok && cfgRaw != nil {
+		if cfgList, ok := cfgRaw.([]interface{}); ok && len(cfgList) > 0 {
+			hasConfiguredEntities = true
+			for _, item := range cfgList {
+				if m, ok := item.(map[string]interface{}); ok {
+					if name, ok := m["entity_name"].(string); ok && name != "" {
+						configuredEntities[strings.ToLower(name)] = true
+					}
+				}
+			}
+		}
+	}
+}
+
+filtered := make([]interface{}, 0, len(entitiesRaw))
+for _, raw := range entitiesRaw {
+	entityMap, ok := raw.(map[string]interface{})
+	if !ok {
+		filtered = append(filtered, raw)
+		continue
+	}
+
+	dataStore, _ := entityMap["dataStore"].(string)
+	if dataStore == "" {
+		entityName, _ := entityMap["entityName"].(string)
+		if hasConfiguredEntities {
+			// Placeholder parent entities (such as "root" for outlook and "site" for sharepoint)
+			// have no backing dataStore and are synthesized by the API on read. Omit them unless
+			// explicitly declared in configuration/state.
+			if !configuredEntities[strings.ToLower(entityName)] {
+				continue
+			}
+		} else {
+			// During import (or when no prior state/config is present), omit synthesized
+			// placeholder entities unless they carry propagated parent-level params or mappings.
+			paramsMap, _ := entityMap["params"].(map[string]interface{})
+			kpmMap, _ := entityMap["keyPropertyMappings"].(map[string]interface{})
+			if len(paramsMap) == 0 && len(kpmMap) == 0 {
+				continue
+			}
+		}
+	}
+
+	filtered = append(filtered, raw)
+}
+
+res["entities"] = filtered
+return res, nil
