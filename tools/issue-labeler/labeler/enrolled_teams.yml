@@ -46,6 +46,7 @@ service/aiplatform-prediction:
   - google_vertex_ai_deployment_resource_pool
   - google_vertex_ai_endpoint_with_model_garden_deployment
   - google_vertex_ai_model_garden_enable_model
+  - google_vertex_ai_publisher_model_config
 service/aiplatform-rag-engine:
   resources:
   - google_vertex_ai_rag_corpus

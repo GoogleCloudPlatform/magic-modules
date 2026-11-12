@@ -1,0 +1,300 @@
+package vertexai_test
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"regexp"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+// The project-wide publisher model config is a per-project singleton, so the tests that
+// touch it must not run in parallel with each other. The API has no delete method; destroy
+// disables the managed logging settings, so CheckDestroy is intentionally omitted.
+func TestAccVertexAIPublisherModelConfig_projectWide(t *testing.T) {
+	context := map[string]interface{}{
+		"project": envvar.GetTestProjectFromEnv(),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIPublisherModelConfig_projectWide(context, "ENABLED"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_publisher_model_config.project_default", "inference_event_logging_config.0.state", "ENABLED"),
+				),
+			},
+			{
+				ResourceName:      "google_vertex_ai_publisher_model_config.project_default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName:       "google_vertex_ai_publisher_model_config.project_default",
+				ImportState:        true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				// Short import form for the project-wide binding.
+				ResourceName:      "google_vertex_ai_publisher_model_config.project_default",
+				ImportState:       true,
+				ImportStateId:     "projects/" + context["project"].(string),
+				ImportStateVerify: true,
+			},
+			{
+				// Re-applying the same configuration must be a no-op (the API answers
+				// 409 ALREADY_EXISTS for identical writes).
+				Config: testAccVertexAIPublisherModelConfig_projectWide(context, "ENABLED"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
+			},
+			{
+				Config: testAccVertexAIPublisherModelConfig_projectWide(context, "DISABLED"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_vertex_ai_publisher_model_config.project_default", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_publisher_model_config.project_default", "inference_event_logging_config.0.state", "DISABLED"),
+				),
+			},
+			{
+				ResourceName:      "google_vertex_ai_publisher_model_config.project_default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// Project-wide BigQuery request/response logging. The API stores but does not
+				// return error_sampling_rate on this binding and canonicalizes nothing, so a
+				// clean follow-up plan proves the read-side handling.
+				Config: testAccVertexAIPublisherModelConfig_projectWideLogging(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_publisher_model_config.project_default", "logging_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_publisher_model_config.project_default", "logging_config.0.sampling_rate", "0.25"),
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_publisher_model_config.project_default", "logging_config.0.error_sampling_rate", "1"),
+				),
+			},
+			{
+				Config: testAccVertexAIPublisherModelConfig_projectWideLogging(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_vertex_ai_publisher_model_config.project_default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// error_sampling_rate is write-only on the project-wide binding (see post_read),
+				// so a fresh import cannot recover it.
+				ImportStateVerifyIgnore: []string{"logging_config.0.error_sampling_rate"},
+			},
+			{
+				// Removing the block disables request/response logging again.
+				Config: testAccVertexAIPublisherModelConfig_projectWide(context, "DISABLED"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckNoResourceAttr(
+						"google_vertex_ai_publisher_model_config.project_default", "logging_config.0.enabled"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccVertexAIPublisherModelConfig_projectWideRejectsOtel(t *testing.T) {
+	context := map[string]interface{}{
+		"project": envvar.GetTestProjectFromEnv(),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccVertexAIPublisherModelConfig_projectWideOtel(context),
+				ExpectError: regexp.MustCompile("enable_otel_logging.*not supported for the project-wide configuration"),
+			},
+		},
+	})
+}
+
+func TestAccVertexAIPublisherModelConfig_model(t *testing.T) {
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIPublisherModelConfig_model(context, "ENABLED", 0.5),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_publisher_model_config.gemini_flash", "inference_event_logging_config.0.state", "ENABLED"),
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_publisher_model_config.gemini_flash", "logging_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_publisher_model_config.gemini_flash", "logging_config.0.sampling_rate", "0.5"),
+				),
+			},
+			{
+				ResourceName:      "google_vertex_ai_publisher_model_config.gemini_flash",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName:       "google_vertex_ai_publisher_model_config.gemini_flash",
+				ImportState:        true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				// Short import form (project/location/publisher/model) from the docs.
+				ResourceName:      "google_vertex_ai_publisher_model_config.gemini_flash",
+				ImportState:       true,
+				ImportStateId:     context["project"].(string) + "/global/google/gemini-3.5-flash",
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccVertexAIPublisherModelConfig_model(context, "ENABLED", 0.5),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
+			},
+			{
+				Config: testAccVertexAIPublisherModelConfig_model(context, "DISABLED", 0.2),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_vertex_ai_publisher_model_config.gemini_flash", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_publisher_model_config.gemini_flash", "inference_event_logging_config.0.state", "DISABLED"),
+					resource.TestCheckResourceAttr(
+						"google_vertex_ai_publisher_model_config.gemini_flash", "logging_config.0.sampling_rate", "0.2"),
+				),
+			},
+			{
+				ResourceName:      "google_vertex_ai_publisher_model_config.gemini_flash",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccVertexAIPublisherModelConfig_projectWide(context map[string]interface{}, state string) string {
+	context["state"] = state
+	return acctest.Nprintf(`
+resource "google_vertex_ai_publisher_model_config" "project_default" {
+  provider = google-beta
+  project  = "%{project}"
+
+  inference_event_logging_config {
+    state = "%{state}"
+  }
+}
+`, context)
+}
+
+func testAccVertexAIPublisherModelConfig_projectWideLogging(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_publisher_model_config" "project_default" {
+  provider = google-beta
+  project  = "%{project}"
+
+  inference_event_logging_config {
+    state = "ENABLED"
+  }
+
+  logging_config {
+    enabled             = true
+    sampling_rate       = 0.25
+    error_sampling_rate = 1
+
+    bigquery_destination {
+      output_uri = "bq://%{project}"
+    }
+  }
+}
+`, context)
+}
+
+func testAccVertexAIPublisherModelConfig_projectWideOtel(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_publisher_model_config" "project_default" {
+  provider = google-beta
+  project  = "%{project}"
+
+  logging_config {
+    enabled             = true
+    enable_otel_logging = true
+
+    bigquery_destination {
+      output_uri = "bq://%{project}"
+    }
+  }
+}
+`, context)
+}
+
+func testAccVertexAIPublisherModelConfig_model(context map[string]interface{}, state string, samplingRate float64) string {
+	context["state"] = state
+	context["sampling_rate"] = samplingRate
+	return acctest.Nprintf(`
+resource "google_vertex_ai_publisher_model_config" "gemini_flash" {
+  provider = google-beta
+  project  = "%{project}"
+
+  location  = "global"
+  publisher = "google"
+  model     = "gemini-3.5-flash"
+
+  inference_event_logging_config {
+    state = "%{state}"
+  }
+
+  logging_config {
+    enabled             = true
+    sampling_rate       = %{sampling_rate}
+    error_sampling_rate = 1
+    enable_otel_logging = false
+
+    bigquery_destination {
+      output_uri = "bq://%{project}.${google_bigquery_dataset.logs.dataset_id}"
+    }
+  }
+}
+
+resource "google_bigquery_dataset" "logs" {
+  provider = google-beta
+  project  = "%{project}"
+
+  dataset_id                 = "tf_test_vertex_ai_request_logs_%{random_suffix}"
+  location                   = "US"
+  delete_contents_on_destroy = true
+}
+`, context)
+}
+{{- end }}
