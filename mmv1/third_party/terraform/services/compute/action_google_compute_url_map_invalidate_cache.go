@@ -80,7 +80,7 @@ func (a *computeUrlMapInvalidateCacheAction) Metadata(_ context.Context, req act
 
 func (a *computeUrlMapInvalidateCacheAction) Schema(_ context.Context, _ action.SchemaRequest, resp *action.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Invalidates Cloud CDN cached content for a global Url map.",
+		Description: "Invalidates Cloud CDN cached content for a global Url map ",
 		MarkdownDescription: "Invalidates Cloud CDN cached content for a global Url map." +
 			"([`urlMaps.invalidateCache`](https://cloud.google.com/compute/docs/reference/rest/v1/urlMaps/invalidateCache)).",
 		Attributes: map[string]schema.Attribute{
@@ -94,7 +94,7 @@ func (a *computeUrlMapInvalidateCacheAction) Schema(_ context.Context, _ action.
 			},
 			"path": schema.StringAttribute{
 				Description: "The path to invalidate. Must start with \"/\" and must not contain \"?\" or \"#\". " +
-					"A \"*\" is allowed only as the final character and matchesevery path with that prefix, so \"/*\" invalidates all content.",
+					"A \"*\" is allowed only as the final character and matches every path with that prefix, so \"/*\" invalidates all content.",
 				Required: true,
 			},
 			"host": schema.StringAttribute{
