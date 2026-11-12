@@ -1,10 +1,14 @@
 package compute
 
 import (
+	"context"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestUnitComputeSubnetworkIpv6ConditionalForceNew(t *testing.T) {
@@ -172,6 +176,134 @@ func TestUnitComputeSubnetworkIpv6ConditionalForceNew(t *testing.T) {
 
 			if d.IsForceNew != tc.ExpectForceNew {
 				t.Errorf("expected IsForceNew to be %v, but was %v", tc.ExpectForceNew, d.IsForceNew)
+			}
+		})
+	}
+}
+
+// Runs the resource's full CustomizeDiff through the SDK planning path, so unknown config values
+// reach the diff the same way they do during terraform plan.
+func TestUnitComputeSubnetworkSecondaryIpRange_planWithUnknowns(t *testing.T) {
+	t.Parallel()
+
+	r := ResourceComputeSubnetwork()
+	block := r.CoreConfigSchema()
+	rangeType := block.BlockTypes["secondary_ip_range"].Block.ImpliedType()
+
+	secondaryRange := func(name, cidr cty.Value) cty.Value {
+		attrs := map[string]cty.Value{}
+		for k, ty := range rangeType.AttributeTypes() {
+			attrs[k] = cty.NullVal(ty)
+		}
+		attrs["range_name"] = name
+		attrs["ip_cidr_range"] = cidr
+		return cty.ObjectVal(attrs)
+	}
+	known := func(name, cidr string) cty.Value {
+		return secondaryRange(cty.StringVal(name), cty.StringVal(cidr))
+	}
+
+	// Builds a full resource object from the given attributes; all other attributes are null.
+	resourceObject := func(attrs map[string]cty.Value) cty.Value {
+		for k, a := range block.Attributes {
+			if _, ok := attrs[k]; !ok {
+				attrs[k] = cty.NullVal(a.Type)
+			}
+		}
+		for k, b := range block.BlockTypes {
+			if _, ok := attrs[k]; !ok {
+				attrs[k] = cty.NullVal(b.ImpliedType())
+			}
+		}
+		return cty.ObjectVal(attrs)
+	}
+	baseAttrs := func(ranges cty.Value) map[string]cty.Value {
+		return map[string]cty.Value{
+			"name":               cty.StringVal("s"),
+			"network":            cty.StringVal("n"),
+			"ip_cidr_range":      cty.StringVal("10.0.0.0/24"),
+			"region":             cty.StringVal("r"),
+			"project":            cty.StringVal("p"),
+			"secondary_ip_range": ranges,
+		}
+	}
+
+	priorAttrs := baseAttrs(cty.ListVal([]cty.Value{known("pods", "10.1.0.0/25"), known("services", "10.2.0.0/24")}))
+	priorAttrs["id"] = cty.StringVal("projects/p/regions/r/subnetworks/s")
+	priorAttrs["deletion_policy"] = cty.StringVal("DELETE")
+	prior := resourceObject(priorAttrs)
+
+	cases := map[string]struct {
+		Ranges cty.Value
+		// Expected planned values for changed secondary_ip_range attributes; "unknown" means computed.
+		Expect map[string]string
+	}{
+		"unchanged": {
+			Ranges: cty.ListVal([]cty.Value{known("pods", "10.1.0.0/25"), known("services", "10.2.0.0/24")}),
+		},
+		"reordered": {
+			Ranges: cty.ListVal([]cty.Value{known("services", "10.2.0.0/24"), known("pods", "10.1.0.0/25")}),
+		},
+		"omitted cidr inherits state": {
+			Ranges: cty.ListVal([]cty.Value{secondaryRange(cty.StringVal("pods"), cty.NullVal(cty.String)), known("services", "10.2.0.0/24")}),
+		},
+		"known cidr change": {
+			Ranges: cty.ListVal([]cty.Value{known("pods", "10.1.0.0/24"), known("services", "10.2.0.0/24")}),
+			Expect: map[string]string{"secondary_ip_range.0.ip_cidr_range": "10.1.0.0/24"},
+		},
+		"unknown cidr": {
+			Ranges: cty.ListVal([]cty.Value{secondaryRange(cty.StringVal("pods"), cty.UnknownVal(cty.String)), known("services", "10.2.0.0/24")}),
+			Expect: map[string]string{"secondary_ip_range.0.ip_cidr_range": "unknown"},
+		},
+		"unknown cidr reordered": {
+			Ranges: cty.ListVal([]cty.Value{known("services", "10.2.0.0/24"), secondaryRange(cty.StringVal("pods"), cty.UnknownVal(cty.String))}),
+			Expect: map[string]string{"secondary_ip_range.0.ip_cidr_range": "unknown"},
+		},
+		"unknown range name": {
+			Ranges: cty.ListVal([]cty.Value{secondaryRange(cty.UnknownVal(cty.String), cty.StringVal("10.1.0.0/25")), known("services", "10.2.0.0/24")}),
+			Expect: map[string]string{"secondary_ip_range.0.range_name": "unknown"},
+		},
+		"unknown list": {
+			Ranges: cty.UnknownVal(cty.List(rangeType)),
+			Expect: map[string]string{"secondary_ip_range.#": "unknown"},
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			config := resourceObject(baseAttrs(tc.Ranges))
+			state, err := r.ShimInstanceStateFromValue(prior)
+			if err != nil {
+				t.Fatalf("unexpected error: %s", err)
+			}
+			state.RawState = prior
+			state.RawConfig = config
+			state.RawPlan = config
+
+			meta := &transport_tpg.Config{Project: "p", Region: "r"}
+			d, err := r.SimpleDiff(context.Background(), state, terraform.NewResourceConfigShimmed(config, block), meta)
+			if err != nil {
+				t.Fatalf("unexpected error: %s", err)
+			}
+
+			got := map[string]string{}
+			for k, a := range d.Attributes {
+				if !strings.HasPrefix(k, "secondary_ip_range") {
+					continue
+				}
+				if a.NewComputed {
+					got[k] = "unknown"
+				} else if a.Old != a.New {
+					got[k] = a.New
+				}
+			}
+			if len(got) != len(tc.Expect) {
+				t.Fatalf("expected secondary_ip_range changes %v, got %v", tc.Expect, got)
+			}
+			for k, v := range tc.Expect {
+				if got[k] != v {
+					t.Fatalf("expected secondary_ip_range changes %v, got %v", tc.Expect, got)
+				}
 			}
 		})
 	}
