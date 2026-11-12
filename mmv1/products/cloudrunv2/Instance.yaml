@@ -465,6 +465,10 @@ properties:
           type: Boolean
           description: |-
             Indicates that this container can act as a sandbox supervisor and launch sandboxes.
+        - name: 'sandboxLauncher'
+          type: Boolean
+          description: |-
+            Indicates that this container can act as a sandbox supervisor and launch sandboxes.
         - name: 'volumeMounts'
           type: Array
           description: |-
