@@ -54,21 +54,6 @@ sweeper:
     - region: "us-east4"
     - region: "us-west4"
 samples:
-  - name: cloudrunv2_instance_sandbox_templates
-    primary_resource_id: default
-    steps:
-      - name: cloudrunv2_instance_sandbox_templates
-        resource_id_vars:
-          cloud_run_instance_name: cloudrun-example
-        ignore_read_extra:
-          - deletion_protection
-          - conditions
-      - name: cloudrunv2_instance_sandbox_templates_update
-        resource_id_vars:
-          cloud_run_instance_name: cloudrun-example
-        ignore_read_extra:
-          - deletion_protection
-          - conditions
   - name: 'cloudrunv2_instance_basic'
     primary_resource_id: 'default'
     steps:
@@ -186,6 +171,19 @@ samples:
           kms_key_name: 'my-key'
         test_vars_overrides:
           kms_key_name: 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-west4", "tf-bootstrap-cloudrun-cmek").CryptoKey.Name'
+        ignore_read_extra:
+          - 'conditions'
+  - name: 'cloudrunv2_instance_sandbox_templates'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'cloudrunv2_instance_sandbox_templates'
+        resource_id_vars:
+          cloud_run_instance_name: 'cloudrun-instance'
+        ignore_read_extra:
+          - 'conditions'
+      - name: 'cloudrunv2_instance_sandbox_templates_update'
+        resource_id_vars:
+          cloud_run_instance_name: 'cloudrun-instance'
         ignore_read_extra:
           - 'conditions'
 parameters:
@@ -463,6 +461,10 @@ properties:
                 description: |-
                   Port number the container listens on. This must be a valid TCP port number, 0 < containerPort < 65536.
                 default_from_api: true
+        - name: 'sandboxLauncher'
+          type: Boolean
+          description: |-
+            Indicates that this container can act as a sandbox supervisor and launch sandboxes.
         - name: 'volumeMounts'
           type: Array
           description: |-

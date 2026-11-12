@@ -52,19 +52,6 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/cloudrunv2_worker_pool_deletion_policy.go.tmpl'
 taint_resource_on_failed_create: true
 samples:
-  - name: cloudrunv2_worker_pool_sandbox_templates
-    primary_resource_id: default
-    steps:
-      - name: cloudrunv2_worker_pool_sandbox_templates
-        resource_id_vars:
-          cloud_run_worker_pool_name: cloudrun-example
-        ignore_read_extra:
-          - deletion_protection
-      - name: cloudrunv2_worker_pool_sandbox_templates_update
-        resource_id_vars:
-          cloud_run_worker_pool_name: cloudrun-example
-        ignore_read_extra:
-          - deletion_protection
   - name: 'cloudrunv2_worker_pool_basic'
     primary_resource_id: 'default'
     steps:
@@ -177,6 +164,19 @@ samples:
           vpc_access_connector_name: 'wp-connector'
           compute_network_name: 'wp-net'
           vpc_compute_subnetwork_name: 'wp-subnet'
+        ignore_read_extra:
+          - 'deletion_protection'
+  - name: 'cloudrunv2_worker_pool_sandbox_templates'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'cloudrunv2_worker_pool_sandbox_templates'
+        resource_id_vars:
+          cloud_run_worker_pool_name: 'cloudrun-example'
+        ignore_read_extra:
+          - 'deletion_protection'
+      - name: 'cloudrunv2_worker_pool_sandbox_templates_update'
+        resource_id_vars:
+          cloud_run_worker_pool_name: 'cloudrun-example'
         ignore_read_extra:
           - 'deletion_protection'
 virtual_fields:
