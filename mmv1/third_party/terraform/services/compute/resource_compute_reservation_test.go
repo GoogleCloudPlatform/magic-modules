@@ -228,3 +228,45 @@ resource "google_compute_reservation" "reservation" {
 }
 `, context)
 }
+
+func TestAccComputeReservation_enableEmergentMaintenance(t *testing.T) {
+	t.Parallel()
+
+	reservationName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeReservationDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeReservation_enableEmergentMaintenance(reservationName),
+			},
+			{
+				ResourceName:            "google_compute_reservation.reservation",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"enable_emergent_maintenance"},
+			},
+		},
+	})
+}
+
+func testAccComputeReservation_enableEmergentMaintenance(reservationName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_reservation" "reservation" {
+  name = "%s"
+  zone = "us-central1-a"
+
+  specific_reservation {
+    count = 1
+    instance_properties {
+      min_cpu_platform = "Intel Cascade Lake"
+      machine_type     = "n2-standard-2"
+    }
+  }
+
+  enable_emergent_maintenance = true
+}
+`, reservationName)
+}
