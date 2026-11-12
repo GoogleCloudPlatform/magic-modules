@@ -1,6 +1,7 @@
 package dataproc
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -10,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -208,6 +210,7 @@ func ResourceDataprocCluster() *schema.Resource {
 			tpgresource.DefaultProviderProject,
 			// User labels are not supported in Dataproc Virtual Cluster
 			tpgresource.SetLabelsDiffWithoutAttributionLabel,
+			secondaryWorkerFlexibleConfigForceNew,
 		),
 
 		SchemaVersion: 1,
@@ -2547,20 +2550,20 @@ by Dataproc`,
 										Type:         schema.TypeInt,
 										Required:     true,
 										ValidateFunc: validation.IntInSlice([]int{2, 4, 8, 16, 32}),
-										Description:  `The number of vCPUs per instance. Must be a power of 2: 2, 4, 8, 16, or 32. Cannot be changed after the secondary worker group exists; Dataproc rejects the update.`,
+										Description:  `The number of vCPUs per instance. Must be a power of 2: 2, 4, 8, 16, or 32. Changing this on an existing secondary worker group forces a new resource to be created.`,
 									},
 									"hardware_class": {
 										Type:         schema.TypeString,
 										Optional:     true,
 										Default:      "STANDARD",
 										ValidateFunc: validation.StringInSlice([]string{"STANDARD", "PERFORMANCE"}, false),
-										Description:  `The hardware class of instances. Allowed values are "STANDARD" and "PERFORMANCE". Defaults to "STANDARD". Cannot be changed after the secondary worker group exists; Dataproc rejects the update.`,
+										Description:  `The hardware class of instances. Allowed values are "STANDARD" and "PERFORMANCE". Defaults to "STANDARD". Changing this on an existing secondary worker group forces a new resource to be created.`,
 									},
 									"boot_disk_size_gb": {
 										Type:        schema.TypeInt,
 										Optional:    true,
 										Computed:    true,
-										Description: `The boot disk size in GB. Cannot be changed after the secondary worker group exists; Dataproc rejects the update.`,
+										Description: `The boot disk size in GB. Changing this on an existing secondary worker group forces a new resource to be created.`,
 									},
 								},
 							},
@@ -2574,6 +2577,44 @@ by Dataproc`,
 		},
 		UseJSONNumber: true,
 	}
+}
+
+// secondaryWorkerFlexibleConfigForceNew forces replacement for known
+// secondary_worker_flexible_config shape changes that Dataproc can't make in
+// place: a changed shape on an existing group, or a group added after creation
+// with a shape that differs from worker_flexible_config. Unknown and unset values
+// are left to the API.
+func secondaryWorkerFlexibleConfigForceNew(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	const sec = "cluster_config.0.secondary_worker_flexible_config"
+	oldSec, newSec := d.GetChange(sec)
+	if d.Id() == "" || len(newSec.([]interface{})) == 0 {
+		return nil
+	}
+	// The block is Optional+Computed: when it is not in config, nothing changes.
+	if raw := d.GetRawConfig(); !raw.IsNull() && raw.IsKnown() {
+		block, err := cty.GetAttrPath("cluster_config").IndexInt(0).GetAttr("secondary_worker_flexible_config").Apply(raw)
+		if err != nil || block.IsNull() || (block.IsKnown() && block.LengthInt() == 0) {
+			return nil
+		}
+	}
+	added := len(oldSec.([]interface{})) == 0
+	for _, field := range []string{"core_count", "hardware_class", "boot_disk_size_gb"} {
+		key := sec + ".0." + field
+		current, want := d.GetChange(key)
+		if added {
+			if !d.NewValueKnown("cluster_config.0.worker_flexible_config.0." + field) {
+				continue
+			}
+			current = d.Get("cluster_config.0.worker_flexible_config.0." + field)
+		}
+		if !d.NewValueKnown(key) || current == want || current == 0 || current == "" || want == 0 || want == "" {
+			continue
+		}
+		if err := d.ForceNew(key); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // We need to pull metrics' schema out so we can use it to make a set hash func

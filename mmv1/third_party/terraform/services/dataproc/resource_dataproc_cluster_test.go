@@ -4284,14 +4284,6 @@ func TestAccDataprocCluster_flexibleConfigSecondaryUpdate(t *testing.T) {
 	var cluster dataproc.Cluster
 	rnd := acctest.RandString(t, 10)
 	name := "google_dataproc_cluster.flexible_secondary"
-	secondary := func(numInstances, coreCount int) string {
-		return fmt.Sprintf(`
-    secondary_worker_flexible_config {
-      num_instances     = %d
-      core_count        = %d
-      boot_disk_size_gb = 100
-    }`, numInstances, coreCount)
-	}
 	expectUpdate := resource.ConfigPlanChecks{
 		PreApply: []plancheck.PlanCheck{
 			plancheck.ExpectResourceAction(name, plancheck.ResourceActionUpdate),
@@ -4303,18 +4295,11 @@ func TestAccDataprocCluster_flexibleConfigSecondaryUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataprocCluster_flexibleConfigSecondary(rnd, ""),
+				Config: testAccDataprocCluster_flexibleConfigNoSecondary(rnd),
 				Check:  testAccCheckDataprocClusterExists(t, name, &cluster),
 			},
 			{
-				// A group added after creation gets the worker_flexible_config shape,
-				// so a different shape is rejected by the API.
-				Config:           testAccDataprocCluster_flexibleConfigSecondary(rnd, secondary(2, 8)),
-				ConfigPlanChecks: expectUpdate,
-				ExpectError:      regexp.MustCompile(`FieldMask path 'config.secondary_worker_flexible_config.core_count' must be one of`),
-			},
-			{
-				Config:           testAccDataprocCluster_flexibleConfigSecondary(rnd, secondary(2, 4)),
+				Config:           testAccDataprocCluster_flexibleConfigWithSecondary(rnd, 2, 4),
 				ConfigPlanChecks: expectUpdate,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, name, &cluster),
@@ -4325,36 +4310,68 @@ func TestAccDataprocCluster_flexibleConfigSecondaryUpdate(t *testing.T) {
 				),
 			},
 			{
-				Config:           testAccDataprocCluster_flexibleConfigSecondary(rnd, secondary(1, 4)),
+				Config:           testAccDataprocCluster_flexibleConfigWithSecondary(rnd, 1, 4),
 				ConfigPlanChecks: expectUpdate,
 				Check:            resource.TestCheckResourceAttr(name, "cluster_config.0.secondary_worker_flexible_config.0.num_instances", "1"),
 			},
 			{
-				Config:           testAccDataprocCluster_flexibleConfigSecondary(rnd, secondary(0, 4)),
+				Config:           testAccDataprocCluster_flexibleConfigWithSecondary(rnd, 0, 4),
 				ConfigPlanChecks: expectUpdate,
 				Check:            resource.TestCheckResourceAttr(name, "cluster_config.0.secondary_worker_flexible_config.0.num_instances", "0"),
 			},
 			{
 				// Removing the block does not change the cluster; set num_instances = 0 to scale down.
-				Config:   testAccDataprocCluster_flexibleConfigSecondary(rnd, ""),
+				Config:   testAccDataprocCluster_flexibleConfigNoSecondary(rnd),
 				PlanOnly: true,
 			},
 			{
-				Config:           testAccDataprocCluster_flexibleConfigSecondary(rnd, secondary(1, 4)),
+				Config:           testAccDataprocCluster_flexibleConfigWithSecondary(rnd, 1, 4),
 				ConfigPlanChecks: expectUpdate,
 				Check:            resource.TestCheckResourceAttr(name, "cluster_config.0.secondary_worker_flexible_config.0.num_instances", "1"),
 			},
 			{
 				// The shape of an existing group cannot be changed in place.
-				Config:           testAccDataprocCluster_flexibleConfigSecondary(rnd, secondary(1, 8)),
-				ConfigPlanChecks: expectUpdate,
-				ExpectError:      regexp.MustCompile(`FieldMask path 'config.secondary_worker_flexible_config.core_count' must be one of`),
+				Config: testAccDataprocCluster_flexibleConfigWithSecondary(rnd, 1, 8),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(name, plancheck.ResourceActionReplace),
+					},
+				},
+				Check: resource.TestCheckResourceAttr(name, "cluster_config.0.secondary_worker_flexible_config.0.core_count", "8"),
 			},
 		},
 	})
 }
 
-func testAccDataprocCluster_flexibleConfigSecondary(rnd, secondary string) string {
+func TestAccDataprocCluster_flexibleConfigSecondaryAddMismatch(t *testing.T) {
+	t.Parallel()
+
+	rnd := acctest.RandString(t, 10)
+	name := "google_dataproc_cluster.flexible_secondary"
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_flexibleConfigNoSecondary(rnd),
+			},
+			{
+				// A group added after creation gets the worker_flexible_config shape,
+				// so adding one with a different shape replaces the cluster.
+				Config: testAccDataprocCluster_flexibleConfigWithSecondary(rnd, 1, 8),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(name, plancheck.ResourceActionReplace),
+					},
+				},
+				Check: resource.TestCheckResourceAttr(name, "cluster_config.0.secondary_worker_flexible_config.0.core_count", "8"),
+			},
+		},
+	})
+}
+
+func testAccDataprocCluster_flexibleConfigNoSecondary(rnd string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "flexible_secondary" {
   name                          = "tf-test-dproc-%s"
@@ -4371,10 +4388,37 @@ resource "google_dataproc_cluster" "flexible_secondary" {
       core_count        = 4
       boot_disk_size_gb = 100
     }
-%s
   }
 }
-`, rnd, secondary)
+`, rnd)
+}
+
+func testAccDataprocCluster_flexibleConfigWithSecondary(rnd string, numInstances, coreCount int) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "flexible_secondary" {
+  name                          = "tf-test-dproc-%s"
+  region                        = "us-central1"
+  graceful_decommission_timeout = "0.2s"
+
+  cluster_config {
+    master_flexible_config {
+      core_count = 2
+    }
+
+    worker_flexible_config {
+      num_instances     = 2
+      core_count        = 4
+      boot_disk_size_gb = 100
+    }
+
+    secondary_worker_flexible_config {
+      num_instances     = %d
+      core_count        = %d
+      boot_disk_size_gb = 100
+    }
+  }
+}
+`, rnd, numInstances, coreCount)
 }
 
 func TestAccDataprocCluster_flexibleConfigDefaults(t *testing.T) {

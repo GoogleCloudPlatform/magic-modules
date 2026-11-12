@@ -922,29 +922,30 @@ cluster_config {
 }
 ```
 
--> **Note:** Changes to this block are applied in place with a
+-> **Note:** Dataproc can only change `num_instances` in place, with a
 [`clusters.patch`](https://cloud.google.com/dataproc/docs/reference/rest/v1/projects.regions.clusters/patch)
-request, never by recreating the cluster. Dataproc can only change `num_instances` in place; the
-shape fields (`core_count`, `hardware_class` and `boot_disk_size_gb`) are
+request. The shape fields (`core_count`, `hardware_class` and `boot_disk_size_gb`) are
 [fixed at creation](https://cloud.google.com/dataproc/docs/reference/rest/v1/ClusterConfig#FlexibleInstanceGroupConfig),
-so changing them makes the apply fail with an error from the API. To change them, recreate the
-cluster, for example with `terraform apply -replace`. You can add this block to an
-existing cluster that uses `worker_flexible_config`: Dataproc creates the secondary workers with the
-`worker_flexible_config` shape, so the shape fields must match it. Removing the block from your
+so changing them recreates the cluster. You can add this block to an existing cluster that uses
+`worker_flexible_config` in place: Dataproc creates the secondary workers with the
+`worker_flexible_config` shape, so adding the block with a different shape also recreates the
+cluster. If a shape value is only known after apply, Terraform can't tell this at plan time; the
+apply then fails with an error from the API, and you can recreate the cluster with
+`terraform apply -replace`. Removing the block from your
 configuration does not change the cluster; set `num_instances = 0` to remove all secondary workers.
 
 * `num_instances` - (Optional) Specifies the number of secondary worker instances to create.
    Defaults to `0`; can be scaled down to `0`; updatable in place.
 
 * `core_count` - (Required) The number of vCPUs per instance. Must be a power of 2
-   (2, 4, 8, 16, or 32). Cannot be changed once the secondary worker group exists.
+   (2, 4, 8, 16, or 32). Changing this on an existing secondary worker group forces a new resource to be created.
 
 * `hardware_class` - (Optional) Controls the hardware class for the flexible instance group.
    Allowed values are `"STANDARD"` and `"PERFORMANCE"`. Defaults to `"STANDARD"`.
-   Cannot be changed once the secondary worker group exists.
+   Changing this on an existing secondary worker group forces a new resource to be created.
 
-* `boot_disk_size_gb` - (Optional) The boot disk size in GB. Cannot be changed once the
-   secondary worker group exists.
+* `boot_disk_size_gb` - (Optional) The boot disk size in GB. Changing this on an existing
+   secondary worker group forces a new resource to be created.
 - - -
 
 <a name="nested_software_config"></a>The `cluster_config.software_config` block supports:
