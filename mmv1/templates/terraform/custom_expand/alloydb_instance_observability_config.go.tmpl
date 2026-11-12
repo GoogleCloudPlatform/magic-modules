@@ -59,6 +59,7 @@ func expandAlloydbInstanceObservabilityConfig(v interface{}, d tpgresource.Terra
 		transformed["trackActiveQueries"] = transformedTrackActiveQueries
 	}
 
+{{- if ne $.ResourceMetadata.TargetVersionName "ga" }}
 	transformedTrackClientAddress, err := expandAlloydbInstanceObservabilityConfigTrackClientAddress(original["track_client_address"], d, config)
 	if err != nil {
 		return nil, err
@@ -72,7 +73,7 @@ func expandAlloydbInstanceObservabilityConfig(v interface{}, d tpgresource.Terra
 	} else if transformedAssistiveExperiencesEnabled != nil {
 		transformed["assistiveExperiencesEnabled"] = transformedAssistiveExperiencesEnabled
 	}
-  log.Printf("vkanishk: expandAlloydbInstanceObservabilityConfig transformed %v", transformed)
+{{- end }}
 	return transformed, nil
 }
 
@@ -86,10 +87,6 @@ func expandAlloydbInstanceObservabilityConfigPreserveComments(v interface{}, d t
 }
 
 func expandAlloydbInstanceObservabilityConfigTrackWaitEvents(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	return v, nil
-}
-
-func expandAlloydbInstanceObservabilityConfigTrackWaitEventTypes(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
 
@@ -109,6 +106,7 @@ func expandAlloydbInstanceObservabilityConfigTrackActiveQueries(v interface{}, d
 	return v, nil
 }
 
+{{- if ne $.ResourceMetadata.TargetVersionName "ga" }}
 func expandAlloydbInstanceObservabilityConfigTrackClientAddress(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
@@ -116,3 +114,4 @@ func expandAlloydbInstanceObservabilityConfigTrackClientAddress(v interface{}, d
 func expandAlloydbInstanceObservabilityConfigAssistiveExperiencesEnabled(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	return v, nil
 }
+{{- end }}
