@@ -39,6 +39,21 @@ samples:
           project: 'my-project-name'
           space: 'example-space'
           application_template_revision_uri: 'projects/my-project-name/locations/us-central1/spaces/example-space/applicationTemplates/example-template/revisions/r-1'
+        test_vars_overrides:
+          project: 'BootstrapDesignCenterProject(t)'
+          space: 'BootstrapDesignCenterSpace(t)'
+          application_template_revision_uri: 'BootstrapDesignCenterApplicationTemplateRevisionURI(t)'
+  - name: 'designcenter_application_full'
+    primary_resource_id: 'example'
+    exclude_basic_doc: true
+    steps:
+      - name: 'designcenter_application_full'
+        resource_id_vars:
+          application_id: 'example-full-application'
+        vars:
+          project: 'my-project-name'
+          space: 'example-space'
+          application_template_revision_uri: 'projects/my-project-name/locations/us-central1/spaces/example-space/applicationTemplates/example-template/revisions/r-1'
           service_account: 'projects/my-project-name/serviceAccounts/deployer@my-project-name.iam.gserviceaccount.com'
         test_vars_overrides:
           project: 'BootstrapDesignCenterProject(t)'
@@ -47,7 +62,7 @@ samples:
           service_account: 'BootstrapDesignCenterApplicationServiceAccount(t)'
       - name: 'designcenter_application_update'
         resource_id_vars:
-          application_id: 'example-application'
+          application_id: 'example-full-application'
         vars:
           project: 'my-project-name'
           space: 'example-space'
@@ -131,16 +146,11 @@ properties:
           description: |
             The key of the parameter.
         - name: 'value'
-          type: String
+          type: JsonValue
           description: |
             The value of the parameter, as a JSON-encoded string. Use
             `jsonencode()` to set it.
           send_empty_value: true
-          state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-          custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-          custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-          validation:
-            function: 'validation.StringIsJSON'
   - name: 'componentParameters'
     type: Array
     default_from_api: true
@@ -168,16 +178,11 @@ properties:
                 description: |
                   The key of the parameter.
               - name: 'value'
-                type: String
+                type: JsonValue
                 description: |
                   The value of the parameter, as a JSON-encoded string. Use
                   `jsonencode()` to set it.
                 send_empty_value: true
-                state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-                validation:
-                  function: 'validation.StringIsJSON'
         - name: 'state'
           type: String
           output: true
@@ -301,16 +306,11 @@ properties:
                 description: |
                   The key of the parameter.
               - name: 'value'
-                type: String
+                type: JsonValue
                 description: |
                   The value of the parameter, as a JSON-encoded string. Use
                   `jsonencode()` to set it.
                 send_empty_value: true
-                state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-                validation:
-                  function: 'validation.StringIsJSON'
         - name: 'destinationComponentParameters'
           type: Array
           description: |
@@ -325,16 +325,11 @@ properties:
                 description: |
                   The key of the parameter.
               - name: 'value'
-                type: String
+                type: JsonValue
                 description: |
                   The value of the parameter, as a JSON-encoded string. Use
                   `jsonencode()` to set it.
                 send_empty_value: true
-                state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-                validation:
-                  function: 'validation.StringIsJSON'
   - name: 'deploymentTarget'
     type: NestedObject
     description: |
@@ -481,11 +476,10 @@ properties:
                     description: |
                       The key of the parameter.
                   - name: 'value'
-                    type: String
+                    type: JsonValue
                     output: true
                     description: |
                       The value of the parameter, as a JSON-encoded string.
-                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
       - name: 'error'
         type: NestedObject
         output: true
