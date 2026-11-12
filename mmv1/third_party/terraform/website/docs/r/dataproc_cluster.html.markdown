@@ -937,7 +937,6 @@ request. The shape fields (`core_count`, `hardware_class` and `boot_disk_size_gb
 [fixed at creation](https://cloud.google.com/dataproc/docs/reference/rest/v1/ClusterConfig#FlexibleInstanceGroupConfig),
 so changing them recreates the cluster **unless** `worker_flexible_config` is set and the shape
 fields in `secondary_worker_flexible_config` exactly match the equivalent fields in `worker_flexible_config`.
-Shape fields that are only known after apply also recreate the cluster.
 
 -> **Note:** Removing the block from your configuration does not change the cluster; set `num_instances = 0`
 to remove all secondary workers.
