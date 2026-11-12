@@ -3,7 +3,7 @@ if err != nil {
 	return err
 }
 
-// --- Begin Custom Code: Unpack full cluster self-link and acquire per-user mutex lock ---
+// --- Begin Custom Code: Unpack full cluster self-link, acquire per-user mutex, and guard acquire-on-create ---
 // If the user passed a full cluster resource ID (projects/{p}/locations/{r}/clusters/{c})
 // instead of a short cluster name, extract project, region, and the short cluster name.
 cluster := d.Get("cluster").(string)
@@ -26,14 +26,31 @@ if err != nil {
 transport_tpg.MutexStore.Lock(lockName)
 defer transport_tpg.MutexStore.Unlock(lockName)
 
-requestedTokenId := ""
+// Creating a cluster (for "default") or a TokenAuthUser automatically provisions an initial
+// "version-1" token on the server. Because :addAuthToken generates token IDs server-side,
+// specifying token_id on create strictly acquires that existing token and exits early.
 if v, ok := d.GetOk("token_id"); ok && v.(string) != "" {
-	requestedTokenId = tpgresource.GetResourceNameFromSelfLink(v.(string))
-}
-
-listUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}RedisBasePath{{"}}" }}projects/{{"{{"}}project{{"}}" }}/locations/{{"{{"}}region{{"}}" }}/clusters/{{"{{"}}cluster{{"}}" }}/tokenAuthUsers/{{"{{"}}user_id{{"}}" }}/authTokens")
-if err != nil {
-	return err
+	requestedTokenId := tpgresource.GetResourceNameFromSelfLink(v.(string))
+	if err := d.Set("token_id", requestedTokenId); err != nil {
+		return fmt.Errorf("Error setting token_id: %s", err)
+	}
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}" }}/locations/{{"{{"}}region{{"}}" }}/clusters/{{"{{"}}cluster{{"}}" }}/tokenAuthUsers/{{"{{"}}user_id{{"}}" }}/authTokens/{{"{{"}}token_id{{"}}" }}")
+	if err != nil {
+		return fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+	if err := resourceRedisClusterAuthTokenRead(d, meta); err != nil {
+		d.SetId("")
+		return err
+	}
+	if d.Id() == "" {
+		return fmt.Errorf("Error acquiring AuthToken %q: token was not found (omit token_id to create a new token)", id)
+	}
+	if name, ok := d.GetOk("name"); ok && name.(string) != "" {
+		d.SetId(name.(string))
+	}
+	log.Printf("[DEBUG] Acquired existing AuthToken %q", d.Id())
+	return nil
 }
 // --- End Custom Code ---
 
@@ -47,50 +64,12 @@ if err != nil {
 	return fmt.Errorf("Error fetching project for AuthToken: %s", err)
 }
 billingProject := project
-if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(listUrl); parts != nil {
+if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
 	billingProject = parts[1]
 }
 if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 	billingProject = bp
 }
-
-// --- Begin Custom Code: Acquire existing AuthToken (e.g. initial version-1) if token_id is specified ---
-// Creating a cluster (for "default") or a TokenAuthUser automatically provisions an initial
-// "version-1" token on the server. When token_id is explicitly specified in configuration and
-// matches an existing active token for the user, adopt that token into state instead of calling :addAuthToken.
-if requestedTokenId != "" {
-	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "GET",
-		Project:   billingProject,
-		RawURL:    listUrl,
-		UserAgent: userAgent,
-	})
-	if err != nil {
-		return fmt.Errorf("Error listing authTokens for %s: %s", listUrl, err)
-	}
-	if tokens, ok := res["authTokens"].([]interface{}); ok {
-		for _, t := range tokens {
-			tokenMap, ok := t.(map[string]interface{})
-			if !ok {
-				continue
-			}
-			name, _ := tokenMap["name"].(string)
-			if tpgresource.GetResourceNameFromSelfLink(name) == requestedTokenId {
-				d.SetId(name)
-				if err := d.Set("name", name); err != nil {
-					return fmt.Errorf("Error setting name: %s", err)
-				}
-				if err := d.Set("token_id", requestedTokenId); err != nil {
-					return fmt.Errorf("Error setting token_id: %s", err)
-				}
-				log.Printf("[DEBUG] Acquired existing AuthToken %q", d.Id())
-				return resourceRedisClusterAuthTokenRead(d, meta)
-			}
-		}
-	}
-}
-// --- End Custom Code ---
 
 res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 	Config:    config,
@@ -115,6 +94,10 @@ if err != nil {
 // The :addAuthToken LRO response returns the parent TokenAuthUser rather than the newly created
 // AuthToken, and the server auto-assigns the sequential version-N ID. List the user's tokens
 // after the LRO completes to determine the newly created token's name and token_id.
+listUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}RedisBasePath{{"}}" }}projects/{{"{{"}}project{{"}}" }}/locations/{{"{{"}}region{{"}}" }}/clusters/{{"{{"}}cluster{{"}}" }}/tokenAuthUsers/{{"{{"}}user_id{{"}}" }}/authTokens")
+if err != nil {
+	return err
+}
 listRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 	Config:    config,
 	Method:    "GET",
@@ -126,44 +109,13 @@ if err != nil {
 	return fmt.Errorf("Error listing authTokens for %s: %s", listUrl, err)
 }
 
-var matchedToken map[string]interface{}
-if tokens, ok := listRes["authTokens"].([]interface{}); ok && len(tokens) > 0 {
-	if requestedTokenId != "" {
-		for _, t := range tokens {
-			if tm, ok := t.(map[string]interface{}); ok {
-				if name, ok := tm["name"].(string); ok && tpgresource.GetResourceNameFromSelfLink(name) == requestedTokenId {
-					matchedToken = tm
-					break
-				}
-			}
-		}
-		if matchedToken == nil {
-			return fmt.Errorf("Created token %q not found in authTokens list", requestedTokenId)
-		}
-	} else {
-		maxVersion := -1
-		for _, t := range tokens {
-			if tm, ok := t.(map[string]interface{}); ok {
-				if name, ok := tm["name"].(string); ok {
-					tokenId := tpgresource.GetResourceNameFromSelfLink(name)
-					var vNum int
-					if _, err := fmt.Sscanf(tokenId, "version-%d", &vNum); err == nil {
-						if vNum > maxVersion {
-							maxVersion = vNum
-							matchedToken = tm
-						}
-					} else if matchedToken == nil {
-						matchedToken = tm
-					}
-				}
-			}
-		}
-		if matchedToken == nil {
-			matchedToken = tokens[len(tokens)-1].(map[string]interface{})
-		}
-	}
-} else {
+tokens, ok := listRes["authTokens"].([]interface{})
+if !ok || len(tokens) == 0 {
 	return fmt.Errorf("No authTokens returned after create for %s", listUrl)
+}
+matchedToken, err := latestRedisClusterAuthToken(tokens)
+if err != nil {
+	return fmt.Errorf("Error finding newly created AuthToken for %s: %s", listUrl, err)
 }
 
 tokenName, ok := matchedToken["name"].(string)

@@ -1,0 +1,38 @@
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
+func latestRedisClusterAuthToken(tokens []interface{}) (map[string]interface{}, error) {
+	if len(tokens) == 0 {
+		return nil, fmt.Errorf("no authTokens found in response")
+	}
+
+	var matchedToken map[string]interface{}
+	maxVersion := -1
+	for _, t := range tokens {
+		tm, ok := t.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		name, ok := tm["name"].(string)
+		if !ok {
+			continue
+		}
+		tokenId := tpgresource.GetResourceNameFromSelfLink(name)
+		var vNum int
+		if _, err := fmt.Sscanf(tokenId, "version-%d", &vNum); err == nil {
+			if vNum > maxVersion {
+				maxVersion = vNum
+				matchedToken = tm
+			}
+		} else if matchedToken == nil {
+			matchedToken = tm
+		}
+	}
+	if matchedToken == nil {
+		fallback, ok := tokens[len(tokens)-1].(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("invalid authToken entry in response")
+		}
+		matchedToken = fallback
+	}
+	return matchedToken, nil
+}
+{{- end }}

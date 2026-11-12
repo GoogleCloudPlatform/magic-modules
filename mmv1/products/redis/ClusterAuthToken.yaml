@@ -12,18 +12,19 @@
 # limitations under the License.
 ---
 name: ClusterAuthToken
-description: Represents an Auth Token for a Token Auth User within a Google Cloud Redis Cluster.
+description: |
+  Represents an Auth Token for a Token Auth User within a Google Cloud Redis Cluster.
+
+  When token-based authentication (`AUTH_MODE_TOKEN_AUTH`) is enabled on a cluster (for the `default` user) or when a `google_redis_cluster_token_auth_user` is created, an initial token (`version-1`) is automatically created by the API. Setting `token_id` on create (for example, `token_id = "version-1"`) acquires and manages that existing token in Terraform state instead of creating a new one, returning an error if no token with that ID exists. Omitting `token_id` creates a new server-assigned token version (`version-N`).
+
+  Each user can have at most 2 active tokens at a time and must retain at least 1 active token. To perform zero-downtime token rotation, declare two `google_redis_cluster_auth_token` resources (acquiring `version-1` with `token_id = "version-1"` on the first resource and creating `version-2` by omitting `token_id` on the second), update client applications to use the new token, and then remove the old token resource from the Terraform configuration.
 references:
   guides:
     Official Documentation: https://cloud.google.com/memorystore/docs/cluster/
   api: https://cloud.google.com/memorystore/docs/cluster/reference/rest/v1/projects.locations.clusters
 docs:
   note: |
-    When token-based authentication (`AUTH_MODE_TOKEN_AUTH`) is enabled on a cluster (for the `default` user) or when a `google_redis_cluster_token_auth_user` is created, an initial token (`version-1`) is automatically created by the API.
-
-    Each user can have at most 2 active tokens at a time and must have at least 1 active token (deleting the sole remaining token for a user is rejected by the API; to abandon the last remaining token from Terraform state without calling the delete API—for example before destroying the parent user or cluster—set `deletion_policy = "ABANDON"`).
-
-    To perform zero-downtime token rotation: declare two `google_redis_cluster_auth_token` resources (acquiring the existing `version-1` token with `token_id = "version-1"` on the first resource and creating `version-2` with the second resource), update client applications to use the new token, and then remove the old token resource from the Terraform configuration.
+    Deleting the sole remaining token for a user is rejected by the API. Set `deletion_policy = "ABANDON"` to remove a user's last remaining token from Terraform state without calling the delete API (for example, before destroying the parent user or cluster).
 supports_indirect_user_project_override: true
 immutable: true
 # A per-user mutex lock is required because :addAuthToken and DELETE transition the parent
@@ -42,6 +43,7 @@ async:
   operation:
     base_url: '{{op_id}}'
 custom_code:
+  constants: templates/terraform/constants/redis_auth_token.go.tmpl
   custom_create: templates/terraform/custom_create/redis_auth_token.go.tmpl
   encoder: templates/terraform/encoders/redis_auth_token.go.tmpl
 samples:
@@ -87,7 +89,7 @@ properties:
     api_name: name
     description: |
       The ID of the auth token (for example, `version-1`), or its full resource name.
-      If specified and an active token with this ID already exists for the user (such as the initial `version-1` token automatically created with the cluster or user), Terraform will acquire and manage the existing token instead of creating a new one.
+      If specified, Terraform acquires and manages the existing active token with this ID (such as the initial `version-1` token automatically created with the cluster or user) and returns an error if it does not exist.
       If omitted, a new token version will be created on the server.
     default_from_api: true
     immutable: true

@@ -23,8 +23,6 @@ func TestAccRedisClusterAuthTokenDatasource(t *testing.T) {
 				Config: testAccRedisClusterAuthTokenDatasource(context),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceState("data.google_redis_cluster_auth_token.with_token_id", "google_redis_cluster_auth_token.token-basic"),
-					resource.TestCheckResourceAttrSet("data.google_redis_cluster_auth_token.default", "name"),
-					resource.TestCheckResourceAttrSet("data.google_redis_cluster_auth_token.default", "token_id"),
 				),
 			},
 		},
@@ -58,13 +56,6 @@ data "google_redis_cluster_auth_token" "with_token_id" {
   user_id                     = google_redis_cluster_token_auth_user.user-basic.user_id
   token_id                    = google_redis_cluster_auth_token.token-basic.token_id
   region                      = "europe-west4"
-}
-
-data "google_redis_cluster_auth_token" "default" {
-  cluster                     = google_redis_cluster.cluster.name
-  user_id                     = google_redis_cluster_token_auth_user.user-basic.user_id
-  region                      = "europe-west4"
-  depends_on                  = [google_redis_cluster_auth_token.token-basic]
 }
 `, context)
 }

@@ -15,8 +15,8 @@ func DataSourceRedisClusterAuthToken() *schema.Resource {
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceRedisClusterAuthToken().Schema)
 
 	// Set 'Required' and 'Optional' schema elements
-	tpgresource.AddRequiredFieldsToSchema(dsSchema, "cluster", "user_id")
-	tpgresource.AddOptionalFieldsToSchema(dsSchema, "token_id", "project", "region")
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, "cluster", "user_id", "token_id")
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project", "region")
 
 	return &schema.Resource{
 		Read:   dataSourceRedisClusterAuthTokenRead,
@@ -52,102 +52,23 @@ func dataSourceRedisClusterAuthTokenRead(d *schema.ResourceData, meta interface{
 	}
 	d.Set("region", region)
 
-	if v, ok := d.GetOk("token_id"); ok && v.(string) != "" {
-		tokenId := tpgresource.GetResourceNameFromSelfLink(v.(string))
-		if err := d.Set("token_id", tokenId); err != nil {
-			return fmt.Errorf("Error setting token_id: %s", err)
-		}
-		id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{region}}/clusters/{{cluster}}/tokenAuthUsers/{{user_id}}/authTokens/{{token_id}}")
-		if err != nil {
-			return fmt.Errorf("Error constructing id: %s", err)
-		}
-		d.SetId(id)
-
-		err = resourceRedisClusterAuthTokenRead(d, meta)
-		if err != nil {
-			return err
-		}
-		if d.Id() == "" {
-			return fmt.Errorf("%s not found", id)
-		}
-		return nil
-	}
-
-	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
-	if err != nil {
-		return err
-	}
-
-	url, err := tpgresource.ReplaceVars(d, config, "{{RedisBasePath}}projects/{{project}}/locations/{{region}}/clusters/{{cluster}}/tokenAuthUsers/{{user_id}}/authTokens")
-	if err != nil {
-		return err
-	}
-
-	billingProject := ""
-	if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
-		billingProject = parts[1]
-	}
-	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
-		billingProject = bp
-	}
-
-	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "GET",
-		Project:   billingProject,
-		RawURL:    url,
-		UserAgent: userAgent,
-	})
-	if err != nil {
-		return fmt.Errorf("Error listing authTokens for %s: %s", url, err)
-	}
-
-	tokens, ok := res["authTokens"].([]interface{})
-	if !ok || len(tokens) == 0 {
-		return fmt.Errorf("No authTokens found for %s", url)
-	}
-
-	var latestToken map[string]interface{}
-	maxVersion := -1
-	for _, t := range tokens {
-		if tm, ok := t.(map[string]interface{}); ok {
-			if name, ok := tm["name"].(string); ok {
-				tokenId := tpgresource.GetResourceNameFromSelfLink(name)
-				var vNum int
-				if _, err := fmt.Sscanf(tokenId, "version-%d", &vNum); err == nil {
-					if vNum > maxVersion {
-						maxVersion = vNum
-						latestToken = tm
-					}
-				} else if latestToken == nil {
-					latestToken = tm
-				}
-			}
-		}
-	}
-	if latestToken == nil {
-		latestToken = tokens[len(tokens)-1].(map[string]interface{})
-	}
-
-	tokenName, ok := latestToken["name"].(string)
-	if !ok {
-		return fmt.Errorf("AuthToken response missing name attribute")
-	}
-	tokenId := tpgresource.GetResourceNameFromSelfLink(tokenName)
-	d.SetId(tokenName)
+	tokenId := tpgresource.GetResourceNameFromSelfLink(d.Get("token_id").(string))
 	if err := d.Set("token_id", tokenId); err != nil {
 		return fmt.Errorf("Error setting token_id: %s", err)
 	}
-	if err := d.Set("name", tokenName); err != nil {
-		return fmt.Errorf("Error setting name: %s", err)
+
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{region}}/clusters/{{cluster}}/tokenAuthUsers/{{user_id}}/authTokens/{{token_id}}")
+	if err != nil {
+		return fmt.Errorf("Error constructing id: %s", err)
 	}
+	d.SetId(id)
 
 	err = resourceRedisClusterAuthTokenRead(d, meta)
 	if err != nil {
 		return err
 	}
 	if d.Id() == "" {
-		return fmt.Errorf("%s not found", tokenName)
+		return fmt.Errorf("%s not found", id)
 	}
 	return nil
 }

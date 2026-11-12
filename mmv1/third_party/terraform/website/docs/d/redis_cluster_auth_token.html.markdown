@@ -31,8 +31,8 @@ The following arguments are supported:
   The unique ID of the token auth user. Can also be set to `"default"` to inspect the cluster's built-in default user.
 
 * `token_id` -
-  (Optional)
-  The ID of the auth token (e.g. `version-1`). If not provided, the latest active token version for the user is returned.
+  (Required)
+  The ID of the auth token (e.g. `version-1`), or its full resource name.
 
 * `project` -
   (Optional)
