@@ -831,6 +831,91 @@ func TestTypeValidateConflicts(t *testing.T) {
 		}
 	})
 
+	t.Run("GA virtual field with mutual beta virtual field conflict is culled in GA and preserved in beta", func(t *testing.T) {
+		t.Parallel()
+
+		newRes := func() *Resource {
+			res := &Resource{
+				Name:        "TestResource",
+				Description: "Test resource",
+				CreateVerb:  "POST",
+				ReadVerb:    "GET",
+				UpdateVerb:  "POST",
+				DeleteVerb:  "DELETE",
+				Properties: []*Type{
+					{
+						Name:        "name",
+						Type:        "String",
+						Description: "Resource name",
+					},
+				},
+				VirtualFields: []*Type{
+					{
+						Name:        "allowed_actions",
+						Type:        "Array",
+						Description: "Beta virtual field",
+						MinVersion:  "beta",
+						ItemType: &Type{
+							Type: "String",
+						},
+						Conflicts: []string{"minimal_action"},
+					},
+					{
+						Name:         "minimal_action",
+						Type:         "String",
+						Description:  "GA virtual field",
+						DefaultValue: "NONE",
+						Conflicts:    []string{"allowed_actions"},
+					},
+				},
+			}
+			res.SetDefault(p)
+			return res
+		}
+
+		gaRes := newRes()
+		// Call ExcludeIfNotInVersion twice (mirroring CountProductsAndResources + GenerateObjects)
+		// to ensure populateMaxVersionSchema preserves the unfiltered virtual fields.
+		gaRes.ExcludeIfNotInVersion(&product.Version{Name: "ga"})
+		gaRes.ExcludeIfNotInVersion(&product.Version{Name: "ga"})
+
+		if !gaRes.VirtualFields[0].Exclude {
+			t.Errorf("expected beta virtual field allowed_actions to have Exclude=true in GA")
+		}
+		if gaRes.VirtualFields[1].Exclude {
+			t.Errorf("expected GA virtual field minimal_action to have Exclude=false in GA")
+		}
+		if got := len(gaRes.UserVirtualFields()); got != 1 || gaRes.UserVirtualFields()[0].Name != "minimal_action" {
+			t.Errorf("expected UserVirtualFields() to only contain minimal_action in GA, got %v", gaRes.UserVirtualFields())
+		}
+		if errs := gaRes.Validate(); len(errs) != 0 {
+			t.Errorf("expected no validation errors for gaRes in GA, got %v", errs)
+		}
+		if got := gaRes.VirtualFields[1].Conflicting(); len(got) != 0 {
+			t.Errorf("expected minimal_action.Conflicting() to be culled to empty in GA, got %v", got)
+		}
+
+		betaRes := newRes()
+		betaRes.ExcludeIfNotInVersion(&product.Version{Name: "beta"})
+		betaRes.ExcludeIfNotInVersion(&product.Version{Name: "beta"})
+
+		if betaRes.VirtualFields[0].Exclude || betaRes.VirtualFields[1].Exclude {
+			t.Errorf("expected both virtual fields to have Exclude=false in beta")
+		}
+		if got := len(betaRes.UserVirtualFields()); got != 2 {
+			t.Errorf("expected 2 UserVirtualFields in beta, got %d", got)
+		}
+		if errs := betaRes.Validate(); len(errs) != 0 {
+			t.Errorf("expected no validation errors for betaRes in beta, got %v", errs)
+		}
+		if got := betaRes.VirtualFields[0].Conflicting(); !reflect.DeepEqual(got, []string{"minimal_action"}) {
+			t.Errorf("expected allowed_actions.Conflicting() to be [minimal_action] in beta, got %v", got)
+		}
+		if got := betaRes.VirtualFields[1].Conflicting(); !reflect.DeepEqual(got, []string{"allowed_actions"}) {
+			t.Errorf("expected minimal_action.Conflicting() to be [allowed_actions] in beta, got %v", got)
+		}
+	})
+
 	t.Run("GA field conflicting with non-mutual beta field returns error in GA", func(t *testing.T) {
 		t.Parallel()
 
@@ -1247,6 +1332,94 @@ func TestTypeValidateOutputOnlyEnum(t *testing.T) {
 			}
 			if !found {
 				t.Fatalf("expected error containing %q, got: %v", tc.wantError, errs)
+			}
+		})
+	}
+}
+
+func TestTypeJsonValue(t *testing.T) {
+	t.Parallel()
+
+	p := &Product{
+		Name: "TestProduct",
+		Versions: []*product.Version{
+			{Name: "ga", BaseUrl: "ga_url"},
+		},
+	}
+
+	prop := &Type{
+		Name: "payload",
+		Type: "JsonValue",
+	}
+	res := &Resource{
+		Name:       "TestResource",
+		Properties: []*Type{prop},
+	}
+	res.SetDefault(p)
+
+	if errs := prop.Validate(res.Name); len(errs) > 0 {
+		t.Fatalf("expected no errors for JsonValue, got: %v", errs)
+	}
+	if got := prop.TFType(prop.Type); got != "schema.TypeString" {
+		t.Errorf("TFType(JsonValue) = %q, want %q", got, "schema.TypeString")
+	}
+	if got := prop.GetFWType(); got != "String" {
+		t.Errorf("GetFWType() = %q, want %q", got, "String")
+	}
+	if !prop.IsJsonField() {
+		t.Errorf("IsJsonField() = false, want true")
+	}
+
+	disallowCases := []struct {
+		description string
+		prop        *Type
+	}{
+		{
+			description: "custom_expand json_value.tmpl disallowed",
+			prop: &Type{
+				Name:         "payload",
+				Type:         "String",
+				CustomExpand: "templates/terraform/custom_expand/json_value.tmpl",
+			},
+		},
+		{
+			description: "custom_expand json_schema.tmpl disallowed",
+			prop: &Type{
+				Name:         "payload",
+				Type:         "String",
+				CustomExpand: "templates/terraform/custom_expand/json_schema.tmpl",
+			},
+		},
+		{
+			description: "custom_flatten json_schema.tmpl disallowed",
+			prop: &Type{
+				Name:          "payload",
+				Type:          "String",
+				Output:        true,
+				CustomFlatten: "templates/terraform/custom_flatten/json_schema.tmpl",
+			},
+		},
+	}
+
+	for _, tc := range disallowCases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			r := &Resource{
+				Name:       "TestResource",
+				Properties: []*Type{tc.prop},
+			}
+			r.SetDefault(p)
+			errs := tc.prop.Validate(r.Name)
+			found := false
+			for _, err := range errs {
+				if strings.Contains(err.Error(), "use type JsonValue instead") {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Fatalf("expected error containing %q, got: %v", "use type JsonValue instead", errs)
 			}
 		})
 	}

@@ -1,0 +1,26 @@
+provider "google" {
+  scopes = [
+    "https://www.googleapis.com/auth/cloud-identity.policies",
+    "https://www.googleapis.com/auth/cloud-platform",
+    "https://www.googleapis.com/auth/userinfo.email",
+  ]
+}
+
+resource "google_cloud_identity_policy" "{{$.PrimaryResourceId}}" {
+  customer = "customers/{{index $.TestEnvVars "cust_id"}}"
+
+  policy_query {
+    org_unit = "orgUnits/{{index $.TestEnvVars "org_unit_id"}}"
+  }
+
+  setting {
+    type = "settings/detector.word_list"
+    value_json = jsonencode({
+      displayName = "Project Sensitive Terms (Updated)"
+      description = "Updated detector for project-specific confidential keywords."
+      wordList = {
+        words = ["confidential", "top-secret", "classified"]
+      }
+    })
+  }
+}

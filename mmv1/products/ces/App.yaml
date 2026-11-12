@@ -127,6 +127,35 @@ properties:
               that the user hasn't heard the full preceding agent message.
               This should not be used in scenarios where agent responses are displayed
               visually.
+      - name: customVoiceSamples
+        type: Array
+        description: |-
+          Configures custom voice samples for voice cloning.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: consentAudioGcsUri
+              type: String
+              description: |-
+                Consent audio for voice cloning.
+            - name: name
+              type: String
+              description: |-
+                The user-defined name for the custom voice sample.
+            - name: previewText
+              type: String
+              description: |-
+                Text for synthesizing preview audio for custom voice.
+            - name: voiceInstruction
+              type: String
+              description: |-
+                Natural language instructions for voice style, tone, pacing, or
+                pronunciation.
+            - name: voiceSampleGcsUri
+              type: String
+              description: |-
+                The Cloud Storage URI to the audio sample for voice cloning. The
+                audio sample should be a mono-channel, 24kHz WAV file.
       - name: inactivityTimeout
         type: String
         description: |-
@@ -718,69 +747,34 @@ properties:
               type: Boolean
               description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.
             - name: defs
-              type: String
+              type: JsonValue
               description: A map of definitions for use by ref. Only allowed at the root of the schema.
-              state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-              validation:
-                function: validation.StringIsJSON
-              custom_expand: templates/terraform/custom_expand/json_value.tmpl
-              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
             - name: default
-              type: String
+              type: JsonValue
               description: |-
                 Optional. Default value of the data. Represents a dynamically typed value
                 which can be either null, a number, a string, a boolean, a struct,
                 or a list of values. The provided default value must be encoded as a JSON string.
                 Use `jsonencode` in Terraform HCL to encode the default value.
-              state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
               send_empty_value: true
-              validation:
-                function: validation.StringIsJSON
-              custom_expand: templates/terraform/custom_expand/json_value.tmpl
-              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
             - name: additionalProperties
-              type: String
+              type: JsonValue
               description: |-
                 Optional. Defines the schema for additional properties allowed in an object.
                 The value must be a valid JSON string representing the Schema object.
                 (Note: OpenAPI also allows a boolean, this definition expects a Schema JSON).
-              state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-              validation:
-                function: validation.StringIsJSON
-              custom_expand: templates/terraform/custom_expand/json_value.tmpl
-              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
             - name: anyOf
-              type: String
+              type: JsonValue
               description: Optional. The instance value should be valid against at least one of the schemas in this list.
-              state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-              validation:
-                function: validation.StringIsJSON
-              custom_expand: templates/terraform/custom_expand/json_value.tmpl
-              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
             - name: prefixItems
-              type: String
+              type: JsonValue
               description: Optional. Schemas of initial elements of Type.ARRAY.
-              state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-              validation:
-                function: validation.StringIsJSON
-              custom_expand: templates/terraform/custom_expand/json_value.tmpl
-              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
             - name: properties
-              type: String
+              type: JsonValue
               description: Properties of Type.OBJECT.
-              state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-              validation:
-                function: validation.StringIsJSON
-              custom_expand: templates/terraform/custom_expand/json_value.tmpl
-              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
             - name: items
-              type: String
+              type: JsonValue
               description: Schema of the elements of Type.ARRAY.
-              state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-              validation:
-                function: validation.StringIsJSON
-              custom_expand: templates/terraform/custom_expand/json_value.tmpl
-              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
   - name: clientCertificateSettings
     type: NestedObject
     description: The default client certificate settings for the app.

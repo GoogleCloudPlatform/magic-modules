@@ -167,14 +167,9 @@ properties:
                         The finish digit (if any).
             # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
             - name: injectedParameters
-              type: String
+              type: JsonValue
               description: |
                 Parameters that need to be injected into the conversation during intent detection.
-              state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-              custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-              validation:
-                function: validation.StringIsJSON
             - name: isWebhookEnabled
               type: Boolean
               description: |
@@ -190,15 +185,10 @@ properties:
           properties:
             # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
             - name: sessionParameters
-              type: String
+              type: JsonValue
               description: |
                 The session parameters available to the bot at this point.
-              state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
               diff_suppress_func: dialogflowcxTestCaseSessionParametersDiffSuppress
-              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-              custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-              validation:
-                function: validation.StringIsJSON
             - name: triggeredIntent
               type: NestedObject
               description: |
@@ -321,14 +311,9 @@ properties:
                             The finish digit (if any).
                 # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                 - name: injectedParameters
-                  type: String
+                  type: JsonValue
                   description: |
                     Parameters that need to be injected into the conversation during intent detection.
-                  state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                  custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                  custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-                  validation:
-                    function: validation.StringIsJSON
                 - name: isWebhookEnabled
                   type: Boolean
                   description: |
@@ -344,14 +329,9 @@ properties:
               properties:
                 # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                 - name: sessionParameters
-                  type: String
+                  type: JsonValue
                   description: |
                     The session parameters available to the bot at this point.
-                  state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                  custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                  custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-                  validation:
-                    function: validation.StringIsJSON
                 - name: differences
                   type: Array
                   description: |
@@ -433,14 +413,9 @@ properties:
                       description: |
                         A developer-facing error message.
                     - name: details
-                      type: String
+                      type: JsonValue
                       description: |
                         A JSON encoded list of messages that carry the error details.
-                      state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                      custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                      custom_expand: templates/terraform/custom_expand/json_value.tmpl
-                      validation:
-                        function: validation.StringIsJSON
       - name: testResult
         type: Enum
         description: |

@@ -289,17 +289,12 @@ properties:
     properties:
       # This is a map of language -> some settings. List of languages is large and constantly expanding so we use a string instead of a NestedObject with 100 properties.
       - name: synthesizeSpeechConfigs
-        type: String
+        type: JsonValue
         description: |
           Configuration of how speech should be synthesized, mapping from [language](https://cloud.google.com/dialogflow/cx/docs/reference/language) to [SynthesizeSpeechConfig](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents#synthesizespeechconfig).
           These settings affect:
           * The phone gateway synthesize configuration set via Agent.text_to_speech_settings.
           * How speech is synthesized when invoking session APIs. `Agent.text_to_speech_settings` only applies if `OutputAudioConfig.synthesize_speech_config` is not specified.
-        state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-        custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-        validation:
-          function: validation.StringIsJSON
   - name: genAppBuilderSettings
     type: NestedObject
     description: |
@@ -354,18 +349,13 @@ properties:
       Settings for end user personalization.
     properties:
       - name: defaultEndUserMetadata
-        type: String
+        type: JsonValue
         description: |
           Default end user metadata, used when processing DetectIntent requests. Recommended to be filled as a template instead of hard-coded value, for example { "age": "$session.params.age" }.
           The data will be merged with the [QueryParameters.end_user_metadata](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/QueryParameters#FIELDS.end_user_metadata)
           in [DetectIntentRequest.query_params](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.sessions/detectIntent#body.request_body.FIELDS.query_params) during query processing.
 
           This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Struct](https://protobuf.dev/reference/protobuf/google.protobuf/#struct).
-        state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-        custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-        validation:
-          function: validation.StringIsJSON
   - name: clientCertificateSettings
     type: NestedObject
     description: |

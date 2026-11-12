@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/tags"
   {{- if ne $.TargetVersionName "ga" }}
+	"regexp"
+
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
   {{- end }}
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
@@ -3093,3 +3095,402 @@ resource "google_compute_region_instance_group_manager" "igm-force" {
 }
 `, template, igm, deletionPolicy)
 }
+{{- if ne $.TargetVersionName "ga" }}
+
+func TestAccComputeRegionInstanceGroupManager_updatePolicyAllowedActions(t *testing.T) {
+	t.Parallel()
+
+	igmName := fmt.Sprintf("tf-test-rigm-%s", acctest.RandString(t, 10))
+	instanceTemplateName := fmt.Sprintf("tf-test-it-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckRegionInstanceGroupManagerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionInstanceGroupManager_updatePolicyAllowedActionsStart(igmName, instanceTemplateName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.#", "3"),
+					resource.TestCheckTypeSetElemAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.*", "REFRESH"),
+					resource.TestCheckTypeSetElemAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.*", "RESTART_IN_PLACE"),
+					resource.TestCheckTypeSetElemAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.*", "RESTART"),
+					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.minimal_action", ""),
+				),
+			},
+			{
+				ResourceName:            "google_compute_region_instance_group_manager.igm",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
+			},
+			{
+				Config: testAccComputeRegionInstanceGroupManager_updatePolicyAllowedActionsUpdate(igmName, instanceTemplateName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.#", "2"),
+					resource.TestCheckTypeSetElemAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.*", "REFRESH"),
+					resource.TestCheckTypeSetElemAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.*", "REPLACE"),
+				),
+			},
+			{
+				ResourceName:            "google_compute_region_instance_group_manager.igm",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
+			},
+			{
+				Config: testAccComputeRegionInstanceGroupManager_updatePolicyMinimalAction(igmName, instanceTemplateName, "RESTART", "REPLACE"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.#", "0"),
+					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.minimal_action", "RESTART"),
+					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.most_disruptive_allowed_action", "REPLACE"),
+				),
+			},
+			{
+				ResourceName:            "google_compute_region_instance_group_manager.igm",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
+			},
+			{
+				Config: testAccComputeRegionInstanceGroupManager_updatePolicyAllowedActionsUpdate(igmName, instanceTemplateName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.#", "2"),
+					resource.TestCheckTypeSetElemAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.*", "REFRESH"),
+					resource.TestCheckTypeSetElemAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.allowed_actions.*", "REPLACE"),
+					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm", "update_policy.0.minimal_action", ""),
+				),
+			},
+			{
+				ResourceName:            "google_compute_region_instance_group_manager.igm",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
+			},
+		},
+	})
+}
+
+func TestAccComputeRegionInstanceGroupManager_updatePolicyAllowedActionsValidation(t *testing.T) {
+	t.Parallel()
+
+	igmName := "tf-test-rigm-val"
+	instanceTemplateName := "tf-test-it-val"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccComputeRegionInstanceGroupManager_updatePolicyBothMinimalAndAllowed(igmName, instanceTemplateName),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`(Invalid combination of arguments|Conflicting configuration arguments)`),
+			},
+			{
+				Config:      testAccComputeRegionInstanceGroupManager_updatePolicyBothMostDisruptiveAndAllowed(igmName, instanceTemplateName),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`Conflicting configuration arguments`),
+			},
+			{
+				Config:      testAccComputeRegionInstanceGroupManager_updatePolicyNeitherMinimalNorAllowed(igmName, instanceTemplateName),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`(?s)one of\s+.*update_policy\.0\.allowed_actions,update_policy\.0\.minimal_action.*must be\s+specified`),
+			},
+			{
+				Config:      testAccComputeRegionInstanceGroupManager_updatePolicyMinimalRestartInPlace(igmName, instanceTemplateName),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`(?s)expected\s+update_policy\.0\.minimal_action\s+to\s+be\s+one\s+of`),
+			},
+		},
+	})
+}
+
+func testAccComputeRegionInstanceGroupManager_updatePolicyAllowedActionsStart(igmName, instanceTemplateName string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  provider = google-beta
+  family   = "debian-13"
+  project  = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-basic" {
+  provider     = google-beta
+  name         = "%s"
+  machine_type = "e2-medium"
+
+  network_interface {
+    network = "default"
+  }
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+}
+
+resource "google_compute_region_instance_group_manager" "igm" {
+  provider = google-beta
+  name     = "%s"
+  region   = "us-central1"
+  version {
+    instance_template = google_compute_instance_template.igm-basic.id
+    name              = "primary"
+  }
+  base_instance_name = "tf-test-rigm"
+
+  update_policy {
+    type                  = "PROACTIVE"
+    allowed_actions       = ["REFRESH", "RESTART_IN_PLACE", "RESTART"]
+    max_surge_fixed       = 0
+    max_unavailable_fixed = 3
+    replacement_method    = "RECREATE"
+  }
+}
+`, instanceTemplateName, igmName)
+}
+
+func testAccComputeRegionInstanceGroupManager_updatePolicyAllowedActionsUpdate(igmName, instanceTemplateName string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  provider = google-beta
+  family   = "debian-13"
+  project  = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-basic" {
+  provider     = google-beta
+  name         = "%s"
+  machine_type = "e2-medium"
+
+  network_interface {
+    network = "default"
+  }
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+}
+
+resource "google_compute_region_instance_group_manager" "igm" {
+  provider = google-beta
+  name     = "%s"
+  region   = "us-central1"
+  version {
+    instance_template = google_compute_instance_template.igm-basic.id
+    name              = "primary"
+  }
+  base_instance_name = "tf-test-rigm"
+
+  update_policy {
+    type                  = "PROACTIVE"
+    allowed_actions       = ["REFRESH", "REPLACE"]
+    max_surge_fixed       = 0
+    max_unavailable_fixed = 3
+    replacement_method    = "RECREATE"
+  }
+}
+`, instanceTemplateName, igmName)
+}
+
+func testAccComputeRegionInstanceGroupManager_updatePolicyMinimalAction(igmName, instanceTemplateName, minimalAction, mostDisruptive string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  provider = google-beta
+  family   = "debian-13"
+  project  = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-basic" {
+  provider     = google-beta
+  name         = "%s"
+  machine_type = "e2-medium"
+
+  network_interface {
+    network = "default"
+  }
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+}
+
+resource "google_compute_region_instance_group_manager" "igm" {
+  provider = google-beta
+  name     = "%s"
+  region   = "us-central1"
+  version {
+    instance_template = google_compute_instance_template.igm-basic.id
+    name              = "primary"
+  }
+  base_instance_name = "tf-test-rigm"
+
+  update_policy {
+    type                           = "PROACTIVE"
+    minimal_action                 = "%s"
+    most_disruptive_allowed_action = "%s"
+    max_surge_fixed                = 0
+    max_unavailable_fixed          = 3
+    replacement_method             = "RECREATE"
+  }
+}
+`, instanceTemplateName, igmName, minimalAction, mostDisruptive)
+}
+
+func testAccComputeRegionInstanceGroupManager_updatePolicyBothMinimalAndAllowed(igmName, instanceTemplateName string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  provider = google-beta
+  family   = "debian-13"
+  project  = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-basic" {
+  provider     = google-beta
+  name         = "%s"
+  machine_type = "e2-medium"
+  network_interface {
+    network = "default"
+  }
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+}
+
+resource "google_compute_region_instance_group_manager" "igm" {
+  provider           = google-beta
+  name               = "%s"
+  region             = "us-central1"
+  base_instance_name = "tf-test-rigm"
+  version {
+    instance_template = google_compute_instance_template.igm-basic.id
+  }
+  update_policy {
+    type            = "PROACTIVE"
+    minimal_action  = "RESTART"
+    allowed_actions = ["REFRESH", "RESTART_IN_PLACE"]
+  }
+}
+`, instanceTemplateName, igmName)
+}
+
+func testAccComputeRegionInstanceGroupManager_updatePolicyBothMostDisruptiveAndAllowed(igmName, instanceTemplateName string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  provider = google-beta
+  family   = "debian-13"
+  project  = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-basic" {
+  provider     = google-beta
+  name         = "%s"
+  machine_type = "e2-medium"
+  network_interface {
+    network = "default"
+  }
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+}
+
+resource "google_compute_region_instance_group_manager" "igm" {
+  provider           = google-beta
+  name               = "%s"
+  region             = "us-central1"
+  base_instance_name = "tf-test-rigm"
+  version {
+    instance_template = google_compute_instance_template.igm-basic.id
+  }
+  update_policy {
+    type                           = "PROACTIVE"
+    most_disruptive_allowed_action = "REPLACE"
+    allowed_actions                = ["REFRESH", "RESTART_IN_PLACE"]
+  }
+}
+`, instanceTemplateName, igmName)
+}
+
+func testAccComputeRegionInstanceGroupManager_updatePolicyNeitherMinimalNorAllowed(igmName, instanceTemplateName string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  provider = google-beta
+  family   = "debian-13"
+  project  = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-basic" {
+  provider     = google-beta
+  name         = "%s"
+  machine_type = "e2-medium"
+  network_interface {
+    network = "default"
+  }
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+}
+
+resource "google_compute_region_instance_group_manager" "igm" {
+  provider           = google-beta
+  name               = "%s"
+  region             = "us-central1"
+  base_instance_name = "tf-test-rigm"
+  version {
+    instance_template = google_compute_instance_template.igm-basic.id
+  }
+  update_policy {
+    type = "PROACTIVE"
+  }
+}
+`, instanceTemplateName, igmName)
+}
+
+func testAccComputeRegionInstanceGroupManager_updatePolicyMinimalRestartInPlace(igmName, instanceTemplateName string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  provider = google-beta
+  family   = "debian-13"
+  project  = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-basic" {
+  provider     = google-beta
+  name         = "%s"
+  machine_type = "e2-medium"
+  network_interface {
+    network = "default"
+  }
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+}
+
+resource "google_compute_region_instance_group_manager" "igm" {
+  provider           = google-beta
+  name               = "%s"
+  region             = "us-central1"
+  base_instance_name = "tf-test-rigm"
+  version {
+    instance_template = google_compute_instance_template.igm-basic.id
+  }
+  update_policy {
+    type           = "PROACTIVE"
+    minimal_action = "RESTART_IN_PLACE"
+  }
+}
+`, instanceTemplateName, igmName)
+}
+{{- end }}

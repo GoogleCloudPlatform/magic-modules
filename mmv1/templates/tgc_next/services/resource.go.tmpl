@@ -88,7 +88,9 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 {{template "SchemaFields" $prop -}}
 			{{- end }}
             {{- range $prop := $.VirtualFields }}
+            {{- if not $prop.Exclude }}
 {{template "SchemaFields" $prop -}}
+            {{- end }}
             {{- end }}
 {{- if $.CustomCode.ExtraSchemaEntry }} 
     {{ customTemplate $ $.CustomCode.ExtraSchemaEntry false -}}

@@ -9,6 +9,7 @@ resource "google_vertex_ai_custom_job" "{{.PrimaryResourceId}}" {
   job_spec {
     service_account         = google_service_account.custom_job_sa.email
     tensorboard             = google_vertex_ai_tensorboard.tensorboard.id
+    experiment              = "{{index $.ResourceIdVars "experiment"}}"
     enable_web_access       = true
     enable_dashboard_access = true
 

@@ -312,12 +312,13 @@ func TestReadEscapedPercentTestFile(t *testing.T) {
 			},
 		},
 		// In an acctest.Nprintf template, "%%" is not an escape, so the
-		// substitution after the first percent sign is still replaced.
+		// substitution after the first percent sign is still replaced with the
+		// literal value from the context map while preserving the leading "%".
 		{
 			ResourceBlock: {
 				"escaped_percent": {
 					"resource": {
-						"field_one": "\"name-%true\"",
+						"field_one": "\"name-%value\"",
 					},
 				},
 			},
@@ -328,7 +329,7 @@ func TestReadEscapedPercentTestFile(t *testing.T) {
 			ResourceBlock: {
 				"escaped_percent": {
 					"resource": {
-						"field_one": "\"name-true\"",
+						"field_one": "\"name-value\"",
 						"field_two": "\"true\"",
 					},
 				},
@@ -525,7 +526,7 @@ func TestReadConfigCallExpr(t *testing.T) {
 			if !ok {
 				t.Fatalf("%s is not a call expression", tc.expr)
 			}
-			configStr, err := readConfigCallExpr(callExpr, map[string]*ast.FuncDecl{}, map[string]*ast.BasicLit{})
+			configStr, err := readConfigCallExpr(callExpr, map[string]*ast.FuncDecl{}, map[string]*ast.BasicLit{}, nil)
 			if tc.wantErr != "" {
 				if err == nil {
 					t.Errorf("expected an error containing %q reading %s, read %q", tc.wantErr, tc.expr, configStr)
@@ -585,5 +586,190 @@ func TestFlattenBlock(t *testing.T) {
 		if got := flattenBlock(tc.unflattened, ""); !reflect.DeepEqual(got, tc.flattened) {
 			t.Errorf("unexpected result of flattening in test %s, expected %v, got %v", tc.name, tc.flattened, got)
 		}
+	}
+}
+
+func TestReadContextMapSubstitution(t *testing.T) {
+	testFile := filepath.Join(t.TempDir(), "context_map_test.go")
+	src := `package service_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+)
+
+func TestAccContextMapSteps(t *testing.T) {
+	randomSuffix := acctest.RandString(t, 10)
+
+	context := map[string]interface{}{
+		"str_field":      "val-one",
+		"int_field":      10,
+		"bool_field":     false,
+		"optional_block": "nested {\n    child = \"c1\"\n  }",
+		"random_suffix":  randomSuffix,
+	}
+
+	context_1 := map[string]interface{}{
+		"str_field":      "val-two",
+		"int_field":      20,
+		"bool_field":     true,
+		"optional_block": "",
+		"random_suffix":  randomSuffix,
+	}
+
+	context_2 := map[string]interface{}{
+		"str_field":      nil,
+		"int_field":      nil,
+		"bool_field":     "null",
+		"optional_block": "",
+		"random_suffix":  randomSuffix,
+	}
+
+	// All values are non-literal; callee parameter "context" must not inherit
+	// Step 0's local "context" variable from the caller.
+	context_3 := map[string]interface{}{
+		"str_field":     randomSuffix,
+		"int_field":     randomSuffix,
+		"bool_field":    randomSuffix,
+		"random_suffix": randomSuffix,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContextMapConfig(context),
+			},
+			{
+				Config: testAccContextMapConfig(context_1),
+			},
+			{
+				Config: testAccContextMapConfig(context_2),
+			},
+			{
+				Config: testAccContextMapConfig(context_3),
+			},
+		},
+	})
+}
+
+func testAccContextMapConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(` + "`" + `
+resource "my_resource" "primary" {
+  name       = "tf-test-%{random_suffix}"
+  str_field  = "%{str_field}"
+  prefixed   = "pfx-%{str_field}"
+  int_field  = %{int_field}
+  bool_field = %{bool_field}
+  %{optional_block}
+}
+` + "`" + `, context)
+}
+`
+	if err := os.WriteFile(testFile, []byte(src), 0o600); err != nil {
+		t.Fatalf("error writing temp test file: %v", err)
+	}
+	tests, errs := ReadTestFiles([]string{testFile})
+	if len(errs) > 0 {
+		t.Fatalf("unexpected errors reading context map test file: %v", errs)
+	}
+	if len(tests) != 1 || len(tests[0].Steps) != 4 {
+		t.Fatalf("expected 1 test with 4 steps, got %#v", tests)
+	}
+	expectedStep0 := Block{
+		"name":         "\"tf-test-true\"",
+		"str_field":    "\"val-one\"",
+		"prefixed":     "\"pfx-val-one\"",
+		"int_field":    "10",
+		"bool_field":   "false",
+		"nested.child": "\"c1\"",
+	}
+	if got0 := tests[0].Steps[0][ResourceBlock]["my_resource"]["primary"]; !reflect.DeepEqual(got0, expectedStep0) {
+		t.Errorf("step 0 mismatch: got %#v, expected %#v", got0, expectedStep0)
+	}
+	expectedStep1 := Block{
+		"name":       "\"tf-test-true\"",
+		"str_field":  "\"val-two\"",
+		"prefixed":   "\"pfx-val-two\"",
+		"int_field":  "20",
+		"bool_field": "true",
+	}
+	if got1 := tests[0].Steps[1][ResourceBlock]["my_resource"]["primary"]; !reflect.DeepEqual(got1, expectedStep1) {
+		t.Errorf("step 1 mismatch: got %#v, expected %#v", got1, expectedStep1)
+	}
+	expectedStep2 := Block{
+		"name":       "\"tf-test-true\"",
+		"str_field":  "null",
+		"prefixed":   "\"pfx-null\"",
+		"int_field":  "null",
+		"bool_field": "null",
+	}
+	got2 := tests[0].Steps[2][ResourceBlock]["my_resource"]["primary"]
+	if !reflect.DeepEqual(got2, expectedStep2) {
+		t.Errorf("step 2 mismatch: got %#v, expected %#v", got2, expectedStep2)
+	}
+	if !IsNullValue(got2["str_field"]) || IsNullValue(got2["prefixed"]) || !IsNullValue("null\x00null") || IsNullValue("\"a\"\x00null") {
+		t.Errorf("unexpected IsNullValue results on step 2: %#v", got2)
+	}
+	expectedStep3 := Block{
+		"name":       "\"tf-test-true\"",
+		"str_field":  "\"true\"",
+		"prefixed":   "\"pfx-true\"",
+		"int_field":  "true",
+		"bool_field": "true",
+	}
+	if got3 := tests[0].Steps[3][ResourceBlock]["my_resource"]["primary"]; !reflect.DeepEqual(got3, expectedStep3) {
+		t.Errorf("step 3 mismatch: got %#v, expected %#v", got3, expectedStep3)
+	}
+}
+
+func TestReadEmptyAndRepeatedNestedBlocks(t *testing.T) {
+	testFile := filepath.Join(t.TempDir(), "empty_and_repeated_blocks_test.go")
+	src := `package service_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+)
+
+func TestAccEmptyAndRepeatedBlocks(t *testing.T) {
+	acctest.VcrTest(t, resource.TestCase{
+		Steps: []resource.TestStep{
+			{
+				Config: ` + "`" + `
+resource "my_resource" "primary" {
+  empty_config {}
+  items {
+    name = "first"
+  }
+  items {
+    name = "second"
+  }
+}
+` + "`" + `,
+			},
+		},
+	})
+}
+`
+	if err := os.WriteFile(testFile, []byte(src), 0o600); err != nil {
+		t.Fatalf("error writing temp test file: %v", err)
+	}
+	tests, errs := ReadTestFiles([]string{testFile})
+	if len(errs) > 0 {
+		t.Fatalf("unexpected errors: %v", errs)
+	}
+	if len(tests) != 1 || len(tests[0].Steps) != 1 {
+		t.Fatalf("expected 1 test with 1 step, got %#v", tests)
+	}
+	expected := Block{
+		"empty_config": "{}",
+		"items.name":   "\"first\"\x00\"second\"",
+	}
+	if got := tests[0].Steps[0][ResourceBlock]["my_resource"]["primary"]; !reflect.DeepEqual(got, expected) {
+		t.Errorf("got %#v, expected %#v", got, expected)
 	}
 }

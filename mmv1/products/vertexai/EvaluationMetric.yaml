@@ -99,18 +99,13 @@ properties:
     description: |
       A description of the EvaluationMetric.
   - name: metric
-    type: String
+    type: JsonValue
     description: |
       The metric configuration as a JSON string. Uses camelCase field names
       to match the API format. Supports LLM-based metrics and custom code
       execution metrics.
       See the [API documentation](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/Metric)
       for the full schema.
-    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-    custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-    validation:
-      function: validation.StringIsJSON
     # The API returns the metric JSON with additional derived fields
     # (e.g. metadata.title populated from display_name) that are not part
     # of the user's input, causing perpetual diffs.

@@ -4,7 +4,7 @@ description: |-
   Represents a StoragePoolType data source.
 ---
 
-# google_compute_storage_pool_type
+# google_compute_storage_pool_types
 
 Represents a StoragePoolType data source.
 The type of Hyperdisk Storage Pool that you create determines the type of disks that you can create in the storage pool.
