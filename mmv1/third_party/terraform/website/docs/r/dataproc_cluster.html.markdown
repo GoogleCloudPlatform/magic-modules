@@ -922,17 +922,15 @@ cluster_config {
 }
 ```
 
--> **Note:** Dataproc can only change `num_instances` in place, with a
+!> **Warning:** Dataproc can only change `num_instances` in place, with a
 [`clusters.patch`](https://cloud.google.com/dataproc/docs/reference/rest/v1/projects.regions.clusters/patch)
 request. The shape fields (`core_count`, `hardware_class` and `boot_disk_size_gb`) are
 [fixed at creation](https://cloud.google.com/dataproc/docs/reference/rest/v1/ClusterConfig#FlexibleInstanceGroupConfig),
-so changing them recreates the cluster. You can add this block to an existing cluster that uses
-`worker_flexible_config` in place: Dataproc creates the secondary workers with the
-`worker_flexible_config` shape, so adding the block with a different shape also recreates the
-cluster. If a shape value is only known after apply, Terraform can't tell this at plan time; the
-apply then fails with an error from the API, and you can recreate the cluster with
-`terraform apply -replace`. Removing the block from your
-configuration does not change the cluster; set `num_instances = 0` to remove all secondary workers.
+so changing them recreates the cluster **unless** `worker_flexible_config` is set and the shape
+fields in `secondary_worker_flexible_config` exactly match the equivalent fields in `worker_flexible_config`.
+
+-> **Note:** Removing the block from your configuration does not change the cluster; set `num_instances = 0`
+to remove all secondary workers.
 
 * `num_instances` - (Optional) Specifies the number of secondary worker instances to create.
    Defaults to `0`; can be scaled down to `0`; updatable in place.
