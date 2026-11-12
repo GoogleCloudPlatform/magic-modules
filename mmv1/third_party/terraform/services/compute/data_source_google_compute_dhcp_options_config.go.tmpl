@@ -49,6 +49,9 @@ func dataSourceGoogleComputeDhcpOptionsConfigRead(d *schema.ResourceData, meta i
 	if d.Id() == "" {
 		return fmt.Errorf("%s not found", id)
 	}
+	if err := d.Set("deletion_policy", nil); err != nil {
+		return fmt.Errorf("Error setting deletion_policy: %s", err)
+	}
 	return nil
 }
 

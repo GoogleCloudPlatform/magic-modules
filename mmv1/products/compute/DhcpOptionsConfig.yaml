@@ -43,6 +43,10 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+# Sweeper skipped because deleting a DhcpOptionsConfig with associations requires clearing them first.
+exclude_sweeper: true
+deletion_policy_custom_docs: true
+deletion_policy_default: 'DEFAULT'
 custom_code:
   constants: 'templates/terraform/constants/compute_dhcp_options_config.go.tmpl'
   pre_create: 'templates/terraform/pre_create/compute_dhcp_options_config.go.tmpl'
@@ -80,11 +84,31 @@ samples:
     min_version: 'beta'
     exclude_basic_doc: true
     steps:
-      - name: 'compute_dhcp_options_config_full'
+      - name: 'compute_dhcp_options_config_force_delete'
         min_version: 'beta'
         resource_id_vars:
           dhcp_options_config_name: 'my-dhcp-assoc'
           network_name_1: 'my-dhcp-assoc-net'
+        ignore_read_extra:
+          - 'deletion_policy'
+virtual_fields:
+  - name: 'deletion_policy'
+    description: |
+      The deletion policy for the DHCP options configuration.
+      Setting `deletion_policy = "FORCE"` clears any remaining network `associations`
+      before deleting the configuration. By default (`DEFAULT`), deletion fails if
+      any `associations` still exist on the resource.
+
+      When a 'terraform destroy' or 'terraform apply' would delete the resource,
+      the command will fail if this field is set to "PREVENT" in Terraform state.
+      When set to "ABANDON", the command will remove the resource from Terraform
+      management without updating or deleting the resource in the API.
+      When set to "DELETE", the command will behave as if set to "DEFAULT".
+
+      Possible values: `DEFAULT`, `FORCE`, `PREVENT`, `ABANDON`, `DELETE`.
+    type: String
+    # excluded from generation due to Universal Deletion Policy
+    exclude: true
 parameters:
   - name: 'region'
     type: ResourceRef

@@ -67,9 +67,10 @@ resource "google_compute_network" "default" {
 resource "google_compute_dhcp_options_config" "default" {
   provider = google-beta
 
-  name        = "%{config_name}"
-  region      = "us-central1"
-  description = "DHCP options config for datasource test"
+  name            = "%{config_name}"
+  region          = "us-central1"
+  description     = "DHCP options config for datasource test"
+  deletion_policy = "FORCE"
 
   lease_time_sec             = 3600
   domain_name                = "corp.example.com"

@@ -1,0 +1,199 @@
+package compute
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"context"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func TestUnitComputeDhcpOptionsConfig_deletePolicy(t *testing.T) {
+	t.Parallel()
+
+	const (
+		project = "test-project"
+		region  = "us-central1"
+		name    = "test-dhcp"
+		resPath = "/projects/test-project/regions/us-central1/dhcpOptionsConfigs/test-dhcp"
+		opPath  = "/projects/test-project/regions/us-central1/operations/op-1"
+	)
+
+	cases := []struct {
+		name           string
+		deletionPolicy string
+		getStatus      int
+		associations   map[string]interface{}
+		wantErrSubstr  string
+		wantCalls      []string
+		wantClearedId  bool
+	}{
+		{
+			name:           "default blocks delete when associations exist",
+			deletionPolicy: "DEFAULT",
+			getStatus:      http.StatusOK,
+			associations: map[string]interface{}{
+				"assoc-1": map[string]interface{}{
+					"network": "projects/test-project/global/networks/net-1",
+				},
+			},
+			wantErrSubstr: `while network associations still exist`,
+			wantCalls:     []string{"GET " + resPath},
+		},
+		{
+			name:           "default deletes directly when no associations exist",
+			deletionPolicy: "DEFAULT",
+			getStatus:      http.StatusOK,
+			associations:   nil,
+			wantCalls: []string{
+				"GET " + resPath,
+				"DELETE " + resPath,
+				"GET " + opPath,
+			},
+		},
+		{
+			name:           "force clears associations then deletes",
+			deletionPolicy: "FORCE",
+			getStatus:      http.StatusOK,
+			associations: map[string]interface{}{
+				"assoc-1": map[string]interface{}{
+					"network": "projects/test-project/global/networks/net-1",
+				},
+			},
+			wantCalls: []string{
+				"GET " + resPath,
+				"PATCH " + resPath + "?updateMask=associations",
+				"GET " + opPath,
+				"DELETE " + resPath,
+				"GET " + opPath,
+			},
+		},
+		{
+			name:           "not found on pre-delete GET clears id cleanly",
+			deletionPolicy: "DEFAULT",
+			getStatus:      http.StatusNotFound,
+			wantCalls:      []string{"GET " + resPath},
+			wantClearedId:  true,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			var calls []string
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				call := r.Method + " " + r.URL.Path
+				if um := r.URL.Query().Get("updateMask"); um != "" {
+					call += "?updateMask=" + um
+				}
+				calls = append(calls, call)
+				w.Header().Set("Content-Type", "application/json")
+
+				switch {
+				case r.Method == http.MethodGet && r.URL.Path == resPath:
+					if tc.getStatus == http.StatusNotFound {
+						w.WriteHeader(http.StatusNotFound)
+						_ = json.NewEncoder(w).Encode(map[string]interface{}{
+							"error": map[string]interface{}{
+								"code":    404,
+								"message": "not found",
+							},
+						})
+						return
+					}
+					body := map[string]interface{}{"name": name}
+					if tc.associations != nil {
+						body["associations"] = tc.associations
+					}
+					_ = json.NewEncoder(w).Encode(body)
+
+				case r.Method == http.MethodPatch && r.URL.Path == resPath:
+					if got := r.URL.Query().Get("updateMask"); got != "associations" {
+						t.Errorf("PATCH updateMask = %q, want %q", got, "associations")
+					}
+					var patchBody map[string]interface{}
+					if err := json.NewDecoder(r.Body).Decode(&patchBody); err != nil {
+						t.Errorf("failed to decode PATCH body: %v", err)
+					} else if len(patchBody) != 0 {
+						t.Errorf("PATCH body = %#v, want empty object", patchBody)
+					}
+					_ = json.NewEncoder(w).Encode(map[string]interface{}{
+						"name":   "op-1",
+						"region": "projects/" + project + "/regions/" + region,
+						"status": "RUNNING",
+					})
+
+				case r.Method == http.MethodDelete && r.URL.Path == resPath:
+					_ = json.NewEncoder(w).Encode(map[string]interface{}{
+						"name":   "op-1",
+						"region": "projects/" + project + "/regions/" + region,
+						"status": "RUNNING",
+					})
+
+				case r.Method == http.MethodGet && r.URL.Path == opPath:
+					_ = json.NewEncoder(w).Encode(map[string]interface{}{
+						"name":   "op-1",
+						"region": "projects/" + project + "/regions/" + region,
+						"status": "DONE",
+					})
+
+				default:
+					t.Errorf("unexpected request: %s", call)
+					http.NotFound(w, r)
+				}
+			}))
+			defer server.Close()
+
+			cfg := &transport_tpg.Config{
+				Context:      context.Background(),
+				Client:       server.Client(),
+				Project:      project,
+				Region:       region,
+				PollInterval: time.Millisecond,
+				CustomEndpoints: map[string]string{
+					"compute_custom_endpoint": server.URL + "/",
+				},
+			}
+
+			res := ResourceComputeDhcpOptionsConfig()
+			d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+				"name":            name,
+				"region":          region,
+				"project":         project,
+				"deletion_policy": tc.deletionPolicy,
+			})
+			d.SetId("projects/" + project + "/regions/" + region + "/dhcpOptionsConfigs/" + name)
+
+			err := res.Delete(d, cfg)
+			if tc.wantErrSubstr != "" {
+				if err == nil {
+					t.Fatalf("Delete() error = nil, want substring %q", tc.wantErrSubstr)
+				}
+				if !strings.Contains(err.Error(), tc.wantErrSubstr) {
+					t.Fatalf("Delete() error = %q, want substring %q", err.Error(), tc.wantErrSubstr)
+				}
+			} else if err != nil {
+				t.Fatalf("Delete() unexpected error: %v", err)
+			}
+
+			if tc.wantClearedId && d.Id() != "" {
+				t.Errorf("d.Id() = %q, want empty", d.Id())
+			}
+
+			if len(calls) != len(tc.wantCalls) {
+				t.Fatalf("calls = %v, want %v", calls, tc.wantCalls)
+			}
+			for i := range tc.wantCalls {
+				if calls[i] != tc.wantCalls[i] {
+					t.Errorf("calls[%d] = %q, want %q", i, calls[i], tc.wantCalls[i])
+				}
+			}
+		})
+	}
+}
+{{- end }}

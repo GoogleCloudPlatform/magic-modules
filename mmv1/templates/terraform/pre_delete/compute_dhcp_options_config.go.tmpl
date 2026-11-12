@@ -1,4 +1,6 @@
-// Compute DhcpOptionsConfig Delete fails if any network associations remain; clear them first.
+// Compute DhcpOptionsConfig Delete fails if any network associations remain.
+// Only clear associations automatically when deletion_policy is "FORCE"; otherwise
+// instruct the user to clear associations first or set deletion_policy = "FORCE".
 getRes, getErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 	Config:    config,
 	Method:    "GET",
@@ -8,33 +10,42 @@ getRes, getErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 	Timeout:   d.Timeout(schema.TimeoutDelete),
 	Headers:   headers,
 })
-if getErr == nil {
-	if assocs, ok := getRes["associations"].(map[string]interface{}); ok && len(assocs) > 0 {
-		clearUrl, err := transport_tpg.AddQueryParams(url, map[string]string{"updateMask": "associations"})
-		if err != nil {
-			return err
-		}
+if getErr != nil {
+	return transport_tpg.HandleNotFoundError(getErr, d, fmt.Sprintf("DhcpOptionsConfig %q", d.Id()))
+}
+if assocs, ok := getRes["associations"].(map[string]interface{}); ok && len(assocs) > 0 {
+	deletionPolicy, _ := d.Get("deletion_policy").(string)
+	if deletionPolicy != "FORCE" {
+		return fmt.Errorf(
+			"cannot destroy DhcpOptionsConfig %q while network associations still exist; remove `associations` and run `terraform apply` first, or set `deletion_policy = \"FORCE\"` and run `terraform apply` before destroying",
+			d.Id(),
+		)
+	}
 
-		log.Printf("[DEBUG] Clearing associations before deleting DhcpOptionsConfig %q", d.Id())
-		patchRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "PATCH",
-			Project:   billingProject,
-			RawURL:    clearUrl,
-			UserAgent: userAgent,
-			Body:      map[string]interface{}{},
-			Timeout:   d.Timeout(schema.TimeoutDelete),
-			Headers:   headers,
-		})
-		if err != nil {
-			return fmt.Errorf("Error clearing associations before deleting DhcpOptionsConfig %q: %s", d.Id(), err)
-		}
+	clearUrl, err := transport_tpg.AddQueryParams(url, map[string]string{"updateMask": "associations"})
+	if err != nil {
+		return err
+	}
 
-		err = ComputeOperationWaitTime(
-			config, patchRes, project, "Clearing DhcpOptionsConfig associations", userAgent,
-			d.Timeout(schema.TimeoutDelete))
-		if err != nil {
-			return fmt.Errorf("Error waiting to clear DhcpOptionsConfig associations %q: %s", d.Id(), err)
-		}
+	log.Printf("[DEBUG] Clearing associations before deleting DhcpOptionsConfig %q", d.Id())
+	patchRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "PATCH",
+		Project:   billingProject,
+		RawURL:    clearUrl,
+		UserAgent: userAgent,
+		Body:      map[string]interface{}{},
+		Timeout:   d.Timeout(schema.TimeoutDelete),
+		Headers:   headers,
+	})
+	if err != nil {
+		return fmt.Errorf("Error clearing associations before deleting DhcpOptionsConfig %q: %s", d.Id(), err)
+	}
+
+	err = ComputeOperationWaitTime(
+		config, patchRes, project, "Clearing DhcpOptionsConfig associations", userAgent,
+		d.Timeout(schema.TimeoutDelete))
+	if err != nil {
+		return fmt.Errorf("Error waiting to clear DhcpOptionsConfig associations %q: %s", d.Id(), err)
 	}
 }
