@@ -3494,3 +3494,75 @@ resource "google_compute_region_instance_group_manager" "igm" {
 `, instanceTemplateName, igmName)
 }
 {{- end }}
+{{- if ne $.TargetVersionName "ga" }}
+
+func TestAccRegionInstanceGroupManager_serviceAccount(t *testing.T) {
+	t.Parallel()
+
+	templateName := fmt.Sprintf("tf-test-rigm-%s", acctest.RandString(t, 10))
+	igmName := fmt.Sprintf("tf-test-rigm-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckRegionInstanceGroupManagerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRegionInstanceGroupManager_serviceAccount(templateName, igmName),
+			},
+			{
+				ResourceName:            "google_compute_region_instance_group_manager.igm-sa",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
+			},
+		},
+	})
+}
+
+func testAccRegionInstanceGroupManager_serviceAccount(template, igm string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {}
+
+data "google_compute_image" "my_image" {
+  family  = "debian-13"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-sa" {
+  name           = "%s"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+}
+
+resource "google_compute_region_instance_group_manager" "igm-sa" {
+  description        = "Terraform test instance group manager"
+  name               = "%s"
+  base_instance_name = "tf-test-igm-sa"
+  region             = "us-central1"
+  target_size        = 0
+  service_account    = "service-${data.google_project.project.number}@compute-system.iam.gserviceaccount.com"
+
+  version {
+    name              = "primary"
+    instance_template = google_compute_instance_template.igm-sa.self_link
+  }
+}
+`, template, igm)
+}
+{{- end }}
