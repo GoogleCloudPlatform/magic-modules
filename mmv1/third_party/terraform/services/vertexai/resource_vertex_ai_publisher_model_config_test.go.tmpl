@@ -36,6 +36,19 @@ func TestAccVertexAIPublisherModelConfig_projectWide(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
+				ResourceName:       "google_vertex_ai_publisher_model_config.project_default",
+				ImportState:        true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				// Short import form for the project-wide binding.
+				ResourceName:      "google_vertex_ai_publisher_model_config.project_default",
+				ImportState:       true,
+				ImportStateId:     "projects/" + context["project"].(string),
+				ImportStateVerify: true,
+			},
+			{
 				// Re-applying the same configuration must be a no-op (the API answers
 				// 409 ALREADY_EXISTS for identical writes).
 				Config: testAccVertexAIPublisherModelConfig_projectWide(context, "ENABLED"),
@@ -145,6 +158,19 @@ func TestAccVertexAIPublisherModelConfig_model(t *testing.T) {
 			{
 				ResourceName:      "google_vertex_ai_publisher_model_config.gemini_flash",
 				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName:       "google_vertex_ai_publisher_model_config.gemini_flash",
+				ImportState:        true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				// Short import form (project/location/publisher/model) from the docs.
+				ResourceName:      "google_vertex_ai_publisher_model_config.gemini_flash",
+				ImportState:       true,
+				ImportStateId:     context["project"].(string) + "/global/google/gemini-3.5-flash",
 				ImportStateVerify: true,
 			},
 			{

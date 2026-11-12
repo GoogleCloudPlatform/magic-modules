@@ -11,11 +11,15 @@
 	limitations under the License.
 */ -}}
 config := meta.(*transport_tpg.Config)
+// Full resource names first: `projects/{project}/publisherModelConfig` has three segments and
+// must not be mistaken for the `{location}/{publisher}/{model}` short form.
 if err := tpgresource.ParseImportId([]string{
 	"^projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/publishers/(?P<publisher>[^/]+)/models/(?P<model>[^/]+)/publisherModelConfig$",
-	"^projects/(?P<project>[^/]+)/publisherModelConfig$",
 	"^projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/publishers/(?P<publisher>[^/]+)/models/(?P<model>[^/]+)$",
+	"^projects/(?P<project>[^/]+)/publisherModelConfig$",
 	"^projects/(?P<project>[^/]+)$",
+	"^(?P<project>[^/]+)/(?P<location>[^/]+)/(?P<publisher>[^/]+)/(?P<model>[^/]+)$",
+	"^(?P<location>[^/]+)/(?P<publisher>[^/]+)/(?P<model>[^/]+)$",
 }, d, config); err != nil {
 	return nil, err
 }

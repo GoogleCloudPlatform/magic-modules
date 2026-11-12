@@ -60,7 +60,6 @@ id_format: 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}
 import_format:
   - 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}/publisherModelConfig'
   - 'projects/{{project}}/publisherModelConfig'
-exclude_identity_generation: true
 exclude_sweeper: true
 timeouts:
   insert_minutes: 20
