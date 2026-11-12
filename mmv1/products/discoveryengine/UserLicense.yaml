@@ -39,14 +39,6 @@ timeouts:
   insert_minutes: 5
   update_minutes: 5
   delete_minutes: 5
-autogen_async: true
-async:
-  actions: ['create', 'delete', 'update']
-  type: OpAsync
-  operation:
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: false
 exclude_sweeper: true
 identity:
   - userPrincipal
@@ -56,33 +48,25 @@ nested_query:
   is_list_of_ids: false
   modify_by_patch: false
 custom_code:
+  constants: templates/terraform/constants/discoveryengine_user_license.go.tmpl
   encoder: templates/terraform/encoders/discoveryengine_user_license.go.tmpl
+  post_create: templates/terraform/post_create/discoveryengine_user_license.go.tmpl
   pre_read: templates/terraform/pre_read/discoveryengine_user_license.go.tmpl
   post_read: templates/terraform/post_read/discoveryengine_user_license.go.tmpl
+  pre_update: templates/terraform/pre_update/discoveryengine_user_license.go.tmpl
+  post_update: templates/terraform/post_update/discoveryengine_user_license.go.tmpl
   pre_delete: templates/terraform/pre_delete/discoveryengine_user_license.go.tmpl
-  test_check_destroy: templates/terraform/custom_check_destroy/discoveryengine_user_license.go.tmpl
+  post_delete: templates/terraform/post_delete/discoveryengine_user_license.go.tmpl
 samples:
   - name: discoveryengine_user_license_basic
     primary_resource_id: primary
+    # Tested via handwritten TestAccDiscoveryEngineUserLicense_basic using shared
+    # bootstrapped LicenseConfigs so test runs do not accumulate undeletable LicenseConfigs.
+    exclude_test: true
     steps:
       - name: discoveryengine_user_license_basic
         resource_id_vars:
           license_config_id: lc-id
-          user_principal_id: user
-      - name: discoveryengine_user_license_update
-        resource_id_vars:
-          license_config_id: lc-id
-          license_config_id_2: lc-id2
-          user_principal_id: user
-        # delete_unassigned_user_licenses is a client-side request option on
-        # BatchUpdateUserLicensesRequest that is not persisted or returned by
-        # ListUserLicenses, so import initializes it to its default value (true).
-        ignore_read_extra:
-          - delete_unassigned_user_licenses
-      - name: discoveryengine_user_license_unassign
-        resource_id_vars:
-          license_config_id: lc-id
-          license_config_id_2: lc-id2
           user_principal_id: user
 virtual_fields:
   - name: delete_unassigned_user_licenses
@@ -114,9 +98,13 @@ properties:
     type: String
     description: |
       The user principal of the User, which may be an email address or a
-      Workforce Identity principal identifier.
+      Workforce Identity principal identifier. Email addresses are normalized
+      to lowercase by the service when assigning a license; prefer canonical
+      lowercase email addresses.
     required: true
     immutable: true
+    diff_suppress_func: discoveryEngineUserPrincipalDiffSuppress
+    custom_flatten: templates/terraform/custom_flatten/discoveryengine_user_license_user_principal.go.tmpl
   - name: licenseConfig
     type: String
     description: |

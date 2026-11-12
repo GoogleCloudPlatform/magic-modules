@@ -14,6 +14,7 @@ resource "google_discovery_engine_license_config" "basic" {
     day   = 1
   }
   subscription_term = "SUBSCRIPTION_TERM_ONE_YEAR"
+  auto_renew        = false
 }
 
 resource "google_discovery_engine_user_license" "{{$.PrimaryResourceId}}" {

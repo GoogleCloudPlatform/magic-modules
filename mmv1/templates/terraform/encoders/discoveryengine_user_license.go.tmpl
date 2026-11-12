@@ -5,6 +5,9 @@
 	} else if v, ok := d.Get("user_principal").(string); ok && v != "" {
 		userLicense["userPrincipal"] = v
 	}
+	// Always populate licenseConfig when configured: batchUpdateUserLicenses
+	// unassigns the license whenever userLicenses[i].licenseConfig is empty,
+	// even if licenseConfig is not listed in updateMask.
 	if v, ok := obj["licenseConfig"].(string); ok && v != "" {
 		userLicense["licenseConfig"] = v
 	}
@@ -12,21 +15,31 @@
 		userLicense["userProfile"] = v
 	}
 
-	// On Create and Update, if license_config is omitted or cleared, keep the
-	// unassigned user license record in the UserStore (NO_LICENSE) rather than
-	// deleting the row from Spanner. Row deletion is controlled by
-	// delete_unassigned_user_licenses during Delete.
-	deleteUnassigned := false
-	if lc, ok := userLicense["licenseConfig"].(string); ok && lc != "" {
-		if v, ok := d.Get("delete_unassigned_user_licenses").(bool); ok {
-			deleteUnassigned = v
+	var updateMask []string
+	if d.Id() == "" {
+		updateMask = []string{"licenseConfig", "userProfile"}
+	} else {
+		if d.HasChange("license_config") {
+			updateMask = append(updateMask, "licenseConfig")
+		}
+		if d.HasChange("user_profile") {
+			updateMask = append(updateMask, "userProfile")
+		}
+		if len(updateMask) == 0 {
+			updateMask = []string{"licenseConfig", "userProfile"}
 		}
 	}
 
+	// On Create and Update, always send deleteUnassignedUserLicenses: false so
+	// omitting or clearing license_config retains the unassigned user license
+	// record in NO_LICENSE state rather than deleting the user license record.
+	// Record deletion on destroy is controlled by delete_unassigned_user_licenses
+	// during Delete.
 	req := map[string]interface{}{
 		"inlineSource": map[string]interface{}{
 			"userLicenses": []interface{}{userLicense},
+			"updateMask":   strings.Join(updateMask, ","),
 		},
-		"deleteUnassignedUserLicenses": deleteUnassigned,
+		"deleteUnassignedUserLicenses": false,
 	}
 	return req, nil
