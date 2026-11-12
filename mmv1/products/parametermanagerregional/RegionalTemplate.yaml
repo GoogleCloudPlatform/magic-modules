@@ -42,23 +42,22 @@ samples:
       - name: regional_template_basic
         resource_id_vars:
           template_id: regional_template
-  - name: regional_template_with_format
-    primary_resource_id: regional-template-with-format
+  - name: regional_template_full
+    primary_resource_id: regional-template-full
     min_version: beta
     steps:
-      - name: regional_template_with_format
+      - name: regional_template_full
         resource_id_vars:
           template_id: regional_template
-  - name: regional_template_with_labels
-    primary_resource_id: regional-template-with-labels
-    min_version: beta
-    steps:
-      - name: regional_template_with_labels
+        vars:
+          key2: val2
+          key3: val3
+      - name: regional_template_full
         resource_id_vars:
           template_id: regional_template
-      - name: regional_template_with_labels_update
-        resource_id_vars:
-          template_id: regional_template
+        vars:
+          key2: val2_update
+          key3: null
 parameters:
   - name: location
     type: String
