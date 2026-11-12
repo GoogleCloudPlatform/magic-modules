@@ -25,7 +25,7 @@ To get more information about cache invalidation, see:
     * [Cache invalidation overview](https://cloud.google.com/cdn/docs/cache-invalidation-overview)
     * [Invalidate cached content](https://cloud.google.com/cdn/docs/invalidating-cached-content)
 
-## Example Usage - Invoke from CLI
+## Example Usage - Invoke from the CLI
 
 ```hcl
 resource "google_storage_bucket" "static" {
@@ -61,13 +61,13 @@ terraform apply -invoke=action.google_compute_url_map_invalidate_cache.example
 
 ## Example Usage - Invalidate when content changes
 
-This example invalidates the cached copy of `index.html` whenever the object changes. it uses the URL map
+This example invalidates the cached copy of `index.html` whenever the object changes. It uses the URL map
 from the previous example.
 
 ```hcl
 resource "google_storage_bucket_object" "index" {
   name   = "index.html"
-  bucket = google_compute_backend_bucket.static.name
+  bucket = google_storage_bucket.static.name
   source = "${path.module}/site/index.html"
 }
 
@@ -117,7 +117,7 @@ The following arguments are supported in the `config` block:
   
 * `path` - (Required) The path to invalidate. The path must start with `/` and must not contain `?` or `#`,
  because query strings and fragments are not matched. A `*` is allowed only as the final character and
- matches every path with the prefix: `/images/*` invalidates everything under `/images/`, and `/*`
+ matches every path with that prefix: `/images/*` invalidates everything under `/images/`, and `/*`
  invalidates all content.
 
 * `host` - (Optional) If set, only content cached for requests with this `Host` header is invalidated. The
@@ -128,7 +128,7 @@ The following arguments are supported in the `config` block:
  least one of these tags, and that also match `path` (and `host`, if set), are invalidated. Tags are set by 
  the origin with the `Cache-Tag` response header. To invalidate by tag alone, set `path` to `/*`.
 
-* `project` - (Optional) The ID of the project that contains the url map. If it is not provided,
+* `project` - (Optional) The ID of the project that contains the URL map. If it is not provided,
  the project in `url_map` is used, and then the provider project. If you set both `project` and a 
  project in `url_map`, they must match.
 
@@ -142,6 +142,6 @@ The following arguments are supported in the `config` block:
  every cache has processed it.
 * If the URL map does not exist, the action returns an error.
 * Each invocation submits a new invalidation. Cloud CDN limits how many invalidation requests a project can
- submit: see [Cache invalidation overview](https://cloud.google.com/cdn/docs/cache-invalidation-overview).
- Attach `action trigger` to a resource that changes only when content changes, rather than to one that is
+ submit; see [Cache invalidation overview](https://cloud.google.com/cdn/docs/cache-invalidation-overview).
+ Attach `action_trigger` to a resource that changes only when content changes, rather than to one that is
  updated on every apply.

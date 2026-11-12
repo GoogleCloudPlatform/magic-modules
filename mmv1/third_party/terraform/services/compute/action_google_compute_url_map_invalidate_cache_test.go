@@ -17,7 +17,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-// Invoke the action from an action_trigger on create and again on update, and checks that one
+// Invokes the action from an action_trigger on create and again on update, and checks that one
 // invalidateCache operation is recorded per invocation. The no-op plan check in step 2 shows the action
 // does not drift the URL map.
 func TestAccGoogleComputeUrlMapInvalidateCacheAction_basic(t *testing.T) {
@@ -85,7 +85,7 @@ func TestAccGoogleComputeUrlMapInvalidateCacheAction_invalidPath(t *testing.T) {
 }
 
 // testAccCheckComputeUrlMapInvalidateCacheCount counts completed invalidateCache operations that target the
-// URL mao. An invalidation does not change the URL map, so the operation log is the only observable evidence
+// URL map. An invalidation does not change the URL map, so the operation log is the only observable evidence
 // that the action ran.
 func testAccCheckComputeUrlMapInvalidateCacheCount(t *testing.T, n string, want int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
@@ -150,7 +150,7 @@ resource "google_storage_bucket" "test" {
   force_destroy = true
 }
 
-resource "google_compute_backend_bucket" "test"{
+resource "google_compute_backend_bucket" "test" {
   name        = "tf-test-cdn-%{random_suffix}"
   bucket_name = google_storage_bucket.test.name
   enable_cdn = true

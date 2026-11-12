@@ -26,7 +26,7 @@ import (
 const (
 	computeUrlMapInvalidateCacheActionName = "google_compute_url_map_invalidate_cache"
 
-	// Same bounds as google_compute_instance_reset. An invalidation normally takes affect in about 10 seconds;
+	// Same bounds as google_compute_instance_reset. An invalidation normally takes effect in about 10 seconds;
 	// the timeout only caps how long the action waits for the operation to finish.
 	computeUrlMapInvalidateCacheDefaultTimeout = 20 * time.Minute
 	computeUrlMapInvalidateCacheMinTimeout     = time.Second
@@ -58,8 +58,8 @@ func NewComputeUrlMapInvalidateCacheAction() action.Action {
 	return &computeUrlMapInvalidateCacheAction{}
 }
 
-// computeUrlMapInvalidateCacheAction invalidates Cloud CDN cached content for a global Url map
-// (urlMaps.invalidateCache). It does not modufy the URL map or its backends, so it causes no drift,
+// computeUrlMapInvalidateCacheAction invalidates Cloud CDN cached content for a global URL map
+// (urlMaps.invalidateCache). It does not modify the URL map or its backends, so it causes no drift,
 // and repeating an invalidation is harmless, so a failed invocation can be retried.
 type computeUrlMapInvalidateCacheAction struct {
 	config *transport_tpg.Config
@@ -86,7 +86,7 @@ func (a *computeUrlMapInvalidateCacheAction) Schema(_ context.Context, _ action.
 		Attributes: map[string]schema.Attribute{
 			"url_map": schema.StringAttribute{
 				Description: "The global URL map whose cache to invalidate. Accepts the URL map name, a partial URI " +
-					"(`project/{project}/global/urlMaps/{name}` or `global/urlMaps/{name}`), or a self link.",
+					"(`projects/{project}/global/urlMaps/{name}` or `global/urlMaps/{name}`), or a self link.",
 				Required: true,
 				Validators: []validator.String{
 					fwvalidators.NonEmptyStringValidator(),
@@ -94,12 +94,12 @@ func (a *computeUrlMapInvalidateCacheAction) Schema(_ context.Context, _ action.
 			},
 			"path": schema.StringAttribute{
 				Description: "The path to invalidate. Must start with \"/\" and must not contain \"?\" or \"#\". " +
-					"A \"*\" is allowed only as the final character and matching every path with that prefix, so \"/*\" invalidates all content.",
+					"A \"*\" is allowed only as the final character and matchesevery path with that prefix, so \"/*\" invalidates all content.",
 				Required: true,
 			},
 			"host": schema.StringAttribute{
 				Description: "If set, only content cached for requests with this Host header is invalidated. " +
-					"The leftmost label may be a wildcard, for example \"*.example.com\". if unset, the path is invalidated for all hosts.",
+					"The leftmost label may be a wildcard, for example \"*.example.com\". If unset, the path is invalidated for all hosts.",
 				Optional: true,
 				Validators: []validator.String{
 					fwvalidators.NonEmptyStringValidator(),
@@ -116,12 +116,12 @@ func (a *computeUrlMapInvalidateCacheAction) Schema(_ context.Context, _ action.
 				},
 			},
 			"project": schema.StringAttribute{
-				Description: "The project of the URL map. If it is not provided, the  project in `url_map` is used," +
+				Description: "The project of the URL map. If it is not provided, the  project in `url_map` is used, " +
 					"and then the provider project.",
 				Optional: true,
 			},
 			"timeout": schema.StringAttribute{
-				Description: "How long to wait for the invalidattion to complete, as a duration string " +
+				Description: "How long to wait for the invalidation to complete, as a duration string " +
 					"(such as \"5m\"). Must be between 1s and 1h. Defaults to \"20m\".",
 				Optional: true,
 				Validators: []validator.String{
@@ -246,14 +246,14 @@ func (a *computeUrlMapInvalidateCacheAction) Invoke(ctx context.Context, req act
 	invalidateURL := fmt.Sprintf("%sprojects/%s/global/urlMaps/%s/invalidateCache", transport_tpg.BaseUrl(Product, a.config), ref.Project, ref.Name)
 
 	// SendRequest and ComputeOperationWaitTime take per-call timeouts rather than a request context, so the
-	// overall budget is carried as a deadline on ctx and each call receives the time remaining untill it.
+	// overall budget is carried as a deadline on ctx and each call receives the time remaining until it.
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 	deadline, _ := ctx.Deadline()
 
-	tflog.Info(ctx, "Invalidating cloud CDN cache", map[string]any{
-		"urlMapID": urlMapID,
-		"path":     data.Path.ValueString(),
+	tflog.Info(ctx, "Invalidating Cloud CDN cache", map[string]any{
+		"url_map": urlMapID,
+		"path":    data.Path.ValueString(),
 	})
 	resp.SendProgress(action.InvokeProgressEvent{
 		Message: fmt.Sprintf("Invalidating cached content for path %q on URL map %s", data.Path.ValueString(), urlMapID),
@@ -293,7 +293,7 @@ func (a *computeUrlMapInvalidateCacheAction) Invoke(ctx context.Context, req act
 	})
 }
 
-// computeUrlMapref identifies a global URL map. Project is empty when neither the reference nor the
+// computeUrlMapRef identifies a global URL map. Project is empty when neither the reference nor the
 // project attribute sets it; the caller fills it from the  provider configuration.
 type computeUrlMapRef struct {
 	Project string
