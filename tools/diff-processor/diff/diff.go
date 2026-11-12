@@ -21,6 +21,7 @@ type ResourceDiff struct {
 	FlattenedSchema FlattenedSchemaRaw
 	Fields          map[string]FieldDiff
 	FieldSets       ResourceFieldSetsDiff
+	NoUpdate        bool
 }
 
 type ResourceFieldSetsDiff struct {
@@ -69,6 +70,12 @@ func ComputeSchemaDiff(oldResourceMap, newResourceMap map[string]*schema.Resourc
 			flattenedNewSchema = flattenSchema("", newResource.Schema)
 			resourceDiff.FlattenedSchema.New = flattenedNewSchema
 			resourceDiff.ResourceConfig.New = &schema.Resource{}
+			// Guard with hasCRUD so synthetic unit-test schema.Resource fixtures that
+			// omit CRUD callbacks altogether are not misclassified as NoUpdate.
+			hasCRUD := newResource.Create != nil || newResource.Read != nil || newResource.CreateContext != nil || newResource.ReadContext != nil
+			if hasCRUD && ((newResource.Update == nil && newResource.UpdateContext == nil) || !hasMutableConfigurableField(flattenedNewSchema)) {
+				resourceDiff.NoUpdate = true
+			}
 		}
 
 		resourceDiff.Fields = make(map[string]FieldDiff)
@@ -106,6 +113,41 @@ func flattenSchema(parentKey string, schemaObj map[string]*schema.Schema) map[st
 	}
 
 	return flattened
+}
+
+// hasMutableConfigurableField reports whether the resource has any configurable
+// leaf field (excluding universal `project` and `deletion_policy`) that can be
+// updated in place. MMv1 generates a stub Update function on otherwise immutable
+// resources solely to persist client-side `deletion_policy` changes in state.
+func hasMutableConfigurableField(flattened map[string]*schema.Schema) bool {
+	hasAnyConfigurable := false
+	for path, sch := range flattened {
+		if sch == nil || path == "project" || path == "deletion_policy" {
+			continue
+		}
+		if _, isRes := sch.Elem.(*schema.Resource); isRes {
+			continue
+		}
+		if !sch.Optional && !sch.Required {
+			continue
+		}
+		hasAnyConfigurable = true
+		if !sch.ForceNew && !hasForceNewAncestorInSchema(path, flattened) {
+			return true
+		}
+	}
+	return !hasAnyConfigurable
+}
+
+func hasForceNewAncestorInSchema(path string, flattened map[string]*schema.Schema) bool {
+	parts := strings.Split(path, ".")
+	for i := 1; i < len(parts); i++ {
+		ancestor := strings.Join(parts[:i], ".")
+		if sch, ok := flattened[ancestor]; ok && sch != nil && sch.ForceNew {
+			return true
+		}
+	}
+	return false
 }
 
 func diffFields(oldField, newField *schema.Schema, fieldName string) (FieldDiff, ResourceFieldSetsDiff, bool) {

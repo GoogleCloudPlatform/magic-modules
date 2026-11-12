@@ -74,7 +74,7 @@ func DetectExhaustiveMissingTests(schemaDiff diff.SchemaDiff, allTests []*reader
 			continue
 		}
 
-		evaluateResourceTests(resourceName, fullSchema, targetFields, allTests)
+		evaluateResourceTests(resourceName, resourceDiff, fullSchema, targetFields, allTests)
 
 		var incompleteFields []string
 		for _, fieldPath := range sortedFieldPaths(targetFields) {
@@ -172,7 +172,7 @@ func getExhaustiveTargetFields(
 			FieldPath:     fieldName,
 			IsNestedBlock: isNestedBlock,
 			Set:           TransitionResult{Status: StatusMissing},
-			Modify:        initialModifyStatus(newField),
+			Modify:        initialModifyStatus(newField, resourceDiff),
 			Unset:         initialUnsetStatus(fieldName, newField),
 		}
 	}
@@ -188,11 +188,19 @@ type stepBlockRecord struct {
 
 func evaluateResourceTests(
 	resourceName string,
+	resourceDiff diff.ResourceDiff,
 	fullSchema map[string]*schema.Schema,
 	targetFields map[string]*ExhaustiveFieldStatus,
 	allTests []*reader.Test,
 ) {
 	sortedTargets := sortedFieldPaths(targetFields)
+
+	omissionUnset := make(map[string]bool, len(sortedTargets))
+	for _, fieldPath := range sortedTargets {
+		omissionUnset[fieldPath] = usesOmissionUnset(fullSchema[fieldPath], resourceDiff)
+	}
+
+	var allResourceSteps []stepBlockRecord
 
 	for _, test := range allTests {
 		// Group steps by resource instance label so multi-step transitions follow the same instance.
@@ -221,6 +229,7 @@ func evaluateResourceTests(
 					instanceOrder = append(instanceOrder, label)
 				}
 				instanceSteps[label] = append(instanceSteps[label], rec)
+				allResourceSteps = append(allResourceSteps, rec)
 
 				// Check SET coverage on this step.
 				for _, fieldPath := range sortedTargets {
@@ -237,7 +246,11 @@ func evaluateResourceTests(
 			}
 		}
 
-		// Evaluate step-to-step MODIFY and in-place UNSET transitions per instance.
+		if resourceDiff.NoUpdate {
+			continue
+		}
+
+		// Evaluate step-to-step MODIFY and in-place UNSET transitions per instance on updatable resources.
 		for _, label := range instanceOrder {
 			recs := instanceSteps[label]
 			for i := 1; i < len(recs); i++ {
@@ -264,8 +277,7 @@ func evaluateResourceTests(
 					// Check in-place UNSET for mutable fields/blocks. For nested fields like
 					// `foo.bar.baz`, `foo.bar` must remain present so removing `foo` altogether
 					// does not count as unsetting `baz`.
-					fieldSchema := fullSchema[fieldPath]
-					if st.Unset.Status == StatusMissing && (fieldSchema == nil || !fieldSchema.ForceNew) &&
+					if st.Unset.Status == StatusMissing && !omissionUnset[fieldPath] &&
 						prevPresent && !currPresent && isParentPresent(curr.block, fieldPath) {
 						st.Unset = TransitionResult{
 							Status:    StatusCovered,
@@ -273,6 +285,27 @@ func evaluateResourceTests(
 							UnsetMode: detectUnsetMode(curr.block, fieldPath),
 						}
 					}
+				}
+			}
+		}
+	}
+
+	// Evaluate omission UNSET across all valid apply steps.
+	for _, rec := range allResourceSteps {
+		stepLabel := fmt.Sprintf("%s (step %d)", rec.testName, rec.stepIndex)
+		for _, fieldPath := range sortedTargets {
+			st := targetFields[fieldPath]
+			if !omissionUnset[fieldPath] || st.Unset.Status != StatusMissing {
+				continue
+			}
+			if isFieldPresent(rec.block, fieldPath) {
+				continue
+			}
+			if isParentPresent(rec.block, fieldPath) {
+				st.Unset = TransitionResult{
+					Status:    StatusCovered,
+					CoveredBy: stepLabel,
+					UnsetMode: detectUnsetMode(rec.block, fieldPath),
 				}
 			}
 		}
