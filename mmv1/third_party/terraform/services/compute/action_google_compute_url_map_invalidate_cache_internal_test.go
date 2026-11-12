@@ -73,7 +73,7 @@ func TestParseComputeUrlMapRef(t *testing.T) {
 				t.Fatalf("unexpected error: %v", err)
 			}
 			if got.Project != tc.wantProject || got.Name != tc.wantName {
-				t.Errorf("expected project %q and name %q, got project %q and name %q", tc.wantProject, tc.wantName, got.Project, got.Name)
+				t.Fatalf("got project %q name %q, want project %q and name %q", got.Project, got.Name, tc.wantProject, tc.wantName)
 			}
 		})
 	}

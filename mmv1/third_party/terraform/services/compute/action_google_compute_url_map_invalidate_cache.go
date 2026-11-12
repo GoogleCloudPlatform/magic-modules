@@ -325,9 +325,9 @@ func parseComputeUrlMapRef(urlMap, project string) (*computeUrlMapRef, error) {
 	if ref.Name == "" || strings.Contains(ref.Name, "/") {
 		return nil, fmt.Errorf("%q is not a valid global URL map name", urlMap)
 	}
-	if ref.Project == "" {
+	if project != "" {
 		if ref.Project != "" && ref.Project != project {
-			return nil, fmt.Errorf("project%q conflicts with project %q in url_map %q", project, ref.Project, urlMap)
+			return nil, fmt.Errorf("project %q conflicts with project %q in url_map %q", project, ref.Project, urlMap)
 		}
 		ref.Project = project
 	}
