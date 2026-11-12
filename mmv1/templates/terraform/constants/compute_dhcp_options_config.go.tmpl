@@ -1,0 +1,17 @@
+func computeDhcpOptionsConfigAssociationHash(v interface{}) int {
+	if v == nil {
+		return 0
+	}
+
+	m := v.(map[string]interface{})
+	var buf bytes.Buffer
+
+	if name, ok := m["name"].(string); ok {
+		buf.WriteString(fmt.Sprintf("%s-", name))
+	}
+	if network, ok := m["network"].(string); ok && network != "" {
+		buf.WriteString(fmt.Sprintf("%s-", tpgresource.GetResourceNameFromSelfLink(network)))
+	}
+
+	return tpgresource.Hashcode(buf.String())
+}

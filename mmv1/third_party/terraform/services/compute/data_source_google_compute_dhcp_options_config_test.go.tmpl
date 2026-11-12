@@ -1,0 +1,106 @@
+package compute_test
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
+)
+
+func TestAccDataSourceGoogleComputeDhcpOptionsConfig_basic(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+	configName := fmt.Sprintf("tf-test-dhcp-ds-%s", randomSuffix)
+	networkName := fmt.Sprintf("tf-test-dhcp-ds-net-%s", randomSuffix)
+
+	context := map[string]interface{}{
+		"config_name":  configName,
+		"network_name": networkName,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeDhcpOptionsConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSourceGoogleComputeDhcpOptionsConfig_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
+						"data.google_compute_dhcp_options_config.explicit",
+						"google_compute_dhcp_options_config.default",
+						[]string{"deletion_policy"},
+					),
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
+						"data.google_compute_dhcp_options_config.default_scope",
+						"google_compute_dhcp_options_config.default",
+						[]string{"deletion_policy"},
+					),
+					resource.TestCheckResourceAttr("data.google_compute_dhcp_options_config.explicit", "name", configName),
+					resource.TestCheckResourceAttr("data.google_compute_dhcp_options_config.explicit", "region", "us-central1"),
+					resource.TestCheckResourceAttr("data.google_compute_dhcp_options_config.explicit", "description", "DHCP options config for datasource test"),
+					resource.TestCheckResourceAttr("data.google_compute_dhcp_options_config.explicit", "lease_time_sec", "3600"),
+					resource.TestCheckResourceAttr("data.google_compute_dhcp_options_config.explicit", "domain_name", "corp.example.com"),
+					resource.TestCheckResourceAttr("data.google_compute_dhcp_options_config.explicit", "associations.#", "1"),
+					resource.TestCheckResourceAttrSet("data.google_compute_dhcp_options_config.explicit", "dhcp_options_config_id"),
+					resource.TestCheckResourceAttrSet("data.google_compute_dhcp_options_config.explicit", "creation_timestamp"),
+					resource.TestCheckResourceAttrSet("data.google_compute_dhcp_options_config.explicit", "self_link"),
+				),
+			},
+		},
+	})
+}
+
+func testAccDataSourceGoogleComputeDhcpOptionsConfig_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_network" "default" {
+  provider = google-beta
+
+  name                    = "%{network_name}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_dhcp_options_config" "default" {
+  provider = google-beta
+
+  name        = "%{config_name}"
+  region      = "us-central1"
+  description = "DHCP options config for datasource test"
+
+  lease_time_sec             = 3600
+  domain_name                = "corp.example.com"
+  dns_search_paths           = ["corp.example.com", "svc.example.com"]
+  ntp_server_ipv4_addresses  = ["192.0.2.10", "192.0.2.11"]
+  ntp_server_ipv6_addresses  = ["2001:db8::10"]
+  tftp_server_ipv4_name      = "tftp.corp.example.com"
+  tftp_server_ipv4_addresses = ["192.0.2.20"]
+  boot_file_ipv4_name        = "pxelinux.0"
+  boot_file_ipv6_url         = "tftp://[2001:db8::20]/bootx64.efi"
+  boot_file_ipv6_parameters  = ["console=ttyS0"]
+
+  associations {
+    name    = "assoc-1"
+    network = google_compute_network.default.id
+  }
+}
+
+data "google_compute_dhcp_options_config" "explicit" {
+  provider = google-beta
+
+  name    = google_compute_dhcp_options_config.default.name
+  region  = google_compute_dhcp_options_config.default.region
+  project = google_compute_dhcp_options_config.default.project
+}
+
+data "google_compute_dhcp_options_config" "default_scope" {
+  provider = google-beta
+
+  name = google_compute_dhcp_options_config.default.name
+}
+`, context)
+}
+{{- end }}

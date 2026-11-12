@@ -1,0 +1,30 @@
+resource "google_compute_network" "net1" {
+  provider = google-beta
+
+  name                    = "{{index $.ResourceIdVars "network_name_1"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_dhcp_options_config" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+
+  name        = "{{index $.ResourceIdVars "dhcp_options_config_name"}}"
+  region      = "us-central1"
+  description = "Initial DHCP options configuration"
+
+  lease_time_sec             = 3600
+  domain_name                = "corp.example.com"
+  dns_search_paths           = ["corp.example.com", "svc.example.com"]
+  ntp_server_ipv4_addresses  = ["192.0.2.10", "192.0.2.11"]
+  ntp_server_ipv6_addresses  = ["2001:db8::10", "2001:db8::11"]
+  tftp_server_ipv4_name      = "tftp.corp.example.com"
+  tftp_server_ipv4_addresses = ["192.0.2.20", "192.0.2.21"]
+  boot_file_ipv4_name        = "pxelinux.0"
+  boot_file_ipv6_url         = "tftp://[2001:db8::20]/bootx64.efi"
+  boot_file_ipv6_parameters  = ["console=ttyS0", "quiet"]
+
+  associations {
+    name    = "assoc-1"
+    network = google_compute_network.net1.id
+  }
+}

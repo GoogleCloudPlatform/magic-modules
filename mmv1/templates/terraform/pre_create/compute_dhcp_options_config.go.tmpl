@@ -1,0 +1,6 @@
+// Compute DhcpOptionsConfig Insert rejects associations; apply them via PATCH in post_create.
+var createAssociations interface{}
+if v, ok := obj["associations"]; ok {
+	createAssociations = v
+	delete(obj, "associations")
+}
