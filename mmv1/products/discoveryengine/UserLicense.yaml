@@ -109,7 +109,8 @@ properties:
     type: String
     description: |
       The full resource name of the LicenseConfig assigned to the user.
-      Format: `projects/{project}/locations/{location}/licenseConfigs/{license_config}`.
+      Format: `projects/{project_number}/locations/{location}/licenseConfigs/{license_config}`
+      (as returned by `google_discovery_engine_license_config.<name>.name`).
       Omitting or clearing this field leaves the user record unassigned in the UserStore.
     diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
   - name: userProfile

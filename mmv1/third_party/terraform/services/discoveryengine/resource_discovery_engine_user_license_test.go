@@ -32,20 +32,25 @@ func BootstrapSharedDiscoveryEngineLicenseConfig(t *testing.T, licenseConfigID, 
 	t.Helper()
 
 	project := envvar.GetTestProjectFromEnv()
-	resourceName := fmt.Sprintf("projects/%s/locations/%s/licenseConfigs/%s", project, location, licenseConfigID)
+	projectNumber := envvar.GetTestProjectNumberFromEnv()
+	fallbackProject := projectNumber
+	if fallbackProject == "" {
+		fallbackProject = project
+	}
+	fallbackName := fmt.Sprintf("projects/%s/locations/%s/licenseConfigs/%s", fallbackProject, location, licenseConfigID)
 	if acctest.IsVcrReplaying() {
-		return resourceName
+		return fallbackName
 	}
 
 	config := transport_tpg.BootstrapConfig(t)
 	if config == nil {
-		return resourceName
+		return fallbackName
 	}
 
 	baseURL := strings.ReplaceAll(transport_tpg.BaseUrl(discoveryengine.Product, config), "{{location}}", location)
-	getURL := baseURL + resourceName
+	getURL := fmt.Sprintf("%sprojects/%s/locations/%s/licenseConfigs/%s", baseURL, project, location, licenseConfigID)
 
-	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
 		Project:   project,
@@ -54,45 +59,70 @@ func BootstrapSharedDiscoveryEngineLicenseConfig(t *testing.T, licenseConfigID, 
 		Timeout:   5 * time.Minute,
 		Headers:   make(http.Header),
 	})
-	if err != nil {
-		if !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
-			t.Fatalf("Error getting shared Discovery Engine LicenseConfig %q: %s", resourceName, err)
+	if err == nil {
+		if name, ok := res["name"].(string); ok && name != "" {
+			return name
 		}
+		return fallbackName
+	}
+	if !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		t.Fatalf("Error getting shared Discovery Engine LicenseConfig %q: %s", getURL, err)
+	}
 
-		log.Printf("[DEBUG] Shared Discovery Engine LicenseConfig %q not found, bootstrapping", resourceName)
-		postURL := fmt.Sprintf("%sprojects/%s/locations/%s/licenseConfigs?licenseConfigId=%s", baseURL, project, location, licenseConfigID)
-		body := map[string]interface{}{
-			"licenseCount":     50,
-			"subscriptionTier": "SUBSCRIPTION_TIER_NOTEBOOK_LM",
-			"subscriptionTerm": "SUBSCRIPTION_TERM_ONE_YEAR",
-			"autoRenew":        false,
-			"startDate": map[string]interface{}{
-				"year":  2099,
-				"month": 1,
-				"day":   1,
-			},
-			"endDate": map[string]interface{}{
-				"year":  2100,
-				"month": 1,
-				"day":   1,
-			},
+	log.Printf("[DEBUG] Shared Discovery Engine LicenseConfig %q not found, bootstrapping", licenseConfigID)
+	postURL := fmt.Sprintf("%sprojects/%s/locations/%s/licenseConfigs?licenseConfigId=%s", baseURL, project, location, licenseConfigID)
+	body := map[string]interface{}{
+		"licenseCount":     50,
+		"subscriptionTier": "SUBSCRIPTION_TIER_NOTEBOOK_LM",
+		"subscriptionTerm": "SUBSCRIPTION_TERM_ONE_YEAR",
+		"autoRenew":        false,
+		"startDate": map[string]interface{}{
+			"year":  2099,
+			"month": 1,
+			"day":   1,
+		},
+		"endDate": map[string]interface{}{
+			"year":  2100,
+			"month": 1,
+			"day":   1,
+		},
+	}
+	createRes, createErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   project,
+		RawURL:    postURL,
+		UserAgent: config.UserAgent,
+		Body:      body,
+		Timeout:   5 * time.Minute,
+		Headers:   make(http.Header),
+	})
+	if createErr != nil {
+		if !transport_tpg.IsGoogleApiErrorWithCode(createErr, 409) {
+			t.Fatalf("Error creating shared Discovery Engine LicenseConfig %q: %s", licenseConfigID, createErr)
 		}
-		_, createErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		getRes, getErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
-			Method:    "POST",
+			Method:    "GET",
 			Project:   project,
-			RawURL:    postURL,
+			RawURL:    getURL,
 			UserAgent: config.UserAgent,
-			Body:      body,
 			Timeout:   5 * time.Minute,
 			Headers:   make(http.Header),
 		})
-		if createErr != nil && !transport_tpg.IsGoogleApiErrorWithCode(createErr, 409) {
-			t.Fatalf("Error creating shared Discovery Engine LicenseConfig %q: %s", resourceName, createErr)
+		if getErr != nil {
+			t.Fatalf("Error re-fetching shared Discovery Engine LicenseConfig %q after 409: %s", licenseConfigID, getErr)
 		}
+		if name, ok := getRes["name"].(string); ok && name != "" {
+			return name
+		}
+		return fallbackName
+	}
+	if name, ok := createRes["name"].(string); ok && name != "" {
+		return name
 	}
 
-	return resourceName
+	return fallbackName
 }
 
 func TestAccDiscoveryEngineUserLicense_basic(t *testing.T) {
