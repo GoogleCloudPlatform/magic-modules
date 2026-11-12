@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	tfjson "github.com/hashicorp/terraform-json"
 	"github.com/stretchr/testify/require"
 )
 
@@ -168,4 +169,28 @@ func TestReadResourceChanges(t *testing.T) {
 		t.Fatalf("marshaling: %v", err)
 	}
 	require.JSONEq(t, string(wantJSON), string(gotJSON))
+}
+
+func TestIsReplace(t *testing.T) {
+	cases := []struct {
+		name    string
+		actions tfjson.Actions
+		want    bool
+	}{
+		{name: "destroy_before_create", actions: tfjson.Actions{"delete", "create"}, want: true},
+		{name: "create_before_destroy", actions: tfjson.Actions{"create", "delete"}, want: true},
+		{name: "create", actions: tfjson.Actions{"create"}, want: false},
+		{name: "update", actions: tfjson.Actions{"update"}, want: false},
+		{name: "delete", actions: tfjson.Actions{"delete"}, want: false},
+		{name: "no-op", actions: tfjson.Actions{"no-op"}, want: false},
+		{name: "read", actions: tfjson.Actions{"read"}, want: false},
+		{name: "forget", actions: tfjson.Actions{"forget"}, want: false},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			rc := &tfjson.ResourceChange{Change: &tfjson.Change{Actions: tc.actions}}
+			require.Equal(t, tc.want, IsReplace(rc))
+			require.Equal(t, tc.want, IsDeleteCreate(rc))
+		})
+	}
 }
