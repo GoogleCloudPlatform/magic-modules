@@ -12,21 +12,21 @@
 # limitations under the License.
 
 ---
-name: 'CatalogTemplate'
-base_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates'
-create_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates?catalogTemplateId={{catalog_template_id}}'
-self_link: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template_id}}'
-update_verb: 'PATCH'
-update_mask: true
+name: CatalogTemplate
 description: |
   A Design Center Catalog Template.
-autogen_async: true
-async:
-  actions: ["delete"]
-  operation:
-    base_url: "{{op_id}}"
+base_url: projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates
+self_link: projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template_id}}
+create_url: projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates?catalogTemplateId={{catalog_template_id}}
+update_mask: true
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template_id}}'
+  - projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template_id}}
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions: [delete]
+autogen_async: true
 samples:
   - name: designcenter_catalog_template_basic
     primary_resource_id: example
@@ -53,91 +53,80 @@ samples:
           project: BootstrapDesignCenterProject(t)
           space: BootstrapDesignCenterSpace(t)
           catalog: BootstrapDesignCenterCatalog(t)
-
 parameters:
   - type: String
-    name: 'location'
+    name: location
     description: |
       The location of the catalog template.
     required: true
     immutable: true
     url_param_only: true
-
   - type: String
-    name: 'space'
+    name: space
     description: |
       The space of the catalog template.
     required: true
     immutable: true
     url_param_only: true
-
   - type: String
-    name: 'catalog'
+    name: catalog
     description: |
       The catalog of the catalog template.
     required: true
     immutable: true
     url_param_only: true
-
   - type: String
-    name: 'catalog_template_id'
+    name: catalog_template_id
     description: |
       The ID of the catalog template.
     required: true
     immutable: true
     url_param_only: true
-
 properties:
   - type: Enum
-    name: 'templateCategory'
+    name: templateCategory
     description: |
       The category of the template.
     required: true
     enum_values:
-      - 'APPLICATION_TEMPLATE'
-      - 'COMPONENT_TEMPLATE'
-
+      - APPLICATION_TEMPLATE
+      - COMPONENT_TEMPLATE
   - type: String
-    name: 'displayName'
+    name: displayName
     description: |
-      The display name of the catalog template.
-
+      The display name of the catalog template. When unset, the API defaults
+      this to `catalog_template_id`.
+    default_from_api: true
   - type: String
-    name: 'description'
+    name: description
     description: |
       The description of the catalog template.
-
   - type: String
-    name: 'type'
+    name: type
     description: |
       The type of the catalog template.
-
   - type: String
-    name: 'name'
+    name: name
     description: |
       The resource name of the catalog template.
     output: true
-
   - type: String
-    name: 'uuid'
+    name: uuid
     description: |
       The unique system-generated UUID for the template.
     output: true
-
   - type: String
-    name: 'latestRevisionId'
+    name: latestRevisionId
     description: |
       The ID of the latest revision of the template.
     output: true
-
   - type: Time
-    name: 'createTime'
+    name: createTime
     description: |
       The time the catalog template was created.
     output: true
-
   - type: Time
-    name: 'updateTime'
+    name: updateTime
     description: |
       The time the catalog template was last updated.
     output: true
