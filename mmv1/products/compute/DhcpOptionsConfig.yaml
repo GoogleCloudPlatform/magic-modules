@@ -96,8 +96,9 @@ virtual_fields:
     description: |
       The deletion policy for the DHCP options configuration.
       Setting `deletion_policy = "FORCE"` clears any remaining network `associations`
-      before deleting the configuration. By default (`DEFAULT`), deletion fails if
-      any `associations` still exist on the resource.
+      before deleting the configuration. By default (`DEFAULT`), Terraform attempts to
+      delete the resource directly, which fails if any `associations` still exist on
+      the resource.
 
       When a 'terraform destroy' or 'terraform apply' would delete the resource,
       the command will fail if this field is set to "PREVENT" in Terraform state.
