@@ -986,6 +986,7 @@ properties:
         output: true
   - name: 'ipAddressSelectionPolicy'
     type: Enum
+    default_from_api: true
     description: |
       Specifies preference of traffic to the backend (from the proxy and from the client for proxyless gRPC).
     enum_values:
@@ -1009,6 +1010,7 @@ properties:
       - 'INTERNAL_SELF_MANAGED'
   - name: 'localityLbPolicy'
     type: Enum
+    default_from_api: true
     description: |
       The load balancing algorithm used within the scope of the locality.
       The possible values are:
