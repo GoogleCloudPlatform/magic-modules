@@ -519,3 +519,85 @@ func TestUnitDiscoveryEngineUserLicense_crudFilterCaseAndErrorSamples(t *testing
 		t.Errorf("Workforce Identity user_profile = %q, want \"Alice Workforce\"", got)
 	}
 }
+
+func TestUnitDiscoveryEngineUserLicense_sweeper(t *testing.T) {
+	t.Parallel()
+
+	var batchBodies []map[string]interface{}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch {
+		case req.Method == "GET" && req.URL.Path == "/v1/projects/test-proj/locations/global/userStores/default_user_store/userLicenses":
+			if req.URL.Query().Get("pageToken") == "" {
+				_ = json.NewEncoder(w).Encode(map[string]interface{}{
+					"userLicenses": []interface{}{
+						map[string]interface{}{"userPrincipal": "real-user@example.com"},
+						map[string]interface{}{"userPrincipal": "tf-test-user-1@example.com"},
+					},
+					"nextPageToken": "page-2",
+				})
+				return
+			}
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"userLicenses": []interface{}{
+					map[string]interface{}{"userPrincipal": "principal://iam.googleapis.com/locations/global/workforcePools/pool-1/subject/real-wf"},
+					map[string]interface{}{"userPrincipal": "principal://iam.googleapis.com/locations/global/workforcePools/pool-1/subject/tf-test-wf-1"},
+				},
+			})
+		case req.Method == "POST" && req.URL.Path == "/v1/projects/test-proj/locations/global/userStores/default_user_store:batchUpdateUserLicenses":
+			var body map[string]interface{}
+			if err := json.NewDecoder(req.Body).Decode(&body); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			batchBodies = append(batchBodies, body)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"name":     "projects/test-proj/locations/global/operations/sweep-op-1",
+				"done":     true,
+				"response": map[string]interface{}{},
+			})
+		case req.Method == "GET" && req.URL.Path == "/v1/projects/test-proj/locations/us/userStores/default_user_store/userLicenses":
+			w.WriteHeader(http.StatusNotFound)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"error": map[string]interface{}{"code": 404, "message": "not found"},
+			})
+		default:
+			http.NotFound(w, req)
+		}
+	}))
+	defer srv.Close()
+
+	cfg := &transport_tpg.Config{
+		Project:      "test-proj",
+		Client:       srv.Client(),
+		PollInterval: time.Millisecond,
+		CustomEndpoints: map[string]string{
+			Product.CustomEndpointField: srv.URL + "/v1/",
+		},
+	}
+
+	if err := sweepDiscoveryEngineUserLicensesInLocation(cfg, "global"); err != nil {
+		t.Fatalf("sweep global failed: %v", err)
+	}
+	if len(batchBodies) != 1 {
+		t.Fatalf("expected 1 batch POST for global, got %d", len(batchBodies))
+	}
+	wantBody := map[string]interface{}{
+		"inlineSource": map[string]interface{}{
+			"userLicenses": []interface{}{
+				map[string]interface{}{"userPrincipal": "tf-test-user-1@example.com"},
+				map[string]interface{}{"userPrincipal": "principal://iam.googleapis.com/locations/global/workforcePools/pool-1/subject/tf-test-wf-1"},
+			},
+			"updateMask": "licenseConfig",
+		},
+		"deleteUnassignedUserLicenses": true,
+	}
+	if !reflect.DeepEqual(batchBodies[0], wantBody) {
+		t.Errorf("sweeper batch body mismatch:\ngot:  %#v\nwant: %#v", batchBodies[0], wantBody)
+	}
+
+	// Verify 404 on unprovisioned location is ignored cleanly.
+	if err := sweepDiscoveryEngineUserLicensesInLocation(cfg, "us"); err != nil {
+		t.Fatalf("expected 404 location sweep to succeed cleanly, got: %v", err)
+	}
+}
