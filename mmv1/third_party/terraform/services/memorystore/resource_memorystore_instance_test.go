@@ -3,9 +3,6 @@ package memorystore_test
 import (
 	"fmt"
 	"log"
-{{- if ne $.TargetVersionName "ga" }}
-	"net/netip"
-{{- end }}
 	"strings"
 	"testing"
 	"time"
@@ -1606,7 +1603,7 @@ func TestAccMemorystoreInstance_memorystorePscAutoInstanceClusterDisabled(t *tes
 				ResourceName:            "google_memorystore_instance.instance-cluster-disabled",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"desired_auto_created_endpoints.#", "desired_auto_created_endpoints.0.%", "desired_auto_created_endpoints.0.project_id", "desired_auto_created_endpoints.0.network", "desired_auto_created_endpoints.0.ip_version", "desired_psc_auto_connections.#", "desired_psc_auto_connections.0.%", "desired_psc_auto_connections.0.network", "desired_psc_auto_connections.0.project_id"},
+				ImportStateVerifyIgnore: []string{"desired_auto_created_endpoints.#", "desired_auto_created_endpoints.0.%", "desired_auto_created_endpoints.0.project_id", "desired_auto_created_endpoints.0.network", "desired_psc_auto_connections.#", "desired_psc_auto_connections.0.%", "desired_psc_auto_connections.0.network", "desired_psc_auto_connections.0.project_id"},
 			},
 			{
 				Config: testAccMemorystoreInstance_memorystorePscAutoInstanceClusterDisabledPscAutoConnections(context),
@@ -1615,7 +1612,7 @@ func TestAccMemorystoreInstance_memorystorePscAutoInstanceClusterDisabled(t *tes
 				ResourceName:            "google_memorystore_instance.instance-cluster-disabled",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"desired_auto_created_endpoints.#", "desired_auto_created_endpoints.0.%", "desired_auto_created_endpoints.0.project_id", "desired_auto_created_endpoints.0.network", "desired_auto_created_endpoints.0.ip_version", "desired_psc_auto_connections.#", "desired_psc_auto_connections.0.%", "desired_psc_auto_connections.0.network", "desired_psc_auto_connections.0.project_id"},
+				ImportStateVerifyIgnore: []string{"desired_auto_created_endpoints.#", "desired_auto_created_endpoints.0.%", "desired_auto_created_endpoints.0.project_id", "desired_auto_created_endpoints.0.network", "desired_psc_auto_connections.#", "desired_psc_auto_connections.0.%", "desired_psc_auto_connections.0.network", "desired_psc_auto_connections.0.project_id"},
 			},
 			{
 				Config: testAccMemorystoreInstance_memorystorePscAutoInstanceClusterDisabled_onlyAutoCreatedEndpoints(context),
@@ -1624,7 +1621,7 @@ func TestAccMemorystoreInstance_memorystorePscAutoInstanceClusterDisabled(t *tes
 				ResourceName:            "google_memorystore_instance.instance-cluster-disabled",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"desired_auto_created_endpoints.#", "desired_auto_created_endpoints.0.%", "desired_auto_created_endpoints.0.project_id", "desired_auto_created_endpoints.0.network", "desired_auto_created_endpoints.0.ip_version", "desired_psc_auto_connections.#", "desired_psc_auto_connections.0.%", "desired_psc_auto_connections.0.network", "desired_psc_auto_connections.0.project_id"},
+				ImportStateVerifyIgnore: []string{"desired_auto_created_endpoints.#", "desired_auto_created_endpoints.0.%", "desired_auto_created_endpoints.0.project_id", "desired_auto_created_endpoints.0.network", "desired_psc_auto_connections.#", "desired_psc_auto_connections.0.%", "desired_psc_auto_connections.0.network", "desired_psc_auto_connections.0.project_id"},
 			},
 			{
 				Config: testAccMemorystoreInstance_memorystorePscAutoInstanceClusterDisabled_neitherConnection(context),
@@ -1633,7 +1630,7 @@ func TestAccMemorystoreInstance_memorystorePscAutoInstanceClusterDisabled(t *tes
 				ResourceName:            "google_memorystore_instance.instance-cluster-disabled",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"desired_auto_created_endpoints.#", "desired_auto_created_endpoints.0.%", "desired_auto_created_endpoints.0.project_id", "desired_auto_created_endpoints.0.network", "desired_auto_created_endpoints.0.ip_version", "desired_psc_auto_connections.#", "desired_psc_auto_connections.0.%", "desired_psc_auto_connections.0.network", "desired_psc_auto_connections.0.project_id"},
+				ImportStateVerifyIgnore: []string{"desired_auto_created_endpoints.#", "desired_auto_created_endpoints.0.%", "desired_auto_created_endpoints.0.project_id", "desired_auto_created_endpoints.0.network", "desired_psc_auto_connections.#", "desired_psc_auto_connections.0.%", "desired_psc_auto_connections.0.network", "desired_psc_auto_connections.0.project_id"},
 			},
 		},
 	})
@@ -2183,223 +2180,3 @@ resource "google_memorystore_instance" "test" {
 }
 `, context)
 }
-{{- if ne $.TargetVersionName "ga" }}
-
-func TestAccMemorystoreInstance_autoCreatedEndpointsIPv6(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"location":      "asia-east1",
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckMemorystoreInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccMemorystoreInstance_autoCreatedEndpointsIPv6(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_memorystore_instance.test_ipv6", "desired_auto_created_endpoints.0.ip_version", "IPV6"),
-					resource.TestCheckResourceAttr("google_memorystore_instance.test_ipv6", "endpoints.0.connections.0.psc_auto_connection.0.ip_version", "IPV6"),
-					resource.TestCheckResourceAttrWith("google_memorystore_instance.test_ipv6", "endpoints.0.connections.0.psc_auto_connection.0.ip_address", func(value string) error {
-						parsedAddr, err := netip.ParseAddr(value)
-						if err != nil {
-							return fmt.Errorf("failed to parse IP address %q: %w", value, err)
-						}
-						if !parsedAddr.Is6() {
-							return fmt.Errorf("expected IPv6 address, got %q", value)
-						}
-						return nil
-					}),
-				),
-			},
-			{
-				ResourceName:      "google_memorystore_instance.test_ipv6",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
-func testAccMemorystoreInstance_autoCreatedEndpointsIPv6(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_memorystore_instance" "test_ipv6" {
-  instance_id                 = "tf-test-ipv6-%{random_suffix}"
-  shard_count                 = 1
-  location                    = "%{location}"
-  replica_count               = 0
-  node_type                   = "SHARED_CORE_NANO"
-  deletion_protection_enabled = false
-  desired_auto_created_endpoints {
-    network    = google_compute_network.producer_net.id
-    project_id = data.google_project.project.project_id
-    ip_version = "IPV6"
-  }
-  depends_on = [google_network_connectivity_service_connection_policy.ipv6_policy]
-}
-
-resource "google_network_connectivity_service_connection_policy" "ipv6_policy" {
-  name          = "tf-test-ipv6-policy-%{random_suffix}"
-  location      = "%{location}"
-  service_class = "gcp-memorystore"
-  description   = "IPv6 service connection policy"
-  network       = google_compute_network.producer_net.id
-  psc_config {
-    subnetworks = [google_compute_subnetwork.producer_subnet.id]
-  }
-}
-
-resource "google_compute_subnetwork" "producer_subnet" {
-  name             = "tf-test-ipv6-subnet-%{random_suffix}"
-  ip_cidr_range    = "10.0.4.0/29"
-  region           = "%{location}"
-  network          = google_compute_network.producer_net.id
-  stack_type       = "IPV4_IPV6"
-  ipv6_access_type = "INTERNAL"
-}
-
-resource "google_compute_network" "producer_net" {
-  name                     = "tf-test-ipv6-net-%{random_suffix}"
-  auto_create_subnetworks  = false
-  enable_ula_internal_ipv6 = true
-}
-
-data "google_project" "project" {
-}
-`, context)
-}
-
-func TestAccMemorystoreInstance_ipVersionDefaultNoDiff(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"location":      "asia-east1",
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckMemorystoreInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				// Create instance without specifying ip_version (defaults to IPV4).
-				Config: testAccMemorystoreInstance_ipVersionOmitted(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_memorystore_instance.test_ip_default", "desired_auto_created_endpoints.0.ip_version", "IPV4"),
-					resource.TestCheckResourceAttr("google_memorystore_instance.test_ip_default", "endpoints.0.connections.0.psc_auto_connection.0.ip_version", "IPV4"),
-				),
-			},
-			{
-				ResourceName:      "google_memorystore_instance.test_ip_default",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				// Re-apply the same config with ip_version omitted — expect no diff.
-				Config:             testAccMemorystoreInstance_ipVersionOmitted(context),
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: false,
-			},
-			{
-				// Explicitly set ip_version = "IPV4" — expect no diff since API already returned IPV4.
-				Config:             testAccMemorystoreInstance_ipVersionExplicitIPv4(context),
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: false,
-			},
-		},
-	})
-}
-
-func testAccMemorystoreInstance_ipVersionOmitted(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_memorystore_instance" "test_ip_default" {
-  instance_id                 = "tf-test-ipdef-%{random_suffix}"
-  shard_count                 = 1
-  location                    = "%{location}"
-  replica_count               = 0
-  node_type                   = "SHARED_CORE_NANO"
-  deletion_protection_enabled = false
-  desired_auto_created_endpoints {
-    network    = google_compute_network.producer_net.id
-    project_id = data.google_project.project.project_id
-  }
-  depends_on = [google_network_connectivity_service_connection_policy.default_policy]
-}
-
-resource "google_network_connectivity_service_connection_policy" "default_policy" {
-  name          = "tf-test-ipdef-policy-%{random_suffix}"
-  location      = "%{location}"
-  service_class = "gcp-memorystore"
-  description   = "default service connection policy"
-  network       = google_compute_network.producer_net.id
-  psc_config {
-    subnetworks = [google_compute_subnetwork.producer_subnet.id]
-  }
-}
-
-resource "google_compute_subnetwork" "producer_subnet" {
-  name          = "tf-test-ipdef-subnet-%{random_suffix}"
-  ip_cidr_range = "10.0.4.0/29"
-  region        = "%{location}"
-  network       = google_compute_network.producer_net.id
-}
-
-resource "google_compute_network" "producer_net" {
-  name                    = "tf-test-ipdef-net-%{random_suffix}"
-  auto_create_subnetworks = false
-}
-
-data "google_project" "project" {
-}
-`, context)
-}
-
-func testAccMemorystoreInstance_ipVersionExplicitIPv4(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_memorystore_instance" "test_ip_default" {
-  instance_id                 = "tf-test-ipdef-%{random_suffix}"
-  shard_count                 = 1
-  location                    = "%{location}"
-  replica_count               = 0
-  node_type                   = "SHARED_CORE_NANO"
-  deletion_protection_enabled = false
-  desired_auto_created_endpoints {
-    network    = google_compute_network.producer_net.id
-    project_id = data.google_project.project.project_id
-    ip_version = "IPV4"
-  }
-  depends_on = [google_network_connectivity_service_connection_policy.default_policy]
-}
-
-resource "google_network_connectivity_service_connection_policy" "default_policy" {
-  name          = "tf-test-ipdef-policy-%{random_suffix}"
-  location      = "%{location}"
-  service_class = "gcp-memorystore"
-  description   = "default service connection policy"
-  network       = google_compute_network.producer_net.id
-  psc_config {
-    subnetworks = [google_compute_subnetwork.producer_subnet.id]
-  }
-}
-
-resource "google_compute_subnetwork" "producer_subnet" {
-  name          = "tf-test-ipdef-subnet-%{random_suffix}"
-  ip_cidr_range = "10.0.4.0/29"
-  region        = "%{location}"
-  network       = google_compute_network.producer_net.id
-}
-
-resource "google_compute_network" "producer_net" {
-  name                    = "tf-test-ipdef-net-%{random_suffix}"
-  auto_create_subnetworks = false
-}
-
-data "google_project" "project" {
-}
-`, context)
-}
-{{- end }}
