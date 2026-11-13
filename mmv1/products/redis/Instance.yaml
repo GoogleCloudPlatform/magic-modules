@@ -67,6 +67,8 @@ samples:
           prevent_destroy: "true"
         test_vars_overrides:
           prevent_destroy: "false"
+        test_env_vars:
+          region: 'REGION'
         oics_vars_overrides:
           prevent_destroy: "false"
         ignore_read_extra:
