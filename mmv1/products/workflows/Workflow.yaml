@@ -26,6 +26,7 @@ docs:
 base_url: projects/{{project}}/locations/{{region}}/workflows
 self_link: projects/{{project}}/locations/{{region}}/workflows/{{name}}
 create_url: projects/{{project}}/locations/{{region}}/workflows?workflowId={{name}}
+generate_list_resource: true
 update_mask: true
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{region}}/workflows/{{name}}
@@ -54,6 +55,8 @@ samples:
     primary_resource_id: example
     steps:
       - name: workflow_basic
+        vars:
+          region: us-central1
         resource_id_vars:
           name: workflow
           account_id: my-account
@@ -67,6 +70,8 @@ samples:
     primary_resource_id: example
     steps:
       - name: workflow_tags
+        vars:
+          region: us-central1
         resource_id_vars:
           name: workflow
           account_id: my-account
