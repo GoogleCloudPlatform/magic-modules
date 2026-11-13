@@ -31,14 +31,16 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           ref: main
+          persist-credentials: false
       
       - name: Set up Go
         if: steps.read-comment.outputs.match != ''
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
-          go-version: '^1.26'
+          go-version: '1.26.10'
           cache-dependency-path: |
-            .ci/magician/go.mod
+            .ci/magician/go.sum
+            tools/issue-labeler/go.sum
 
       
       - name: Build magician
@@ -51,9 +53,10 @@ jobs:
         if: steps.read-comment.outputs.match != ''
         env:
           COMMENT_BODY: ${{ github.event.comment.body }}
+          GITHUB_EVENT_COMMENT_USER_LOGIN: ${{ github.event.comment.user.login }}
         run: |
           # Execute the parse-comment subcommand
           # The comment body is passed via the COMMENT_BODY environment variable
           .ci/magician/magician parse-comment \
             ${{ github.event.issue.number }} \
-            ${{ github.event.comment.user.login }}
+            ${GITHUB_EVENT_COMMENT_USER_LOGIN}

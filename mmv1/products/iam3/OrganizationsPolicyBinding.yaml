@@ -60,6 +60,23 @@ samples:
         test_vars_overrides:
           # for backward compatible
           display_name: '"binding for all principals in the Organization" + randomSuffix'
+  - name: iam_organizations_policy_binding_access_policy
+    primary_resource_id: my-org-access-policy-binding
+    external_providers: [time]
+    # The test organization enforces the managed org policy constraint
+    # iam.managed.disableAccessPolicyBinding, which rejects access policy bindings.
+    # Overriding it would require changing org-wide policy on the shared test org.
+    # `target.resource` is covered by the project and folder policy binding tests,
+    # which override the constraint on resources they create.
+    exclude_test: true
+    steps:
+      - name: iam_organizations_policy_binding_access_policy
+        test_env_vars:
+          org_id: ORG_ID
+        resource_id_vars:
+          account_id: ap-sa-
+          access_policy_id: my-org-policy-
+          org_binding_id: my-org-access-binding-
 parameters:
   - name: organization
     type: String
@@ -110,18 +127,32 @@ properties:
     type: NestedObject
     description: |
       Target is the full resource name of the resource to which the policy will be bound. Immutable once set.
+      Exactly one of `principal_set` (for principal access boundary policy bindings) or
+      `resource` (for access policy bindings) must be set.
     required: true
     properties:
       - name: principalSet
         type: String
         description: |
-          Required. Immutable. Full Resource Name of the principal set used for principal access boundary policy bindings.
+          Immutable. Full Resource Name of the principal set used for principal access boundary policy bindings.
           Examples for each one of the following supported principal set types:
           * Organization `//cloudresourcemanager.googleapis.com/organizations/ORGANIZATION_ID`
           * Workforce Identity: `//iam.googleapis.com/locations/global/workforcePools/WORKFORCE_POOL_ID`
           * Workspace Identity: `//iam.googleapis.com/locations/global/workspace/WORKSPACE_ID`
           It must be parent by the policy binding's parent (the organization).
         immutable: true
+        conflicts:
+          - target.0.resource
+      - name: resource
+        type: String
+        description: |
+          Immutable. Full Resource Name of the resource used for access policy bindings.
+          Use this together with `policy_kind = "ACCESS"`. Examples:
+          * Organization: `//cloudresourcemanager.googleapis.com/organizations/ORGANIZATION_ID`
+          It must be the policy binding's parent (the organization).
+        immutable: true
+        conflicts:
+          - target.0.principal_set
   - name: policyKind
     type: String
     description: |
@@ -166,6 +197,7 @@ properties:
       The exact variables and functions that may be referenced within an expression are
       determined by the service that evaluates it. See the service documentation for
       additional information.
+      Conditions are currently only supported when the bound policy is a principal access boundary policy.
     properties:
       - name: expression
         type: String

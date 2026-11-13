@@ -51,6 +51,8 @@ samples:
     external_providers: ["random", "time"]
     steps:
       - name: 'iap_destgroup'
+        resource_id_vars:
+          group_name: 'testgroup'
 parameters:
   - name: 'region'
     type: String

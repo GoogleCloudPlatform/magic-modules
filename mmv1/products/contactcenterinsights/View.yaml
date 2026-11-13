@@ -18,6 +18,7 @@ description: |
 references:
   api: https://cloud.google.com/contact-center/insights/docs/reference/rest/v1/projects.locations.views
 base_url: projects/{{project}}/locations/{{location}}/views
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/views/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/views
 delete_url: projects/{{project}}/locations/{{location}}/views/{{name}}

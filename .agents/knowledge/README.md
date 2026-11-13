@@ -10,7 +10,7 @@ this directory only for knowledge that has no home in the docs: judgment rules t
 down, pitfall catalogs, and (later) lessons proposed by agents from completed tasks. If something is
 covered by the contributor docs but covered badly, the fix is improving the docs — not writing a copy here.
 
-Planned entries: [`BACKLOG.md`](BACKLOG.md).
+Planned entries: [`__BACKLOG.md`](__BACKLOG.md).
 
 ## Entry format
 

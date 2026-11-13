@@ -46,11 +46,13 @@ func (o *readTestsOptions) run(args []string) error {
 		fmt.Printf("%s:\n", test.Name)
 		for index, step := range test.Steps {
 			fmt.Printf("  Step %d:\n", index)
-			for resourceType, resources := range step {
-				for _, resource := range resources {
-					fmt.Printf("    %s:\n", resourceType)
-					for field, value := range resource {
-						fmt.Printf("      %s: %v\n", field, value)
+			for blockType, typeLabels := range step {
+				for typeLabel, blocks := range typeLabels {
+					for _, block := range blocks {
+						fmt.Printf("    %s %s:\n", blockType, typeLabel)
+						for field, value := range block {
+							fmt.Printf("      %s: %v\n", field, value)
+						}
 					}
 				}
 			}

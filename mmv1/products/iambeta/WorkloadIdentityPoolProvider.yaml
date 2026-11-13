@@ -80,6 +80,7 @@ samples:
         resource_id_vars:
           workload_identity_pool_id: example-pool
           workload_identity_pool_provider_id: example-prvdr
+          actor_provider_id: actor-prvdr
   - name: iam_workload_identity_pool_provider_saml_basic
     primary_resource_id: example
     steps:
@@ -138,7 +139,7 @@ properties:
     validation:
       function: ValidateWorkloadIdentityPoolProviderId
   - name: state
-    type: Enum
+    type: String
     description: |
       The state of the provider.
       * STATE_UNSPECIFIED: State unspecified.
@@ -148,10 +149,6 @@ properties:
         UndeleteWorkloadIdentityPoolProvider. You cannot reuse the ID of a soft-deleted provider
         until it is permanently deleted.
     output: true
-    enum_values:
-      - STATE_UNSPECIFIED
-      - ACTIVE
-      - DELETED
   - name: displayName
     type: String
     description: A display name for the provider. Cannot exceed 32 characters.
@@ -274,6 +271,7 @@ properties:
       - oidc.allowed_audiences
       - oidc.issuer_uri
       - oidc.jwks_json
+      - oidc.discovery_uri
     exactly_one_of:
       - aws
       - oidc
@@ -330,6 +328,27 @@ properties:
         required: false
         diff_suppress_func: jwksJsonDiffSuppress
         is_missing_in_cai: true
+      - name: discoveryUri
+        type: String
+        description: |
+          The URL to fetch the OIDC discovery document from, overriding the default URL
+          derived from `issuer_uri`. If not set, `discovery_uri` defaults to `issuer_uri`
+          with `/.well-known/openid-configuration` appended, as per the OpenID Connect
+          Discovery 1.0 specification.
+
+          If set, `discovery_uri` must meet the following requirements:
+            * Must start with `https://`.
+            * Must not exceed 2000 characters.
+            * The scheme, host, and port must match `issuer_uri`.
+            * The path must contain `/.well-known/<suffix>` (where `<suffix>` is not
+              empty, such as `openid-configuration`) and conform to the `issuer_uri`
+              topology:
+              * The well-known path segment is inserted before the issuer path (for
+                example, `https://example.com/.well-known/openid-configuration/tenant1`
+                for issuer `https://example.com/tenant1`), or
+              * The well-known path segment is appended under the issuer path (for
+                example, `https://example.com/tenant1/.well-known/openid-configuration`
+                for issuer `https://example.com/tenant1`).
   - name: saml
     type: NestedObject
     description: An SAML 2.0 identity provider. Not compatible with the property oidc or aws.
@@ -393,3 +412,18 @@ properties:
                   description: |
                     PEM certificate of the PKI used for validation. Must only contain one
                     ca certificate(either root or intermediate cert).
+  - name: actorProviders
+    type: Array
+    description: |
+      A list of the resource names of `WorkloadIdentityPoolProvider`s in the same pool
+      that are authorized to issue actor tokens for this provider. An actor token
+      represents the identity of the acting party to whom authority is delegated. At
+      most 3 actor providers can be specified. Actor providers are only supported for
+      OIDC providers.
+
+      Each entry must be formatted as
+      `projects/{project}/locations/global/workloadIdentityPools/{workload_identity_pool_id}/providers/{workload_identity_pool_provider_id}`,
+      where `{project}` matches the `project` configured on this resource (for example,
+      by referencing `google_iam_workload_identity_pool_provider.<actor>.id`).
+    item_type:
+      type: String

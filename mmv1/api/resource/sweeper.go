@@ -29,9 +29,14 @@ import (
 // deletion code, parent-child relationships (unless configured via Parent), or
 // complex URL parameters. Defining the sweeper block overrides these exclusions.
 type Sweeper struct {
-	// IdentifierField specifies which field in the resource object should be used
-	// to identify resources for deletion. If not specified, defaults to "name"
-	// if present in the resource, otherwise falls back to "id".
+	// IdentifierField specifies which field in the resource object should be
+	// matched against the sweepable test prefixes to decide whether a resource
+	// should be deleted. If not specified, defaults to "name" if present in the
+	// resource, otherwise falls back to "id".
+	//
+	// This only selects the value used for matching. The delete URL is always
+	// built from the resource's own "name" (or "id") so that a resource matched
+	// on, say, displayName is still deleted by its real id.
 	IdentifierField string `yaml:"identifier_field,omitempty"`
 
 	// Regions (deprecated - use url_substitutions) defines which regions to run
@@ -79,6 +84,11 @@ type Sweeper struct {
 	// updating it if necessary before attempting deletion. See the EnsureValue
 	// struct for configuration details.
 	EnsureValue *EnsureValue `yaml:"ensure_value,omitempty"`
+
+	// WaitForDeleteOperation is a flag for locally debugging sweeper failures and
+	// should never be checked in. It only works for resources that use operations
+	// for deletion.
+	WaitForDeleteOperation bool `yaml:"wait_for_delete_operation,omitempty"`
 }
 
 // EnsureValue specifies a field and value that must be set before a resource can be deleted.
@@ -185,6 +195,8 @@ func (s Sweeper) EnvVarInterpolate(value string) string {
 		return "envvar.GetTestVmwareengineProjectFromEnv(t)"
 	case "ZONE":
 		return "envvar.GetTestZoneFromEnv()"
+	case "ORG_UNIT_ID":
+		return "envvar.GetTestOrgUnitIdFromEnv(t)"
 	}
 
 	// Check if the string contains any patterns that need to be replaced
@@ -195,6 +207,7 @@ func (s Sweeper) EnvVarInterpolate(value string) string {
 		"${SERVICE_ACCT}", "${PROJECT_NAME}", "${PROJECT_NUMBER}",
 		"${CUST_ID}", "${IDENTITY_USER}", "${PAP_DESCRIPTION}",
 		"${CHRONICLE_ID}", "${VMWAREENGINE_PROJECT}", "${ZONE}",
+		"${ORG_UNIT_ID}",
 	} {
 		if strings.Contains(value, pattern) {
 			hasPattern = true
@@ -228,6 +241,7 @@ func (s Sweeper) EnvVarInterpolate(value string) string {
 		"${CHRONICLE_ID}":         "\" + envvar.GetTestChronicleInstanceIdFromEnv(t) + \"",
 		"${VMWAREENGINE_PROJECT}": "\" + envvar.GetTestVmwareengineProjectFromEnv(t) + \"",
 		"${ZONE}":                 "\" + envvar.GetTestZoneFromEnv() + \"",
+		"${ORG_UNIT_ID}":          "\" + envvar.GetTestOrgUnitIdFromEnv(t) + \"",
 	}
 
 	for pattern, replacement := range replacements {

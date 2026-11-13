@@ -1,0 +1,4 @@
+resource "google_parameter_manager_template" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  template_id = "{{index $.ResourceIdVars "template_id"}}"
+}

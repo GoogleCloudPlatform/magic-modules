@@ -4,10 +4,38 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"testing"
 )
 
 const TestEnvVar = "TF_ACC"
+
+// AccTestPreCheck ensures required environment variables are set before running acceptance tests.
+func AccTestPreCheck(t *testing.T) {
+	if v := os.Getenv("GOOGLE_CREDENTIALS_FILE"); v != "" {
+		creds, err := os.ReadFile(v)
+		if err != nil {
+			t.Fatalf("Error reading GOOGLE_CREDENTIALS_FILE path: %s", err)
+		}
+		os.Setenv("GOOGLE_CREDENTIALS", string(creds))
+	}
+
+	if v := MultiEnvSearch(CredsEnvVars); v == "" {
+		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(CredsEnvVars, ", "))
+	}
+
+	if v := MultiEnvSearch(ProjectEnvVars); v == "" {
+		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(ProjectEnvVars, ", "))
+	}
+
+	if v := MultiEnvSearch(RegionEnvVars); v == "" {
+		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(RegionEnvVars, ", "))
+	}
+
+	if v := MultiEnvSearch(ZoneEnvVars); v == "" {
+		t.Fatalf("One of %s must be set for acceptance tests", strings.Join(ZoneEnvVars, ", "))
+	}
+}
 
 var CredsEnvVars = []string{
 	"GOOGLE_CREDENTIALS",
@@ -27,6 +55,13 @@ func CredsEnvVarsExcludingAdcs() []string {
 		}
 	}
 	return filtered
+}
+
+// AccessTokenEnvVars are the environment variables that can supply an OAuth2
+// access token. This matches the env var used for the provider's access_token
+// field.
+var AccessTokenEnvVars = []string{
+	"GOOGLE_OAUTH_ACCESS_TOKEN",
 }
 
 var ProjectNumberEnvVars = []string{
@@ -66,6 +101,13 @@ var CustIdEnvVars = []string{
 // See https://admin.google.com/ac/users when logged into an org admin for a list.
 var IdentityUserEnvVars = []string{
 	"GOOGLE_IDENTITY_USER",
+}
+
+// This value is the obfuscated ID of an organizational unit within the GOOGLE_ORG_DOMAIN
+// workspace, without the "orgUnits/" prefix (for example "03abcxyz"). It can be obtained from
+// the orgUnitId returned by the Admin SDK Directory API, with the "id:" prefix removed.
+var OrgUnitIdEnvVars = []string{
+	"GOOGLE_ORG_UNIT_ID",
 }
 
 var OrgEnvDomainVars = []string{
@@ -142,6 +184,12 @@ func GetTestCredsFromEnv() string {
 	return MultiEnvSearch(CredsEnvVars)
 }
 
+// GetTestAccessTokenFromEnv returns the OAuth2 access token configured in the
+// environment, if any.
+func GetTestAccessTokenFromEnv() string {
+	return MultiEnvSearch(AccessTokenEnvVars)
+}
+
 // Returns googleapis.com if there's no universe set.
 func GetTestUniverseDomainFromEnv(t *testing.T) string {
 	return MultiEnvSearch(UniverseDomainEnvVars)
@@ -173,6 +221,11 @@ func GetTestCustIdFromEnv(t *testing.T) string {
 func GetTestIdentityUserFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, IdentityUserEnvVars...)
 	return MultiEnvSearch(IdentityUserEnvVars)
+}
+
+func GetTestOrgUnitIdFromEnv(t *testing.T) string {
+	SkipIfEnvNotSet(t, OrgUnitIdEnvVars...)
+	return MultiEnvSearch(OrgUnitIdEnvVars)
 }
 
 // Returns the raw organization id like 1234567890, skipping the test if one is

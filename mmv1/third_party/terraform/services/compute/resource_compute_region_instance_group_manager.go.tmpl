@@ -3,9 +3,8 @@ package compute
 import (
 	"fmt"
 	"log"
-{{- if ne $.TargetVersionName "ga" }}
+	"sort"
 	"strconv"
-{{- end }}
 	"strings"
 	"time"
 
@@ -21,6 +20,15 @@ import (
 )
 
 func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
+	deletionPolicySchema := tpgresource.DeletionPolicySchemaEntry("DELETE")
+	deletionPolicySchema.Description = `Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+When a 'terraform destroy' or 'terraform apply' would delete the instance,
+the command will fail if this field is set to "PREVENT" in Terraform state.
+When set to "ABANDON", the command will remove the resource from Terraform
+management without updating or deleting the resource in the API.
+When set to "DELETE", deleting the resource is allowed. If graceful shutdown is configured, the MIG deletion waits for all instances to shut down gracefully before deletion.
+When set to "FORCE", deleting the resource is allowed, and graceful shutdown is skipped for instance deletion even if it's configured for the instances.
+`
 	return &schema.Resource{
 		Create: resourceComputeRegionInstanceGroupManagerCreate,
 		Read:   resourceComputeRegionInstanceGroupManagerRead,
@@ -130,7 +138,6 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 										Description: `Full machine-type names, e.g. "n1-standard-16"`,
 									},
 
-									{{- if ne $.TargetVersionName `ga` }}
 									"min_cpu_platform": {
 										Type:        schema.TypeString,
 										Optional:    true,
@@ -400,7 +407,6 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 											},
 										},
 									},
-									{{- end }}
 								},
 							},
 						},
@@ -676,9 +682,31 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 				Description: `The update policy for this managed instance group.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+{{- if ne $.TargetVersionName "ga" }}
+						"allowed_actions": {
+							Type:     schema.TypeSet,
+							Optional: true,
+							MinItems: 1,
+							Elem: &schema.Schema{
+								Type:         schema.TypeString,
+								ValidateFunc: validation.StringInSlice([]string{"NONE", "REFRESH", "RESTART_IN_PLACE", "RESTART", "REPLACE"}, false),
+							},
+							Set: schema.HashString,
+							ExactlyOneOf:  []string{"update_policy.0.minimal_action", "update_policy.0.allowed_actions"},
+							ConflictsWith: []string{"update_policy.0.minimal_action", "update_policy.0.most_disruptive_allowed_action"},
+							Description:   `Specifies the allowed actions list for this update. Valid values are: "NONE", "REFRESH", "RESTART_IN_PLACE", "RESTART", "REPLACE". allowed_actions is the only way to request RESTART_IN_PLACE. Conflicts with minimal_action and most_disruptive_allowed_action.`,
+						},
+
+{{- end }}
 						"minimal_action": {
 							Type:         schema.TypeString,
+{{- if ne $.TargetVersionName "ga" }}
+							Optional:      true,
+							ExactlyOneOf:  []string{"update_policy.0.minimal_action", "update_policy.0.allowed_actions"},
+							ConflictsWith: []string{"update_policy.0.allowed_actions"},
+{{- else }}
 							Required:     true,
+{{- end }}
 							ValidateFunc: validation.StringInSlice([]string{"NONE", "REFRESH", "RESTART", "REPLACE"}, false),
 							Description:  `Minimal action to be taken on an instance. You can specify either NONE to forbid any actions, REFRESH to update without stopping instances, RESTART to restart existing instances or REPLACE to delete and create new instances from the target template. If you specify a REFRESH, the Updater will attempt to perform that action only. However, if the Updater determines that the minimal action you specify is not enough to perform the update, it might perform a more disruptive action.`,
 						},
@@ -686,6 +714,9 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 						"most_disruptive_allowed_action": {
 							Type:         schema.TypeString,
 							Optional:     true,
+{{- if ne $.TargetVersionName "ga" }}
+							ConflictsWith: []string{"update_policy.0.allowed_actions"},
+{{- end }}
 							ValidateFunc: validation.StringInSlice([]string{"NONE", "REFRESH", "RESTART", "REPLACE"}, false),
 							Description:  `Most disruptive action that is allowed to be taken on an instance. You can specify either NONE to forbid any actions, REFRESH to allow actions that do not need instance restart, RESTART to allow actions that can be applied without instance replacing or REPLACE to allow all possible actions. If the Updater determines that the minimal update action needed is more disruptive than most disruptive allowed action you specify it will not perform the update at all.`,
 						},
@@ -970,10 +1001,18 @@ func ResourceComputeRegionInstanceGroupManager() *schema.Resource {
 					},
 				},
 			},
+			"service_account": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				Description: `The service account to be used as credentials for all operations performed by the managed instance group on instances. The service account needs all permissions required to create and delete instances. By default, the service account {projectNumber}@cloudservices.gserviceaccount.com is used.`,
+			},
 			{{- end }}
+
 			//UDP schema start
-            "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
-//UDP schema end
+			"deletion_policy": deletionPolicySchema,
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -1044,6 +1083,9 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 	if params := expandInstanceGroupManagerParams(d); params != nil {
 		body["params"] = params
 	}
+	if sa := d.Get("service_account").(string); sa != "" {
+		body["serviceAccount"] = sa
+	}
 	{{- end }}
 
 	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/instanceGroupManagers")
@@ -1087,11 +1129,18 @@ func resourceComputeRegionInstanceGroupManagerCreate(d *schema.ResourceData, met
 
 func computeRIGMWaitForInstanceStatus(d *schema.ResourceData, meta interface{}) error {
 	waitForUpdates := d.Get("wait_for_instances_status").(string) == "UPDATED"
+	config := meta.(*transport_tpg.Config)
+	var pollInterval time.Duration
+	if config.SleepUnit > 0 && config.SleepUnit != time.Second {
+		pollInterval = config.SleepUnit
+	}
 	conf := retry.StateChangeConf{
-		Pending: []string{"creating", "error", "updating per instance configs", "reaching version target", "updating all instances config"},
-		Target:  []string{"created"},
-		Refresh: waitForRegionInstancesRefreshFunc(getRegionalManager, waitForUpdates, d, meta),
-		Timeout: d.Timeout(schema.TimeoutCreate),
+		Pending:      []string{"creating", "error", "updating per instance configs", "reaching version target", "updating all instances config"},
+		Target:       []string{"created"},
+		Refresh:      waitForRegionInstancesRefreshFunc(getRegionalManager, waitForUpdates, d, meta),
+		Timeout:      d.Timeout(schema.TimeoutCreate),
+		MinTimeout:   config.SleepUnit / 2,
+		PollInterval: pollInterval,
 	}
 	_, err := conf.WaitForState()
 	if err != nil {
@@ -1263,6 +1312,11 @@ func resourceComputeRegionInstanceGroupManagerRead(d *schema.ResourceData, meta 
 			return fmt.Errorf("Error setting self_link: %s", err)
 		}
 	}
+	{{- if ne $.TargetVersionName "ga" }}
+	if err := d.Set("service_account", manager["serviceAccount"]); err != nil {
+		return fmt.Errorf("Error setting service_account: %s", err)
+	}
+	{{- end }}
 	if err := d.Set("auto_healing_policies", flattenRegionAutoHealingPolicies(manager["autoHealingPolicies"])); err != nil {
 		return fmt.Errorf("Error setting auto_healing_policies in state: %s", err.Error())
 	}
@@ -1560,6 +1614,13 @@ func resourceComputeRegionInstanceGroupManagerDelete(d *schema.ResourceData, met
 		return err
 	}
 
+	if d.Get("deletion_policy").(string) == "FORCE" {
+		url, err = transport_tpg.AddQueryParams(url, map[string]string{"noGracefulShutdown": "true"})
+		if err != nil {
+			return err
+		}
+	}
+
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "DELETE",
@@ -1587,6 +1648,25 @@ func expandRegionUpdatePolicy(configured []interface{}) map[string]interface{} {
 	for _, raw := range configured {
 		data := raw.(map[string]interface{})
 
+{{- if ne $.TargetVersionName "ga" }}
+		if v, ok := data["allowed_actions"]; ok && v.(*schema.Set).Len() > 0 {
+			updatePolicy["allowedActions"] = v.(*schema.Set).List()
+			updatePolicy["minimalAction"] = nil
+			updatePolicy["mostDisruptiveAllowedAction"] = nil
+		} else {
+			updatePolicy["allowedActions"] = nil
+			if minimalAction := data["minimal_action"].(string); minimalAction != "" {
+				updatePolicy["minimalAction"] = minimalAction
+			} else {
+				updatePolicy["minimalAction"] = nil
+			}
+			if mostDisruptiveAllowedAction := data["most_disruptive_allowed_action"].(string); mostDisruptiveAllowedAction != "" {
+				updatePolicy["mostDisruptiveAllowedAction"] = mostDisruptiveAllowedAction
+			} else {
+				updatePolicy["mostDisruptiveAllowedAction"] = nil
+			}
+		}
+{{- else }}
 		updatePolicy["minimalAction"] = data["minimal_action"].(string)
 		mostDisruptiveAllowedAction := data["most_disruptive_allowed_action"].(string)
 		if mostDisruptiveAllowedAction != "" {
@@ -1594,6 +1674,7 @@ func expandRegionUpdatePolicy(configured []interface{}) map[string]interface{} {
 		} else {
 			updatePolicy["mostDisruptiveAllowedAction"] = nil
 		}
+{{- end }}
 		updatePolicy["type"] = data["type"].(string)
 		updatePolicy["instanceRedistributionType"] = data["instance_redistribution_type"].(string)
 		if rm := data["replacement_method"].(string); rm != "" {
@@ -1655,9 +1736,18 @@ func flattenRegionUpdatePolicy(updatePolicyRaw interface{}) []map[string]interfa
 	}
 {{- if ne $.TargetVersionName "ga" }}
 	up["min_ready_sec"] = getInt(updatePolicy["minReadySec"])
-{{- end }}
+	if allowedActions, ok := updatePolicy["allowedActions"].([]interface{}); ok && len(allowedActions) > 0 {
+		up["allowed_actions"] = schema.NewSet(schema.HashString, allowedActions)
+		up["minimal_action"] = ""
+		up["most_disruptive_allowed_action"] = ""
+	} else {
+		up["minimal_action"] = updatePolicy["minimalAction"]
+		up["most_disruptive_allowed_action"] = updatePolicy["mostDisruptiveAllowedAction"]
+	}
+{{- else }}
 	up["minimal_action"] = updatePolicy["minimalAction"]
 	up["most_disruptive_allowed_action"] = updatePolicy["mostDisruptiveAllowedAction"]
+{{- end }}
 	up["type"] = updatePolicy["type"]
 	up["instance_redistribution_type"] = updatePolicy["instanceRedistributionType"]
 	up["replacement_method"] = updatePolicy["replacementMethod"]
@@ -1705,12 +1795,10 @@ func expandInstanceSelections(instanceSelections []any) (map[string]interface{},
 	for _, instanceSelectionRaw := range instanceSelections {
 		instanceSelectionData := instanceSelectionRaw.(map[string]any)
 
-		{{- if ne $.TargetVersionName `ga` }}
 		disks, err := expandInstanceSelectionDisks(instanceSelectionData["disks"].([]any))
 		if err != nil {
 			return nil, err
 		}
-		{{- end }}
 
 		instanceSelection := map[string]interface{}{
 			"machineTypes": tpgresource.ConvertStringSet(instanceSelectionData["machine_types"].(*schema.Set)),
@@ -1718,20 +1806,17 @@ func expandInstanceSelections(instanceSelections []any) (map[string]interface{},
 		if rank := int64(instanceSelectionData["rank"].(int)); rank != 0 {
 			instanceSelection["rank"] = rank
 		}
-		{{- if ne $.TargetVersionName `ga` }}
 		if mcp := instanceSelectionData["min_cpu_platform"].(string); mcp != "" {
 			instanceSelection["minCpuPlatform"] = mcp
 		}
 		if len(disks) > 0 {
 			instanceSelection["disks"] = disks
 		}
-		{{- end }}
 		instanceSelectionsMap[instanceSelectionData["name"].(string)] = instanceSelection
 	}
 	return instanceSelectionsMap, nil
 }
 
-{{- if ne $.TargetVersionName `ga` }}
 func expandInstanceSelectionDisks(disks []any) ([]interface{}, error) {
   attachedDisks := make([]interface{}, 0, len(disks))
   for _, diskRaw := range disks {
@@ -1914,8 +1999,7 @@ func expandInstanceSelectionDisks(disks []any) ([]interface{}, error) {
               for _, feature := range v.([]any) {
                   features = append(features, map[string]interface{}{"type": feature.(string)})
               }
-              initializeParams["guestOsFeatures"] = features
-              hasInitializeParams = true
+              disk["guestOsFeatures"] = features
           }
 
           if v, exists := diskData["resource_policies"]; exists && len(v.([]any)) > 0 {
@@ -1944,7 +2028,6 @@ func hasFieldSet(d any) bool {
         return val != nil
     }
 }
-{{- end }}
 
 func expandDistributionPolicyForUpdate(d *schema.ResourceData) map[string]interface{} {
 	dpts := d.Get("distribution_policy_target_shape").(string)
@@ -2002,18 +2085,17 @@ func flattenInstanceSelections(instanceSelectionsRaw interface{}) []map[string]a
 		}
 		instanceSelectionData := make(map[string]any)
 		instanceSelectionData["name"] = instanceSelectionName
-		instanceSelectionData["rank"] = getInt(instanceSelection["rank"])
+		instanceSelectionData["rank"] = int(getInt(instanceSelection["rank"]))
 		instanceSelectionData["machine_types"] = instanceSelection["machineTypes"]
-		{{- if ne $.TargetVersionName `ga` }}
-		instanceSelectionData["min_cpu_platform"] = instanceSelection["minCpuPlatform"]
+		if v, ok := instanceSelection["minCpuPlatform"].(string); ok && v != "" {
+			instanceSelectionData["min_cpu_platform"] = v
+		}
 		instanceSelectionData["disks"] = flattenInstanceSelectionDisks(instanceSelection["disks"])
-		{{- end }}
 		instanceSelectionsMap = append(instanceSelectionsMap, instanceSelectionData)
 	}
 	return instanceSelectionsMap
 }
 
-{{- if ne $.TargetVersionName `ga` }}
 func flattenInstanceSelectionDisks(disksRaw interface{}) []map[string]any {
     flattenedDisks := make([]map[string]any, 0)
     disks, ok := disksRaw.([]interface{})
@@ -2027,27 +2109,58 @@ func flattenInstanceSelectionDisks(disksRaw interface{}) []map[string]any {
         }
         diskData := make(map[string]any)
 
-        diskData["auto_delete"] = disk["autoDelete"]
-        diskData["boot"] = disk["boot"]
-        diskData["device_name"] = disk["deviceName"]
-        diskData["interface"] = disk["interface"]
-        diskData["mode"] = disk["mode"]
-        diskData["type"] = disk["type"]
-        diskData["architecture"] = disk["architecture"]
+        if autoDelete, ok := disk["autoDelete"].(bool); ok {
+            diskData["auto_delete"] = autoDelete
+        } else {
+            diskData["auto_delete"] = true
+        }
+        if boot, ok := disk["boot"].(bool); ok {
+            diskData["boot"] = boot
+        } else {
+            diskData["boot"] = false
+        }
+        if v, ok := disk["deviceName"].(string); ok && v != "" {
+            diskData["device_name"] = v
+        }
+        if v, ok := disk["interface"].(string); ok && v != "" {
+            diskData["interface"] = v
+        }
+        if v, ok := disk["mode"].(string); ok && v != "" {
+            diskData["mode"] = v
+        }
+        if v, ok := disk["type"].(string); ok && v != "" {
+            diskData["type"] = v
+        }
+        if v, ok := disk["architecture"].(string); ok && v != "" {
+            diskData["architecture"] = v
+        }
 
-        if v := getInt(disk["diskSizeGb"]); v != 0 {
+        if v := int(getInt(disk["diskSizeGb"])); v != 0 {
             diskData["disk_size_gb"] = v
         }
 
+        var guestOsRaw []interface{}
+        if g, ok := disk["guestOsFeatures"].([]interface{}); ok && g != nil {
+            guestOsRaw = g
+        }
+
         if encKey, ok := disk["diskEncryptionKey"].(map[string]interface{}); ok && encKey != nil {
-            encryption := make([]map[string]any, 1)
-            encryption[0] = map[string]any{
-                "raw_key":                encKey["rawKey"],
-                "rsa_encrypted_key":      encKey["rsaEncryptedKey"],
-                "kms_key_self_link":      encKey["kmsKeyName"],
-                "kms_key_service_account": encKey["kmsKeyServiceAccount"],
+            kMap := map[string]any{}
+            if v, ok := encKey["rawKey"].(string); ok && v != "" {
+                kMap["raw_key"] = v
             }
-            diskData["disk_encryption_key"] = encryption
+            if v, ok := encKey["rsaEncryptedKey"].(string); ok && v != "" {
+                kMap["rsa_encrypted_key"] = v
+            }
+            if v, ok := encKey["kmsKeyName"].(string); ok && v != "" {
+                kMap["kms_key_self_link"] = v
+            }
+            if v, ok := encKey["kmsKeyServiceAccount"].(string); ok && v != "" {
+                kMap["kms_key_service_account"] = v
+            }
+            if len(kMap) > 0 {
+                diskData["disk_encryption_key"] = []map[string]any{kMap}
+            }
         }
 
         if source, ok := disk["source"].(string); ok && source != "" {
@@ -2056,29 +2169,39 @@ func flattenInstanceSelectionDisks(disksRaw interface{}) []map[string]any {
             if v, ok := initParams["diskName"].(string); ok && v != "" {
                 diskData["disk_name"] = v
             }
-            if v := getInt(initParams["diskSizeGb"]); v != 0 {
+            if v := int(getInt(initParams["diskSizeGb"])); v != 0 {
                 diskData["disk_size_gb"] = v
             }
             if v, ok := initParams["diskType"].(string); ok && v != "" {
                 diskData["disk_type"] = v
             }
-            if v := getInt(initParams["provisionedIops"]); v != 0 {
+            if v := int(getInt(initParams["provisionedIops"])); v != 0 {
                 diskData["provisioned_iops"] = v
             }
-            if v := getInt(initParams["provisionedThroughput"]); v != 0 {
+            if v := int(getInt(initParams["provisionedThroughput"])); v != 0 {
                 diskData["provisioned_throughput"] = v
             }
             if rmTagsRaw, ok := initParams["resourceManagerTags"].(map[string]interface{}); ok && rmTagsRaw != nil {
-                rmTags := make([]any, 0, len(rmTagsRaw))
-                for k, v := range rmTagsRaw {
-                    rmTags = append(rmTags, map[string]any{"key": k, "value": v})
+                keys := make([]string, 0, len(rmTagsRaw))
+                for k := range rmTagsRaw {
+                    keys = append(keys, k)
+                }
+                sort.Strings(keys)
+                rmTags := make([]any, 0, len(keys))
+                for _, k := range keys {
+                    rmTags = append(rmTags, map[string]any{"key": k, "value": rmTagsRaw[k]})
                 }
                 diskData["resource_manager_tags"] = rmTags
             }
             if labelsRaw, ok := initParams["labels"].(map[string]interface{}); ok && labelsRaw != nil {
-                labels := make([]any, 0, len(labelsRaw))
-                for k, v := range labelsRaw {
-                    labels = append(labels, map[string]any{"key": k, "value": v})
+                keys := make([]string, 0, len(labelsRaw))
+                for k := range labelsRaw {
+                    keys = append(keys, k)
+                }
+                sort.Strings(keys)
+                labels := make([]any, 0, len(keys))
+                for _, k := range keys {
+                    labels = append(labels, map[string]any{"key": k, "value": labelsRaw[k]})
                 }
                 diskData["labels"] = labels
             }
@@ -2089,46 +2212,66 @@ func flattenInstanceSelectionDisks(disksRaw interface{}) []map[string]any {
                 diskData["source_image"] = v
             }
             if encKey, ok := initParams["sourceImageEncryptionKey"].(map[string]interface{}); ok && encKey != nil {
-                encryption := make([]map[string]any, 1)
-                encryption[0] = map[string]any{
-                    "raw_key":                encKey["rawKey"],
-                    "rsa_encrypted_key":      encKey["rsaEncryptedKey"],
-                    "kms_key_service_account": encKey["kmsKeyServiceAccount"],
-                    "kms_key_self_link":      encKey["kmsKeyName"],
+                kMap := map[string]any{}
+                if v, ok := encKey["rawKey"].(string); ok && v != "" {
+                    kMap["raw_key"] = v
                 }
-                diskData["source_image_encryption_key"] = encryption
+                if v, ok := encKey["rsaEncryptedKey"].(string); ok && v != "" {
+                    kMap["rsa_encrypted_key"] = v
+                }
+                if v, ok := encKey["kmsKeyServiceAccount"].(string); ok && v != "" {
+                    kMap["kms_key_service_account"] = v
+                }
+                if v, ok := encKey["kmsKeyName"].(string); ok && v != "" {
+                    kMap["kms_key_self_link"] = v
+                }
+                if len(kMap) > 0 {
+                    diskData["source_image_encryption_key"] = []map[string]any{kMap}
+                }
             }
             if v, ok := initParams["sourceSnapshot"].(string); ok && v != "" {
                 diskData["source_snapshot"] = v
             }
             if encKey, ok := initParams["sourceSnapshotEncryptionKey"].(map[string]interface{}); ok && encKey != nil {
-                encryption := make([]map[string]any, 1)
-                encryption[0] = map[string]any{
-                    "raw_key":                encKey["rawKey"],
-                    "rsa_encrypted_key":      encKey["rsaEncryptedKey"],
-                    "kms_key_service_account": encKey["kmsKeyServiceAccount"],
-                    "kms_key_self_link":      encKey["kmsKeyName"],
+                kMap := map[string]any{}
+                if v, ok := encKey["rawKey"].(string); ok && v != "" {
+                    kMap["raw_key"] = v
                 }
-                diskData["source_snapshot_encryption_key"] = encryption
+                if v, ok := encKey["rsaEncryptedKey"].(string); ok && v != "" {
+                    kMap["rsa_encrypted_key"] = v
+                }
+                if v, ok := encKey["kmsKeyServiceAccount"].(string); ok && v != "" {
+                    kMap["kms_key_service_account"] = v
+                }
+                if v, ok := encKey["kmsKeyName"].(string); ok && v != "" {
+                    kMap["kms_key_self_link"] = v
+                }
+                if len(kMap) > 0 {
+                    diskData["source_snapshot_encryption_key"] = []map[string]any{kMap}
+                }
             }
             if v, ok := initParams["architecture"].(string); ok && v != "" {
                 diskData["architecture"] = v
             }
-            if guestOsRaw, ok := initParams["guestOsFeatures"].([]interface{}); ok && guestOsRaw != nil {
-                features := make([]any, 0, len(guestOsRaw))
-                for _, featureRaw := range guestOsRaw {
-                    if feature, ok := featureRaw.(map[string]interface{}); ok {
-                        features = append(features, feature["type"])
-                    }
+            if guestOsRaw == nil {
+                if g, ok := initParams["guestOsFeatures"].([]interface{}); ok && g != nil {
+                    guestOsRaw = g
                 }
-                diskData["guest_os_features"] = features
             }
+        }
+        if guestOsRaw != nil {
+            features := make([]any, 0, len(guestOsRaw))
+            for _, featureRaw := range guestOsRaw {
+                if feature, ok := featureRaw.(map[string]interface{}); ok {
+                    features = append(features, feature["type"])
+                }
+            }
+            diskData["guest_os_features"] = features
         }
         flattenedDisks = append(flattenedDisks, diskData)
     }
     return flattenedDisks
 }
-{{- end }}
 
 func flattenDistributionPolicy(distributionPolicyRaw interface{}) []string {
 	zones := make([]string, 0)

@@ -110,9 +110,6 @@ properties:
         type: NestedObject
         description: |
           gRPC specific configuration to access the gRPC server to obtain the cert and private key.
-        exactly_one_of:
-          - grpc_endpoint
-          - certificate_provider_instance
         properties:
           - name: targetUri
             type: String
@@ -123,9 +120,6 @@ properties:
         type: NestedObject
         description: |
           The certificate provider instance specification that will be passed to the data plane, which will be used to load necessary credential information.
-        exactly_one_of:
-          - grpc_endpoint
-          - certificate_provider_instance
         properties:
           - name: pluginInstance
             type: String
@@ -143,9 +137,6 @@ properties:
           type: NestedObject
           description: |
             gRPC specific configuration to access the gRPC server to obtain the cert and private key.
-          exactly_one_of:
-            - grpc_endpoint
-            - certificate_provider_instance
           properties:
             - name: targetUri
               type: String
@@ -156,9 +147,6 @@ properties:
           type: NestedObject
           description: |
             The certificate provider instance specification that will be passed to the data plane, which will be used to load necessary credential information.
-          exactly_one_of:
-            - grpc_endpoint
-            - certificate_provider_instance
           properties:
             - name: pluginInstance
               type: String

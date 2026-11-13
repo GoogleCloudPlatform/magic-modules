@@ -30,7 +30,7 @@ func TestAccBackupDRBackupPlan_fullUpdate(t *testing.T) {
 				ResourceName:            "google_backup_dr_backup_plan.bp",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"resource"},
+				ImportStateVerifyIgnore: []string{"labels", "resource", "terraform_labels"},
 			},
 			{
 				Config: testAccBackupDRBackupPlan_fullUpdate(context),
@@ -39,7 +39,7 @@ func TestAccBackupDRBackupPlan_fullUpdate(t *testing.T) {
 				ResourceName:            "google_backup_dr_backup_plan.bp",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"resource"},
+				ImportStateVerifyIgnore: []string{"labels", "resource", "terraform_labels"},
 			},
 		},
 	})
@@ -59,7 +59,7 @@ resource "google_compute_instance" "default" {
   tags = ["foo", "bar"]
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-11"
+      image = "debian-cloud/debian-13"
       labels = {
         my_label = "value"
       }
@@ -105,6 +105,9 @@ resource "google_backup_dr_backup_plan" "bp" {
   resource_type  = "compute.googleapis.com/Instance"
   backup_vault   = google_backup_dr_backup_vault.my-backup-vault.name
   max_custom_on_demand_retention_days = 30
+  labels = {
+    foo = "bar"
+  }
 
   backup_rules {
     rule_id                = "rule-1"
@@ -141,7 +144,7 @@ resource "google_compute_instance" "default" {
   tags = ["foo", "bar"]
   boot_disk {
     initialize_params {
-      image = "debian-cloud/debian-11"
+      image = "debian-cloud/debian-13"
       labels = {
         my_label = "value"
       }
@@ -188,6 +191,9 @@ resource "google_backup_dr_backup_plan" "bp" {
   resource_type  = "compute.googleapis.com/Instance"
   backup_vault   = google_backup_dr_backup_vault.my-backup-vault.name
   max_custom_on_demand_retention_days = 45
+  labels = {
+    foo = "bar"
+  }
   compute_instance_backup_plan_properties {
     guest_flush = true
   }

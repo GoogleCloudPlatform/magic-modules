@@ -74,10 +74,6 @@ properties:
     description: ' Update time.'
     output: true
   - name: type
-    type: Enum
+    type: String
     description: Boundary type.
     output: true
-    enum_values:
-      - AUTOMATIC
-      - MANUAL
-      - MANAGED_AUTOMATIC

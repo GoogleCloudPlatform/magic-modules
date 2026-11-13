@@ -44,10 +44,18 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 include_in_tgc_next: true
+api_version:
+  ga: '2026-11-01'
 custom_code:
   pre_create: 'templates/terraform/pre_create/compute_global_forwarding_rule.go.tmpl'
   post_create: 'templates/terraform/post_create/labels.tmpl'
 legacy_long_form_project: true
+sweeper:
+  prefixes:
+    # PSC Google APIs forwarding rule names must match ^[a-z][a-z0-9]{0,19}$,
+    # so neither "tf-test" nor "tf_test" is a legal prefix for them. The tests
+    # use "frtest" instead; register it so those rules are still swept.
+    - "frtest"
 samples:
   - name: 'external_ssl_proxy_lb_mig_backend'
     primary_resource_id: 'default'
@@ -121,9 +129,6 @@ samples:
           forwarding_rule_name: 'global-rule'
           http_proxy_name: 'target-proxy'
           backend_service_name: 'backend'
-        test_vars_overrides:
-          # for backward compatible
-          backend_service_name: '"backend" + randomSuffix'
         ignore_read_extra:
           - 'port_range'
           - 'target'
@@ -138,9 +143,6 @@ samples:
           http_proxy_name: 'target-proxy'
           backend_service_name: 'backend'
           igm_name: 'igm-internal'
-        test_vars_overrides:
-          # for backward compatible
-          backend_service_name: '"backend" + randomSuffix'
         ignore_read_extra:
           - 'port_range'
           - 'target'
@@ -152,9 +154,6 @@ samples:
           forwarding_rule_name: 'global-rule'
           http_proxy_name: 'target-proxy'
           backend_service_name: 'backend'
-        test_vars_overrides:
-          # for backward compatible
-          backend_service_name: '"backend" + randomSuffix'
         ignore_read_extra:
           - 'port_range'
           - 'target'
@@ -213,8 +212,10 @@ samples:
           global_address_name: 'global-psconnect-ip'
           forwarding_rule_name: 'globalrule'
         test_vars_overrides:
-          # for backward compatible
-          forwarding_rule_name: '"globalrule" + randomSuffix'
+          # The name must match ^[a-z][a-z0-9]{0,19}$, so the generator's
+          # automatic "tf-test-" prefix is not legal here. Use the "frtest"
+          # prefix registered on this resource's sweeper instead.
+          forwarding_rule_name: '"frtest" + randomSuffix'
         test_env_vars:
           project: 'PROJECT_NAME'
         ignore_read_extra:
@@ -231,14 +232,30 @@ samples:
           global_address_name: 'global-psconnect-ip'
           forwarding_rule_name: 'globalrule'
         test_vars_overrides:
-          # for backward compatible
-          forwarding_rule_name: '"globalrule" + randomSuffix'
+          # The name must match ^[a-z][a-z0-9]{0,19}$, so the generator's
+          # automatic "tf-test-" prefix is not legal here. Use the "frtest"
+          # prefix registered on this resource's sweeper instead.
+          forwarding_rule_name: '"frtest" + randomSuffix'
         test_env_vars:
           project: 'PROJECT_NAME'
         ignore_read_extra:
           - 'ip_address'
 parameters:
 properties:
+
+  - name: 'backendService'
+    type: ResourceRef
+    description: |
+      Identifies the backend service to which the forwarding rule sends traffic.
+
+      Required for Global External Passthrough Network Load Balancing;
+      must be omitted for all other load balancer types.
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    exactly_one_of:
+      - 'backend_service'
+      - 'target'
+    resource: 'BackendService'
+    imports: 'selfLink'
   - name: 'pscConnectionId'
     type: String
     description: 'The PSC connection id of the PSC Forwarding Rule.'
@@ -346,6 +363,16 @@ properties:
     update_url: 'projects/{{project}}/global/forwardingRules/{{name}}/setLabels'
     update_verb: 'POST'
     key_expander: ''
+  - name: 'ipAddresses'
+    api_name: 'IPAddresses'
+    type: Array
+    description: |
+      IP addresses for which this forwarding rule accepts traffic, ordered by
+      Availability Group 0 followed by Availability Group 1. Specify literal
+      IP addresses (for example, `google_compute_global_address.example.address`).
+    default_from_api: true
+    item_type:
+      type: String
   - name: 'loadBalancingScheme'
     type: Enum
     description: |
@@ -353,12 +380,13 @@ properties:
 
       For more information about forwarding rules, refer to
       [Forwarding rule concepts](https://cloud.google.com/load-balancing/docs/forwarding-rule-concepts).
-    default_value: "EXTERNAL"
+    default_value: "EXTERNAL_MANAGED"
     enum_values:
       - 'EXTERNAL'
       - 'EXTERNAL_MANAGED'
       - 'INTERNAL_MANAGED'
       - 'INTERNAL_SELF_MANAGED'
+      - 'EXTERNAL_PASSTHROUGH'
     update_url: 'projects/{{project}}/global/forwardingRules/{{name}}'
     update_verb: 'PATCH'
   - name: 'metadataFilters'
@@ -520,7 +548,9 @@ properties:
         *  `all-apis` - [All supported Google APIs](https://cloud.google.com/vpc/docs/private-service-connect#supported-apis).
 
       For Private Service Connect forwarding rules that forward traffic to managed services, the target must be a service attachment.
-    required: true
+    exactly_one_of:
+      - 'backend_service'
+      - 'target'
     update_url: 'projects/{{project}}/global/forwardingRules/{{name}}/setTarget'
     update_verb: 'POST'
     diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'

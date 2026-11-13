@@ -7,6 +7,14 @@ on:
     branches:
       - main
 
+# Only one deploy runs at a time. If several commits land on main in quick
+# succession, an in-progress deploy is allowed to finish and only the newest
+# pending run is kept; intermediate pending runs are cancelled, since each
+# deploy publishes the full site from the latest main.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-22.04
@@ -17,6 +25,7 @@ jobs:
         with:
           submodules: false  # Fetch Hugo themes (true OR recursive)
           fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
+          persist-credentials: false
 
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@2752ce1d29631191ea3f27c23495fa06139a5b78 # v3.2.1

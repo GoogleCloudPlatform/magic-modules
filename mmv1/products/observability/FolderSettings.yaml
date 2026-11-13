@@ -15,7 +15,6 @@
 name: FolderSettings
 description: Manages Cloud Observability settings for a folder.
 base_url: folders/{{folder}}/locations/{{location}}/settings
-min_version: beta
 self_link: folders/{{folder}}/locations/{{location}}/settings
 create_url: folders/{{folder}}/locations/{{location}}/settings
 update_url: folders/{{folder}}/locations/{{location}}/settings

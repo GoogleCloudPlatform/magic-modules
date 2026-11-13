@@ -23,7 +23,7 @@ func testAccDataSourceCheckInterconnectLocation() func(s *terraform.State) error
 		ds_attr := ds.Primary.Attributes
 		expected := map[string]string{
 			"name":              interconnectLoc,
-			"description":       "Zakim-to-Zakim location",
+			"description":       "Google Z2Z us-west8 (ncphxk-z)",
 			"facility_provider": "Google",
 		}
 		for attr, expect_value := range expected {
@@ -38,6 +38,8 @@ func testAccDataSourceCheckInterconnectLocation() func(s *terraform.State) error
 	}
 }
 func TestAccDataSourceGoogleComputeInterconnectLocation_basic(t *testing.T) {
+	t.Parallel()
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),

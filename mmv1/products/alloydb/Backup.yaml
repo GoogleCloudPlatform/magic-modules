@@ -30,6 +30,10 @@ timeouts:
   insert_minutes: 10
   update_minutes: 10
   delete_minutes: 10
+sweeper:
+  url_substitutions:
+    - location: us-central1
+    - location: us-east1
 async:
   type: OpAsync
   operation:
@@ -201,13 +205,9 @@ properties:
     output: true
     properties:
       - name: encryptionType
-        type: Enum
+        type: String
         description: Output only. Type of encryption.
         output: true
-        enum_values:
-          - TYPE_UNSPECIFIED
-          - GOOGLE_DEFAULT_ENCRYPTION
-          - CUSTOMER_MANAGED_ENCRYPTION
       - name: kmsKeyVersions
         type: Array
         description: |

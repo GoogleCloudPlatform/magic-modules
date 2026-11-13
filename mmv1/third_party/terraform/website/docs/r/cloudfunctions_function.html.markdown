@@ -36,7 +36,7 @@ resource "google_storage_bucket_object" "archive" {
 resource "google_cloudfunctions_function" "function" {
   name        = "function-test"
   description = "My function"
-  runtime     = "nodejs20"
+  runtime     = "nodejs22"
 
   available_memory_mb   = 128
   source_archive_bucket = google_storage_bucket.bucket.name
@@ -73,7 +73,7 @@ resource "google_storage_bucket_object" "archive" {
 resource "google_cloudfunctions_function" "function" {
   name        = "function-test"
   description = "My function"
-  runtime     = "nodejs20"
+  runtime     = "nodejs22"
 
   available_memory_mb          = 128
   source_archive_bucket        = google_storage_bucket.bucket.name
@@ -109,7 +109,7 @@ The following arguments are supported:
 * `name` - (Required) A user-defined name of the function. Function names must be unique globally.
 
 * `runtime` - (Required) The runtime in which the function is going to run.
-Eg. `"nodejs20"`, `"python39"`, `"dotnet3"`, `"go116"`, `"java11"`, `"ruby30"`, `"php74"`, etc. Check the [official doc](https://cloud.google.com/functions/docs/concepts/exec#runtimes) for the up-to-date list.
+Eg. `"nodejs22"`, `"python39"`, `"dotnet3"`, `"go116"`, `"java11"`, `"ruby30"`, `"php74"`, etc. Check the [official doc](https://cloud.google.com/functions/docs/concepts/exec#runtimes) for the up-to-date list.
 
 - - -
 
@@ -235,9 +235,9 @@ which to observe events. For example, `"myBucket"` or `"projects/my-project/topi
 
 * `secret` - (Required) ID of the secret in secret manager (not the full resource name).
 
-* `versions` - (Optional) List of secret versions to mount for this secret. If empty, the "latest" version of the secret will be made available in a file named after the secret under the mount point. Structure is [documented below](#nested_nested_versions).
+* `versions` - (Optional) List of secret versions to mount for this secret. If empty, the "latest" version of the secret will be made available in a file named after the secret under the mount point. Structure is [documented below](#nested_secret_volumes_versions).
 
-<a name="nested_versions"></a>The `versions` block supports:
+<a name="nested_secret_volumes_versions"></a>The `versions` block supports:
 
 * `path` - (Required) Relative path of the file under the mount path where the secret value for this version will be fetched and made available. For example, setting the mount_path as "/etc/secrets" and path as "/secret_foo" would mount the secret value file at "/etc/secrets/secret_foo".
 
@@ -257,6 +257,10 @@ exported:
 * `project` - Project of the function. If it is not provided, the provider project is used.
 
 * `region` - Region of function. If it is not provided, the provider region is used.
+
+* `status` - Describes the current stage of a deployment.
+
+* `version_id` - The version identifier of the Cloud Function. Each deployment attempt results in a new version of a function being created.
 
 ## Timeouts
 

@@ -11,11 +11,13 @@
 	limitations under the License.
 */ -}}
 // This customizeDiff recreates the resource if changing between different auth provider types
-// (api_key, two_legged_oauth, three_legged_oauth), as changing the type via PATCH is rejected by the API.
+// (api_key, two_legged_oauth, three_legged_oauth, xaa_auth_provider, connector_reference_auth_provider), as changing the type via PATCH is rejected by the API.
 func agentIdentityAuthProviderCustomizeDiffFunc(diff tpgresource.TerraformResourceDiff) error {
 	oldApiKey, newApiKey := diff.GetChange("auth_provider_type_params.0.api_key")
 	oldTwoLegged, newTwoLegged := diff.GetChange("auth_provider_type_params.0.two_legged_oauth")
 	oldThreeLegged, newThreeLegged := diff.GetChange("auth_provider_type_params.0.three_legged_oauth")
+	oldXaa, newXaa := diff.GetChange("auth_provider_type_params.0.xaa_auth_provider")
+	oldConnRef, newConnRef := diff.GetChange("auth_provider_type_params.0.connector_reference_auth_provider")
 	if !tpgresource.IsEmptyValue(reflect.ValueOf(oldApiKey)) && tpgresource.IsEmptyValue(reflect.ValueOf(newApiKey)) {
 		diff.ForceNew("auth_provider_type_params.0.api_key")
 		return nil
@@ -26,6 +28,14 @@ func agentIdentityAuthProviderCustomizeDiffFunc(diff tpgresource.TerraformResour
 	}
 	if !tpgresource.IsEmptyValue(reflect.ValueOf(oldThreeLegged)) && tpgresource.IsEmptyValue(reflect.ValueOf(newThreeLegged)) {
 		diff.ForceNew("auth_provider_type_params.0.three_legged_oauth")
+		return nil
+	}
+	if !tpgresource.IsEmptyValue(reflect.ValueOf(oldXaa)) && tpgresource.IsEmptyValue(reflect.ValueOf(newXaa)) {
+		diff.ForceNew("auth_provider_type_params.0.xaa_auth_provider")
+		return nil
+	}
+	if !tpgresource.IsEmptyValue(reflect.ValueOf(oldConnRef)) && tpgresource.IsEmptyValue(reflect.ValueOf(newConnRef)) {
+		diff.ForceNew("auth_provider_type_params.0.connector_reference_auth_provider")
 		return nil
 	}
 	return nil

@@ -51,7 +51,7 @@ samples:
           - deletion_protection
         test_vars_overrides:
           deletion_protection: "false"
-          project: '"oci-terraform-testing-prod"'
+          project: '"oasis-terraform-testing-prod"'
           cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-test-tf-configured-exadata-%s", acctest.RandString(t, 10))
 parameters:
   - name: location
@@ -72,3 +72,8 @@ properties:
     required: true
     immutable: true
     description: The total storage to be allocated to Exascale in GBs.
+  - name: totalVmStorageSizeGb
+    type: Integer
+    required: false
+    immutable: true
+    description: Storage size needed for VM storage on Exascale in GBs.

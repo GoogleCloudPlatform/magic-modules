@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"testing"
 	"time"
 
@@ -35,13 +36,13 @@ func waitForBackupdrOperation(ctx context.Context, t *testing.T, backupdrService
 				return nil, fmt.Errorf("error getting operation %s: %w", op.Name, err)
 			}
 			op = latestOp
-			t.Logf("Operation %s status: Done=%v", op.Name, op.Done)
+			log.Printf("[DEBUG] Operation %s status: Done=%v", op.Name, op.Done)
 
 			if op.Done {
 				if op.Error != nil {
 					return op, fmt.Errorf("operation %s failed: %v (code %d)", op.Name, op.Error.Message, op.Error.Code)
 				}
-				t.Logf("Operation %s completed successfully.", op.Name)
+				log.Printf("[DEBUG] Operation %s completed successfully.", op.Name)
 				return op, nil
 			}
 		}
@@ -50,8 +51,13 @@ func waitForBackupdrOperation(ctx context.Context, t *testing.T, backupdrService
 
 // BootstrapBackupDRVault creates or gets a BackupDR backup vault for testing.
 func BootstrapBackupDRVault(t *testing.T, vaultID, location string) string {
-	ctx := context.Background()
 	project := envvar.GetTestProjectFromEnv()
+	vaultName := fmt.Sprintf("projects/%s/locations/%s/backupVaults/%s", project, location, vaultID)
+	if os.Getenv("VCR_PATH") != "" && os.Getenv("VCR_MODE") == "REPLAYING" {
+		return vaultName
+	}
+
+	ctx := context.Background()
 	config := transport_tpg.BootstrapConfig(t)
 	if config == nil {
 		t.Fatal("Could not bootstrap config.")
@@ -59,7 +65,6 @@ func BootstrapBackupDRVault(t *testing.T, vaultID, location string) string {
 
 	// Create a backupdr client and check if the vault exists, if not create a vault
 	// backupdrClient := NewClient(config, config.UserAgent)
-	vaultName := fmt.Sprintf("projects/%s/locations/%s/backupVaults/%s", project, location, vaultID)
 	projectAndLocation := fmt.Sprintf("projects/%s/locations/%s", project, location)
 
 	log.Printf("[DEBUG] Getting BackupDR vault %q", vaultName)
@@ -87,13 +92,13 @@ func BootstrapBackupDRVault(t *testing.T, vaultID, location string) string {
 		if err != nil {
 			t.Fatalf("Error calling Create BackupDR vault %q: %s", vaultName, err)
 		}
-		fmt.Printf("Successfully initiated creation of BackupDR vault %q (Operation: %s)\n", vaultName, op.Name)
+		log.Printf("[DEBUG] Successfully initiated creation of BackupDR vault %q (Operation: %s)", vaultName, op.Name)
 
 		// *** WAIT FOR COMPLETION ***
 		if _, err := waitForBackupdrOperation(ctx, t, backupdrService, op); err != nil {
 			t.Fatalf("Create operation for %s failed: %v", vaultName, err)
 		}
-		fmt.Printf("Successfully created BackupDR vault %q\n", vaultName)
+		log.Printf("[DEBUG] Successfully created BackupDR vault %q", vaultName)
 
 	}
 

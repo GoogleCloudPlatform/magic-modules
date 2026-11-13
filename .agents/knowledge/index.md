@@ -24,6 +24,7 @@ Read this index at decision points; open only the source the task needs. Format 
 - Fix diffs and permadiffs — `docs/content/develop/diffs.md`
 - Client-side fields — `docs/content/develop/client-side-fields.md`
 - Promote beta → GA — `docs/content/develop/promote-to-ga.md`
+- Update provider dependencies (`go.mod` / `go.sum`) — `docs/content/develop/update-dependencies.md`
 - Generate the providers / set up the environment — `docs/content/develop/generate-providers.md`, `docs/content/develop/set-up-dev-environment.md`
 
 **Testing:**
@@ -37,6 +38,8 @@ Read this index at decision points; open only the source the task needs. Format 
 - Create a PR — `docs/content/code-review/create-pr.md`
 - Write release notes — `docs/content/code-review/release-notes.md`
 - Review a PR — `docs/content/code-review/review-pr.md`
+- Make a breaking change / deprecations / removals — `docs/content/breaking-changes/make-a-breaking-change.md`
+- Types of breaking changes — `docs/content/breaking-changes/breaking-changes.md`
 
 **Documentation:**
 
@@ -65,7 +68,6 @@ Read this index at decision points; open only the source the task needs. Format 
 
 *(No entries yet)*
 
-### List resources (`list-resource/`)
+### Test (`test/`)
 
-- **list-resource-oracle** — Living catalog of every failure pattern, gotcha, and fix encountered during list-resource generation. Read before starting any list-resource task. — [knowledge/list-resource-oracle.md](list-resource-oracle.md)
-- **list-resource-patterns** *(agent-generated, append-only)* — Permanent log of every add-list-resource run: passing resources, dropped resources with reasons, and per-run observations. Read before starting a new batch for any product. — [list-resource/list-resource-patterns.md](list-resource/list-resource-patterns.md)
+- **unit-test-scope** — When to write unit tests vs acceptance tests, and avoiding test bloat. — [test/unit-test-scope.md](test/unit-test-scope.md)

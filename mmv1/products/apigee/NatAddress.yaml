@@ -48,6 +48,8 @@ custom_code:
   post_create: templates/terraform/post_create/apigee_nat_address.go.tmpl
   custom_update: templates/terraform/custom_update/apigee_nat_address.go.tmpl
   custom_import: templates/terraform/custom_import/apigee_nat_address.go.tmpl
+error_retry_predicates:
+  - 'transport_tpg.IsApigeeRetryableError'
 samples:
   - name: apigee_nat_address_basic
     exclude_test: true

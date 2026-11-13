@@ -18,6 +18,7 @@
           "goog-terraform-provisioned": "true"
         },
         "location": "EU",
+        "defaultCollation": "",
         "defaultTableExpirationMs": 3.6e+06
       }
     }

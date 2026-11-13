@@ -335,6 +335,7 @@ resource "google_ces_guardrail" "ces_guardrail_generative_answer_llm_prompt_secu
       model_settings {
         model = "gemini-3.0-flash-001"
         temperature = 50
+        thinking_level = "LOW"
       }
       prompt = "example_prompt"
       policy_scope = "USER_QUERY"
@@ -383,6 +384,7 @@ resource "google_ces_guardrail" "ces_guardrail_generative_answer_llm_prompt_secu
       model_settings {
         model = "gemini-3.0-flash-001"
         temperature = 49
+        thinking_level = "HIGH"
       }
       prompt = "example_prompt_updated"
       policy_scope = "USER_QUERY"
@@ -469,21 +471,25 @@ resource "google_ces_guardrail" "ces_guardrail_code_callback" {
         description = "Example callback"
         disabled    = false
         python_code = "def callback(context):\n    return {'override': true}"
+        proactive_execution_enabled = false
     }
     after_agent_callback {
         description = "Example callback"
         disabled    = true
         python_code = "def callback(context):\n    return {'override': true}"
+        proactive_execution_enabled = false
     }
     before_model_callback {
         description = "Example callback"
         disabled    = true
         python_code = "def callback(context):\n    return {'override': true}"
+        proactive_execution_enabled = false
     }
     after_model_callback {
         description = "Example callback"
         disabled    = true
         python_code = "def callback(context):\n    return {'override': true}"
+        proactive_execution_enabled = false
     }
   }
 }
@@ -526,21 +532,25 @@ resource "google_ces_guardrail" "ces_guardrail_code_callback" {
         description = "Example callback updated"
         disabled    = true
         python_code = "def callback(context):\n    return {'override': False}"
+        proactive_execution_enabled = true
     }
     after_agent_callback {
         description = "Example callback updated"
         disabled    = true
         python_code = "def callback(context):\n    return {'override': False}"
+        proactive_execution_enabled = true
     }
     before_model_callback {
         description = "Example callback updated"
         disabled    = true
         python_code = "def callback(context):\n    return {'override': False}"
+        proactive_execution_enabled = true
     }
     after_model_callback {
         description = "Example callback updated"
         disabled    = true
         python_code = "def callback(context):\n    return {'override': False}"
+        proactive_execution_enabled = true
     }
   }
 }
@@ -622,6 +632,7 @@ resource "google_ces_guardrail" "ces_guardrail_llm_policy" {
     model_settings {
         model = "gemini-3.0-flash-001"
         temperature = 50
+        thinking_level = "LOW"
     }
     prompt = "example_prompt"
     policy_scope = "USER_QUERY"
@@ -668,6 +679,7 @@ resource "google_ces_guardrail" "ces_guardrail_llm_policy" {
     model_settings {
         model = "gemini-3.0-flash-001"
         temperature = 45
+        thinking_level = "HIGH"
     }
     prompt = "example_prompt_updated"
     policy_scope = "USER_QUERY"

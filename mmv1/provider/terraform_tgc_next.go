@@ -31,7 +31,6 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"github.com/otiai10/copy"
 )
 
 var testRegex = regexp.MustCompile("func (TestAcc[^(]+)")
@@ -91,7 +90,7 @@ func (tgc TerraformGoogleConversionNext) Generate(outputFolder, resourceToGenera
 		object.ExcludeIfNotInVersion(tgc.Product.Version)
 
 		if resourceToGenerate != "" && object.Name != resourceToGenerate {
-			log.Printf("Excluding %s per user request", object.Name)
+			google.LogVerbose("Excluding %s per user request", object.Name)
 			continue
 		}
 
@@ -107,6 +106,7 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName, tgc.templateFS)
 
 	if !object.ExcludeResource {
+		google.IncrementResourceGenerated()
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 	}
 	tgc.addTestsFromSamples(&object)
@@ -192,7 +192,6 @@ func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string,
 		"pkg/registry/registry.go":                   "third_party/terraform/registry/registry.go",
 
 		// services
-		"pkg/services/compute/client.go":                        "third_party/terraform/services/compute/client.go.tmpl",
 		"pkg/services/compute/compute_instance_helpers.go":      "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
 		"pkg/services/compute/compute_instance_http_helpers.go": "third_party/terraform/services/compute/compute_instance_http_helpers.go.tmpl",
 		"pkg/services/compute/metadata.go":                      "third_party/terraform/services/compute/metadata.go.tmpl",
@@ -262,7 +261,7 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 		return
 	}
 
-	log.Printf("Copying common files for tgc.")
+	google.LogVerbose("Copying common files for tgc.")
 
 	if err := os.MkdirAll(outputFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating output directory %v: %v", outputFolder, err))
@@ -313,15 +312,13 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 
 		srcDir := filepath.Join("third_party/tgc_next/pkg/services", tgc.Product.ApiName)
 		dstDir := filepath.Join(outputFolder, "pkg/services", tgc.Product.ApiName)
-		if err := copy.Copy(srcDir, dstDir); err != nil && !errors.Is(err, os.ErrNotExist) {
+		if err := copyDir(srcDir, dstDir, nil); err != nil && !errors.Is(err, os.ErrNotExist) {
 			log.Println(fmt.Errorf("error copying service directory %v: %v", srcDir, err))
 		}
 	} else {
 		// Shared copying
-		if err := copy.Copy("third_party/tgc_next", outputFolder, copy.Options{
-			Skip: func(srcinfo os.FileInfo, src, dest string) (bool, error) {
-				return strings.Contains(src, "pkg/services/"), nil
-			},
+		if err := copyDir("third_party/tgc_next", outputFolder, func(src string) bool {
+			return strings.Contains(src, "pkg/services/")
 		}); err != nil {
 			log.Println(fmt.Errorf("error copying directory %v: %v", outputFolder, err))
 		}
@@ -337,8 +334,9 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 
 func (tgc TerraformGoogleConversionNext) CopyTfToCaiCommonFiles(outputFolder string) {
 	resourceConverters := map[string]string{
-		"pkg/tfplan2cai/converters/services/compute/image.go":     "third_party/terraform/services/compute/image.go",
-		"pkg/tfplan2cai/converters/services/compute/disk_type.go": "third_party/terraform/services/compute/disk_type.go",
+		"pkg/tfplan2cai/converters/services/compute/image.go":                             "third_party/terraform/services/compute/image.go",
+		"pkg/tfplan2cai/converters/services/compute/disk_type.go":                         "third_party/terraform/services/compute/disk_type.go",
+		"pkg/tfplan2cai/converters/services/bigtable/bigtable_app_profile_handwritten.go": "third_party/terraform/services/bigtable/bigtable_app_profile_handwritten.go",
 	}
 	tgc.CopyFileList(outputFolder, resourceConverters)
 }

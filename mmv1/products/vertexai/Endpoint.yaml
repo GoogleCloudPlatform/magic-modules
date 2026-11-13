@@ -72,10 +72,13 @@ samples:
       - name: vertex_ai_endpoint_private_service_connect
         resource_id_vars:
           network_name: psc-network
+          endpoint_name: endpoint-name
   - name: vertex_ai_endpoint_dedicated_endpoint
     primary_resource_id: endpoint
     steps:
       - name: vertex_ai_endpoint_dedicated_endpoint
+        resource_id_vars:
+          endpoint_name: endpoint-name
 parameters:
   - name: location
     type: String
@@ -227,7 +230,7 @@ properties:
           description: If true, the container of the DeployedModel instances will send `stderr` and `stdout` streams to Stackdriver Logging. Only supported for custom-trained Models and AutoML Tabular Models.
           output: true
   - name: trafficSplit
-    type: String
+    type: JsonValue
     default_from_api: true
     description: |
       A map from a DeployedModel's id to the percentage of this Endpoint's traffic that should be forwarded to that DeployedModel.
@@ -237,11 +240,6 @@ properties:
       [documentation](https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.endpoints/deployModel) for more information.
 
       ~> **Note:** To set the map to empty, set `"{}"`, apply, and then remove the field from your config.
-    state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-    custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-    validation:
-      function: validation.StringIsJSON
   - name: etag
     type: String
     description: Used to perform consistent read-modify-write updates. If not set, a blind "overwrite" update happens.
@@ -320,12 +318,9 @@ properties:
               output: true
               description: Forwarding rule created by the PSC service automation.
             - name: state
-              type: Enum
+              type: String
               output: true
               description: The state of the PSC service automation.
-              enum_values:
-                - PSC_AUTOMATION_STATE_FAILED
-                - PSC_AUTOMATION_STATE_SUCCESSFUL
             - name: errorMessage
               type: String
               output: true

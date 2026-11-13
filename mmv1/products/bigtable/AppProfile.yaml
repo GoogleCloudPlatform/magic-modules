@@ -38,7 +38,6 @@ exclude_sweeper: true
 custom_code:
   extra_schema_entry: templates/terraform/extra_schema_entry/bigtable_app_profile.go.tmpl
   encoder: templates/terraform/encoders/bigtable_app_profile.go.tmpl
-  constants: templates/terraform/constants/bigtable_app_profile_routing.go.tmpl
   pre_update: templates/terraform/pre_update/bigtable_app_profile.go.tmpl
 samples:
   - name: bigtable_app_profile_anycluster
@@ -178,6 +177,14 @@ properties:
           - PRIORITY_LOW
           - PRIORITY_MEDIUM
           - PRIORITY_HIGH
+      - name: memoryConfig
+        type: NestedObject
+        description: |
+          The memory config to use for requests sent using this app profile.
+          If set, eligible single-row requests (currently limited to ReadRows) using this app profile will be routed to the memory layer. All eligible writes populate the memory layer. `memory_config` can only be set if the AppProfile uses single cluster routing and the configured cluster has a memory layer enabled.
+        allow_empty_object: true
+        send_empty_value: true
+        properties: []
   - name: dataBoostIsolationReadOnly
     type: NestedObject
     description: |

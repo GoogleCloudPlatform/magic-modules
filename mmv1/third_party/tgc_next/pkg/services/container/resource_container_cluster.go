@@ -119,6 +119,8 @@ var (
 		"addons_config.0.pod_snapshot_config",
 		"addons_config.0.slurm_operator_config",
 		"addons_config.0.node_readiness_config",
+		"addons_config.0.agent_sandbox_config",
+		"addons_config.0.high_scale_checkpointing_config",
 	}
 
 	privateClusterConfigKeys = []string{
@@ -671,6 +673,39 @@ func ResourceContainerCluster() *schema.Resource {
 									"enabled": {
 										Type:     schema.TypeBool,
 										Required: true,
+									},
+								},
+							},
+						},
+						"high_scale_checkpointing_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `The status of the High Scale Checkpointing addon. Defaults to disabled; set enabled = true to enable.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Required: true,
+									},
+								},
+							},
+						},
+						"agent_sandbox_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `The status of the Agent Sandbox addon. It is disabled by default. Set enabled = true to enable.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: `Whether the Agent Sandbox feature is enabled.`,
 									},
 								},
 							},
@@ -2059,6 +2094,25 @@ func ResourceContainerCluster() *schema.Resource {
 									},
 								},
 							},
+						},
+					},
+				},
+			},
+
+			"managed_opentelemetry_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: `Configuration for Managed OpenTelemetry pipeline.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"scope": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Computed:         true,
+							Description:      "The scope of the Managed OpenTelemetry pipeline. Available options include NONE and COLLECTION_AND_INSTRUMENTATION_COMPONENTS. See https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/projects.locations.clusters#managedopentelemetryconfig for more information. To disable the feature, explicitly set this to NONE.",
+							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("SCOPE_UNSPECIFIED"),
 						},
 					},
 				},

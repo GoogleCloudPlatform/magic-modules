@@ -346,7 +346,7 @@ The following arguments are supported:
   Resulting name for a `name_prefix` <= 37 characters:
   `name_prefix` + YYYYmmddHHSSssss + 8 digit incremental counter
   Resulting name for a `name_prefix` 38 - 54 characters:
-  `name_prefix` + YYmmdd + 3 digit incremental counter
+  `name_prefix` + 9 random lowercase alphanumeric characters
 
 * `can_ip_forward` - (Optional) Whether to allow sending and receiving of
     packets with non-matching source or destination IPs. This defaults to false.
@@ -516,7 +516,7 @@ The following arguments are supported:
 
     If you do not provide an encryption key, then the disk will be encrypted using an automatically generated key and you do not need to provide a key to use the disk later.
 
-    Instance templates do not store customer-supplied encryption keys, so you cannot use your own keys to encrypt disks in a managed instance group. Structure [documented below](#nested_access_config).
+    Instance templates do not store customer-supplied encryption keys, so you cannot use your own keys to encrypt disks in a managed instance group. Structure [documented below](#nested_disk_encryption_key).
 
 * `resource_policies` (Optional) -- A list (short name or id) of resource policies to attach to this disk for automatic snapshot creations. Currently a max of 1 resource policy is supported.
 
@@ -584,6 +584,10 @@ The following arguments are supported:
     created in. Either `network` or `subnetwork` must be provided.
 
 * `network_attachment` - (Optional) The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.
+
+* `enable_vpc_scoped_dns` - (Optional) If true, DNS resolution will be enabled over this interface. Only valid with `network_attachment`.
+
+* `service_class_id` - (Optional) Producer Service's Service class Id for the region of this network interface. Can only be used with `network_attachment`. It is not possible to use on its own; however, `network_attachment` can be used without `service_class_id`.
 
 * `vlan` - (Optional) VLAN tag of a dynamic network interface, must be an integer in the range from 2 to 255 inclusively.
 
@@ -699,7 +703,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `on_instance_stop_action` - (Optional) Specifies the action to be performed when the instance is terminated using `max_run_duration` and `STOP` `instance_termination_action`. Only support `true` `discard_local_ssd` at this point. Structure is [documented below](#nested_on_instance_stop_action).
 
-* `host_error_timeout_seconds` - (Optional) [Beta](../guides/provider_versions.html.markdown) Specifies the time in seconds for host error detection, the value must be within the range of [90, 330] with the increment of 30, if unset, the default behavior of host error recovery will be used.
+* `host_error_timeout_seconds` - (Optional) Specifies the time in seconds for host error detection, the value must be within the range of [90, 330] with the increment of 30, if unset, the default behavior of host error recovery will be used.
 
 * `maintenance_interval` - (Optional) [Beta](../guides/provider_versions.html.markdown) Specifies the frequency of planned maintenance events. The accepted values are: `PERIODIC`.
 
@@ -709,7 +713,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `skip_guest_os_shutdown` - (Optional) [Beta](../guides/provider_versions.html.markdown) Boolean parameter. Default is false and there will be 120 seconds between GCE ACPI G2 Soft Off and ACPI G3 Mechanical Off for Standard VMs and 30 seconds for Spot VMs.
 
-* `preemption_notice_duration` - (Optional) [Beta](../guides/provider_versions.html.markdown) Specifies the Metadata Service preemption notice duration before the GCE ACPI G2 Soft Off signal is triggered for Spot VMs only. If not specified, there will be no wait before the G2 Soft Off signal is triggered. Structure is [documented below](#nested_preemption_notice_duration).
+* `preemption_notice_duration` - (Optional) Specifies the Metadata Service preemption notice duration before the GCE ACPI G2 Soft Off signal is triggered for Spot VMs only. If not specified, there will be no wait before the G2 Soft Off signal is triggered. Structure is [documented below](#nested_preemption_notice_duration).
 
 <a name="nested_graceful_shutdown"></a>The `graceful_shutdown` block supports:
 
@@ -717,15 +721,17 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `max_duration` (Optional) The time allotted for the instance to gracefully shut down.
     If the graceful shutdown isn't complete after this time, then the instance
-    transitions to the STOPPING state. Structure is documented below:
+    transitions to the STOPPING state. Structure is [documented below](#nested_max_duration).
 
-    * `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
-        resolution. Durations less than one second are represented with a 0
-        `seconds` field and a positive `nanos` field. Must be from 0 to
-        999,999,999 inclusive.
+<a name="nested_max_duration"></a>The `max_duration` block supports:
 
-    * `seconds` - (Required) Span of time at a resolution of a second.
-        The value must be between 1 and 3600, which is 3,600 seconds (one hour).`
+* `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
+    resolution. Durations less than one second are represented with a 0
+    `seconds` field and a positive `nanos` field. Must be from 0 to
+    999,999,999 inclusive.
+
+* `seconds` - (Required) Span of time at a resolution of a second.
+    The value must be between 1 and 3600, which is 3,600 seconds (one hour).
 
 <a name="nested_preemption_notice_duration"></a>The `preemption_notice_duration` block supports:
 
@@ -777,7 +783,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 * `operator` (Required) - The operator. Can be `IN` for node-affinities
     or `NOT_IN` for anti-affinities.
 
-* `value` (Required) - The values for the node affinity label.
+* `values` (Required) - The values for the node affinity label.
 
 <a name="nested_reservation_affinity"></a>The `reservation_affinity` block supports:
 
@@ -821,6 +827,8 @@ The `specific_reservation` block supports:
 * `visible_core_count` - (Optional) The number of physical cores to expose to an instance. [visible cores info (VC)](https://cloud.google.com/compute/docs/instances/customize-visible-cores).
 
 * `performance_monitoring_unit` - (Optional) [The PMU](https://cloud.google.com/compute/docs/pmu-overview) is a hardware component within the CPU core that monitors how the processor runs code. Valid values for the level of PMU are `STANDARD`, `ENHANCED`, and `ARCHITECTURAL`.
+
+    ~> **Note:** Early 8.X.0 provider versions dropped an explicitly configured `STANDARD` value when creating the resource. On affected resources the diff stays suppressed, so Terraform reports no changes. For `google_compute_instance`, apply once with another level (`ENHANCED` or `ARCHITECTURAL`) and then again with `STANDARD`; this requires `allow_stopping_for_update`. For instance templates the field is `ForceNew`, so use `terraform apply -replace=...` instead.
 
 * `enable_uefi_networking` - (Optional) Whether to enable UEFI networking for instance creation.
 

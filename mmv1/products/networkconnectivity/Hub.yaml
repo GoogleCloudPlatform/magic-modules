@@ -54,51 +54,45 @@ samples:
       - name: network_connectivity_hub_basic
         resource_id_vars:
           resource_name: basic
-        test_vars_overrides:
-          # for backward compatible
-          resource_name: '"basic" + randomSuffix'
   - name: network_connectivity_hub_with_export_psc
     primary_resource_id: primary
     steps:
       - name: network_connectivity_hub_with_export_psc
         resource_id_vars:
           resource_name: basic
-        test_vars_overrides:
-          # for backward compatible
-          resource_name: '"basic" + randomSuffix'
+  - name: network_connectivity_hub_with_export_psc_config
+    primary_resource_id: primary
+    min_version: 'beta'
+    steps:
+      - name: network_connectivity_hub_with_export_psc_config
+        resource_id_vars:
+          resource_name: psc-config
+      - name: network_connectivity_hub_with_export_psc_config_update
+        resource_id_vars:
+          resource_name: psc-config
   - name: network_connectivity_hub_mesh_topology
     primary_resource_id: primary
     steps:
       - name: network_connectivity_hub_mesh_topology
         resource_id_vars:
           resource_name: mesh
-        test_vars_overrides:
-          # for backward compatible
-          resource_name: '"mesh" + randomSuffix'
   - name: network_connectivity_hub_star_topology
     primary_resource_id: primary
     steps:
       - name: network_connectivity_hub_star_topology
         resource_id_vars:
           resource_name: star
-        test_vars_overrides:
-          # for backward compatible
-          resource_name: '"star" + randomSuffix'
   - name: network_connectivity_hub_policy_mode
     primary_resource_id: primary
     steps:
       - name: network_connectivity_hub_policy_mode
         resource_id_vars:
           resource_name: policy
-        test_vars_overrides:
-          # for backward compatible
-          resource_name: '"policy" + randomSuffix'
 parameters:
 properties:
   - name: name
     type: String
     description: 'Immutable. The name of the hub. Hub names must be unique. They use the following form: `projects/{project_number}/locations/global/hubs/{hub_id}`'
-    required: true
     immutable: true
     default_from_api: true
     diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
@@ -126,11 +120,6 @@ properties:
     type: String
     description: Output only. The current lifecycle state of this hub.
     output: true
-    exactly_one_of:
-      - STATE_UNSPECIFIED
-      - CREATING
-      - ACTIVE
-      - DELETING
   - name: routingVpcs
     type: Array
     description: The VPC network associated with this hub's spokes. All of the VPN tunnels, VLAN attachments, and router appliance instances referenced by this hub's spokes must belong to this VPC network. This field is read-only. Network Connectivity Center automatically populates it based on the set of spokes attached to the hub.
@@ -162,3 +151,19 @@ properties:
     type: Boolean
     description: Whether Private Service Connect transitivity is enabled for the hub. If true, Private Service Connect endpoints in VPC spokes attached to the hub are made accessible to other VPC spokes attached to the hub. The default value is false.
     default_from_api: true
+  - name: exportPscConfig
+    type: NestedObject
+    min_version: 'beta'
+    description: |
+      Config for more granular control of Private Service Connect transitivity. Only takes effect when `export_psc` is true.
+      If `export_psc` is true, at least one of `published_services_and_regional_google_apis` and `global_google_apis` must be true.
+    default_from_api: true
+    properties:
+      - name: publishedServicesAndRegionalGoogleApis
+        type: Boolean
+        description: Whether Private Service Connect endpoints for published services (regional ILBs) and regional Google APIs are propagated.
+        send_empty_value: true
+      - name: globalGoogleApis
+        type: Boolean
+        description: Whether Private Service Connect endpoints for global Google APIs are propagated. The default value is false.
+        send_empty_value: true

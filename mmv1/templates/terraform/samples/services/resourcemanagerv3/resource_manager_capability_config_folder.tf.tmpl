@@ -1,0 +1,30 @@
+resource "google_folder" "folder" {
+  display_name        = "{{index $.ResourceIdVars "folder_name"}}"
+  parent              = "organizations/{{index $.TestEnvVars "org_id"}}"
+  deletion_protection = false
+}
+
+# An existing project can be supplied as the management project. If
+# management_project is omitted, the API creates one automatically.
+resource "google_project" "management_project" {
+  project_id      = "{{index $.ResourceIdVars "management_project_id"}}"
+  name            = "{{index $.ResourceIdVars "management_project_id"}}"
+  folder_id       = google_folder.folder.folder_id
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
+  deletion_policy = "DELETE"
+}
+
+// wait for project creation
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+  depends_on = [google_project.management_project]
+}
+
+resource "google_resource_manager_capability_config" "{{$.PrimaryResourceId}}" {
+  parent               = google_folder.folder.name
+  capability_config_id = "{{index $.ResourceIdVars "capability_config_id"}}"
+  display_name         = "Folder capability config"
+  types                = ["AGENT_MANAGEMENT"]
+  management_project   = "projects/${google_project.management_project.number}"
+  depends_on = [time_sleep.wait_60_seconds]
+}

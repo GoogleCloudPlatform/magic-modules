@@ -15,7 +15,6 @@
 name: ProjectSettings
 description: Manages Cloud Observability settings for a project.
 base_url: projects/{{project}}/locations/{{location}}/settings
-min_version: beta
 self_link: projects/{{project}}/locations/{{location}}/settings
 create_url: projects/{{project}}/locations/{{location}}/settings
 update_url: projects/{{project}}/locations/{{location}}/settings

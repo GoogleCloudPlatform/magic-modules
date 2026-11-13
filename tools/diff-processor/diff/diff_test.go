@@ -11,12 +11,10 @@ import (
 	oldProvider "google/provider/old/google/provider"
 	oldVerify "google/provider/old/google/verify"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestNewProviderOldProviderChanges(t *testing.T) {
@@ -195,7 +193,9 @@ func TestFlattenSchema(t *testing.T) {
 		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
 			flattened := flattenSchema("", tc.resourceSchema)
-			assert.Equal(t, tc.expectFlattened, flattened)
+			if diff := cmp.Diff(tc.expectFlattened, flattened); diff != "" {
+				t.Errorf("flattenSchema() mismatch (-want +got):\n%s", diff)
+			}
 		})
 	}
 }
@@ -994,11 +994,11 @@ func TestFieldChanged(t *testing.T) {
 						diff,
 					)
 				} else {
-					t.Errorf("want %t; got %t. No field diff.\nOld field: %s\nNew field: %s\n",
+					t.Errorf("want %t; got %t. No field diff.\nOld field: %#v\nNew field: %#v\n",
 						tc.expectChanged,
 						changed,
-						spew.Sdump(tc.oldField),
-						spew.Sdump(tc.newField),
+						tc.oldField,
+						tc.newField,
 					)
 				}
 			}

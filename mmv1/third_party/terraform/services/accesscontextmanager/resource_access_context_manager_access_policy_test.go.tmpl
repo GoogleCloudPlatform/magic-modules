@@ -29,7 +29,7 @@ func TestAccAccessContextManager(t *testing.T) {
 		"service_perimeter_nongcp_patterns":		testAccAccessContextManagerServicePerimeter_nonGcpServicePatternsTest,
 		"service_perimeters_nongcp_patterns":		testAccAccessContextManagerServicePerimeters_nonGcpServicePatternsTest,
 		"service_perimeter_resource":			testAccAccessContextManagerServicePerimeterResource_basicTest,
-		"service_perimeter_dry_run_resource":		testAccAccessContextManagerServicePerimeterResource_basicTest,
+		"service_perimeter_dry_run_resource":		testAccAccessContextManagerServicePerimeterDryRunResource_basicTest,
 		"access_level":					testAccAccessContextManagerAccessLevel_basicTest,
 		"access_level_full":				testAccAccessContextManagerAccessLevel_fullTest,
 		"access_level_custom":				testAccAccessContextManagerAccessLevel_customTest,
@@ -38,14 +38,19 @@ func TestAccAccessContextManager(t *testing.T) {
 		"service_perimeter_psc_endpoint": testAccAccessContextManagerServicePerimeter_pscEndpointTest,
 		"service_perimeter_egress_policy":		testAccAccessContextManagerServicePerimeterEgressPolicy_basicTest,
 		"service_perimeter_egress_policy_update":	testAccAccessContextManagerServicePerimeterEgressPolicy_updateTest,
+		"service_perimeter_egress_policy_parent_update":	testAccAccessContextManagerServicePerimeterEgressPolicy_parentPerimeterUpdateTest,
 		"service_perimeter_dry_run_egress_policy":		testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_basicTest,
+		"service_perimeter_dry_run_egress_policy_update":	testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_updateTest,
 		"service_perimeter_egress_policy_psc_endpoint":	testAccAccessContextManagerServicePerimeterEgressPolicy_pscEndpointTest,
 		"service_perimeter_ingress_policy":		testAccAccessContextManagerServicePerimeterIngressPolicy_basicTest,
 		"service_perimeter_ingress_policy_update":	testAccAccessContextManagerServicePerimeterIngressPolicy_updateTest,
 		"service_perimeter_dry_run_ingress_policy":		testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_basicTest,
+		"service_perimeter_dry_run_ingress_policy_update":	testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_updateTest,
 		"service_perimeter_ingress_policy_psc_endpoint":	testAccAccessContextManagerServicePerimeterIngressPolicy_pscEndpointTest,
 		"service_perimeters":				testAccAccessContextManagerServicePerimeters_basicTest,
 		"gcp_user_access_binding":			testAccAccessContextManagerGcpUserAccessBinding_basicTest,
+		"gcp_user_access_binding_principal":		testAccAccessContextManagerGcpUserAccessBinding_principalTest,
+		"gcp_user_access_binding_restricted_project":		testAccAccessContextManagerGcpUserAccessBindingRestrictedProjectScopeTest,
 		"authorized_orgs_desc":				testAccAccessContextManagerAuthorizedOrgsDesc_basicTest,
 		"data_source_access_policy_basic":          testAccDataSourceAccessContextManagerServicePerimeter_basicTest,
 		"data_source_access_policy_scoped":         testAccDataSourceAccessContextManagerServicePerimeter_scopedPolicyTest,
@@ -57,7 +62,7 @@ func TestAccAccessContextManager(t *testing.T) {
 		// yet, we don't have a race condition
 		// see https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
 		tc := tc
-		t.Run(name, func(t *testing.T) {
+		acctest.RunVcrSubtest(t, name, func(t *testing.T) {
 			tc(t)
 		})
 	}
@@ -80,12 +85,24 @@ func testAccAccessContextManagerAccessPolicy_basicTest(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
+				ResourceName:       "google_access_context_manager_access_policy.test-access",
+				ImportState:        true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
+			},
+			{
 				Config: testAccAccessContextManagerAccessPolicy_basic(org, "my new policy"),
 			},
 			{
 				ResourceName:      "google_access_context_manager_access_policy.test-access",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				ResourceName:       "google_access_context_manager_access_policy.test-access",
+				ImportState:        true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},
 		},
 	})
@@ -147,6 +164,12 @@ func testAccAccessContextManagerAccessPolicy_scopedTest(t *testing.T) {
 				ResourceName:      "google_access_context_manager_access_policy.test-access",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				ResourceName:       "google_access_context_manager_access_policy.test-access",
+				ImportState:        true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},
 		},
 	})

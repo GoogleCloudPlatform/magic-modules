@@ -1,0 +1,3 @@
+if policy, ok := d.GetOk("deletion_policy"); ok && strings.EqualFold(policy.(string), "FORCE") {
+	url = url + "?force=true"
+}

@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -40,13 +39,13 @@ var (
 		"scheduling.0.max_run_duration",
 		"scheduling.0.on_instance_stop_action",
 		"scheduling.0.termination_time",
+		"scheduling.0.host_error_timeout_seconds",
 {{- if ne $.TargetVersionName "ga" }}
 		"scheduling.0.maintenance_interval",
-		"scheduling.0.host_error_timeout_seconds",
 		"scheduling.0.graceful_shutdown",
 		"scheduling.0.skip_guest_os_shutdown",
-		"scheduling.0.preemption_notice_duration",
 {{- end }}
+		"scheduling.0.preemption_notice_duration",
 		"scheduling.0.local_ssd_recovery_timeout",
 	}
 
@@ -526,6 +525,20 @@ Google Cloud KMS. Only one of kms_key_self_link, rsa_encrypted_key and raw_key m
 							Description:      `The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.`,
 						},
 
+						"enable_vpc_scoped_dns": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `If true, DNS resolution will be enabled over this interface. Only valid with network_attachment.`,
+						},
+
+						"service_class_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `Producer Service's Service class Id for the region of this network interface. Can only be used with network_attachment. It is not possible to use on its own; however, network_attachment can be used without service_class_id.`,
+						},
+
 						"parent_nic_name": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -904,13 +917,13 @@ be from 0 to 999,999,999 inclusive.`,
 in RFC3339 text format. If specified, the instance termination action
 will be performed at the termination time.`,
 						},
-{{- if ne $.TargetVersionName "ga" }}
 						"host_error_timeout_seconds": {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							ForceNew:    true,
 							Description: `Specify the time in seconds for host error detection, the value must be within the range of [90, 330] with the increment of 30, if unset, the default behavior of host error recovery will be used.`,
 						},
+{{- if ne $.TargetVersionName "ga" }}
 
 						"maintenance_interval" : {
 							Type:        schema.TypeString,
@@ -1001,6 +1014,7 @@ be from 0 to 999,999,999 inclusive.`,
 							Default:     false,
 							Description: `Default is false and there will be 120 seconds between GCE ACPI G2 Soft Off and ACPI G3 Mechanical Off for Standard VMs and 30 seconds for Spot VMs.`,
 						},
+{{- end }}
 						"preemption_notice_duration": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -1022,7 +1036,6 @@ be from 0 to 999,999,999 inclusive.`,
 								},
 							},
 						},
-{{- end }}
 					},
 				},
 			},
@@ -1190,7 +1203,7 @@ be from 0 to 999,999,999 inclusive.`,
 							Type:        schema.TypeString,
 							Optional:    true,
 							ForceNew:    true,
-							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("STANDARD"),
+							DiffSuppressFunc: performanceMonitoringUnitDiffSuppress,
 							ValidateFunc: validation.StringInSlice([]string{"STANDARD", "ENHANCED", "ARCHITECTURAL"}, false),
 							Description: `The PMU is a hardware component within the CPU core that monitors how the processor runs code. Valid values for the level of PMU are "STANDARD", "ENHANCED", and "ARCHITECTURAL".`,
 						},
@@ -1885,7 +1898,7 @@ func flattenDisk(disk *compute.AttachedDisk, configDisk map[string]any, defaultP
 		if disk.InitializeParams.SourceImage != "" {
 			path, err := resolveImageRefToRelativeURI(defaultProject, disk.InitializeParams.SourceImage)
 			if err != nil {
-				return nil, errwrap.Wrapf("Error expanding source image input to relative URI: {{"{{"}}err{{"}}"}}", err)
+				return nil, fmt.Errorf("Error expanding source image input to relative URI: %w", err)
 			}
 			diskMap["source_image"] = path
 		} else {
@@ -2358,7 +2371,6 @@ func expandResourceComputeInstanceTemplateScheduling(d *schema.ResourceData, met
 			schedulingTyped.ForceSendFields = append(schedulingTyped.ForceSendFields, pair[1])
 		}
 	}
-{{- if ne $.TargetVersionName "ga" }}
 	if v, ok := expanded["hostErrorTimeoutSeconds"]; ok {
 		if v == nil {
 			schedulingTyped.NullFields = append(schedulingTyped.NullFields, "HostErrorTimeoutSeconds")
@@ -2366,7 +2378,6 @@ func expandResourceComputeInstanceTemplateScheduling(d *schema.ResourceData, met
 			schedulingTyped.ForceSendFields = append(schedulingTyped.ForceSendFields, "HostErrorTimeoutSeconds")
 		}
 	}
-{{- end }}
 	return schedulingTyped, nil
 }
 

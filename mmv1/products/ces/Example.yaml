@@ -116,10 +116,25 @@ properties:
                       handle the conversation from this point forward.
                       Format: `projects/{project}/locations/{location}/apps/{app}/agents/{agent}`
                     required: true
+              - name: blob
+                type: NestedObject
+                description: Represents a blob input or output in the conversation.
+                properties:
+                  - name: data
+                    type: String
+                    description: Raw bytes of the blob.
+                    required: true
+                  - name: mimeType
+                    type: String
+                    description: The IANA standard MIME type of the source data.
+                    required: true
               - name: image
                 type: NestedObject
                 description: Represents an image input or output in the conversation.
                 properties:
+                  - name: altText
+                    type: String
+                    description: The alternative text for the image.
                   - name: data
                     type: String
                     description: Raw bytes of the image.
@@ -141,12 +156,8 @@ properties:
                 description: Request for the client or the agent to execute the specified tool.
                 properties:
                   - name: args
-                    type: String
+                    type: JsonValue
                     description: The input parameters and values for the tool in JSON object format.
-                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
-                    validation:
-                      function: 'validation.StringIsJSON'
                   - name: displayName
                     type: String
                     description: Display name of the tool.
@@ -189,17 +200,13 @@ properties:
                     type: String
                     description: The matching ID of the tool call the response is for.
                   - name: response
-                    type: String
+                    type: JsonValue
                     description: |-
                       The tool execution result in JSON object format.
                       Use "output" key to specify tool response and "error" key to specify
                       error details (if any). If "output" and "error" keys are not specified,
                       then whole "response" is treated as tool execution result.
                     required: true
-                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
-                    validation:
-                      function: 'validation.StringIsJSON'
                   - name: tool
                     type: String
                     description: |-
@@ -221,14 +228,10 @@ properties:
                         description: |-
                           The tool ID to filter the tools to retrieve the schema for.
               - name: updatedVariables
-                type: String
+                type: JsonValue
                 description: |-
                   A struct represents variables that were updated in the conversation,
                   keyed by variable names.
-                custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
-                validation:
-                  function: 'validation.StringIsJSON'
         - name: role
           type: String
           description: The role within the conversation, e.g., user, agent.

@@ -23,6 +23,17 @@ func TestDetectMissingIdentityCoverage(t *testing.T) {
 			want:            map[string]*MissingIdentityInfo{},
 		},
 		{
+			name:            "resource with identity import step using RefreshState instead of ImportState is flagged",
+			resourceContent: fakeResourceWithFullCoverage(),
+			testContent:     fakeTestWithRefreshStateIdentity(),
+			resourceName:    "foo_instance",
+			want: map[string]*MissingIdentityInfo{
+				"foo_instance": {
+					MissingImportTest: true,
+				},
+			},
+		},
+		{
 			name:            "resource with identity missing Create and Update CRUD and import test is flagged",
 			resourceContent: fakeResourceMissingCreateUpdate(),
 			testContent:     "",
@@ -177,6 +188,24 @@ func TestAccFooInstance_importBlockWithResourceIdentity(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		Steps: []resource.TestStep{
 			{
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+			},
+		},
+	})
+}
+`
+}
+
+// fakeTestWithRefreshStateIdentity returns a test file that mistakenly uses RefreshState: true with ImportBlockWithResourceIdentity.
+func fakeTestWithRefreshStateIdentity() string {
+	return `package fake
+
+func TestAccFooInstance_importBlockWithResourceIdentity(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		Steps: []resource.TestStep{
+			{
+				RefreshState:    true,
 				ImportStateKind: resource.ImportBlockWithResourceIdentity,
 			},
 		},

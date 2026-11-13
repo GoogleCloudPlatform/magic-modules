@@ -1,8 +1,8 @@
 resource "google_compute_network" "network-peering-vpc" {
-  name = "default-vpc"
+  name = "{{index $.ResourceIdVars "vpc_name"}}"
 }
 resource "google_vmwareengine_network" "network-peering-standard-nw" {
-   name              = "default-standard-nw-np"
+   name              = "{{index $.ResourceIdVars "network_name"}}"
    location          = "global"
    type              = "STANDARD"
 }

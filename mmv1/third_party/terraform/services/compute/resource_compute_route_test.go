@@ -32,6 +32,8 @@ func TestAccComputeRoute_defaultInternetGateway(t *testing.T) {
 }
 
 func TestAccComputeRoute_hopInstance(t *testing.T) {
+	t.Parallel()
+
 	instanceName := "tf-test-" + acctest.RandString(t, 10)
 	zone := "us-central1-b"
 
@@ -53,6 +55,7 @@ func TestAccComputeRoute_hopInstance(t *testing.T) {
 }
 
 func TestAccComputeRoute_resourceManagerTags(t *testing.T) {
+	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
 
@@ -116,7 +119,7 @@ resource "google_compute_route" "foobar" {
 func testAccComputeRoute_hopInstance(instanceName, zone, suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 

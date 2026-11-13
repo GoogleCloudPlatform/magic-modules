@@ -372,6 +372,7 @@ resource "google_ces_tool" "ces_tool_data_store_tool_engine_source_basic" {
                 model_settings {
                     model = "gemini-3.0-flash-001"
                     temperature = 1
+                    thinking_level = "LOW"
                 }
                 prompt = "example-prompt"
                 disabled = false
@@ -380,6 +381,7 @@ resource "google_ces_tool" "ces_tool_data_store_tool_engine_source_basic" {
                 model_settings {
                     model = "gemini-3.0-flash-001"
                     temperature = 1
+                    thinking_level = "LOW"
                 }
                 prompt = "example-prompt"
                 disabled = false
@@ -387,6 +389,10 @@ resource "google_ces_tool" "ces_tool_data_store_tool_engine_source_basic" {
             grounding_config {
                 grounding_level = 3
                 disabled = false
+            }
+            snippets_config {
+                enable_snippets = true
+                max_snippets    = 5
             }
         }
 
@@ -467,6 +473,7 @@ resource "google_ces_tool" "ces_tool_data_store_tool_engine_source_basic" {
                 model_settings {
                     model = "gemini-3.0-flash-001"
                     temperature = 1
+                    thinking_level = "HIGH"
                 }
                 prompt = "example-prompt"
                 disabled = false
@@ -475,6 +482,7 @@ resource "google_ces_tool" "ces_tool_data_store_tool_engine_source_basic" {
                 model_settings {
                     model = "gemini-3.0-flash-001"
                     temperature = 1
+                    thinking_level = "HIGH"
                 }
                 prompt = "example-prompt"
                 disabled = false
@@ -482,6 +490,10 @@ resource "google_ces_tool" "ces_tool_data_store_tool_engine_source_basic" {
             grounding_config {
                 grounding_level = 3
                 disabled = false
+            }
+            snippets_config {
+                enable_snippets = false
+                max_snippets    = 10
             }
         }
 
@@ -664,6 +676,9 @@ resource "google_ces_tool" "ces_tool_python_function_basic" {
     python_function {
         name = "example_function"
         python_code = "def example_function() -> int: return 0"
+        service_directory_config {
+            service = "projects/example/locations/us/namespaces/namespace/services/service"
+        }
     }
 }
 `, context)
@@ -695,6 +710,9 @@ resource "google_ces_tool" "ces_tool_python_function_basic" {
     python_function {
         name = "example_function_updated"
         python_code = "def example_function_updated() -> int: return 0"
+        service_directory_config {
+            service = "projects/example/locations/us/namespaces/namespace/services/service-updated"
+        }
     }
 }
 `, context)
@@ -751,7 +769,7 @@ resource "google_ces_app" "my-app" {
 }
 
 resource "google_ces_agent" "target_agent" {
-  agent_id     = "target-agent-%{random_suffix}"
+  agent_id     = "tf-test-target-agent-%{random_suffix}"
   location     = "us"
   app          = google_ces_app.my-app.app_id
   display_name = "Target Agent"
@@ -785,7 +803,7 @@ resource "google_ces_app" "my-app" {
 }
 
 resource "google_ces_agent" "target_agent" {
-  agent_id     = "target-agent-%{random_suffix}"
+  agent_id     = "tf-test-target-agent-%{random_suffix}"
   location     = "us"
   app          = google_ces_app.my-app.app_id
   display_name = "Target Agent"

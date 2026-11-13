@@ -89,6 +89,8 @@ func TestAccComputeImage_basedondisk(t *testing.T) {
 	t.Parallel()
 
 	var image map[string]interface{}
+	diskName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	imageName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -96,7 +98,7 @@ func TestAccComputeImage_basedondisk(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeImageDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeImage_basedondisk(acctest.RandString(t, 10), acctest.RandString(t, 10)),
+				Config: testAccComputeImage_basedondisk(diskName, imageName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeImageExists(
 						t, "google_compute_image.foobar", &image),
@@ -280,8 +282,8 @@ func TestAccComputeImage_resolveImage(t *testing.T) {
 
 	var image map[string]interface{}
 	rand := acctest.RandString(t, 10)
-	name := fmt.Sprintf("test-image-%s", rand)
-	fam := fmt.Sprintf("test-image-family-%s", rand)
+	name := fmt.Sprintf("tf-test-test-image-%s", rand)
+	fam := fmt.Sprintf("tf-test-test-image-family-%s", rand)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -417,7 +419,7 @@ func testAccCheckComputeImageResolution(t *testing.T, n string) resource.TestChe
 		family := rs.Primary.Attributes["family"]
 		link := rs.Primary.Attributes["self_link"]
 
-		url := fmt.Sprintf("%sprojects/%s/global/images/family/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), "debian-cloud", "debian-11")
+		url := fmt.Sprintf("%sprojects/%s/global/images/family/%s", transport_tpg.BaseUrl(tpgcompute.Product, config), "debian-cloud", "debian-13")
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "GET",
@@ -595,7 +597,7 @@ func testAccCheckComputeImageHasSourceType(image *map[string]interface{}) resour
 func testAccComputeImage_resolving(name, family string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -644,12 +646,12 @@ resource "google_compute_image" "foobar" {
 func testAccComputeImage_license(name string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
 resource "google_compute_disk" "foobar" {
-  name  = "disk-test-%s"
+  name  = "%s"
   zone  = "us-central1-a"
   image = data.google_compute_image.my_image.self_link
 }
@@ -663,7 +665,7 @@ resource "google_compute_image" "foobar" {
     my-label    = "my-label-value"
   }
   licenses = [
-    "https://www.googleapis.com/compute/v1/projects/debian-cloud/global/licenses/debian-11-bullseye",
+    "https://www.googleapis.com/compute/v1/projects/debian-cloud/global/licenses/debian-13-trixie",
   ]
 }
 `, name, name)
@@ -701,18 +703,18 @@ resource "google_compute_image" "foobar" {
 func testAccComputeImage_basedondisk(diskName, imageName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
 resource "google_compute_disk" "foobar" {
-  name  = "disk-test-%s"
+  name  = "%s"
   zone  = "us-central1-a"
   image = data.google_compute_image.my_image.self_link
 }
 
 resource "google_compute_image" "foobar" {
-  name        = "image-test-%s"
+  name        = "%s"
   source_disk = google_compute_disk.foobar.self_link
 }
 `, diskName, imageName)
@@ -721,7 +723,7 @@ resource "google_compute_image" "foobar" {
 func testAccComputeImage_shieldedInstance_InitialState(imageName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -753,7 +755,7 @@ resource "google_compute_image" "foobar" {
 func testAccComputeImage_shieldedInstance_UpdatedState(imageName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -781,7 +783,7 @@ resource "google_compute_image" "foobar" {
 func testAccComputeImage_sourceImage(imageName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -795,7 +797,7 @@ resource "google_compute_image" "foobar" {
 func testAccComputeImage_sourceSnapshot(diskName, snapshotName, imageName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -823,7 +825,7 @@ resource "google_compute_image" "foobar" {
 func testAccComputeImage_sourceDiskEncryptionKey(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "debian" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -896,7 +898,7 @@ data "google_compute_default_service_account" "default" {
 func testAccComputeImage_sourceImageEncryptionKey(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "debian" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -969,7 +971,7 @@ data "google_compute_default_service_account" "default" {
 func testAccComputeImage_sourceSnapshotEncryptionKey(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "debian" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1101,7 +1103,7 @@ resource "google_kms_crypto_key_iam_member" "crypto_key" {
 }
 
 data "google_compute_image" "debian" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
@@ -1149,19 +1151,19 @@ func testAccComputeImage_resourceManagerTags(context map[string]interface{}) str
 	return acctest.Nprintf(`
 resource "google_tags_tag_key" "tag_key" {
   parent      = "projects/%{project_id}"
-  short_name  = "image-tag-%{random_suffix}"
+  short_name  = "tf-test-image-tag-%{random_suffix}"
   description = "Tag key for image acceptance tests"
 }
 
 resource "google_tags_tag_value" "tag_value_1" {
   parent      = google_tags_tag_key.tag_key.id
-  short_name  = "value-one-%{random_suffix}"
+  short_name  = "tf-test-value-one-%{random_suffix}"
   description = "First tag value for image acceptance tests"
 }
 
 resource "google_tags_tag_value" "tag_value_2" {
   parent      = google_tags_tag_key.tag_key.id
-  short_name  = "value-two-%{random_suffix}"
+  short_name  = "tf-test-value-two-%{random_suffix}"
   description = "Second tag value for image acceptance tests"
 
   # Serialize value creation for stable VCR recordings.

@@ -76,8 +76,6 @@ samples:
         test_vars_overrides:
           # for backward compatible
           folder: '"folder" + randomSuffix'
-          # for backward compatible
-          network: '"network" + randomSuffix'
         test_env_vars:
           org_id: 'ORG_ID'
         min_version: beta
@@ -94,8 +92,6 @@ samples:
         test_vars_overrides:
           # for backward compatible
           folder: '"folder" + randomSuffix'
-          # for backward compatible
-          network: '"network" + randomSuffix'
         test_env_vars:
           org_id: 'ORG_ID'
   - name: 'firewall_policy_rule_secure_tags'
@@ -211,8 +207,6 @@ properties:
           - 'INTRA_VPC'
           - 'NON_INTERNET'
           - 'VPC_NETWORKS'
-        conflicts:
-          - match.0.src_network_context
       - name: 'destNetworkContext'
         type: Enum
         default_from_api: true
@@ -224,8 +218,6 @@ properties:
           - 'INTRA_VPC'
           - 'NON_INTERNET'
           - 'VPC_NETWORKS'
-        conflicts:
-          - match.0.src_network_scope
       - name: 'layer4Configs'
         type: Array
         send_empty_value: true
@@ -318,13 +310,10 @@ properties:
                 Name of the secure tag, created with TagManager's TagValue API.
               diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
             - name: 'state'
-              type: Enum
+              type: String
               description: |
                 State of the secure tag, either EFFECTIVE or INEFFECTIVE. A secure tag is INEFFECTIVE when it is deleted or its network is deleted.
               output: true
-              enum_values:
-                - 'EFFECTIVE'
-                - 'INEFFECTIVE'
   - name: 'action'
     type: String
     description: 'The Action to perform when the client connection triggers the rule. Valid actions are "allow", "deny", "goto_next" and "apply_security_profile_group".'
@@ -394,13 +383,10 @@ properties:
             Name of the secure tag, created with TagManager's TagValue API.
           diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
         - name: 'state'
-          type: Enum
+          type: String
           description: |
             State of the secure tag, either EFFECTIVE or INEFFECTIVE. A secure tag is INEFFECTIVE when it is deleted or its network is deleted.
           output: true
-          enum_values:
-            - 'EFFECTIVE'
-            - 'INEFFECTIVE'
   - name: 'disabled'
     type: Boolean
     send_empty_value: true

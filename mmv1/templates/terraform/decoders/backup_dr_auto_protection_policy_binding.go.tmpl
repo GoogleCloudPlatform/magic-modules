@@ -1,0 +1,7 @@
+// initiateDelete transitions the binding to DELETION_INITIATED while background cleanup runs.
+// Treat DELETION_INITIATED as already deleted so refresh and plan see the binding as gone.
+if v := res["state"]; v == "DELETION_INITIATED" {
+	return nil, nil
+}
+
+return res, nil

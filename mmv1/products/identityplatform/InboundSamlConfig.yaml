@@ -29,7 +29,13 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+# The API requires this resource's name to start with `saml.`, so test resources
+# cannot use the standard tf-test prefix. Sweep on the name the tests use instead.
+sweeper:
+  prefixes:
+    - saml.tf-config
 include_in_tgc_next: true
+generate_list_resource: true
 custom_code:
 samples:
   - name: identity_platform_inbound_saml_config_basic

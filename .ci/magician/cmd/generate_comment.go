@@ -16,9 +16,9 @@
 package cmd
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -36,10 +36,7 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler/labeler"
 
 	"github.com/spf13/cobra"
-	"github.com/yuin/goldmark"
-	"github.com/yuin/goldmark/parser"
-	"go.abhg.dev/goldmark/frontmatter"
-	"golang.org/x/exp/maps"
+	"gopkg.in/yaml.v3"
 
 	_ "embed"
 )
@@ -65,6 +62,12 @@ type BreakingChange struct {
 type MissingTestInfo struct {
 	SuggestedTest string
 	Tests         []string
+}
+
+// The output of `diff-processor detect-unreadable-tests`.
+type UnreadableTestsReport struct {
+	NewUnreadableTests   map[string]string
+	StaleUnreadableTests []string
 }
 
 type MissingIdentityInfo struct {
@@ -94,6 +97,7 @@ type diffCommentData struct {
 	BreakingChanges      []BreakingChange
 	MissingServiceLabels []string
 	MissingTests         map[string]*MissingTestInfo
+	UnreadableTests      *UnreadableTestsReport
 	MissingDocs          *MissingDocsSummary
 	MissingIdentity      map[string]*MissingIdentityInfo
 	MultipleResources    []string
@@ -107,6 +111,12 @@ type simpleSchemaDiff struct {
 const allowBreakingChangesLabel = "override-breaking-change"
 const allowMissingServiceLabelsLabel = "override-missing-service-labels"
 const allowMultipleResourcesLabel = "override-multiple-resources"
+
+// enableMissingServiceLabelsCheck controls whether added resources are checked
+// for missing service labels. When disabled, the
+// terraform-provider-missing-service-labels status is still posted (always as
+// "success") so that it never blocks PRs. Set to true to re-enable the check.
+const enableMissingServiceLabelsCheck = false
 
 var gcEnvironmentVariables = [...]string{
 	"BUILD_ID",
@@ -232,8 +242,36 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	data := diffCommentData{
 		CommitSHA: commitSha,
 	}
+	var repos []*source.Repo
+	var providerRepos []*source.Repo
+	commitSHAs := map[string]string{}
+	oldCommitSHAs := map[string]string{}
 	for _, repo := range []*source.Repo{&tpgRepo, &tpgbRepo, &tgcRepo, &tfoicsRepo} {
 		errors[repo.Title] = []string{}
+		variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repo.Name)
+		oldVariablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repo.Name)
+		commitSHA, err := rnr.ReadFile(variablePath)
+		if err != nil {
+			errors[repo.Title] = append(errors[repo.Title], "Failed to read commit sha from file")
+			continue
+		}
+		oldCommitSHA, err := rnr.ReadFile(oldVariablePath)
+		if err != nil {
+			errors[repo.Title] = append(errors[repo.Title], "Failed to read old commit sha from file")
+			continue
+		}
+		if strings.TrimSpace(commitSHA) != "" && strings.TrimSpace(commitSHA) == strings.TrimSpace(oldCommitSHA) {
+			fmt.Printf("Skipping clone of %q; new and old commit SHAs match\n", repo.Name)
+			continue
+		}
+		commitSHAs[repo.Name] = commitSHA
+		oldCommitSHAs[repo.Name] = oldCommitSHA
+		repos = append(repos, repo)
+		if repo == &tpgRepo || repo == &tpgbRepo {
+			providerRepos = append(providerRepos, repo)
+		}
+	}
+	for _, repo := range repos {
 		repo.Branch = newBranch
 		repo.Cloned = true
 		if err := ctlr.Clone(repo); err != nil {
@@ -245,28 +283,11 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			fmt.Printf("Failed to fetch branch %q for repo %q: %s\n", oldBranch, repo.Name, err)
 			errors[repo.Title] = append(errors[repo.Title], "Failed to clone repo at old branch")
 			repo.Cloned = false
-			continue
-		}
-		if repo.Name == "terraform-provider-google-beta" || repo.Name == "terraform-provider-google" {
-			if err := ctlr.Checkout(repo, oldBranch); err != nil {
-				fmt.Printf("Failed to checkout branch %q for repo %q: %s\n", oldBranch, repo.Name, err)
-				errors[repo.Title] = append(errors[repo.Title], fmt.Sprintf("Failed to checkout branch %s", oldBranch))
-				repo.Cloned = false
-				continue
-			}
-			rnr.PushDir(repo.Path)
-			if _, err := rnr.Run("make", []string{"build"}, nil); err != nil {
-				fmt.Printf("Failed to build branch %q for repo %q: %s\n", oldBranch, repo.Name, err)
-				errors[repo.Title] = append(errors[repo.Title], fmt.Sprintf("Failed to build branch %s", oldBranch))
-				repo.Cloned = false
-			}
-			rnr.PopDir()
-			ctlr.Checkout(repo, newBranch)
 		}
 	}
 
 	diffs := []Diff{}
-	for _, repo := range []*source.Repo{&tpgRepo, &tpgbRepo, &tgcRepo, &tfoicsRepo} {
+	for _, repo := range repos {
 		if !repo.Cloned {
 			fmt.Println("Skipping diff; repo failed to clone: ", repo.Name)
 			continue
@@ -277,24 +298,12 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			errors[repo.Title] = append(errors[repo.Title], "Failed to compute repo diff shortstats")
 		}
 		if shortStat != "" {
-			variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repo.Name)
-			oldVariablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repo.Name)
-			commitSHA, err := rnr.ReadFile(variablePath)
-			if err != nil {
-				errors[repo.Title] = append(errors[repo.Title], "Failed to read commit sha from file")
-				continue
-			}
-			oldCommitSHA, err := rnr.ReadFile(oldVariablePath)
-			if err != nil {
-				errors[repo.Title] = append(errors[repo.Title], "Failed to read old commit sha from file")
-				continue
-			}
 			diffs = append(diffs, Diff{
 				Title:        repo.Title,
 				Repo:         repo.Name,
 				ShortStat:    shortStat,
-				CommitSHA:    commitSHA,
-				OldCommitSHA: oldCommitSHA,
+				CommitSHA:    commitSHAs[repo.Name],
+				OldCommitSHA: oldCommitSHAs[repo.Name],
 			})
 			repo.ChangedFiles, err = ctlr.DiffNameOnly(repo, oldBranch, newBranch)
 			if err != nil {
@@ -318,7 +327,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		"GOPATH": os.Getenv("GOPATH"),
 		"HOME":   os.Getenv("HOME"),
 	}
-	for _, repo := range []source.Repo{tpgRepo, tpgbRepo} {
+	for _, repo := range providerRepos {
 		if !repo.Cloned {
 			fmt.Println("Skipping diff processor; repo failed to clone: ", repo.Name)
 			continue
@@ -352,6 +361,13 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			}
 			data.MissingTests = missingTests
 
+			unreadableTests, err := detectUnreadableTests(diffProcessorPath, repo.Path, changedServices(repo.ChangedFiles), rnr)
+			if err != nil {
+				fmt.Println("Error running unreadable test detector: ", err)
+				errors[repo.Title] = append(errors[repo.Title], "The unreadable test detector failed to run.")
+			}
+			data.UnreadableTests = unreadableTests
+
 			missingDocs, err := detectMissingDocs(diffProcessorPath, repo.Path, rnr)
 			if err != nil {
 				fmt.Println("Error running missing doc detector: ", err)
@@ -366,13 +382,13 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			}
 			data.MissingIdentity = missingIdentity
 
-			errStrs := checkDocumentFrontmatter(repo)
+			errStrs := checkDocumentFrontmatter(*repo)
 			if len(errStrs) > 0 {
 				errors[repo.Title] = append(errors[repo.Title], errStrs...)
 			}
 		}
 
-		simpleDiff, err := computeAffectedResources(diffProcessorPath, rnr, repo)
+		simpleDiff, err := computeAffectedResources(diffProcessorPath, rnr, *repo)
 		if err != nil {
 			fmt.Println("computing changed resource schemas: ", err)
 			errors[repo.Title] = append(errors[repo.Title], "The diff processor crashed while computing changed resource schemas.")
@@ -385,7 +401,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			uniqueAffectedResources[resource] = struct{}{}
 		}
 	}
-	breakingChangesSlice := maps.Values(uniqueBreakingChanges)
+	breakingChangesSlice := slices.Collect(maps.Values(uniqueBreakingChanges))
 	sort.Slice(breakingChangesSlice, func(i, j int) bool {
 		return breakingChangesSlice[i].Message < breakingChangesSlice[j].Message
 	})
@@ -393,7 +409,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 
 	// Check if multiple resources were added.
 	multipleResourcesState := "success"
-	data.MultipleResources = multipleResources(maps.Keys(uniqueAddedResources))
+	data.MultipleResources = multipleResources(slices.Collect(maps.Keys(uniqueAddedResources)))
 	if len(data.MultipleResources) > 1 {
 		multipleResourcesState = "failure"
 		for _, label := range pullRequest.Labels {
@@ -411,7 +427,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 
 	// Compute affected resources based on changed files
 	changedFilesAffectedResources := map[string]struct{}{}
-	for _, repo := range []source.Repo{tpgRepo, tpgbRepo} {
+	for _, repo := range providerRepos {
 		if !repo.Cloned {
 			fmt.Println("Skipping changed file service labels; repo failed to clone: ", repo.Name)
 			continue
@@ -423,7 +439,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			}
 		}
 	}
-	fmt.Printf("affected resources based on changed files: %v\n", maps.Keys(changedFilesAffectedResources))
+	fmt.Printf("affected resources based on changed files: %v\n", slices.Collect(maps.Keys(changedFilesAffectedResources)))
 
 	// Compute service labels based on affected resources
 	uniqueServiceLabels := map[string]struct{}{}
@@ -433,7 +449,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		errors["Other"] = append(errors["Other"], "Failed to parse service label mapping")
 	}
 	if len(regexpLabels) > 0 {
-		for _, label := range labeler.ComputeLabels(maps.Keys(uniqueAffectedResources), regexpLabels) {
+		for _, label := range labeler.ComputeLabels(slices.Collect(maps.Keys(uniqueAffectedResources)), regexpLabels) {
 			uniqueServiceLabels[label] = struct{}{}
 		}
 	}
@@ -448,7 +464,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			}
 		}
 		if !hasServiceLabels {
-			serviceLabelsSlice := maps.Keys(uniqueServiceLabels)
+			serviceLabelsSlice := slices.Collect(maps.Keys(uniqueServiceLabels))
 			sort.Strings(serviceLabelsSlice)
 			if len(serviceLabelsSlice) > 3 {
 				// Treat this as a cross-provider change
@@ -482,6 +498,9 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	missingServiceLabels := []string{}
 	if len(regexpLabels) > 0 {
 		for resource, _ := range uniqueAddedResources {
+			if !enableMissingServiceLabelsCheck {
+				break
+			}
 			found := false
 			for _, rl := range regexpLabels {
 				if rl.Regexp.MatchString(resource) {
@@ -631,6 +650,27 @@ func detectMissingTests(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner)
 	return missingTests, rnr.PopDir()
 }
 
+// Run the unreadable test detector on the given services and return the
+// results: acceptance tests the missing test detector can't read that aren't
+// known to be unreadable, and tests known to be unreadable that it can now read.
+func detectUnreadableTests(diffProcessorPath, tpgbLocalPath string, services []string, rnr ExecRunner) (*UnreadableTestsReport, error) {
+	if err := rnr.PushDir(diffProcessorPath); err != nil {
+		return nil, err
+	}
+
+	args := append([]string{"detect-unreadable-tests", fmt.Sprintf("%s/google-beta/services", tpgbLocalPath)}, services...)
+	output, err := rnr.Run("bin/diff-processor", args, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var unreadableTests *UnreadableTestsReport
+	if err = json.Unmarshal([]byte(output), &unreadableTests); err != nil {
+		return nil, err
+	}
+	return unreadableTests, rnr.PopDir()
+}
+
 // Run the missing doc detector and return the results.
 func detectMissingDocs(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner) (*MissingDocsSummary, error) {
 	if err := rnr.PushDir(diffProcessorPath); err != nil {
@@ -707,8 +747,7 @@ func multipleResources(resources []string) []string {
 		}
 	}
 
-	ret := maps.Keys(final)
-	slices.Sort(ret)
+	ret := slices.Sorted(maps.Keys(final))
 	return ret
 }
 
@@ -735,6 +774,19 @@ func fileToResource(path string) string {
 		resource = "google_" + resource
 	}
 	return resource
+}
+
+// Return the sorted names of the beta provider services containing changed files.
+func changedServices(changedFiles []string) []string {
+	services := map[string]struct{}{}
+	for _, path := range changedFiles {
+		if rest, ok := strings.CutPrefix(path, "google-beta/services/"); ok {
+			if service, _, ok := strings.Cut(rest, "/"); ok {
+				services[service] = struct{}{}
+			}
+		}
+	}
+	return slices.Sorted(maps.Keys(services))
 }
 
 func pathChanged(path string, changedFiles []string) bool {
@@ -767,20 +819,8 @@ func checkDocumentFrontmatter(repo source.Repo) []string {
 			continue
 		}
 
-		md := goldmark.New(
-			goldmark.WithExtensions(&frontmatter.Extender{}),
-		)
-
-		ctx := parser.NewContext()
-		var buff bytes.Buffer
-
-		err = md.Convert(src, &buff, parser.WithContext(ctx))
-		if err != nil {
-			errs = append(errs, "Error parsing file "+f)
-			continue
-		}
-		data := frontmatter.Get(ctx)
-		if data == nil {
+		fm, ok := extractFrontmatter(string(src))
+		if !ok {
 			errs = append(errs, fmt.Sprintf("No frontmatter found in file %s. This is usually due to an incorrect structure in the frontmatter.", f))
 			continue
 		}
@@ -788,9 +828,24 @@ func checkDocumentFrontmatter(repo source.Repo) []string {
 		var metadata struct {
 			Subcategory string
 		}
-		if err := data.Decode(&metadata); err != nil {
+		if err := yaml.Unmarshal([]byte(fm), &metadata); err != nil {
 			errs = append(errs, fmt.Sprintf("Failed to decode frontmatter in file %s. This is usually due to an incorrect structure in the frontmatter.", f))
 		}
 	}
 	return errs
+}
+
+func extractFrontmatter(content string) (string, bool) {
+	normalized := strings.ReplaceAll(content, "\r\n", "\n")
+	trimmed := strings.TrimLeft(normalized, "\n")
+	lines := strings.Split(trimmed, "\n")
+	if len(lines) == 0 || strings.TrimRight(lines[0], " \t") != "---" {
+		return "", false
+	}
+	for i := 1; i < len(lines); i++ {
+		if strings.TrimRight(lines[i], " \t") == "---" {
+			return strings.Join(lines[1:i], "\n"), true
+		}
+	}
+	return "", false
 }

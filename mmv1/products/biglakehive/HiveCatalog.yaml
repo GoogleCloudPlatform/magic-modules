@@ -13,19 +13,19 @@
 
 ---
 name: HiveCatalog
+api_resource_type_kind: Catalog
+api_variant_patterns:
+  - projects/{project}/catalogs/{catalog}
 description: |
   Hive Catalogs in Biglake Metastore
 references:
   guides:
     QUICKSTART_TITLE: https://docs.cloud.google.com/lakehouse/docs/about-spark-hive-metastore
-# hive/v1beta is added here instead of into the base url of the product.yaml.
+# hive/v1 is added here instead of into the base url of the product.yaml.
 # This is because the IAM policy does not contain this prefix, so it must be separated.
-base_url: hive/v1beta/projects/{{project}}/catalogs
-# Marks the resource as beta-only. Ensure a beta version block is present in
-# provider.yaml.
-min_version: beta
-self_link: hive/v1beta/projects/{{project}}/catalogs/{{name}}
-create_url: hive/v1beta/projects/{{project}}/catalogs?hiveCatalogId={{name}}&primary_location={{primary_location}}
+base_url: hive/v1/projects/{{project}}/catalogs
+self_link: hive/v1/projects/{{project}}/catalogs/{{name}}
+create_url: hive/v1/projects/{{project}}/catalogs?hiveCatalogId={{name}}&primary_location={{primary_location}}
 update_mask: true
 update_verb: PATCH
 # The IAM policy is shared with Iceberg Catalog (biglakeiceberg).
@@ -105,13 +105,8 @@ properties:
           description: The region of the replica, e.g., `us-east1`.
           output: true
         - name: state
-          type: Enum
+          type: String
           description: If the catalog is replicated to multiple regions, this enum describes the current state of the replica. STATE_UNSPECIFIED - The replica state is unknown. STATE_PRIMARY - The replica is the writable primary. STATE_PRIMARY_IN_PROGRESS - The replica has been recently assigned as the primary, but not all databases are writeable yet. STATE_SECONDARY - The replica is a read-only secondary replica.
           output: true
-          enum_values:
-            - STATE_UNSPECIFIED
-            - STATE_PRIMARY
-            - STATE_PRIMARY_IN_PROGRESS
-            - STATE_SECONDARY
     description: Output only. The replicas for the catalog metadata.
     output: true

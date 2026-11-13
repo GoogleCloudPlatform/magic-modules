@@ -2,6 +2,17 @@ resource "google_iam_workload_identity_pool" "pool" {
   workload_identity_pool_id = "{{index $.ResourceIdVars "workload_identity_pool_id"}}"
 }
 
+resource "google_iam_workload_identity_pool_provider" "actor" {
+  workload_identity_pool_id          = google_iam_workload_identity_pool.pool.workload_identity_pool_id
+  workload_identity_pool_provider_id = "{{index $.ResourceIdVars "actor_provider_id"}}"
+  attribute_mapping = {
+    "google.subject" = "assertion.sub"
+  }
+  oidc {
+    issuer_uri = "https://sts.windows.net/azure-tenant-id"
+  }
+}
+
 resource "google_iam_workload_identity_pool_provider" "{{$.PrimaryResourceId}}" {
   workload_identity_pool_id          = google_iam_workload_identity_pool.pool.workload_identity_pool_id
   workload_identity_pool_provider_id = "{{index $.ResourceIdVars "workload_identity_pool_provider_id"}}"
@@ -22,5 +33,9 @@ EOT
   oidc {
     allowed_audiences = ["https://example.com/gcp-oidc-federation", "example.com/gcp-oidc-federation"]
     issuer_uri        = "https://sts.windows.net/azure-tenant-id"
+    discovery_uri     = "https://sts.windows.net/azure-tenant-id/.well-known/openid-configuration"
   }
+  actor_providers = [
+    google_iam_workload_identity_pool_provider.actor.id,
+  ]
 }

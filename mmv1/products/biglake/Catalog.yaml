@@ -13,6 +13,8 @@
 
 ---
 name: Catalog
+api_variant_patterns:
+  - projects/{project}/locations/{location}/catalogs/{catalog}
 description: |
   Catalogs are top-level containers for Databases and Tables.
 references:

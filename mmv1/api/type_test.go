@@ -132,13 +132,6 @@ func TestTypeFieldType(t *testing.T) {
 			expected: []string{},
 		},
 		{
-			description: "WriteOnlyLegacy field",
-			obj: Type{
-				WriteOnlyLegacy: true,
-			},
-			expected: []string{"Optional", "Write-Only"},
-		},
-		{
 			description: "WriteOnly field",
 			obj: Type{
 				WriteOnly: true,
@@ -332,6 +325,52 @@ func TestTypeExcludeIfNotInVersion(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("map value_type nested property is excluded if not in version", func(t *testing.T) {
+		t.Parallel()
+
+		makeMapProp := func() (*Type, *Type) {
+			res := &Resource{
+				Name:            "test",
+				ProductMetadata: &p,
+			}
+			nestedBetaProp := &Type{
+				Name:             "betaProp",
+				Type:             "String",
+				MinVersion:       "beta",
+				ResourceMetadata: res,
+			}
+			mapProp := &Type{
+				Name:             "mapProp",
+				Type:             "Map",
+				ResourceMetadata: res,
+				ValueType: &Type{
+					Type:             "NestedObject",
+					ResourceMetadata: res,
+					Properties:       []*Type{nestedBetaProp},
+				},
+			}
+			return mapProp, nestedBetaProp
+		}
+
+		gaMapProp, gaNestedBetaProp := makeMapProp()
+		gaMapProp.ExcludeIfNotInVersion(&product.Version{Name: "ga"})
+		if gaMapProp.Exclude {
+			t.Errorf("expected mapProp.Exclude to be false in ga")
+		}
+		if !gaNestedBetaProp.Exclude {
+			t.Errorf("expected nestedBetaProp.Exclude to be true in ga")
+		}
+
+		betaMapProp, betaNestedBetaProp := makeMapProp()
+		betaMapProp.ExcludeIfNotInVersion(&product.Version{Name: "beta"})
+		if betaMapProp.Exclude {
+			t.Errorf("expected mapProp.Exclude to be false in beta")
+		}
+		if betaNestedBetaProp.Exclude {
+			t.Errorf("expected nestedBetaProp.Exclude to be false in beta")
+		}
+	})
 }
 
 func TestLineage(t *testing.T) {
@@ -627,6 +666,760 @@ func TestProviderOnly(t *testing.T) {
 			got := tc.obj.ProviderOnly()
 			if got != tc.expected {
 				t.Errorf("expected %t to be %t", got, tc.expected)
+			}
+		})
+	}
+}
+
+func TestTypeValidateConflicts(t *testing.T) {
+	t.Parallel()
+
+	p := &Product{
+		Name: "TestProduct",
+		Versions: []*product.Version{
+			{Name: "ga", BaseUrl: "ga_url"},
+			{Name: "beta", BaseUrl: "beta_url"},
+		},
+	}
+
+	t.Run("valid conflicts path passes validation", func(t *testing.T) {
+		t.Parallel()
+
+		res := &Resource{
+			Name: "TestResource",
+			Properties: []*Type{
+				{
+					Name:      "foo",
+					Type:      "String",
+					Conflicts: []string{"bar"},
+				},
+				{
+					Name:      "bar",
+					Type:      "String",
+					Conflicts: []string{"foo"},
+				},
+			},
+		}
+		res.SetDefault(p)
+
+		if errs := res.Properties[0].Validate(res.Name); len(errs) != 0 {
+			t.Errorf("expected no validation errors, got %v", errs)
+		}
+	})
+
+	t.Run("bad conflicts path that resolves to empty ConflictsWith returns error", func(t *testing.T) {
+		t.Parallel()
+
+		res := &Resource{
+			Name: "TestResource",
+			Properties: []*Type{
+				{
+					Name: "nested",
+					Type: "NestedObject",
+					Properties: []*Type{
+						{
+							Name:      "foo",
+							Type:      "String",
+							Conflicts: []string{"bar"},
+						},
+						{
+							Name:      "bar",
+							Type:      "String",
+							Conflicts: []string{"foo"},
+						},
+					},
+				},
+			},
+		}
+		res.SetDefault(p)
+
+		errs := res.Properties[0].Validate(res.Name)
+		if len(errs) != 2 {
+			t.Fatalf("expected 2 validation errors, got %d: %v", len(errs), errs)
+		}
+		for _, err := range errs {
+			if !strings.Contains(err.Error(), "resolved to an empty ConflictsWith") {
+				t.Errorf("expected error to mention empty ConflictsWith, got %v", err)
+			}
+		}
+	})
+
+	t.Run("conflicts with one valid and one invalid entry returns error", func(t *testing.T) {
+		t.Parallel()
+
+		res := &Resource{
+			Name: "TestResource",
+			Properties: []*Type{
+				{
+					Name: "nested",
+					Type: "NestedObject",
+					Properties: []*Type{
+						{
+							Name:      "foo",
+							Type:      "String",
+							Conflicts: []string{"nested.0.bar", "nonexistent"},
+						},
+						{
+							Name:      "bar",
+							Type:      "String",
+							Conflicts: []string{"nested.0.foo"},
+						},
+					},
+				},
+			},
+		}
+		res.SetDefault(p)
+
+		errs := res.Properties[0].Validate(res.Name)
+		if len(errs) != 1 {
+			t.Fatalf("expected 1 validation error, got %d: %v", len(errs), errs)
+		}
+		if !strings.Contains(errs[0].Error(), "resolved to an empty ConflictsWith") {
+			t.Errorf("expected error to mention empty ConflictsWith, got %v", errs[0])
+		}
+		if !strings.Contains(errs[0].Error(), "nonexistent") {
+			t.Errorf("expected error to mention the invalid entry 'nonexistent', got %v", errs[0])
+		}
+	})
+
+	t.Run("GA field with mutual beta conflict is culled in GA and preserved in beta", func(t *testing.T) {
+		t.Parallel()
+
+		newRes := func() *Resource {
+			res := &Resource{
+				Name: "TestResource",
+				Properties: []*Type{
+					{
+						Name:      "gaField",
+						Type:      "String",
+						Conflicts: []string{"beta_field"},
+					},
+					{
+						Name:       "betaField",
+						Type:       "String",
+						MinVersion: "beta",
+						Conflicts:  []string{"ga_field"},
+					},
+				},
+			}
+			res.SetDefault(p)
+			return res
+		}
+
+		gaRes := newRes()
+		gaRes.ExcludeIfNotInVersion(&product.Version{Name: "ga"})
+		if errs := gaRes.Properties[0].Validate(gaRes.Name); len(errs) != 0 {
+			t.Errorf("expected no validation error for gaField with valid mutual beta conflict in GA, got %v", errs)
+		}
+		if got := gaRes.Properties[0].Conflicting(); len(got) != 0 {
+			t.Errorf("expected gaField.Conflicting() to be culled to empty in GA, got %v", got)
+		}
+		if errs := gaRes.Properties[1].Validate(gaRes.Name); len(errs) != 0 {
+			t.Errorf("expected no validation error for excluded betaField in GA, got %v", errs)
+		}
+
+		betaRes := newRes()
+		betaRes.ExcludeIfNotInVersion(&product.Version{Name: "beta"})
+		if got := betaRes.Properties[0].Conflicting(); !reflect.DeepEqual(got, []string{"beta_field"}) {
+			t.Errorf("expected gaField.Conflicting() to be [beta_field] in beta, got %v", got)
+		}
+		if errs := betaRes.Properties[0].Validate(betaRes.Name); len(errs) != 0 {
+			t.Errorf("expected no validation error for gaField in beta, got %v", errs)
+		}
+		if errs := betaRes.Properties[1].Validate(betaRes.Name); len(errs) != 0 {
+			t.Errorf("expected no validation error for betaField in beta, got %v", errs)
+		}
+	})
+
+	t.Run("GA virtual field with mutual beta virtual field conflict is culled in GA and preserved in beta", func(t *testing.T) {
+		t.Parallel()
+
+		newRes := func() *Resource {
+			res := &Resource{
+				Name:        "TestResource",
+				Description: "Test resource",
+				CreateVerb:  "POST",
+				ReadVerb:    "GET",
+				UpdateVerb:  "POST",
+				DeleteVerb:  "DELETE",
+				Properties: []*Type{
+					{
+						Name:        "name",
+						Type:        "String",
+						Description: "Resource name",
+					},
+				},
+				VirtualFields: []*Type{
+					{
+						Name:        "allowed_actions",
+						Type:        "Array",
+						Description: "Beta virtual field",
+						MinVersion:  "beta",
+						ItemType: &Type{
+							Type: "String",
+						},
+						Conflicts: []string{"minimal_action"},
+					},
+					{
+						Name:         "minimal_action",
+						Type:         "String",
+						Description:  "GA virtual field",
+						DefaultValue: "NONE",
+						Conflicts:    []string{"allowed_actions"},
+					},
+				},
+			}
+			res.SetDefault(p)
+			return res
+		}
+
+		gaRes := newRes()
+		// Call ExcludeIfNotInVersion twice (mirroring CountProductsAndResources + GenerateObjects)
+		// to ensure populateMaxVersionSchema preserves the unfiltered virtual fields.
+		gaRes.ExcludeIfNotInVersion(&product.Version{Name: "ga"})
+		gaRes.ExcludeIfNotInVersion(&product.Version{Name: "ga"})
+
+		if !gaRes.VirtualFields[0].Exclude {
+			t.Errorf("expected beta virtual field allowed_actions to have Exclude=true in GA")
+		}
+		if gaRes.VirtualFields[1].Exclude {
+			t.Errorf("expected GA virtual field minimal_action to have Exclude=false in GA")
+		}
+		if got := len(gaRes.UserVirtualFields()); got != 1 || gaRes.UserVirtualFields()[0].Name != "minimal_action" {
+			t.Errorf("expected UserVirtualFields() to only contain minimal_action in GA, got %v", gaRes.UserVirtualFields())
+		}
+		if errs := gaRes.Validate(); len(errs) != 0 {
+			t.Errorf("expected no validation errors for gaRes in GA, got %v", errs)
+		}
+		if got := gaRes.VirtualFields[1].Conflicting(); len(got) != 0 {
+			t.Errorf("expected minimal_action.Conflicting() to be culled to empty in GA, got %v", got)
+		}
+
+		betaRes := newRes()
+		betaRes.ExcludeIfNotInVersion(&product.Version{Name: "beta"})
+		betaRes.ExcludeIfNotInVersion(&product.Version{Name: "beta"})
+
+		if betaRes.VirtualFields[0].Exclude || betaRes.VirtualFields[1].Exclude {
+			t.Errorf("expected both virtual fields to have Exclude=false in beta")
+		}
+		if got := len(betaRes.UserVirtualFields()); got != 2 {
+			t.Errorf("expected 2 UserVirtualFields in beta, got %d", got)
+		}
+		if errs := betaRes.Validate(); len(errs) != 0 {
+			t.Errorf("expected no validation errors for betaRes in beta, got %v", errs)
+		}
+		if got := betaRes.VirtualFields[0].Conflicting(); !reflect.DeepEqual(got, []string{"minimal_action"}) {
+			t.Errorf("expected allowed_actions.Conflicting() to be [minimal_action] in beta, got %v", got)
+		}
+		if got := betaRes.VirtualFields[1].Conflicting(); !reflect.DeepEqual(got, []string{"allowed_actions"}) {
+			t.Errorf("expected minimal_action.Conflicting() to be [allowed_actions] in beta, got %v", got)
+		}
+	})
+
+	t.Run("GA field conflicting with non-mutual beta field returns error in GA", func(t *testing.T) {
+		t.Parallel()
+
+		res := &Resource{
+			Name: "TestResource",
+			Properties: []*Type{
+				{
+					Name:      "gaField",
+					Type:      "String",
+					Conflicts: []string{"beta_field"},
+				},
+				{
+					Name:       "otherGaField",
+					Type:       "String",
+					MinVersion: "ga",
+				},
+				{
+					Name:       "betaField",
+					Type:       "String",
+					MinVersion: "beta",
+					Conflicts:  []string{"other_ga_field"},
+				},
+			},
+		}
+		res.SetDefault(p)
+		res.ExcludeIfNotInVersion(&product.Version{Name: "ga"})
+
+		if errs := res.Properties[0].Validate(res.Name); len(errs) == 0 {
+			t.Errorf("expected validation error for gaField conflicting with non-mutual betaField in GA, got none")
+		}
+	})
+
+	t.Run("field conflicting with unconditionally excluded field returns error", func(t *testing.T) {
+		t.Parallel()
+
+		res := &Resource{
+			Name: "TestResource",
+			Properties: []*Type{
+				{
+					Name:      "gaField",
+					Type:      "String",
+					Conflicts: []string{"excluded_field"},
+				},
+				{
+					Name:      "excludedField",
+					Type:      "String",
+					Exclude:   true,
+					Conflicts: []string{"ga_field"},
+				},
+			},
+		}
+		res.SetDefault(p)
+		res.ExcludeIfNotInVersion(&product.Version{Name: "ga"})
+
+		if errs := res.Properties[0].Validate(res.Name); len(errs) == 0 {
+			t.Errorf("expected validation error for gaField conflicting with unconditionally excluded field, got none")
+		}
+	})
+}
+
+func TestTypeValidateSiblingConstraints(t *testing.T) {
+	t.Parallel()
+
+	p := &Product{
+		Name: "TestProduct",
+		Versions: []*product.Version{
+			{Name: "ga", BaseUrl: "ga_url"},
+			{Name: "beta", BaseUrl: "beta_url"},
+		},
+	}
+
+	kinds := []struct {
+		yamlAttr   string
+		schemaAttr string
+		set        func(prop *Type, list []string)
+		get        func(prop *Type) []string
+	}{
+		{
+			yamlAttr:   "at_least_one_of",
+			schemaAttr: "AtLeastOneOf",
+			set:        func(prop *Type, list []string) { prop.AtLeastOneOf = list },
+			get:        func(prop *Type) []string { return prop.AtLeastOneOfList() },
+		},
+		{
+			yamlAttr:   "exactly_one_of",
+			schemaAttr: "ExactlyOneOf",
+			set:        func(prop *Type, list []string) { prop.ExactlyOneOf = list },
+			get:        func(prop *Type) []string { return prop.ExactlyOneOfList() },
+		},
+		{
+			yamlAttr:   "required_with",
+			schemaAttr: "RequiredWith",
+			set:        func(prop *Type, list []string) { prop.RequiredWith = list },
+			get:        func(prop *Type) []string { return prop.RequiredWithList() },
+		},
+	}
+
+	for _, kind := range kinds {
+		kind := kind
+		t.Run(kind.yamlAttr, func(t *testing.T) {
+			t.Parallel()
+
+			t.Run("valid nested path passes validation", func(t *testing.T) {
+				t.Parallel()
+
+				foo := &Type{Name: "foo", Type: "String"}
+				bar := &Type{Name: "bar", Type: "String"}
+				kind.set(foo, []string{"nested.0.foo", "nested.0.bar"})
+				kind.set(bar, []string{"nested.0.foo", "nested.0.bar"})
+
+				res := &Resource{
+					Name: "TestResource",
+					Properties: []*Type{
+						{
+							Name:       "nested",
+							Type:       "NestedObject",
+							Properties: []*Type{foo, bar},
+						},
+					},
+				}
+				res.SetDefault(p)
+
+				if errs := res.Properties[0].Validate(res.Name); len(errs) != 0 {
+					t.Errorf("expected no validation errors, got %v", errs)
+				}
+			})
+
+			t.Run("unqualified nested relative path returns error", func(t *testing.T) {
+				t.Parallel()
+
+				foo := &Type{Name: "foo", Type: "String"}
+				bar := &Type{Name: "bar", Type: "String"}
+				kind.set(foo, []string{"foo", "bar"})
+				kind.set(bar, []string{"foo", "bar"})
+
+				res := &Resource{
+					Name: "TestResource",
+					Properties: []*Type{
+						{
+							Name:       "nested",
+							Type:       "NestedObject",
+							Properties: []*Type{foo, bar},
+						},
+					},
+				}
+				res.SetDefault(p)
+
+				errs := res.Properties[0].Validate(res.Name)
+				if len(errs) == 0 {
+					t.Fatalf("expected validation errors for unqualified nested %s, got none", kind.yamlAttr)
+				}
+				wantMsg := "resolved to an empty " + kind.schemaAttr
+				for _, err := range errs {
+					if !strings.Contains(err.Error(), wantMsg) {
+						t.Errorf("expected error containing %q, got %v", wantMsg, err)
+					}
+				}
+			})
+
+			t.Run("cross-version beta sibling is culled in GA and preserved in beta", func(t *testing.T) {
+				t.Parallel()
+
+				newRes := func() *Resource {
+					gaOne := &Type{Name: "gaOne", Type: "String"}
+					gaTwo := &Type{Name: "gaTwo", Type: "String"}
+					betaThree := &Type{Name: "betaThree", Type: "String", MinVersion: "beta"}
+					all := []string{"ga_one", "ga_two", "beta_three"}
+					kind.set(gaOne, all)
+					kind.set(gaTwo, all)
+					kind.set(betaThree, all)
+
+					res := &Resource{
+						Name:       "TestResource",
+						Properties: []*Type{gaOne, gaTwo, betaThree},
+					}
+					res.Properties = res.AddExtraFields(res.PropertiesWithExcluded(), nil)
+					res.SetDefault(p)
+					return res
+				}
+
+				gaRes := newRes()
+				gaRes.ExcludeIfNotInVersion(&product.Version{Name: "ga"})
+				for _, prop := range gaRes.Properties {
+					if errs := prop.Validate(gaRes.Name); len(errs) != 0 {
+						t.Errorf("expected no GA validation errors on %s, got %v", prop.Name, errs)
+					}
+				}
+				if got := kind.get(gaRes.Properties[0]); !reflect.DeepEqual(got, []string{"ga_one", "ga_two"}) {
+					t.Errorf("expected GA %s list [ga_one ga_two], got %v", kind.yamlAttr, got)
+				}
+
+				betaRes := newRes()
+				betaRes.ExcludeIfNotInVersion(&product.Version{Name: "beta"})
+				for _, prop := range betaRes.Properties {
+					if errs := prop.Validate(betaRes.Name); len(errs) != 0 {
+						t.Errorf("expected no beta validation errors on %s, got %v", prop.Name, errs)
+					}
+				}
+				if got := kind.get(betaRes.Properties[0]); !reflect.DeepEqual(got, []string{"beta_three", "ga_one", "ga_two"}) {
+					t.Errorf("expected beta %s list [beta_three ga_one ga_two], got %v", kind.yamlAttr, got)
+				}
+			})
+
+			t.Run("unconditionally excluded target returns error", func(t *testing.T) {
+				t.Parallel()
+
+				gaField := &Type{Name: "gaField", Type: "String"}
+				exclField := &Type{Name: "excludedField", Type: "String", Exclude: true}
+				kind.set(gaField, []string{"ga_field", "excluded_field"})
+				kind.set(exclField, []string{"ga_field", "excluded_field"})
+
+				res := &Resource{
+					Name:       "TestResource",
+					Properties: []*Type{gaField, exclField},
+				}
+				res.SetDefault(p)
+				res.ExcludeIfNotInVersion(&product.Version{Name: "ga"})
+
+				if errs := res.Properties[0].Validate(res.Name); len(errs) == 0 {
+					t.Errorf("expected validation error when referencing unconditionally excluded field in %s, got none", kind.yamlAttr)
+				}
+			})
+
+			t.Run("one valid and one invalid entry triggers error even with valid beta sibling", func(t *testing.T) {
+				t.Parallel()
+
+				gaOne := &Type{Name: "gaOne", Type: "String"}
+				gaTwo := &Type{Name: "gaTwo", Type: "String"}
+				betaThree := &Type{Name: "betaThree", Type: "String", MinVersion: "beta"}
+				list := []string{"ga_one", "ga_two", "beta_three", "nonexistent_field"}
+				kind.set(gaOne, list)
+				kind.set(gaTwo, list)
+				kind.set(betaThree, list)
+
+				res := &Resource{
+					Name:       "TestResource",
+					Properties: []*Type{gaOne, gaTwo, betaThree},
+				}
+				res.Properties = res.AddExtraFields(res.PropertiesWithExcluded(), nil)
+				res.SetDefault(p)
+				res.ExcludeIfNotInVersion(&product.Version{Name: "ga"})
+
+				if errs := res.Properties[0].Validate(res.Name); len(errs) == 0 {
+					t.Errorf("expected validation error for mixed valid + invalid %s entries, got none", kind.yamlAttr)
+				}
+			})
+		})
+	}
+}
+
+func TestTypeValidateDefaultFromApi(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		description string
+		prop        *Type
+		resource    string
+		wantError   string
+	}{
+		{
+			description: "default_from_api and required not allowlisted returns error",
+			prop: &Type{
+				Name:           "customField",
+				Type:           "String",
+				DefaultFromApi: true,
+				Required:       true,
+			},
+			resource:  "MyResource",
+			wantError: "property custom_field cannot set both default_from_api and required in resource MyResource",
+		},
+		{
+			description: "default_from_api and output not allowlisted returns error",
+			prop: &Type{
+				Name:           "customField",
+				Type:           "String",
+				DefaultFromApi: true,
+				Output:         true,
+			},
+			resource:  "MyResource",
+			wantError: "property custom_field cannot set both default_from_api and output in resource MyResource",
+		},
+		{
+			description: "default_from_api and output allowlisted succeeds",
+			prop: &Type{
+				Name:           "ruleId",
+				Type:           "String",
+				DefaultFromApi: true,
+				Output:         true,
+			},
+			resource:  "Rule",
+			wantError: "",
+		},
+	}
+
+	p := &Product{
+		Name: "TestProduct",
+		Versions: []*product.Version{
+			{Name: "ga", BaseUrl: "ga_url"},
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			res := &Resource{
+				Name:       tc.resource,
+				Properties: []*Type{tc.prop},
+			}
+			res.SetDefault(p)
+
+			errs := tc.prop.Validate(tc.resource)
+			if tc.wantError == "" {
+				if len(errs) > 0 {
+					t.Fatalf("expected no errors, got: %v", errs)
+				}
+				return
+			}
+			found := false
+			for _, err := range errs {
+				if strings.Contains(err.Error(), tc.wantError) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Fatalf("expected error containing %q, got: %v", tc.wantError, errs)
+			}
+		})
+	}
+}
+
+func TestTypeValidateOutputOnlyEnum(t *testing.T) {
+	t.Parallel()
+
+	p := &Product{
+		Name: "TestProduct",
+		Versions: []*product.Version{
+			{Name: "ga", BaseUrl: "ga_url"},
+		},
+	}
+
+	cases := []struct {
+		description string
+		prop        *Type
+		wantError   string
+	}{
+		{
+			description: "output-only Enum returns error",
+			prop: &Type{
+				Name:       "state",
+				Type:       "Enum",
+				Output:     true,
+				EnumValues: []string{"ACTIVE", "INACTIVE"},
+			},
+			wantError: "property state cannot be an output-only Enum in resource TestResource; use String instead",
+		},
+		{
+			description: "output-only Array of Enum returns error",
+			prop: &Type{
+				Name:   "states",
+				Type:   "Array",
+				Output: true,
+				ItemType: &Type{
+					Type:       "Enum",
+					EnumValues: []string{"ACTIVE", "INACTIVE"},
+				},
+			},
+			wantError: "property states cannot be an output-only Enum in resource TestResource; use String instead",
+		},
+		{
+			description: "input Enum succeeds",
+			prop: &Type{
+				Name:       "mode",
+				Type:       "Enum",
+				EnumValues: []string{"FAST", "SLOW"},
+			},
+			wantError: "",
+		},
+		{
+			description: "output String succeeds",
+			prop: &Type{
+				Name:   "state",
+				Type:   "String",
+				Output: true,
+			},
+			wantError: "",
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			res := &Resource{
+				Name:       "TestResource",
+				Properties: []*Type{tc.prop},
+			}
+			res.SetDefault(p)
+
+			errs := tc.prop.Validate(res.Name)
+			if tc.wantError == "" {
+				if len(errs) > 0 {
+					t.Fatalf("expected no errors, got: %v", errs)
+				}
+				return
+			}
+			found := false
+			for _, err := range errs {
+				if strings.Contains(err.Error(), tc.wantError) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Fatalf("expected error containing %q, got: %v", tc.wantError, errs)
+			}
+		})
+	}
+}
+
+func TestTypeJsonValue(t *testing.T) {
+	t.Parallel()
+
+	p := &Product{
+		Name: "TestProduct",
+		Versions: []*product.Version{
+			{Name: "ga", BaseUrl: "ga_url"},
+		},
+	}
+
+	prop := &Type{
+		Name: "payload",
+		Type: "JsonValue",
+	}
+	res := &Resource{
+		Name:       "TestResource",
+		Properties: []*Type{prop},
+	}
+	res.SetDefault(p)
+
+	if errs := prop.Validate(res.Name); len(errs) > 0 {
+		t.Fatalf("expected no errors for JsonValue, got: %v", errs)
+	}
+	if got := prop.TFType(prop.Type); got != "schema.TypeString" {
+		t.Errorf("TFType(JsonValue) = %q, want %q", got, "schema.TypeString")
+	}
+	if got := prop.GetFWType(); got != "String" {
+		t.Errorf("GetFWType() = %q, want %q", got, "String")
+	}
+	if !prop.IsJsonField() {
+		t.Errorf("IsJsonField() = false, want true")
+	}
+
+	disallowCases := []struct {
+		description string
+		prop        *Type
+	}{
+		{
+			description: "custom_expand json_value.tmpl disallowed",
+			prop: &Type{
+				Name:         "payload",
+				Type:         "String",
+				CustomExpand: "templates/terraform/custom_expand/json_value.tmpl",
+			},
+		},
+		{
+			description: "custom_expand json_schema.tmpl disallowed",
+			prop: &Type{
+				Name:         "payload",
+				Type:         "String",
+				CustomExpand: "templates/terraform/custom_expand/json_schema.tmpl",
+			},
+		},
+		{
+			description: "custom_flatten json_schema.tmpl disallowed",
+			prop: &Type{
+				Name:          "payload",
+				Type:          "String",
+				Output:        true,
+				CustomFlatten: "templates/terraform/custom_flatten/json_schema.tmpl",
+			},
+		},
+	}
+
+	for _, tc := range disallowCases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			r := &Resource{
+				Name:       "TestResource",
+				Properties: []*Type{tc.prop},
+			}
+			r.SetDefault(p)
+			errs := tc.prop.Validate(r.Name)
+			found := false
+			for _, err := range errs {
+				if strings.Contains(err.Error(), "use type JsonValue instead") {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Fatalf("expected error containing %q, got: %v", "use type JsonValue instead", errs)
 			}
 		})
 	}

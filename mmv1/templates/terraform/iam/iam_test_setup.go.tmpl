@@ -2,6 +2,9 @@
 {{- $config := $.FirstTestConfig }}
 {{- $sample := $config.Sample }}
 {{- $step := $config.Step }}
+{{- if $sample.SkipTest }}
+	t.Skip("{{$sample.SkipTest}}")
+{{- end }}
 {{- if $sample.BootstrapIam }}
 	resourcemanager.BootstrapIamMembers(t, []resourcemanager.IamMember{
 {{- range $iam := $sample.BootstrapIam }}

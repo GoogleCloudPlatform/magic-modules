@@ -49,7 +49,7 @@ async:
   actions: [create, delete]
   result:
     resource_inside_response: true
-autogen_async: false
+autogen_async: true
 custom_code:
   encoder: templates/terraform/encoders/discovery_engine_chat_engine_hardcode_solution_type.go.tmpl
 samples:
@@ -61,6 +61,8 @@ samples:
           engine_id: chat-engine-id
           data_store_id: data-store
           data_store_2_id: data-store-2
+        ignore_read_extra:
+          - data_store_ids
   - name: discoveryengine_chat_engine_existing_dialogflow_agent
     primary_resource_id: primary
     steps:
@@ -117,6 +119,7 @@ properties:
     description: |
       The data stores associated with this engine. Multiple DataStores in the same Collection can be associated here. All listed DataStores must be `SOLUTION_TYPE_CHAT`.
     required: true
+    custom_flatten: templates/terraform/custom_flatten/discoveryengine_data_store_ids.go.tmpl
     item_type:
       type: String
     min_size: 1

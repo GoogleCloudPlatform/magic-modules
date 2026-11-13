@@ -58,6 +58,11 @@ samples:
           workstation_cluster_name: workstation-cluster
           workstation_config_name: workstation-config
           workstation_name: work-station
+      - name: workstation_basic_update
+        resource_id_vars:
+          workstation_cluster_name: workstation-cluster
+          workstation_config_name: workstation-config
+          workstation_name: work-station
 parameters:
   - name: workstationId
     type: String
@@ -125,17 +130,10 @@ properties:
       To send traffic to a different port, clients may prefix the host with the destination port in the format "{port}-{host}".
     output: true
   - name: state
-    type: Enum
+    type: String
     description: |
       Current state of the workstation.
     output: true
-    enum_values:
-      - STATE_STARTING
-      - STATE_RUNNING
-      - STATE_STOPPING
-      - STATE_STOPPED
-      - STATE_SUSPENDING
-      - STATE_SUSPENDED
   - name: sourceWorkstation
     type: String
     description: |

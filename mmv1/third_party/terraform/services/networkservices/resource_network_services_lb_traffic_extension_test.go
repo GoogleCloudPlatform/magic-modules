@@ -295,7 +295,10 @@ resource "google_compute_instance" "callouts_instance" {
 
   # Initialize an Envoy's Ext Proc gRPC API based on a docker container
   metadata = {
-    gce-container-declaration = "# DISCLAIMER:\n# This container declaration format is not a public API and may change without\n# notice. Please use gcloud command-line tool or Google Cloud Console to run\n# Containers on Google Compute Engine.\n\nspec:\n  containers:\n  - image: us-docker.pkg.dev/service-extensions/ext-proc/service-callout-basic-example-python:latest\n    name: callouts-vm\n    securityContext:\n      privileged: false\n    stdin: false\n    tty: false\n    volumeMounts: []\n  restartPolicy: Always\n  volumes: []\n"
+    startup-script = <<-EOF
+      #! /bin/bash
+      docker run -d --restart=always --network=host --name=callouts-vm us-docker.pkg.dev/service-extensions/ext-proc/service-callout-basic-example-python:latest
+    EOF
     google-logging-enabled = "true"
   }
 
@@ -633,7 +636,10 @@ resource "google_compute_instance" "callouts_instance" {
 
   # Initialize an Envoy's Ext Proc gRPC API based on a docker container
   metadata = {
-    gce-container-declaration = "# DISCLAIMER:\n# This container declaration format is not a public API and may change without\n# notice. Please use gcloud command-line tool or Google Cloud Console to run\n# Containers on Google Compute Engine.\n\nspec:\n  containers:\n  - image: us-docker.pkg.dev/service-extensions/ext-proc/service-callout-basic-example-python:latest\n    name: callouts-vm\n    securityContext:\n      privileged: false\n    stdin: false\n    tty: false\n    volumeMounts: []\n  restartPolicy: Always\n  volumes: []\n"
+    startup-script = <<-EOF
+      #! /bin/bash
+      docker run -d --restart=always --network=host --name=callouts-vm us-docker.pkg.dev/service-extensions/ext-proc/service-callout-basic-example-python:latest
+    EOF
     google-logging-enabled = "true"
   }
 
@@ -733,7 +739,10 @@ resource "google_compute_instance" "callouts_instance_2" {
 
   # Initialize an Envoy's Ext Proc gRPC API based on a docker container
   metadata = {
-    gce-container-declaration = "# DISCLAIMER:\n# This container declaration format is not a public API and may change without\n# notice. Please use gcloud command-line tool or Google Cloud Console to run\n# Containers on Google Compute Engine.\n\nspec:\n  containers:\n  - image: us-docker.pkg.dev/service-extensions/ext-proc/service-callout-basic-example-python:latest\n    name: callouts-vm\n    securityContext:\n      privileged: false\n    stdin: false\n    tty: false\n    volumeMounts: []\n  restartPolicy: Always\n  volumes: []\n"
+    startup-script = <<-EOF
+      #! /bin/bash
+      docker run -d --restart=always --network=host --name=callouts-vm us-docker.pkg.dev/service-extensions/ext-proc/service-callout-basic-example-python:latest
+    EOF
     google-logging-enabled = "true"
   }
 
@@ -827,7 +836,7 @@ func TestAccNetworkServicesLbTrafficExtension_crossRegionInternalPluginExtension
 				Config: testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
 				Check: resource.ComposeTestCheckFunc(
 					// Upload the compiled plugin code to Artifact Registry
-					testAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
+					acctest.TestAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
 						t,
 						"google_artifact_registry_repository.test_repository",
 						"my-wasm-plugin",
@@ -1086,7 +1095,7 @@ func TestAccNetworkServicesLbTrafficExtension_globalExternalPluginExtension(t *t
 				Config: testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
 				Check: resource.ComposeTestCheckFunc(
 					// Upload the compiled plugin code to Artifact Registry
-					testAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
+					acctest.TestAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
 						t,
 						"google_artifact_registry_repository.test_repository",
 						"my-wasm-plugin",

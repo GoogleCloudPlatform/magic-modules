@@ -63,6 +63,7 @@ samples:
           network_name: network-name
           deployed_index_id: deployed_index_id
           display_name: vertex-deployed-index
+          index_endpoint_display_name: sample-endpoint
           display_name_index: test-index
           bucket_name: bucket-name
           service_account_id: vertex-sa
@@ -79,6 +80,7 @@ samples:
           network_name: network-name
           deployed_index_id: deployed_index_id
           display_name: vertex-deployed-index
+          index_endpoint_display_name: sample-endpoint
           display_name_index: test-index
           bucket_name: bucket-name
           service_account_id: vertex-sa
@@ -95,6 +97,7 @@ samples:
           display_name_index: test-index
           bucket_name: bucket-name
           display_name: vertex-deployed-index
+          index_endpoint_display_name: sample-endpoint
           deployed_index_id: deployed_index_id
   - name: vertex_ai_index_endpoint_deployed_index_automatic_resources
     primary_resource_id: automatic_resources
@@ -105,6 +108,7 @@ samples:
           display_name_index: test-index
           bucket_name: bucket-name
           display_name: vertex-deployed-index
+          index_endpoint_display_name: sample-endpoint
           deployed_index_id: deployed_index_id
 parameters:
   - name: indexEndpoint

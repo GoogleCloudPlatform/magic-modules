@@ -38,6 +38,7 @@ async:
   result:
     resource_inside_response: true
 autogen_async: true
+error_retry_predicates: ['transport_tpg.IsAgentGatewayInUseError']
 samples:
   - name: network_services_agent_gateway_full
     primary_resource_id: default
@@ -49,6 +50,19 @@ samples:
           subnetwork_name: my-gateway-subnetwork
           network_attachment_name: my-gateway-attachment
           dns_zone_name: my-gateway-zone
+        test_env_vars:
+          project: PROJECT_NAME
+  - name: network_services_agent_gateway_dns_peering
+    exclude_basic_doc: true
+    primary_resource_id: default
+    steps:
+      - name: network_services_agent_gateway_dns_peering
+        resource_id_vars:
+          name: my-dns-agent-gateway
+          network_name: my-dns-gateway-network
+          subnetwork_name: my-dns-gateway-subnetwork
+          network_attachment_name: my-dns-gateway-attachment
+          dns_zone_name: my-dns-gateway-zone
         test_env_vars:
           project: PROJECT_NAME
   - name: network_services_agent_gateway_client_to_agent
@@ -162,6 +176,13 @@ properties:
       `//agentregistry.googleapis.com/{version}/projects/{{project}}/locations/{{location}}`
     item_type:
       type: String
+  - name: agentConnectivityTemplate
+    type: String
+    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+    description: |
+      The resource name of the AgentConnectivityTemplate.
+      Must be of format
+      `projects/{{project}}/locations/{{location}}/agentConnectivityTemplates/{{agent_connectivity_template}}`
   - name: networkConfig
     type: NestedObject
     description: |

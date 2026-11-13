@@ -10,6 +10,8 @@ import (
 )
 
 func TestAccComputeRegionAutoscaler_update(t *testing.T) {
+	t.Parallel()
+
 	var itName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	var tpName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	var igmName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
@@ -118,7 +120,7 @@ func TestAccComputeRegionAutoscaler_scaleInControl(t *testing.T) {
 func testAccComputeRegionAutoscaler_scaffolding(itName, tpName, igmName string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 

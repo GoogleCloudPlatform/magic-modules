@@ -23,7 +23,6 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 
-	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"golang.org/x/oauth2/google"
@@ -115,7 +114,7 @@ func dataSourceGoogleSignedUrlRead(d *schema.ResourceData, meta interface{}) err
 	}
 	duration, err := time.ParseDuration(durationString)
 	if err != nil {
-		return errwrap.Wrapf("could not parse duration: {{err}}", err)
+		return fmt.Errorf("could not parse duration: %w", err)
 	}
 	expires := time.Now().Unix() + int64(duration.Seconds())
 	urlData.Expires = int(expires)
@@ -201,12 +200,12 @@ func loadJwtConfig(d *schema.ResourceData, meta interface{}) (*jwt.Config, error
 	if strings.TrimSpace(credentials) != "" {
 		contents, _, err := verify.PathOrContents(credentials)
 		if err != nil {
-			return nil, errwrap.Wrapf("Error loading credentials: {{err}}", err)
+			return nil, fmt.Errorf("Error loading credentials: %w", err)
 		}
 
 		cfg, err := google.JWTConfigFromJSON([]byte(contents), "")
 		if err != nil {
-			return nil, errwrap.Wrapf("Error parsing credentials: {{err}}", err)
+			return nil, fmt.Errorf("Error parsing credentials: %w", err)
 		}
 		return cfg, nil
 	}
@@ -248,7 +247,7 @@ func parsePrivateKey(key []byte) (*rsa.PrivateKey, error) {
 	if err != nil {
 		parsedKey, err = x509.ParsePKCS1PrivateKey(key)
 		if err != nil {
-			return nil, errwrap.Wrapf("private key should be a PEM or plain PKSC1 or PKCS8; parse error: {{err}}", err)
+			return nil, fmt.Errorf("private key should be a PEM or plain PKSC1 or PKCS8; parse error: %w", err)
 		}
 	}
 	parsed, ok := parsedKey.(*rsa.PrivateKey)
@@ -300,21 +299,53 @@ func (u *UrlData) SigningString() []byte {
 	buf.WriteString("\n")
 
 	// Extra HTTP headers (optional)
-	// Must be sorted in lexigraphical order
-	var keys []string
-	for k := range u.HttpHeaders {
-		keys = append(keys, strings.ToLower(k))
-	}
-	sort.Strings(keys)
-	// Write sorted headers to signing string buffer
-	for _, k := range keys {
-		buf.WriteString(fmt.Sprintf("%s:%s\n", k, u.HttpHeaders[k]))
+	for _, h := range canonicalExtensionHeaders(u.HttpHeaders) {
+		buf.WriteString(h)
 	}
 
 	// Storage Object path (includes bucketname)
 	buf.WriteString(u.SignPath)
 
 	return buf.Bytes()
+}
+
+// canonicalExtensionHeaders builds the CANONICALIZED_EXTENSION_HEADERS block of
+// the v2 signing string, as documented at
+// https://cloud.google.com/storage/docs/access-control/signed-urls-v2:
+// header names are lowercased, values with the same name are merged into one
+// comma-separated value, folded values are flattened onto a single line,
+// whitespace around the colon is dropped, and the result is sorted by name.
+func canonicalExtensionHeaders(headers map[string]string) []string {
+	merged := map[string][]string{}
+	for k, v := range headers {
+		name := strings.ToLower(strings.TrimSpace(k))
+		merged[name] = append(merged[name], foldHeaderValue(v))
+	}
+
+	names := make([]string, 0, len(merged))
+	for name := range merged {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	canonical := make([]string, 0, len(names))
+	for _, name := range names {
+		values := merged[name]
+		// Terraform hands us a map, so there is no request order to preserve;
+		// sort the values instead to keep the signature stable across runs.
+		sort.Strings(values)
+		canonical = append(canonical, fmt.Sprintf("%s:%s\n", name, strings.Join(values, ",")))
+	}
+	return canonical
+}
+
+// foldHeaderValue flattens a header value onto a single line so that it cannot
+// contribute extra lines to the signing string.
+func foldHeaderValue(v string) string {
+	for _, nl := range []string{"\r\n", "\r", "\n"} {
+		v = strings.ReplaceAll(v, nl, " ")
+	}
+	return strings.TrimSpace(v)
 }
 
 func (u *UrlData) Signature() ([]byte, error) {
@@ -371,19 +402,19 @@ func SignString(toSign []byte, cfg *jwt.Config) ([]byte, error) {
 	// Parse private key
 	pk, err := parsePrivateKey(cfg.PrivateKey)
 	if err != nil {
-		return nil, errwrap.Wrapf("failed to sign string, could not parse key: {{err}}", err)
+		return nil, fmt.Errorf("failed to sign string, could not parse key: %w", err)
 	}
 
 	// Hash string
 	hasher := sha256.New()
 	if _, err := hasher.Write(toSign); err != nil {
-		return nil, errwrap.Wrapf("failed to calculate sha256: {{err}}", err)
+		return nil, fmt.Errorf("failed to calculate sha256: %w", err)
 	}
 
 	// Sign string
 	signed, err := rsa.SignPKCS1v15(rand.Reader, pk, crypto.SHA256, hasher.Sum(nil))
 	if err != nil {
-		return nil, errwrap.Wrapf("failed to sign string, an error occurred: {{err}}", err)
+		return nil, fmt.Errorf("failed to sign string, an error occurred: %w", err)
 	}
 
 	return signed, nil

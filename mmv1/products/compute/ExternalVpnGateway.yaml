@@ -50,6 +50,10 @@ samples:
           external_gateway_name: 'external-gateway'
           global_address_name: 'global-address'
           router_name: 'ha-vpn-router1'
+          subnetwork1_name: 'ha-vpn-subnet-1'
+          subnetwork2_name: 'ha-vpn-subnet-2'
+          vpn_tunnel1_name: 'ha-vpn-tunnel1'
+          vpn_tunnel2_name: 'ha-vpn-tunnel2'
           # Multiple fine-grained resources
   - name: 'only_external_vpn_gateway_full'
     primary_resource_id: 'external_gateway'

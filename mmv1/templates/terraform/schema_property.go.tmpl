@@ -40,11 +40,13 @@
 {{ if .IsForceNew -}}
   ForceNew: true,
 {{ end -}}
-{{ if and (not .Output) .Validation -}}
+{{ if not .Output -}}
 	{{ if .Validation.Regex -}}
   ValidateFunc: verify.ValidateRegexp(`{{ .Validation.Regex -}}`),
 	{{ else if .Validation.Function -}}
   ValidateFunc: {{ .Validation.Function -}},
+	{{ else if eq .Type "JsonValue" -}}
+  ValidateFunc: validation.StringIsJSON,
 	{{ end  -}}
 {{ end -}}
 {{ if and (eq .Type "Enum") (not .Output) -}}
@@ -57,6 +59,8 @@
 {{ end -}}
 {{ if .StateFunc -}}
 	StateFunc: {{ .StateFunc }},
+{{ else if and (eq .Type "JsonValue") (not .Output) -}}
+	StateFunc: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s },
 {{ end -}}
   Description: `{{ replace .GetDescription "`" "'" -1 -}}
 {{- if and (eq .Type "Array") (eq .ItemType.Type "Enum") (not .Output) (not .ItemType.ExcludeDocsValues) -}}
@@ -122,6 +126,14 @@ Default value: {{ .ItemType.DefaultValue -}}
         {{- if not .Output }}
         DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
         {{- end }}
+    {{ else if eq .ItemType.Type "JsonValue" -}}
+        Type: schema.TypeString,
+        {{- if not .Output }}
+          {{- if not (or .ItemValidation.Regex .ItemValidation.Function) }}
+        ValidateFunc: validation.StringIsJSON,
+          {{- end }}
+        StateFunc: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s },
+        {{- end }}
     {{ else -}}
         Type: {{ .TFType .ItemType.Type }},
     {{ end -}}
@@ -131,7 +143,7 @@ Default value: {{ .ItemType.DefaultValue -}}
   {{ if .IsSet -}}
     {{ if .SetHashFunc -}}
     Set: {{ .SetHashFunc -}},
-    {{ else if or (eq .ItemType.Type "String") (eq .ItemType.Type "Enum") -}}
+    {{ else if or (eq .ItemType.Type "String") (eq .ItemType.Type "Enum") (eq .ItemType.Type "JsonValue") -}}
     Set: schema.HashString,
     {{ else -}}
     // Default schema.HashSchema is used.
@@ -164,7 +176,7 @@ Default value: {{ .ItemType.DefaultValue -}}
 {{ if .Sensitive -}}
     Sensitive: true,
 {{ end -}}
-{{ if or .WriteOnlyLegacy .WriteOnly -}}
+{{ if .WriteOnly -}}
   WriteOnly: true,
 {{ end -}}
 {{ if not (eq .DefaultValue nil ) -}}

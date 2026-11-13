@@ -258,12 +258,17 @@ group. You can specify only one value. Structure is [documented below](#nested_a
 
 * `target_size_policy` - (Optional) The policy that specifies how the MIG creates its VMs to achieve the target size. Structure is [documented below](#nested_target_size_policy).
 
+* `instance_lifecycle_policy` - (Optional) The instance lifecycle policy for this managed instance group. Structure is [documented below](#nested_instance_lifecycle_policy).
+
+* `service_account` - (Optional, [Beta](../guides/provider_versions.html.markdown)) The service account to be used as credentials for all operations performed by the managed instance group on instances. The service account needs all permissions required to create and delete instances. By default, the service account {projectNumber}@cloudservices.gserviceaccount.com is used.
+
 * `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
     When a 'terraform destroy' or 'terraform apply' would delete the resource,
     the command will fail if this field is set to "PREVENT" in Terraform state.
     When set to "ABANDON", the command will remove the resource from Terraform
     management without updating or deleting the resource in the API.
-    When set to "DELETE", deleting the resource is allowed.
+    When set to "DELETE", deleting the resource is allowed. If graceful shutdown is configured, the MIG waits for all instances to shut down gracefully before deletion.
+    When set to "FORCE", deleting the resource is allowed, and graceful shutdown is skipped for instance deletion even if it's configured for the instances.
 
 - - -
 
@@ -287,9 +292,11 @@ update_policy {
 }
 ```
 
-* `minimal_action` - (Required) - Minimal action to be taken on an instance. You can specify either `NONE` to forbid any actions, `REFRESH` to update without stopping instances, `RESTART` to restart existing instances or `REPLACE` to delete and create new instances from the target template. If you specify a `REFRESH`, the Updater will attempt to perform that action only. However, if the Updater determines that the minimal action you specify is not enough to perform the update, it might perform a more disruptive action.
+* `minimal_action` - (Optional) - Minimal action to be taken on an instance. You can specify either `NONE` to forbid any actions, `REFRESH` to update without stopping instances, `RESTART` to restart existing instances or `REPLACE` to delete and create new instances from the target template. If you specify a `REFRESH`, the Updater will attempt to perform that action only. However, if the Updater determines that the minimal action you specify is not enough to perform the update, it might perform a more disruptive action. Required in the `google` provider; optional in `google-beta` when `allowed_actions` is set (conflicts with `allowed_actions`).
 
-* `most_disruptive_allowed_action` - (Optional) - Most disruptive action that is allowed to be taken on an instance. You can specify either NONE to forbid any actions, REFRESH to allow actions that do not need instance restart, RESTART to allow actions that can be applied without instance replacing or REPLACE to allow all possible actions. If the Updater determines that the minimal update action needed is more disruptive than most disruptive allowed action you specify it will not perform the update at all.
+* `allowed_actions` - (Optional, [Beta](../guides/provider_versions.html.markdown)) - Specifies the allowed actions list for this update. Valid values are: `"NONE"`, `"REFRESH"`, `"RESTART_IN_PLACE"`, `"RESTART"`, `"REPLACE"`. `allowed_actions` is the only way to request `RESTART_IN_PLACE`. Conflicts with `minimal_action` and `most_disruptive_allowed_action`.
+
+* `most_disruptive_allowed_action` - (Optional) - Most disruptive action that is allowed to be taken on an instance. You can specify either NONE to forbid any actions, REFRESH to allow actions that do not need instance restart, RESTART to allow actions that can be applied without instance replacing or REPLACE to allow all possible actions. If the Updater determines that the minimal update action needed is more disruptive than most disruptive allowed action you specify it will not perform the update at all. Conflicts with `allowed_actions`.
 
 * `type` - (Required) - The type of update process. You can specify either `PROACTIVE` so that the instance group manager proactively executes actions in order to bring instances to their target versions or `OPPORTUNISTIC` so that no action is proactively executed but the update will be performed as part of other actions (for example, resizes or recreateInstances calls).
 
@@ -480,7 +487,7 @@ The `status` block holds:
 
 The `version_target` block holds:
 
-* `version_target` - A bit indicating whether version target has been reached in this managed instance group, i.e. all instances are in their target version. Instances' target version are specified by version field on Instance Group Manager.
+* `is_reached` - A bit indicating whether version target has been reached in this managed instance group, i.e. all instances are in their target version. Instances' target version are specified by version field on Instance Group Manager.
 
 The `all_instances_config` block holds:
 
@@ -505,7 +512,7 @@ This resource provides the following
 
 - `create` - Default is 15 minutes.
 - `update` - Default is 15 minutes.
-- `delete` - Default is 15 minutes.
+- `delete` - Default is 15 minutes. Note if graceful shutdown is configured on the instance template and not skipped with `deletion_policy = "FORCE"` it can take up to 6 hours.
 
 
 ## Import

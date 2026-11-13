@@ -33,9 +33,9 @@ async:
   type: OpAsync
   operation:
     timeouts:
-      insert_minutes: 20
-      update_minutes: 20
-      delete_minutes: 20
+      insert_minutes: 30
+      update_minutes: 30
+      delete_minutes: 30
     base_url: '{{op_id}}'
   actions:
     - create
@@ -46,6 +46,7 @@ async:
   include_project: false
 autogen_status: TXVsdGljYXN0R3JvdXBDb25zdW1lckFjdGl2YXRpb24=
 autogen_async: true
+generate_list_resource: true
 samples:
   - name: network_services_multicast_group_consumer_activation_basic
     primary_resource_id: mgca_test
