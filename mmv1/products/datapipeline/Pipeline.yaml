@@ -23,6 +23,7 @@ docs:
 base_url: projects/{{project}}/locations/{{region}}/pipelines
 update_mask: true
 update_verb: PATCH
+generate_list_resource: true
 id_format: projects/{{project}}/locations/{{region}}/pipelines/{{name}}
 import_format:
   - projects/{{project}}/locations/{{region}}/pipelines/{{name}}
