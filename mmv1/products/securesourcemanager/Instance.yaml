@@ -22,6 +22,7 @@ docs:
 base_url: projects/{{project}}/locations/{{location}}/instances
 create_url: projects/{{project}}/locations/{{location}}/instances?instance_id={{instance_id}}
 immutable: true
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
 iam_policy:
   method_name_separator: ':'
