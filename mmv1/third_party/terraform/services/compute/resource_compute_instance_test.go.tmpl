@@ -3043,10 +3043,8 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 
 	var instance map[string]interface{}
 	var instance2 map[string]interface{}
-	{{- if ne $.TargetVersionName "ga" }}
 	var instance3 map[string]interface{}
 	var instance4 map[string]interface{}
-	{{- end }}
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -3061,12 +3059,10 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, true, "SEV"),
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar2", &instance2),
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance2, true, ""),
-					{{- if ne $.TargetVersionName "ga" }}
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar3", &instance3),
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance3, true, "SEV"),
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar4", &instance4),
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance4, true, ""),
-					{{- end }}
 				),
 			},
 			{
@@ -11254,7 +11250,6 @@ resource "google_compute_instance" "foobar2" {
 
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 resource "google_compute_instance" "foobar3" {
   name         = "%s3"
   machine_type = "c3d-standard-4"
@@ -11306,9 +11301,6 @@ resource "google_compute_instance" "foobar4" {
 
 }
 `, instance, confidentialInstanceType, instance, instance, confidentialInstanceType, instance)
-{{- else }}
-`, instance, confidentialInstanceType, instance)
-{{- end }}
 }
 
 func testAccComputeInstanceConfidentialInstanceConfigNoEnable(instance string, minCpuPlatform, confidentialInstanceType string) string {
