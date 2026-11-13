@@ -1,0 +1,3 @@
+	if !d.HasChange("license_config") && !d.HasChange("user_profile") {
+		return resourceDiscoveryEngineUserLicenseRead(d, meta)
+	}

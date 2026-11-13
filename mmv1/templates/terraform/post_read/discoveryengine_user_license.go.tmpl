@@ -1,0 +1,77 @@
+	targetPrincipal, _ := d.Get("user_principal").(string)
+	hasMatchingPrincipal := func(payload map[string]interface{}) bool {
+		items, ok := payload["userLicenses"].([]interface{})
+		if !ok || targetPrincipal == "" {
+			return false
+		}
+		for _, raw := range items {
+			if m, ok := raw.(map[string]interface{}); ok {
+				if p, ok := m["userPrincipal"].(string); ok && discoveryEngineUserPrincipalsMatch(p, targetPrincipal) {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
+	// Email principals are normalized to lowercase by the service when a license
+	// is assigned, while userLicenses.list filters are case-sensitive. If an
+	// exact-case filtered lookup returns no match for a mixed-case email, retry
+	// with the lowercase email filter.
+	if !hasMatchingPrincipal(res) && targetPrincipal != "" && !strings.ContainsAny(targetPrincipal, ",=") &&
+		isDiscoveryEngineEmailPrincipal(targetPrincipal) && strings.ToLower(targetPrincipal) != targetPrincipal {
+		lowerURL, lowerErr := transport_tpg.AddQueryParams(url, map[string]string{
+			"filter": fmt.Sprintf("user_principal=%s", strings.ToLower(targetPrincipal)),
+		})
+		if lowerErr != nil {
+			return lowerErr
+		}
+		lowerRes, lowerErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    lowerURL,
+			UserAgent: userAgent,
+			Headers:   headers,
+		})
+		if lowerErr != nil {
+			return transport_tpg.HandleNotFoundError(lowerErr, d, fmt.Sprintf("DiscoveryEngineUserLicense %q", d.Id()))
+		}
+		url = lowerURL
+		res = lowerRes
+	}
+
+	for {
+		if hasMatchingPrincipal(res) {
+			break
+		}
+		pageToken, ok := res["nextPageToken"].(string)
+		if !ok || pageToken == "" {
+			break
+		}
+		pageURL, pageErr := transport_tpg.AddQueryParams(url, map[string]string{
+			"pageToken": pageToken,
+		})
+		if pageErr != nil {
+			return pageErr
+		}
+		pageRes, pageErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    pageURL,
+			UserAgent: userAgent,
+			Headers:   headers,
+		})
+		if pageErr != nil {
+			return pageErr
+		}
+		var existing []interface{}
+		if v, ok := res["userLicenses"].([]interface{}); ok {
+			existing = v
+		}
+		if nextItems, ok := pageRes["userLicenses"].([]interface{}); ok {
+			res["userLicenses"] = append(existing, nextItems...)
+		}
+		res["nextPageToken"] = pageRes["nextPageToken"]
+	}
