@@ -1,0 +1,20 @@
+data "google_project" "project" {}
+
+resource "google_agent_registry_skill" "{{.PrimaryResourceId}}" {
+  location         = "global"
+  skill_id         = "{{index $.ResourceIdVars "skill_id"}}"
+  display_name     = "Updated Test Skill"
+  description      = "A test skill"
+  target_state     = "TARGET_STATE_ACTIVE"
+  type             = "SIMPLE"
+  default_revision = "projects/${data.google_project.project.project_id}/locations/global/skills/private-{{index $.ResourceIdVars "skill_id"}}/revisions/rev-1"
+  scanning_config {
+    policy = "ENABLED_NONBLOCKING"
+  }
+  initial_revision {
+    name = "projects/${data.google_project.project.project_id}/locations/global/skills/private-{{index $.ResourceIdVars "skill_id"}}/revisions/rev-1"
+    archive_upload_source {
+      archive_content = "UEsDBBQAAAAAAEEQQRBjKl0XOwAAADsAAAAIAAAAU0tJTEwubWQtLS0KbmFtZTogdGVzdC1za2lsbApkZXNjcmlwdGlvbjogVGVzdCBza2lsbAotLS0KIyBUZXN0CnYwClBLAQIUAxQAAAAAAEEQQRBjKl0XOwAAADsAAAAIAAAAAAAAAAAAAQAAAAAAAABTS0lMTC5tZFBLBQYAAAAAAQABADYAAABhAAAAAAA="
+    }
+  }
+}
