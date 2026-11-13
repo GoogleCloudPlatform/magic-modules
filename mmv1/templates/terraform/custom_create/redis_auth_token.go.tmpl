@@ -1,0 +1,135 @@
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+	return err
+}
+
+// --- Begin Custom Code: Unpack full cluster self-link, acquire per-user mutex, and guard acquire-on-create ---
+// If the user passed a full cluster resource ID (projects/{p}/locations/{r}/clusters/{c})
+// instead of a short cluster name, extract project, region, and the short cluster name.
+cluster := d.Get("cluster").(string)
+if parts := regexp.MustCompile("projects/([^/]+)/locations/([^/]+)/clusters/([^/]+)").FindStringSubmatch(cluster); parts != nil {
+	if d.Get("project") == "" {
+		d.Set("project", parts[1])
+	}
+	if d.Get("region") == "" {
+		d.Set("region", parts[2])
+	}
+	d.Set("cluster", parts[3])
+}
+
+// Serialize token operations per (cluster, user_id) because the backend transitions the parent
+// TokenAuthUser to UPDATING during :addAuthToken and rejects concurrent token mutations.
+lockName, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}" }}/locations/{{"{{"}}region{{"}}" }}/clusters/{{"{{"}}cluster{{"}}" }}/tokenAuthUsers/{{"{{"}}user_id{{"}}" }}")
+if err != nil {
+	return err
+}
+transport_tpg.MutexStore.Lock(lockName)
+defer transport_tpg.MutexStore.Unlock(lockName)
+
+// Creating a cluster (for "default") or a TokenAuthUser automatically provisions an initial
+// "version-1" token on the server. Because :addAuthToken generates token IDs server-side,
+// specifying token_id on create strictly acquires that existing token and exits early.
+if v, ok := d.GetOk("token_id"); ok && v.(string) != "" {
+	requestedTokenId := tpgresource.GetResourceNameFromSelfLink(v.(string))
+	if err := d.Set("token_id", requestedTokenId); err != nil {
+		return fmt.Errorf("Error setting token_id: %s", err)
+	}
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}" }}/locations/{{"{{"}}region{{"}}" }}/clusters/{{"{{"}}cluster{{"}}" }}/tokenAuthUsers/{{"{{"}}user_id{{"}}" }}/authTokens/{{"{{"}}token_id{{"}}" }}")
+	if err != nil {
+		return fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+	if err := resourceRedisClusterAuthTokenRead(d, meta); err != nil {
+		d.SetId("")
+		return err
+	}
+	if d.Id() == "" {
+		return fmt.Errorf("Error acquiring AuthToken %q: token was not found (omit token_id to create a new token)", id)
+	}
+	if name, ok := d.GetOk("name"); ok && name.(string) != "" {
+		d.SetId(name.(string))
+	}
+	log.Printf("[DEBUG] Acquired existing AuthToken %q", d.Id())
+	return nil
+}
+// --- End Custom Code ---
+
+url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}RedisBasePath{{"}}" }}projects/{{"{{"}}project{{"}}" }}/locations/{{"{{"}}region{{"}}" }}/clusters/{{"{{"}}cluster{{"}}" }}/tokenAuthUsers/{{"{{"}}user_id{{"}}" }}:addAuthToken")
+if err != nil {
+	return err
+}
+
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+	return fmt.Errorf("Error fetching project for AuthToken: %s", err)
+}
+billingProject := project
+if parts := regexp.MustCompile(`projects\/([^\/]+)\/`).FindStringSubmatch(url); parts != nil {
+	billingProject = parts[1]
+}
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+	billingProject = bp
+}
+
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "POST",
+	Project:   billingProject,
+	RawURL:    url,
+	UserAgent: userAgent,
+	Timeout:   d.Timeout(schema.TimeoutCreate),
+})
+if err != nil {
+	return fmt.Errorf("Error creating AuthToken: %s", err)
+}
+
+err = RedisOperationWaitTime(
+	config, res, project, "Creating AuthToken", userAgent,
+	d.Timeout(schema.TimeoutCreate))
+if err != nil {
+	return fmt.Errorf("Error waiting to create AuthToken: %s", err)
+}
+
+// --- Begin Custom Code: Discover server-assigned token_id via ListAuthTokens ---
+// The :addAuthToken LRO response returns the parent TokenAuthUser rather than the newly created
+// AuthToken, and the server auto-assigns the sequential version-N ID. List the user's tokens
+// after the LRO completes to determine the newly created token's name and token_id.
+listUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}RedisBasePath{{"}}" }}projects/{{"{{"}}project{{"}}" }}/locations/{{"{{"}}region{{"}}" }}/clusters/{{"{{"}}cluster{{"}}" }}/tokenAuthUsers/{{"{{"}}user_id{{"}}" }}/authTokens")
+if err != nil {
+	return err
+}
+listRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	Project:   billingProject,
+	RawURL:    listUrl,
+	UserAgent: userAgent,
+})
+if err != nil {
+	return fmt.Errorf("Error listing authTokens for %s: %s", listUrl, err)
+}
+
+tokens, ok := listRes["authTokens"].([]interface{})
+if !ok || len(tokens) == 0 {
+	return fmt.Errorf("No authTokens returned after create for %s", listUrl)
+}
+matchedToken, err := latestRedisClusterAuthToken(tokens)
+if err != nil {
+	return fmt.Errorf("Error finding newly created AuthToken for %s: %s", listUrl, err)
+}
+
+tokenName, ok := matchedToken["name"].(string)
+if !ok {
+	return fmt.Errorf("AuthToken response missing name attribute")
+}
+tokenId := tpgresource.GetResourceNameFromSelfLink(tokenName)
+d.SetId(tokenName)
+if err := d.Set("name", tokenName); err != nil {
+	return fmt.Errorf("Error setting name: %s", err)
+}
+if err := d.Set("token_id", tokenId); err != nil {
+	return fmt.Errorf("Error setting token_id: %s", err)
+}
+// --- End Custom Code ---
+
+return resourceRedisClusterAuthTokenRead(d, meta)
