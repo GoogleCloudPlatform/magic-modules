@@ -27,6 +27,7 @@ references:
 docs:
 base_url: projects/{{project}}/locations/{{location}}/keyHandles
 immutable: true
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/keyHandles/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/keyHandles?keyHandleId={{name}}
 id_format: projects/{{project}}/locations/{{location}}/keyHandles/{{name}}
@@ -65,6 +66,8 @@ samples:
         test_env_vars:
           org_id: ORG_ID
           billing_account: BILLING_ACCT
+        test_vars_overrides:
+          location: '"global"'
 parameters:
   - name: location
     type: String
