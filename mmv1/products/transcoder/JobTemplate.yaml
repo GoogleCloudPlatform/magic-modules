@@ -21,6 +21,7 @@ references:
 docs:
 base_url: projects/{{project}}/locations/{{location}}/jobTemplates
 immutable: true
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/jobTemplates/{{job_template_id}}
 create_url: projects/{{project}}/locations/{{location}}/jobTemplates?jobTemplateId={{job_template_id}}
 import_format:
