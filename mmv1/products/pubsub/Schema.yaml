@@ -26,6 +26,7 @@ create_url: projects/{{project}}/schemas?schemaId={{name}}
 update_url: projects/{{project}}/schemas/{{name}}:commit
 update_mask: false
 update_verb: POST
+generate_list_resource: true
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: schema
