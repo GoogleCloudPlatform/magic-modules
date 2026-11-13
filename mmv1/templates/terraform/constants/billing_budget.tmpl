@@ -21,3 +21,8 @@ func checkValAndDefaultStringSuppress(defaultVal string, checkVal string) schema
 		return (old == "" && new == defaultVal) || (new == "" && old == defaultVal)
 	}
 }
+
+// Adding or removing a spend cap on an existing budget is not supported in place.
+func billingBudgetSpendCapPresenceChanged(_ context.Context, old, new, _ interface{}) bool {
+	return len(old.([]interface{})) != len(new.([]interface{}))
+}

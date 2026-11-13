@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/billingbudgets"
@@ -669,5 +670,115 @@ resource "google_billing_budget" "budget" {
   }
 }
 
+`, context)
+}
+
+func TestAccBillingBudget_spendCap(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"billing_acct":  envvar.GetTestMasterBillingAccountFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBillingBudgetsBudgetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBillingBudget_spendCap(context, "Spend Cap Budget", true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_billing_budget.budget", "spend_cap.0.input_state", "CONFIGURED"),
+					resource.TestCheckResourceAttrSet("google_billing_budget.budget", "spend_cap.0.output_state"),
+				),
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBillingBudget_spendCap(context, "Spend Cap Budget Updated", true),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_billing_budget.budget", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBillingBudget_spendCap(context, "Spend Cap Budget Updated", false),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_billing_budget.budget", plancheck.ResourceActionReplace),
+					},
+				},
+				Check: resource.TestCheckResourceAttr("google_billing_budget.budget", "spend_cap.#", "0"),
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccBillingBudget_spendCap(context map[string]interface{}, displayName string, spendCap bool) string {
+	context["display_name"] = displayName
+	context["spend_cap"] = ""
+	if spendCap {
+		context["spend_cap"] = `
+  spend_cap {
+    input_state = "CONFIGURED"
+  }`
+	}
+	return acctest.Nprintf(`
+data "google_billing_account" "account" {
+  billing_account = "%{billing_acct}"
+}
+
+data "google_project" "project" {
+}
+
+resource "google_billing_budget" "budget" {
+  billing_account = data.google_billing_account.account.id
+  display_name    = "%{display_name}%{random_suffix}"
+  ownership_scope = "ALL_USERS"
+
+  budget_filter {
+    projects               = ["projects/${data.google_project.project.number}"]
+    services               = ["services/6F81-5844-456A"] # Compute Engine
+    calendar_period        = "MONTH"
+    credit_types_treatment = "EXCLUDE_ALL_CREDITS"
+  }
+
+  amount {
+    specified_amount {
+      currency_code = "USD"
+      units         = "100"
+    }
+  }
+
+  threshold_rules {
+    threshold_percent = 0.5
+  }
+  threshold_rules {
+    threshold_percent = 0.8
+  }
+  threshold_rules {
+    threshold_percent = 1.0
+  }
+
+  all_updates_rule {
+    enable_project_level_recipients = true
+  }
+%{spend_cap}
+}
 `, context)
 }
