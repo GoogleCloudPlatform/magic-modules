@@ -41,6 +41,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 exclude_tgc: true
+generate_list_resource: true
 custom_code:
   extra_schema_entry: templates/terraform/extra_schema_entry/source_repo_repository.tmpl
   update_encoder: templates/terraform/update_encoder/source_repo_repository.tmpl
