@@ -963,6 +963,36 @@ func TestAccComputeInstanceTemplate_ConfidentialInstanceConfigMain(t *testing.T)
 	})
 }
 
+func TestAccComputeInstanceTemplate_confidentialParavisorConfig(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate map[string]interface{}
+	var instanceTemplate2 map[string]interface{}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceTemplate_confidentialParavisorConfig(acctest.RandString(t, 10)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar", &instanceTemplate),
+					testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate, false, "SEV_SNP"),
+					testAccCheckComputeInstanceTemplateHasConfidentialParavisorConfig(&instanceTemplate, "EPHEMERAL", "RESTRICTED"),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "confidential_instance_config.0.confidential_paravisor_config.0.confidential_tpm_type", "EPHEMERAL"),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "confidential_instance_config.0.confidential_paravisor_config.0.sev_snp_irq_mode", "RESTRICTED"),
+					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar2", &instanceTemplate2),
+					testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(&instanceTemplate2, false, "SEV_SNP"),
+					testAccCheckComputeInstanceTemplateHasConfidentialParavisorConfig(&instanceTemplate2, "NO_CC_TPM", "UNRESTRICTED"),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar2", "confidential_instance_config.0.confidential_paravisor_config.0.confidential_tpm_type", "NO_CC_TPM"),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar2", "confidential_instance_config.0.confidential_paravisor_config.0.sev_snp_irq_mode", "UNRESTRICTED"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccComputeInstanceTemplate_AdvancedMachineFeatures(t *testing.T) {
 	t.Parallel()
 
@@ -3093,6 +3123,24 @@ func testAccCheckComputeInstanceTemplateHasConfidentialInstanceConfig(instanceTe
 	}
 }
 
+func testAccCheckComputeInstanceTemplateHasConfidentialParavisorConfig(instanceTemplate *map[string]interface{}, confidentialTpmType, sevSnpIrqMode string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		props, _ := (*instanceTemplate)["properties"].(map[string]interface{})
+		cic, _ := props["confidentialInstanceConfig"].(map[string]interface{})
+		cpc, _ := cic["confidentialParavisorConfig"].(map[string]interface{})
+		actualTpmType, _ := cpc["confidentialTpmType"].(string)
+		if actualTpmType != confidentialTpmType {
+			return fmt.Errorf("Wrong ConfidentialParavisorConfig ConfidentialTpmType: expected %s, got %s", confidentialTpmType, actualTpmType)
+		}
+		actualIrqMode, _ := cpc["sevSnpIrqMode"].(string)
+		if actualIrqMode != sevSnpIrqMode {
+			return fmt.Errorf("Wrong ConfidentialParavisorConfig SevSnpIrqMode: expected %s, got %s", sevSnpIrqMode, actualIrqMode)
+		}
+
+		return nil
+	}
+}
+
 func testAccCheckComputeInstanceTemplateLacksShieldedVmConfig(instanceTemplate *map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		props, _ := (*instanceTemplate)["properties"].(map[string]interface{})
@@ -4908,6 +4956,73 @@ resource "google_compute_instance_template" "foobar5" {
 
 }
 `, suffix, confidentialInstanceType)
+}
+
+func testAccComputeInstanceTemplate_confidentialParavisorConfig(suffix string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "ubuntu-2204-lts"
+  project = "ubuntu-os-cloud"
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name         = "tf-test-instance-template-%s-1"
+  machine_type = "n2d-standard-2"
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  min_cpu_platform = "AMD Milan"
+
+  confidential_instance_config {
+    confidential_instance_type = "SEV_SNP"
+    confidential_paravisor_config {
+      confidential_tpm_type = "EPHEMERAL"
+      sev_snp_irq_mode      = "RESTRICTED"
+    }
+  }
+
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+}
+
+resource "google_compute_instance_template" "foobar2" {
+  name         = "tf-test-instance-template-%s-2"
+  machine_type = "n2d-standard-2"
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  min_cpu_platform = "AMD Milan"
+
+  confidential_instance_config {
+    confidential_instance_type = "SEV_SNP"
+    confidential_paravisor_config {
+      confidential_tpm_type = "NO_CC_TPM"
+      sev_snp_irq_mode      = "UNRESTRICTED"
+    }
+  }
+
+  scheduling {
+    on_host_maintenance = "TERMINATE"
+  }
+}
+`, suffix, suffix)
 }
 
 func testAccComputeInstanceTemplateAdvancedMachineFeatures(suffix string) string {

@@ -1561,6 +1561,31 @@ be from 0 to 999,999,999 inclusive.`,
 								"AMD Milan" is currently required.`,
 							AtLeastOneOf: []string{"confidential_instance_config.0.enable_confidential_compute", "confidential_instance_config.0.confidential_instance_type"},
 						},
+						"confidential_paravisor_config": {
+							Type:        schema.TypeList,
+							MaxItems:    1,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `The Confidential Paravisor config being used by the instance.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"confidential_tpm_type": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										ForceNew:     true,
+										ValidateFunc: validation.StringInSlice([]string{"EPHEMERAL", "NO_CC_TPM"}, false),
+										Description:  `Defines the type of confidential TPM for the instance. Possible values: ["EPHEMERAL", "NO_CC_TPM"].`,
+									},
+									"sev_snp_irq_mode": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										ForceNew:     true,
+										ValidateFunc: validation.StringInSlice([]string{"UNRESTRICTED", "RESTRICTED"}, false),
+										Description:  `Defines the interrupt mode for the SEV-SNP instance. Possible values: ["UNRESTRICTED", "RESTRICTED"].`,
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -1992,6 +2017,9 @@ func expandComputeInstance(project string, d *schema.ResourceData, config *trans
 		}
 		if t, _ := cic["confidentialInstanceType"].(string); t != "" {
 			confidential["confidentialInstanceType"] = t
+		}
+		if cpc, ok := cic["confidentialParavisorConfig"].(map[string]interface{}); ok && len(cpc) > 0 {
+			confidential["confidentialParavisorConfig"] = cpc
 		}
 		instance["confidentialInstanceConfig"] = confidential
 	}
