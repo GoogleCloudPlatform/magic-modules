@@ -51,6 +51,7 @@ async:
     resource_inside_response: true
 error_abort_predicates:
   - transport_tpg.Is429QuotaError
+generate_list_resource: true
 schema_version: 1
 state_upgraders: true
 autogen_async: true
@@ -64,6 +65,14 @@ custom_code:
   post_create: templates/terraform/post_create/filestore_instance.go.tmpl
   post_update: templates/terraform/post_update/filestore_instance.go.tmpl
 samples:
+  # The first runnable sample is used by the generated list query test, which lists
+  # in the provider default region; it must create the instance in a region, not a zone.
+  - name: filestore_instance_protocol
+    primary_resource_id: instance
+    steps:
+      - name: filestore_instance_protocol
+        resource_id_vars:
+          instance_name: test-instance
   - name: filestore_instance_basic
     primary_resource_id: instance
     steps:
@@ -74,12 +83,6 @@ samples:
     primary_resource_id: instance
     steps:
       - name: filestore_instance_full
-        resource_id_vars:
-          instance_name: test-instance
-  - name: filestore_instance_protocol
-    primary_resource_id: instance
-    steps:
-      - name: filestore_instance_protocol
         resource_id_vars:
           instance_name: test-instance
   - name: filestore_instance_enterprise
