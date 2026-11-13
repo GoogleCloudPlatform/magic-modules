@@ -1,0 +1,4 @@
+// addTokenAuthUser takes the user name as `tokenAuthUser` in the request body, while the
+// TokenAuthUser resource itself only exposes it through its full resource `name`.
+obj["tokenAuthUser"] = d.Get("user_id")
+return obj, nil
