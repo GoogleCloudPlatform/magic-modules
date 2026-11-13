@@ -20,6 +20,7 @@ base_url: projects/{{project}}/locations/{{location}}/templates
 self_link: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
 create_url: projects/{{project}}/locations/{{location}}/templates?templateId={{template_id}}
 update_mask: true
+generate_list_resource: true
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
 import_format:
