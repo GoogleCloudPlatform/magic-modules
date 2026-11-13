@@ -13,6 +13,13 @@
 
 ---
 name: 'Catalog'
+description: |
+  A Design Center Catalog.
+references:
+  guides:
+    'Application Design Center Overview': 'https://docs.cloud.google.com/application-design-center/docs/overview'
+    'Manage, publish, and share catalogs': 'https://docs.cloud.google.com/application-design-center/docs/manage-catalogs'
+  api: 'https://docs.cloud.google.com/application-design-center/docs/reference/rest/v1/projects.locations.spaces.catalogs'
 base_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs'
 create_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs?catalogId={{catalog_id}}'
 self_link: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog_id}}'
@@ -23,8 +30,6 @@ async:
   actions: ["delete"]
   operation:
     base_url: "{{op_id}}"
-description: |
-  A Design Center Catalog.
 import_format:
   - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog_id}}'
 timeouts:
