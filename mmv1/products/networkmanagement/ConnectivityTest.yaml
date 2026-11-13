@@ -30,6 +30,7 @@ id_format: projects/{{project}}/locations/global/connectivityTests/{{name}}
 # ListConnectivityTestsResponse returns the list under the generic "resources",
 # not "connectivityTests"; without this the sweeper would find nothing.
 collection_url_key: resources
+generate_list_resource: true
 timeouts:
   insert_minutes: 5
   update_minutes: 5
