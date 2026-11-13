@@ -42,7 +42,7 @@ async:
 error_retry_predicates:
   - transport_tpg.HealthcareDatasetNotInitialized
 custom_code:
-  decoder: templates/terraform/decoders/long_name_to_self_link.go.tmpl
+  decoder: templates/terraform/decoders/healthcare_dataset.go.tmpl
 samples:
   - name: healthcare_dataset_basic
     primary_resource_id: default
