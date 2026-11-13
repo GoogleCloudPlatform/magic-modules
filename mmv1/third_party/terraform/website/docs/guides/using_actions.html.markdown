@@ -73,3 +73,5 @@ provider describes how the action interacts with the related resource and whethe
 ## Available actions
 
 * [`google_compute_instance_reset`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/actions/compute_instance_reset) - Performs a hard reset of a running Compute Engine instance.
+* [`google_compute_url_map_invalidate_cache`](https://registry.terraform.io/providers/hashicorp/google/latest/docs/actions/compute_url_map_invalidate_cache) - Invalidates Cloud CDN cached content for a global URL map.
+
