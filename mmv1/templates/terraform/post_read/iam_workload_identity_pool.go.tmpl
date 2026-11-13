@@ -1,10 +1,5 @@
 	// list attestation_rules
-	// In the list flattener, url is the collection URL, so derive the pool URL
-	// from the returned resource name when available.
 	ruleUrl := url + ":listAttestationRules"
-	if poolName, ok := res["name"].(string); ok && poolName != "" {
-		ruleUrl = transport_tpg.BaseUrl(Product, config) + poolName + ":listAttestationRules"
-	}
 
 	ruleRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
