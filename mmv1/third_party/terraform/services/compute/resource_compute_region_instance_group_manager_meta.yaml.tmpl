@@ -120,6 +120,9 @@ fields:
   - api_field: 'region'
   - api_field: 'resourcePolicies.workloadPolicy'
   - api_field: 'selfLink'
+{{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'serviceAccount'
+{{- end }}
   - api_field: 'standbyPolicy.initialDelaySec'
   - api_field: 'standbyPolicy.mode'
   - field: 'stateful_disk.delete_rule'
