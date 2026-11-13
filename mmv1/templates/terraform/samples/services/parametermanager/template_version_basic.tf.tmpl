@@ -1,0 +1,14 @@
+resource "google_parameter_manager_template" "template-basic" {
+  provider = google-beta
+  template_id = "{{index $.ResourceIdVars "template_id"}}"
+}
+
+resource "google_parameter_manager_template_version" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  template = google_parameter_manager_template.template-basic.template_id
+  template_version_id = "{{index $.ResourceIdVars "template_version_id"}}"
+  disabled = {{index $.Vars "disabled"}}
+  payload {
+    template_data = "app: my-app\nenv: {{"{{"}}.env{{"}}"}}\n"
+  }
+}
