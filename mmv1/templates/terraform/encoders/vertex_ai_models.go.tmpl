@@ -1,0 +1,11 @@
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") -}}
+// Copy does not accept fields that are applied by the post-create PATCH.
+if d.Id() == "" {
+	delete(obj, "description")
+	delete(obj, "displayName")
+	delete(obj, "labels")
+}
+// Copy and UpdateModel do not manage aliases; the post hooks use mergeVersionAliases.
+delete(obj, "versionAliases")
+{{- end }}
+return obj, nil
