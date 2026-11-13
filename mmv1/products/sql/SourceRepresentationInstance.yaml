@@ -22,6 +22,7 @@ description: |
   affect billing. You cannot update the source representation instance.
 base_url: projects/{{project}}/instances
 immutable: true
+generate_list_resource: true
 kind: sql#instance
 id_format: projects/{{project}}/instances/{{name}}
 sweeper:
