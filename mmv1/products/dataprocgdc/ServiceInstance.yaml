@@ -20,6 +20,7 @@ references:
   api: https://cloud.google.com/dataproc-gdc/docs/reference/rest/v1/projects.locations.serviceInstances
 base_url: projects/{{project}}/locations/{{location}}/serviceInstances
 immutable: true
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/serviceInstances/{{service_instance_id}}
 create_url: projects/{{project}}/locations/{{location}}/serviceInstances?serviceInstanceId={{service_instance_id}}
 id_format: projects/{{project}}/locations/{{location}}/serviceInstances/{{service_instance_id}}
