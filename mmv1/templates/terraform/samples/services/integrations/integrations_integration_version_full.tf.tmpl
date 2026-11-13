@@ -1,0 +1,475 @@
+resource "google_service_account" "test_sa" {
+  account_id   = "tf-test-sa%{random_suffix}"
+  display_name = "Test Service Account"
+}
+
+resource "google_integrations_integration_version" "version_full" {
+  location = "us-east4"
+  integration = "%{integration_name}"
+  description = "%{description}"
+  user_label = "v1.0.0"
+  database_persistence_policy = "DATABASE_PERSISTENCE_DISABLED"
+  enable_variable_masking = true
+  run_as_service_account = google_service_account.test_sa.email
+
+  cloud_logging_details {
+    cloud_logging_severity = "INFO"
+    enable_cloud_logging = true
+  }
+
+  trigger_configs {
+    label = "test_trigger"
+    trigger_type = "API"
+    trigger_number = "1"
+    trigger_id = "api_trigger/test_trigger"
+    description = "API trigger description"
+    trigger = "API Trigger"
+    error_catcher_id = "ERROR_CATCHER_1"
+    next_tasks_execution_policy = "RUN_ALL_MATCH"
+    input_variables {
+      names = ["param1"]
+    }
+    output_variables {
+      names = ["param2"]
+    }
+    properties = {
+      "Trigger name" = "test_trigger"
+    }
+    position {
+      x = "50"
+      y = "50"
+    }
+    start_tasks {
+      task_id = "1"
+      condition = "true"
+      description = "Start task description"
+      display_name = "start"
+      task_config_id = "1"
+    }
+    alert_config {
+      aggregation_period = "3600s"
+      alert_threshold = 1
+      disable_alert = false
+      display_name = "test-alert"
+      duration_threshold = "3600s"
+      metric_type = "EVENT_ERROR_RATE"
+      only_final_attempt = false
+      threshold_type = "EXPECTED_MAX"
+      threshold_value {
+        absolute = "1"
+        percentage = 50
+      }
+    }
+  }
+
+  trigger_configs {
+    label = "schedule_trigger"
+    trigger_type = "CRON"
+    trigger_number = "2"
+    trigger_id = "cron_trigger/schedule_trigger/0+0+*+*+*"
+    description = "Cloud scheduler trigger description"
+    trigger = "Cloud Scheduler Trigger"
+    properties = {
+      "Timer Name" = "schedule_trigger"
+      "Scheduled Time spec" = "0 0 * * *"
+    }
+    position {
+      x = "150"
+      y = "150"
+    }
+    start_tasks {
+      task_id = "1"
+      condition = "true"
+      description = "Start task from scheduler"
+      display_name = "start"
+      task_config_id = "1"
+    }
+    cloud_scheduler_config {
+      cron_tab = "0 0 * * *"
+      location = "us-east4"
+      service_account_email = google_service_account.test_sa.email
+    }
+  }
+
+  task_configs {
+    task = "GenericRestV2Task"
+    task_id = "1"
+    description = "Task 1 description"
+    display_name = "REST Caller Task"
+    external_task_type = "NORMAL_TASK"
+    task_execution_strategy = "WHEN_ALL_SUCCEED"
+    json_validation_option = "SKIP"
+    position {
+      x = "100"
+      y = "100"
+    }
+    parameters {
+      key = "url"
+      masked = false
+      value {
+        boolean_value = false
+        double_value = 0
+        string_value = "https://example.com"
+      }
+    }
+    parameters {
+      key = "httpMethod"
+      masked = false
+      value {
+        boolean_value = false
+        double_value = 0
+        string_value = "GET"
+      }
+    }
+    success_policy {
+      final_state = "SUCCEEDED"
+    }
+    conditional_failure_policies {
+      default_failure_policy {
+        condition = "true"
+        interval_time = "1970-01-01T00:00:10Z"
+        max_retries = 3
+        retry_strategy = "FIXED_INTERVAL"
+      }
+      failure_policies {
+        condition = "true"
+        interval_time = "1970-01-01T00:00:10Z"
+        max_retries = 3
+        retry_strategy = "FIXED_INTERVAL"
+      }
+    }
+    next_tasks {
+      task_id = "2"
+      condition = "true"
+      display_name = "Next Task"
+      description = "Next task description"
+      task_config_id = "2"
+    }
+    next_tasks_execution_policy = "RUN_ALL_MATCH"
+  }
+
+  task_configs {
+    task = "GenericRestV2Task"
+    task_id = "2"
+    description = "Task 2 description"
+    display_name = "REST Caller Task 2"
+    external_task_type = "NORMAL_TASK"
+    task_execution_strategy = "WHEN_ALL_SUCCEED"
+    position {
+      x = "200"
+      y = "200"
+    }
+    parameters {
+      key = "url"
+      masked = false
+      value {
+        boolean_value = false
+        double_value = 0
+        string_value = "https://example.com/api"
+      }
+    }
+    parameters {
+      key = "httpMethod"
+      masked = false
+      value {
+        boolean_value = false
+        double_value = 0
+        string_value = "POST"
+      }
+    }
+  }
+
+  error_catcher_configs {
+    error_catcher_id = "ERROR_CATCHER_1"
+    error_catcher_number = "1"
+    label = "Catch Flow"
+    description = "Error catcher description"
+    position {
+      x = 100
+      y = 100
+    }
+    start_error_tasks {
+      task_id = "2"
+      condition = "true"
+      description = "Start error task description"
+      display_name = "Start Error Task"
+      task_config_id = "2"
+    }
+  }
+
+  integration_parameters {
+    key = "param1"
+    data_type = "STRING_VALUE"
+    default_value {
+      string_value = "default_val"
+    }
+    display_name = "param1"
+    input_output_type = "IN"
+    searchable = true
+    masked = false
+    contains_large_data = false
+    description = "string parameter"
+  }
+
+  integration_parameters {
+    key = "param2"
+    data_type = "INT_VALUE"
+    default_value {
+      int_value = "10"
+    }
+    display_name = "param2"
+    input_output_type = "OUT"
+    searchable = true
+    masked = false
+    description = "int parameter"
+  }
+
+  integration_parameters {
+    key = "param3"
+    data_type = "BOOLEAN_VALUE"
+    default_value {
+      boolean_value = true
+    }
+    display_name = "param3"
+    input_output_type = "IN"
+    searchable = true
+    masked = false
+    description = "bool parameter"
+  }
+
+  integration_parameters {
+    key = "param4"
+    data_type = "DOUBLE_VALUE"
+    default_value {
+      double_value = 3.14
+    }
+    display_name = "param4"
+    input_output_type = "IN"
+    searchable = true
+    masked = false
+    description = "double parameter"
+  }
+
+  integration_parameters {
+    key = "param5"
+    data_type = "STRING_ARRAY"
+    default_value {
+      string_array {
+        string_values = ["val1", "val2"]
+      }
+    }
+    display_name = "param5"
+    input_output_type = "IN"
+    searchable = true
+    masked = false
+    description = "string array parameter"
+    is_transient = false
+    producer = "1_1"
+  }
+
+  integration_parameters {
+    key = "param6"
+    data_type = "INT_ARRAY"
+    default_value {
+      int_array {
+        int_values = ["1", "2"]
+      }
+    }
+    display_name = "param6"
+    input_output_type = "IN"
+    searchable = true
+    masked = false
+    description = "int array parameter"
+  }
+
+  integration_parameters {
+    key = "param7"
+    data_type = "BOOLEAN_ARRAY"
+    default_value {
+      boolean_array {
+        boolean_values = [true, false]
+      }
+    }
+    display_name = "param7"
+    input_output_type = "IN"
+    searchable = true
+    masked = false
+    description = "bool array parameter"
+  }
+
+  integration_parameters {
+    key = "param8"
+    data_type = "DOUBLE_ARRAY"
+    default_value {
+      double_array {
+        double_values = [1.1, 2.2]
+      }
+    }
+    display_name = "param8"
+    input_output_type = "IN"
+    searchable = true
+    masked = false
+    description = "double array parameter"
+  }
+
+  integration_parameters {
+    key = "param9"
+    data_type = "JSON_VALUE"
+    default_value {
+      json_value = jsonencode({ "key" = "val" })
+    }
+    display_name = "param9"
+    input_output_type = "IN"
+    searchable = true
+    masked = false
+    description = "json parameter"
+    json_schema = jsonencode({ "$schema" = "http://json-schema.org/draft-04/schema#" })
+  }
+
+  integration_config_parameters {
+    parameter {
+      key = "` + "`CONFIG_param1`" + `"
+      data_type = "STRING_VALUE"
+      default_value {
+        string_value = "default_config_val"
+      }
+      display_name = "` + "`CONFIG_param1`" + `"
+      input_output_type = "IN"
+      searchable = true
+      masked = false
+      contains_large_data = false
+      description = "config param description"
+      is_transient = false
+      producer = "1_1"
+    }
+  }
+
+  integration_config_parameters {
+    parameter {
+      key = "` + "`CONFIG_param2`" + `"
+      data_type = "INT_VALUE"
+      default_value {
+        int_value = "10"
+      }
+      display_name = "` + "`CONFIG_param2`" + `"
+      input_output_type = "IN"
+      searchable = true
+      masked = false
+      description = "int config param"
+    }
+  }
+
+  integration_config_parameters {
+    parameter {
+      key = "` + "`CONFIG_param3`" + `"
+      data_type = "BOOLEAN_VALUE"
+      default_value {
+        boolean_value = true
+      }
+      display_name = "` + "`CONFIG_param3`" + `"
+      input_output_type = "IN"
+      searchable = true
+      masked = false
+      description = "bool config param"
+    }
+  }
+
+  integration_config_parameters {
+    parameter {
+      key = "` + "`CONFIG_param4`" + `"
+      data_type = "DOUBLE_VALUE"
+      default_value {
+        double_value = 3.14
+      }
+      display_name = "` + "`CONFIG_param4`" + `"
+      input_output_type = "IN"
+      searchable = true
+      masked = false
+      description = "double config param"
+    }
+  }
+
+  integration_config_parameters {
+    parameter {
+      key = "` + "`CONFIG_param5`" + `"
+      data_type = "STRING_ARRAY"
+      default_value {
+        string_array {
+          string_values = ["val1", "val2"]
+        }
+      }
+      display_name = "` + "`CONFIG_param5`" + `"
+      input_output_type = "IN"
+      searchable = true
+      masked = false
+      description = "string array config param"
+    }
+  }
+
+  integration_config_parameters {
+    parameter {
+      key = "` + "`CONFIG_param6`" + `"
+      data_type = "INT_ARRAY"
+      default_value {
+        int_array {
+          int_values = ["1", "2"]
+        }
+      }
+      display_name = "` + "`CONFIG_param6`" + `"
+      input_output_type = "IN"
+      searchable = true
+      masked = false
+      description = "int array config param"
+    }
+  }
+
+  integration_config_parameters {
+    parameter {
+      key = "` + "`CONFIG_param7`" + `"
+      data_type = "BOOLEAN_ARRAY"
+      default_value {
+        boolean_array {
+          boolean_values = [true, false]
+        }
+      }
+      display_name = "` + "`CONFIG_param7`" + `"
+      input_output_type = "IN"
+      searchable = true
+      masked = false
+      description = "bool array config param"
+    }
+  }
+
+  integration_config_parameters {
+    parameter {
+      key = "` + "`CONFIG_param8`" + `"
+      data_type = "DOUBLE_ARRAY"
+      default_value {
+        double_array {
+          double_values = [1.1, 2.2]
+        }
+      }
+      display_name = "` + "`CONFIG_param8`" + `"
+      input_output_type = "IN"
+      searchable = true
+      masked = false
+      description = "double array config param"
+    }
+  }
+
+  integration_config_parameters {
+    parameter {
+      key = "` + "`CONFIG_param9`" + `"
+      data_type = "JSON_VALUE"
+      default_value {
+        json_value = jsonencode({ "key" = "val" })
+      }
+      display_name = "` + "`CONFIG_param9`" + `"
+      input_output_type = "IN"
+      searchable = true
+      masked = false
+      description = "json config param"
+      json_schema = jsonencode({ "$schema" = "http://json-schema.org/draft-04/schema#" })
+    }
+  }
+}
