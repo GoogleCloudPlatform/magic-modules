@@ -59,6 +59,7 @@ Read this index at decision points; open only the source the task needs. Format 
 ### Field (`field/`)
 
 - **enums-vs-strings** — Model an API enum as Enum (strict, plan-time) or String (forward-compatible): the deliberate trade-off. — [field/enums-vs-strings.md](field/enums-vs-strings.md)
+- **permadiff-decision-path** — Choose the right schema attribute or custom hook to eliminate post-apply diffs without masking real drift. — [field/permadiff-decision-path.md](field/permadiff-decision-path.md)
 
 ### Template (`template/`)
 
