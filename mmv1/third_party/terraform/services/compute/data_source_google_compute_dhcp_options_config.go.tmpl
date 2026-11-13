@@ -1,0 +1,66 @@
+package compute
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func DataSourceGoogleComputeDhcpOptionsConfig() *schema.Resource {
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceComputeDhcpOptionsConfig().Schema)
+
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, "name")
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project", "region")
+
+	return &schema.Resource{
+		Read:          dataSourceGoogleComputeDhcpOptionsConfigRead,
+		Schema:        dsSchema,
+		UseJSONNumber: true,
+	}
+}
+
+func dataSourceGoogleComputeDhcpOptionsConfigRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+
+	name := d.Get("name").(string)
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	region, err := tpgresource.GetRegion(d, config)
+	if err != nil {
+		return err
+	}
+
+	id := fmt.Sprintf("projects/%s/regions/%s/dhcpOptionsConfigs/%s", project, region, name)
+	d.SetId(id)
+
+	err = resourceComputeDhcpOptionsConfigRead(d, meta)
+	if err != nil {
+		return err
+	}
+
+	if d.Id() == "" {
+		return fmt.Errorf("%s not found", id)
+	}
+	if err := d.Set("deletion_policy", nil); err != nil {
+		return fmt.Errorf("Error setting deletion_policy: %s", err)
+	}
+	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_compute_dhcp_options_config",
+		ProductName: "compute",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceGoogleComputeDhcpOptionsConfig(),
+	}.Register()
+}
+{{- end }}

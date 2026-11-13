@@ -1,0 +1,37 @@
+resource "google_compute_network" "net1" {
+  provider = google-beta
+
+  name                    = "{{index $.ResourceIdVars "network_name_1"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_network" "net2" {
+  provider = google-beta
+
+  name                    = "{{index $.ResourceIdVars "network_name_2"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_dhcp_options_config" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+
+  name        = "{{index $.ResourceIdVars "dhcp_options_config_name"}}"
+  region      = "us-central1"
+  description = "Updated DHCP options configuration"
+
+  lease_time_sec             = 7200
+  domain_name                = "prod.example.com"
+  dns_search_paths           = ["prod.example.com"]
+  ntp_server_ipv4_addresses  = ["192.0.2.30"]
+  ntp_server_ipv6_addresses  = ["2001:db8::30"]
+  tftp_server_ipv4_name      = "tftp.prod.example.com"
+  tftp_server_ipv4_addresses = ["192.0.2.40"]
+  boot_file_ipv4_name        = "ipxe.efi"
+  boot_file_ipv6_url         = "http://[2001:db8::40]/boot.img"
+  boot_file_ipv6_parameters  = ["console=ttyS0,115200"]
+
+  associations {
+    name    = "assoc-2"
+    network = google_compute_network.net2.self_link
+  }
+}

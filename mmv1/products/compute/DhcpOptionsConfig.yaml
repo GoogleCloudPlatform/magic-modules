@@ -1,0 +1,255 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'DhcpOptionsConfig'
+kind: 'compute#dhcpOptionsConfig'
+description: |
+  A standalone, regional Compute Engine resource that encapsulates a set of
+  user-defined DHCP configurations for custom NTP, domain search, lease time,
+  and iPXE/TFTP network boot options.
+references:
+  guides:
+    'VPC network overview': 'https://cloud.google.com/vpc/docs/vpc'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/dhcpOptionsConfigs'
+min_version: 'beta'
+base_url: 'projects/{{project}}/regions/{{region}}/dhcpOptionsConfigs'
+self_link: 'projects/{{project}}/regions/{{region}}/dhcpOptionsConfigs/{{name}}'
+has_self_link: true
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/regions/{{region}}/dhcpOptionsConfigs/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+collection_url_key: 'items'
+# Sweeper skipped because deleting a DhcpOptionsConfig with associations requires clearing them first.
+exclude_sweeper: true
+deletion_policy_custom_docs: true
+deletion_policy_default: 'DEFAULT'
+custom_code:
+  constants: 'templates/terraform/constants/compute_dhcp_options_config.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/compute_dhcp_options_config.go.tmpl'
+  post_create: 'templates/terraform/post_create/compute_dhcp_options_config.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/compute_dhcp_options_config.go.tmpl'
+samples:
+  - name: 'compute_dhcp_options_config_basic'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    steps:
+      - name: 'compute_dhcp_options_config_basic'
+        min_version: 'beta'
+        resource_id_vars:
+          dhcp_options_config_name: 'my-dhcp-config'
+      - name: 'compute_dhcp_options_config_full'
+        min_version: 'beta'
+        include_step_doc: true
+        resource_id_vars:
+          dhcp_options_config_name: 'my-dhcp-config'
+          network_name_1: 'my-dhcp-net-1'
+      - name: 'compute_dhcp_options_config_update'
+        min_version: 'beta'
+        resource_id_vars:
+          dhcp_options_config_name: 'my-dhcp-config'
+          network_name_1: 'my-dhcp-net-1'
+          network_name_2: 'my-dhcp-net-2'
+      - name: 'compute_dhcp_options_config_clear'
+        min_version: 'beta'
+        resource_id_vars:
+          dhcp_options_config_name: 'my-dhcp-config'
+          network_name_1: 'my-dhcp-net-1'
+          network_name_2: 'my-dhcp-net-2'
+  - name: 'compute_dhcp_options_config_create_with_associations'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    exclude_basic_doc: true
+    steps:
+      - name: 'compute_dhcp_options_config_force_delete'
+        min_version: 'beta'
+        resource_id_vars:
+          dhcp_options_config_name: 'my-dhcp-assoc'
+          network_name_1: 'my-dhcp-assoc-net'
+        ignore_read_extra:
+          - 'deletion_policy'
+virtual_fields:
+  - name: 'deletion_policy'
+    description: |
+      The deletion policy for the DHCP options configuration.
+      Setting `deletion_policy = "FORCE"` clears any remaining network `associations`
+      before deleting the configuration. By default (`DEFAULT`), Terraform attempts to
+      delete the resource directly, which fails if any `associations` still exist on
+      the resource.
+
+      When a 'terraform destroy' or 'terraform apply' would delete the resource,
+      the command will fail if this field is set to "PREVENT" in Terraform state.
+      When set to "ABANDON", the command will remove the resource from Terraform
+      management without updating or deleting the resource in the API.
+      When set to "DELETE", the command will behave as if set to "DEFAULT".
+
+      Possible values: `DEFAULT`, `FORCE`, `PREVENT`, `ABANDON`, `DELETE`.
+    type: String
+    # excluded from generation due to Universal Deletion Policy
+    exclude: true
+parameters:
+  - name: 'region'
+    type: ResourceRef
+    description: |
+      The region where the DHCP options config resides.
+      If it is not provided, the provider region is used.
+    required: false
+    immutable: true
+    ignore_read: true
+    url_param_only: true
+    default_from_api: true
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Region'
+    imports: 'name'
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      Name of the resource. Provided by the client when the resource is created.
+      The name must be 1-63 characters long, and comply with RFC1035.
+      Specifically, the name must be 1-63 characters long and match the regular
+      expression `[a-z]([-a-z0-9]*[a-z0-9])?` which means the first character
+      must be a lowercase letter, and all following characters must be a dash,
+      lowercase letter, or digit, except the last character, which cannot be a dash.
+    required: true
+    immutable: true
+    validation:
+      regex: '^[a-z]([-a-z0-9]{0,61}[a-z0-9])?$'
+  - name: 'description'
+    type: String
+    description: |
+      An optional description of this resource.
+  - name: 'leaseTimeSec'
+    type: Integer
+    description: |
+      The duration, in seconds, of the IPv4 address lease offered by the DHCP
+      server to the client VM guest OS (between 3600 and 4294967295).
+      Corresponds to DHCPv4 Option 51.
+  - name: 'domainName'
+    type: String
+    description: |
+      The domain name that the client VM guest OS should use when resolving
+      hostnames via DNS (e.g., `example.com`). It defines the default domain
+      suffix for the client. Corresponds to DHCPv4 Option 15.
+  - name: 'dnsSearchPaths'
+    type: Array
+    description: |
+      An ordered list of domain suffixes (search paths) that the client VM guest
+      OS should append to resolve hostnames that are not fully qualified.
+      Applies to both DHCPv4 Option 119 and DHCPv6 Option 24.
+    item_type:
+      type: String
+  - name: 'ntpServerIpv4Addresses'
+    type: Array
+    description: |
+      An ordered list of IPv4 addresses of Network Time Protocol (NTP) servers
+      available to the client VM guest OS for system clock synchronization,
+      listed in order of preference. Corresponds to DHCPv4 Option 42.
+    item_type:
+      type: String
+  - name: 'ntpServerIpv6Addresses'
+    type: Array
+    description: |
+      An ordered list of IPv6 addresses of Network Time Protocol (NTP) servers
+      available to the client VM guest OS for system clock synchronization.
+      Corresponds to DHCPv6 Option 56.
+    item_type:
+      type: String
+  - name: 'tftpServerIpv4Name'
+    type: String
+    description: |
+      The hostname or IP address of the Trivial File Transfer Protocol (TFTP)
+      server from which the client VM guest OS can download boot files.
+      Corresponds to DHCPv4 Option 66.
+  - name: 'tftpServerIpv4Addresses'
+    type: Array
+    description: |
+      An ordered list of one or more IPv4 addresses of TFTP servers.
+      Corresponds to DHCPv4 Option 150.
+    item_type:
+      type: String
+  - name: 'bootFileIpv4Name'
+    type: String
+    description: |
+      The file path and name of the boot image/file on the TFTP server that the
+      client VM guest OS should download and execute during network boot.
+      Corresponds to DHCPv4 Option 67.
+  - name: 'bootFileIpv6Url'
+    type: String
+    description: |
+      The Uniform Resource Locator (URL) specifying the protocol, server address,
+      and file path of the boot file that the client VM guest OS should download
+      and execute for network boot (e.g., `tftp://[2001:db8::1]/bootx64.efi` or
+      `http://[2001:db8::1]/boot.img`). Corresponds to DHCPv6 Option 59.
+  - name: 'bootFileIpv6Parameters'
+    type: Array
+    description: |
+      A list of UTF-8 encoded parameter strings to be passed as arguments to the
+      bootloader program or OS kernel after downloading the boot file.
+      Corresponds to DHCPv6 Option 60.
+    item_type:
+      type: String
+  - name: 'associations'
+    type: Map
+    description: |
+      Mapping of user-defined keys to Network associations for this DHCP options
+      configuration.
+    key_name: 'name'
+    set_hash_func: computeDhcpOptionsConfigAssociationHash
+    value_type:
+      type: NestedObject
+      properties:
+        - name: 'network'
+          type: ResourceRef
+          resource: 'Network'
+          imports: 'selfLink'
+          required: true
+          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+          description: |
+            The target VPC network this DHCP options configuration is attached to,
+            specified as a full or partial URL or network name in the same project.
+        - name: 'networkId'
+          type: String
+          output: true
+          description: |
+            The server-defined ID of the associated Network.
+        - name: 'state'
+          type: String
+          output: true
+          description: |
+            State of the association (for example, `ACTIVE` or `ORPHANED`).
+  - name: 'dhcpOptionsConfigId'
+    type: String
+    api_name: id
+    output: true
+    description: |
+      The unique identifier for the resource. This identifier is defined by the server.
+  - name: 'creationTimestamp'
+    type: String
+    output: true
+    description: |
+      Creation timestamp in RFC3339 text format.

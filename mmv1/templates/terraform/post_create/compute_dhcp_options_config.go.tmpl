@@ -1,0 +1,35 @@
+if createAssociations != nil && !tpgresource.IsEmptyValue(reflect.ValueOf(createAssociations)) {
+	patchObj := map[string]interface{}{
+		"associations": createAssociations,
+	}
+	patchUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{ $.SelfLinkUri }}")
+	if err != nil {
+		return err
+	}
+	patchUrl, err = transport_tpg.AddQueryParams(patchUrl, map[string]string{"updateMask": "associations"})
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[DEBUG] Patching associations after creating DhcpOptionsConfig %q: %#v", d.Id(), patchObj)
+	patchRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "PATCH",
+		Project:   billingProject,
+		RawURL:    patchUrl,
+		UserAgent: userAgent,
+		Body:      patchObj,
+		Timeout:   d.Timeout(schema.TimeoutCreate),
+		Headers:   headers,
+	})
+	if err != nil {
+		return fmt.Errorf("Error patching associations after creating DhcpOptionsConfig %q: %s", d.Id(), err)
+	}
+
+	err = ComputeOperationWaitTime(
+		config, patchRes, project, "Updating DhcpOptionsConfig associations", userAgent,
+		d.Timeout(schema.TimeoutCreate))
+	if err != nil {
+		return fmt.Errorf("Error waiting to update DhcpOptionsConfig associations %q: %s", d.Id(), err)
+	}
+}
