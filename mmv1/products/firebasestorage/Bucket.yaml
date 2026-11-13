@@ -25,6 +25,7 @@ base_url: projects/{{project}}/buckets
 min_version: beta
 # Does not support update operation. There is nothing to update.
 immutable: true
+generate_list_resource: true
 self_link: projects/{{project}}/buckets/{{bucket_id}}
 create_url: projects/{{project}}/buckets/{{bucket_id}}:addFirebase
 delete_url: projects/{{project}}/buckets/{{bucket_id}}:removeFirebase
