@@ -2052,11 +2052,11 @@ func flattenClouddeployDeliveryPipelineSerialPipelineStagesStrategyStandardVerif
 
 func expandClouddeployDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis(o interface{}) *DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis {
 	if o == nil {
-		return nil
+		return EmptyDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis
 	}
 	objArr := o.([]interface{})
 	if len(objArr) == 0 || objArr[0] == nil {
-		return nil
+		return EmptyDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis
 	}
 	obj := objArr[0].(map[string]interface{})
 	return &DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis{
