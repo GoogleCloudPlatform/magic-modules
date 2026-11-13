@@ -47,7 +47,7 @@ tgc_tests:
     skip: For instances vs throughput, prefer instances during cai2hcl conversion as throughput is discouraged.
 custom_code:
   encoder: templates/terraform/encoders/no_send_name.go.tmpl
-  decoder: templates/terraform/decoders/long_name_to_self_link.go.tmpl
+  decoder: templates/terraform/decoders/vpc_access_connector.go.tmpl
   constants: templates/terraform/constants/vpc_access_connector.go.tmpl
   post_create: templates/terraform/post_create/sleep.go.tmpl
   pre_update: templates/terraform/pre_update/vpc_access_connector_instances.go.tmpl
