@@ -3,6 +3,7 @@ resource "google_dataproc_session_template" "{{$.PrimaryResourceId}}" {
     location = "{{index $.TestEnvVars "location"}}"
 
     jupyter_session {
-      kernel = "PYTHON"
+      kernel       = "PYTHON"
+      display_name = "tf python kernel"
     }
 }
