@@ -23,6 +23,7 @@ references:
 docs:
 base_url: projects/{{project}}/locations/{{location}}/clients
 immutable: true
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/clients
 create_url: projects/{{project}}/locations/{{location}}/clients:provision
 delete_url: projects/{{project}}/locations/{{location}}/clients:deprovision
