@@ -20,6 +20,7 @@ description: |
 base_url: projects/{{project}}/locations/{{location}}/autoscalingPolicies
 self_link: projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}
 collection_url_key: policies
+generate_list_resource: true
 iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: POST
@@ -45,6 +46,8 @@ samples:
       - name: dataproc_autoscaling_policy_basic
         resource_id_vars:
           name: dataproc-policy
+        test_env_vars:
+          location: REGION
   - name: dataproc_autoscaling_policy
     primary_resource_id: asp
     steps:

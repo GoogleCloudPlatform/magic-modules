@@ -24,6 +24,7 @@ references:
   api: https://cloud.google.com/dataproc-serverless/docs/reference/rest/v1/projects.locations.batches
 base_url: projects/{{project}}/locations/{{location}}/batches
 immutable: true
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/batches/{{batch_id}}
 create_url: projects/{{project}}/locations/{{location}}/batches?batchId={{batch_id}}
 delete_url: projects/{{project}}/locations/{{location}}/batches/{{batch_id}}
@@ -62,9 +63,10 @@ samples:
           subnetwork_name: default
         test_env_vars:
           project_name: PROJECT_NAME
+          location: REGION
         test_vars_overrides:
           prevent_destroy: "false"
-          subnetwork_name: BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-spark-test-network", "dataproc-spark-test-subnetwork")
+          subnetwork_name: 'compute.BootstrapSubnetWithOverrides(t, "dataproc-spark-test-region-subnetwork", func() string { n := compute.BootstrapSharedTestNetwork(t, "dataproc-spark-test-network"); BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-spark-test-subnetwork", n); return n }(), map[string]interface{}{"privateIpGoogleAccess": true, "ipCidrRange": "10.80.0.0/20"})'
   - name: dataproc_batch_spark_full
     primary_resource_id: example_batch_spark
     steps:
