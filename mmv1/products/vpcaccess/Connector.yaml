@@ -23,6 +23,7 @@ base_url: projects/{{project}}/locations/{{region}}/connectors
 create_url: projects/{{project}}/locations/{{region}}/connectors?connectorId={{name}}
 update_url: projects/{{project}}/locations/{{region}}/connectors/{{name}}
 update_mask: true
+generate_list_resource: true
 update_verb: PATCH
 kind: vpcaccess#Connector
 timeouts:
