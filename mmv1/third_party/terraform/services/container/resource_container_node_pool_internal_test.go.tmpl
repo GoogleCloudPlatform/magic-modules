@@ -2,6 +2,10 @@ package container
 
 import (
 	"context"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -16,6 +20,100 @@ import (
 	container "google.golang.org/api/container/v1beta1"
 {{ end }}
 )
+
+func TestNodePoolCacheRefresh(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name          string
+		fresh         bool
+		listError     bool
+		present       bool
+	}{
+		{name: "deleted pool"},
+		{name: "existing pool", present: true},
+		{name: "list error preserves cache", listError: true},
+		{name: "unexpired cache skips list", fresh: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			info := &NodePoolInformation{project: "project", location: "location", cluster: "cluster"}
+			otherInfo := &NodePoolInformation{project: "project", location: "location", cluster: "other-cluster"}
+			updated := time.Now().Add(-time.Hour)
+			if tc.fresh {
+				updated = time.Now()
+			}
+			old := &nodePoolWithUpdateTime{nodePool: &container.NodePool{Name: "pool", InitialNodeCount: 1}, updateTime: updated}
+			other := &nodePoolWithUpdateTime{nodePool: &container.NodePool{Name: "pool"}, updateTime: updated}
+			cache := &nodePoolCache{
+				nodePools: map[string]*nodePoolWithUpdateTime{
+					info.fullyQualifiedName("pool"): old,
+					otherInfo.fullyQualifiedName("pool"): other,
+				},
+				ttl: 5 * time.Minute,
+			}
+			var requests atomic.Int32
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				requests.Add(1)
+{{ if eq $.TargetVersionName `ga` }}
+				const apiVersion = "v1"
+{{ else }}
+				const apiVersion = "v1beta1"
+{{ end }}
+				if want := "/" + apiVersion + "/projects/project/locations/location/clusters/cluster/nodePools"; r.Method != http.MethodGet || r.URL.Path != want {
+					t.Errorf("unexpected request: %s %s", r.Method, r.URL.Path)
+				}
+				if tc.listError {
+					http.Error(w, "list failed", http.StatusForbidden)
+					return
+				}
+				w.Header().Set("Content-Type", "application/json")
+				if tc.present {
+					fmt.Fprint(w, `{"nodePools":[{"name":"pool","initialNodeCount":2},{"name":"sibling"}]}`)
+				} else {
+					fmt.Fprint(w, `{"nodePools":[{"name":"sibling"}]}`)
+				}
+			}))
+			defer server.Close()
+			config := &transport_tpg.Config{
+				Context: context.Background(), Client: server.Client(),
+				CustomEndpoints: map[string]string{"container_custom_endpoint": server.URL + "/v1/"},
+			}
+			d := schema.TestResourceDataRaw(t, map[string]*schema.Schema{}, nil)
+			err := cache.refreshIfNeeded(d, config, "test", info, "pool")
+			if (err != nil) != tc.listError {
+				t.Fatalf("refreshIfNeeded() error = %v, want error %t", err, tc.listError)
+			}
+			wantRequests := 1
+			if tc.fresh {
+				wantRequests = 0
+			}
+			if got := requests.Load(); got != int32(wantRequests) {
+				t.Fatalf("list requests = %d, want %d", got, wantRequests)
+			}
+			if cache.nodePools[otherInfo.fullyQualifiedName("pool")] != other {
+				t.Fatal("refresh changed another cluster's cached pool")
+			}
+			if tc.fresh || tc.listError {
+				if cache.nodePools[info.fullyQualifiedName("pool")] != old {
+					t.Fatal("refresh changed the cached pool without a successful list")
+				}
+				return
+			}
+			pool, err := cache.get(info.fullyQualifiedName("pool"))
+			if tc.present {
+				if err != nil || pool.InitialNodeCount != 2 || cache.needsRefresh(info.fullyQualifiedName("pool")) {
+					t.Fatalf("existing pool was not refreshed: pool = %#v, error = %v", pool, err)
+				}
+			} else if err == nil {
+				t.Fatal("deleted pool remains in cache after successful list")
+			}
+			if _, err := cache.get(info.fullyQualifiedName("sibling")); err != nil {
+				t.Fatalf("listed sibling was not cached: %v", err)
+			}
+		})
+	}
+}
 
 func TestPerformanceMonitoringUnitStandardPlan(t *testing.T) {
 	t.Parallel()
