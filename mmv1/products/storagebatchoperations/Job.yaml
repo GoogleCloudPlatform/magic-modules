@@ -71,6 +71,7 @@ parameters:
   - name: jobId
     type: String
     description: The ID of the job.
+    api_name: name
     immutable: true
     url_param_only: true
     validation:
