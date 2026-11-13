@@ -14,6 +14,7 @@
 ---
 name: 'TunnelDestGroup'
 include_in_tgc_next: true
+generate_list_resource: true
 description: |
   Tunnel destination groups represent resources that have the same tunnel access restrictions.
 references:
