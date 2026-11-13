@@ -91,14 +91,3 @@ properties:
     description: |
       The current state of the memory layer.
     output: true
-  - name: 'memoryConfig'
-    type: NestedObject
-    description: |
-      The memory configuration for the cluster.
-    output: true
-    properties:
-      - name: 'storageSizeGib'
-        type: Integer
-        description: |
-          Reporting the current size of the memory layer in GiB.
-        output: true
