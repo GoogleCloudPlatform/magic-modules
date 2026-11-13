@@ -608,6 +608,9 @@ Some additional things to bear in mind are that VCR tests in REPLAYING mode will
 
 These tests can still run in VCR replaying mode; however, REPLAYING mode can't be used as a way to completely avoid HTTP traffic generally or with GCP APIs.
 
+## Test sweepers {#sweepers}
+
+Test sweepers (`mmv1/third_party/terraform/services/<product>/<resource>_sweeper.go` and `mmv1/templates/terraform/sweeper_file.go.tmpl`) delete orphaned test resources in shared test projects. Inside resource-deletion loops, log per-item errors and `continue` rather than returning early so a single transient or dependency error does not leave remaining resources leaked.
 
 ## What's next?
 

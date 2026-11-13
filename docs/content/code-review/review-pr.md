@@ -25,20 +25,23 @@ to review by repository maintainers. For community members, this is not required
    1. the features are added in the correct version
       * features only available in beta are not included in the GA google provider.
       * features added to the GA provider are also included in the beta provider -- beta should be a strict superset of GA.
+      * distinguish provider gating (`min_version: beta`) from resource API attributes named `launch_stage` (e.g., `launch_stage = "BETA"` in HCL, which is valid in GA tests when the `launch_stage` field itself is GA).
    1. no [breaking changes]({{< ref "/breaking-changes/make-a-breaking-change" >}}) are introduced without a valid justification. Add the `override-breaking-change` label if there is a valid justification.
       * remember to check for changes in default behaviour like changing the flags on delete! 
    1. verify the change **fully** resolves the linked issues, if any. If it does not, change the "Fixes" message to "Part of".
+   1. on follow-up review rounds, confirm prior review comments were either addressed in code or answered with technical justification.
 1. Check the tests added/modified to ensure that:
-   1. all fields added/updated in the PR appear in at least one test.
-      * It is advisable to test updating from a non-zero value to a zero value if feasible.
-   1. all mutable fields are tested in at least one update test.
+   1. all configurable (`Optional`/`Required`, non-output) fields added/updated in the PR appear in at least one test. Extending an existing `TestAcc<Resource>_basic` / `_update` pair is preferred over adding a separate test function unless the field requires a conflicting mode or topology.
+   1. all mutable fields are exercised in a 2-step update test (`valA -> valB`, or `unset -> valA` so step 2 sends `PATCH` with `updateMask`) followed by `ImportStateVerify: true`. Additional sub-transition steps (such as `true -> false` toggles) are only needed when testing `send_empty_value` or custom zero-value clearing.
    1. all resources in the acceptance tests have a `tf-test` or `tf_test` prefix in their primary id field.
-   1. all handwritten test Config steps include import steps following them
+   1. all handwritten test Config steps include `ImportState: true` and `ImportStateVerify: true` steps following them; explicit `resource.TestCheckResourceAttr` checks are unnecessary for attributes already verified by import.
    1. all related tests pass in GA for features promoted from beta to GA.
       > [!NOTE]
       > Note:
-      > Presubmit VCR tests do not run in GA. Manual testing is required for promoted GA features.
-   1. newly added or modified diff suppress functions are tested in at least one unit test.
+      > Presubmit VCR tests do not run in GA. Manual testing is required for promoted GA features; when test configurations exist and presubmit checks pass, if manual GA test results are not pasted in the PR description, request confirmation in a non-blocking comment rather than treating the missing comment as a code defect.
+   1. custom helpers (`DiffSuppressFunc`, validators, parsers, expanders/flatteners) with branching or parsing logic have unit tests. Reusing shared helpers (`tpgresource.*`, `customdiff.*`), single-condition `DiffSuppressFunc`s, or `CustomizeDiff` hooks typed on `*schema.ResourceDiff` and covered by `TestAcc` do not need standalone unit tests.
+   1. widening an existing `max_size` or numeric limit is verified via schema and standard acceptance tests without requiring quota-heavy max-scale resource counts.
+   1. minor-release field deprecations keep existing acceptance tests on the deprecated field until major-release removal, adding separate coverage for any replacement field.
    1. the linked issue (if any) is covered by at least one test that reproduces the issue
       * for example - a bugfix should test the bug (or explain why it's not feasible to do so in the description, including manual results when possible) and an enhancement should test the new behaviour(s).
    1. all related PR presubmit tests have been completed successfully, including:
@@ -48,7 +51,7 @@ to review by repository maintainers. For community members, this is not required
       * VCR-test
       > [!NOTE]
       > Note:
-      > Some acceptance tests may be skipped in VCR and manual testing is required.
+      > Skipping or stubbing acceptance tests for modified behavior requires explicit maintainer sign-off on the PR. Pre-existing failures on unrelated resources in package-wide logs do not block unrelated changes.
    1. a significant number of preexisting tests have not been modified. Changing old tests often indicates a change is backwards incompatible.
 1. Check documentation to ensure
    1. resource-level and field-level documentation are generated correctly for MMv1-based resource

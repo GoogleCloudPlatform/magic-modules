@@ -29,6 +29,14 @@ These attributes are defined once for an entire sample.
 * `external_providers`: A list of external providers (such as `random`, `time`) needed for the sample.
 * `tgc_skip_test`: Skips generated conversion tests specifically running inside the TGC (Terraform Google Conversion) suite (value should be a ticket link reason).
 
+### Sample Ordering & `FirstTestConfig()`
+
+`FirstTestConfig()` (`mmv1/api/resource.go`) selects the first sample without `exclude_test: true` or a higher sample-level `min_version` (ignoring `skip_test` and step-level `min_version`) to scaffold generated IAM and datasource tests. Place a runnable, GA-compatible minimal sample first in `samples`.
+
+### Regional Locations in Samples
+
+Sample templates (`mmv1/templates/terraform/samples/services/<product>/*.tf.tmpl`) may hardcode supported GCP regions or zones (such as `"us-central1"`); use `test_env_vars` or `resource_id_vars` only when dynamic test substitution is needed.
+
 ---
 
 ## Step Attributes
