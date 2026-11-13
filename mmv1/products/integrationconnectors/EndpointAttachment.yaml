@@ -50,6 +50,8 @@ samples:
       - name: integration_connectors_endpoint_attachment
         resource_id_vars:
           endpoint_attachment_name: test-endpoint-attachment
+        test_env_vars:
+          region: REGION
 parameters:
   - name: location
     type: String
