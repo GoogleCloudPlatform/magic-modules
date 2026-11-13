@@ -1,0 +1,48 @@
+resource "google_cloud_identity_group" "group" {
+  display_name         = "{{index $.ResourceIdVars "id_group"}}"
+  initial_group_config = "WITH_INITIAL_OWNER"
+  parent               = "customers/{{index $.TestEnvVars "cust_id"}}"
+
+  group_key {
+    id = "{{index $.ResourceIdVars "id_group"}}@{{index $.TestEnvVars "org_domain"}}"
+  }
+
+  labels = {
+    "cloudidentity.googleapis.com/groups.discussion_forum" = ""
+  }
+}
+
+resource "google_cloud_identity_inbound_saml_sso_profile" "saml_profile" {
+  customer     = "customers/{{index $.TestEnvVars "cust_id"}}"
+  display_name = "{{index $.ResourceIdVars "display_name"}}"
+
+  idp_config {
+    entity_id                  = "https://idp.example.com/{{index $.ResourceIdVars "display_name"}}"
+    single_sign_on_service_uri = "https://idp.example.com/sso"
+  }
+}
+
+resource "google_cloud_identity_inbound_oidc_sso_profile" "oidc_profile" {
+  customer     = "customers/{{index $.TestEnvVars "cust_id"}}"
+  display_name = "{{index $.ResourceIdVars "display_name"}}-oidc"
+
+  idp_config {
+    issuer_uri = "https://idp.example.com"
+  }
+
+  rp_config {
+    client_id     = "test-client-id"
+    client_secret = "test-client-secret"
+  }
+}
+
+resource "google_cloud_identity_inbound_sso_assignment" "{{$.PrimaryResourceId}}" {
+  customer     = "customers/{{index $.TestEnvVars "cust_id"}}"
+  target_group = google_cloud_identity_group.group.name
+  rank         = 3
+  sso_mode     = "SSO_OFF"
+
+  sign_in_behavior {
+    redirect_condition = "NEVER"
+  }
+}
