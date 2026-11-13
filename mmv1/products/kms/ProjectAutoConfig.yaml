@@ -44,6 +44,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 exclude_sweeper: true
+generate_list_resource: true
 custom_code:
   post_create: templates/terraform/post_create/kms_autokey_config_sleep.go.tmpl
   post_update: templates/terraform/post_create/kms_autokey_config_sleep.go.tmpl
