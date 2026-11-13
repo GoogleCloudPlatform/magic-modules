@@ -68,6 +68,7 @@ parameters:
       The ID to use for the Extension Instance, which will become the final
       component of the instance's name.
     min_version: beta
+    api_name: name
     url_param_only: true
     required: true
     immutable: true
