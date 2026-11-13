@@ -25,6 +25,7 @@ self_link: projects/{{project}}/instances/{{instance_id}}
 create_url: projects/{{project}}/instances?instanceId={{instance_id}}
 update_mask: true
 generate_list_resource: true
+collection_url_key: instances
 update_verb: PATCH
 # TODO: add API field once documentation is ready
 import_format:
