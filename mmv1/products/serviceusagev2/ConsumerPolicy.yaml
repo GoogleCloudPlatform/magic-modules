@@ -13,7 +13,6 @@
 
 ---
 name: ConsumerPolicy
-min_version: beta
 base_url: '{{parent}}/consumerPolicies/{{name}}'
 self_link: '{{parent}}/consumerPolicies/{{name}}'
 create_verb: PATCH
@@ -24,7 +23,7 @@ description: |
 references:
   guides:
     'Enabling and Disabling Services': 'https://cloud.google.com/service-usage/docs/enable-disable'
-  api: 'https://docs.cloud.google.com/service-usage/docs/reference/rest/v2beta/consumerPolicies'
+  api: 'https://docs.cloud.google.com/service-usage/docs/reference/rest/v2/consumerPolicies'
 import_format: ['{{%parent}}/consumerPolicies/{{name}}']
 id_format: '{{parent}}/consumerPolicies/{{name}}'
 autogen_async: true

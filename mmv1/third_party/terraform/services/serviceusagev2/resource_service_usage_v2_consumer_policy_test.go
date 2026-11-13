@@ -16,7 +16,7 @@
 // ----------------------------------------------------------------------------
 
 package serviceusagev2_test
-{{- if ne $.TargetVersionName "ga" }}
+
 import (
 	"regexp"
 	"testing"
@@ -37,7 +37,7 @@ func TestAccServiceUsageV2ConsumerPolicy_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccServiceUsageV2ConsumerPolicy_serviceusagev2Consumerpolicy_dependencyError(context),
@@ -109,15 +109,15 @@ func TestAccServiceUsageV2ConsumerPolicy_update(t *testing.T) {
 		},
 	})
 }
+
 func testAccServiceUsageV2ConsumerPolicy_serviceusagev2Consumerpolicy_dependencyError(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-provider "google-beta" {
+provider "google" {
   user_project_override = true
   billing_project = "%{project_id}"
 }
 
 resource "google_project" "basic" {
-  provider = google-beta
   project_id = "tf-test-suv2%{random_suffix}"
   name       = "suv2-test%{random_suffix}"
   org_id     = "%{org_id}"
@@ -125,7 +125,6 @@ resource "google_project" "basic" {
 }
 
 resource "google_service_usage_v2_consumer_policy" "default" {
-  provider = google-beta
   parent = "projects/${google_project.basic.project_id}"
   name   = "default"
   enable_rules  {
@@ -138,13 +137,12 @@ resource "google_service_usage_v2_consumer_policy" "default" {
 
 func testAccServiceUsageV2ConsumerPolicy_allowDeletion(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-    provider "google-beta" {
+    provider "google" {
       user_project_override = true
       billing_project = "%{project_id}"
     }
 
     resource "google_project" "basic" {
-      provider = google-beta
       project_id = "tf-test-suv2%{random_suffix}"
       name       = "tf-test-suv2%{random_suffix}"
       org_id     = "%{org_id}"
@@ -152,7 +150,6 @@ func testAccServiceUsageV2ConsumerPolicy_allowDeletion(context map[string]interf
     }
 
     resource "google_service_usage_v2_consumer_policy" "default" {
-      provider = google-beta
       parent = "projects/${google_project.basic.project_id}"
       name   = "default"
 
@@ -162,19 +159,19 @@ func testAccServiceUsageV2ConsumerPolicy_allowDeletion(context map[string]interf
 
       # 🚀 Override strict validations to allow clean teardown
       validate_dependencies = false
+      check_usage_on_remove = false
     }
 `, context)
 }
 
 func testAccServiceUsageV2ConsumerPolicy_serviceusagev2Consumerpolicy_dependencyOK(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-provider "google-beta" {
+provider "google" {
   user_project_override = true
   billing_project = "%{project_id}"
 }
 
 resource "google_project" "basic" {
-  provider = google-beta
   project_id = "tf-test-suv2%{random_suffix}"
   name       = "tf-test-suv2%{random_suffix}"
   org_id     = "%{org_id}"
@@ -182,11 +179,15 @@ resource "google_project" "basic" {
 }
 
 resource "google_service_usage_v2_consumer_policy" "default" {
-  provider = google-beta
   parent = "projects/${google_project.basic.project_id}"
   name   = "default"
   enable_rules  {
-    services = ["services/compute.googleapis.com","services/oslogin.googleapis.com"]
+    services = [
+      "services/compute.googleapis.com",
+      "services/oslogin.googleapis.com",
+      "services/backupdr.googleapis.com",
+      "services/servicenetworking.googleapis.com",
+    ]
   }
   validate_dependencies = true
 }
@@ -195,13 +196,12 @@ resource "google_service_usage_v2_consumer_policy" "default" {
 
 func testAccServiceUsageV2ConsumerPolicy_serviceusagev2Consumerpolicy_removeDepedencyError(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-provider "google-beta" {
+provider "google" {
   user_project_override = true
   billing_project = "%{project_id}"
 }
 
 resource "google_project" "basic" {
-  provider = google-beta
   project_id = "tf-test-suv2%{random_suffix}"
   name       = "tf-test-suv2%{random_suffix}"
   org_id     = "%{org_id}"
@@ -209,7 +209,6 @@ resource "google_project" "basic" {
 }
 
 resource "google_service_usage_v2_consumer_policy" "default" {
-  provider = google-beta
   parent = "projects/${google_project.basic.project_id}"
   name   = "default"
   enable_rules  {
@@ -222,13 +221,12 @@ resource "google_service_usage_v2_consumer_policy" "default" {
 
 func testAccServiceUsageV2ConsumerPolicy_serviceusagev2Consumerpolicy_removeDependencyOK(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-provider "google-beta" {
+provider "google" {
   user_project_override = true
   billing_project = "%{project_id}"
 }
 
 resource "google_project" "basic" {
-  provider = google-beta
   project_id = "tf-test-suv2%{random_suffix}"
   name       = "tf-test-suv2%{random_suffix}"
   org_id     = "%{org_id}"
@@ -236,7 +234,6 @@ resource "google_project" "basic" {
 }
 
 resource "google_service_usage_v2_consumer_policy" "default" {
-  provider = google-beta
   parent = "projects/${google_project.basic.project_id}"
   name   = "default"
   enable_rules  {
@@ -249,13 +246,12 @@ resource "google_service_usage_v2_consumer_policy" "default" {
 
 func testAccServiceUsageV2ConsumerPolicy_serviceusagev2Consumerpolicy_withCatalogs(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-provider "google-beta" {
+provider "google" {
   user_project_override = true
   billing_project = "%{project_id}"
 }
 
 resource "google_project" "basic" {
-  provider = google-beta
   project_id = "tf-test-suv2%{random_suffix}"
   name       = "tf-test-suv2%{random_suffix}"
   org_id     = "%{org_id}"
@@ -263,7 +259,6 @@ resource "google_project" "basic" {
 }
 
 resource "google_service_usage_v2_consumer_policy" "default" {
-  provider = google-beta
   parent = "projects/${google_project.basic.project_id}"
   name   = "default"
   enable_rules  {
@@ -277,13 +272,12 @@ resource "google_service_usage_v2_consumer_policy" "default" {
 
 func testAccServiceUsageV2ConsumerPolicy_serviceusagev2Consumerpolicy_dependnecyValidationOff(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-provider "google-beta" {
+provider "google" {
   user_project_override = true
   billing_project = "%{project_id}"
 }
 
 resource "google_project" "basic" {
-  provider = google-beta
   project_id = "tf-test-suv2%{random_suffix}"
   name       = "tf-test-suv2%{random_suffix}"
   org_id     = "%{org_id}"
@@ -291,7 +285,6 @@ resource "google_project" "basic" {
 }
 
 resource "google_service_usage_v2_consumer_policy" "default" {
-  provider = google-beta
   parent = "projects/${google_project.basic.project_id}"
   name   = "default"
   enable_rules  {
@@ -304,13 +297,12 @@ resource "google_service_usage_v2_consumer_policy" "default" {
 
 func testAccServiceUsageV2ConsumerPolicy_serviceusagev2Consumerpolicy_dependnecyValidationOnError(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-provider "google-beta" {
+provider "google" {
   user_project_override = true
   billing_project = "%{project_id}"
 }
 
 resource "google_project" "basic" {
-  provider = google-beta
   project_id = "tf-test-suv2%{random_suffix}"
   name       = "tf-test-suv2%{random_suffix}"
   org_id     = "%{org_id}"
@@ -318,7 +310,6 @@ resource "google_project" "basic" {
 }
 
 resource "google_service_usage_v2_consumer_policy" "default" {
-  provider = google-beta
   parent = "projects/${google_project.basic.project_id}"
   name   = "default"
   enable_rules  {
@@ -328,4 +319,3 @@ resource "google_service_usage_v2_consumer_policy" "default" {
 }
 `, context)
 }
-{{- end }}
