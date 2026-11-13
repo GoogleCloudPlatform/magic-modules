@@ -149,6 +149,12 @@
 		if count != nil {
 			newObj["specificSkuCount"] = obj["specificReservation"].(map[string]interface{})["count"]
 		}
+	} else if d.HasChange("enable_emergent_maintenance") {
+		newObj["enableEmergentMaintenance"] = d.Get("enable_emergent_maintenance")
+		if urlUpdateMask != "" {
+			urlUpdateMask = urlUpdateMask + "&paths=enableEmergentMaintenance"
+			newObj["urlUpdateMask"] = urlUpdateMask
+		}
 	}
 
 	return newObj, nil

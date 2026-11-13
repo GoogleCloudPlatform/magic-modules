@@ -390,9 +390,8 @@ properties:
     type: Boolean
     description: |
       Indicates if this group of VMs have emergent maintenance enabled.
-    immutable: true
+    send_empty_value: true
     ignore_read: true
-    min_version: 'beta'
   - name: 'kind'
     type: String
     description: |
