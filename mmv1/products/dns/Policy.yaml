@@ -23,6 +23,7 @@ references:
 docs:
 base_url: projects/{{project}}/policies
 immutable: true
+generate_list_resource: true
 kind: dns#policy
 id_format: projects/{{project}}/policies/{{name}}
 timeouts:
