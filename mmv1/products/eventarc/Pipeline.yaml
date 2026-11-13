@@ -36,6 +36,7 @@ async:
     resource_inside_response: true
 autogen_async: true
 include_in_tgc_next: true
+generate_list_resource: true
 custom_code:
 iam_policy:
   method_name_separator: ':'
