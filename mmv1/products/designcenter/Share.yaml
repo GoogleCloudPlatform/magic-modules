@@ -101,5 +101,5 @@ properties:
   - name: 'createTime'
     type: 'Time'
     description: |
-      Output only. [Output only] Create time stamp.
+      The share creation timestamp.
     output: true
