@@ -26,6 +26,7 @@ func TestAccTags(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
 		"tagKeyBasic":                              testAccTagsTagKey_tagKeyBasic,
 		"tagKeyBasicWithPurposeGceFirewall":        testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewall,
+		"tagKeyImportWithPurposeDataGceFirewall":   testAccTagsTagKey_tagKeyImportWithPurposeDataGceFirewall,
 		"tagKeyBasicWithPurposeDataGovernance":     testAccTagsTagKey_tagKeyBasicWithPurposeDataGovernance,
 		"tagKeyBasicWithAllowedValuesRegex":        testAccTagsTagKey_tagKeyBasicWithAllowedValuesRegex,
 		"tagKeyUpdate":                             testAccTagsTagKey_tagKeyUpdate,
@@ -125,6 +126,56 @@ resource "google_tags_tag_key" "key" {
 	  purpose_data = {network = "${google_compute_network.tag_network.project}/${google_compute_network.tag_network.name}"}
 	}
 
+`, context)
+}
+
+func testAccTagsTagKey_tagKeyImportWithPurposeDataGceFirewall(t *testing.T) {
+	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckTagsTagKeyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTagsTagKey_tagKeyImportWithPurposeDataGceFirewallExample(context),
+			},
+			{
+				ResourceName:      "google_tags_tag_key.key",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// The real import id is "tagKeys/<name> organization=auto": name is Computed
+				// so it isn't known until after apply, and the purpose_data key=value pair
+				// has to be supplied on the import id since the API echoes back a resolved
+				// organization number, not "auto", so purpose_data is never read back from
+				// the API (see purposeData's ignore_read in TagKey.yaml) and must come from
+				// the import id instead.
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					rs, ok := s.RootModule().Resources["google_tags_tag_key.key"]
+					if !ok {
+						return "", fmt.Errorf("resource not found: google_tags_tag_key.key")
+					}
+					return fmt.Sprintf("tagKeys/%s organization=auto", rs.Primary.Attributes["name"]), nil
+				},
+			},
+		},
+	})
+}
+
+func testAccTagsTagKey_tagKeyImportWithPurposeDataGceFirewallExample(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_tags_tag_key" "key" {
+  parent      = "organizations/%{org_id}"
+  short_name  = "tf-test-foo%{random_suffix}"
+  description = "For foo%{random_suffix} resources."
+  purpose     = "GCE_FIREWALL"
+  purpose_data = {
+    organization = "auto"
+  }
+}
 `, context)
 }
 
