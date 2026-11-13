@@ -24,6 +24,7 @@ docs:
 base_url: projects/{{project}}/instanceConfigs
 update_mask: true
 update_verb: PATCH
+generate_list_resource: true
 id_format: '{{project}}/{{name}}'
 import_format:
   - projects/{{project}}/instanceConfigs/{{name}}
