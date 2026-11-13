@@ -131,15 +131,17 @@ resource "{{ $.TerraformName }}_iam_member" "member" {
 
 func testAcc{{ $.ResourceName }}IamMemberListQuery_list(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-
-variable "{{ underscore $.IamParentResourceName}}" { type = string }
-
+{{- range $attribute := $.IamAttributes }}
+variable "{{ $attribute}}" { type = string }
+{{- end }}
 
 list "{{ $.TerraformName }}_iam_member" "members" {
     provider = {{ if $.VersionedProvider $sample.MinVersion }}google-beta{{ else }}google{{ end }}
 	limit = 1000
     config {
-        {{ underscore $.IamParentResourceName }} =  var.{{ underscore $.IamParentResourceName }}
+    {{- range $attribute := $.IamAttributes}}
+        {{ $attribute}} = var.{{ $attribute }}
+    {{- end}}
 	{{- if $.IamPolicy.MemberListResource.RoleFilterEnabled }}
 		role = "{{ $.IamPolicy.AllowedIamRole }}"
 	{{- end }}	
