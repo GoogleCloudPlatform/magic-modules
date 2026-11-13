@@ -19,6 +19,7 @@ self_link: projects/{{project}}/locations/{{location}}/traceScopes/{{trace_scope
 create_url: projects/{{project}}/locations/{{location}}/traceScopes?traceScopeId={{trace_scope_id}}
 update_mask: true
 update_verb: PATCH
+generate_list_resource: true
 id_format: projects/{{project}}/locations/{{location}}/traceScopes/{{trace_scope_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/traceScopes/{{trace_scope_id}}

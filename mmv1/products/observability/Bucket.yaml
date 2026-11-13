@@ -41,6 +41,7 @@ async:
   result:
     resource_inside_response: true
 exclude_delete: true
+generate_list_resource: true
 autogen_status: QnVja2V0QXV0b2dlblYyQWdlbnQ=
 autogen_async: true
 custom_code:
