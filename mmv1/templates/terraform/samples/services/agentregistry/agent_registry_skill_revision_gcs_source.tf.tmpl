@@ -21,7 +21,7 @@ resource "google_storage_bucket_object" "archive" {
 
 resource "google_agent_registry_skill_revision" "{{$.PrimaryResourceId}}" {
   location          = "global"
-  skill             = "private-tf-test-skill"
+  skill             = "{{index $.Vars "skill"}}"
   skill_revision_id = "{{index $.ResourceIdVars "revision"}}"
 
   gcs_source {

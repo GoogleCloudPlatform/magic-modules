@@ -33,6 +33,8 @@ async:
   result:
     resource_inside_response: true
 autogen_async: true
+custom_code:
+  test_constants: templates/terraform/test_constants/agent_registry_skill_revision.go.tmpl
 samples:
   - name: agent_registry_skill_revision_basic
     primary_resource_id: default
@@ -40,6 +42,10 @@ samples:
       - name: agent_registry_skill_revision_basic
         resource_id_vars:
           revision: ar-rev
+        vars:
+          skill: private-tf-test-skill
+        test_vars_overrides:
+          skill: bootstrapAgentRegistrySkill(t)
         ignore_read_extra:
           - scan_result
   - name: agent_registry_skill_revision_gcs_source
@@ -49,6 +55,10 @@ samples:
         resource_id_vars:
           bucket: ar-skill-bucket
           revision: ar-rev-gcs
+        vars:
+          skill: private-tf-test-skill
+        test_vars_overrides:
+          skill: bootstrapAgentRegistrySkill(t)
         ignore_read_extra:
           - scan_result
 
