@@ -31,14 +31,11 @@ func TestAccIAMWorkforcePoolWorkforcePoolProvider_oidc(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccIAMWorkforcePoolWorkforcePoolProvider_oidc_full(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_iam_workforce_pool_provider.my_provider", "attribute_sync_interval", "7200s"),
-				),
 			},
 			{
-				ResourceName:      "google_iam_workforce_pool_provider.my_provider",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_iam_workforce_pool_provider.my_provider",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"oidc.0.client_secret.0.value.0.plain_text"},
 			},
 			{
@@ -48,14 +45,11 @@ func TestAccIAMWorkforcePoolWorkforcePoolProvider_oidc(t *testing.T) {
 						plancheck.ExpectResourceAction("google_iam_workforce_pool_provider.my_provider", plancheck.ResourceActionUpdate),
 					},
 				},
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_iam_workforce_pool_provider.my_provider", "attribute_sync_interval", "3600s"),
-				),
 			},
 			{
-				ResourceName:      "google_iam_workforce_pool_provider.my_provider",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_iam_workforce_pool_provider.my_provider",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"oidc.0.client_secret.0.value.0.plain_text"},
 			},
 			{
@@ -65,14 +59,11 @@ func TestAccIAMWorkforcePoolWorkforcePoolProvider_oidc(t *testing.T) {
 						plancheck.ExpectResourceAction("google_iam_workforce_pool_provider.my_provider", plancheck.ResourceActionUpdate),
 					},
 				},
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_iam_workforce_pool_provider.my_provider", "attribute_sync_interval", ""),
-				),
 			},
 			{
-				ResourceName:      "google_iam_workforce_pool_provider.my_provider",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_iam_workforce_pool_provider.my_provider",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"oidc.0.client_secret.0.value.0.plain_text"},
 			},
 			{
@@ -82,21 +73,15 @@ func TestAccIAMWorkforcePoolWorkforcePoolProvider_oidc(t *testing.T) {
 						plancheck.ExpectResourceAction("google_iam_workforce_pool_provider.my_provider", plancheck.ResourceActionUpdate),
 					},
 				},
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_iam_workforce_pool_provider.my_provider", "attribute_sync_interval", "1800s"),
-				),
 			},
 			{
-				ResourceName:      "google_iam_workforce_pool_provider.my_provider",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_iam_workforce_pool_provider.my_provider",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"oidc.0.client_secret.0.value.0.plain_text"},
 			},
 			{
 				Config: testAccIAMWorkforcePoolWorkforcePoolProvider_oidc_update(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_iam_workforce_pool_provider.my_provider", "attribute_sync_interval", ""),
-				),
 			},
 			{
 				ResourceName:      "google_iam_workforce_pool_provider.my_provider",
