@@ -15,6 +15,11 @@
 name: CatalogTemplate
 description: |
   A Design Center Catalog Template.
+references:
+  guides:
+    Application Design Center Overview: https://docs.cloud.google.com/application-design-center/docs/overview
+    Manage, publish, and share catalogs: https://docs.cloud.google.com/application-design-center/docs/manage-catalogs
+  api: https://docs.cloud.google.com/application-design-center/docs/reference/rest/v1/projects.locations.spaces.catalogs.templates
 base_url: projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates
 self_link: projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template_id}}
 create_url: projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates?catalogTemplateId={{catalog_template_id}}
@@ -83,14 +88,12 @@ parameters:
     immutable: true
     url_param_only: true
 properties:
-  - type: Enum
+  - type: String
     name: templateCategory
     description: |
-      The category of the template.
+      The category of the template. Possible values include
+      `APPLICATION_TEMPLATE`, `COMPONENT_TEMPLATE`, and `INSTANCE_TEMPLATE`.
     required: true
-    enum_values:
-      - APPLICATION_TEMPLATE
-      - COMPONENT_TEMPLATE
   - type: String
     name: displayName
     description: |
