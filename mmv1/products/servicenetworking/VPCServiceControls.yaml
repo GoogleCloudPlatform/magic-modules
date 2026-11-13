@@ -69,6 +69,7 @@ async:
     resource_inside_response: false
   include_project: true
 exclude_delete: true
+generate_list_resource: true
 autogen_async: true
 # excluding tgc because of helpers in custom_code.constants
 exclude_tgc: true
