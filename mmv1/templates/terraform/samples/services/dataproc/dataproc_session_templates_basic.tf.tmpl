@@ -1,0 +1,8 @@
+resource "google_dataproc_session_template" "{{$.PrimaryResourceId}}" {
+    name     = "projects/{{index $.TestEnvVars "project_name"}}/locations/{{index $.TestEnvVars "location"}}/sessionTemplates/{{index $.ResourceIdVars "name"}}"
+    location = "{{index $.TestEnvVars "location"}}"
+
+    jupyter_session {
+      kernel = "PYTHON"
+    }
+}

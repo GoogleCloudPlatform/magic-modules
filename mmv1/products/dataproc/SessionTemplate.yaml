@@ -42,6 +42,17 @@ error_retry_predicates:
 custom_code:
   custom_import: templates/terraform/custom_import/set_id_name_with_slashes.go.tmpl
 samples:
+  - name: dataproc_session_templates_basic
+    primary_resource_id: example_session_templates_basic
+    steps:
+      - name: dataproc_session_templates_basic
+        resource_id_vars:
+          name: tf-test-session-template
+        test_env_vars:
+          project_name: PROJECT_NAME
+          location: REGION
+        ignore_read_extra:
+          - runtime_config.0.properties
   - name: dataproc_session_templates_jupyter
     primary_resource_id: example_session_templates_jupyter
     steps:
