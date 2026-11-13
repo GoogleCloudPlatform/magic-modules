@@ -7,10 +7,35 @@ resource "google_oracle_database_odb_network" "{{$.PrimaryResourceId}}"{
   labels = {
     terraform_created = "true"
   }
+  service_connectivity_config {
+    psc_interface_config {
+      network_attachment = google_compute_network_attachment.default.id
+    }
+  }
   deletion_protection = "{{index $.ResourceIdVars "deletion_protection"}}"
 }
 
 data "google_compute_network" "default" {
   name     = "new"
   project = "{{index $.ResourceIdVars "project"}}"
+}
+
+resource "google_compute_network_attachment" "default" {
+  name                  = "{{index $.ResourceIdVars "network_attachment_name"}}"
+  region                = "us-west3"
+  project               = "{{index $.ResourceIdVars "project"}}"
+  description           = "basic network attachment description"
+  connection_preference = "ACCEPT_AUTOMATIC"
+
+  subnetworks = [
+    google_compute_subnetwork.default.self_link
+  ]
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "{{index $.ResourceIdVars "subnetwork_name"}}"
+  region        = "us-west3"
+  project       = "{{index $.ResourceIdVars "project"}}"
+  network       = data.google_compute_network.default.id
+  ip_cidr_range = "10.1.0.0/16"
 }
