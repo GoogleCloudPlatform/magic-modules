@@ -49,6 +49,7 @@ async:
 # TODO: remove this default in the 8.0.0 major release
 deletion_policy_default: ABANDON
 autogen_async: true
+generate_list_resource: true
 custom_code:
   pre_delete: templates/terraform/pre_delete/firestore_database.go.tmpl
 samples:
