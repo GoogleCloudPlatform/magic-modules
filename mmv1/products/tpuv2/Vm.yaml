@@ -27,6 +27,7 @@ create_url: projects/{{project}}/locations/{{zone}}/nodes?nodeId={{name}}
 update_url: projects/{{project}}/locations/{{zone}}/nodes/{{name}}
 update_mask: true
 update_verb: PATCH
+generate_list_resource: true
 custom_diff:
   - acceleratorTypeCustomizeDiff
 sweeper:
