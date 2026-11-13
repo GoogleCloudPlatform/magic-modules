@@ -1906,3 +1906,45 @@ func TestIsFieldInNewNestedStructure(t *testing.T) {
 		})
 	}
 }
+
+func TestComputeSchemaDiff_NoUpdate(t *testing.T) {
+	dummyCRUD := func(d *schema.ResourceData, meta interface{}) error { return nil }
+	sd := ComputeSchemaDiff(nil, map[string]*schema.Resource{
+		"google_immutable": {
+			Create: dummyCRUD,
+			Read:   dummyCRUD,
+			Delete: dummyCRUD,
+			Schema: map[string]*schema.Schema{
+				"field_a": {Type: schema.TypeString, Optional: true, ForceNew: true},
+			},
+		},
+		"google_immutable_with_deletion_policy_stub_update": {
+			Create: dummyCRUD,
+			Read:   dummyCRUD,
+			Update: dummyCRUD,
+			Delete: dummyCRUD,
+			Schema: map[string]*schema.Schema{
+				"field_a":         {Type: schema.TypeString, Optional: true, ForceNew: true},
+				"deletion_policy": {Type: schema.TypeString, Optional: true, Computed: true},
+			},
+		},
+		"google_updatable": {
+			Create: dummyCRUD,
+			Read:   dummyCRUD,
+			Update: dummyCRUD,
+			Delete: dummyCRUD,
+			Schema: map[string]*schema.Schema{
+				"field_a": {Type: schema.TypeString, Optional: true},
+			},
+		},
+	})
+	if !sd["google_immutable"].NoUpdate {
+		t.Errorf("expected google_immutable.NoUpdate = true, got false")
+	}
+	if !sd["google_immutable_with_deletion_policy_stub_update"].NoUpdate {
+		t.Errorf("expected google_immutable_with_deletion_policy_stub_update.NoUpdate = true, got false")
+	}
+	if sd["google_updatable"].NoUpdate {
+		t.Errorf("expected google_updatable.NoUpdate = false, got true")
+	}
+}

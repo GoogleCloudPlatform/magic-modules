@@ -270,6 +270,224 @@ func TestDetectExhaustiveMissingTests_CoreExemptions(t *testing.T) {
 	assertExempt("opt_block.req_child.Unset", info.Fields["opt_block.req_child"].Unset, "required_in_parent")
 }
 
+func TestDetectExhaustiveMissingTests_CoreForceNewOmissionUnset(t *testing.T) {
+	schemaDiff := diff.SchemaDiff{
+		"google_updatable_with_forcenew": {
+			Fields: map[string]diff.FieldDiff{
+				"name": {
+					New: &schema.Schema{Type: schema.TypeString, Required: true, ForceNew: true},
+				},
+				"labels": {
+					New: &schema.Schema{Type: schema.TypeMap, Optional: true, Elem: &schema.Schema{Type: schema.TypeString}},
+				},
+				"description": {
+					New: &schema.Schema{Type: schema.TypeString, Optional: true, ForceNew: true},
+				},
+			},
+		},
+	}
+
+	// Case 1: Only a _full test exists where optional ForceNew description is always set.
+	fullOnlyTests := []*reader.Test{
+		{
+			Name: "TestAccUpdatableWithForcenew_full",
+			Steps: []reader.Step{
+				{
+					reader.ResourceBlock: {
+						"google_updatable_with_forcenew": {
+							"primary": {
+								"name":        "\"n1\"",
+								"labels.env":  "\"dev\"",
+								"description": "\"desc\"",
+							},
+						},
+					},
+				},
+				{
+					reader.ResourceBlock: {
+						"google_updatable_with_forcenew": {
+							"primary": {
+								"name":        "\"n1\"",
+								"labels.env":  "\"prod\"",
+								"description": "\"desc\"",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	gotMissing, err := DetectExhaustiveMissingTests(schemaDiff, fullOnlyTests, false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	infoMissing := gotMissing["google_updatable_with_forcenew"]
+	if infoMissing == nil {
+		t.Fatalf("expected incomplete fields when optional ForceNew fields are never omitted")
+	}
+	for _, fp := range []string{"description", "labels"} {
+		if infoMissing.Fields[fp].Unset.Status != StatusMissing {
+			t.Errorf("expected %s.Unset to be MISSING, got %+v", fp, infoMissing.Fields[fp].Unset)
+		}
+	}
+
+	// Case 2: Add _basic test omitting ForceNew description -> description UNSET becomes COVERED,
+	// while mutable labels still requires an in-place update UNSET step.
+	withBasicNoLabelsUnset := append([]*reader.Test{}, fullOnlyTests...)
+	withBasicNoLabelsUnset = append(withBasicNoLabelsUnset, &reader.Test{
+		Name: "TestAccUpdatableWithForcenew_basic",
+		Steps: []reader.Step{
+			{
+				reader.ResourceBlock: {
+					"google_updatable_with_forcenew": {
+						"primary": {
+							"name": "\"n1\"",
+						},
+					},
+				},
+			},
+		},
+	})
+
+	gotPartial, err := DetectExhaustiveMissingTests(schemaDiff, withBasicNoLabelsUnset, false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	infoPartial := gotPartial["google_updatable_with_forcenew"]
+	if infoPartial == nil {
+		t.Fatalf("expected mutable labels UNSET to still be missing without an in-place unset step")
+	}
+	if diffStr := cmp.Diff([]string{"labels"}, infoPartial.IncompleteFields); diffStr != "" {
+		t.Errorf("expected ONLY mutable labels to remain incomplete (-want +got):\n%s", diffStr)
+	}
+	if infoPartial.Fields["description"].Unset.CoveredBy != "TestAccUpdatableWithForcenew_basic (step 1)" {
+		t.Errorf("expected description.Unset covered by basic test, got %+v", infoPartial.Fields["description"].Unset)
+	}
+
+	// Case 3: Add Step 3 unsetting mutable labels in-place -> 0 incomplete fields!
+	completeTests := []*reader.Test{
+		{
+			Name: "TestAccUpdatableWithForcenew_full",
+			Steps: append(append([]reader.Step{}, fullOnlyTests[0].Steps...), reader.Step{
+				reader.ResourceBlock: {
+					"google_updatable_with_forcenew": {
+						"primary": {
+							"name":        "\"n1\"",
+							"description": "\"desc\"",
+						},
+					},
+				},
+			}),
+		},
+		withBasicNoLabelsUnset[1],
+	}
+
+	gotComplete, err := DetectExhaustiveMissingTests(schemaDiff, completeTests, false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(gotComplete) != 0 {
+		t.Errorf("expected 0 incomplete fields once in-place labels UNSET + ForceNew omission step are present, got:\n%s", FormatExhaustiveMarkdown(gotComplete))
+	}
+}
+
+func TestDetectExhaustiveMissingTests_NoUpdateResource(t *testing.T) {
+	dummyCRUD := func(d *schema.ResourceData, meta interface{}) error { return nil }
+	computedDiff := diff.ComputeSchemaDiff(nil, map[string]*schema.Resource{
+		"google_all_forcenew_with_deletion_policy": {
+			Create: dummyCRUD,
+			Read:   dummyCRUD,
+			Update: dummyCRUD,
+			Delete: dummyCRUD,
+			Schema: map[string]*schema.Schema{
+				"name":            {Type: schema.TypeString, Required: true, ForceNew: true},
+				"deletion_policy": {Type: schema.TypeString, Optional: true, Computed: true},
+			},
+		},
+	})
+	if !computedDiff["google_all_forcenew_with_deletion_policy"].NoUpdate {
+		t.Fatalf("expected google_all_forcenew_with_deletion_policy to have NoUpdate=true")
+	}
+
+	schemaDiff := diff.SchemaDiff{
+		"google_immutable_resource": {
+			NoUpdate: true,
+			Fields: map[string]diff.FieldDiff{
+				"name": {
+					New: &schema.Schema{Type: schema.TypeString, Required: true, ForceNew: true},
+				},
+				"opt_computed": {
+					New: &schema.Schema{Type: schema.TypeString, Optional: true, Computed: true, ForceNew: true},
+				},
+				"opt_covered": {
+					New: &schema.Schema{Type: schema.TypeString, Optional: true, ForceNew: true},
+				},
+				"opt_never_unset": {
+					New: &schema.Schema{Type: schema.TypeString, Optional: true, ForceNew: true},
+				},
+			},
+		},
+	}
+
+	tests := []*reader.Test{
+		{
+			Name: "TestAccImmutable_full",
+			Steps: []reader.Step{
+				{
+					reader.ResourceBlock: {
+						"google_immutable_resource": {
+							"primary": {
+								"name":            "\"n1\"",
+								"opt_computed":    "\"oc1\"",
+								"opt_covered":     "\"c1\"",
+								"opt_never_unset": "\"nu1\"",
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			Name: "TestAccImmutable_basic",
+			Steps: []reader.Step{
+				{
+					reader.ResourceBlock: {
+						"google_immutable_resource": {
+							"primary": {
+								"name":            "\"n1\"",
+								"opt_never_unset": "\"nu1\"",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	got, err := DetectExhaustiveMissingTests(schemaDiff, tests, false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	info := got["google_immutable_resource"]
+	if info == nil {
+		t.Fatalf("expected google_immutable_resource to have incomplete fields")
+	}
+
+	if diffStr := cmp.Diff([]string{"opt_never_unset"}, info.IncompleteFields); diffStr != "" {
+		t.Errorf("IncompleteFields mismatch (-want +got):\n%s", diffStr)
+	}
+	if info.Fields["opt_covered"].Modify.ExemptCode != "resource_not_updatable" {
+		t.Errorf("expected opt_covered.Modify exemptCode resource_not_updatable, got %+v", info.Fields["opt_covered"].Modify)
+	}
+	if info.Fields["opt_covered"].Unset.Status != StatusCovered {
+		t.Errorf("expected opt_covered.Unset to be COVERED by basic test, got %+v", info.Fields["opt_covered"].Unset)
+	}
+	if info.Fields["opt_never_unset"].Unset.Status != StatusMissing {
+		t.Errorf("expected opt_never_unset.Unset to be MISSING, got %+v", info.Fields["opt_never_unset"].Unset)
+	}
+}
+
 func TestDetectExhaustiveMissingTests_IncludeChangedFieldsFlag(t *testing.T) {
 	schemaDiff := diff.SchemaDiff{
 		"google_example_resource": {
