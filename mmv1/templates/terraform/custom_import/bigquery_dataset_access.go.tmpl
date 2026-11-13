@@ -1,0 +1,53 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2024 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+	config := meta.(*transport_tpg.Config)
+
+	// google_bigquery_dataset_access entries have no unique ID of their own in the API - they are
+	// identified within a dataset's access list by an aggregate of role plus exactly one member
+	// field, so the id must specify which member field it refers to.
+	if matched, err := resourceBigQueryDatasetAccessImportNested(d, config); err != nil {
+		return nil, err
+	} else if matched {
+		return []*schema.ResourceData{d}, nil
+	}
+
+	if err := tpgresource.ParseImportId([]string{
+		"^projects/(?P<project>[^/]+)/datasets/(?P<dataset_id>[^/]+)/roles/(?P<role>[^/]+)/userByEmail/(?P<user_by_email>[^/]+)$",
+		"^projects/(?P<project>[^/]+)/datasets/(?P<dataset_id>[^/]+)/roles/(?P<role>[^/]+)/groupByEmail/(?P<group_by_email>[^/]+)$",
+		"^projects/(?P<project>[^/]+)/datasets/(?P<dataset_id>[^/]+)/roles/(?P<role>[^/]+)/domain/(?P<domain>[^/]+)$",
+		"^projects/(?P<project>[^/]+)/datasets/(?P<dataset_id>[^/]+)/roles/(?P<role>[^/]+)/specialGroup/(?P<special_group>[^/]+)$",
+		"^projects/(?P<project>[^/]+)/datasets/(?P<dataset_id>[^/]+)/roles/(?P<role>[^/]+)/iamMember/(?P<iam_member>[^/]+)$",
+		"^(?P<project>[^/]+)/(?P<dataset_id>[^/]+)/roles/(?P<role>[^/]+)/userByEmail/(?P<user_by_email>[^/]+)$",
+		"^(?P<project>[^/]+)/(?P<dataset_id>[^/]+)/roles/(?P<role>[^/]+)/groupByEmail/(?P<group_by_email>[^/]+)$",
+		"^(?P<project>[^/]+)/(?P<dataset_id>[^/]+)/roles/(?P<role>[^/]+)/domain/(?P<domain>[^/]+)$",
+		"^(?P<project>[^/]+)/(?P<dataset_id>[^/]+)/roles/(?P<role>[^/]+)/specialGroup/(?P<special_group>[^/]+)$",
+		"^(?P<project>[^/]+)/(?P<dataset_id>[^/]+)/roles/(?P<role>[^/]+)/iamMember/(?P<iam_member>[^/]+)$",
+		"^(?P<dataset_id>[^/]+)/roles/(?P<role>[^/]+)/userByEmail/(?P<user_by_email>[^/]+)$",
+		"^(?P<dataset_id>[^/]+)/roles/(?P<role>[^/]+)/groupByEmail/(?P<group_by_email>[^/]+)$",
+		"^(?P<dataset_id>[^/]+)/roles/(?P<role>[^/]+)/domain/(?P<domain>[^/]+)$",
+		"^(?P<dataset_id>[^/]+)/roles/(?P<role>[^/]+)/specialGroup/(?P<special_group>[^/]+)$",
+		"^(?P<dataset_id>[^/]+)/roles/(?P<role>[^/]+)/iamMember/(?P<iam_member>[^/]+)$",
+		"^(?P<project>[^/]+)/(?P<dataset_id>[^/]+)/(?P<role>[^/]+)/(?P<user_by_email>[^/]+)$",
+		"^(?P<dataset_id>[^/]+)/(?P<role>[^/]+)/(?P<user_by_email>[^/]+)$",
+	}, d, config); err != nil {
+		return nil, err
+	}
+
+	// Replace import id for the resource id
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/datasets/{{"{{"}}dataset_id{{"}}"}}")
+	if err != nil {
+		return nil, fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+
+	return []*schema.ResourceData{d}, nil
