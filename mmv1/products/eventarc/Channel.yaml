@@ -35,6 +35,7 @@ error_retry_predicates:
   - transport_tpg.EventarcChannel403Retry
 legacy_long_form_project: true
 autogen_async: true
+generate_list_resource: true
 custom_code:
 samples:
   - name: eventarc_channel_with_cmek
