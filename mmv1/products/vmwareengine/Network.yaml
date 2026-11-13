@@ -23,6 +23,7 @@ docs:
 base_url: projects/{{project}}/locations/{{location}}/vmwareEngineNetworks
 self_link: projects/{{project}}/locations/{{location}}/vmwareEngineNetworks/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/vmwareEngineNetworks?vmwareEngineNetworkId={{name}}
+generate_list_resource: true
 update_mask: true
 update_verb: PATCH
 collection_url_key: vmwareEngineNetworks
