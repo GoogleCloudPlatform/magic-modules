@@ -23,6 +23,7 @@ base_url: projects/{{project}}/locations/{{region}}/connectors
 create_url: projects/{{project}}/locations/{{region}}/connectors?connectorId={{name}}
 update_url: projects/{{project}}/locations/{{region}}/connectors/{{name}}
 update_mask: true
+generate_list_resource: true
 update_verb: PATCH
 kind: vpcaccess#Connector
 timeouts:
@@ -46,7 +47,6 @@ tgc_tests:
     skip: For instances vs throughput, prefer instances during cai2hcl conversion as throughput is discouraged.
 custom_code:
   encoder: templates/terraform/encoders/no_send_name.go.tmpl
-  decoder: templates/terraform/decoders/long_name_to_self_link.go.tmpl
   constants: templates/terraform/constants/vpc_access_connector.go.tmpl
   post_create: templates/terraform/post_create/sleep.go.tmpl
   pre_update: templates/terraform/pre_update/vpc_access_connector_instances.go.tmpl
@@ -164,7 +164,7 @@ properties:
     type: String
     description: |
       The fully qualified name of this VPC connector
-    ignore_read: true
+    api_name: name
     output: true
   - name: connectedProjects
     type: Array
