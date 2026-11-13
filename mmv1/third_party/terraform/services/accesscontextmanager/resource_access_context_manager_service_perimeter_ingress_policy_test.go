@@ -394,7 +394,7 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
     }
   }
   ingress_to {
-    resources = ["projects/%d"]
+    resources = ["projects/%d", google_folder.test-folder.name, "organizations/%s"]
     operations {
       service_name = "bigquery.googleapis.com"
       method_selectors {
@@ -406,7 +406,7 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
     }
   }
 }
-`, testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitleName), org, policyTitle, projectNumber, projectNumber)
+`, testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitleName), org, policyTitle, projectNumber, projectNumber, org)
 }
 
 func testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitleName string) string {
