@@ -96,7 +96,7 @@ properties:
   - name: 'state'
     type: 'String'
     description: |
-      The state of the share.
+      The state of the share, which indicates whether the catalog is in sync. Possible values include `IN_SYNC` and `OUT_OF_SYNC`.
     output: true
   - name: 'createTime'
     type: 'Time'
