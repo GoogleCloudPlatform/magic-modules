@@ -142,6 +142,8 @@ samples:
           deletion_protection_enabled: "true"
         test_vars_overrides:
           deletion_protection_enabled: "false"
+        test_env_vars:
+          region: 'REGION'
         oics_vars_overrides:
           deletion_protection_enabled: "false"
   - name: redis_cluster_ha
