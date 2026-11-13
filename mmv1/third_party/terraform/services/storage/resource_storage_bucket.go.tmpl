@@ -1017,7 +1017,7 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 
 	// If the retention policy is not already locked, check if it
 	// needs to be locked.
-	if v, ok := d.GetOk("retention_policy"); ok && !res.RetentionPolicy.IsLocked {
+	if v, ok := d.GetOk("retention_policy"); ok && !isBucketRetentionPolicyLocked(res.RetentionPolicy) {
 		retention_policies := v.([]interface{})
 
 		sb.RetentionPolicy = &storage.BucketRetentionPolicy{}
@@ -1808,6 +1808,11 @@ func flattenBucketRetentionPolicy(bucketRetentionPolicy *storage.BucketRetention
 
 	bucketRetentionPolicies = append(bucketRetentionPolicies, retentionPolicy)
 	return bucketRetentionPolicies
+}
+
+// The API returns no retention policy when retention_period is 0.
+func isBucketRetentionPolicyLocked(policy *storage.BucketRetentionPolicy) bool {
+	return policy != nil && policy.IsLocked
 }
 
 func flattenBucketObjectRetention(bucketObjectRetention *storage.BucketObjectRetention) bool {

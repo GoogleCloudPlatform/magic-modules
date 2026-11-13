@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"google.golang.org/api/googleapi"
+	"google.golang.org/api/storage/v1"
 )
 
 func TestLabelDiffSuppress(t *testing.T) {
@@ -250,4 +251,31 @@ func TestForceDestroyDeleteWorkerContract(t *testing.T) {
 			t.Fatalf("kept an ignorable error: %v", err)
 		}
 	})
+}
+
+func TestIsBucketRetentionPolicyLocked(t *testing.T) {
+	cases := map[string]struct {
+		policy   *storage.BucketRetentionPolicy
+		expected bool
+	}{
+		// retention_period = 0: the API returns no policy.
+		"nil": {
+			policy:   nil,
+			expected: false,
+		},
+		"unlocked": {
+			policy:   &storage.BucketRetentionPolicy{RetentionPeriod: 10},
+			expected: false,
+		},
+		"locked": {
+			policy:   &storage.BucketRetentionPolicy{RetentionPeriod: 10, IsLocked: true},
+			expected: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		if got := isBucketRetentionPolicyLocked(tc.policy); got != tc.expected {
+			t.Errorf("%s: expected %t, got %t", tn, tc.expected, got)
+		}
+	}
 }
