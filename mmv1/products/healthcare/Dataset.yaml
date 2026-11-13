@@ -20,8 +20,10 @@ references:
     Creating a dataset: https://cloud.google.com/healthcare/docs/how-tos/datasets
   api: https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets
 docs:
-base_url: projects/{{project}}/locations/{{location}}/datasets?datasetId={{name}}
+base_url: projects/{{project}}/locations/{{location}}/datasets
 self_link: projects/{{project}}/locations/{{location}}/datasets/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/datasets?datasetId={{name}}
+generate_list_resource: true
 update_mask: true
 update_verb: PATCH
 kind: healthcare#dataset
