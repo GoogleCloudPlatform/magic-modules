@@ -1,0 +1,162 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Connection'
+base_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component}}/connections'
+self_link: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component}}/connections/{{connection_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component}}/connections?connectionId={{connection_id}}'
+update_verb: 'PATCH'
+update_mask: true
+async:
+  actions: []
+description: |
+  A connection between two components in an Application Design Center Application Template.
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component}}/connections/{{connection_id}}'
+samples:
+  - name: designcenter_connection_basic
+    primary_resource_id: example
+    steps:
+      - name: designcenter_connection_basic
+        resource_id_vars:
+          connection_id: example-connection
+        vars:
+          project: my-project-name
+          space: my-space
+          application_template: my-application-template
+          component: my-source-component
+          destination_component_uri: projects/my-project-name/locations/us-central1/spaces/my-space/applicationTemplates/my-application-template/components/my-dest-component
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          application_template: BootstrapDesignCenterApplicationTemplate(t)
+          component: BootstrapDesignCenterComponent(t)
+          destination_component_uri: BootstrapDesignCenterDestinationComponentURI(t)
+      - name: designcenter_connection_update
+        resource_id_vars:
+          connection_id: example-connection
+        vars:
+          project: my-project-name
+          space: my-space
+          application_template: my-application-template
+          component: my-source-component
+          destination_component_uri: projects/my-project-name/locations/us-central1/spaces/my-space/applicationTemplates/my-application-template/components/my-dest-component
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          application_template: BootstrapDesignCenterApplicationTemplate(t)
+          component: BootstrapDesignCenterComponent(t)
+          destination_component_uri: BootstrapDesignCenterDestinationComponentURI(t)
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The location of the space.
+    required: true
+    url_param_only: true
+    immutable: true
+  - name: 'space'
+    type: String
+    description: |
+      The ID of the space.
+    required: true
+    url_param_only: true
+    immutable: true
+  - name: 'application_template'
+    type: String
+    description: |
+      The ID of the application template.
+    required: true
+    url_param_only: true
+    immutable: true
+  - name: 'component'
+    type: String
+    description: |
+      The ID of the component.
+    required: true
+    url_param_only: true
+    immutable: true
+  - name: 'connection_id'
+    type: String
+    description: |
+      The ID of the connection.
+    required: true
+    url_param_only: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the Connection. Format: projects/{project}/locations/{location}/spaces/{space}/applicationTemplates/{application_template}/components/{component}/connections/{connection_id}
+    output: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      Create time stamp.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Update time stamp.
+    output: true
+  - name: 'destinationComponentUri'
+    type: String
+    description: |
+      The component URI that the connection points to.
+    required: true
+  - name: 'sourceComponentParameters'
+    type: Array
+    description: |
+      Parameters associated with the source component. When unset, the
+      API fills these in from the connected components.
+    default_from_api: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'key'
+          type: String
+          description: |
+            The key of the parameter.
+          required: true
+        - name: 'value'
+          type: JsonValue
+          description: |
+            The value of the parameter, as a JSON-encoded string. Use
+            `jsonencode()` to set it.
+          send_empty_value: true
+  - name: 'destinationComponentParameters'
+    type: Array
+    description: |
+      Parameters associated with the destination component. When unset,
+      the API fills these in from the connected components.
+    default_from_api: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'key'
+          type: String
+          description: |
+            The key of the parameter.
+          required: true
+        - name: 'value'
+          type: JsonValue
+          description: |
+            The value of the parameter, as a JSON-encoded string. Use
+            `jsonencode()` to set it.
+          send_empty_value: true
+  - name: 'dependencyType'
+    type: String
+    description: |
+      The dependency type of the connection.
+    output: true
