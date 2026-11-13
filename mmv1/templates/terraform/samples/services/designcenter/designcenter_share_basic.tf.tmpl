@@ -1,0 +1,8 @@
+resource "google_design_center_share" "example" {
+  project           = "{{index $.Vars "project"}}"
+  location          = "us-central1"
+  space             = "{{index $.Vars "space"}}"
+  catalog           = "{{index $.Vars "catalog"}}"
+  share_id          = "{{index $.ResourceIdVars "share_id"}}"
+  destination_space = "projects/{{index $.Vars "project"}}/locations/us-central1/spaces/{{index $.Vars "destination_space"}}"
+}
