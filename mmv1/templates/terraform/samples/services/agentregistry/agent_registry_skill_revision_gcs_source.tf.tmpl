@@ -1,0 +1,33 @@
+data "google_project" "project" {}
+
+resource "google_storage_bucket" "bucket" {
+  name                        = "{{index $.ResourceIdVars "bucket"}}"
+  location                    = "US"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+resource "google_storage_bucket_iam_member" "viewer" {
+  bucket = google_storage_bucket.bucket.name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-agentregistry.iam.gserviceaccount.com"
+}
+
+resource "google_storage_bucket_object" "archive" {
+  name    = "skill.zip"
+  bucket  = google_storage_bucket.bucket.name
+  content = base64decode("UEsDBBQAAAAAAAAAIQBbV0s5OAAAADgAAAAIAAAAU0tJTEwubWQtLS0KbmFtZTogbXktdGVzdC1za2lsbApkZXNjcmlwdGlvbjogQSB0ZXN0IHNraWxsIDQKLS0tClBLAQIUAxQAAAAAAAAAIQBbV0s5OAAAADgAAAAIAAAAAAAAAAAAAQAAAAAAAABTS0lMTC5tZFBLBQYAAAAAAQABADYAAABeAAAAAAA=")
+}
+
+resource "google_agent_registry_skill_revision" "{{$.PrimaryResourceId}}" {
+  location          = "global"
+  skill             = "{{index $.Vars "skill"}}"
+  skill_revision_id = "{{index $.ResourceIdVars "revision"}}"
+
+  gcs_source {
+    uri        = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.archive.name}"
+    generation = google_storage_bucket_object.archive.generation
+  }
+
+  depends_on = [google_storage_bucket_iam_member.viewer]
+}
