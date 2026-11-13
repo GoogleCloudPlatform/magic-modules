@@ -22,6 +22,7 @@ docs:
 base_url: projects/{{project}}/locations/{{location}}/networkPolicies
 self_link: projects/{{project}}/locations/{{location}}/networkPolicies/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/networkPolicies?networkPolicyId={{name}}
+generate_list_resource: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/networkPolicies/{{name}}
