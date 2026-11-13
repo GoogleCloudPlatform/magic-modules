@@ -1,0 +1,153 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: CloudVmClusterIdentityConnector
+description: |
+  Manages the Workload Identity Connector on an existing Oracle Cloud VM Cluster.
+
+  ~> **Note:** Destroying this resource only removes it from Terraform state; it does not disable the Workload Identity Connector on the Cloud VM Cluster. To disable the connector, set `enabled = false` and apply before removing the resource. Deleting the parent `google_oracle_database_cloud_vm_cluster` automatically cleans up the connector without being blocked by this resource.
+references:
+  guides:
+    Create VM clusters: https://cloud.google.com/oracle/database/docs/create-clusters
+  api: https://cloud.google.com/oracle/database/docs/reference/rest/v1/projects.locations.cloudVmClusters
+self_link: projects/{{project}}/locations/{{location}}/cloudVmClusters/{{cloud_vm_cluster}}
+create_url: projects/{{project}}/locations/{{location}}/cloudVmClusters/{{cloud_vm_cluster}}:enableIdentityConnector
+create_verb: POST
+update_url: projects/{{project}}/locations/{{location}}/cloudVmClusters/{{cloud_vm_cluster}}:enableIdentityConnector
+update_verb: POST
+exclude_delete: true
+deletion_policy_exclude: true
+exclude_tgc: true
+legacy_long_form_project: true
+id_format: projects/{{project}}/locations/{{location}}/cloudVmClusters/{{cloud_vm_cluster}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/cloudVmClusters/{{cloud_vm_cluster}}
+timeouts:
+  insert_minutes: 60
+  update_minutes: 60
+  delete_minutes: 20
+autogen_async: true
+async:
+  type: OpAsync
+  operation:
+    timeouts:
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 20
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - update
+  result:
+    resource_inside_response: true
+custom_code:
+  encoder: templates/terraform/encoders/oracledatabase_cloud_vm_cluster_identity_connector.go.tmpl
+  pre_create: templates/terraform/pre_create/oracledatabase_cloud_vm_cluster_identity_connector.go.tmpl
+  pre_update: templates/terraform/pre_update/oracledatabase_cloud_vm_cluster_identity_connector.go.tmpl
+  decoder: templates/terraform/decoders/oracledatabase_cloud_vm_cluster_identity_connector.go.tmpl
+samples:
+  - name: oracledatabase_cloud_vm_cluster_identity_connector_basic
+    primary_resource_id: my_identity_connector
+    steps:
+      - name: oracledatabase_cloud_vm_cluster_identity_connector_basic
+        vars:
+          enabled: true
+        resource_id_vars:
+          project: my-project
+          cloud_vm_cluster_id: my-instance
+          cloud_exadata_infrastructure_id: my-exadata
+          hostname_prefix: hostname1
+          odb_network: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork
+          odb_subnet: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet
+          backup_odb_subnet: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-backup-odbsubnet
+          deletion_protection: true
+        test_vars_overrides:
+          deletion_protection: "false"
+          project: '"oasis-terraform-testing-prod"'
+          # ofake- prefix is needed to create a dummy resource for testing purposes only
+          # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
+          cloud_vm_cluster_id: fmt.Sprintf("ofake-tf-test-vmcluster-ic-%s", randomSuffix)
+          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-ic-%s", randomSuffix)
+          hostname_prefix: fmt.Sprintf("h%s", randomSuffix)
+          odb_network: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
+          odb_subnet: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+          backup_odb_subnet: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-backup-odbsubnet"'
+      - name: oracledatabase_cloud_vm_cluster_identity_connector_basic
+        vars:
+          enabled: false
+        resource_id_vars:
+          project: my-project
+          cloud_vm_cluster_id: my-instance
+          cloud_exadata_infrastructure_id: my-exadata
+          hostname_prefix: hostname1
+          odb_network: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork
+          odb_subnet: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet
+          backup_odb_subnet: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-backup-odbsubnet
+          deletion_protection: true
+        test_vars_overrides:
+          deletion_protection: "false"
+          project: '"oasis-terraform-testing-prod"'
+          cloud_vm_cluster_id: fmt.Sprintf("ofake-tf-test-vmcluster-ic-%s", randomSuffix)
+          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-ic-%s", randomSuffix)
+          hostname_prefix: fmt.Sprintf("h%s", randomSuffix)
+          odb_network: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
+          odb_subnet: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+          backup_odb_subnet: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-backup-odbsubnet"'
+      - name: oracledatabase_cloud_vm_cluster_identity_connector_basic
+        vars:
+          enabled: true
+        resource_id_vars:
+          project: my-project
+          cloud_vm_cluster_id: my-instance
+          cloud_exadata_infrastructure_id: my-exadata
+          hostname_prefix: hostname1
+          odb_network: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork
+          odb_subnet: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet
+          backup_odb_subnet: projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-backup-odbsubnet
+          deletion_protection: true
+        test_vars_overrides:
+          deletion_protection: "false"
+          project: '"oasis-terraform-testing-prod"'
+          cloud_vm_cluster_id: fmt.Sprintf("ofake-tf-test-vmcluster-ic-%s", randomSuffix)
+          cloud_exadata_infrastructure_id: fmt.Sprintf("ofake-tf-test-exadata-ic-%s", randomSuffix)
+          hostname_prefix: fmt.Sprintf("h%s", randomSuffix)
+          odb_network: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
+          odb_subnet: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+          backup_odb_subnet: '"projects/oasis-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-backup-odbsubnet"'
+parameters:
+  - name: location
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: The location of the Cloud VM Cluster.
+  - name: cloudVmCluster
+    type: ResourceRef
+    required: true
+    immutable: true
+    url_param_only: true
+    resource: CloudVmCluster
+    imports: name
+    description: |-
+      The ID or full resource name of the Cloud VM Cluster, in the format
+      `{cloud_vm_cluster}` or
+      `projects/{project}/locations/{location}/cloudVmClusters/{cloud_vm_cluster}`.
+properties:
+  - name: enabled
+    type: Boolean
+    required: true
+    send_empty_value: true
+    description: |-
+      Whether the Workload Identity Connector is enabled for the Cloud VM Cluster.
+      Set to `true` to enable the connector or `false` to disable it.
