@@ -1,0 +1,188 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: InboundSsoAssignment
+description: |
+  Assigns an inbound SSO behavior (SSO off, a SAML SSO profile or an OIDC SSO profile) to a
+  Google Group or an Org Unit of a Google enterprise customer.
+
+  The caller must be a Google Workspace / Cloud Identity administrator of the
+  customer with the SSO settings privilege (for example a super admin);
+  Google Cloud IAM roles are not sufficient.
+
+  If you are using User ADCs (Application Default Credentials) with this resource,
+  you must specify a `billing_project` and set `user_project_override` to true
+  in the provider configuration. Otherwise the Cloud Identity API will return a 403 error.
+  Your account must have the `serviceusage.services.use` permission on the
+  `billing_project` you defined.
+references:
+  guides:
+    Assign SSO profiles: https://cloud.google.com/identity/docs/how-to/assign-sso-profiles
+  api: https://cloud.google.com/identity/docs/reference/rest/v1/inboundSsoAssignments
+base_url: inboundSsoAssignments
+self_link: 'inboundSsoAssignments/{{inbound_sso_assignment_id}}'
+create_url: inboundSsoAssignments
+update_url: 'inboundSsoAssignments/{{inbound_sso_assignment_id}}'
+update_verb: PATCH
+update_mask: true
+delete_url: 'inboundSsoAssignments/{{inbound_sso_assignment_id}}'
+id_format: 'inboundSsoAssignments/{{inbound_sso_assignment_id}}'
+import_format:
+  - 'inboundSsoAssignments/{{inbound_sso_assignment_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+exclude_sweeper: true
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, delete, update]
+  result:
+    resource_inside_response: true
+autogen_async: true
+samples:
+  - name: cloud_identity_inbound_sso_assignment_group_saml
+    skip_test: Acceptance test requires Google Workspace admin privileges not held by the CI service account
+    primary_resource_id: assignment
+    steps:
+      - name: cloud_identity_inbound_sso_assignment_group_saml
+        resource_id_vars:
+          id_group: sso-group
+          display_name: saml-profile
+        test_env_vars:
+          org_domain: ORG_DOMAIN
+          cust_id: CUST_ID
+      - name: cloud_identity_inbound_sso_assignment_group_oidc
+        resource_id_vars:
+          id_group: sso-group
+          display_name: saml-profile
+        test_env_vars:
+          org_domain: ORG_DOMAIN
+          cust_id: CUST_ID
+      - name: cloud_identity_inbound_sso_assignment_group_off
+        resource_id_vars:
+          id_group: sso-group
+          display_name: saml-profile
+        test_env_vars:
+          org_domain: ORG_DOMAIN
+          cust_id: CUST_ID
+  - name: cloud_identity_inbound_sso_assignment_org_unit
+    skip_test: Acceptance test requires Google Workspace admin privileges not held by the CI service account
+    primary_resource_id: assignment
+    steps:
+      - name: cloud_identity_inbound_sso_assignment_org_unit
+        test_env_vars:
+          cust_id: CUST_ID
+          org_unit_id: ORG_UNIT_ID
+        vars:
+          sso_mode: SSO_OFF
+      - name: cloud_identity_inbound_sso_assignment_org_unit
+        test_env_vars:
+          cust_id: CUST_ID
+          org_unit_id: ORG_UNIT_ID
+        vars:
+          sso_mode: DOMAIN_WIDE_SAML_IF_ENABLED
+properties:
+  - name: name
+    type: String
+    description: |
+      Resource name of the Inbound SSO Assignment.
+      Format: `inboundSsoAssignments/{inbound_sso_assignment_id}`.
+    output: true
+  - name: inboundSsoAssignmentId
+    api_name: name
+    type: String
+    description: |
+      The server-assigned ID of the Inbound SSO Assignment (the last segment of `name`).
+    output: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: customer
+    type: String
+    description: |
+      The customer. For example: `customers/C0123abc`. If omitted, the customer of the caller is used.
+    immutable: true
+    default_from_api: true
+  - name: targetGroup
+    type: String
+    description: |
+      The Google Group to assign. Must be of the form `groups/{group}`.
+    immutable: true
+    exactly_one_of:
+      - 'target_group'
+      - 'target_org_unit'
+  - name: targetOrgUnit
+    type: String
+    description: |
+      The Org Unit to assign. Must be of the form `orgUnits/{org_unit}`.
+    immutable: true
+    exactly_one_of:
+      - 'target_group'
+      - 'target_org_unit'
+  - name: rank
+    type: Integer
+    description: |
+      Must be zero (which is the default value so it can be omitted) for assignments with
+      `target_org_unit` set and must be greater-than-or-equal-to one for assignments with
+      `target_group` set.
+  - name: ssoMode
+    type: Enum
+    description: |
+      Inbound SSO behavior.
+    required: true
+    enum_values:
+      - 'SSO_OFF'
+      - 'SAML_SSO'
+      - 'OIDC_SSO'
+      - 'DOMAIN_WIDE_SAML_IF_ENABLED'
+  - name: samlSsoInfo
+    type: NestedObject
+    description: |
+      SAML SSO details. Must be set if and only if `sso_mode` is set to `SAML_SSO`.
+    conflicts:
+      - 'oidc_sso_info'
+    properties:
+      - name: inboundSamlSsoProfile
+        type: String
+        description: |
+          Name of the `InboundSamlSsoProfile` to use. Must be of the form
+          `inboundSamlSsoProfiles/{inbound_saml_sso_profile}`.
+        required: true
+  - name: oidcSsoInfo
+    type: NestedObject
+    description: |
+      OpenID Connect SSO details. Must be set if and only if `sso_mode` is set to `OIDC_SSO`.
+    conflicts:
+      - 'saml_sso_info'
+    properties:
+      - name: inboundOidcSsoProfile
+        type: String
+        description: |
+          Name of the `InboundOidcSsoProfile` to use. Must be of the form
+          `inboundOidcSsoProfiles/{inbound_oidc_sso_profile}`.
+        required: true
+  - name: signInBehavior
+    type: NestedObject
+    description: |
+      Assertions about users assigned to an IdP will always be accepted from that IdP. This
+      controls whether/when Google should redirect a user to the IdP. Unset (defaults) is the
+      recommended configuration.
+    properties:
+      - name: redirectCondition
+        type: Enum
+        description: |
+          When to redirect sign-ins to the IdP. Unset means "always".
+        enum_values:
+          - 'NEVER'
