@@ -45,7 +45,6 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 exclude_sweeper: true
-generate_list_resource: true
 # This is a singleton resource that cannot be deleted.
 exclude_delete: true
 custom_code:
