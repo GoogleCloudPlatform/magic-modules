@@ -10,7 +10,20 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
+<<<<<<<< HEAD:mmv1/templates/terraform/update_encoder/lustre_instance.go.tmpl
 // Exists only to shadow the create encoder: MMv1 falls back to
 // custom_code.encoder on update when update_encoder is unset, which would strip
 // target_version from every PATCH. Update needs no rewriting of its own.
 return obj, nil
+========
+// Managed rotation is a property of the regional secret. Treat the resource as gone if the secret no
+// longer reports a managed rotation status (e.g. the secret was deleted and recreated).
+rotation, ok := res["rotation"].(map[string]interface{})
+if !ok {
+	return nil, nil
+}
+if _, ok := rotation["managedRotationStatus"]; !ok {
+	return nil, nil
+}
+return res, nil
+>>>>>>>> 88f8e615b (chore: restore out-of-scope files):mmv1/templates/terraform/decoders/secret_manager_regional_secret_managed_rotation.go.tmpl
