@@ -7,5 +7,6 @@ resource "google_gemini_gibq_observability_setting" "{{$.PrimaryResourceId}}" {
         traces_enabled = false
         feedback_enabled = false
         logging_enabled = false
+        bqaa_enabled = true
     }
 }

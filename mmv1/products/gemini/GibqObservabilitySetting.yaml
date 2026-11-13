@@ -68,6 +68,10 @@ properties:
       - name: loggingEnabled
         type: Boolean
         description: Whether to enable logging.
+      - name: bqaaEnabled
+        type: Boolean
+        description: Whether to enable BigQuery Agent Analytics (BQAA).
+        send_empty_value: true
   - name: labels
     type: KeyValueLabels
     description: Labels as key value pairs.
