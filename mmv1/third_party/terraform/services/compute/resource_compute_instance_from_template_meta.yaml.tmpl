@@ -283,6 +283,9 @@ fields:
     provider_only: true
   - api_field: 'workloadIdentityConfig.identity'
   - api_field: 'workloadIdentityConfig.identityCertificateEnabled'
+{{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'workloadIdentityConfig.identityType'
+{{- end }}
   - api_field: 'zone'
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'eraseWindowsVssSignature'

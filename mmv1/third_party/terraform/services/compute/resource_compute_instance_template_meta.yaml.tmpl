@@ -278,3 +278,7 @@ fields:
     api_field: 'properties.workloadIdentityConfig.identity'
   - field: 'workload_identity_config.identity_certificate_enabled'
     api_field: 'properties.workloadIdentityConfig.identityCertificateEnabled'
+{{- if ne $.TargetVersionName "ga" }}
+  - field: 'workload_identity_config.identity_type'
+    api_field: 'properties.workloadIdentityConfig.identityType'
+{{- end }}
