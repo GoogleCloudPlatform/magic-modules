@@ -1,0 +1,71 @@
+package parametermanagerregional_test
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/parametermanagerregional"
+)
+
+func TestAccDataSourceParameterManagerRegionalTemplateVersionRender_basic(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckParameterManagerRegionalRegionalTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccParameterManagerRegionalTemplateVersionRender_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.google_parameter_manager_regional_template_version_render.rendered", "rendered_template_data", "database:\n  host: 10.0.0.1\n  port: 5432\n"),
+					resource.TestCheckResourceAttr("data.google_parameter_manager_regional_template_version_render.rendered", "template_data", "database:\n  host: {{"{{"}}.host{{"}}"}}\n  port: {{"{{"}}.port{{"}}"}}\n"),
+				),
+			},
+		},
+	})
+}
+
+func testAccParameterManagerRegionalTemplateVersionRender_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_parameter_manager_regional_parameter" "param" {
+  parameter_id = "tf_test_reg_param_%{random_suffix}"
+  location     = "us-central1"
+  format       = "YAML"
+}
+
+resource "google_parameter_manager_regional_parameter_version" "param_ver" {
+  parameter            = google_parameter_manager_regional_parameter.param.id
+  parameter_version_id = "v1"
+  parameter_data       = "host: 10.0.0.1\nport: 5432\n"
+}
+
+resource "google_parameter_manager_regional_template" "tmpl" {
+  template_id = "tf_test_reg_tmpl_%{random_suffix}"
+  location    = "us-central1"
+  format      = "TEMPLATE_FORMAT_YAML"
+}
+
+resource "google_parameter_manager_regional_template_version" "tmpl_ver" {
+  template            = google_parameter_manager_regional_template.tmpl.id
+  template_version_id = "v1"
+  payload {
+    template_data = "database:\n  host: {{"{{"}}.host{{"}}"}}\n  port: {{"{{"}}.port{{"}}"}}\n"
+  }
+}
+
+data "google_parameter_manager_regional_template_version_render" "rendered" {
+  template            = google_parameter_manager_regional_template.tmpl.id
+  template_version_id = google_parameter_manager_regional_template_version.tmpl_ver.template_version_id
+  parameter_version   = google_parameter_manager_regional_parameter_version.param_ver.name
+}
+`, context)
+}
+{{- end }}
