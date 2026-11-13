@@ -52,9 +52,6 @@ samples:
     external_providers: [time]
     steps:
       - name: "observability_bucket_basic"
-        test_env_vars:
-          org_id: ORG_ID
-          billing_account: BILLING_ACCT
         test_vars_overrides:
           kms_key: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-bootstrap-observability-key1").CryptoKey.Name
         vars:
@@ -62,9 +59,6 @@ samples:
           description: "Initial description"
           kms_key: example-key-1
       - name: "observability_bucket_basic"
-        test_env_vars:
-          org_id: ORG_ID
-          billing_account: BILLING_ACCT
         test_vars_overrides:
           kms_key: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-bootstrap-observability-key2").CryptoKey.Name
         vars:
