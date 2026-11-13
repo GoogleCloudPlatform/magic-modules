@@ -1,0 +1,7 @@
+resource "google_network_connectivity_psc_authorization_policy" "{{$.PrimaryResourceId}}" {
+  psc_authorization_policy_id = "{{index $.ResourceIdVars "policy_id"}}"
+  location                    = "us-central1"
+  target_resource_uri         = "//agentregistry.googleapis.com/projects/{{index $.TestEnvVars "project_name"}}/locations/global"
+  authorized_client_resources = ["*"]
+  authorization_mode          = "AUTHORIZATION_MODE_TRANSITIVE_TO_SERVICE_ATTACHMENT"
+}

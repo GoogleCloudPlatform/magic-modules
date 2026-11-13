@@ -1,0 +1,131 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: PscAuthorizationPolicy
+description: A PscAuthorizationPolicy represents an instance-level policy specified by a producer for control over destination connectivity via PSC.
+references:
+  guides:
+    About Service Connectivity Automation: https://cloud.google.com/vpc/docs/about-service-connectivity-automation
+  api: https://cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.pscAuthorizationPolicies
+base_url: projects/{{project}}/locations/{{location}}/pscAuthorizationPolicies
+immutable: true
+self_link: projects/{{project}}/locations/{{location}}/pscAuthorizationPolicies/{{psc_authorization_policy_id}}
+create_url: projects/{{project}}/locations/{{location}}/pscAuthorizationPolicies?pscAuthorizationPolicyId={{psc_authorization_policy_id}}
+id_format: projects/{{project}}/locations/{{location}}/pscAuthorizationPolicies/{{psc_authorization_policy_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/pscAuthorizationPolicies/{{psc_authorization_policy_id}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+sweeper:
+  url_substitutions:
+    - region: us-central1
+    - region: us-east1
+autogen_async: true
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+  result:
+    resource_inside_response: true
+autogen_status: UHNjQXV0aG9yaXphdGlvblBvbGljeUF1dG9nZW5WMkFnZW50
+samples:
+  - name: network_connectivity_psc_authorization_policy_basic
+    primary_resource_id: default
+    steps:
+      - name: network_connectivity_psc_authorization_policy_basic
+        resource_id_vars:
+          policy_id: my-psc-auth-policy
+        test_env_vars:
+          project_name: PROJECT_NAME
+  - name: network_connectivity_psc_authorization_policy_full
+    primary_resource_id: default
+    steps:
+      - name: network_connectivity_psc_authorization_policy_full
+        resource_id_vars:
+          policy_id: my-psc-auth-policy-full
+        test_env_vars:
+          project_name: PROJECT_NAME
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: pscAuthorizationPolicyId
+    type: String
+    description: The ID to use for the PscAuthorizationPolicy, which will become the final component of the PscAuthorizationPolicy's resource name.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: authorizationMode
+    type: String
+    description: |-
+      The authorization mode of the PscAuthorizationPolicy.
+      Possible values:
+      AUTHORIZATION_MODE_TRANSITIVE_TO_SERVICE_ATTACHMENT
+    required: true
+  - name: authorizedClientResources
+    type: Array
+    description: |-
+      The list of authorized consumer resources that are allowed to
+      connect to the target resource. The list is limited to 1 value, and can be
+      one of the following:
+      * `projects/{project_id}`: A specific project ID.
+      * `*`: Wildcard to allow any consumer.
+    required: true
+    item_type:
+      type: String
+  - name: createTime
+    type: String
+    description: The time when the PscAuthorizationPolicy was created.
+    output: true
+  - name: description
+    type: String
+    description: A description of this resource.
+  - name: etag
+    type: String
+    description: The etag of the PscAuthorizationPolicy.
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: User-defined labels.
+  - name: name
+    type: String
+    description: |-
+      Identifier. The name of the PscAuthorizationPolicy.
+      Format:
+      projects/{project}/locations/{location}/pscAuthorizationPolicies/{psc_authorization_policy}
+      See: https://google.aip.dev/122#fields-representing-resource-names
+    output: true
+  - name: targetResourceUri
+    type: String
+    description: |-
+      The full, absolute URI of the targeted resource governed by this
+      policy. Format:
+      `//agentregistry.googleapis.com/projects/{project}/locations/{location}`
+    required: true
+  - name: uid
+    type: String
+    description: The unique identifier (UUID4) of the PscAuthorizationPolicy.
+    output: true
+  - name: updateTime
+    type: String
+    description: The time when the PscAuthorizationPolicy was updated.
+    output: true
