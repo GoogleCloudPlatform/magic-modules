@@ -29,6 +29,7 @@ self_link: locations/{{location}}/workforcePools/{{workforce_pool_id}}
 create_url: locations/{{location}}/workforcePools?workforcePoolId={{workforce_pool_id}}
 update_mask: true
 update_verb: PATCH
+generate_list_resource: true
 iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: POST
