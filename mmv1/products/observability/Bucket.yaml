@@ -41,31 +41,36 @@ async:
   result:
     resource_inside_response: true
 exclude_delete: true
+generate_list_resource: true
 autogen_status: QnVja2V0QXV0b2dlblYyQWdlbnQ=
 autogen_async: true
 custom_code:
   pre_create: templates/terraform/pre_create/observability_bucket.go.tmpl
 samples:
+  # Listed first: the generated ListQuery test uses the first sample. It must not set CMEK,
+  # because the shared test project's _Trace bucket cannot have a CMEK key added to it.
+  - name: "observability_bucket_list"
+    primary_resource_id: "primary"
+    exclude_basic_doc: true
+    steps:
+      - name: "observability_bucket_list"
+        vars:
+          display_name: "Trace bucket"
+          description: "Trace bucket for list query"
   - name: "observability_bucket_basic"
     primary_resource_id: "primary"
     external_providers: [time]
     steps:
       - name: "observability_bucket_basic"
-        test_env_vars:
-          org_id: ORG_ID
-          billing_account: BILLING_ACCT
         test_vars_overrides:
-          kms_key: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-bootstrap-observability-key1").CryptoKey.Name
+          kms_key: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tf-bootstrap-observability-key1").CryptoKey.Name
         vars:
           display_name: "Initial Display Name"
           description: "Initial description"
           kms_key: example-key-1
       - name: "observability_bucket_basic"
-        test_env_vars:
-          org_id: ORG_ID
-          billing_account: BILLING_ACCT
         test_vars_overrides:
-          kms_key: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-bootstrap-observability-key2").CryptoKey.Name
+          kms_key: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tf-bootstrap-observability-key2").CryptoKey.Name
         vars:
           display_name: "Updated Display Name"
           description: "Updated description"
