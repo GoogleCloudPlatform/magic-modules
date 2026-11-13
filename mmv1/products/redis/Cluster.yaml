@@ -101,6 +101,7 @@ self_link: projects/{{project}}/locations/{{region}}/clusters/{{name}}
 create_url: projects/{{project}}/locations/{{region}}/clusters?clusterId={{name}}
 update_mask: true
 update_verb: PATCH
+generate_list_resource: true
 timeouts:
   insert_minutes: 60
   update_minutes: 120
