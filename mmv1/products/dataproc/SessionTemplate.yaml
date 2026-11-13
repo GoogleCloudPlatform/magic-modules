@@ -26,6 +26,7 @@ docs:
 base_url: projects/{{project}}/locations/{{location}}/sessionTemplates
 self_link: '{{name}}'
 update_verb: PATCH
+generate_list_resource: true
 collection_url_key: sessionTemplates
 id_format: '{{name}}'
 import_format:

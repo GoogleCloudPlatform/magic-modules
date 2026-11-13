@@ -24,6 +24,7 @@ references:
   api: https://cloud.google.com/dataproc-serverless/docs/reference/rest/v1/projects.locations.batches
 base_url: projects/{{project}}/locations/{{location}}/batches
 immutable: true
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/batches/{{batch_id}}
 create_url: projects/{{project}}/locations/{{location}}/batches?batchId={{batch_id}}
 delete_url: projects/{{project}}/locations/{{location}}/batches/{{batch_id}}
