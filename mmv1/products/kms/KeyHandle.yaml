@@ -65,6 +65,8 @@ samples:
         test_env_vars:
           org_id: ORG_ID
           billing_account: BILLING_ACCT
+        vars:
+          location: us-central1
 parameters:
   - name: location
     type: String
