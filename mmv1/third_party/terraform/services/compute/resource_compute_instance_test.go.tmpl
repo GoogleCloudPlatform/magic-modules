@@ -287,6 +287,32 @@ func TestAccComputeInstance_basic1(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstance_stockoutRetry(t *testing.T) {
+	t.Parallel()
+
+	var instance map[string]interface{}
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	const retryTimeoutSeconds = 60
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_basicWithStockoutRetry(instanceName, retryTimeoutSeconds),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "current_status", "RUNNING"),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "retry_on_stockout", "true"),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "stockout_retry_timeout_seconds", fmt.Sprint(retryTimeoutSeconds)),
+				),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"retry_on_stockout", "stockout_retry_timeout_seconds"}),
+		},
+	})
+}
+
 func TestAccComputeInstance_basic2(t *testing.T) {
 	t.Parallel()
 
@@ -7155,6 +7181,48 @@ resource "google_compute_instance" "foobar" {
   }
 }
 `, instance)
+}
+
+func testAccComputeInstance_basicWithStockoutRetry(instance string, retryTimeoutSeconds int) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-13"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name                           = "%s"
+  machine_type                   = "e2-medium"
+  zone                           = "us-central1-a"
+  tags                           = ["foo", "bar"]
+  desired_status                 = "RUNNING"
+  retry_on_stockout              = true
+  stockout_retry_timeout_seconds = %d
+
+  //deletion_protection = false is implicit in this config due to default value
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  metadata = {
+    foo            = "bar"
+    baz            = "qux"
+    startup-script = "echo Hello"
+  }
+
+  labels = {
+    my_key       = "my_value"
+    my_other_key = "my_other_value"
+  }
+}
+`, instance, retryTimeoutSeconds)
 }
 
 func testAccComputeInstance_basic2(instance string) string {
