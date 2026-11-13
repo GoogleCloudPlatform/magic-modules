@@ -24,6 +24,7 @@ docs:
 base_url: projects/{{project}}/locations/{{location}}/securitySettings
 update_mask: true
 update_verb: PATCH
+generate_list_resource: true
 collection_url_key: securitySettings
 id_format: projects/{{project}}/locations/{{location}}/securitySettings/{{name}}
 import_format:
