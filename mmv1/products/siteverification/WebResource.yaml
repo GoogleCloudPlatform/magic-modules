@@ -29,6 +29,7 @@ references:
   api: https://developers.google.com/site-verification/v1
 docs:
 base_url: webResource
+generate_list_resource: true
 immutable: true
 self_link: webResource/{{web_resource_id}}
 create_url: webResource?verificationMethod={{verification_method}}
