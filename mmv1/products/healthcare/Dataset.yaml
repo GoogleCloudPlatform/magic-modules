@@ -20,8 +20,10 @@ references:
     Creating a dataset: https://cloud.google.com/healthcare/docs/how-tos/datasets
   api: https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets
 docs:
-base_url: projects/{{project}}/locations/{{location}}/datasets?datasetId={{name}}
+base_url: projects/{{project}}/locations/{{location}}/datasets
 self_link: projects/{{project}}/locations/{{location}}/datasets/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/datasets?datasetId={{name}}
+generate_list_resource: true
 update_mask: true
 update_verb: PATCH
 kind: healthcare#dataset
@@ -39,8 +41,6 @@ async:
     base_url: '{{op_id}}'
 error_retry_predicates:
   - transport_tpg.HealthcareDatasetNotInitialized
-custom_code:
-  decoder: templates/terraform/decoders/long_name_to_self_link.go.tmpl
 samples:
   - name: healthcare_dataset_basic
     primary_resource_id: default
@@ -76,6 +76,7 @@ properties:
       The resource name for the Dataset.
     required: true
     immutable: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
   - name: timeZone
     type: String
     description: |
@@ -85,10 +86,10 @@ properties:
     required: false
     default_from_api: true
   - name: selfLink
+    api_name: name
     type: String
     description: |
       The fully qualified name of this dataset
-    ignore_read: true
     output: true
   - name: encryptionSpec
     type: NestedObject
