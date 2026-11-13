@@ -23,6 +23,7 @@ docs:
 base_url: projects/{{project}}/locations/global/managedZones
 self_link: projects/{{project}}/locations/global/managedZones/{{name}}
 create_url: projects/{{project}}/locations/global/managedZones?managedZoneId={{name}}
+generate_list_resource: true
 update_mask: true
 update_verb: PATCH
 timeouts:

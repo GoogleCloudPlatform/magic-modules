@@ -23,6 +23,7 @@ docs:
 base_url: projects/{{project}}/locations/{{location}}/endpointAttachments
 self_link: projects/{{project}}/locations/{{location}}/endpointAttachments/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/endpointAttachments?endpointAttachmentId={{name}}
+generate_list_resource: true
 update_mask: true
 update_verb: PATCH
 timeouts:
@@ -49,6 +50,8 @@ samples:
       - name: integration_connectors_endpoint_attachment
         resource_id_vars:
           endpoint_attachment_name: test-endpoint-attachment
+        test_env_vars:
+          region: REGION
 parameters:
   - name: location
     type: String
