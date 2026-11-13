@@ -312,6 +312,13 @@ func TestCustomUnmarshalYAMLRejectsUnknownFields(t *testing.T) {
 			wantField: "nonexistent_step_key",
 			wantLine:  "line 4:",
 		},
+		{
+			name:      "Timeouts",
+			raw:       "insert_minutes: 40\nbogus_minutes: 10\n",
+			newTarget: func() interface{} { return &Timeouts{} },
+			wantField: "bogus_minutes",
+			wantLine:  "line 2:",
+		},
 	}
 
 	for _, tc := range cases {
