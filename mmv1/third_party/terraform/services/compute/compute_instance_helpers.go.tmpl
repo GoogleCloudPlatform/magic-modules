@@ -1707,17 +1707,52 @@ func stripInitializeParams(instanceMap map[string]interface{}) {
 }
 
 
+// isWorkloadIdentityCertConfigured reports whether identity_certificate_enabled
+// was explicitly set in config. When omitted, GCE applies a backend default based
+// on identity_type (true for AGENT_IDENTITY, false for SERVICE_ACCOUNT), whereas
+// an explicit false disables certificates even for AGENT_IDENTITY.
+func isWorkloadIdentityCertConfigured(d tpgresource.TerraformResourceData) bool {
+	rawConfig := d.GetRawConfig()
+	if !rawConfig.IsNull() && rawConfig.IsKnown() && rawConfig.Type().IsObjectType() && rawConfig.Type().HasAttribute("workload_identity_config") {
+		wicConfig := rawConfig.GetAttr("workload_identity_config")
+		if wicConfig.IsKnown() && !wicConfig.IsNull() && wicConfig.CanIterateElements() {
+			if wicConfig.LengthInt() == 0 {
+				return false
+			}
+			elem := wicConfig.AsValueSlice()[0]
+			if !elem.IsNull() && elem.Type().IsObjectType() && elem.Type().HasAttribute("identity_certificate_enabled") {
+				return !elem.GetAttr("identity_certificate_enabled").IsNull()
+			}
+		}
+	}
+	_, ok := d.GetOk("workload_identity_config.0.identity_certificate_enabled")
+	return ok || d.HasChange("workload_identity_config.0.identity_certificate_enabled")
+}
+
 func expandWorkloadIdentityConfig(d tpgresource.TerraformResourceData) map[string]interface{} {
 	iek, ok := d.GetOk("workload_identity_config")
 	if !ok {
 		return nil
 	}
-
-	wicRes := iek.([]interface{})[0].(map[string]interface{})
-	return map[string]interface{}{
-		"identity":                   wicRes["identity"].(string),
-		"identityCertificateEnabled": wicRes["identity_certificate_enabled"].(bool),
+	s := iek.([]interface{})
+	if len(s) == 0 || s[0] == nil {
+		return nil
 	}
+
+	wicRes := s[0].(map[string]interface{})
+	wicMap := map[string]interface{}{}
+	if v, ok := wicRes["identity"]; ok && v != nil && v.(string) != "" {
+		wicMap["identity"] = v.(string)
+	}
+	if isWorkloadIdentityCertConfigured(d) {
+		wicMap["identityCertificateEnabled"] = wicRes["identity_certificate_enabled"].(bool)
+	}
+	{{- if ne $.TargetVersionName "ga" }}
+	if v, ok := wicRes["identity_type"]; ok && v != nil && v.(string) != "" {
+		wicMap["identityType"] = v.(string)
+	}
+	{{- end }}
+	return wicMap
 }
 
 func flattenWorkloadIdentityConfig(v map[string]interface{}) []map[string]interface{} {
@@ -1728,6 +1763,9 @@ func flattenWorkloadIdentityConfig(v map[string]interface{}) []map[string]interf
 		{
 			"identity":                     v["identity"],
 			"identity_certificate_enabled": v["identityCertificateEnabled"],
+			{{- if ne $.TargetVersionName "ga" }}
+			"identity_type":                v["identityType"],
+			{{- end }}
 		},
 	}
 }
