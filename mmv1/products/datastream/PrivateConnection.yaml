@@ -21,6 +21,7 @@ references:
   api: https://cloud.google.com/datastream/docs/reference/rest/v1/projects.locations.privateConnections
 docs:
 base_url: projects/{{project}}/locations/{{location}}/privateConnections
+generate_list_resource: true
 immutable: true
 self_link: projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}
 create_url: projects/{{project}}/locations/{{location}}/privateConnections?privateConnectionId={{private_connection_id}}&force={{create_without_validation}}
