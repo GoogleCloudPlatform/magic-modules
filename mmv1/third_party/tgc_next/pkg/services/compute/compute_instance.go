@@ -1479,18 +1479,21 @@ be from 0 to 999,999,999 inclusive.`,
 				Type:        schema.TypeList,
 				MaxItems:    1,
 				Optional:    true,
+				ForceNew:    true,
 				Description: `Workload identity config.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"identity": {
 							Type:        schema.TypeString,
 							Optional:    true,
+							Computed:    true,
 							ForceNew:    true,
 							Description: `Identity SPIFFE id.`,
 						},
 						"identity_certificate_enabled": {
 							Type:        schema.TypeBool,
 							Optional:    true,
+							Computed:    true,
 							ForceNew:    true,
 							Description: `Specifies whether identity certificates are enabled.`,
 						},
