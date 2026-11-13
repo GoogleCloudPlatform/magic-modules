@@ -136,7 +136,10 @@ The following arguments are supported:
 * `zone` - (Optional) The zone that the machine should be created in. If it is not provided, the provider zone is used.
 
 * `network_interface` - (Required) Networks to attach to the instance. This can
-    be specified multiple times. Structure is [documented below](#nested_network_interface).
+    be specified multiple times. Trailing dynamic VLAN network interfaces (`vlan` in `2..255`)
+    can be added and removed in place without replacing the instance, whereas adding, removing,
+    or reordering non-dynamic network interfaces (`vlan` unset) forces a new resource to be created.
+    Structure is [documented below](#nested_network_interface).
 
 - - -
 
@@ -493,7 +496,7 @@ is desired, you will need to modify your state file manually using
 
 * `service_class_id` - (Optional) Producer Service's Service class Id for the region of this network interface. Can only be used with `network_attachment`. It is not possible to use on its own; however, `network_attachment` can be used without `service_class_id`.
 
-* `vlan` - (Optional) VLAN tag of a dynamic network interface, must be an integer in the range from 2 to 255 inclusively.
+* `vlan` - (Optional) VLAN tag of a dynamic network interface, must be an integer in the range from 2 to 255 inclusively. Trailing dynamic network interfaces can be added and removed in place; modifying `vlan` on an existing interface forces a new resource to be created.
 
 * `igmp_query` - (Optional) Indicates whether igmp query is enabled on the network interface or not. If enabled, also indicates the version of IGMP supported.
 
