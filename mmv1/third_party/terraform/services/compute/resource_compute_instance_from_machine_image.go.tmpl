@@ -166,16 +166,6 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 		instanceBody["partnerMetadata"] = partnerMetadataConverted
 	}
 
-	sa := d.Get("service_account").([]interface{})
-	if len(sa) == 0 {
-		// ServiceAccount is required when the image is from a different project
-		instanceBody["serviceAccounts"] = []interface{}{
-			map[string]interface{}{
-				"email": "default",
-			},
-		}
-	}
-
 	src := d.Get("source_machine_image").(string)
 	instanceBody["sourceMachineImage"] = src
 
@@ -203,6 +193,45 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 	})
 	if err != nil {
 		return err
+	}
+
+	sa := d.Get("service_account").([]interface{})
+	if len(sa) == 0 {
+		hasAgentIdentity := false
+		if wic, ok := instanceBody["workloadIdentityConfig"].(map[string]interface{}); ok && wic != nil {
+			if idType, ok := wic["identityType"].(string); ok && idType == "AGENT_IDENTITY" {
+				hasAgentIdentity = true
+			}
+		}
+		if !hasAgentIdentity {
+			var miWic map[string]interface{}
+			if props, ok := miRes["instanceProperties"].(map[string]interface{}); ok && props != nil {
+				if w, ok := props["workloadIdentityConfig"].(map[string]interface{}); ok {
+					miWic = w
+				}
+			}
+			if miWic == nil {
+				if props, ok := miRes["sourceInstanceProperties"].(map[string]interface{}); ok && props != nil {
+					if w, ok := props["workloadIdentityConfig"].(map[string]interface{}); ok {
+						miWic = w
+					}
+				}
+			}
+			if miWic != nil {
+				if idType, ok := miWic["identityType"].(string); ok && idType == "AGENT_IDENTITY" {
+					hasAgentIdentity = true
+				}
+			}
+		}
+
+		if !hasAgentIdentity {
+			// ServiceAccount is required when the image is from a different project
+			instanceBody["serviceAccounts"] = []interface{}{
+				map[string]interface{}{
+					"email": "default",
+				},
+			}
+		}
 	}
 
 	disks, err := adjustInstanceFromMachineImageDisks(d, config, miRes, project)
