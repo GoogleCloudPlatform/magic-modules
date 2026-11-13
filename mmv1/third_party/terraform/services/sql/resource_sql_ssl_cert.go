@@ -174,6 +174,12 @@ func resourceSqlSslCertRead(d *schema.ResourceData, meta interface{}) error {
 	commonName := d.Get("common_name").(string)
 	fingerprint := d.Get("sha1_fingerprint").(string)
 
+	// A certificate lookup can return 403 when its parent instance is gone.
+	// Check the instance so permission errors still preserve the certificate in state.
+	if _, err := NewClient(config, userAgent).Instances.Get(project, instance).Do(); err != nil {
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("SQL Ssl Cert %q in instance %q", commonName, instance))
+	}
+
 	sslCerts, err := NewClient(config, userAgent).SslCerts.Get(project, instance, fingerprint).Do()
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("SQL Ssl Cert %q in instance %q", commonName, instance))

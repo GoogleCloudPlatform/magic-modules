@@ -476,7 +476,8 @@ func resourceSqlUserRead(d *schema.ResourceData, meta interface{}) error {
 	host := d.Get("host").(string)
 	databaseInstance, err := NewClient(config, userAgent).Instances.Get(project, instance).Do()
 	if err != nil {
-		return err
+		// The instance may have been deleted outside of Terraform.
+		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("SQL User %q in instance %q", name, instance))
 	}
 	if err := tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
 		"project":  project,
