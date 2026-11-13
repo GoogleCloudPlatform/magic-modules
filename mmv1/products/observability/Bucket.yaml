@@ -47,6 +47,16 @@ autogen_async: true
 custom_code:
   pre_create: templates/terraform/pre_create/observability_bucket.go.tmpl
 samples:
+  # Listed first: the generated ListQuery test uses the first sample. It must not set CMEK,
+  # because the shared test project's _Trace bucket cannot have a CMEK key added to it.
+  - name: "observability_bucket_list"
+    primary_resource_id: "primary"
+    exclude_basic_doc: true
+    steps:
+      - name: "observability_bucket_list"
+        vars:
+          display_name: "Trace bucket"
+          description: "Trace bucket for list query"
   - name: "observability_bucket_basic"
     primary_resource_id: "primary"
     external_providers: [time]
