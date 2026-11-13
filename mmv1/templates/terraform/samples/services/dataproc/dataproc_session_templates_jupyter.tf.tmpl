@@ -1,6 +1,6 @@
 resource "google_dataproc_session_template" "{{$.PrimaryResourceId}}" {
-    name     = "projects/{{index $.TestEnvVars "project_name"}}/locations/us-east1/sessionTemplates/{{index $.ResourceIdVars "name"}}"
-    location = "us-east1"
+    name     = "projects/{{index $.TestEnvVars "project_name"}}/locations/{{index $.TestEnvVars "location"}}/sessionTemplates/{{index $.ResourceIdVars "name"}}"
+    location = "{{index $.TestEnvVars "location"}}"
     labels   = {"session_template_test": "terraform"}
 
     runtime_config {

@@ -46,6 +46,8 @@ samples:
       - name: dataproc_autoscaling_policy_basic
         resource_id_vars:
           name: dataproc-policy
+        test_env_vars:
+          location: REGION
   - name: dataproc_autoscaling_policy
     primary_resource_id: asp
     steps:

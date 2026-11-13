@@ -52,8 +52,9 @@ samples:
           prevent_destroy: "true"
         test_env_vars:
           project_name: PROJECT_NAME
+          location: REGION
         test_vars_overrides:
-          subnetwork_name: BootstrapSubnetWithFirewallForDataprocBatches(t, "jupyer-session-test-network", "jupyter-session-test-subnetwork")
+          subnetwork_name: 'compute.BootstrapSubnetWithOverrides(t, "jupyter-session-test-region-subnetwork", func() string { n := compute.BootstrapSharedTestNetwork(t, "jupyer-session-test-network"); BootstrapFirewallForDataprocSharedNetwork(t, "jupyter-session-test-subnetwork", n); return n }(), map[string]interface{}{"privateIpGoogleAccess": true, "ipCidrRange": "10.80.0.0/20"})'
           prevent_destroy: "false"
         ignore_read_extra:
           - runtime_config.0.properties
