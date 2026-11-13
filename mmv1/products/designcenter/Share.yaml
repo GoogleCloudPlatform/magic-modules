@@ -17,8 +17,8 @@ description: |
   A Share in Application Design Center.
 references:
   guides:
-    'Application Design Center': 'https://cloud.google.com/designcenter/docs'
-  api: 'https://cloud.google.com/designcenter/docs/reference/rest'
+    'Share a catalog with a space': 'https://cloud.google.com/application-design-center/docs/manage-catalogs#share-a-catalog-with-a-space'
+  api: 'https://cloud.google.com/application-design-center/docs/reference/rest/v1/projects.locations.spaces.catalogs.shares'
 id_format: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/shares/{{share_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/shares'
 create_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/shares?shareId={{share_id}}'
