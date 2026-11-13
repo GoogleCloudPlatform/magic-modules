@@ -35,6 +35,7 @@ error_retry_predicates:
   - transport_tpg.EventarcChannel403Retry
 legacy_long_form_project: true
 autogen_async: true
+generate_list_resource: true
 custom_code:
 samples:
   - name: eventarc_channel_with_cmek
@@ -74,7 +75,7 @@ properties:
     immutable: true
     diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
     custom_expand: templates/terraform/custom_expand/eventarc_channel_name.go.tmpl
-    custom_flatten: templates/terraform/custom_flatten/eventarc_channel_name.go.tmpl
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
   - name: labels
     type: KeyValueLabels
     description: User-defined labels for the channel.
