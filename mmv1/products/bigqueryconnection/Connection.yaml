@@ -97,6 +97,19 @@ samples:
         ignore_read_extra:
           # password removed
           - cloud_sql.0.credential
+  - name: bigquery_connection_aws_cache
+    primary_resource_id: connection
+    steps:
+      - name: bigquery_connection_aws_cache
+        resource_id_vars:
+          connection_id: my-connection
+        vars:
+          cache_enabled: "true"
+      - name: bigquery_connection_aws_cache
+        resource_id_vars:
+          connection_id: my-connection
+        vars:
+          cache_enabled: "false"
   - name: bigquery_connection_aws
     primary_resource_id: connection
     external_providers: [random, time]
@@ -108,6 +121,19 @@ samples:
         test_vars_overrides:
           # for backward compatible
           iam_role_id: '"arn:aws:iam::999999999999:role/omnirole" + randomSuffix'
+  - name: bigquery_connection_azure_cache
+    primary_resource_id: connection
+    steps:
+      - name: bigquery_connection_azure_cache
+        resource_id_vars:
+          connection_id: my-connection
+        vars:
+          cache_enabled: "true"
+      - name: bigquery_connection_azure_cache
+        resource_id_vars:
+          connection_id: my-connection
+        vars:
+          cache_enabled: "false"
   - name: bigquery_connection_azure
     primary_resource_id: connection
     external_providers: [random, time]
@@ -333,6 +359,7 @@ properties:
     description: Connection properties specific to Amazon Web Services.
     update_mask_fields:
       - aws.access_role.iam_role_id
+      - aws.cross_cloud_cache_options.enabled
     exactly_one_of:
       - cloud_sql
       - aws
@@ -356,12 +383,24 @@ properties:
             type: String
             description: A unique Google-owned and Google-generated identity for the Connection. This identity will be used to access the user's AWS IAM Role.
             output: true
+      - name: crossCloudCacheOptions
+        type: NestedObject
+        description: Configuration options for cross-cloud caching of data and metadata files.
+        properties:
+          - name: enabled
+            type: Boolean
+            description: |
+              Whether cross-cloud caching is enabled for queries through BigQuery.
+              When enabled, read data and metadata are cached, which can improve performance
+              and reduce network egress costs for cross-cloud queries.
+            send_empty_value: true
   - name: azure
     type: NestedObject
     description: Container for connection properties specific to Azure.
     update_mask_fields:
       - azure.customer_tenant_id
       - azure.federated_application_client_id
+      - azure.cross_cloud_cache_options.enabled
     exactly_one_of:
       - cloud_sql
       - aws
@@ -399,6 +438,17 @@ properties:
         type: String
         description: A unique Google-owned and Google-generated identity for the Connection. This identity will be used to access the user's Azure Active Directory Application.
         output: true
+      - name: crossCloudCacheOptions
+        type: NestedObject
+        description: Configuration options for cross-cloud caching of data and metadata files.
+        properties:
+          - name: enabled
+            type: Boolean
+            description: |
+              Whether cross-cloud caching is enabled for queries through BigQuery.
+              When enabled, read data and metadata are cached, which can improve performance
+              and reduce network egress costs for cross-cloud queries.
+            send_empty_value: true
   - name: cloudSpanner
     type: NestedObject
     description: Connection properties specific to Cloud Spanner
