@@ -118,7 +118,7 @@ resource "google_storage_bucket_iam_member" "cv_sa_storage_admin" {
 
 resource "google_biglake_iceberg_namespace" "namespace" {
   catalog = google_biglake_iceberg_catalog.catalog.name
-  namespace_id = "my_namespace_%{random_suffix}"
+  namespace_id = "tf_test_my_namespace_%{random_suffix}"
 }
 
 resource "google_biglake_iceberg_table" "my_iceberg_table" {
@@ -147,7 +147,7 @@ resource "google_biglake_iceberg_table" "my_iceberg_table" {
 func testAccBiglakeIcebergIcebergTable_updateInitial(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_storage_bucket" "bucket" {
-  name          = "my-bucket-%{random_suffix}"
+  name          = "tf-test-my-bucket-%{random_suffix}"
   location      = "us-central1"
   force_destroy = true
   uniform_bucket_level_access = true
@@ -160,13 +160,13 @@ resource "google_biglake_iceberg_catalog" "catalog" {
 
 resource "google_biglake_iceberg_namespace" "namespace" {
   catalog = google_biglake_iceberg_catalog.catalog.name
-  namespace_id = "my_namespace_%{random_suffix}"
+  namespace_id = "tf_test_my_namespace_%{random_suffix}"
 }
 
 resource "google_biglake_iceberg_table" "my_iceberg_table" {
   catalog   = google_biglake_iceberg_catalog.catalog.name
   namespace = google_biglake_iceberg_namespace.namespace.namespace_id
-  name      = "my_table_%{random_suffix}"
+  name      = "tf_test_my_table_%{random_suffix}"
   schema {
     type = "struct"
     fields {
@@ -201,7 +201,7 @@ resource "google_biglake_iceberg_table" "my_iceberg_table" {
 func testAccBiglakeIcebergIcebergTable_updateUpdated(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_storage_bucket" "bucket" {
-  name          = "my-bucket-%{random_suffix}"
+  name          = "tf-test-my-bucket-%{random_suffix}"
   location      = "us-central1"
   force_destroy = true
   uniform_bucket_level_access = true
@@ -214,13 +214,13 @@ resource "google_biglake_iceberg_catalog" "catalog" {
 
 resource "google_biglake_iceberg_namespace" "namespace" {
   catalog = google_biglake_iceberg_catalog.catalog.name
-  namespace_id = "my_namespace_%{random_suffix}"
+  namespace_id = "tf_test_my_namespace_%{random_suffix}"
 }
 
 resource "google_biglake_iceberg_table" "my_iceberg_table" {
   catalog   = google_biglake_iceberg_catalog.catalog.name
   namespace = google_biglake_iceberg_namespace.namespace.namespace_id
-  name      = "my_table_%{random_suffix}"
+  name      = "tf_test_my_table_%{random_suffix}"
   schema {
     type = "struct"
     fields {

@@ -75,12 +75,12 @@ func TestAccBiglakeIcebergIcebergNamespace_location(t *testing.T) {
 						plancheck.ExpectKnownValue(
 							"google_biglake_iceberg_namespace.my_iceberg_namespace",
 							tfjsonpath.New("properties").AtMapKey("location"),
-							knownvalue.StringExact(fmt.Sprintf("gs://my-bucket-%s/custom-location", context["bucket_suffix"])),
+							knownvalue.StringExact(fmt.Sprintf("gs://tf-test-my-bucket-%s/custom-location", context["bucket_suffix"])),
 						),
 					},
 				},
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_biglake_iceberg_namespace.my_iceberg_namespace", "properties.location", fmt.Sprintf("gs://my-bucket-%s/custom-location", context["bucket_suffix"])),
+					resource.TestCheckResourceAttr("google_biglake_iceberg_namespace.my_iceberg_namespace", "properties.location", fmt.Sprintf("gs://tf-test-my-bucket-%s/custom-location", context["bucket_suffix"])),
 				),
 			},
 			{
@@ -100,7 +100,7 @@ func TestAccBiglakeIcebergIcebergNamespace_location(t *testing.T) {
 					},
 				},
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_biglake_iceberg_namespace.my_iceberg_namespace", "properties.location", fmt.Sprintf("gs://my-bucket-%s/custom-location", context["bucket_suffix"])),
+					resource.TestCheckResourceAttr("google_biglake_iceberg_namespace.my_iceberg_namespace", "properties.location", fmt.Sprintf("gs://tf-test-my-bucket-%s/custom-location", context["bucket_suffix"])),
 					resource.TestCheckResourceAttr("google_biglake_iceberg_namespace.my_iceberg_namespace", "properties.key", "updated"),
 				),
 			},
@@ -118,7 +118,7 @@ func testAccBiglakeIcebergIcebergNamespace_location(context map[string]interface
 	context["key_value"] = key
 	return acctest.Nprintf(`
 resource "google_storage_bucket" "bucket" {
-  name          = "my-bucket-%{bucket_suffix}"
+  name          = "tf-test-my-bucket-%{bucket_suffix}"
   location      = "us-central1"
   force_destroy = true
   uniform_bucket_level_access = true
@@ -131,7 +131,7 @@ resource "google_biglake_iceberg_catalog" "catalog" {
 
 resource "google_biglake_iceberg_namespace" "my_iceberg_namespace" {
   catalog = google_biglake_iceberg_catalog.catalog.name
-  namespace_id = "my-namespace-%{bucket_suffix}"
+  namespace_id = "tf-test-my-namespace-%{bucket_suffix}"
   properties = {
     location = "gs://${google_storage_bucket.bucket.name}/custom-location"
     key      = "%{key_value}"
@@ -143,7 +143,7 @@ resource "google_biglake_iceberg_namespace" "my_iceberg_namespace" {
 func testAccBiglakeIcebergIcebergNamespace_updateInitial(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_storage_bucket" "bucket" {
-  name          = "my-bucket-%{bucket_suffix}"
+  name          = "tf-test-my-bucket-%{bucket_suffix}"
   location      = "us-central1"
   force_destroy = true
   uniform_bucket_level_access = true
@@ -156,7 +156,7 @@ resource "google_biglake_iceberg_catalog" "catalog" {
 
 resource "google_biglake_iceberg_namespace" "my_iceberg_namespace" {
   catalog = google_biglake_iceberg_catalog.catalog.name
-  namespace_id = "my-namespace-%{bucket_suffix}"
+  namespace_id = "tf-test-my-namespace-%{bucket_suffix}"
   properties = {
     key = "initial"
   }
@@ -167,7 +167,7 @@ resource "google_biglake_iceberg_namespace" "my_iceberg_namespace" {
 func testAccBiglakeIcebergIcebergNamespace_updateUpdated(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_storage_bucket" "bucket" {
-  name          = "my-bucket-%{bucket_suffix}"
+  name          = "tf-test-my-bucket-%{bucket_suffix}"
   location      = "us-central1"
   force_destroy = true
   uniform_bucket_level_access = true
@@ -180,7 +180,7 @@ resource "google_biglake_iceberg_catalog" "catalog" {
 
 resource "google_biglake_iceberg_namespace" "my_iceberg_namespace" {
   catalog = google_biglake_iceberg_catalog.catalog.name
-  namespace_id = "my-namespace-%{bucket_suffix}"
+  namespace_id = "tf-test-my-namespace-%{bucket_suffix}"
   properties = {
     key = "updated"
   }
