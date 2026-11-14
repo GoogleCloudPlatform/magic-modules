@@ -17,6 +17,7 @@ description: Description
 base_url: projects/{{project}}/locations/{{location}}/collections
 self_link: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}
 create_url: projects/{{project}}/locations/{{location}}/collections?collectionId={{collection_id}}
+delete_url: projects/{{project}}/locations/{{location}}/collections/{{collection_id}}?force={{force_destroy}}
 update_mask: true
 update_verb: PATCH
 import_format:
@@ -49,6 +50,11 @@ samples:
       - name: vectorsearch_collection_cmek
         resource_id_vars:
           collection_id: example-cmek-collection
+virtual_fields:
+  - name: force_destroy
+    description: If set to true, will allow deletion of the Collection even if it contains Indexes or DataObjects. These Indexes and DataObjects will also be deleted.
+    type: Boolean
+    default_value: false
 parameters:
   - name: location
     type: String
