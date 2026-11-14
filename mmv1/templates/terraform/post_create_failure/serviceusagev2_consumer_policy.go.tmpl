@@ -1,6 +1,6 @@
 {{/*
 	The license inside this block applies to this file
-	Copyright 2026 Google Inc.
+	Copyright 2024 Google Inc.
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
 	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -11,18 +11,7 @@
 	limitations under the License.
 */ -}}
 
-<<<<<<<< HEAD:mmv1/templates/terraform/post_create_failure/serviceusagev2_consumer_policy.go.tmpl
 if ok, _ := isCommonOpError(err, ApiErrorSuConflictingConcurrentModification); ok || isTimeoutError(err) {
 	return fmt.Errorf("The consumer policy might have been changed from other toolings. Please try again: %w", err)
 }
 return err
-========
-// loadBalancingScheme is not returned in CAI assets. When service (backend_service)
-// is also absent (backendless TCP proxy), default loadBalancingScheme to INTERNAL_MANAGED
-// to satisfy at_least_one_of(backend_service, load_balancing_scheme).
-if res["service"] == nil && res["loadBalancingScheme"] == nil {
-	res["loadBalancingScheme"] = "INTERNAL_MANAGED"
-}
-
-return res, hclData, nil
->>>>>>>> 88f8e615b (chore: restore out-of-scope files):mmv1/templates/tgc_next/decoders/compute_target_tcp_proxy.go.tmpl
