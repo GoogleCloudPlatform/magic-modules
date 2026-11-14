@@ -1,0 +1,38 @@
+data "google_project" "project" {
+  project_id = "{{index $.Vars "project"}}"
+}
+
+resource "google_design_center_policy" "example" {
+  project              = "{{index $.Vars "project"}}"
+  location             = "us-central1"
+  space                = "{{index $.Vars "space"}}"
+  application_template = "{{index $.Vars "application_template"}}"
+  policy_id            = "{{index $.ResourceIdVars "policy_id"}}"
+  display_name         = "Updated Example Policy"
+  description          = "Updated Managed by Terraform"
+  policy_type          = "COMPLIANCE_FRAMEWORK"
+  policy_revision_uri  = "projects/${data.google_project.project.number}/locations/global/frameworks/builtin-us-data-boundary-and-support"
+
+  apply_conditions {
+    condition_key   = "environment"
+    condition_value = "STAGING"
+  }
+
+  cloud_control_configs {
+    cloud_control = "projects/${data.google_project.project.number}/locations/global/cloudControls/builtin-cloud-logging-storage-locations"
+
+    parameters {
+      key   = "cloudLoggingStorageLocations"
+      value = jsonencode(["us-central1"])
+    }
+  }
+
+  cloud_control_configs {
+    cloud_control = "projects/${data.google_project.project.number}/locations/global/cloudControls/builtin-big-query-regulatory-settings"
+
+    parameters {
+      key   = "framework"
+      value = jsonencode("US_DATA_BOUNDARY_AND_SUPPORT")
+    }
+  }
+}
