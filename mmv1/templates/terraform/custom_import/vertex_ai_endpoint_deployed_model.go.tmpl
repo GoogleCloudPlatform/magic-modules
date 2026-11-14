@@ -1,0 +1,9 @@
+config := meta.(*transport_tpg.Config)
+if err := tpgresource.ParseImportId([]string{
+	"(?P<endpoint>projects/(?P<project>[^/]+)/locations/(?P<region>[^/]+)/endpoints/[^/]+)/deployedModels/(?P<deployed_model_id>[^/]+)",
+}, d, config); err != nil {
+	return nil, err
+}
+id := fmt.Sprintf("%s/deployedModels/%s", d.Get("endpoint").(string), d.Get("deployed_model_id").(string))
+d.SetId(id)
+return []*schema.ResourceData{d}, nil
