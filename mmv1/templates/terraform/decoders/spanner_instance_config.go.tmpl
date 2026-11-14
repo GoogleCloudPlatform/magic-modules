@@ -9,24 +9,20 @@ id, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}project{{"}}"}}/{{"{{"}}n
 if err != nil {
 return nil, err
 }
-// Google-managed configs (returned by list) have no baseConfig and no custom replicas to filter.
-if baseConfig, ok := res["baseConfig"].(string); ok && baseConfig != "" {
-  baseReplicas, err := getBaseInstanceConfigReplicas(d, config, baseConfig, res["project"].(string), config.UserAgent)
-  if err != nil {
-    return nil, err
-  }
-  customReplica := make(map[int]interface{})
-  for _, b := range baseReplicas {
-    customReplica[replicasHash(b)] = b
-  }
-  var cR []interface{}
-  replicas, _ := res["replicas"].([]interface{})
-  for _, r := range replicas {
-    if _, ok := customReplica[replicasHash(r)]; !ok {
-      cR = append(cR, r)
-    }
-  }
-  res["replicas"] = cR
+baseReplicas, err := getBaseInstanceConfigReplicas(d, config, res["baseConfig"], res["project"].(string), config.UserAgent)
+if err != nil {
+  return nil, err
 }
+customReplica := make(map[int]interface{})
+for _, b := range baseReplicas {
+  customReplica[replicasHash(b)] = b
+}
+var cR []interface{}
+for _, r := range res["replicas"].([]interface{}) {
+  if _, ok := customReplica[replicasHash(r)]; !ok {
+    cR = append(cR, r)
+  }
+}
+res["replicas"] = cR
 d.SetId(id)
 return res, nil
