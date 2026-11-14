@@ -27,19 +27,21 @@ autogen_async: false
 samples:
   - name: saas_runtime_unit_basic
     primary_resource_id: example
-    min_version: beta
     bootstrap_iam:
       - member: serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com
         role: roles/saasservicemgmt.serviceAgent
     steps:
       - name: saas_runtime_unit_basic
-        min_version: beta
         resource_id_vars:
           saas_name: example-saas
           unitkind_name: example-unitkind
           unit_name: example-unit
         test_env_vars:
           project: PROJECT_NAME
+        ignore_read_extra:
+          - conditions
+          - state
+          - update_time
 parameters:
   - name: location
     type: String
@@ -62,6 +64,15 @@ properties:
       They are not queryable and should be preserved when modifying objects.
 
       More info: https://kubernetes.io/docs/user-guide/annotations
+  - name: application
+    type: String
+    description: |-
+      Reference to the App Hub Application this Unit belongs to, in the format
+      `projects/{project}/locations/{location}/applications/{application}`.
+      All resources deployed in this Unit are associated with the specified
+      Application. If empty, the service sets it during any UnitOperation
+      when the UnitKind has `app_params.group` and App Hub is enabled.
+    default_from_api: true
   - name: conditions
     type: Array
     description: |-

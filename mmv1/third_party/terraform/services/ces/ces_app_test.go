@@ -9,6 +9,7 @@ import (
 	_ "github.com/hashicorp/terraform-provider-google/google/services/ces"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/secretmanager"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
 )
 
 func TestAccCESApp_update(t *testing.T) {
@@ -65,7 +66,7 @@ func testAccCESApp_cesAppBasicExample_full(context map[string]interface{}) strin
 data "google_project" "project" {}
 
 resource "google_secret_manager_secret" "fake_private_key_secret" {
-  secret_id = "fake-pk-secret-app-tf%{random_suffix}"
+  secret_id = "tf-test-fake-pk-secret-app-tf%{random_suffix}"
 
   replication {
     auto{}
@@ -157,8 +158,9 @@ resource "google_ces_app" "ces_app_basic" {
   }
 
   model_settings {
-    model       = "gemini-3.0-flash-001"
-    temperature = 0.5
+    model          = "gemini-3.0-flash-001"
+    temperature    = 0.5
+    thinking_level = "LOW"
   }
 
   evaluation_metrics_thresholds {
@@ -291,7 +293,7 @@ func testAccCESApp_cesAppBasicExample_update(context map[string]interface{}) str
 data "google_project" "project" {}
 
 resource "google_secret_manager_secret" "fake_private_key_secret" {
-  secret_id = "fake-pk-secret-app-tf%{random_suffix}"
+  secret_id = "tf-test-fake-pk-secret-app-tf%{random_suffix}"
 
   replication {
     auto{}
@@ -383,8 +385,9 @@ resource "google_ces_app" "ces_app_basic" {
   }
 
   model_settings {
-    model       = "gemini-3.0-flash-001"
-    temperature = 1.0
+    model          = "gemini-3.0-flash-001"
+    temperature    = 1.0
+    thinking_level = "HIGH"
   }
 
   evaluation_metrics_thresholds {
@@ -513,6 +516,268 @@ resource "google_ces_app" "ces_app_basic" {
   }
 
   # Root agent should not be specified when creating an app
+}
+`, context)
+}
+
+func TestAccCESApp_synthesizeSpeechConfig(t *testing.T) {
+	t.Parallel()
+	ctx := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCESAppDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCESApp_synthesizeSpeechConfig_initial(ctx),
+			},
+			{
+				ResourceName:            "google_ces_app.ces_app_tts",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app_id"},
+			},
+			{
+				Config: testAccCESApp_synthesizeSpeechConfig_update(ctx),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_ces_app.ces_app_tts", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_ces_app.ces_app_tts",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app_id"},
+			},
+		},
+	})
+}
+
+func testAccCESApp_synthesizeSpeechConfig_initial(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_ces_app" "ces_app_tts" {
+  app_id       = "tf-test-app-tts-%{random_suffix}"
+  location     = "us"
+  description  = "CES App with Gemini TTS model and instruction"
+  display_name = "tf-test-my-app-tts-%{random_suffix}"
+
+  language_settings {
+    default_language_code       = "en-US"
+    supported_language_codes    = ["es-ES"]
+    enable_multilingual_support = true
+    fallback_action             = "escalate"
+  }
+
+  audio_processing_config {
+    synthesize_speech_configs {
+      language_code = "en-US"
+      voice         = "en-US-Standard-A"
+      speaking_rate = 1.0
+      model         = "gemini-3.1-flash-tts-preview"
+      instruction   = "Speak clearly in a professional tone."
+    }
+    synthesize_speech_configs {
+      language_code = "es-ES"
+      voice         = "es-ES-Standard-A"
+      speaking_rate = 0.95
+      model         = "gemini-3.1-flash-tts-preview"
+      instruction   = "Habla claramente."
+    }
+  }
+
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+`, context)
+}
+
+func testAccCESApp_synthesizeSpeechConfig_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_ces_app" "ces_app_tts" {
+  app_id       = "tf-test-app-tts-%{random_suffix}"
+  location     = "us"
+  description  = "CES App with updated Gemini TTS model and instruction"
+  display_name = "tf-test-my-app-tts-%{random_suffix}"
+
+  language_settings {
+    default_language_code       = "en-US"
+    supported_language_codes    = ["es-ES"]
+    enable_multilingual_support = true
+    fallback_action             = "escalate"
+  }
+
+  audio_processing_config {
+    synthesize_speech_configs {
+      language_code = "en-US"
+      voice         = "en-US-Standard-A"
+      speaking_rate = 1.05
+      model         = "gemini-3.1-flash-tts-preview"
+      instruction   = "Speak in an updated friendly tone."
+    }
+    synthesize_speech_configs {
+      language_code = "es-ES"
+      voice         = "es-ES-Standard-A"
+      speaking_rate = 1.0
+      model         = "gemini-3.1-flash-tts-preview"
+      instruction   = "Habla con tono amigable."
+    }
+  }
+
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+}
+`, context)
+}
+
+func TestAccCESApp_customVoiceSamples(t *testing.T) {
+	t.Parallel()
+	ctx := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCESAppDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCESApp_customVoiceSamples_initial(ctx),
+			},
+			{
+				ResourceName:            "google_ces_app.ces_app_voice",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app_id", "etag", "update_time"},
+			},
+			{
+				Config: testAccCESApp_customVoiceSamples_update(ctx),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_ces_app.ces_app_voice", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_ces_app.ces_app_voice",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"app_id", "etag", "update_time"},
+			},
+		},
+	})
+}
+
+func testAccCESApp_customVoiceSamples_initial(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+resource "google_storage_bucket" "voice_bucket" {
+  name                        = "tf-test-ces-voice-%{random_suffix}"
+  location                    = "US"
+  force_destroy               = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_iam_member" "ces_sa_viewer" {
+  bucket = google_storage_bucket.voice_bucket.name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-ces.iam.gserviceaccount.com"
+}
+
+resource "google_storage_bucket_object" "voice_sample" {
+  name   = "voice_sample.wav"
+  bucket = google_storage_bucket.voice_bucket.name
+  source = "test-fixtures/voice_sample.wav"
+}
+
+resource "google_storage_bucket_object" "consent_audio" {
+  name   = "consent_audio.wav"
+  bucket = google_storage_bucket.voice_bucket.name
+  source = "test-fixtures/voice_sample.wav"
+}
+
+resource "google_ces_app" "ces_app_voice" {
+  app_id       = "tf-test-app-voice-%{random_suffix}"
+  location     = "us"
+  description  = "CES App with custom voice samples"
+  display_name = "tf-test-my-app-voice-%{random_suffix}"
+
+  audio_processing_config {
+    custom_voice_samples {
+      name                  = "sample_voice_1"
+      voice_sample_gcs_uri  = "gs://${google_storage_bucket.voice_bucket.name}/${google_storage_bucket_object.voice_sample.name}"
+      consent_audio_gcs_uri = "gs://${google_storage_bucket.voice_bucket.name}/${google_storage_bucket_object.consent_audio.name}"
+      voice_instruction     = "Speak in a calm and helpful tone."
+      preview_text          = "Hello, how can I help you today?"
+    }
+  }
+
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+
+  depends_on = [google_storage_bucket_iam_member.ces_sa_viewer]
+}
+`, context)
+}
+
+func testAccCESApp_customVoiceSamples_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+resource "google_storage_bucket" "voice_bucket" {
+  name                        = "tf-test-ces-voice-%{random_suffix}"
+  location                    = "US"
+  force_destroy               = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_iam_member" "ces_sa_viewer" {
+  bucket = google_storage_bucket.voice_bucket.name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-ces.iam.gserviceaccount.com"
+}
+
+resource "google_storage_bucket_object" "voice_sample" {
+  name   = "voice_sample.wav"
+  bucket = google_storage_bucket.voice_bucket.name
+  source = "test-fixtures/voice_sample.wav"
+}
+
+resource "google_storage_bucket_object" "consent_audio" {
+  name   = "consent_audio.wav"
+  bucket = google_storage_bucket.voice_bucket.name
+  source = "test-fixtures/voice_sample.wav"
+}
+
+resource "google_ces_app" "ces_app_voice" {
+  app_id       = "tf-test-app-voice-%{random_suffix}"
+  location     = "us"
+  description  = "CES App with updated custom voice samples"
+  display_name = "tf-test-my-app-voice-%{random_suffix}"
+
+  audio_processing_config {
+    custom_voice_samples {
+      name                  = "sample_voice_2"
+      voice_sample_gcs_uri  = "gs://${google_storage_bucket.voice_bucket.name}/${google_storage_bucket_object.consent_audio.name}"
+      consent_audio_gcs_uri = "gs://${google_storage_bucket.voice_bucket.name}/${google_storage_bucket_object.voice_sample.name}"
+      voice_instruction     = "Speak in a friendly and concise tone."
+      preview_text          = "Hello, this is an updated preview."
+    }
+  }
+
+  time_zone_settings {
+    time_zone = "America/Los_Angeles"
+  }
+
+  depends_on = [google_storage_bucket_iam_member.ces_sa_viewer]
 }
 `, context)
 }

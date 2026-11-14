@@ -53,6 +53,7 @@ samples:
       - name: app_engine_service_network_settings
         resource_id_vars:
           bucket_name: appengine-static-content
+          service_name: internalapp
 parameters:
 properties:
   - name: service

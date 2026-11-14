@@ -19,7 +19,7 @@ import (
 
 func testAccAccessContextManagerAccessLevels_basicTest(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
-	vpcName := fmt.Sprintf("test-vpc-%s", acctest.RandString(t, 10))
+	vpcName := fmt.Sprintf("tf-test-vpc-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -27,7 +27,7 @@ func testAccAccessContextManagerAccessLevels_basicTest(t *testing.T) {
 		CheckDestroy:             testAccCheckAccessContextManagerAccessLevelsDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAccessContextManagerAccessLevels_basic(org, "my policy", "corpnet_access", "prodnet_access"),
+				Config: testAccAccessContextManagerAccessLevels_basic(org, "my policy", "tf_test_corpnet_access", "tf_test_prodnet_access"),
 			},
 			{
 				ResourceName:      "google_access_context_manager_access_levels.test-access",
@@ -35,12 +35,24 @@ func testAccAccessContextManagerAccessLevels_basicTest(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccAccessContextManagerAccessLevels_basicUpdated(org, "my new policy", "corpnet_access", "prodnet_access", vpcName),
+				ResourceName:       "google_access_context_manager_access_levels.test-access",
+				ImportState:        true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
+			},
+			{
+				Config: testAccAccessContextManagerAccessLevels_basicUpdated(org, "my new policy", "tf_test_corpnet_access", "tf_test_prodnet_access", vpcName),
 			},
 			{
 				ResourceName:      "google_access_context_manager_access_levels.test-access",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				ResourceName:       "google_access_context_manager_access_levels.test-access",
+				ImportState:        true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},
 			{
 				Config: testAccAccessContextManagerAccessLevel_empty(org, "my new policy"),
@@ -49,6 +61,12 @@ func testAccAccessContextManagerAccessLevels_basicTest(t *testing.T) {
 				ResourceName:      "google_access_context_manager_access_levels.test-access",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				ResourceName:       "google_access_context_manager_access_levels.test-access",
+				ImportState:        true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},
 		},
 	})

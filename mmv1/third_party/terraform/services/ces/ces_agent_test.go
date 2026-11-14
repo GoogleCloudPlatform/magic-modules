@@ -115,7 +115,7 @@ resource "google_ces_toolset" "ces_toolset_for_agent" {
 
 
 resource "google_ces_agent" "ces_child_agent" {
-  agent_id = "child-agent-id%{random_suffix}"
+  agent_id = "tf-test-child-agent-id%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_agent.app_id
   display_name = "child agent"
@@ -167,6 +167,12 @@ resource "google_ces_agent" "ces_agent_basic" {
 
 
   instruction = "You are a helpful assistant for this example."
+
+  model_settings {
+    model          = "gemini-3.0-flash-001"
+    temperature    = 0.5
+    thinking_level = "LOW"
+  }
 
   before_agent_callbacks {
     description = "Example callback"
@@ -317,7 +323,7 @@ resource "google_ces_toolset" "ces_toolset_for_agent" {
 
 
 resource "google_ces_agent" "ces_child_agent" {
-  agent_id = "child-agent-id%{random_suffix}"
+  agent_id = "tf-test-child-agent-id%{random_suffix}"
   location = "us"
   app      = google_ces_app.ces_app_for_agent.app_id
   display_name = "child agent"
@@ -362,6 +368,12 @@ resource "google_ces_agent" "ces_agent_basic" {
 
 
   instruction = "You are a helpful assistant for this example updated."
+
+  model_settings {
+    model          = "gemini-3.0-flash-001"
+    temperature    = 0.5
+    thinking_level = "HIGH"
+  }
 
   before_agent_callbacks {
     description = "Example callback"

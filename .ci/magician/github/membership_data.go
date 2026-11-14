@@ -79,6 +79,10 @@ var (
 					startDate: newDate(2026, 9, 17),
 					endDate:   newDate(2026, 9, 23),
 				},
+				{
+					startDate: newDate(2026, 11, 7),
+					endDate:   newDate(2026, 11, 15),
+				},
 			},
 		},
 		"melinath": {
@@ -127,25 +131,25 @@ var (
 					startDate: newDate(2026, 7, 5),
 					endDate:   newDate(2026, 8, 17),
 				},
+				{
+					startDate: newDate(2026, 10, 8),
+					endDate:   newDate(2026, 11, 8),
+				},
 			},
 		},
 		"ScottSuarez": {
 			vacations: []Vacation{
 				{
 					startDate: newDate(2026, 9, 14),
-					endDate:   newDate(2026, 11, 15),
+					endDate:   newDate(2026, 11, 18),
 				},
 			},
 		},
 		"SirGitsalot": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2026, 4, 8),
-					endDate:   newDate(2026, 4, 15),
-				},
-				{
-					startDate: newDate(2026, 06, 01),
-					endDate:   newDate(2026, 06, 12),
+					startDate: newDate(2026, 11, 2),
+					endDate:   newDate(2026, 11, 9),
 				},
 			},
 		},
@@ -171,5 +175,7 @@ var (
 		"trodge":            {},
 		"zli82016":          {},
 		"vr-ibm":            {},
+		"NA2047":            {},
+		"ShuaiXia-GCP":      {},
 	}
 )

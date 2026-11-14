@@ -16,7 +16,7 @@ if err != nil {
     return nil, err
 }
 
-url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/networkEndpointGroups/{{"{{"}}network_endpoint_group{{"}}"}}/listNetworkEndpoints")
+url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/networkEndpointGroups/{{"{{"}}network_endpoint_group{{"}}"}}/listNetworkEndpoints")
 if err != nil {
     return nil, err
 }

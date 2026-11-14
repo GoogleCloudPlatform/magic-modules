@@ -1,6 +1,6 @@
 resource "google_alloydb_cluster" "{{$.PrimaryResourceId}}" {
   cluster_id = "{{index $.ResourceIdVars "alloydb_cluster_name"}}"
-  location   = "us-central1"
+  location   = "us-east1"
   network    = data.google_compute_network.default.id
 
   initial_user {
@@ -24,7 +24,7 @@ resource "google_alloydb_instance" "{{$.PrimaryResourceId}}" {
 
 resource "google_alloydb_backup" "{{$.PrimaryResourceId}}" {
   backup_id    = "{{index $.ResourceIdVars "alloydb_backup_id"}}"
-  location     = "us-central1"
+  location     = "us-east1"
   cluster_name = google_alloydb_cluster.{{$.PrimaryResourceId}}.name
 
   depends_on = [google_alloydb_instance.{{$.PrimaryResourceId}}]
@@ -32,7 +32,7 @@ resource "google_alloydb_backup" "{{$.PrimaryResourceId}}" {
 
 resource "google_alloydb_cluster" "restored_from_backup" {
   cluster_id            = "{{index $.ResourceIdVars "alloydb_backup_restored_cluster_name"}}"
-  location              = "us-central1"
+  location              = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -45,7 +45,7 @@ resource "google_alloydb_cluster" "restored_from_backup" {
 
 resource "google_alloydb_cluster" "restored_via_pitr" {
   cluster_id             = "{{index $.ResourceIdVars "alloydb_pitr_restored_cluster_name"}}"
-  location               = "us-central1"
+  location               = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }

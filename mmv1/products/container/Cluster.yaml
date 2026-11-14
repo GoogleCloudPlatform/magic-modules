@@ -190,3 +190,14 @@ properties:
   - name: ignoreNodeCountChanges
     type: Boolean
     client_side: true
+  - name: enterpriseConfig
+    type: NestedObject
+    # enterprise_config is deprecated and not converted by cai2hcl
+    ignore_read: true
+    properties:
+      - name: desiredTier
+        type: String
+        ignore_read: true
+      - name: clusterTier
+        type: String
+        ignore_read: true

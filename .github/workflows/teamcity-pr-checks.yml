@@ -24,8 +24,20 @@ jobs:
         uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
         with:
           distribution: zulu
-          java-version: 21
+          java-version: '21.0.12'
           java-package: jdk
+
+      # Maven 3.10.0 (default on newer runner images) breaks TeamCity DSL generation with JDOM NoSuchMethodError
+      - name: Setup Maven
+        env:
+          MAVEN_VERSION: 3.9.16
+          MAVEN_SHA512: 831a8591fe20c8243b1dbe7d71e3244f31d1665b0804b2e825e38cbbe5ce0cafb8338851f90780735568773e0a6cd07bbec107cda0b896b008b861075358b6f6
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/apache-maven-${MAVEN_VERSION}-bin.tar.gz" "https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${MAVEN_VERSION}/apache-maven-${MAVEN_VERSION}-bin.tar.gz"
+          echo "${MAVEN_SHA512}  $RUNNER_TEMP/apache-maven-${MAVEN_VERSION}-bin.tar.gz" | sha512sum -c -
+          tar -xzf "$RUNNER_TEMP/apache-maven-${MAVEN_VERSION}-bin.tar.gz" -C "$RUNNER_TEMP"
+          rm -f "$RUNNER_TEMP/apache-maven-${MAVEN_VERSION}-bin.tar.gz"
+          echo "$RUNNER_TEMP/apache-maven-${MAVEN_VERSION}/bin" >> "$GITHUB_PATH"
 
       - name: Cache Maven files
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5

@@ -1,0 +1,124 @@
+resource "google_design_center_application" "example" {
+  project            = "{{index $.Vars "project"}}"
+  location           = "us-central1"
+  space              = "{{index $.Vars "space"}}"
+  application_id     = "{{index $.ResourceIdVars "application_id"}}"
+  display_name       = "Updated Example Application"
+  description        = "Updated Managed by Terraform"
+  deployment_region  = "us-central1"
+  deployment_project = "{{index $.Vars "project"}}"
+  service_account    = "{{index $.Vars "service_account"}}"
+
+  source {
+    application_template_revision = "{{index $.Vars "application_template_revision_uri"}}"
+  }
+
+  scope {
+    type = "REGIONAL"
+  }
+
+  app_parameters {
+    key   = "project_id"
+    value = jsonencode("{{index $.Vars "project"}}")
+  }
+
+  app_parameters {
+    key   = "location"
+    value = jsonencode("us-central1")
+  }
+
+  attributes {
+    criticality {
+      type = "MEDIUM"
+    }
+
+    environment {
+      type = "TEST"
+    }
+
+    developer_owners {
+      display_name = "Updated Example Developer"
+      email        = "updated-developer@example.com"
+    }
+  }
+
+  deployment_target {
+    gke_deployment_target {
+      cluster_self_link                   = "projects/{{index $.Vars "project"}}/locations/us-central1/clusters/example-cluster"
+      namespace                           = "example-namespace"
+      kubernetes_service_account          = "default"
+      kubernetes_service_account_creation = true
+    }
+  }
+
+  component_parameters {
+    component = "{{index $.Vars "source_component"}}"
+
+    parameters {
+      key   = "service_name"
+      value = jsonencode("example-service")
+    }
+
+    parameters {
+      key   = "project_id"
+      value = jsonencode("{{index $.Vars "project"}}")
+    }
+
+    parameters {
+      key   = "location"
+      value = jsonencode("us-central1")
+    }
+  }
+
+  component_parameters {
+    component = "{{index $.Vars "destination_component"}}"
+
+    parameters {
+      key   = "project_id"
+      value = jsonencode("{{index $.Vars "project"}}")
+    }
+
+    parameters {
+      key   = "region"
+      value = jsonencode("us-central1")
+    }
+  }
+
+  connection_configs {
+    connection_uri = "{{index $.Vars "connection"}}"
+
+    source_component_parameters {
+      key   = "service_account_project_roles"
+      value = jsonencode(["roles/cloudsql.client"])
+    }
+
+    destination_component_parameters {
+      key = "iam_users"
+      value = jsonencode([
+        {
+          id    = "example-sa"
+          email = "example-sa@{{index $.Vars "project"}}.iam.gserviceaccount.com"
+          type  = "CLOUD_IAM_SERVICE_ACCOUNT"
+        },
+      ])
+    }
+  }
+
+  composite_application_parameters {
+    service_account_map = {
+      "{{index $.Vars "source_component"}}" = "{{index $.Vars "service_account"}}"
+    }
+  }
+
+  roles_apis_config {
+    project_id = "{{index $.Vars "project"}}"
+
+    roles {
+      role = "roles/viewer"
+    }
+
+    apis {
+      api = "logging.googleapis.com"
+    }
+  }
+}

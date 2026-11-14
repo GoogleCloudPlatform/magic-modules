@@ -35,13 +35,14 @@ import_format:
   - 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataConnector'
 custom_code:
   constants: "templates/terraform/constants/discoveryengine_data_connector.go.tmpl"
+  post_create: "templates/terraform/post_create/discoveryengine_data_connector.go.tmpl"
 state_upgraders: true
 schema_version: 1
 timeouts:
   insert_minutes: 20
   update_minutes: 5
   delete_minutes: 20
-autogen_async: false
+autogen_async: true
 async:
   actions: ['create', 'delete']
   type: 'OpAsync'
@@ -62,6 +63,29 @@ samples:
       - name: 'discoveryengine_dataconnector_jira_with_actions'
         resource_id_vars:
           collection_id: 'collection-id'
+        ignore_read_extra:
+          - action_state
+          - errors
+          - state
+          - update_time
+  - name: 'discoveryengine_dataconnector_jira_with_json_action_params'
+    primary_resource_id: 'jira-with-json-action-params'
+    steps:
+      - name: 'discoveryengine_dataconnector_jira_with_json_action_params'
+        resource_id_vars:
+          collection_id: 'collection-id'
+        vars:
+          action_instance_id: '12345678-1234-1234-1234-123456789abc'
+        ignore_read_extra:
+          - action_state
+          - errors
+          - state
+          - update_time
+      - name: 'discoveryengine_dataconnector_jira_with_json_action_params'
+        resource_id_vars:
+          collection_id: 'collection-id'
+        vars:
+          action_instance_id: '12345678-1234-1234-1234-123456789def'
         ignore_read_extra:
           - action_state
           - errors
@@ -189,6 +213,8 @@ properties:
     description: |
       Params needed to access the source in the format of json string.
     ignore_read: true
+    update_mask_fields:
+      - 'params'
     exactly_one_of:
       - params
       - json_params
@@ -242,14 +268,9 @@ properties:
             method, a DataStore is automatically created for each source entity.
           output: true
         - name: 'params'
-          type: String
+          type: JsonValue
           description: 'The parameters for the entity to facilitate data ingestion.'
           diff_suppress_func: 'DataConnectorJsonStructFieldsDiffSuppress'
-          custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-          custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
-          state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-          validation:
-            function: 'validation.StringIsJSON'
   - name: 'createTime'
     type: Time
     description: |
@@ -316,6 +337,20 @@ properties:
           String-to-String (Key, Value) pairs. Contains connection
           credentials and configuration for the action connector.
         ignore_read: true
+        conflicts:
+          - action_config.0.json_action_params
+      - name: 'jsonActionParams'
+        type: String
+        description: |
+          Params needed to configure the actions in the format of a json string.
+          Use this instead of `action_params` when some values must be sent as
+          non-string JSON types, for example booleans such as
+          `pkce_support_enabled` for custom MCP connectors.
+        ignore_read: true
+        validation:
+          function: 'validation.StringIsJSON'
+        conflicts:
+          - action_config.0.action_params
       - name: 'isActionConfigured'
         type: Boolean
         description: |
@@ -393,14 +428,9 @@ properties:
                 description: |
                   Target port number accepted by the destination.
         - name: 'params'
-          type: String
+          type: JsonValue
           description: 'Additional parameters for this destination config in structured json format.'
           diff_suppress_func: 'DataConnectorJsonStructFieldsDiffSuppress'
-          custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-          custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
-          state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-          validation:
-            function: 'validation.StringIsJSON'
   - name: 'staticIpAddresses'
     type: Array
     description: |
@@ -476,6 +506,7 @@ properties:
     type: String
     description: |
       User-facing, version-independent label for this connector.
+    default_from_api: true
     immutable: true
   - name: 'metadata'
     type: NestedObject

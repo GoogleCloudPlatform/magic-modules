@@ -51,8 +51,10 @@ resource "google_network_services_agent_connectivity_template" "{{$.PrimaryResou
   location                       = "us-west2"
   description                    = "An updated advanced configuration for Agent Connectivity Template"
 
-  access_types = ["PUBLIC"]
-  access_path = "AGENT_TO_ANYWHERE"
+  agent_compute    = "CLOUD_RUN"
+  deployment_model = "AMBIENT"
+  access_types     = ["PUBLIC"]
+  access_path      = "AGENT_TO_ANYWHERE"
 
   labels = {
     env = "prod"

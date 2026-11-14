@@ -47,6 +47,9 @@ for apiKey, stateKey := range map[string]string{
 	"minReplicaCount":      "min_replica_count",
 	"maxReplicaCount":      "max_replica_count",
 	"requiredReplicaCount": "required_replica_count",
+{{- if ne $.TargetVersionName "ga" }}
+	"initialReplicaCount":  "initial_replica_count",
+{{- end }}
 } {
 	if v, ok := apiResources[apiKey]; ok {
 		dedicatedResources[apiKey] = v
@@ -54,6 +57,11 @@ for apiKey, stateKey := range map[string]string{
 		dedicatedResources[apiKey] = d.Get(resourcesPrefix + stateKey)
 	}
 }
+{{- if ne $.TargetVersionName "ga" }}
+if v, ok := apiResources["scaleToZeroSpec"]; ok {
+	dedicatedResources["scaleToZeroSpec"] = v
+}
+{{- end }}
 
 res["deployConfig"] = map[string]interface{}{
 	"dedicatedResources": dedicatedResources,

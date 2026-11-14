@@ -196,15 +196,10 @@ properties:
         output: true
         properties:
           - name: 'effectiveSla'
-            type: Enum
+            type: String
             description: |
               Which SLA this group supports. Options are the same as the
               intent.
-            enum_values:
-              - 'PRODUCTION_CRITICAL'
-              - 'PRODUCTION_NON_CRITICAL'
-              - 'NO_SLA'
-              - 'EFFECTIVE_SLA_UNSPECIFIED'
             output: true
           - name: 'intendedSlaBlockers'
             type: Array
@@ -217,17 +212,9 @@ properties:
               type: NestedObject
               properties:
                 - name: 'blockerType'
-                  type: Enum
+                  type: String
                   description: |
                     The category of an unmet SLA requirement.
-                  enum_values:
-                    - 'BLOCKER_TYPE_UNSPECIFIED'
-                    - 'NO_ATTACHMENTS'
-                    - 'INCOMPATIBLE_REGIONS'
-                    - 'INCOMPATIBLE_METROS'
-                    - 'NO_ATTACHMENTS_IN_METRO_AND_ZONE'
-                    - 'MISSING_GLOBAL_ROUTING'
-                    - 'OTHER'
                   output: true
                 - name: 'explanation'
                   type: String

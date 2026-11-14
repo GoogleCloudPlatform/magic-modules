@@ -70,6 +70,21 @@ samples:
         resource_id_vars:
           dataset_id: 'dataset_id'
           routine_id: 'routine_id'
+  - name: 'bigquery_routine_any_table'
+    primary_resource_id: 'sproc'
+    steps:
+      - name: 'bigquery_routine_any_table'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          routine_id: 'routine_id'
+      - name: 'bigquery_routine_table_type'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          routine_id: 'routine_id'
+      - name: 'bigquery_routine_any_table'
+        resource_id_vars:
+          dataset_id: 'dataset_id'
+          routine_id: 'routine_id'
   - name: 'bigquery_routine_pyspark'
     primary_resource_id: 'pyspark'
     steps:
@@ -187,6 +202,7 @@ properties:
             - 'FIXED_TYPE'
             - 'ANY_TYPE'
             - 'FIXED_TABLE'
+            - 'ANY_TABLE'
         - name: 'mode'
           type: Enum
           description: |
@@ -199,20 +215,15 @@ properties:
         # which can contain nested StandardSqlDataType.
         # We'll have people provide the json blob for the schema instead.
         - name: 'dataType'
-          type: String
+          type: JsonValue
           description: |
-            A JSON schema for the data type. Required unless argumentKind = ANY_TYPE.
+            A JSON schema for the data type. Required if argumentKind = FIXED_TYPE.
             ~>**NOTE**: Because this field expects a JSON string, any changes to the string
             will create a diff, even if the JSON itself hasn't changed. If the API returns
             a different value for the same schema, e.g. it switched the order of values
             or replaced STRUCT field type with RECORD field type, we currently cannot
             suppress the recurring diff this causes. As a workaround, we recommend using
             the schema as returned by the API.
-          state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-          custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-          custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
-          validation:
-            function: 'validation.StringIsJSON'
         - name: 'tableType'
           type: NestedObject
           description: |
@@ -230,7 +241,7 @@ properties:
                     description: |
                       The name of the column.
                   - name: 'type'
-                    type: String
+                    type: JsonValue
                     description: |
                       A JSON schema for the data type of the column. Required unless argumentKind = ANY_TYPE.
                       ~>**NOTE**: Because this field expects a JSON string, any changes to the string
@@ -239,13 +250,8 @@ properties:
                       or replaced STRUCT field type with RECORD field type, we currently cannot
                       suppress the recurring diff this causes. As a workaround, we recommend using
                       the schema as returned by the API.
-                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
-                    validation:
-                      function: 'validation.StringIsJSON'
   - name: 'returnType'
-    type: String
+    type: JsonValue
     description: |
       A JSON schema for the return type. Optional if language = "SQL"; required otherwise.
       If absent, the return type is inferred from definitionBody at query time in each query
@@ -256,24 +262,14 @@ properties:
       d the order of values or replaced STRUCT field type with RECORD field type, we currently
       cannot suppress the recurring diff this causes. As a workaround, we recommend using
       the schema as returned by the API.
-    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
-    validation:
-      function: 'validation.StringIsJSON'
   - name: 'returnTableType'
-    type: String
+    type: JsonValue
     description: |
       Optional. Can be set only if routineType = "TABLE_VALUED_FUNCTION".
 
       If absent, the return table type is inferred from definitionBody at query time in each query
       that references this routine. If present, then the columns in the evaluated table result will
       be cast to match the column types specificed in return table type, at query time.
-    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
-    validation:
-      function: 'validation.StringIsJSON'
   - name: 'importedLibraries'
     type: Array
     description: |
@@ -463,3 +459,27 @@ properties:
           Maximum number of concurrent requests per Python UDF container instance. For more
           information, see [Configure container limits for Python
           UDFs](https://cloud.google.com/bigquery/docs/user-defined-functions-python#configure-container-limits)
+      - name: 'volumeMounts'
+        type: Array
+        description: |
+          List of volume mounts for the Python UDF container that executes the
+          managed function. When volume mounts are set, `runtime_connection` must
+          also be set. For more information, see [Create a Python UDF with volume
+          mounts](https://cloud.google.com/bigquery/docs/user-defined-functions-python#volume-mounts).
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'sourcePath'
+              type: String
+              required: true
+              description: |
+                The absolute path of the source to be mounted. Only Google Cloud
+                Storage buckets or folders are currently supported. For example,
+                `gs://my-bucket` for a Cloud Storage bucket, or
+                `gs://my-bucket/folder1/folder2` for a Cloud Storage folder.
+            - name: 'mountPath'
+              type: String
+              required: true
+              description: |
+                The absolute path within the container where the volume should be
+                mounted. For example, `/mnt/data`.

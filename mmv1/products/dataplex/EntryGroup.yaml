@@ -25,6 +25,7 @@ iam_policy:
   exclude_import_test: true
   method_name_separator: ':'
   parent_resource_attribute: entry_group_id
+  max_backoff_timeout_seconds: 1200
   import_format:
     - projects/{{project}}/locations/{{location}}/entryGroups/{{entry_group_id}}
     - '{{entry_group_id}}'
@@ -111,12 +112,8 @@ properties:
     description: |
       User-defined labels for the EntryGroup.
   - name: transferStatus
-    type: Enum
+    type: String
     description: |
       Denotes the transfer status of the Entry Group. It is unspecified
       for Entry Group created from Dataplex API.
     output: true
-    enum_values:
-      - TRANSFER_STATUS_UNSPECIFIED
-      - TRANSFER_STATUS_MIGRATED
-      - TRANSFER_STATUS_TRANSFERRED

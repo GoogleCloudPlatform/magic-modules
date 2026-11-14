@@ -256,9 +256,7 @@ fields:
   - api_field: 'maintenancePolicy.disruptionBudget.lastMinorVersionDisruptionTime'  
   - api_field: 'maintenancePolicy.disruptionBudget.MinorVersionDisruptionInterval'
   - api_field: 'maintenancePolicy.disruptionBudget.PatchVersionDisruptionInterval'
-{{- if ne $.TargetVersionName "ga" }}
   - api_field: 'managedOpentelemetryConfig.scope'
-{{- end }}
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'managedMachineLearningDiagnosticsConfig.enabled'
 {{- end }}
@@ -302,6 +300,7 @@ fields:
   - api_field: 'nodeConfig.bootDisk.sizeGb'
   - api_field: 'nodeConfig.confidentialNodes.enabled'
   - api_field: 'nodeConfig.confidentialNodes.confidentialInstanceType'
+  - api_field: 'nodeConfig.consolidationDelay'
   - api_field: 'nodeConfig.containerdConfig.privateRegistryAccessConfig.certificateAuthorityDomainConfig.fqdns'
   - api_field: 'nodeConfig.containerdConfig.privateRegistryAccessConfig.certificateAuthorityDomainConfig.gcpSecretManagerCertificateConfig.secretUri'
   - api_field: 'nodeConfig.containerdConfig.privateRegistryAccessConfig.enabled'
@@ -542,6 +541,8 @@ fields:
     api_field: 'nodePools.config.confidentialNodes.enabled'
   - field: 'node_pool.node_config.confidential_nodes.confidential_instance_type'
     api_field: 'nodePools.config.confidentialNodes.confidentialInstanceType'
+  - field: 'node_pool.node_config.consolidation_delay'
+    api_field: 'nodePools.config.consolidationDelay'
   - field: 'node_pool.node_config.containerd_config.private_registry_access_config.certificate_authority_domain_config.fqdns'
     api_field: 'nodePools.config.containerdConfig.privateRegistryAccessConfig.certificateAuthorityDomainConfig.fqdns'
   - field: 'node_pool.node_config.containerd_config.private_registry_access_config.certificate_authority_domain_config.gcp_secret_manager_certificate_config.secret_uri'
@@ -844,6 +845,10 @@ fields:
     api_field: 'nodePools.placementPolicy.type'
   - field: 'node_pool.queued_provisioning.enabled'
     api_field: 'nodePools.queuedProvisioning.enabled'
+  - field: 'node_pool.best_effort_provisioning.enabled'
+    api_field: 'nodePools.bestEffortProvisioning.enabled'
+  - field: 'node_pool.best_effort_provisioning.min_provision_nodes'
+    api_field: 'nodePools.bestEffortProvisioning.minProvisionNodes'
 {{- if ne $.TargetVersionName "ga" }}
   - field: 'node_pool.upgrade_settings.blue_green_settings.autoscaled_rollout_policy.wait_for_drain_duration'
     api_field: 'nodePools.upgradeSettings.blueGreenSettings.autoscaledRolloutPolicy.waitForDrainDuration'
@@ -928,6 +933,7 @@ fields:
   - field: 'resource_usage_export_config.enable_resource_consumption_metering'
     api_field: 'resourceUsageExportConfig.consumptionMeteringConfig.enabled'
   - api_field: 'rollbackSafeUpgrade.controlPlaneSoakDuration'
+  - api_field: 'scheduleUpgradeConfig.enabled'
   - api_field: 'secretManagerConfig.enabled'
   - api_field: 'secretManagerConfig.rotationConfig.enabled'
   - api_field: 'secretManagerConfig.rotationConfig.rotationInterval'

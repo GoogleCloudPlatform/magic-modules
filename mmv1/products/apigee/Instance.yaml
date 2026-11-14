@@ -55,6 +55,10 @@ samples:
       - name: 'apigee_instance_basic'
         resource_id_vars:
           instance_name: 'my-instance-name'
+        vars:
+          prefix_length: 16
+          peering_cidr_range: null
+          ip_range: null
   # This is a more verbose version of the above that creates all
   # the resources needed for the acceptance test.
   - name: 'apigee_instance_basic_test'
@@ -68,12 +72,21 @@ samples:
         test_env_vars:
           org_id: 'ORG_ID'
           billing_account: 'BILLING_ACCT'
+        vars:
+          prefix_length: 16
+          peering_cidr_range: null
+          ip_range: null
   - name: 'apigee_instance_cidr_range'
     exclude_test: true
     steps:
       - name: 'apigee_instance_cidr_range'
+        config_path: 'templates/terraform/samples/services/apigee/apigee_instance_basic.tf.tmpl'
         resource_id_vars:
           instance_name: 'my-instance-name'
+        vars:
+          prefix_length: 22
+          peering_cidr_range: 'SLASH_22'
+          ip_range: null
   # This is a more verbose version of the above that creates all
   # the resources needed for the acceptance test.
   - name: 'apigee_instance_cidr_range_test'
@@ -84,15 +97,25 @@ samples:
     external_providers: ["time"]
     steps:
       - name: 'apigee_instance_cidr_range_test'
+        config_path: 'templates/terraform/samples/services/apigee/apigee_instance_basic_test.tf.tmpl'
         test_env_vars:
           org_id: 'ORG_ID'
           billing_account: 'BILLING_ACCT'
+        vars:
+          prefix_length: 22
+          peering_cidr_range: 'SLASH_22'
+          ip_range: null
   - name: 'apigee_instance_ip_range'
     exclude_test: true
     steps:
       - name: 'apigee_instance_ip_range'
+        config_path: 'templates/terraform/samples/services/apigee/apigee_instance_basic.tf.tmpl'
         resource_id_vars:
           instance_name: 'my-instance-name'
+        vars:
+          prefix_length: 22
+          peering_cidr_range: null
+          ip_range: '10.87.8.0/22'
   # This is a more verbose version of the above that creates all
   # the resources needed for the acceptance test.
   - name: 'apigee_instance_ip_range_test'
@@ -103,9 +126,14 @@ samples:
     external_providers: ["time"]
     steps:
       - name: 'apigee_instance_ip_range_test'
+        config_path: 'templates/terraform/samples/services/apigee/apigee_instance_basic_test.tf.tmpl'
         test_env_vars:
           org_id: 'ORG_ID'
           billing_account: 'BILLING_ACCT'
+        vars:
+          prefix_length: 21
+          peering_cidr_range: null
+          ip_range: '${google_compute_global_address.apigee_range.address}/22'
   - name: 'apigee_instance_full'
     exclude_test: true
     steps:

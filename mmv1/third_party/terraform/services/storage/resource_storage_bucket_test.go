@@ -95,7 +95,7 @@ func TestAccStorageBucket_importBlockWithResourceIdentity(t *testing.T) {
 			},
 			{
 				ResourceName:       "google_storage_bucket.bucket",
-				RefreshState:       true,
+				ImportState:        true,
 				ExpectNonEmptyPlan: true,
 				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},
@@ -1897,7 +1897,7 @@ func testAccCheckStorageBucketRetentionPolicy(t *testing.T, bucketName string) r
 		}
 
 		// Wait 10 seconds and delete again
-		time.Sleep(10000 * time.Millisecond)
+		acctest.Sleep(10 * time.Second)
 
 		if err := storage_tpg.NewClient(config, config.UserAgent).Objects.Delete(bucketName, object.Name).Do(); err == nil {
 			log.Printf("[INFO] Deleted object %v at location %v\n\n", object.Name, object.SelfLink)

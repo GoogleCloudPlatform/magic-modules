@@ -1,0 +1,7 @@
+// BigQuery streaming connectors remain in CREATING until continuous query
+// allowlisting completes, which can take days and exceeds Terraform timeouts.
+if shouldSkipDataConnectorReadyPoll(d.Get("data_source").(string), d.Get("sync_mode").(string)) {
+	log.Printf("[DEBUG] Skipping post-create readiness poll for BigQuery streaming DataConnector %q", id)
+} else if err := waitForDataConnectorReady(d, config, d.Timeout(schema.TimeoutCreate)); err != nil {
+	return fmt.Errorf("Error waiting for DataConnector %q to finish initializing during creation: %s", id, err)
+}

@@ -264,3 +264,30 @@ properties:
     description: |
       The labels associated with this reservation. You can use these to
       organize and group your reservations.
+  - name: schedulingPolicy
+    type: NestedObject
+    description: |
+      The scheduling policy to use for jobs and queries running under this
+      reservation. The scheduling policy controls how the reservation's resources
+      are distributed.
+    update_mask_fields:
+      - schedulingPolicy.concurrency
+      - schedulingPolicy.maxSlots
+    properties:
+      - name: concurrency
+        type: Integer
+        description: |
+          If present and > 0, the reservation will attempt to limit the concurrency
+          of jobs running for any particular project within it to the given value.
+        at_least_one_of:
+          - scheduling_policy.0.concurrency
+          - scheduling_policy.0.max_slots
+      - name: maxSlots
+        type: Integer
+        description: |
+          If present and > 0, the reservation will attempt to limit the slot
+          consumption of queries running for any particular project within it to
+          the given value.
+        at_least_one_of:
+          - scheduling_policy.0.concurrency
+          - scheduling_policy.0.max_slots

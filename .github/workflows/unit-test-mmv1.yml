@@ -13,9 +13,12 @@ on:
     types: [checks_requested]
   pull_request:
 
+# Pushes share one group per branch and are never cancelled mid-run: when several
+# merges land at once, the running build finishes and only the newest pending
+# push run is kept. Every commit on main was already tested by its merge_group run.
 concurrency:
-  group: ${{ github.event_name == 'merge_group' && format('mmv1-merge-group-{0}', github.event.merge_group.head_sha) || github.event_name == 'pull_request' && format('mmv1-pr-{0}', github.event.pull_request.number) || format('mmv1-commit-{0}', github.sha) }}
-  cancel-in-progress: true
+  group: ${{ github.event_name == 'merge_group' && format('mmv1-merge-group-{0}', github.event.merge_group.head_sha) || github.event_name == 'pull_request' && format('mmv1-pr-{0}', github.event.pull_request.number) || format('mmv1-push-{0}', github.ref) }}
+  cancel-in-progress: ${{ github.event_name != 'push' }}
 
 jobs:
   version-guard-check:
@@ -35,6 +38,12 @@ jobs:
           git config user.email "magic-modules@google.com"
           git fetch origin ${GITHUB_BASE_REF} # Fetch the base branch
           git merge --no-ff origin/${GITHUB_BASE_REF} # Merge with the base branch
+      - name: Set up Go
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        with:
+          go-version: '1.26.10'
+          cache-dependency-path: |
+            repo/tools/template-check/go.sum
       - name: Check for invalid version guards
         run: |
           cd repo/tools/template-check
@@ -62,6 +71,12 @@ jobs:
           git config user.email "magic-modules@google.com"
           git fetch origin ${GITHUB_BASE_REF} # Fetch the base branch
           git merge --no-ff origin/${GITHUB_BASE_REF} # Merge with the base branch
+      - name: Set up Go
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        with:
+          go-version: '1.26.10'
+          cache-dependency-path: |
+            repo/tools/template-check/go.sum
       - name: Check new product templates are linked
         id: new_templates
         run: |
@@ -90,6 +105,12 @@ jobs:
           git config user.email "magic-modules@google.com"
           git fetch origin ${GITHUB_BASE_REF} # Fetch the base branch
           git merge --no-ff origin/${GITHUB_BASE_REF} # Merge with the base branch
+      - name: Set up Go
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        with:
+          go-version: '1.26.10'
+          cache-dependency-path: |
+            repo/tools/template-check/go.sum
       - name: Check for legacy Apiary usage
         run: |
           cd repo/tools/template-check
@@ -161,9 +182,9 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
         with:
-          go-version: '^1.26'
+          go-version: '1.26.10'
           cache-dependency-path: |
-            repo/mmv1/go.mod
+            repo/mmv1/go.sum
 
       - name: Run mmv1 unit tests
         run: |

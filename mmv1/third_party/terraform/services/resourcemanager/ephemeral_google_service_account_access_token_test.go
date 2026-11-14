@@ -112,7 +112,12 @@ func TestAccEphemeralServiceAccountToken_withCustomLifetime(t *testing.T) {
 }
 
 func testAccEphemeralServiceAccountToken_basic(context map[string]interface{}) string {
-	return acctest.EchoResourceConfig(context["ephemeral_reference"].(string)) + acctest.Nprintf(`
+	return acctest.Nprintf(`
+provider "echo" {
+  data = %{ephemeral_reference}
+}
+resource "echo" "test" {}
+
 
 ephemeral "google_service_account_access_token" "%{ephemeral_resource_name}" {
   target_service_account = "%{target_service_account}"
@@ -122,7 +127,12 @@ ephemeral "google_service_account_access_token" "%{ephemeral_resource_name}" {
 }
 
 func testAccEphemeralServiceAccountToken_withDelegates(context map[string]interface{}) string {
-	return acctest.EchoResourceConfig(context["ephemeral_reference"].(string)) + acctest.Nprintf(`
+	return acctest.Nprintf(`
+provider "echo" {
+  data = %{ephemeral_reference}
+}
+resource "echo" "test" {}
+
 
 ephemeral "google_service_account_access_token" "%{ephemeral_resource_name}" {
   target_service_account = "%{target_service_account}"
@@ -136,7 +146,12 @@ ephemeral "google_service_account_access_token" "%{ephemeral_resource_name}" {
 }
 
 func testAccEphemeralServiceAccountToken_withCustomLifetime(context map[string]interface{}) string {
-	return acctest.EchoResourceConfig(context["ephemeral_reference"].(string)) + acctest.Nprintf(`
+	return acctest.Nprintf(`
+provider "echo" {
+  data = %{ephemeral_reference}
+}
+resource "echo" "test" {}
+
 
 ephemeral "google_service_account_access_token" "%{ephemeral_resource_name}" {
   target_service_account = "%{target_service_account}"

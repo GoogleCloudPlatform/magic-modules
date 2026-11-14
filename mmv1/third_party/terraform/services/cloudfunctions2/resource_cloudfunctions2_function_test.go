@@ -80,7 +80,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
   }
 
   build_config {
-    runtime = "nodejs20"
+    runtime = "nodejs24"
     entry_point = "helloHttp"
     source {
       storage_source {
@@ -122,7 +122,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
   }
 
   build_config {
-    runtime = "nodejs20"
+    runtime = "nodejs24"
     entry_point = "helloHttp"
     source {
       storage_source {
@@ -160,7 +160,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
   description = "function test"
 
   build_config {
-    runtime = "nodejs20"
+    runtime = "nodejs24"
     entry_point = "helloHttp"
     environment_variables = {
         BUILD_CONFIG_TEST = "build_test"
@@ -289,7 +289,7 @@ resource "google_cloudfunctions2_function" "function" {
   description = "a new function"
 
   build_config {
-    runtime     = "nodejs20"
+    runtime     = "nodejs24"
     entry_point = "entryPoint" # Set the entry point in the code
     environment_variables = {
       BUILD_CONFIG_TEST = "build_test"
@@ -403,7 +403,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
   }
 
   build_config {
-    runtime = "nodejs20"
+    runtime = "nodejs24"
     entry_point = "helloHttp"
     source {
       storage_source {
@@ -446,7 +446,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
   }
 
   build_config {
-    runtime = "nodejs20"
+    runtime = "nodejs24"
     entry_point = "helloHttp"
     source {
       storage_source {
@@ -487,7 +487,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
   }
 
   build_config {
-    runtime = "nodejs20"
+    runtime = "nodejs24"
     entry_point = "helloHttp"
     source {
       storage_source {
@@ -550,7 +550,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
   }
 
   build_config {
-    runtime = "nodejs20"
+    runtime = "nodejs24"
     entry_point = "helloHttp"
     source {
       storage_source {
@@ -630,7 +630,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
   }
 
   build_config {
-    runtime = "nodejs20"
+    runtime = "nodejs24"
     entry_point = "helloHttp"
     source {
       storage_source {
@@ -721,7 +721,7 @@ resource "google_cloudfunctions2_function" "function" {
   description = "a new function"
 
   build_config {
-    runtime = "nodejs20"
+    runtime = "nodejs24"
     entry_point = "helloHttp"  # Set the entry point
     source {
     storage_source {
@@ -770,7 +770,7 @@ resource "google_cloudfunctions2_function" "function" {
   description = "a new function"
 
   build_config {
-    runtime = "nodejs20"
+    runtime = "nodejs24"
     entry_point = "helloHttp"  # Set the entry point
     source {
     storage_source {

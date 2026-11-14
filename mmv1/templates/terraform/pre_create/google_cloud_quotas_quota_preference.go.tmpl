@@ -1,0 +1,10 @@
+if v, ok := d.GetOk("ignore_safety_checks"); ok && !strings.Contains(v.(string), "QUOTA_SAFETY_CHECK_UNSPECIFIED") {
+	var checks []interface{}
+	for _, check := range splitQuotaPreferenceIgnoreSafetyChecks(v.(string)) {
+		checks = append(checks, check)
+	}
+	url, err = transport_tpg.AddArrayQueryParams(url, "ignoreSafetyChecks", checks)
+	if err != nil {
+		return err
+	}
+}

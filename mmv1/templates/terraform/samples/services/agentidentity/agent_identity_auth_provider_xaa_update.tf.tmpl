@@ -1,0 +1,29 @@
+resource "google_agent_identity_auth_provider" "{{$.PrimaryResourceId}}" {
+  location         = "us-central1"
+  auth_provider_id = "{{index $.ResourceIdVars "auth_provider_id"}}"
+  description      = "Updated Cross-App Access auth provider"
+
+  auth_provider_type_params {
+    xaa_auth_provider {
+      additional_parameters = {
+        prompt     = "consent"
+        login_hint = "user@example.com"
+      }
+      client_secret_auth {
+        client_id     = "test-client-id-updated"
+        client_secret = "test-client-secret-updated"
+      }
+      custom_issuer {
+        token_url = "https://auth.example.com/token/v2"
+        issuer    = "https://auth.example.com/v2"
+      }
+      id_token_input {
+        id_jag_auth_provider = "projects/{{index $.TestEnvVars "project"}}/locations/us-central1/authProviders/idp-provider-v2"
+        id_jag_additional_claims = jsonencode({
+          env  = "prod"
+          role = "admin"
+        })
+      }
+    }
+  }
+}

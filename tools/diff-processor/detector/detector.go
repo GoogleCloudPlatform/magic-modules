@@ -144,7 +144,10 @@ func getMissingTestsForChanges(changedFields map[string]ResourceChanges, allTest
 }
 
 func markCoverage(fieldCoverage ResourceChanges, config reader.Block) error {
-	for fieldName := range config {
+	for fieldName, val := range config {
+		if reader.IsNullValue(val) {
+			continue
+		}
 		if field, ok := fieldCoverage[fieldName]; ok {
 			field.Tested = true
 		}
@@ -192,33 +195,20 @@ func suggestedTest(resourceName string, untested []string) string {
 func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string) (map[string]MissingDocDetails, error) {
 	ret := make(map[string]MissingDocDetails)
 	for resource, resourceDiff := range schemaDiff {
-		fieldsInDoc := make(map[string]bool)
-
-		docFilePath, err := resourceToDocFile(resource, repoPath)
-		if err == nil {
-			content, err := os.ReadFile(docFilePath)
-			if err != nil {
-				return nil, fmt.Errorf("failed to read resource doc %s: %w", docFilePath, err)
-			}
-			parser := documentparser.NewParser()
-			err = parser.Parse(content)
-			if err != nil {
-				return nil, fmt.Errorf("failed to parse document %s: %w", docFilePath, err)
-			}
-
-			fieldsInDoc = listToMap(parser.FlattenFields())
-			// for iam resource
-			if v, ok := fieldsInDoc["member/members"]; ok {
-				fieldsInDoc["member"] = v
-				fieldsInDoc["members"] = v
-			}
+		fieldsInDoc, docFilePath, err := documentedFields(resource, repoPath, 0)
+		if err != nil {
+			return nil, err
 		}
 		var newFields []string
 		for field, fieldDiff := range resourceDiff.Fields {
 			if !isNewField(fieldDiff) {
 				continue
 			}
-			// skip condition field, check mmv1/templates/terraform/resource_iam.html.markdown.tmpl for IamConditionsRequestType
+			// Ignore condition fields on IAM resources because the shared IAM schema
+			// always includes them whether or not the resource supports IAM conditions,
+			// whereas mmv1/templates/terraform/resource_iam.html.markdown.tmpl only
+			// documents them when IamConditionsRequestType is set.
+			// Longer-term fix tracked at https://github.com/hashicorp/terraform-provider-google/issues/18412
 			if field == "condition" || strings.HasPrefix(field, "condition.") {
 				continue
 			}
@@ -237,6 +227,74 @@ func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string) (map[string]
 		}
 	}
 	return ret, nil
+}
+
+// A docReference says that the fields of a resource under Prefix are
+// documented in another resource's doc, under DocPrefix.
+type docReference struct {
+	Prefix    string
+	Resource  string
+	DocPrefix string
+}
+
+// resourceDocReferences lists the resources whose docs refer to other
+// resources' docs for some of their fields.
+var resourceDocReferences = map[string][]docReference{
+	// "In addition to these, all arguments from `google_compute_instance` are supported"
+	"google_compute_instance_from_machine_image": {{Resource: "google_compute_instance"}},
+	"google_compute_instance_from_template":      {{Resource: "google_compute_instance"}},
+	// "See google_container_node_pool for exact schema."
+	"google_container_cluster": {{Prefix: "node_pool.", Resource: "google_container_node_pool"}},
+	// "See google_container_cluster for exact schema."
+	"google_container_node_pool": {{Prefix: "node_config.", Resource: "google_container_cluster", DocPrefix: "node_config."}},
+}
+
+// How many hops a chain of doc references can follow before stopping to
+// prevent cycles. A depth of 2 is needed because google_container_cluster
+// delegates node_pool.* to google_container_node_pool (hop 1), which in turn
+// delegates node_config.* back to google_container_cluster (hop 2) to
+// populate node_pool.node_config.*.
+const maxDocReferenceDepth = 2
+
+// Return the fields documented for a resource, including those documented in
+// other resources' docs that its doc refers to, and the path of its doc. A
+// resource without a doc has no documented fields.
+func documentedFields(resource, repoPath string, depth int) (map[string]bool, string, error) {
+	fields := make(map[string]bool)
+	docFilePath, err := resourceToDocFile(resource, repoPath)
+	if err != nil {
+		return fields, docFilePath, nil
+	}
+	content, err := os.ReadFile(docFilePath)
+	if err != nil {
+		return nil, docFilePath, fmt.Errorf("failed to read resource doc %s: %w", docFilePath, err)
+	}
+	parser := documentparser.NewParser()
+	if err := parser.Parse(content); err != nil {
+		return nil, docFilePath, fmt.Errorf("failed to parse document %s: %w", docFilePath, err)
+	}
+	fields = listToMap(parser.FlattenFields())
+	// for iam resource
+	if v, ok := fields["member/members"]; ok {
+		fields["member"] = v
+		fields["members"] = v
+	}
+	if refs, ok := resourceDocReferences[resource]; ok && depth < maxDocReferenceDepth {
+		for _, ref := range refs {
+			refFields, _, err := documentedFields(ref.Resource, repoPath, depth+1)
+			if err != nil {
+				return nil, docFilePath, err
+			}
+			for field := range refFields {
+				if ref.DocPrefix == "" {
+					fields[ref.Prefix+field] = true
+				} else if suffix, ok := strings.CutPrefix(field, ref.DocPrefix); ok {
+					fields[ref.Prefix+suffix] = true
+				}
+			}
+		}
+	}
+	return fields, docFilePath, nil
 }
 
 // DetectMissingDocsForDatasource detect new fields that are missing docs given the schema diffs.
@@ -301,7 +359,7 @@ func dataSourceToDocFile(resource string, repoPath string) (string, error) {
 		resource,
 	}
 	// There are only iam_policy files, no iam_binding, iam_member, iam_audit_config.
-	suffix := []string{"_iam_binding", "_iam_member", "iam_audit_config"}
+	suffix := []string{"_iam_binding", "_iam_member", "_iam_audit_config"}
 	for _, s := range suffix {
 		if strings.HasSuffix(resource, s) {
 			iamName := strings.ReplaceAll(resource, s, "_iam_policy")

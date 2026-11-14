@@ -528,13 +528,11 @@ properties:
     properties:
       - name: minNodeCount
         type: Integer
-        required: true
         description: |
           Minimum number of nodes in the runtime nodes.
         default_from_api: true
       - name: maxNodeCount
         type: Integer
-        required: true
         description: |
           Minimum number of nodes in the runtime nodes.
         default_from_api: true
@@ -893,6 +891,42 @@ properties:
         type: Boolean
         description: |
           Enrichment Enabled.
+      - name: allowedEventTypes
+        type: Array
+        description: |
+          List of allowed event types for the connection.
+        item_type:
+          type: String
+      - name: globalEventFilter
+        type: String
+        description: |
+          Filter to be applied on the events to be received by the connection.
+      - name: deadLetterConfig
+        type: NestedObject
+        description: |
+          Dead letter configuration for eventing of a connection.
+        properties:
+          - name: projectId
+            type: String
+            required: true
+            description: |
+              Project which has the topic given.
+          - name: topic
+            type: String
+            required: true
+            description: |
+              Topic to push events which couldn't be processed.
+      - name: enrichmentConfig
+        type: NestedObject
+        description: |
+          Data enrichment configuration.
+        allow_empty_object: true
+        properties:
+          - name: appendAcl
+            type: Boolean
+            send_empty_value: true
+            description: |
+              Append ACL to the event.
   - name: connectorVersionLaunchStage
     type: String
     description: |
@@ -935,3 +969,31 @@ properties:
         description: |
           Max QPS supported by the connector version before throttling of requests.
         output: true
+  - name: asyncOperationsEnabled
+    type: Boolean
+    description: |
+      Async operations enabled for the connection. If Async Operations is enabled, Connection allows the customers to initiate async long running operations using the actions API.
+    send_empty_value: true
+  - name: authOverrideEnabled
+    type: Boolean
+    description: |
+      Auth override enabled for the connection. If Auth Override is enabled, Connection allows the backend service auth to be overridden in the entities/actions API.
+    send_empty_value: true
+  - name: trafficShapingConfigs
+    type: Array
+    description: |
+      Traffic shaping configuration for the connection. Client specifies the throttling configuration for Connector API calls.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: quotaLimit
+          type: String
+          required: true
+          description: |
+            Maximum number of api calls allowed.
+        - name: duration
+          type: String
+          required: true
+          description: |
+            Specifies the duration over which the API call quota limits are calculated.
+            A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".

@@ -40,6 +40,23 @@ Please add an acceptance test which includes these fields. The test should inclu
 
 {{- end }}
 {{end}}
+{{- if and .UnreadableTests (or .UnreadableTests.NewUnreadableTests .UnreadableTests.StaleUnreadableTests) }}
+## Unreadable test report
+{{- if .UnreadableTests.NewUnreadableTests }}
+
+Missing test detection may be incomplete because the following tests can't be read. Each test step's `Config` should call a function that returns a single `fmt.Sprintf` or `acctest.Nprintf` template.
+{{ range $testName, $err := .UnreadableTests.NewUnreadableTests }}
+- `{{ $testName }}`: {{ $err }}
+{{- end }}
+{{- end }}
+{{- if .UnreadableTests.StaleUnreadableTests }}
+
+These tests can now be read; please remove them from `KnownUnreadableTests` in `tools/diff-processor/detector/unreadable_tests.go`.
+{{ range .UnreadableTests.StaleUnreadableTests }}
+- `{{ . }}`
+{{- end }}
+{{- end }}
+{{end}}
 {{- if gt (len .MissingIdentity) 0}}
 ## Missing ResourceIdentity coverage
 Your PR includes resources that declare `ResourceIdentity` but are missing identity handling.

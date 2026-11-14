@@ -35,6 +35,7 @@ async:
   actions:
     - create
     - delete
+    - update
   result:
     resource_inside_response: true
 autogen_status: R29sZGVuZ2F0ZUNvbm5lY3Rpb25Bc3NpZ25tZW50
@@ -45,7 +46,10 @@ samples:
   - name: oracledatabase_goldengate_connection_assignment_full
     primary_resource_id: assignment
     steps:
+      # Step 1 -> create test
       - name: oracledatabase_goldengate_connection_assignment_full
+        vars:
+          label_value: value-one
         resource_id_vars:
           project: my-project
           goldengate_connection_assignment_id: my-assignment
@@ -57,7 +61,25 @@ samples:
         test_vars_overrides:
           project: '"oasis-terraform-testing-prod"'
           deletion_protection: false
-          goldengate_connection_assignment_id: fmt.Sprintf("tf-gcca-%s", acctest.RandString(t, 10))
+          goldengate_connection_assignment_id: fmt.Sprintf("tf-gcca-%s", randomSuffix)
+          goldengate_deployment_id: '"tf-test-permanent-deployment"'
+          goldengate_connection_id: '"tf-test-permanent-connection"'
+      # Step 2 -> update test (in-place update of labels)
+      - name: oracledatabase_goldengate_connection_assignment_full
+        vars:
+          label_value: value-two
+        resource_id_vars:
+          project: my-project
+          goldengate_connection_assignment_id: my-assignment
+          goldengate_deployment_id: my-deployment
+          goldengate_connection_id: my-connection
+          deletion_protection: true
+        ignore_read_extra:
+          - deletion_protection
+        test_vars_overrides:
+          project: '"oasis-terraform-testing-prod"'
+          deletion_protection: false
+          goldengate_connection_assignment_id: fmt.Sprintf("tf-gcca-%s", randomSuffix)
           goldengate_deployment_id: '"tf-test-permanent-deployment"'
           goldengate_connection_id: '"tf-test-permanent-connection"'
 virtual_fields:
@@ -92,6 +114,8 @@ properties:
     output: true
   - name: labels
     type: KeyValueLabels
+    update_url: 'projects/{{project}}/locations/{{location}}/goldengateConnectionAssignments/{{goldengate_connection_assignment_id}}?updateMask=labels'
+    update_verb: 'PATCH'
     description: The labels or tags associated with the GoldengateConnectionAssignment.
   - name: name
     type: String

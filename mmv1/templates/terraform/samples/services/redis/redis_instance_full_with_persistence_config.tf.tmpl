@@ -2,9 +2,9 @@ resource "google_redis_instance" "{{$.PrimaryResourceId}}" {
   name           = "{{index $.ResourceIdVars "instance_name"}}"
   tier           = "STANDARD_HA"
   memory_size_gb = 1
-  region                  = "us-west1"
-  location_id             = "us-west1-a"
-  alternative_location_id = "us-west1-b"
+  region                  = "northamerica-south1"
+  location_id             = "northamerica-south1-a"
+  alternative_location_id = "northamerica-south1-b"
 
   persistence_config {
     persistence_mode = "RDB"

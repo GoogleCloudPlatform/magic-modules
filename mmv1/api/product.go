@@ -18,13 +18,12 @@ import (
 	"log"
 	"reflect"
 	"regexp"
+	"slices"
 	"strings"
 	"unicode"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"golang.org/x/exp/slices"
-	"gopkg.in/yaml.v3"
 )
 
 // Represents a product to be managed
@@ -73,7 +72,8 @@ type Product struct {
 	ClientName string `yaml:"client_name,omitempty"`
 
 	// RepByDefault is if this product should default to REP endpoints if
-	// available. Changing this requires REP to be supported in *ALL* regions
+	// available. Changing this requires REP to be supported in *ALL* regions.
+	// Setting this is currently disallowed.
 	RepByDefault bool `yaml:"rep_by_default,omitempty"`
 
 	// The version of the product which is currently being generated.
@@ -89,11 +89,9 @@ type Product struct {
 	Runtime Runtime `yaml:"-"`
 }
 
-func (p *Product) UnmarshalYAML(value *yaml.Node) error {
+func (p *Product) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type productAlias Product
-	aliasObj := (*productAlias)(p)
-
-	if err := value.Decode(aliasObj); err != nil {
+	if err := unmarshal((*productAlias)(p)); err != nil {
 		return err
 	}
 
@@ -128,6 +126,10 @@ func (p *Product) Validate() {
 
 	for _, v := range p.Versions {
 		v.Validate(p.Name)
+	}
+
+	if p.RepByDefault {
+		log.Fatalf("cannot set `rep_by_default` to true for product %s", p.Name)
 	}
 }
 
@@ -330,6 +332,15 @@ func Merge(self, otherObj reflect.Value, version string) {
 
 		if selfObj.Field(i).Kind() == reflect.Slice {
 			DeepMerge(selfObj.Field(i), otherObj.Field(i), version)
+		} else if selfObj.Field(i).Kind() == reflect.Map {
+			if selfObj.Field(i).IsNil() {
+				selfObj.Field(i).Set(otherObj.Field(i))
+			} else {
+				iter := otherObj.Field(i).MapRange()
+				for iter.Next() {
+					selfObj.Field(i).SetMapIndex(iter.Key(), iter.Value())
+				}
+			}
 		} else if selfObj.Field(i).Kind() == reflect.Pointer {
 			// merge the objects that are being pointed to, if both exist (namely, ItemTypes)
 			if reflect.Indirect(selfObj.Field(i)).IsValid() && reflect.Indirect(otherObj.Field(i)).IsValid() {

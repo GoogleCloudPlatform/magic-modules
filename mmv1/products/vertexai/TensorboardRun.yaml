@@ -42,11 +42,19 @@ samples:
           tensorboardRunId: run
           tensorboardExperimentId: experiment
           tensorboard: tensorboard
-      - name: vertex_ai_tensorboard_run_update
+        vars:
+          display_name: "sample run"
+          description: null
+          labels: '{ "key" : "value" }'
+      - name: vertex_ai_tensorboard_run_basic
         resource_id_vars:
           tensorboardRunId: run
           tensorboardExperimentId: experiment
           tensorboard: tensorboard
+        vars:
+          display_name: "sample run updated"
+          description: "updated description"
+          labels: '{ "key" : "value-updated", "new-key" : "new-value" }'
 parameters:
   - name: location
     type: String

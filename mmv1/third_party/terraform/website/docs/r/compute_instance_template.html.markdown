@@ -346,7 +346,7 @@ The following arguments are supported:
   Resulting name for a `name_prefix` <= 37 characters:
   `name_prefix` + YYYYmmddHHSSssss + 8 digit incremental counter
   Resulting name for a `name_prefix` 38 - 54 characters:
-  `name_prefix` + YYmmdd + 3 digit incremental counter
+  `name_prefix` + 9 random lowercase alphanumeric characters
 
 * `can_ip_forward` - (Optional) Whether to allow sending and receiving of
     packets with non-matching source or destination IPs. This defaults to false.
@@ -516,7 +516,7 @@ The following arguments are supported:
 
     If you do not provide an encryption key, then the disk will be encrypted using an automatically generated key and you do not need to provide a key to use the disk later.
 
-    Instance templates do not store customer-supplied encryption keys, so you cannot use your own keys to encrypt disks in a managed instance group. Structure [documented below](#nested_access_config).
+    Instance templates do not store customer-supplied encryption keys, so you cannot use your own keys to encrypt disks in a managed instance group. Structure [documented below](#nested_disk_encryption_key).
 
 * `resource_policies` (Optional) -- A list (short name or id) of resource policies to attach to this disk for automatic snapshot creations. Currently a max of 1 resource policy is supported.
 
@@ -585,6 +585,10 @@ The following arguments are supported:
 
 * `network_attachment` - (Optional) The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.
 
+* `enable_vpc_scoped_dns` - (Optional) If true, DNS resolution will be enabled over this interface. Only valid with `network_attachment`.
+
+* `service_class_id` - (Optional) Producer Service's Service class Id for the region of this network interface. Can only be used with `network_attachment`. It is not possible to use on its own; however, `network_attachment` can be used without `service_class_id`.
+
 * `vlan` - (Optional) VLAN tag of a dynamic network interface, must be an integer in the range from 2 to 255 inclusively.
 
 * `subnetwork_project` - (Optional) The ID of the project in which the subnetwork belongs.
@@ -617,6 +621,10 @@ The following arguments are supported:
 * `ipv6_access_config` - (Optional) An array of IPv6 access configurations for this interface.
 Currently, only one IPv6 access config, DIRECT_IPV6, is supported. If there is no ipv6AccessConfig
 specified, then this instance will have no external IPv6 Internet access. Structure [documented below](#nested_ipv6_access_config).
+
+* `internal_ipv6_prefix_length` - (Optional) The prefix length of the primary internal IPv6 range.
+
+* `ipv6_address` - (Optional) An IPv6 internal network address for this network interface. If not specified, Google Cloud will automatically assign an internal IPv6 address from the instance's subnetwork.
 
 * `queue_count` - (Optional) The networking queue count that's specified by users for the network interface. Both Rx and Tx queues will be set to this number. It will be empty if not specified.
 
@@ -675,6 +683,8 @@ specified, then this instance will have no external IPv6 Internet access. Struct
     false. Read more on this
     [here](https://cloud.google.com/compute/docs/instances/preemptible).
 
+* `min_node_cpus` - (Optional) Minimum number of cpus for the instance.
+
 * `node_affinities` - (Optional) Specifies node affinities or anti-affinities
    to determine which sole-tenant nodes your instances and managed instance
    groups will use as host systems. Read more on sole-tenant node creation
@@ -709,7 +719,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `skip_guest_os_shutdown` - (Optional) [Beta](../guides/provider_versions.html.markdown) Boolean parameter. Default is false and there will be 120 seconds between GCE ACPI G2 Soft Off and ACPI G3 Mechanical Off for Standard VMs and 30 seconds for Spot VMs.
 
-* `preemption_notice_duration` - (Optional) [Beta](../guides/provider_versions.html.markdown) Specifies the Metadata Service preemption notice duration before the GCE ACPI G2 Soft Off signal is triggered for Spot VMs only. If not specified, there will be no wait before the G2 Soft Off signal is triggered. Structure is [documented below](#nested_preemption_notice_duration).
+* `preemption_notice_duration` - (Optional) Specifies the Metadata Service preemption notice duration before the GCE ACPI G2 Soft Off signal is triggered for Spot VMs only. If not specified, there will be no wait before the G2 Soft Off signal is triggered. Structure is [documented below](#nested_preemption_notice_duration).
 
 <a name="nested_graceful_shutdown"></a>The `graceful_shutdown` block supports:
 
@@ -717,15 +727,17 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `max_duration` (Optional) The time allotted for the instance to gracefully shut down.
     If the graceful shutdown isn't complete after this time, then the instance
-    transitions to the STOPPING state. Structure is documented below:
+    transitions to the STOPPING state. Structure is [documented below](#nested_max_duration).
 
-    * `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
-        resolution. Durations less than one second are represented with a 0
-        `seconds` field and a positive `nanos` field. Must be from 0 to
-        999,999,999 inclusive.
+<a name="nested_max_duration"></a>The `max_duration` block supports:
 
-    * `seconds` - (Required) Span of time at a resolution of a second.
-        The value must be between 1 and 3600, which is 3,600 seconds (one hour).`
+* `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
+    resolution. Durations less than one second are represented with a 0
+    `seconds` field and a positive `nanos` field. Must be from 0 to
+    999,999,999 inclusive.
+
+* `seconds` - (Required) Span of time at a resolution of a second.
+    The value must be between 1 and 3600, which is 3,600 seconds (one hour).
 
 <a name="nested_preemption_notice_duration"></a>The `preemption_notice_duration` block supports:
 
@@ -777,16 +789,16 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 * `operator` (Required) - The operator. Can be `IN` for node-affinities
     or `NOT_IN` for anti-affinities.
 
-* `value` (Required) - The values for the node affinity label.
+* `values` (Required) - The values for the node affinity label.
 
 <a name="nested_reservation_affinity"></a>The `reservation_affinity` block supports:
 
 * `type` - (Required) The type of reservation from which this instance can consume resources.
 
 * `specific_reservation` - (Optional) Specifies the label selector for the reservation to use..
-    Structure is documented below.
+    Structure is [documented below](#nested_reservation_affinity_specific_reservation).
 
-The `specific_reservation` block supports:
+<a name="nested_reservation_affinity_specific_reservation"></a>The `specific_reservation` block supports:
 
 * `key` - (Required) Corresponds to the label key of a reservation resource. To target a SPECIFIC_RESERVATION by name, specify compute.googleapis.com/reservation-name as the key and specify the name of your reservation as the only value.
 
@@ -853,6 +865,20 @@ Referencing an instance template via this attribute prevents Time of Check to Ti
 * `tags_fingerprint` - The unique fingerprint of the tags.
 
 * `network_interface.0.parent_nic_name` - Name of the parent network interface of a dynamic network interface.
+
+* `network_interface.0.name` - The name of the network_interface.
+
+* `network_interface.0.ipv6_access_type` - One of EXTERNAL, INTERNAL to indicate whether the IP can be accessed from the Internet. This field is always inherited from its subnetwork.
+
+* `network_interface.0.access_config.0.public_ptr_domain_name` - The DNS domain name for the public PTR record.
+
+* `network_interface.0.ipv6_access_config.0.external_ipv6` - The first IPv6 address of the external IPv6 range associated with this instance, prefix length is stored in externalIpv6PrefixLength in ipv6AccessConfig. The field is output only, an IPv6 address from a subnetwork associated with the instance will be allocated dynamically.
+
+* `network_interface.0.ipv6_access_config.0.external_ipv6_prefix_length` - The prefix length of the external IPv6 range.
+
+* `network_interface.0.ipv6_access_config.0.name` - The name of this access configuration.
+
+* `network_interface.0.ipv6_access_config.0.public_ptr_domain_name` - The domain name to be used when creating DNSv6 records for the external IPv6 ranges.
 
 [1]: /docs/providers/google/r/compute_instance_group_manager.html
 [2]: /docs/language/meta-arguments/lifecycle.html

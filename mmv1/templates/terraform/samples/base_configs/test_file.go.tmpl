@@ -116,6 +116,10 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 		"random_suffix": randomSuffix,
 	}
 	{{- end }}
+	{{- if $.Res.ApiVersion }}
+
+	acctest.AssertRequestApiVersion(t, "{{ $.Res.BaseUrl }}", "{{ $.Res.ApiVersion }}")
+	{{- end }}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -159,8 +163,8 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 			},
 			{{- if not $.Res.ExcludeIdentityGeneration }}
 			{
-				ResourceName:       "{{ $.Res.TerraformName }}.{{ $s.PrimaryResourceId }}",
-				RefreshState:       true,
+				ResourceName:       "{{ $s.ResourceType $.Res.TerraformName }}.{{ $s.PrimaryResourceId }}",
+				ImportState:        true,
 				ExpectNonEmptyPlan: true,
 				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},
@@ -202,8 +206,8 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 		if err != nil {
 			return err
 		}
-{{- if $.Res.ProductMetadata.Version.RepEnabled }}
-		if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+{{- if $.Res.ProductMetadata.Version.HasRegionalUrl }}
+		if strings.Contains(url, "{{"{{"}}{{ $.Res.ProductMetadata.Version.RegionalUrlVariable }}{{"}}"}}") {
 			return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
 		}
 {{- end }}
@@ -221,10 +225,13 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 			RawURL: url,
 			UserAgent: config.UserAgent,
 		{{- if $.Res.ErrorRetryPredicates }}
-			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{- join $.Res.ErrorRetryPredicates "," -}} },
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{- range $i, $p := $.Res.ErrorRetryPredicates }}{{ if $i }},{{ end }}{{ if not (contains $p ".") }}{{ lower $.Res.ProductMetadata.Name }}.{{ end }}{{ $p }}{{ end -}} },
 		{{- end }}
 		{{- if $.Res.ErrorAbortPredicates }}
-			ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{- join $.Res.ErrorAbortPredicates "," -}} },
+			ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{- range $i, $p := $.Res.ErrorAbortPredicates }}{{ if $i }},{{ end }}{{ if not (contains $p ".") }}{{ lower $.Res.ProductMetadata.Name }}.{{ end }}{{ $p }}{{ end -}} },
+		{{- end }}
+		{{- if $.Res.ApiVersion }}
+			ApiVersion: "{{ $.Res.ApiVersion }}",
 		{{- end }}
 		})
 		if err == nil {

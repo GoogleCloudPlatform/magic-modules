@@ -1,0 +1,119 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Space
+description: |
+  Space is a top level resource for managing teams building applications
+  through Application Design Center.
+docs:
+  note: |
+    The project must have application management enabled (an App Hub
+    management project), and only one Space is allowed per region within a
+    management project. See
+    [Set up Application Design Center](https://cloud.google.com/application-design-center/docs/setup).
+references:
+  guides:
+    'Application Design Center Overview': 'https://cloud.google.com/application-design-center/docs/overview'
+  api: 'https://cloud.google.com/application-design-center/docs/reference/rest/v1/projects.locations.spaces'
+base_url: projects/{{project}}/locations/{{location}}/spaces
+self_link: projects/{{project}}/locations/{{location}}/spaces/{{space_id}}
+create_url: projects/{{project}}/locations/{{location}}/spaces?spaceId={{space_id}}
+update_verb: PATCH
+update_mask: true
+import_format:
+  - projects/{{project}}/locations/{{location}}/spaces/{{space_id}}
+async:
+  actions: []
+error_retry_predicates:
+  - 'IsDesignCenterServiceAgentNotFoundError'
+custom_code:
+  constants: 'templates/terraform/constants/design_center_space.go.tmpl'
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: space_id
+  import_format:
+    - projects/{{project}}/locations/{{location}}/spaces/{{space_id}}
+    - '{{space_id}}'
+  fetch_iam_policy_verb: GET
+parameters:
+  - name: location
+    type: String
+    description: The location of the space.
+    required: true
+    immutable: true
+    url_param_only: true
+  - name: space_id
+    type: String
+    description: The ID of the space.
+    required: true
+    immutable: true
+    url_param_only: true
+properties:
+  - name: displayName
+    type: String
+    description: Display name for the space.
+  - name: description
+    type: String
+    description: Description for the space.
+  - name: enableGcpSharedTemplates
+    type: Boolean
+    description: Flag to enable Google opinionated shared templates.
+    send_empty_value: true
+  - name: gcsBucket
+    type: String
+    description: |
+      An existing Google Cloud Storage bucket that you want to use instead of
+      creating a new bucket during Application Design Center setup. If not
+      provided, a default bucket is created during setup. The bucket must exist
+      in the same project as the space. Format: {bucket_name}
+    immutable: true
+  - name: tags
+    type: KeyValuePairs
+    description: |
+      Input only. Resource Manager tags to bind to the space at creation, as a
+      map of namespaced tag keys to tag value short names, for example
+      `{"123/environment" = "production"}`. For more information, see
+      https://cloud.google.com/resource-manager/docs/tags/tags-overview.
+    immutable: true
+    ignore_read: true
+  - name: name
+    type: String
+    description: Identifier. The space name.
+    output: true
+  - name: createTime
+    type: Time
+    description: Space creation timestamp.
+    output: true
+  - name: updateTime
+    type: Time
+    description: Space update timestamp.
+    output: true
+samples:
+  - name: designcenter_space_basic
+    primary_resource_id: example
+    steps:
+      - name: designcenter_space_basic
+        resource_id_vars:
+          space_id: example-space
+        vars:
+          project: my-project-name
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+      - name: designcenter_space_update
+        resource_id_vars:
+          space_id: example-space
+        vars:
+          project: my-project-name
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)

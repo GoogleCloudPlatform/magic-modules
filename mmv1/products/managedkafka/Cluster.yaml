@@ -26,7 +26,7 @@ import_format:
   - 'projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}'
 timeouts:
   insert_minutes: 60
-  update_minutes: 30
+  update_minutes: 150
   delete_minutes: 30
 autogen_async: true
 autogen_status: Q2x1c3Rlcg==
@@ -196,6 +196,13 @@ properties:
     type: String
     description: "The bootstrap address of the Kafka cluster. Use port :9092 for SASL connection and :9192 for mTLS connection"
     output: true
+  - name: 'kafkaVersion'
+    type: String
+    default_from_api: true
+    description: |-
+      The Apache Kafka version of the cluster. Specifically, this value is the finalized metadata version.
+      If not specified during cluster creation, defaults to `3.7.x`.
+      If you manage Kafka versions outside of Terraform, leave this field unset to avoid a permanent diff.
   - name: 'tlsConfig'
     type: NestedObject
     default_from_api: true

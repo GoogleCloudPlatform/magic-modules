@@ -1189,10 +1189,9 @@ properties:
                       description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.
                       output: true
                     - name: defs
-                      type: String
+                      type: JsonValue
                       description: A map of definitions for use by ref. Only allowed at the root of the schema.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: default
                       type: String
                       description: |-
@@ -1202,33 +1201,28 @@ properties:
                         with the defined 'type' and other schema constraints.
                       output: true
                     - name: additionalProperties
-                      type: String
+                      type: JsonValue
                       description: |-
                         Optional. Defines the schema for additional properties allowed in an object.
                         The value must be a valid JSON string representing the Schema object.
                         (Note: OpenAPI also allows a boolean, this definition expects a Schema JSON).
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: anyOf
-                      type: String
+                      type: JsonValue
                       description: Optional. The instance value should be valid against at least one of the schemas in this list.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: prefixItems
-                      type: String
+                      type: JsonValue
                       description: Optional. Schemas of initial elements of Type.ARRAY.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: properties
-                      type: String
+                      type: JsonValue
                       description: Properties of Type.OBJECT.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: items
-                      type: String
+                      type: JsonValue
                       description: Schema of the elements of Type.ARRAY.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
           - name: clientCertificateSettings
             type: NestedObject
             description: |-
@@ -1417,10 +1411,9 @@ properties:
                           output: true
                           properties:
                             - name: args
-                              type: String
+                              type: JsonValue
                               description: The input parameters and values for the tool in JSON object format.
                               output: true
-                              custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                             - name: displayName
                               type: String
                               description: Display name of the tool.
@@ -1469,14 +1462,13 @@ properties:
                               description: The matching ID of the tool call the response is for.
                               output: true
                             - name: response
-                              type: String
+                              type: JsonValue
                               description: |-
                                 The tool execution result in JSON object format.
                                 Use "output" key to specify tool response and "error" key to specify
                                 error details (if any). If "output" and "error" keys are not specified,
                                 then whole "response" is treated as tool execution result.
                               output: true
-                              custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                             - name: tool
                               type: String
                               description: |-
@@ -1501,12 +1493,11 @@ properties:
                                     The tool ID to filter the tools to retrieve the schema for.
                                   output: true
                         - name: updatedVariables
-                          type: String
+                          type: JsonValue
                           description: |-
                             A struct represents variables that were updated in the conversation,
                             keyed by variable names.
                           output: true
-                          custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                   - name: role
                     type: String
                     description: The role within the conversation, e.g., user, agent.
@@ -2046,10 +2037,9 @@ properties:
                       description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.
                       output: true
                     - name: defs
-                      type: String
+                      type: JsonValue
                       description: A map of definitions for use by ref. Only allowed at the root of the schema.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: default
                       type: String
                       description: |-
@@ -2059,33 +2049,28 @@ properties:
                         with the defined 'type' and other schema constraints.
                       output: true
                     - name: additionalProperties
-                      type: String
+                      type: JsonValue
                       description: |-
                         Optional. Defines the schema for additional properties allowed in an object.
                         The value must be a valid JSON string representing the Schema object.
                         (Note: OpenAPI also allows a boolean, this definition expects a Schema JSON).
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: anyOf
-                      type: String
+                      type: JsonValue
                       description: Optional. The instance value should be valid against at least one of the schemas in this list.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: prefixItems
-                      type: String
+                      type: JsonValue
                       description: Optional. Schemas of initial elements of Type.ARRAY.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: properties
-                      type: String
+                      type: JsonValue
                       description: Properties of Type.OBJECT.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: items
-                      type: String
+                      type: JsonValue
                       description: Schema of the elements of Type.ARRAY.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                 - name: response
                   type: NestedObject
                   description: Represents a select subset of an OpenAPI 3.0 schema object.
@@ -2156,10 +2141,9 @@ properties:
                       description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.
                       output: true
                     - name: defs
-                      type: String
+                      type: JsonValue
                       description: A map of definitions for use by ref. Only allowed at the root of the schema.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: default
                       type: String
                       description: |-
@@ -2169,33 +2153,28 @@ properties:
                         with the defined 'type' and other schema constraints.
                       output: true
                     - name: additionalProperties
-                      type: String
+                      type: JsonValue
                       description: |-
                         Optional. Defines the schema for additional properties allowed in an object.
                         The value must be a valid JSON string representing the Schema object.
                         (Note: OpenAPI also allows a boolean, this definition expects a Schema JSON).
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: anyOf
-                      type: String
+                      type: JsonValue
                       description: Optional. The instance value should be valid against at least one of the schemas in this list.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: prefixItems
-                      type: String
+                      type: JsonValue
                       description: Optional. Schemas of initial elements of Type.ARRAY.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: properties
-                      type: String
+                      type: JsonValue
                       description: Properties of Type.OBJECT.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: items
-                      type: String
+                      type: JsonValue
                       description: Schema of the elements of Type.ARRAY.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
             - name: createTime
               type: String
               description: Timestamp when the tool was created.

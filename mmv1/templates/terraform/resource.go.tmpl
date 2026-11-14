@@ -35,7 +35,6 @@ import (
     "strings"
     "time"
 
-    "github.com/hashicorp/errwrap"
     "github.com/hashicorp/go-cty/cty"
     "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
     "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
@@ -76,7 +75,6 @@ var (
     _ = strconv.Atoi
     _ = strings.Trim
     _ = time.Now
-    _ = errwrap.Wrap
     _ = cty.BoolVal
     _ = diag.Diagnostic{}
     _ = customdiff.All
@@ -321,8 +319,8 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     if err != nil {
         return err
     }
-{{- if $.ProductMetadata.Version.RepEnabled }}
-    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
+    if strings.Contains(url, "{{"{{"}}{{ $.ProductMetadata.Version.RegionalUrlVariable }}{{"}}"}}") {
 		return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
     }
 {{- end }}
@@ -372,14 +370,20 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- if $.CustomCode.PreCreate }}
     {{ customTemplate $ $.CustomCode.PreCreate false -}}
 {{- end}}
+{{- if $.ErrorRetryOnAsync }}
+    var res map[string]interface{}
+    err = transport_tpg.Retry(transport_tpg.RetryOptions{
+        RetryFunc: func() error {
+            var err error
+{{- end}}
 {{- if $.RPCCreateMethod }}
-    res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
+    res, err {{if $.ErrorRetryOnAsync}}={{else}}:={{end}} transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
         Config: config,
         Product: "{{ $.ProductMetadata.Name -}}",
         RPCService: "{{ $.RPCService -}}",
         Method: "{{ $.RPCCreateMethod -}}",
 {{- else }}
-    res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    res, err {{if $.ErrorRetryOnAsync}}={{else}}:={{end}} transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "{{ upper $.CreateVerb -}}",
 {{- end}}
@@ -394,6 +398,9 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- end}}
 {{- if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{ join $.ErrorAbortPredicates "," -}}{{"}"}},
+{{- end}}
+{{- if $.ApiVersion }}
+        ApiVersion: "{{ $.ApiVersion }}",
 {{- end}}
     })
     if err != nil {
@@ -424,15 +431,15 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{if and $.GetAsync ($.GetAsync.Allow "Create") -}}
 {{  if ($.GetAsync.IsA "OpAsync") -}}
 {{    if and $.GetAsync.Result.ResourceInsideResponse $.HasPostCreateComputedFields -}}
-{{- if $.ProductMetadata.Version.RepEnabled }}
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
     // Derive location for use in REP endpoints
-    location := tpgresource.LocationFromId(d.Id())
+    endpointLocation := tpgresource.LocationFromId(d.Id())
 {{- end}}
     // Use the resource in the operation response to populate
     // identity fields and d.Id() before read
     var opRes map[string]interface{}
     err = {{ $.ClientNamePascal -}}OperationWaitTimeWithResponse(
-    config, res, &opRes, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }},{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}}{{ end -}} "Creating {{ $.Name -}}", userAgent,
+    config, res, &opRes, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }},{{ end -}}{{if $.ProductMetadata.Version.HasRegionalUrl }} endpointLocation,{{ end -}} "Creating {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutCreate))
     if err != nil {
 {{if $.CustomCode.PostCreateFailure -}}
@@ -506,12 +513,12 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     d.SetId(id)
 
 {{        else -}}
-{{- if $.ProductMetadata.Version.RepEnabled }}
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
     // Derive location for use in REP endpoints
-    location := tpgresource.LocationFromId(d.Id())
+    endpointLocation := tpgresource.LocationFromId(d.Id())
 {{- end}}
     err = {{ $.ClientNamePascal -}}OperationWaitTime(
-    config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Creating {{ $.Name -}}", userAgent,
+    config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.HasRegionalUrl }} endpointLocation,{{ end -}} "Creating {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutCreate))
 
     if err != nil {
@@ -528,13 +535,28 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{        end  -}}
 {{      end -}}{{/*if ($.GetAsync.IsA "OpAsync")*/}}
 {{    end -}}{{/*if and $.GetAsync ($.GetAsync.Allow "Create")*/}}
+{{- if $.ErrorRetryOnAsync }}
+            return nil
+        },
+        Timeout: d.Timeout(schema.TimeoutCreate),
+{{- if $.ErrorRetryPredicates }}
+        ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+{{- if $.ErrorAbortPredicates }}
+        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{ join $.ErrorAbortPredicates "," -}}{{"}"}},
+{{- end}}
+    })
+    if err != nil {
+        return err
+    }
+{{- end}}
 {{if $.CustomCode.PostCreate -}} 
     {{- customTemplate $ $.CustomCode.PostCreate false -}}
 {{- end}}
 
 {{if and ($.GetAsync) ($.GetAsync.Allow "Create") -}}
 {{if $.GetAsync.IsA "PollAsync" -}}
-    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Creating {{ $.Name -}}", d.Timeout(schema.TimeoutCreate), {{ $.GetAsync.TargetOccurrences -}})
+    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Creating {{ $.Name -}}", d.Timeout(schema.TimeoutCreate), {{ $.GetAsync.TargetOccurrences -}}, config.SleepUnit)
     if err != nil {
 {{- if $.GetAsync.SuppressError -}}
 
@@ -589,9 +611,9 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
         if err != nil {
             return nil, err
         }
-{{- if $.ProductMetadata.Version.RepEnabled }}
-        if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
-            return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
+        if strings.Contains(url, "{{"{{"}}{{ $.ProductMetadata.Version.RegionalUrlVariable }}{{"}}"}}") {
+            return nil, fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
         }
 {{- end }}
 
@@ -645,6 +667,9 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
 {{- if $.ErrorAbortPredicates }}
             ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
+{{- if $.ApiVersion }}
+            ApiVersion: "{{ $.ApiVersion }}",
+{{- end}}
         })
         if err != nil {
             return res, err
@@ -681,7 +706,6 @@ func resource{{ $.ResourceName -}}PollRead(d *schema.ResourceData, meta interfac
 func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{}) error {
 {{if $.ExcludeRead -}}
   // This resource could not be read from the API.
-  return nil
 {{  else  -}}
     config := meta.(*transport_tpg.Config)
     userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
@@ -693,8 +717,8 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     if err != nil {
         return err
     }
-{{- if $.ProductMetadata.Version.RepEnabled }}
-    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
+    if strings.Contains(url, "{{"{{"}}{{ $.ProductMetadata.Version.RegionalUrlVariable }}{{"}}"}}") {
 		return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
     }
 {{- end }}
@@ -749,6 +773,9 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 {{- if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{- end}}
+{{- if $.ApiVersion }}
+        ApiVersion: "{{ $.ApiVersion }}",
+{{- end}}
     })
     if err != nil {
 {{- if $.ReadErrorTransform -}}
@@ -795,7 +822,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 
   // Explicitly set virtual fields to default values if unset
 {{- range $prop := $.VirtualFields }}
-{{-      if not (eq $prop.DefaultValue nil) }}
+{{-      if and (not $prop.Exclude) (not (eq $prop.DefaultValue nil)) }}
     if _, ok := d.GetOkExists("{{ $prop.Name -}}"); !ok {
         if err := d.Set("{{ $prop.Name -}}", {{ $prop.GoLiteral $prop.DefaultValue -}}); err != nil {
             return fmt.Errorf("Error setting {{ $prop.Name -}}: %s", err)
@@ -985,8 +1012,8 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     if err != nil {
         return err
     }
-{{- if $.ProductMetadata.Version.RepEnabled }}
-    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
+    if strings.Contains(url, "{{"{{"}}{{ $.ProductMetadata.Version.RegionalUrlVariable }}{{"}}"}}") {
         return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
     }
 {{- end }}
@@ -1023,6 +1050,10 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
 // if updateMask is empty we are not updating anything so skip the post
 if len(updateMask) > 0 {
 {{-             end}}
+{{- if $.ErrorRetryOnAsync }}
+    err = transport_tpg.Retry(transport_tpg.RetryOptions{
+        RetryFunc: func() error {
+{{- end}}
 {{- if $.RPCUpdateMethod }}
     res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
         Config: config,
@@ -1046,6 +1077,9 @@ if len(updateMask) > 0 {
 {{-             if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{-             end}}
+{{-             if $.ApiVersion }}
+        ApiVersion: "{{ $.ApiVersion }}",
+{{-             end}}
     })
 
     if err != nil {
@@ -1059,12 +1093,12 @@ if len(updateMask) > 0 {
 
 {{              if and ($.GetAsync) ($.GetAsync.Allow "update") -}}
 {{                  if $.GetAsync.IsA "OpAsync" -}}
-{{- if $.ProductMetadata.Version.RepEnabled }}
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
     // Derive location for use in REP endpoints
-    location := tpgresource.LocationFromId(d.Id())
+    endpointLocation := tpgresource.LocationFromId(d.Id())
 {{- end}}
     err = {{ $.ClientNamePascal -}}OperationWaitTime(
-        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Updating {{ $.Name -}}", userAgent,
+        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.HasRegionalUrl }} endpointLocation,{{ end -}} "Updating {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutUpdate))
 
     if err != nil {
@@ -1077,7 +1111,7 @@ if len(updateMask) > 0 {
 {{""}}
 {{-             end}}
 {{-                  else if $.GetAsync.IsA "PollAsync" -}}
-    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Updating {{ $.Name -}}", d.Timeout(schema.TimeoutUpdate), {{ $.GetAsync.TargetOccurrences -}})
+    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Updating {{ $.Name -}}", d.Timeout(schema.TimeoutUpdate), {{ $.GetAsync.TargetOccurrences -}}, config.SleepUnit)
     if err != nil {
 {{                      if $.GetAsync.SuppressError -}}
         log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", d.Id(), err)
@@ -1090,6 +1124,21 @@ if len(updateMask) > 0 {
     }
 {{-                 end}}
 {{-             end}}
+{{- if $.ErrorRetryOnAsync }}
+            return nil
+        },
+        Timeout: d.Timeout(schema.TimeoutUpdate),
+{{- if $.ErrorRetryPredicates }}
+        ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+{{- if $.ErrorAbortPredicates }}
+        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
+{{- end}}
+    })
+    if err != nil {
+        return err
+    }
+{{- end}}
 {{-              if $.UpdateMask -}}
   }
 {{-             end}}
@@ -1105,8 +1154,8 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         if err != nil {
             return err
         }
-{{- if $.ProductMetadata.Version.RepEnabled }}
-        if strings.Contains(getUrl, "{{"{{"}}location{{"}}"}}") {
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
+        if strings.Contains(getUrl, "{{"{{"}}{{ $.ProductMetadata.Version.RegionalUrlVariable }}{{"}}"}}") {
             return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", getUrl)
         }
 {{- end }}
@@ -1140,6 +1189,9 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 {{-                     end}}
 {{		                if $.ErrorAbortPredicates -}}
         	ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{-                     end}}
+{{-                     if $.ApiVersion }}
+            ApiVersion: "{{ $.ApiVersion }}",
 {{-                     end}}
         })
         if err != nil {
@@ -1200,8 +1252,8 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         if err != nil {
             return err
         }
-{{- if $.ProductMetadata.Version.RepEnabled }}
-        if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
+        if strings.Contains(url, "{{"{{"}}{{ $.ProductMetadata.Version.RegionalUrlVariable }}{{"}}"}}") {
             return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
         }
 {{- end }}
@@ -1243,6 +1295,9 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 {{-                 if $.ErrorAbortPredicates -}}
         	ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorAbortPredicates "," -}}{{"}"}},
 {{-                 end}}
+{{-                 if $.ApiVersion }}
+            ApiVersion: "{{ $.ApiVersion }}",
+{{-                 end}}
 			Headers:   headers,
         })
         if err != nil {
@@ -1256,12 +1311,12 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 
 {{                  if and ($.GetAsync) ($.GetAsync.Allow "update") -}}
 {{                      if $.GetAsync.IsA "OpAsync" -}}
-{{- if $.ProductMetadata.Version.RepEnabled }}
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
     // Derive location for use in REP endpoints
-    location := tpgresource.LocationFromId(d.Id())
+    endpointLocation := tpgresource.LocationFromId(d.Id())
 {{- end}}
 	    err = {{ $.ClientNamePascal -}}OperationWaitTime(
-	        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Updating {{ $.Name -}}", userAgent,
+	        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.HasRegionalUrl }} endpointLocation,{{ end -}} "Updating {{ $.Name -}}", userAgent,
 	        d.Timeout(schema.TimeoutUpdate))
 	    if err != nil {
 {{- if $.CustomCode.PostUpdateFailure -}}
@@ -1270,7 +1325,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
 	        return err
 	    }
 {{-                      else if $.GetAsync.IsA "PollAsync" -}}
-	    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Updating {{ $.Name -}}", d.Timeout(schema.TimeoutUpdate), {{ $.GetAsync.TargetOccurrences -}})
+	    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Updating {{ $.Name -}}", d.Timeout(schema.TimeoutUpdate), {{ $.GetAsync.TargetOccurrences -}}, config.SleepUnit)
 	    if err != nil {
 {{-                          if $.GetAsync.SuppressError -}}
 	        log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", d.Id(), err)
@@ -1357,8 +1412,8 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     if err != nil {
         return err
     }
-{{- if $.ProductMetadata.Version.RepEnabled }}
-    if strings.Contains(url, "{{"{{"}}location{{"}}"}}") {
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
+    if strings.Contains(url, "{{"{{"}}{{ $.ProductMetadata.Version.RegionalUrlVariable }}{{"}}"}}") {
 		return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
     }
 {{- end }}
@@ -1418,6 +1473,9 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         {{- if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{- join $.ErrorAbortPredicates "," -}}{{"}"}},
         {{- end }}
+        {{- if $.ApiVersion }}
+        ApiVersion: "{{ $.ApiVersion }}",
+        {{- end}}
     })
     if err != nil {
 {{- if and ($.CustomCode.PostDeleteFailure) (not $.GetAsync) -}}
@@ -1427,7 +1485,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     }
     {{ if and $.GetAsync ($.GetAsync.Allow "Delete") -}}
         {{ if $.GetAsync.IsA "PollAsync" }}
-    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName }}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncAbsence }}, "Deleting {{ $.Name }}", d.Timeout(schema.TimeoutCreate), {{ $.Async.TargetOccurrences }})
+    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName }}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncAbsence }}, "Deleting {{ $.Name }}", d.Timeout(schema.TimeoutCreate), {{ $.Async.TargetOccurrences }}, config.SleepUnit)
     if err != nil {
             {{- if $.Async.SuppressError }}
         log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name }} %q finished updating: %q", d.Id(), err)
@@ -1439,12 +1497,12 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
             {{- end }}
     }
         {{- else }}
-{{- if $.ProductMetadata.Version.RepEnabled }}
+{{- if $.ProductMetadata.Version.HasRegionalUrl }}
     // Derive location for use in REP endpoints
-    location := tpgresource.LocationFromId(d.Id())
+    endpointLocation := tpgresource.LocationFromId(d.Id())
 {{- end}}
     err = {{ $.ClientNamePascal }}OperationWaitTime(
-        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.RepEnabled }} location,{{ end -}} "Deleting {{ $.Name -}}", userAgent,
+        config, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project){{ else }}project{{ end }}, {{ end -}}{{if $.ProductMetadata.Version.HasRegionalUrl }} endpointLocation,{{ end -}} "Deleting {{ $.Name -}}", userAgent,
         d.Timeout(schema.TimeoutDelete))
 
     if err != nil {
@@ -1489,7 +1547,7 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
 
     // Explicitly set virtual fields to default values on import
             {{- range $vf := $.VirtualFields }}
-                {{- if not (eq $vf.DefaultValue nil) }}
+                {{- if and (not $vf.Exclude) (not (eq $vf.DefaultValue nil)) }}
     if err := d.Set("{{ $vf.Name }}", {{ $vf.GoLiteral $vf.DefaultValue }}); err != nil {
         return nil, fmt.Errorf("Error setting {{ $vf.Name }}: %s", err)
     }

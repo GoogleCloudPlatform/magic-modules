@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -3872,7 +3873,7 @@ func TestAccDataprocCluster_instanceFlexibilityDiskConfig(t *testing.T) {
 					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.boot_disk_size_gb", "100"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.boot_disk_provisioned_throughput", "140"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.attached_disk_config.0.disk_size_gb", "3000"),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.attached_disk_config.0.disk_type", "HYPERDISK_THROUGHPUT"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.attached_disk_config.0.type", "hyperdisk-throughput"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.machine_types.0", "n4-standard-2"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.boot_disk_type", "hyperdisk-balanced"),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.instance_flexibility_disk_config", "cluster_config.0.worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.boot_disk_provisioned_iops", "3000"),
@@ -3920,7 +3921,7 @@ resource "google_dataproc_cluster" "instance_flexibility_disk_config" {
 						boot_disk_provisioned_throughput = 140
 						attached_disk_config {
 							disk_size_gb = 3000
-							disk_type = "HYPERDISK_THROUGHPUT"
+							type = "hyperdisk-throughput"
 						}
 					}
 				}
@@ -3946,7 +3947,7 @@ func TestAccDataprocCluster_AttachedDiskConfigMaster(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.attached_disk_config_master", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.attached_disk_config_master", "cluster_config.0.master_config.0.disk_config.0.attached_disk_config.0.disk_size_gb", "30"),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.attached_disk_config_master", "cluster_config.0.master_config.0.disk_config.0.attached_disk_config.0.disk_type", "HYPERDISK_BALANCED"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.attached_disk_config_master", "cluster_config.0.master_config.0.disk_config.0.attached_disk_config.0.type", "hyperdisk-balanced"),
 				),
 			},
 		},
@@ -3968,7 +3969,7 @@ func TestAccDataprocCluster_AttachedDiskConfigWorker(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.attached_disk_config_worker", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.attached_disk_config_worker", "cluster_config.0.worker_config.0.disk_config.0.attached_disk_config.0.disk_size_gb", "30"),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.attached_disk_config_worker", "cluster_config.0.worker_config.0.disk_config.0.attached_disk_config.0.disk_type", "HYPERDISK_BALANCED"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.attached_disk_config_worker", "cluster_config.0.worker_config.0.disk_config.0.attached_disk_config.0.type", "hyperdisk-balanced"),
 				),
 			},
 		},
@@ -3990,7 +3991,7 @@ func TestAccDataprocCluster_AttachedDiskConfigSecondary(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.attached_disk_config_secondary", &cluster),
 					resource.TestCheckResourceAttr("google_dataproc_cluster.attached_disk_config_secondary", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.attached_disk_config.0.disk_size_gb", "30"),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.attached_disk_config_secondary", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.attached_disk_config.0.disk_type", "HYPERDISK_BALANCED"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.attached_disk_config_secondary", "cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list.1.disk_config.0.attached_disk_config.0.type", "hyperdisk-balanced"),
 				),
 			},
 		},
@@ -4013,7 +4014,7 @@ resource "google_dataproc_cluster" "attached_disk_config_master" {
 				boot_disk_type = "hyperdisk-balanced"
 				attached_disk_config {   
 					disk_size_gb = 30
-					disk_type    = "HYPERDISK_BALANCED"
+					type         = "hyperdisk-balanced"
 				}
       }
     }
@@ -4055,7 +4056,7 @@ resource "google_dataproc_cluster" "attached_disk_config_worker" {
 				boot_disk_type = "hyperdisk-balanced"
 				attached_disk_config {
 					disk_size_gb = 30
-					disk_type = "HYPERDISK_BALANCED"
+					type = "hyperdisk-balanced"
 				}
 			}
 		}
@@ -4109,7 +4110,7 @@ resource "google_dataproc_cluster" "attached_disk_config_secondary" {
 						boot_disk_type = "hyperdisk-balanced"
 						attached_disk_config {
 							disk_size_gb = 30
-							disk_type = "HYPERDISK_BALANCED"
+							type = "hyperdisk-balanced"
 						}
 					}
 				}
@@ -4175,6 +4176,343 @@ resource "google_dataproc_cluster" "preemptible_disk_config" {
         boot_disk_size_gb = 30
         boot_disk_type    = "hyperdisk-balanced"
       }
+    }
+  }
+}
+`, rnd)
+}
+
+func TestAccDataprocCluster_flexibleConfig(t *testing.T) {
+	t.Parallel()
+
+	var cluster dataproc.Cluster
+	rnd := acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_flexibleConfig(rnd, 2, 1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.flexible_cluster", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.master_flexible_config.#", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.master_flexible_config.0.num_instances", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.master_flexible_config.0.core_count", "4"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.master_flexible_config.0.hardware_class", "STANDARD"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.master_flexible_config.0.boot_disk_size_gb", "100"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.worker_flexible_config.#", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.worker_flexible_config.0.num_instances", "2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.worker_flexible_config.0.core_count", "8"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.worker_flexible_config.0.hardware_class", "STANDARD"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.worker_flexible_config.0.boot_disk_size_gb", "100"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.secondary_worker_flexible_config.#", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.secondary_worker_flexible_config.0.num_instances", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.secondary_worker_flexible_config.0.core_count", "8"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.secondary_worker_flexible_config.0.hardware_class", "PERFORMANCE"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.secondary_worker_flexible_config.0.boot_disk_size_gb", "100"),
+				),
+			},
+			{
+				Config: testAccDataprocCluster_flexibleConfig(rnd, 3, 2),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_dataproc_cluster.flexible_cluster", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.flexible_cluster", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.worker_flexible_config.0.num_instances", "3"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.secondary_worker_flexible_config.0.num_instances", "2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.preemptible_worker_config.0.num_instances", "2"),
+				),
+			},
+			{
+				Config: testAccDataprocCluster_flexibleConfig(rnd, 3, 1),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_dataproc_cluster.flexible_cluster", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.flexible_cluster", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.worker_flexible_config.0.num_instances", "3"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.secondary_worker_flexible_config.0.num_instances", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster", "cluster_config.0.preemptible_worker_config.0.num_instances", "1"),
+				),
+			},
+		},
+	})
+}
+
+func testAccDataprocCluster_flexibleConfig(rnd string, workers, secWorkers int) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "flexible_cluster" {
+  name   = "tf-test-dproc-%s"
+  region = "us-central1"
+  graceful_decommission_timeout = "0.2s"
+
+  cluster_config {
+    master_flexible_config {
+      num_instances     = 1
+      core_count        = 4
+      hardware_class    = "STANDARD"
+      boot_disk_size_gb = 100
+    }
+
+    worker_flexible_config {
+      num_instances     = %d
+      core_count        = 8
+      hardware_class    = "STANDARD"
+      boot_disk_size_gb = 100
+    }
+
+    secondary_worker_flexible_config {
+      num_instances     = %d
+      core_count        = 8
+      hardware_class    = "PERFORMANCE"
+      boot_disk_size_gb = 100
+    }
+  }
+}
+`, rnd, workers, secWorkers)
+}
+
+func TestAccDataprocCluster_flexibleConfigSecondaryUpdate(t *testing.T) {
+	t.Parallel()
+
+	var cluster dataproc.Cluster
+	rnd := acctest.RandString(t, 10)
+	name := "google_dataproc_cluster.flexible_secondary"
+	expectUpdate := resource.ConfigPlanChecks{
+		PreApply: []plancheck.PlanCheck{
+			plancheck.ExpectResourceAction(name, plancheck.ResourceActionUpdate),
+		},
+	}
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_flexibleConfigNoSecondary(rnd),
+				Check:  testAccCheckDataprocClusterExists(t, name, &cluster),
+			},
+			{
+				Config:           testAccDataprocCluster_flexibleConfigWithSecondary(rnd, 2, 4),
+				ConfigPlanChecks: expectUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, name, &cluster),
+					resource.TestCheckResourceAttr(name, "cluster_config.0.secondary_worker_flexible_config.0.num_instances", "2"),
+					resource.TestCheckResourceAttr(name, "cluster_config.0.secondary_worker_flexible_config.0.core_count", "4"),
+					resource.TestCheckResourceAttr(name, "cluster_config.0.secondary_worker_flexible_config.0.boot_disk_size_gb", "100"),
+					resource.TestCheckResourceAttr(name, "cluster_config.0.preemptible_worker_config.0.num_instances", "2"),
+				),
+			},
+			{
+				Config:           testAccDataprocCluster_flexibleConfigWithSecondary(rnd, 1, 4),
+				ConfigPlanChecks: expectUpdate,
+				Check:            resource.TestCheckResourceAttr(name, "cluster_config.0.secondary_worker_flexible_config.0.num_instances", "1"),
+			},
+			{
+				Config:           testAccDataprocCluster_flexibleConfigWithSecondary(rnd, 0, 4),
+				ConfigPlanChecks: expectUpdate,
+				Check:            resource.TestCheckResourceAttr(name, "cluster_config.0.secondary_worker_flexible_config.0.num_instances", "0"),
+			},
+			{
+				// Removing the block does not change the cluster; set num_instances = 0 to scale down.
+				Config:   testAccDataprocCluster_flexibleConfigNoSecondary(rnd),
+				PlanOnly: true,
+			},
+			{
+				Config:           testAccDataprocCluster_flexibleConfigWithSecondary(rnd, 1, 4),
+				ConfigPlanChecks: expectUpdate,
+				Check:            resource.TestCheckResourceAttr(name, "cluster_config.0.secondary_worker_flexible_config.0.num_instances", "1"),
+			},
+			{
+				// The shape of an existing group cannot be changed in place.
+				Config: testAccDataprocCluster_flexibleConfigWithSecondary(rnd, 1, 8),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(name, plancheck.ResourceActionReplace),
+					},
+				},
+				Check: resource.TestCheckResourceAttr(name, "cluster_config.0.secondary_worker_flexible_config.0.core_count", "8"),
+			},
+		},
+	})
+}
+
+func TestAccDataprocCluster_flexibleConfigSecondaryAddMismatch(t *testing.T) {
+	t.Parallel()
+
+	rnd := acctest.RandString(t, 10)
+	name := "google_dataproc_cluster.flexible_secondary"
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_flexibleConfigNoSecondary(rnd),
+			},
+			{
+				// A group added after creation gets the worker_flexible_config shape,
+				// so adding one with a different shape replaces the cluster.
+				Config: testAccDataprocCluster_flexibleConfigWithSecondary(rnd, 1, 8),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(name, plancheck.ResourceActionReplace),
+					},
+				},
+				Check: resource.TestCheckResourceAttr(name, "cluster_config.0.secondary_worker_flexible_config.0.core_count", "8"),
+			},
+		},
+	})
+}
+
+func testAccDataprocCluster_flexibleConfigNoSecondary(rnd string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "flexible_secondary" {
+  name                          = "tf-test-dproc-%s"
+  region                        = "us-central1"
+  graceful_decommission_timeout = "0.2s"
+
+  cluster_config {
+    master_flexible_config {
+      core_count = 2
+    }
+
+    worker_flexible_config {
+      num_instances     = 2
+      core_count        = 4
+      boot_disk_size_gb = 100
+    }
+  }
+}
+`, rnd)
+}
+
+func testAccDataprocCluster_flexibleConfigWithSecondary(rnd string, numInstances, coreCount int) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "flexible_secondary" {
+  name                          = "tf-test-dproc-%s"
+  region                        = "us-central1"
+  graceful_decommission_timeout = "0.2s"
+
+  cluster_config {
+    master_flexible_config {
+      core_count = 2
+    }
+
+    worker_flexible_config {
+      num_instances     = 2
+      core_count        = 4
+      boot_disk_size_gb = 100
+    }
+
+    secondary_worker_flexible_config {
+      num_instances     = %d
+      core_count        = %d
+      boot_disk_size_gb = 100
+    }
+  }
+}
+`, rnd, numInstances, coreCount)
+}
+
+func TestAccDataprocCluster_flexibleConfigDefaults(t *testing.T) {
+	t.Parallel()
+
+	var cluster dataproc.Cluster
+	rnd := acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_flexibleConfigDefaults(rnd),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.flexible_cluster_defaults", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_defaults", "cluster_config.0.master_flexible_config.#", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_defaults", "cluster_config.0.master_flexible_config.0.num_instances", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_defaults", "cluster_config.0.master_flexible_config.0.core_count", "2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_defaults", "cluster_config.0.master_flexible_config.0.hardware_class", "STANDARD"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_defaults", "cluster_config.0.worker_flexible_config.#", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_defaults", "cluster_config.0.worker_flexible_config.0.num_instances", "2"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_defaults", "cluster_config.0.worker_flexible_config.0.core_count", "4"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.flexible_cluster_defaults", "cluster_config.0.worker_flexible_config.0.hardware_class", "STANDARD"),
+				),
+			},
+		},
+	})
+}
+
+func testAccDataprocCluster_flexibleConfigDefaults(rnd string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "flexible_cluster_defaults" {
+  name                          = "tf-test-dproc-%s"
+  region                        = "us-central1"
+  graceful_decommission_timeout = "0.2s"
+
+  cluster_config {
+    master_flexible_config {
+      core_count = 2
+    }
+
+    worker_flexible_config {
+      num_instances = 2
+      core_count    = 4
+    }
+  }
+}
+`, rnd)
+}
+
+func TestAccDataprocCluster_withMultiZoneConfig(t *testing.T) {
+	t.Parallel()
+
+	var cluster dataproc.Cluster
+	rnd := acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_withMultiZoneConfig(rnd),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.multi_zone", &cluster),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.multi_zone", "cluster_config.0.gce_cluster_config.0.multi_zone_config.#", "1"),
+					resource.TestCheckResourceAttr("google_dataproc_cluster.multi_zone", "cluster_config.0.gce_cluster_config.0.multi_zone_config.0.target_shape", "ANY"),
+				),
+			},
+		},
+	})
+}
+
+func testAccDataprocCluster_withMultiZoneConfig(rnd string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "multi_zone" {
+  name                          = "tf-test-dproc-%s"
+  region                        = "us-central1"
+  graceful_decommission_timeout = "0.2s"
+
+  cluster_config {
+    gce_cluster_config {
+      multi_zone_config {
+        target_shape = "ANY"
+      }
+    }
+
+    master_flexible_config {
+      core_count = 2
+    }
+
+    worker_flexible_config {
+      num_instances = 2
+      core_count    = 4
     }
   }
 }

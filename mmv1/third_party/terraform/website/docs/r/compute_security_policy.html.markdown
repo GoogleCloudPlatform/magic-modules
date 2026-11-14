@@ -187,13 +187,11 @@ resource "google_compute_security_policy" "policy" {
 
 ```hcl
 resource "google_compute_network" "default" {
-  provider                = google-beta
   name                    = "%{network_name}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "default" {
-  provider      = google-beta
   name          = "test-subnet"
   region        = "us-west2"
   network       = google_compute_network.default.id
@@ -201,8 +199,7 @@ resource "google_compute_subnetwork" "default" {
 }
 
 resource "google_compute_health_check" "default" {
-  provider = google-beta
-  name     = "test-health-check"
+  name = "test-health-check"
 
   http_health_check {
     port = 80
@@ -210,7 +207,6 @@ resource "google_compute_health_check" "default" {
 }
 
 resource "google_compute_security_policy" "policy_rule_one" {
-  provider    = google-beta
   name        = "policyruletest"
   description = "global security policy with body inspection"
   type        = "CLOUD_ARMOR"
@@ -258,12 +254,11 @@ resource "google_compute_security_policy" "policy_rule_one" {
 }
 
 resource "google_compute_instance_template" "default" {
-  provider     = google-beta
   name         = "backendpolicy"
   machine_type = "e2-micro"
 
   disk {
-    source_image = "projects/debian-cloud/global/images/family/debian-11"
+    source_image = "projects/debian-cloud/global/images/family/debian-13"
     auto_delete  = true
     boot         = true
   }
@@ -275,7 +270,6 @@ resource "google_compute_instance_template" "default" {
 }
 
 resource "google_compute_instance_group_manager" "default" {
-  provider           = google-beta
   name               = "backendpolicy"
   base_instance_name = "backend"
   zone               = "us-west2-a"
@@ -288,7 +282,6 @@ resource "google_compute_instance_group_manager" "default" {
 }
 
 resource "google_compute_backend_service" "default" {
-  provider              = google-beta
   name                  = "backendpolicy"
   protocol              = "HTTP"
   load_balancing_scheme = "EXTERNAL_MANAGED"
@@ -308,7 +301,6 @@ resource "google_compute_backend_service" "default" {
 
 ```hcl
 resource "google_compute_security_policy" "policy" {
-  provider    = google-beta
   name        = "my-policy"
   description = "Policy with Request Body inspection"
 
@@ -553,6 +545,7 @@ The following arguments are supported:
   * `TLS_JA3_FINGERPRINT`: JA3 TLS/SSL fingerprint if the client connects using HTTPS, HTTP/2 or HTTP/3. If not available, the key type defaults to ALL.
   * `TLS_JA4_FINGERPRINT`: JA4 TLS/SSL fingerprint if the client connects using HTTPS, HTTP/2 or HTTP/3. If not available, the key type defaults to ALL.
   * `USER_IP`: The IP address of the originating client, which is resolved based on "user_ip_request_headers" configured with the securitypolicy. If there is no "user_ip_request_headers" configuration or an IP address cannot be resolved from it, the key type defaults to IP.
+  * `ASN`: The autonomous system number of the originating client. If not available, the key type defaults to `ALL`.
 
 * `enforce_on_key_name` - (Optional) Rate limit key name applicable only for the following key types:
 
@@ -562,6 +555,8 @@ The following arguments are supported:
 * `enforce_on_key_configs` - (Optional, [Beta](../guides/provider_versions.html.markdown)) If specified, any combination of values of enforce_on_key_type/enforce_on_key_name is treated as the key on which rate limit threshold/action is enforced. You can specify up to 3 enforce_on_key_configs. If `enforce_on_key_configs` is specified, `enforce_on_key` must be set to an empty string. Structure is [documented below](#nested_enforce_on_key_configs).
 
   **Note:** To avoid the conflict between `enforce_on_key` and `enforce_on_key_configs`, the field [`enforce_on_key`](#enforce_on_key) needs to be set to an empty string.
+
+* `exceed_redirect_options` - (Optional) Parameters defining the redirect action that is used as the exceed action. Cannot be specified if the exceed action is not redirect. Structure is [documented below](#nested_exceed_redirect_options).
 
 <a name="nested_enforce_on_key_configs"></a>The `enforce_on_key_configs` block supports:
 
@@ -583,8 +578,7 @@ The following arguments are supported:
     * `TLS_JA3_FINGERPRINT`: JA3 TLS/SSL fingerprint if the client connects using HTTPS, HTTP/2 or HTTP/3. If not available, the key type defaults to ALL.
     * `TLS_JA4_FINGERPRINT`: JA4 TLS/SSL fingerprint if the client connects using HTTPS, HTTP/2 or HTTP/3. If not available, the key type defaults to ALL.
     * `USER_IP`: The IP address of the originating client, which is resolved based on "user_ip_request_headers" configured with the securitypolicy. If there is no "user_ip_request_headers" configuration or an IP address cannot be resolved from it, the key type defaults to IP.
-
-* `exceed_redirect_options` - (Optional) Parameters defining the redirect action that is used as the exceed action. Cannot be specified if the exceed action is not redirect. Structure is [documented below](#nested_exceed_redirect_options).
+    * `ASN`: The autonomous system number of the originating client. If not available, the key type defaults to `ALL`.
 
 <a name="nested_threshold"></a>The `{ban/rate_limit}_threshold` block supports:
 

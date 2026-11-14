@@ -258,7 +258,7 @@ is preferred because it will allow the user to see a clearer diff when the field
 
 The function specified can be a
 [provider-specific function](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/google-beta/tpgresource/common_diff_suppress.go)
-(for example, `tgpresource.CaseDiffSuppress`) or a function defined in resource-specific
+(for example, `tpgresource.CaseDiffSuppress`) or a function defined in resource-specific
 [custom code]({{<ref "/develop/custom-code#add-reusable-variables-and-functions" >}}).
 
 Example:
@@ -506,4 +506,26 @@ properties:
     type: String
     description: |
       MULTI_LINE_FIELD_DESCRIPTION
+```
+
+## `JsonValue`
+
+Represents an arbitrary JSON value in the REST API (such as `google.protobuf.Value`, `google.protobuf.Struct`, recursive JSON schemas, or untyped JSON objects/arrays) exposed in Terraform as a JSON-encoded string (`TypeString`).
+
+For configurable fields, `JsonValue` automatically:
+- Validates that the configured string is valid JSON (`validation.StringIsJSON`).
+- Normalizes the JSON string in Terraform state (`structure.NormalizeJsonString`) to avoid whitespace/formatting diffs.
+- Unmarshals the JSON string into a structured value when sending API requests, and marshals the API response back into a JSON string on read.
+
+For output-only (`output: true`) fields, `JsonValue` marshals the API response value into a JSON string on read.
+
+Only use `JsonValue` when the REST API sends and receives structured JSON on the wire. If the REST API field itself is a raw string containing JSON, use `type: String` instead.
+
+Example:
+
+```yaml
+- name: 'payload'
+  type: JsonValue
+  description: |
+    Arbitrary JSON payload passed to the service.
 ```

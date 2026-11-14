@@ -73,16 +73,11 @@ properties:
     description: '[Output only] Create time stamp'
     output: true
   - name: dataSchema
-    type: String
+    type: JsonValue
     description: |-
       JSON Schema for data.
       Field names must contain only alphanumeric characters,
       underscores, and hyphens.
-    state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-    custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-    validation:
-      function: validation.StringIsJSON
   - name: description
     type: String
     description: User-specified description of the collection
@@ -131,8 +126,6 @@ properties:
         - name: denseVector
           type: NestedObject
           description: Message describing a dense vector field.
-          conflicts:
-            - sparseVector
           properties:
             - name: dimensions
               type: Integer
@@ -173,8 +166,6 @@ properties:
         - name: sparseVector
           type: NestedObject
           description: Message describing a sparse vector field.
-          conflicts:
-            - denseVector
           allow_empty_object: true
           send_empty_value: true
           properties: []

@@ -87,15 +87,9 @@ properties:
     output: true
     properties:
       - name: code
-        type: Enum
+        type: String
         description: Describes the state of a Fleet resource.
         output: true
-        enum_values:
-          - CODE_UNSPECIFIED
-          - CREATING
-          - READY
-          - DELETING
-          - UPDATING
   - name: defaultClusterConfig
     type: NestedObject
     description: The default cluster configurations to apply across the fleet.
