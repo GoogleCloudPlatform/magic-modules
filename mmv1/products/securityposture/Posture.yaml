@@ -36,6 +36,7 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+generate_list_resource: true
 autogen_async: true
 # Sets parameters for handling operations returned by the API.
 async:
