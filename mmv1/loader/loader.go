@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"path/filepath"
 	"reflect"
 	"runtime"
@@ -482,7 +483,7 @@ func (l *Loader) AddExtraFields() error {
 	return nil
 }
 
-func (l *Loader) Validate() {
+func (l *Loader) ValidateErrors() []error {
 	if l.Products == nil {
 		log.Fatalln("products have not been loaded into memory")
 	}
@@ -494,6 +495,11 @@ func (l *Loader) Validate() {
 			resource.ExcludeIfNotInVersion(ver)
 			es := resource.Validate()
 			if len(es) > 0 {
+				if os.Getenv("GITHUB_ACTIONS") == "true" {
+					for _, e := range es {
+						fmt.Printf("::error file=mmv1/%s::%s\n", resource.SourceYamlFile, e.Error())
+					}
+				}
 				es = utils.TransformErrs(func(e error) error {
 					return fmt.Errorf("%s%s%s: %w", utils.ColorRed, resource.SourceYamlFile, utils.ColorReset, e)
 				}, es)
@@ -501,6 +507,11 @@ func (l *Loader) Validate() {
 			}
 		}
 	}
+	return allErrs
+}
+
+func (l *Loader) Validate() {
+	allErrs := l.ValidateErrors()
 	if len(allErrs) > 0 {
 		log.Fatalf("%v", errors.Join(allErrs...))
 	}

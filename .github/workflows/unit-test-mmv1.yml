@@ -157,7 +157,7 @@ jobs:
         if: ${{ !failure() && steps.yaml_files.outputs.yamlfiles != '' }}
         run: |
           cd repo
-          yamllint -c .yamllint ${STEPS_YAML_FILES_OUTPUTS_YAMLFILES}
+          yamllint -f github -c .yamllint ${STEPS_YAML_FILES_OUTPUTS_YAMLFILES}
         env:
           STEPS_YAML_FILES_OUTPUTS_YAMLFILES: ${{ steps.yaml_files.outputs.yamlfiles }}  
   unit-tests:
