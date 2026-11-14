@@ -1,0 +1,168 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'PhoneNumber'
+min_version: beta
+# Composite declarative resource bridging Dialogflow's PhoneNumberOrders and PhoneNumbers APIs:
+# - Create submits a PhoneNumberOrder (count = 1), waits for COMPLETED, and optionally PATCHes
+#   the resulting PhoneNumber to configure conversation_profile and allowed_sip_trunks.
+# - Read uses nested_query over ListPhoneNumbers (since GetPhoneNumber does not exist and
+#   ListPhoneNumbers filters out DELETE_REQUESTED numbers) and enriches order metadata via decoder.
+# - Update PATCHes mutable PhoneNumber fields (conversation_profile, allowed_sip_trunks) in place.
+# - Delete calls DeletePhoneNumber (soft-deleting to DELETE_REQUESTED) or honors deletion_policy.
+description: |
+  Represents a provisioned Dialogflow phone number ordered through the Google
+  Telephony Platform (`PhoneNumberOrders`) and managed via the `PhoneNumbers` API.
+  On creation, Terraform orders a phone number according to `phone_number_spec`,
+  waits for the order to complete, and optionally binds `conversation_profile`
+  and `allowed_sip_trunks`. On deletion, the phone number is soft-deleted
+  (`DELETE_REQUESTED`) unless `deletion_policy = "ABANDON"` is set.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/dialogflow/es/docs'
+  api: 'https://cloud.google.com/dialogflow/es/docs/reference/rest/v2beta1/projects.locations.phoneNumbers'
+base_url: 'projects/{{project}}/locations/{{location}}/phoneNumbers'
+self_link: 'projects/{{project}}/locations/{{location}}/phoneNumbers?pageSize=1000'
+create_url: 'projects/{{project}}/locations/{{location}}/phoneNumberOrders'
+update_url: '{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: '{{name}}'
+id_format: '{{name}}'
+import_format:
+  - '{{name}}'
+identity:
+  - name
+nested_query:
+  keys:
+    - phoneNumbers
+  is_list_of_ids: false
+  modify_by_patch: false
+# Sweeper skipped because pre_delete dynamically rewrites the endpoint host for regional locations.
+exclude_sweeper: true
+timeouts:
+  insert_minutes: 40
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  custom_create: 'templates/terraform/custom_create/dialogflow_phone_number.go.tmpl'
+  pre_read: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
+  decoder: 'templates/terraform/decoders/dialogflow_phone_number.go.tmpl'
+  pre_update: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
+  pre_delete: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project_and_location.go.tmpl'
+  test_check_destroy: 'templates/terraform/test_check_destroy/dialogflow_phone_number.go.tmpl'
+samples:
+  - name: 'dialogflow_phone_number_basic'
+    primary_resource_id: 'basic_phone_number'
+    min_version: beta
+    steps:
+      - name: 'dialogflow_phone_number_basic'
+        min_version: beta
+      - name: 'dialogflow_phone_number_update'
+        min_version: beta
+        resource_id_vars:
+          app_display_name: 'my-app'
+          app_id: 'app-id'
+          profile_name: 'dialogflow-profile'
+          trunk_name: 'dialogflow-trunk'
+parameters:
+  - name: 'location'
+    type: String
+    url_param_only: true
+    required: true
+    immutable: true
+    description: |
+      The location of the phone number (e.g. `us-central1`, `global`).
+properties:
+  - name: 'name'
+    type: String
+    output: true
+    description: |
+      Identifier. The unique resource name of the phone number, of the form
+      `projects/<Project ID>/locations/<Location ID>/phoneNumbers/<PhoneNumber ID>`.
+  - name: 'orderName'
+    type: String
+    output: true
+    description: |
+      Output only. The resource name of the `PhoneNumberOrder` that provisioned this phone number,
+      of the form `projects/<Project ID>/locations/<Location ID>/phoneNumberOrders/<Order ID>`.
+  - name: 'phoneNumber'
+    type: String
+    output: true
+    description: |
+      Output only. Phone number in E.164 format (for example, `+16505550100`).
+  - name: 'lifecycleState'
+    type: String
+    output: true
+    description: |
+      Output only. The state of the `PhoneNumber` (`ACTIVE`, `DELETE_REQUESTED`).
+  - name: 'purgeTime'
+    type: String
+    output: true
+    description: |
+      Output only. The time at which this resource will be purged if in `DELETE_REQUESTED` state.
+  - name: 'description'
+    type: String
+    immutable: true
+    description: |
+      Optional. A description of the phone number order (limit is 1024 bytes).
+  - name: 'phoneNumberSpec'
+    type: NestedObject
+    required: true
+    immutable: true
+    description: |
+      Required. Specification of the phone number to order when creating this resource.
+    properties:
+      - name: 'countryCode'
+        type: Integer
+        required: true
+        immutable: true
+        description: |
+          Required. ITU country calling code for the requested number (e.g., `1` for US).
+      - name: 'preferredAreaCodes'
+        type: Array
+        immutable: true
+        description: |
+          Optional. Area codes to prefer when ordering the phone number. An empty list means any area code.
+        item_type:
+          type: String
+  - name: 'conversationProfile'
+    type: String
+    send_empty_value: true
+    description: |
+      Optional. The `ConversationProfile` resource name calls to this `PhoneNumber` should use.
+      Must belong to the same project and location as the phone number.
+      Format: `projects/<Project ID>/locations/<Location ID>/conversationProfiles/<ConversationProfile ID>`.
+  - name: 'allowedSipTrunks'
+    type: NestedObject
+    send_empty_value: true
+    description: |
+      Optional. List of SIP trunks that are allowed to make calls to this phone number.
+    properties:
+      - name: 'sipTrunks'
+        type: Array
+        send_empty_value: true
+        description: |
+          List of SIP trunk resource names allowed to make calls to this phone number.
+          Format: `projects/<Project ID>/locations/<Location ID>/sipTrunks/<SipTrunk ID>`.
+        item_type:
+          type: String
+      - name: 'carrierIds'
+        type: Array
+        send_empty_value: true
+        description: |
+          Optional. List of GTP carrier IDs allowed to make calls to this phone number.
+        item_type:
+          type: String
