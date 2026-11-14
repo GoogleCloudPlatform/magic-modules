@@ -260,6 +260,61 @@ An update test ensures that updatable fields can be changed without recreating t
 {{< /tab >}}
 {{% /tabs %}}
 
+## Write tests the missing test detector can read {#readable-tests}
+
+When your PR changes a resource, the magician reads the provider's acceptance tests and reports, under **Missing test report**, any changed fields that no test sets. The detector doesn't run your tests. It parses the Go source, follows each test step's `Config` to the function that builds it, and parses the resulting Terraform config.
+
+Tests generated from MMv1 `samples` already have a shape the detector can read. Handwritten tests need to follow the rules below. If the detector can't read a test, the magician lists it under **Unreadable test report**, and fields that only that test covers might be reported as missing.
+
+Do:
+
+- Name the test function `TestAcc...` and call `acctest.VcrTest` directly in its body, not inside `t.Run`, a loop, or a helper. Pass it a `resource.TestCase` literal with `Steps` written inline. The detector doesn't see a `VcrTest` call anywhere else, and it doesn't list that test as unreadable either.
+- Set each step's `Config` to a call to a config function declared in a `_test.go` file in the same service folder. An inline `acctest.Nprintf` or `fmt.Sprintf` call, a string literal, or a package-level string constant or variable also works.
+- Return a single `acctest.Nprintf` or `fmt.Sprintf` template from the config function. You can join templates with `fmt.Sprint` or `+`, for example to add a shared setup config.
+- Write the fields you want covered directly in the template. Substituting a value inside a line, such as `name = "%{name}"`, is fine.
+
+Don't:
+
+- Build the config with `+=`, `strings.Builder`, loops, or `if`/`else` branches that return different configs. The detector reads only the first `return` statement at the top level of the config function.
+- Assign the config to a local variable in the test function and pass that to `Config`.
+- Call a helper from another package, such as an `acctest` function that returns a config.
+- Use indexed verbs such as `%[1]s`.
+- Rely on a substitution that sits alone on its own line to add fields. The detector drops that line, so it works for a shared setup block, but the fields it adds aren't counted as covered.
+
+The detector ignores steps that set `ExpectError`, `PlanOnly`, `Destroy`, `ImportState`, or `RefreshState`, because those steps don't apply the config. Fields set in `data`, `list`, or `ephemeral` blocks don't count as coverage for the resource.
+
+The following test is readable:
+
+```go
+func TestAccPubsubTopic_update(t *testing.T) {
+    context := map[string]interface{}{
+        "random_suffix": acctest.RandString(t, 10),
+    }
+
+    acctest.VcrTest(t, resource.TestCase{
+        ...
+        Steps: []resource.TestStep{
+            {
+                Config: testAccPubsubTopic_full(context),
+            },
+            ...
+        },
+    })
+}
+
+func testAccPubsubTopic_full(context map[string]interface{}) string {
+    return acctest.Nprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "tf-test-topic-%{random_suffix}"
+
+  labels = {
+    env = "test"
+  }
+}
+`, context)
+}
+```
+
 ## Bootstrap API resources {#bootstrapping}
 
 Most acceptance tests run in a the default org and default test project, which means that they can conflict for quota, resource namespaces, and control over shared resources. You can work around these limitations with "bootstrapped" resources.
