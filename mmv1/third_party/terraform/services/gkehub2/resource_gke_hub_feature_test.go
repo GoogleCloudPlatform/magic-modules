@@ -672,6 +672,7 @@ resource "google_gke_hub_feature" "feature" {
   location = "global"
   fleet_default_member_config {
     policycontroller {
+      version = "1.24.1"
       policy_controller_hub_config {
         install_spec = "INSTALL_SPEC_ENABLED"
         exemptable_namespaces = ["foo"]
@@ -699,6 +700,7 @@ resource "google_gke_hub_feature" "feature" {
   location = "global"
   fleet_default_member_config {
     policycontroller {
+      version = "1.24.1"
       policy_controller_hub_config {
         install_spec = "INSTALL_SPEC_SUSPENDED"
         policy_content {
@@ -763,6 +765,7 @@ resource "google_gke_hub_feature" "feature" {
   location = "global"
   fleet_default_member_config {
     policycontroller {
+      version = "1.24.1"
       policy_controller_hub_config {
         install_spec = "INSTALL_SPEC_ENABLED"
         policy_content {}
