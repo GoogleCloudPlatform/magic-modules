@@ -994,7 +994,7 @@ properties:
                     Minimum consecutive successes for the probe to be considered successful after having failed.
                     Defaults to 2.
                   default_from_api: true
-                  # The API accepts and stores this field, but the v2 API never returns it.
+                  # The v2 API accepts this field in requests but never returns it in responses.
                   ignore_read: true
                 - name: 'httpGet'
                   type: NestedObject
