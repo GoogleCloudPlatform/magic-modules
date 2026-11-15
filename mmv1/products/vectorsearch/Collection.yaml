@@ -22,12 +22,16 @@ update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/collections/{{collection_id}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 90
 async:
   operation:
     timeouts:
       insert_minutes: 20
       update_minutes: 20
-      delete_minutes: 20
+      delete_minutes: 90
     base_url: '{{op_id}}'
   actions:
     - create
