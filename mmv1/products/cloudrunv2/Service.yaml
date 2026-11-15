@@ -151,6 +151,7 @@ samples:
           cloud_run_service_name: 'cloudrun-service'
         ignore_read_extra:
           - 'deletion_protection'
+          - 'template.0.containers.0.readiness_probe.0.success_threshold'
   - name: 'cloudrunv2_service_secret'
     primary_resource_id: 'default'
     steps:
@@ -993,6 +994,8 @@ properties:
                     Minimum consecutive successes for the probe to be considered successful after having failed.
                     Defaults to 2.
                   default_from_api: true
+                  # The API accepts and stores this field, but the v2 API never returns it.
+                  ignore_read: true
                 - name: 'httpGet'
                   type: NestedObject
                   description: |-
