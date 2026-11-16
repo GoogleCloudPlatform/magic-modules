@@ -2,7 +2,7 @@ resource "google_memorystore_instance" "{{$.PrimaryResourceId}}-instance" {
   instance_id                 = "{{index $.ResourceIdVars "instance_name"}}"
   shard_count                 = 1
   node_type                   = "SHARED_CORE_NANO"
-  location                    = "northamerica-south1"
+  location                    = "europe-west4"
   authorization_mode          = "TOKEN_AUTH"
   deletion_protection_enabled = false
 }
@@ -10,5 +10,5 @@ resource "google_memorystore_instance" "{{$.PrimaryResourceId}}-instance" {
 resource "google_memorystore_auth_token" "{{$.PrimaryResourceId}}" {
   instance                    = google_memorystore_instance.{{$.PrimaryResourceId}}-instance.instance_id
   user_id                     = "default"
-  location                    = "northamerica-south1"
+  location                    = "europe-west4"
 }

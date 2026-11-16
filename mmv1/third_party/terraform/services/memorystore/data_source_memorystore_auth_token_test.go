@@ -28,7 +28,7 @@ func TestAccMemorystoreAuthTokenDatasource(t *testing.T) {
 					resource.TestCheckResourceAttrSet("data.google_memorystore_auth_token.default_v1", "token"),
 					resource.TestCheckResourceAttr("data.google_memorystore_auth_token.default_v1", "user_id", "default"),
 					resource.TestCheckResourceAttr("data.google_memorystore_auth_token.default_v1", "token_id", "version-1"),
-					resource.TestCheckResourceAttr("data.google_memorystore_auth_token.default_v1", "location", "northamerica-south1"),
+					resource.TestCheckResourceAttr("data.google_memorystore_auth_token.default_v1", "location", "europe-west4"),
 				),
 			},
 		},
@@ -41,7 +41,7 @@ resource "google_memorystore_instance" "instance" {
   instance_id                 = "tf-test-ms-instance-%{random_suffix}"
   shard_count                 = 1
   node_type                   = "SHARED_CORE_NANO"
-  location                    = "northamerica-south1"
+  location                    = "europe-west4"
   authorization_mode          = "TOKEN_AUTH"
   deletion_protection_enabled = false
 }
@@ -49,14 +49,14 @@ resource "google_memorystore_instance" "instance" {
 resource "google_memorystore_auth_token" "token-basic" {
   instance                    = google_memorystore_instance.instance.instance_id
   user_id                     = "default"
-  location                    = "northamerica-south1"
+  location                    = "europe-west4"
 }
 
 data "google_memorystore_auth_token" "with_token_id" {
   instance                    = google_memorystore_instance.instance.instance_id
   user_id                     = "default"
   token_id                    = google_memorystore_auth_token.token-basic.token_id
-  location                    = "northamerica-south1"
+  location                    = "europe-west4"
 }
 
 data "google_memorystore_auth_token" "with_self_links" {
@@ -69,7 +69,7 @@ data "google_memorystore_auth_token" "default_v1" {
   instance                    = google_memorystore_instance.instance.instance_id
   user_id                     = "default"
   token_id                    = "version-1"
-  location                    = "northamerica-south1"
+  location                    = "europe-west4"
 }
 `, context)
 }

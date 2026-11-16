@@ -154,7 +154,7 @@ resource "google_memorystore_instance" "instance" {
   instance_id                 = "tf-test-ms-instance-%{random_suffix}"
   shard_count                 = 1
   node_type                   = "SHARED_CORE_NANO"
-  location                    = "northamerica-south1"
+  location                    = "europe-west4"
   authorization_mode          = "TOKEN_AUTH"
   deletion_protection_enabled = false
 }
@@ -162,7 +162,7 @@ resource "google_memorystore_instance" "instance" {
 resource "google_memorystore_auth_token" "token-default" {
   instance                    = google_memorystore_instance.instance.id
   user_id                     = "${google_memorystore_instance.instance.id}/tokenAuthUsers/default"
-  location                    = "northamerica-south1"
+  location                    = "europe-west4"
 }
 `, context)
 }
@@ -173,7 +173,7 @@ resource "google_memorystore_instance" "instance" {
   instance_id                 = "tf-test-ms-instance-%{random_suffix}"
   shard_count                 = 1
   node_type                   = "SHARED_CORE_NANO"
-  location                    = "northamerica-south1"
+  location                    = "europe-west4"
   authorization_mode          = "TOKEN_AUTH"
   deletion_protection_enabled = false
 }
@@ -182,14 +182,14 @@ resource "google_memorystore_auth_token" "token1" {
   instance                    = google_memorystore_instance.instance.instance_id
   user_id                     = "default"
   token_id                    = "version-1"
-  location                    = "northamerica-south1"
+  location                    = "europe-west4"
 }
 
 resource "google_memorystore_auth_token" "token2" {
   instance                    = google_memorystore_instance.instance.instance_id
   user_id                     = "default"
   deletion_policy             = "ABANDON"
-  location                    = "northamerica-south1"
+  location                    = "europe-west4"
   depends_on                  = [google_memorystore_auth_token.token1]
 }
 `, context)
@@ -201,7 +201,7 @@ resource "google_memorystore_instance" "instance" {
   instance_id                 = "tf-test-ms-instance-%{random_suffix}"
   shard_count                 = 1
   node_type                   = "SHARED_CORE_NANO"
-  location                    = "northamerica-south1"
+  location                    = "europe-west4"
   authorization_mode          = "TOKEN_AUTH"
   deletion_protection_enabled = false
 }
@@ -210,7 +210,7 @@ resource "google_memorystore_auth_token" "token2" {
   instance                    = google_memorystore_instance.instance.instance_id
   user_id                     = "default"
   deletion_policy             = "ABANDON"
-  location                    = "northamerica-south1"
+  location                    = "europe-west4"
 }
 `, context)
 }
@@ -221,7 +221,7 @@ resource "google_memorystore_instance" "instance" {
   instance_id                 = "tf-test-ms-instance-%{random_suffix}"
   shard_count                 = 1
   node_type                   = "SHARED_CORE_NANO"
-  location                    = "northamerica-south1"
+  location                    = "europe-west4"
   authorization_mode          = "TOKEN_AUTH"
   deletion_protection_enabled = false
 }
@@ -230,14 +230,14 @@ resource "google_memorystore_auth_token" "token2" {
   instance                    = google_memorystore_instance.instance.instance_id
   user_id                     = "default"
   deletion_policy             = "ABANDON"
-  location                    = "northamerica-south1"
+  location                    = "europe-west4"
 }
 
 resource "google_memorystore_auth_token" "token_missing" {
   instance                    = google_memorystore_instance.instance.instance_id
   user_id                     = "default"
   token_id                    = "version-99"
-  location                    = "northamerica-south1"
+  location                    = "europe-west4"
 }
 `, context)
 }

@@ -15,7 +15,7 @@ data "google_memorystore_auth_token" "qa" {
   instance = google_memorystore_instance.instance.instance_id
   user_id  = "default"
   token_id = "version-1"
-  location = "northamerica-south1"
+  location = "europe-west4"
 }
 ```
 
