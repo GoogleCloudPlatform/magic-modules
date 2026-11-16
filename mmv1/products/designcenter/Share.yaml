@@ -19,19 +19,13 @@ references:
   guides:
     'Share a catalog with a space': 'https://cloud.google.com/application-design-center/docs/manage-catalogs#share-a-catalog-with-a-space'
   api: 'https://cloud.google.com/application-design-center/docs/reference/rest/v1/projects.locations.spaces.catalogs.shares'
-id_format: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/shares/{{share_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/shares'
 create_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/shares?shareId={{share_id}}'
 self_link: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/shares/{{share_id}}'
 immutable: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/shares/{{share_id}}'
-  - '{{project}}/{{location}}/{{space}}/{{catalog}}/{{share_id}}'
-  - '{{location}}/{{space}}/{{catalog}}/{{share_id}}'
 autogen_async: true
-timeouts:
-  insert_minutes: 20
-  delete_minutes: 20
 samples:
   - name: designcenter_share_basic
     primary_resource_id: example
@@ -56,28 +50,24 @@ parameters:
     description: |
       The location of the share.
     required: true
-    immutable: true
     url_param_only: true
   - name: 'space'
     type: 'String'
     description: |
       The space for the share.
     required: true
-    immutable: true
     url_param_only: true
   - name: 'catalog'
     type: 'String'
     description: |
       The catalog for the share.
     required: true
-    immutable: true
     url_param_only: true
   - name: 'share_id'
     type: 'String'
     description: |
       The ID of the share.
     required: true
-    immutable: true
     url_param_only: true
 properties:
   - name: 'name'
@@ -92,7 +82,6 @@ properties:
       The space to which the catalog is shared.
       Format: `projects/{project}/locations/{location}/spaces/{space}`
     required: true
-    immutable: true
   - name: 'state'
     type: 'String'
     description: |
