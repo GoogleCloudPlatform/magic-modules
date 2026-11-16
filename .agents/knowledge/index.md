@@ -59,6 +59,7 @@ Read this index at decision points; open only the source the task needs. Format 
 ### Field (`field/`)
 
 - **enums-vs-strings** — Model an API enum as Enum (strict, plan-time) or String (forward-compatible): the deliberate trade-off. — [field/enums-vs-strings.md](field/enums-vs-strings.md)
+- **zero-value-clearing** — When updateMask suffices vs. when send_empty_value, allow_empty_object, or GetRawConfigAt is needed. — [field/zero-value-clearing.md](field/zero-value-clearing.md)
 
 ### Template (`template/`)
 
