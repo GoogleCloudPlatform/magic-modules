@@ -7,9 +7,12 @@ import (
 	"log"
 	"os"
 
+	newProvider "google/provider/new/google/provider"
+
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/detector"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/test-reader/reader"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/spf13/cobra"
 )
 
@@ -18,6 +21,7 @@ const detectMissingTestsDesc = "Run the missing test detector using the given se
 type detectMissingTestsOptions struct {
 	rootOptions             *rootOptions
 	computeSchemaDiff       func() diff.SchemaDiff
+	resourceMap             func() map[string]*schema.Resource
 	stdout                  io.Writer
 	exhaustive              bool
 	exhaustiveChangedFields bool
@@ -30,8 +34,9 @@ func newDetectMissingTestsCmd(rootOptions *rootOptions) *cobra.Command {
 		computeSchemaDiff: func() diff.SchemaDiff {
 			return schemaDiff
 		},
-		stdout: os.Stdout,
-		format: "json",
+		resourceMap: newProvider.ResourceMap,
+		stdout:      os.Stdout,
+		format:      "json",
 	}
 	cmd := &cobra.Command{
 		Use:   "detect-missing-tests SERVICES_DIR",
@@ -60,7 +65,11 @@ func (o *detectMissingTestsOptions) run(args []string) error {
 		if o.format != "" && o.format != "json" && o.format != "markdown" {
 			return fmt.Errorf("unsupported --format %q (must be \"json\" or \"markdown\")", o.format)
 		}
-		exhaustiveMissing, err := detector.DetectExhaustiveMissingTests(sd, allTests, o.exhaustiveChangedFields)
+		var resMap map[string]*schema.Resource
+		if o.resourceMap != nil {
+			resMap = o.resourceMap()
+		}
+		exhaustiveMissing, err := detector.DetectExhaustiveMissingTests(sd, resMap, allTests, o.exhaustiveChangedFields)
 		if err != nil {
 			return fmt.Errorf("error detecting exhaustive missing tests: %v", err)
 		}
