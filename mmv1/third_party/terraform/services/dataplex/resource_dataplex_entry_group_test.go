@@ -96,8 +96,7 @@ func TestAccDataplexEntryGroup_type(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"location", "entry_group_id", "labels", "terraform_labels"},
 			},
 			{
-				Config:   testAccDataplexEntryGroup_typeContextSet(context),
-				PlanOnly: true,
+				Config: testAccDataplexEntryGroup_typeContextSet(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectEmptyPlan(),
