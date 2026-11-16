@@ -39,3 +39,21 @@ url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": str
 if err != nil {
 	return err
 }
+
+// deleted_principals_support is a Terraform-only field mapped to the
+// deletedPrincipalSyntax query parameter. When it is omitted the parameter is
+// not sent, which the API treats as DELETED_PRINCIPAL_SYNTAX_SUPPORT_UNSPECIFIED.
+// Omitting it keeps orgs outside the preview working.
+deletedPrincipalSyntax := ""
+switch d.Get("deleted_principals_support").(string) {
+case "enable":
+	deletedPrincipalSyntax = "DELETED_PRINCIPAL_SYNTAX_SUPPORT_ENABLED"
+case "disable":
+	deletedPrincipalSyntax = "DELETED_PRINCIPAL_SYNTAX_SUPPORT_DISABLED"
+}
+if deletedPrincipalSyntax != "" {
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"deletedPrincipalSyntax": deletedPrincipalSyntax})
+	if err != nil {
+		return err
+	}
+}
