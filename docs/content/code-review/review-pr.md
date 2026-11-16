@@ -21,7 +21,7 @@ to review by repository maintainers. For community members, this is not required
    * establishes clear context itself via title or description.
 2. If the PR adds any new resource, ensure that the resource does not already exist in the [GA provider](https://github.com/hashicorp/terraform-provider-google) or [beta provider](https://github.com/hashicorp/terraform-provider-google-beta)
 1. Read through all the changes in the PR, generated code in the downstreams and the API documentation to ensure that:
-   1. the resource schema added in the PR matches the API structure.
+   1. the resource schema added in the PR matches the API structure (verify field names, types, and endpoint availability against the target GCP REST Discovery document—`v1` for GA, `beta` for beta).
    1. the features are added in the correct version
       * features only available in beta are not included in the GA google provider.
       * features added to the GA provider are also included in the beta provider -- beta should be a strict superset of GA.
@@ -38,8 +38,8 @@ to review by repository maintainers. For community members, this is not required
    1. all related tests pass in GA for features promoted from beta to GA.
       > [!NOTE]
       > Note:
-      > Presubmit VCR tests do not run in GA. Manual testing is required for promoted GA features; when test configurations exist and presubmit checks pass, if manual GA test results are not pasted in the PR description, request confirmation in a non-blocking comment rather than treating the missing comment as a code defect.
-   1. custom helpers (`DiffSuppressFunc`, validators, parsers, expanders/flatteners) with branching or parsing logic have unit tests. Reusing shared helpers (`tpgresource.*`, `customdiff.*`), single-condition `DiffSuppressFunc`s, or `CustomizeDiff` hooks typed on `*schema.ResourceDiff` and covered by `TestAcc` do not need standalone unit tests.
+      > Presubmit VCR tests do not run in GA. Manual testing is required for promoted GA features (Discovery schema presence alone does not verify runtime GA behavior); when test configurations exist and presubmit checks pass, if manual GA test results are not pasted in the PR description, request confirmation in a non-blocking comment rather than treating the missing comment as a code defect.
+   1. custom helpers (`DiffSuppressFunc`, validators, parsers, expanders/flatteners) with branching or parsing logic have unit tests. Reusing shared helpers (`tpgresource.*`, `customdiff.*`), single-condition `DiffSuppressFunc`s, or `CustomizeDiff` hooks typed on `*schema.ResourceDiff` and covered by `TestAcc` do not need standalone unit tests. Offline Go unit and schema tests (`func Test...` without `TestAcc`) run without `TF_ACC=1` and do not emit HTTP wire logs.
    1. widening an existing `max_size` or numeric limit is verified via schema and standard acceptance tests without requiring quota-heavy max-scale resource counts.
    1. minor-release field deprecations keep existing acceptance tests on the deprecated field until major-release removal, adding separate coverage for any replacement field.
    1. the linked issue (if any) is covered by at least one test that reproduces the issue
