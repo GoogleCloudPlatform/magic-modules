@@ -5,7 +5,7 @@ topics: [field, tgc]
 task_types: [field-add, new-resource, code-review]
 source: docs/content/develop/add-fields.md + docs/content/convert/add-new-resource-tgc.md
 status: approved
-last_verified: 2026-11-06
+last_verified: 2026-11-16
 ---
 
 # Cross-Schema Field Sync (`*Version.yaml` & `is_missing_in_cai`)
@@ -20,6 +20,7 @@ Some products pair a resource with a sibling `<Resource>Version.yaml` that embed
   - Read-only snapshot blocks (e.g., `snapshot` in `mmv1/products/ces/AppVersion.yaml`): mark the mirrored property and all nested children `output: true`.
   - Configurable version input blocks (e.g., `tool` in `mmv1/products/dialogflowcx/ToolVersion.yaml`): match the parent's `required` / optional input attributes.
 - Skip request-only parameters (`url_param_only: true`) or write-only secrets omitted from version payloads.
+- **Review scoping:** During code review, if the linked issue or ticket is explicitly scoped strictly to the parent resource or specific fields implemented, report an omitted `<Resource>Version.yaml` mirror as a **non-blocking follow-up note** rather than a merge blocker (block only when `<Resource>Version` is part of the requested scope).
 
 ## 2. `is_missing_in_cai: true` on `include_in_tgc_next: true` Resources
 
