@@ -117,3 +117,10 @@ properties:
       Denotes the transfer status of the Entry Group. It is unspecified
       for Entry Group created from Dataplex API.
     output: true
+  - name: type
+    type: String
+    description: |
+      The type of this EntryGroup. The default value is an empty string.
+      Recognised values include:
+      * `context-set`: EntryGroup containing context set data assets.
+    immutable: true

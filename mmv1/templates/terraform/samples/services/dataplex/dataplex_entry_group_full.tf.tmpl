@@ -6,4 +6,5 @@ resource "google_dataplex_entry_group" "{{$.PrimaryResourceId}}" {
   labels = { "tag": "test-tf" }
   display_name = "terraform entry group"
   description = "entry group created by Terraform"
+  type = "context-set"
 }
