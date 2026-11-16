@@ -899,6 +899,7 @@ properties:
   - name: kmsKey
     type: String
     description: The KMS key used to encrypt the at-rest data of the cluster.
+    immutable: true
   - name: managedServerCa
     type: NestedObject
     output: true
