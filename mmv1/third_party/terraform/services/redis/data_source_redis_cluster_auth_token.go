@@ -57,6 +57,11 @@ func dataSourceRedisClusterAuthTokenRead(d *schema.ResourceData, meta interface{
 		return fmt.Errorf("Error setting token_id: %s", err)
 	}
 
+	userId := tpgresource.GetResourceNameFromSelfLink(d.Get("user_id").(string))
+	if err := d.Set("user_id", userId); err != nil {
+		return fmt.Errorf("Error setting user_id: %s", err)
+	}
+
 	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{region}}/clusters/{{cluster}}/tokenAuthUsers/{{user_id}}/authTokens/{{token_id}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
