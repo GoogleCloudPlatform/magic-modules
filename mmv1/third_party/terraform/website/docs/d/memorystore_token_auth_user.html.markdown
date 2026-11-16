@@ -14,7 +14,7 @@ Get information about a Google Cloud Memorystore Token Auth User. For more detai
 data "google_memorystore_token_auth_user" "qa" {
   instance = google_memorystore_instance.instance.instance_id
   user_id  = "my-user"
-  location = "northamerica-south1"
+  location = "europe-west4"
 }
 ```
 

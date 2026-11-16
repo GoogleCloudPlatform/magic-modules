@@ -64,14 +64,14 @@ resource "google_memorystore_instance" "instance" {
   instance_id                 = "tf-test-ms-instance-%{random_suffix}"
   shard_count                 = 1
   node_type                   = "SHARED_CORE_NANO"
-  location                    = "northamerica-south1"
+  location                    = "europe-west4"
   authorization_mode          = "TOKEN_AUTH"
   deletion_protection_enabled = false
 }
 
 resource "google_memorystore_token_auth_user" "user-basic" {
   instance                    = google_memorystore_instance.instance.name
-  location                    = "northamerica-south1"
+  location                    = "europe-west4"
   user_id                     = "tf-test-user-%{random_suffix}"
 }
 `, context)
@@ -84,14 +84,14 @@ resource "google_memorystore_instance" "instance" {
   instance_id                 = "tf-test-ms-instance-%{random_suffix}"
   shard_count                 = 1
   node_type                   = "SHARED_CORE_NANO"
-  location                    = "northamerica-south1"
+  location                    = "europe-west4"
   authorization_mode          = "TOKEN_AUTH"
   deletion_protection_enabled = false
 }
 
 resource "google_memorystore_token_auth_user" "user-invalid" {
   instance                    = google_memorystore_instance.instance.name
-  location                    = "northamerica-south1"
+  location                    = "europe-west4"
   user_id                     = "%{user_id}"
 }
 `, context)

@@ -26,7 +26,7 @@ func TestAccMemorystoreTokenAuthUserDatasource(t *testing.T) {
 					acctest.CheckDataSourceStateMatchesResourceState("data.google_memorystore_token_auth_user.custom", "google_memorystore_token_auth_user.user-basic"),
 					resource.TestCheckResourceAttrSet("data.google_memorystore_token_auth_user.default", "name"),
 					resource.TestCheckResourceAttr("data.google_memorystore_token_auth_user.default", "user_id", "default"),
-					resource.TestCheckResourceAttr("data.google_memorystore_token_auth_user.default", "location", "northamerica-south1"),
+					resource.TestCheckResourceAttr("data.google_memorystore_token_auth_user.default", "location", "europe-west4"),
 				),
 			},
 		},
@@ -39,7 +39,7 @@ resource "google_memorystore_instance" "instance" {
   instance_id                 = "tf-test-ms-instance-%{random_suffix}"
   shard_count                 = 1
   node_type                   = "SHARED_CORE_NANO"
-  location                    = "northamerica-south1"
+  location                    = "europe-west4"
   authorization_mode          = "TOKEN_AUTH"
   deletion_protection_enabled = false
 }
@@ -47,13 +47,13 @@ resource "google_memorystore_instance" "instance" {
 resource "google_memorystore_token_auth_user" "user-basic" {
   instance                    = google_memorystore_instance.instance.instance_id
   user_id                     = "tf-test-user-%{random_suffix}"
-  location                    = "northamerica-south1"
+  location                    = "europe-west4"
 }
 
 data "google_memorystore_token_auth_user" "custom" {
   instance                    = google_memorystore_instance.instance.instance_id
   user_id                     = google_memorystore_token_auth_user.user-basic.user_id
-  location                    = "northamerica-south1"
+  location                    = "europe-west4"
 }
 
 data "google_memorystore_token_auth_user" "default" {
