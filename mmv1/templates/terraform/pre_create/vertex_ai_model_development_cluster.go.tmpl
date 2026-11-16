@@ -13,13 +13,3 @@
 if err := validateVertexAIModelDevelopmentClusterNodePoolVersions(d); err != nil {
 	return err
 }
-
-// The Create API rejects controlPlaneVersion and nodePoolVersions on initial
-// cluster creation; strip them from the POST body and apply them via a
-// follow-up PATCH in post_create if configured.
-if orch, ok := obj["orchestratorSpec"].(map[string]interface{}); ok {
-	if k8s, ok := orch["kubernetesSpec"].(map[string]interface{}); ok {
-		delete(k8s, "controlPlaneVersion")
-		delete(k8s, "nodePoolVersions")
-	}
-}

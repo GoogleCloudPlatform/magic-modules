@@ -1,0 +1,117 @@
+data "google_container_engine_versions" "default" {
+  provider = google-beta
+  location = "us-east1"
+}
+
+resource "google_compute_network" "net" {
+  provider                = google-beta
+  name                    = "{{index $.ResourceIdVars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnet" {
+  provider                 = google-beta
+  name                     = "{{index $.ResourceIdVars "subnetwork_name"}}"
+  ip_cidr_range            = "10.0.0.0/24"
+  region                   = "us-east1"
+  network                  = google_compute_network.net.id
+  private_ip_google_access = true
+
+  secondary_ip_range {
+    range_name    = "pods-range"
+    ip_cidr_range = "10.16.0.0/14"
+  }
+
+  secondary_ip_range {
+    range_name    = "services-range"
+    ip_cidr_range = "10.20.0.0/20"
+  }
+}
+
+resource "google_compute_firewall" "internal" {
+  provider      = google-beta
+  name          = "{{index $.ResourceIdVars "firewall_name"}}"
+  network       = google_compute_network.net.name
+  direction     = "INGRESS"
+  source_ranges = ["10.0.0.0/24"]
+
+  allow {
+    protocol = "tcp"
+    ports    = ["0-65535"]
+  }
+  allow {
+    protocol = "udp"
+    ports    = ["0-65535"]
+  }
+  allow {
+    protocol = "icmp"
+  }
+}
+
+resource "google_vertex_ai_model_development_cluster" "{{$.PrimaryResourceId}}" {
+  provider                     = google-beta
+  region                       = "us-east1"
+  model_development_cluster_id = "{{index $.ResourceIdVars "model_development_cluster_id"}}"
+  display_name                 = "tftest-gke-full"
+  deletion_policy              = "DELETE"
+  depends_on                   = [google_compute_firewall.internal]
+
+  labels = {
+    env = "dev"
+  }
+
+  network {
+    network                       = google_compute_network.net.id
+    subnetwork                    = google_compute_subnetwork.subnet.id
+    pods_secondary_range_name     = "pods-range"
+    services_secondary_range_name = "services-range"
+  }
+
+  orchestrator_spec {
+    kubernetes_spec {
+      enable_ip_alias                = true
+      public_access_endpoint_enabled = true
+      control_plane_version          = data.google_container_engine_versions.default.release_channel_latest_version["REGULAR"]
+      node_pool_versions = {
+        cpu1 = data.google_container_engine_versions.default.release_channel_latest_version["REGULAR"]
+      }
+      kueue_version    = "v0.16.2"
+      nccl_gib_version = "v1.1.2"
+      maintenance_policy = jsonencode({
+        window = {
+          dailyMaintenanceWindow = {
+            startTime = "03:00"
+          }
+          maintenanceExclusions = {
+            no-node-upgrades = {
+              maintenanceExclusionOptions = {
+                scope           = "NO_MINOR_OR_NODE_UPGRADES"
+                endTimeBehavior = "UNTIL_END_OF_SUPPORT"
+              }
+            }
+          }
+        }
+      })
+    }
+  }
+
+  node_pools {
+    id                 = "cpu1"
+    zone               = "us-east1-b"
+    provisioning_model = "ON_DEMAND"
+
+    boot_disk {
+      boot_disk_size_gb = 100
+      boot_disk_type    = "pd-standard"
+    }
+
+    machine_spec {
+      machine_type = "n2-standard-4"
+    }
+
+    scaling_spec {
+      min_node_count = 1
+      max_node_count = 2
+    }
+  }
+}
