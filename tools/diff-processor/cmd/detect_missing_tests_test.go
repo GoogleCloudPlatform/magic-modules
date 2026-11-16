@@ -86,4 +86,34 @@ func TestDetectMissingTestsCmdRun(t *testing.T) {
 			t.Errorf("unexpected markdown output:\n%s", out)
 		}
 	})
+
+	t.Run("exhaustive-noupdate-via-resource-map", func(t *testing.T) {
+		dummyCRUD := func(d *schema.ResourceData, meta interface{}) error { return nil }
+		var buf bytes.Buffer
+		o := &detectMissingTestsOptions{
+			computeSchemaDiff: func() diff.SchemaDiff { return sd },
+			resourceMap: func() map[string]*schema.Resource {
+				return map[string]*schema.Resource{
+					"covered_resource": {
+						Create: dummyCRUD,
+						Read:   dummyCRUD,
+						Delete: dummyCRUD,
+					},
+				}
+			},
+			stdout:     &buf,
+			exhaustive: true,
+			format:     "json",
+		}
+		if err := o.run([]string{"../../test-reader/reader/testdata"}); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		var got map[string]*detector.ExhaustiveMissingTestInfo
+		if err := json.Unmarshal(buf.Bytes(), &got); err != nil {
+			t.Fatalf("unmarshal error: %v", err)
+		}
+		if len(got) != 0 {
+			t.Errorf("expected 0 incomplete fields when covered_resource is NoUpdate (SET + omission UNSET both covered in testdata), got %+v", got)
+		}
+	})
 }
