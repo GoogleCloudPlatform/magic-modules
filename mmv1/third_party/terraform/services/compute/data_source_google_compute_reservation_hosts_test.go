@@ -10,11 +10,19 @@ import (
 	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
+// Standard VM reservations (such as n2-standard-2) do not allocate physical
+// compute#host entities (which are system-populated only on Extended
+// Reservations with dedicated host hardware entitlements), and hosts.list only
+// resolves host associations under reservation_block / reservation_sub_block
+// scopes or the top-level zonal /hosts collection, so hosts.# is expected to be
+// 0 here. Multi-page item flattening and schema validation are covered in
+// data_source_google_compute_reservation_hosts_internal_test.go.
 func TestAccDataSourceComputeReservationHosts_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
 		"reservation_name": fmt.Sprintf("tf-test-res-hosts-%s", acctest.RandString(t, 10)),
+		"zone":             "us-west1-a",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -23,14 +31,10 @@ func TestAccDataSourceComputeReservationHosts_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeReservationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccDataSourceComputeReservationHosts_missingReservation(context),
-				ExpectError: regexp.MustCompile("(?s)all of.*`reservation,reservation_block`.*must be specified"),
-			},
-			{
 				Config: testAccDataSourceComputeReservationHosts_topLevel(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchResourceAttr("data.google_compute_reservation_hosts.top", "id", regexp.MustCompile(`^projects/[^/]+/zones/us-central1-a/hosts$`)),
-					resource.TestCheckResourceAttr("data.google_compute_reservation_hosts.top", "zone", "us-central1-a"),
+					resource.TestMatchResourceAttr("data.google_compute_reservation_hosts.top", "id", regexp.MustCompile(`^projects/[^/]+/zones/us-west1-a/hosts$`)),
+					resource.TestCheckResourceAttr("data.google_compute_reservation_hosts.top", "zone", "us-west1-a"),
 					resource.TestCheckResourceAttrSet("data.google_compute_reservation_hosts.top", "project"),
 					resource.TestCheckResourceAttrSet("data.google_compute_reservation_hosts.top", "hosts.#"),
 				),
@@ -38,8 +42,8 @@ func TestAccDataSourceComputeReservationHosts_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceComputeReservationHosts_withReservation(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchResourceAttr("data.google_compute_reservation_hosts.scoped", "id", regexp.MustCompile(`^projects/[^/]+/zones/us-central1-c/reservations/tf-test-res-hosts-[^/]+/hosts$`)),
-					resource.TestCheckResourceAttr("data.google_compute_reservation_hosts.scoped", "zone", "us-central1-c"),
+					resource.TestMatchResourceAttr("data.google_compute_reservation_hosts.scoped", "id", regexp.MustCompile(`^projects/[^/]+/zones/us-west1-a/reservations/tf-test-res-hosts-[^/]+/hosts/filter=state = ACTIVE$`)),
+					resource.TestCheckResourceAttr("data.google_compute_reservation_hosts.scoped", "zone", "us-west1-a"),
 					resource.TestCheckResourceAttr("data.google_compute_reservation_hosts.scoped", "hosts.#", "0"),
 				),
 			},
@@ -50,7 +54,7 @@ func TestAccDataSourceComputeReservationHosts_basic(t *testing.T) {
 func testAccDataSourceComputeReservationHosts_topLevel(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_reservation_hosts" "top" {
-  zone = "us-central1-a"
+  zone = "%{zone}"
 }
 `, context)
 }
@@ -59,7 +63,7 @@ func testAccDataSourceComputeReservationHosts_withReservation(context map[string
 	return acctest.Nprintf(`
 resource "google_compute_reservation" "reservation" {
   name = "%{reservation_name}"
-  zone = "us-central1-c"
+  zone = "%{zone}"
 
   specific_reservation {
     count = 1
@@ -70,19 +74,8 @@ resource "google_compute_reservation" "reservation" {
 }
 
 data "google_compute_reservation_hosts" "scoped" {
-  reservation = google_compute_reservation.reservation.name
-  zone        = "us-central1-c"
+  reservation = google_compute_reservation.reservation.id
   filter      = "state = ACTIVE"
-}
-`, context)
-}
-
-func testAccDataSourceComputeReservationHosts_missingReservation(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-data "google_compute_reservation_hosts" "invalid" {
-  reservation_block     = "my-block"
-  reservation_sub_block = "my-sub-block"
-  zone                  = "us-central1-a"
 }
 `, context)
 }

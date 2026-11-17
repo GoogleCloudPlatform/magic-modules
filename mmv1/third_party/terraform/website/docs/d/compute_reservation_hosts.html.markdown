@@ -8,19 +8,27 @@ description: |-
 
 List Google Compute Engine Hosts in a zone, optionally scoped to a reservation, reservation block, or reservation sub-block.
 
+~> **Note:** When listing hosts within a block-based Extended Reservation, specify `reservation_block` (and optionally `reservation_sub_block`) in addition to `reservation`, or omit `reservation` to list all hosts in the zone, as the Compute Engine `hosts.list` endpoint resolves host associations at the reservation block or sub-block level.
+
 For more information see the [official documentation](https://cloud.google.com/compute/docs/instances/reserving-zonal-resources)
 and the [API](https://cloud.google.com/compute/docs/reference/rest/v1/hosts/list).
 
 ## Example Usage
 
 ```hcl
-data "google_compute_reservation_hosts" "hosts" {
-  reservation = "my-reservation"
-  zone        = "us-central1-a"
+data "google_compute_reservation_hosts" "block_hosts" {
+  reservation       = "my-reservation"
+  reservation_block = "my-reservation-block"
+  zone              = "us-west1-a"
 }
 
-output "host_names" {
-  value = [for h in data.google_compute_reservation_hosts.hosts.hosts : h.name]
+data "google_compute_reservation_hosts" "zonal_hosts" {
+  zone   = "us-west1-a"
+  filter = "state = ACTIVE"
+}
+
+output "block_host_names" {
+  value = [for h in data.google_compute_reservation_hosts.block_hosts.hosts : h.name]
 }
 ```
 
@@ -28,7 +36,7 @@ output "host_names" {
 
 The following arguments are supported:
 
-* `reservation` - (Optional) The name of the parent reservation. When omitted, lists hosts from the top-level zonal `/hosts` collection.
+* `reservation` - (Optional) The name or self-link of the parent reservation. When omitted, lists hosts from the top-level zonal `/hosts` collection.
 
 * `reservation_block` - (Optional) The name of the parent reservation block. Requires `reservation` to be set.
 
@@ -36,21 +44,23 @@ The following arguments are supported:
 
 * `filter` - (Optional) A filter expression that filters resources listed in the response.
 
-* `zone` - (Optional) The zone where the hosts reside. If it is not provided, the provider zone is used.
+* `zone` - (Optional) The zone where the hosts reside. If it is not provided, any zone in a `reservation` self-link is used before falling back to the provider zone.
 
-* `project` - (Optional) The project in which the resource belongs. If it is not provided, the provider project is used.
+* `project` - (Optional) The project in which the resource belongs. If it is not provided, any project in a `reservation` self-link is used before falling back to the provider project.
 
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
 
-* `id` - The identifier for the data source with format `projects/{{project}}/zones/{{zone}}/hosts` or `projects/{{project}}/zones/{{zone}}/{{association}}/hosts`.
+* `id` - The identifier for the data source with format `projects/{{project}}/zones/{{zone}}/hosts` or `projects/{{project}}/zones/{{zone}}/reservations/{{reservation}}[/reservationBlocks/{{reservation_block}}[/reservationSubBlocks/{{reservation_sub_block}}]]/hosts` (with `/filter={{filter}}` appended when `filter` is set).
 
 * `hosts` - A list of matching host objects. Structure is [documented below](#nested_hosts).
 
 <a name="nested_hosts"></a>The `hosts` block contains:
 
 * `name` - The name of the host.
+
+* `description` - An optional description of this resource.
 
 * `kind` - Type of the resource. Always `compute#host` for hosts.
 
@@ -78,7 +88,7 @@ In addition to the arguments listed above, the following computed attributes are
 
 <a name="nested_physical_topology"></a>The `physical_topology` block contains:
 
-* `cluster` - The cluster name of the reservation sub-block.
+* `cluster` - The cluster name of the host.
 
 * `block` - The unique identifier of the capacity block within the cluster.
 
