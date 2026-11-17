@@ -44,6 +44,11 @@ func TestAcc{{ $.ResourceName }}IamBindingGenerated(t *testing.T) {
 {{ template "IamTestSetupSample" $ }}
 
 	acctest.VcrTest(t, resource.TestCase{
+{{- if not $.IamPolicy.ExcludeImportTest }}
+	TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+		tfversion.RequireAbove(tfversion.Version1_12_0), // resource identity min version
+	},
+{{- end }}
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 {{- if eq $.MinVersionObj.Name "beta" }}
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
@@ -79,6 +84,11 @@ func TestAcc{{ $.ResourceName }}IamBindingGenerated(t *testing.T) {
 				ImportStateIdFunc: generate{{ $.ResourceName }}IAMBindingStateID("{{ $.IamTerraformName }}_binding.foo"),
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				ResourceName:      "{{ $.IamTerraformName }}_binding.foo",
+				ImportState:       true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
 			},
 {{-  end }}
 		},
