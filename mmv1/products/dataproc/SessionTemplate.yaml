@@ -26,6 +26,7 @@ docs:
 base_url: projects/{{project}}/locations/{{location}}/sessionTemplates
 self_link: '{{name}}'
 update_verb: PATCH
+generate_list_resource: true
 collection_url_key: sessionTemplates
 id_format: '{{name}}'
 import_format:
@@ -41,6 +42,17 @@ error_retry_predicates:
 custom_code:
   custom_import: templates/terraform/custom_import/set_id_name_with_slashes.go.tmpl
 samples:
+  - name: dataproc_session_templates_basic
+    primary_resource_id: example_session_templates_basic
+    steps:
+      - name: dataproc_session_templates_basic
+        resource_id_vars:
+          name: tf-test-session-template
+        test_env_vars:
+          project_name: PROJECT_NAME
+          location: REGION
+        ignore_read_extra:
+          - runtime_config.0.properties
   - name: dataproc_session_templates_jupyter
     primary_resource_id: example_session_templates_jupyter
     steps:
@@ -51,8 +63,9 @@ samples:
           prevent_destroy: "true"
         test_env_vars:
           project_name: PROJECT_NAME
+          location: REGION
         test_vars_overrides:
-          subnetwork_name: BootstrapSubnetWithFirewallForDataprocBatches(t, "jupyer-session-test-network", "jupyter-session-test-subnetwork")
+          subnetwork_name: 'compute.BootstrapSubnetWithOverrides(t, "jupyter-session-test-region-subnetwork", func() string { n := compute.BootstrapSharedTestNetwork(t, "jupyer-session-test-network"); BootstrapFirewallForDataprocSharedNetwork(t, "jupyter-session-test-subnetwork", n); return n }(), map[string]interface{}{"privateIpGoogleAccess": true, "ipCidrRange": "10.80.0.0/20"})'
           prevent_destroy: "false"
         ignore_read_extra:
           - runtime_config.0.properties
