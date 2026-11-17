@@ -54,11 +54,12 @@ include_in_tgc_next: true
 tgc_tests:
   - name: TestAccAlloydbInstance_connectionPoolConfig
     skip: fix it after the next release, as connection_pool_config will be in the next release
+  - name: TestAccAlloydbInstance_expressPublicDnsAndUpgrade
+    skip: beta-only test; express_config and public_dns_enabled are not in the GA provider
 custom_code:
   constants: templates/terraform/constants/alloydb_instance.go.tmpl
   decoder: templates/terraform/decoders/alloydb_instance.go.tmpl
   pre_create: templates/terraform/pre_create/alloydb_instance.go.tmpl
-  pre_update: templates/terraform/pre_update/alloydb_instance.go.tmpl
   pre_delete: templates/terraform/pre_delete/alloydb_instance.go.tmpl
   custom_import: templates/terraform/custom_import/alloydb_instance.go.tmpl
   # Decoder reads Terraform state via d.Get; skip during CAI→HCL (no state).
@@ -469,7 +470,9 @@ properties:
         description: |
           A list of external networks authorized to access this instance. This
           field is only allowed to be set when `enable_public_ip` is set to
-          true (or when `public_dns_enabled` is set to true in `google-beta`).
+          true.
+        required_with:
+          - networkConfig.0.enablePublicIp
         item_type:
           type: NestedObject
           properties:
@@ -489,10 +492,12 @@ properties:
       - name: publicDnsEnabled
         type: Boolean
         min_version: beta
-        send_empty_value: true
         description: |
           Whether Public DNS is enabled for the instance. Only supported on
-          AlloyDB Express primary instances.
+          AlloyDB Express instances. When Public DNS is enabled, the instance's
+          DNS name is exported as `network_info.public_dns_name`. To use
+          `authorized_external_networks` with Public DNS, set
+          `enable_public_ip` to `false`.
       - name: allocatedIpRangeOverride
         type: String
         immutable: true

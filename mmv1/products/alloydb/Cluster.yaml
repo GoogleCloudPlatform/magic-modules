@@ -61,11 +61,12 @@ deletion_policy_default: DEFAULT
 autogen_async: true
 include_in_tgc_next: true
 custom_code:
+  constants: templates/terraform/constants/alloydb_cluster.go.tmpl
   pre_create: templates/terraform/pre_create/alloydb_cluster.go.tmpl
   pre_update: templates/terraform/pre_update/alloydb_cluster.go.tmpl
   pre_delete: templates/terraform/pre_delete/alloydb_cluster.go.tmpl
-error_retry_predicates:
-  - IsAlloyDbInstanceUpdatingError
+custom_diff:
+  - alloydbClusterExpressConfigCustomizeDiff
 samples:
   - name: alloydb_cluster_basic
     primary_resource_id: default
@@ -733,10 +734,11 @@ properties:
     type: NestedObject
     min_version: beta
     description: |
-      Configuration for AlloyDB Express edition. Setting `enabled` to `true` on cluster creation
-      provisions an AlloyDB Express cluster. Updating `enabled` from `true` to `false` upgrades
-      an AlloyDB Express cluster to a standard cluster in-place; downgrading from `false` to
-      `true` is not supported.
+      Configuration for AlloyDB Express. Setting `enabled` to `true` when the cluster is
+      created provisions an AlloyDB Express cluster. Changing `enabled` from `true` to `false`
+      upgrades the Express cluster to a standard AlloyDB cluster in place. The upgrade can't be
+      undone, and a standard cluster can't be converted to an Express cluster. Removing the
+      `express_config` block doesn't upgrade the cluster; set `enabled` to `false` to upgrade.
     default_from_api: true
     custom_flatten: templates/terraform/custom_flatten/alloydb_cluster_express_config.go.tmpl
     properties:
