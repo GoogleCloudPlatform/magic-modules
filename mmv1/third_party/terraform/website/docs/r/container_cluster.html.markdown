@@ -602,6 +602,9 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 * `kalm_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)).
     Configuration for the KALM addon, which manages the lifecycle of k8s. It is disabled by default; Set `enabled = true` to enable.
 
+* `wiz_sensor_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)).
+    Configuration for the [Wiz Sensor addon](https://docs.cloud.google.com/kubernetes-engine/security/install-wiz-sensor-addon) (requires GKE `1.36.4-gke.1495000` or later). It is disabled by default; set `enabled = true` to enable and `enabled = false` to disable. Structure is [documented below](#nested_wiz_sensor_config).
+
 *  `config_connector_config` -  (Optional).
     The status of the ConfigConnector addon. It is disabled by default; Set `enabled = true` to enable.
 
@@ -729,6 +732,18 @@ addons_config {
     cluster. It is disabled by default. Set `disabled = false` to enable.
 
 * `auth` - (Optional) The authentication type between services in Istio. Available options include `AUTH_MUTUAL_TLS`.
+
+<a name="nested_wiz_sensor_config"></a>The `wiz_sensor_config` block supports:
+
+~> **Note:** Setting `registry_secret_uri`, `api_key_secret_uri`, or `proxy_secret_uri` requires both Workload Identity ([`workload_identity_config`](#nested_workload_identity_config)) and Secret Manager Sync ([`secret_sync_config`](#nested_secret_sync_config) with `enabled = true`) to be enabled on the cluster. `registry_secret_uri` and `api_key_secret_uri` must be specified together (both set or both omitted).
+
+* `enabled` - (Required) Whether the Wiz Sensor addon is enabled for this cluster. Set `enabled = true` to enable and `enabled = false` to disable.
+
+* `registry_secret_uri` - (Optional) The GCP Secret Manager URI for the Wiz registry secret. Must be set together with `api_key_secret_uri`. Format: `projects/{project_id}/secrets/{secret_name}/versions/{version}` or `projects/{project_id}/locations/{location_id}/secrets/{secret_name}/versions/{version}`.
+
+* `api_key_secret_uri` - (Optional) The GCP Secret Manager URI for the Wiz API key secret. Must be set together with `registry_secret_uri`. Format: `projects/{project_id}/secrets/{secret_name}/versions/{version}` or `projects/{project_id}/locations/{location_id}/secrets/{secret_name}/versions/{version}`.
+
+* `proxy_secret_uri` - (Optional) The GCP Secret Manager URI for the Wiz proxy configuration. Format: `projects/{project_id}/secrets/{secret_name}/versions/{version}` or `projects/{project_id}/locations/{location_id}/secrets/{secret_name}/versions/{version}`.
 
 <a name="nested_cluster_autoscaling"></a>The `cluster_autoscaling` block supports:
 

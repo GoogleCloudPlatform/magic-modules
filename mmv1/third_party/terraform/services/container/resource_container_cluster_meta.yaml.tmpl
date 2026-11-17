@@ -36,6 +36,10 @@ fields:
 {{- end }}
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'addonsConfig.kalmConfig.enabled'
+  - api_field: 'addonsConfig.wizSensorConfig.apiKeySecretUri'
+  - api_field: 'addonsConfig.wizSensorConfig.enabled'
+  - api_field: 'addonsConfig.wizSensorConfig.proxySecretUri'
+  - api_field: 'addonsConfig.wizSensorConfig.registrySecretUri'
 {{- end }}
   - api_field: 'addonsConfig.lustreCsiDriverConfig.enableLegacyLustrePort'
   - api_field: 'addonsConfig.lustreCsiDriverConfig.disableMultiNic'

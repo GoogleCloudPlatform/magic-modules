@@ -21811,3 +21811,402 @@ resource "google_container_cluster" "primary" {
 }
 `, clusterName, networkName, subnetworkName, npName)
 }
+
+{{ if ne $.TargetVersionName `ga` -}}
+func TestAccContainerCluster_withWizSensorConfig(t *testing.T) {
+	t.Parallel()
+
+	suffix := acctest.RandString(t, 10)
+	clusterName := fmt.Sprintf("tf-test-wiz-%s", suffix)
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccContainerCluster_wizSensorMissingPairedSecretURI(clusterName, networkName, subnetworkName),
+				ExpectError: regexp.MustCompile(`(?s)all of.*api_key_secret_uri,.*registry_secret_uri.*must be specified`),
+			},
+			{
+				Config: testAccContainerCluster_withWizSensorBaseURIs(clusterName, suffix, networkName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.with_wiz_sensor", "addons_config.0.wiz_sensor_config.0.enabled", "true"),
+					resource.TestCheckResourceAttrSet("google_container_cluster.with_wiz_sensor", "addons_config.0.wiz_sensor_config.0.registry_secret_uri"),
+					resource.TestCheckResourceAttrSet("google_container_cluster.with_wiz_sensor", "addons_config.0.wiz_sensor_config.0.api_key_secret_uri"),
+					resource.TestCheckResourceAttr("google_container_cluster.with_wiz_sensor", "addons_config.0.wiz_sensor_config.0.proxy_secret_uri", ""),
+				),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_wiz_sensor",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// min_master_version = "latest" is a write-only input resolved by GKE; deletion_protection is client-side only.
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withWizSensorAllURIs(clusterName, suffix, networkName, subnetworkName, false),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.with_wiz_sensor", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.with_wiz_sensor", "addons_config.0.wiz_sensor_config.0.enabled", "true"),
+					resource.TestCheckResourceAttrSet("google_container_cluster.with_wiz_sensor", "addons_config.0.wiz_sensor_config.0.registry_secret_uri"),
+					resource.TestCheckResourceAttrSet("google_container_cluster.with_wiz_sensor", "addons_config.0.wiz_sensor_config.0.api_key_secret_uri"),
+					resource.TestCheckResourceAttrSet("google_container_cluster.with_wiz_sensor", "addons_config.0.wiz_sensor_config.0.proxy_secret_uri"),
+				),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_wiz_sensor",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// min_master_version = "latest" is a write-only input resolved by GKE; deletion_protection is client-side only.
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withWizSensorAllURIs(clusterName, suffix, networkName, subnetworkName, true),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.with_wiz_sensor", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.with_wiz_sensor", "addons_config.0.http_load_balancing.0.disabled", "true"),
+					resource.TestCheckResourceAttr("google_container_cluster.with_wiz_sensor", "addons_config.0.wiz_sensor_config.0.enabled", "true"),
+					resource.TestCheckResourceAttrSet("google_container_cluster.with_wiz_sensor", "addons_config.0.wiz_sensor_config.0.registry_secret_uri"),
+					resource.TestCheckResourceAttrSet("google_container_cluster.with_wiz_sensor", "addons_config.0.wiz_sensor_config.0.api_key_secret_uri"),
+					resource.TestCheckResourceAttrSet("google_container_cluster.with_wiz_sensor", "addons_config.0.wiz_sensor_config.0.proxy_secret_uri"),
+				),
+			},
+			{
+				Config: testAccContainerCluster_withWizSensorDisabled(clusterName, suffix, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.with_wiz_sensor", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.with_wiz_sensor", "addons_config.0.wiz_sensor_config.0.enabled", "false"),
+					resource.TestCheckResourceAttr("google_container_cluster.with_wiz_sensor", "addons_config.0.wiz_sensor_config.0.registry_secret_uri", ""),
+					resource.TestCheckResourceAttr("google_container_cluster.with_wiz_sensor", "addons_config.0.wiz_sensor_config.0.api_key_secret_uri", ""),
+					resource.TestCheckResourceAttr("google_container_cluster.with_wiz_sensor", "addons_config.0.wiz_sensor_config.0.proxy_secret_uri", ""),
+				),
+			},
+		},
+	})
+}
+
+func TestAccContainerCluster_withWizSensorConfigEnableSecretSyncInPlace(t *testing.T) {
+	t.Parallel()
+
+	suffix := acctest.RandString(t, 10)
+	clusterName := fmt.Sprintf("tf-test-wiz-ss-%s", suffix)
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withWizSensorNoURIs(clusterName, suffix, networkName, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.with_wiz_ss", "addons_config.0.wiz_sensor_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_container_cluster.with_wiz_ss", "addons_config.0.wiz_sensor_config.0.registry_secret_uri", ""),
+					resource.TestCheckResourceAttr("google_container_cluster.with_wiz_ss", "addons_config.0.wiz_sensor_config.0.api_key_secret_uri", ""),
+				),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_wiz_ss",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// min_master_version = "latest" is a write-only input resolved by GKE; deletion_protection is client-side only.
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withWizSensorSecretSyncEnabledInPlace(clusterName, suffix, networkName, subnetworkName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.with_wiz_ss", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.with_wiz_ss", "secret_sync_config.0.enabled", "true"),
+					resource.TestCheckResourceAttr("google_container_cluster.with_wiz_ss", "addons_config.0.wiz_sensor_config.0.enabled", "true"),
+					resource.TestCheckResourceAttrSet("google_container_cluster.with_wiz_ss", "addons_config.0.wiz_sensor_config.0.registry_secret_uri"),
+					resource.TestCheckResourceAttrSet("google_container_cluster.with_wiz_ss", "addons_config.0.wiz_sensor_config.0.api_key_secret_uri"),
+				),
+			},
+			{
+				ResourceName:      "google_container_cluster.with_wiz_ss",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// min_master_version = "latest" is a write-only input resolved by GKE; deletion_protection is client-side only.
+				ImportStateVerifyIgnore: []string{"min_master_version", "deletion_protection"},
+			},
+		},
+	})
+}
+
+func testAccContainerCluster_wizSensorMissingPairedSecretURI(clusterName, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {}
+
+resource "google_container_cluster" "with_wiz_sensor" {
+  name                = "%s"
+  location            = "us-east1-b"
+  initial_node_count  = 1
+  network             = "%s"
+  subnetwork          = "%s"
+  deletion_protection = false
+
+  addons_config {
+    wiz_sensor_config {
+      enabled             = true
+      registry_secret_uri = "projects/${data.google_project.project.project_id}/secrets/wiz-reg/versions/1"
+    }
+  }
+}
+`, clusterName, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_wizSensorSecretsConfig(suffix, clusterResourceRef string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {}
+
+resource "google_secret_manager_secret" "wiz_registry" {
+  secret_id = "tf-test-wiz-reg-%s"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "wiz_registry" {
+  secret      = google_secret_manager_secret.wiz_registry.id
+  secret_data = "{\"auths\":{}}"
+}
+
+resource "google_secret_manager_secret" "wiz_api_key" {
+  secret_id = "tf-test-wiz-key-%s"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "wiz_api_key" {
+  secret      = google_secret_manager_secret.wiz_api_key.id
+  secret_data = "test-wiz-api-key"
+}
+
+resource "google_secret_manager_secret" "wiz_proxy" {
+  secret_id = "tf-test-wiz-proxy-%s"
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "wiz_proxy" {
+  secret      = google_secret_manager_secret.wiz_proxy.id
+  secret_data = "http://proxy.example.com:8080"
+}
+
+resource "google_secret_manager_secret_iam_member" "wiz_registry_access" {
+  secret_id  = google_secret_manager_secret.wiz_registry.id
+  role       = "roles/secretmanager.secretAccessor"
+  member     = "principal://iam.googleapis.com/projects/${data.google_project.project.number}/locations/global/workloadIdentityPools/${data.google_project.project.project_id}.svc.id.goog/subject/ns/gke-managed-wiz/sa/wiz-sensor-secretsync-sa"
+  depends_on = [%s]
+}
+
+resource "google_secret_manager_secret_iam_member" "wiz_api_key_access" {
+  secret_id  = google_secret_manager_secret.wiz_api_key.id
+  role       = "roles/secretmanager.secretAccessor"
+  member     = "principal://iam.googleapis.com/projects/${data.google_project.project.number}/locations/global/workloadIdentityPools/${data.google_project.project.project_id}.svc.id.goog/subject/ns/gke-managed-wiz/sa/wiz-sensor-secretsync-sa"
+  depends_on = [%s]
+}
+
+resource "google_secret_manager_secret_iam_member" "wiz_proxy_access" {
+  secret_id  = google_secret_manager_secret.wiz_proxy.id
+  role       = "roles/secretmanager.secretAccessor"
+  member     = "principal://iam.googleapis.com/projects/${data.google_project.project.number}/locations/global/workloadIdentityPools/${data.google_project.project.project_id}.svc.id.goog/subject/ns/gke-managed-wiz/sa/wiz-sensor-secretsync-sa"
+  depends_on = [%s]
+}
+`, suffix, suffix, suffix, clusterResourceRef, clusterResourceRef, clusterResourceRef)
+}
+
+func testAccContainerCluster_withWizSensorBaseURIs(clusterName, suffix, networkName, subnetworkName string) string {
+	return testAccContainerCluster_wizSensorSecretsConfig(suffix, "google_container_cluster.with_wiz_sensor") + fmt.Sprintf(`
+resource "google_container_cluster" "with_wiz_sensor" {
+  name                = "%s"
+  location            = "us-east1-b"
+  initial_node_count  = 1
+  network             = "%s"
+  subnetwork          = "%s"
+  deletion_protection = false
+
+  min_master_version = "latest"
+  release_channel {
+    channel = "RAPID"
+  }
+
+  workload_identity_config {
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+  }
+
+  secret_sync_config {
+    enabled = true
+  }
+
+  addons_config {
+    http_load_balancing {
+      disabled = false
+    }
+    wiz_sensor_config {
+      enabled             = true
+      registry_secret_uri = google_secret_manager_secret_version.wiz_registry.name
+      api_key_secret_uri  = google_secret_manager_secret_version.wiz_api_key.name
+    }
+  }
+}
+`, clusterName, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_withWizSensorAllURIs(clusterName, suffix, networkName, subnetworkName string, hlbDisabled bool) string {
+	return testAccContainerCluster_wizSensorSecretsConfig(suffix, "google_container_cluster.with_wiz_sensor") + fmt.Sprintf(`
+resource "google_container_cluster" "with_wiz_sensor" {
+  name                = "%s"
+  location            = "us-east1-b"
+  initial_node_count  = 1
+  network             = "%s"
+  subnetwork          = "%s"
+  deletion_protection = false
+
+  min_master_version = "latest"
+  release_channel {
+    channel = "RAPID"
+  }
+
+  workload_identity_config {
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+  }
+
+  secret_sync_config {
+    enabled = true
+  }
+
+  addons_config {
+    http_load_balancing {
+      disabled = %t
+    }
+    wiz_sensor_config {
+      enabled             = true
+      registry_secret_uri = google_secret_manager_secret_version.wiz_registry.name
+      api_key_secret_uri  = google_secret_manager_secret_version.wiz_api_key.name
+      proxy_secret_uri    = google_secret_manager_secret_version.wiz_proxy.name
+    }
+  }
+}
+`, clusterName, networkName, subnetworkName, hlbDisabled)
+}
+
+func testAccContainerCluster_withWizSensorDisabled(clusterName, suffix, networkName, subnetworkName string) string {
+	return testAccContainerCluster_wizSensorSecretsConfig(suffix, "google_container_cluster.with_wiz_sensor") + fmt.Sprintf(`
+resource "google_container_cluster" "with_wiz_sensor" {
+  name                = "%s"
+  location            = "us-east1-b"
+  initial_node_count  = 1
+  network             = "%s"
+  subnetwork          = "%s"
+  deletion_protection = false
+
+  min_master_version = "latest"
+  release_channel {
+    channel = "RAPID"
+  }
+
+  workload_identity_config {
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+  }
+
+  secret_sync_config {
+    enabled = true
+  }
+
+  addons_config {
+    http_load_balancing {
+      disabled = true
+    }
+    wiz_sensor_config {
+      enabled = false
+    }
+  }
+}
+`, clusterName, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_withWizSensorNoURIs(clusterName, suffix, networkName, subnetworkName string) string {
+	return testAccContainerCluster_wizSensorSecretsConfig(suffix, "google_container_cluster.with_wiz_ss") + fmt.Sprintf(`
+resource "google_container_cluster" "with_wiz_ss" {
+  name                = "%s"
+  location            = "us-east1-b"
+  initial_node_count  = 1
+  network             = "%s"
+  subnetwork          = "%s"
+  deletion_protection = false
+
+  min_master_version = "latest"
+  release_channel {
+    channel = "RAPID"
+  }
+
+  workload_identity_config {
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+  }
+
+  addons_config {
+    wiz_sensor_config {
+      enabled = true
+    }
+  }
+}
+`, clusterName, networkName, subnetworkName)
+}
+
+func testAccContainerCluster_withWizSensorSecretSyncEnabledInPlace(clusterName, suffix, networkName, subnetworkName string) string {
+	return testAccContainerCluster_wizSensorSecretsConfig(suffix, "google_container_cluster.with_wiz_ss") + fmt.Sprintf(`
+resource "google_container_cluster" "with_wiz_ss" {
+  name                = "%s"
+  location            = "us-east1-b"
+  initial_node_count  = 1
+  network             = "%s"
+  subnetwork          = "%s"
+  deletion_protection = false
+
+  min_master_version = "latest"
+  release_channel {
+    channel = "RAPID"
+  }
+
+  workload_identity_config {
+    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
+  }
+
+  secret_sync_config {
+    enabled = true
+  }
+
+  addons_config {
+    wiz_sensor_config {
+      enabled             = true
+      registry_secret_uri = google_secret_manager_secret_version.wiz_registry.name
+      api_key_secret_uri  = google_secret_manager_secret_version.wiz_api_key.name
+    }
+  }
+}
+`, clusterName, networkName, subnetworkName)
+}
+{{- end }}
