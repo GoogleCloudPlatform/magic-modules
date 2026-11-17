@@ -15,6 +15,21 @@
 	maskId := ""
 	firstProject := true
 	urlUpdateMask := ""
+
+	// Resize.
+	if obj["specificReservation"] != nil {
+		count := obj["specificReservation"].(map[string]interface{})["count"]
+		if count != nil {
+			newObj["specificSkuCount"] = obj["specificReservation"].(map[string]interface{})["count"]
+		}
+		return newObj, nil
+	}
+
+	// Emergent maintenance (field-specific PATCH).
+	if _, hasEM := obj["enableEmergentMaintenance"]; hasEM || (d.HasChange("enable_emergent_maintenance") && obj["shareSettings"] == nil) {
+		newObj["enableEmergentMaintenance"] = d.Get("enable_emergent_maintenance")
+		return newObj, nil
+	}
 {{- if ne $.TargetVersionName "ga" }}
 
 	if d.HasChange("share_settings.0.projects") {
@@ -141,20 +156,6 @@
 			urlUpdateMask = urlUpdateMask + decodedPath
 		}
 		newObj["urlUpdateMask"] = urlUpdateMask
-	}
-
-	// Resize.
-	if obj["specificReservation"] != nil {
-		count := obj["specificReservation"].(map[string]interface{})["count"]
-		if count != nil {
-			newObj["specificSkuCount"] = obj["specificReservation"].(map[string]interface{})["count"]
-		}
-	} else if d.HasChange("enable_emergent_maintenance") {
-		newObj["enableEmergentMaintenance"] = d.Get("enable_emergent_maintenance")
-		if urlUpdateMask != "" {
-			urlUpdateMask = urlUpdateMask + "&paths=enableEmergentMaintenance"
-			newObj["urlUpdateMask"] = urlUpdateMask
-		}
 	}
 
 	return newObj, nil

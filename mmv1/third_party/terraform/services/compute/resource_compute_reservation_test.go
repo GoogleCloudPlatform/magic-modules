@@ -229,10 +229,18 @@ resource "google_compute_reservation" "reservation" {
 `, context)
 }
 
+// Compute Engine only permits in-place PATCH updates of enable_emergent_maintenance on
+// Hypercompute Cluster (Extended Reservation) allocations, which require dedicated ExR
+// capacity delivery and cannot be dynamically provisioned in standard CI projects.
+// In-place update encoding and isolated ?paths=enableEmergentMaintenance PATCH routing
+// are verified in resource_compute_reservation_internal_test.go.
 func TestAccComputeReservation_enableEmergentMaintenance(t *testing.T) {
 	t.Parallel()
 
-	reservationName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	context := map[string]interface{}{
+		"reservation_name": fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+		"zone":             "us-west1-a",
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -240,7 +248,7 @@ func TestAccComputeReservation_enableEmergentMaintenance(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeReservationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeReservation_enableEmergentMaintenance(reservationName),
+				Config: testAccComputeReservation_enableEmergentMaintenance(context),
 			},
 			{
 				ResourceName:            "google_compute_reservation.reservation",
@@ -252,21 +260,20 @@ func TestAccComputeReservation_enableEmergentMaintenance(t *testing.T) {
 	})
 }
 
-func testAccComputeReservation_enableEmergentMaintenance(reservationName string) string {
-	return fmt.Sprintf(`
+func testAccComputeReservation_enableEmergentMaintenance(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 resource "google_compute_reservation" "reservation" {
-  name = "%s"
-  zone = "us-central1-a"
+  name = "%{reservation_name}"
+  zone = "%{zone}"
 
   specific_reservation {
     count = 1
     instance_properties {
-      min_cpu_platform = "Intel Cascade Lake"
-      machine_type     = "n2-standard-2"
+      machine_type = "n2-standard-2"
     }
   }
 
   enable_emergent_maintenance = true
 }
-`, reservationName)
+`, context)
 }

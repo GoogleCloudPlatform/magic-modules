@@ -390,7 +390,11 @@ properties:
     type: Boolean
     description: |
       Indicates if this group of VMs have emergent maintenance enabled.
-    send_empty_value: true
+      In-place updates are only supported by Compute Engine on Hypercompute
+      Cluster reservations; standard zonal reservations ignore this field on
+      creation and reject updates.
+    update_url: 'projects/{{project}}/zones/{{zone}}/reservations/{{name}}?paths=enableEmergentMaintenance'
+    update_verb: 'PATCH'
     ignore_read: true
   - name: 'kind'
     type: String
