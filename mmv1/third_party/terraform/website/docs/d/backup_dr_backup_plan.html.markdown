@@ -23,9 +23,10 @@ The following arguments are supported:
 
 * `location` - (Required) The location in which the `BackupPlan` resource belongs.
 * `backup_plan_id` - (Required) The ID of the `BackupPlan` resource.
-* `project` - (Optional) The ID of the project in which the resource belongs. If it is not provided, the provider project is used.
 
 - - -
+
+* `project` - (Optional) The ID of the project in which the resource belongs. If it is not provided, the provider project is used.
 
 ## Attributes Reference
 
