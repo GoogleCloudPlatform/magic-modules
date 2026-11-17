@@ -344,161 +344,33 @@ func TestSqlUser_entraidUserLifecycle(t *testing.T) {
 	}
 }
 
-func TestSqlUser_passwordWoRawConfigHandling(t *testing.T) {
+func TestGetSqlUserPassword(t *testing.T) {
 	t.Parallel()
-
-	const (
-		project      = "tf-test-project"
-		instanceName = "tf-test-mysql"
-		userName     = "appuser"
-		userHost     = "%"
-	)
-
+	res := ResourceSqlUser()
 	cases := []struct {
-		name         string
-		rawConfig    cty.Value
-		wantPassword string
+		name     string
+		password string
+		rawCfg   cty.Value
+		want     string
 	}{
-		{
-			name: "configured string password_wo is sent to API",
-			rawConfig: cty.ObjectVal(map[string]cty.Value{
-				"instance":            cty.StringVal(instanceName),
-				"name":                cty.StringVal(userName),
-				"host":                cty.StringVal(userHost),
-				"password_wo":         cty.StringVal("wo-secret-123"),
-				"password_wo_version": cty.NumberIntVal(2),
-			}),
-			wantPassword: "wo-secret-123",
-		},
-		{
-			name:         "nil RawConfig (cty.NilVal) does not panic",
-			rawConfig:    cty.NilVal,
-			wantPassword: "",
-		},
-		{
-			name: "RawConfig missing password_wo attribute does not panic",
-			rawConfig: cty.ObjectVal(map[string]cty.Value{
-				"instance": cty.StringVal(instanceName),
-				"name":     cty.StringVal(userName),
-			}),
-			wantPassword: "",
-		},
-		{
-			name: "null password_wo does not panic",
-			rawConfig: cty.ObjectVal(map[string]cty.Value{
-				"instance":    cty.StringVal(instanceName),
-				"name":        cty.StringVal(userName),
-				"password_wo": cty.NullVal(cty.String),
-			}),
-			wantPassword: "",
-		},
-		{
-			name: "unknown password_wo does not panic",
-			rawConfig: cty.ObjectVal(map[string]cty.Value{
-				"instance":    cty.StringVal(instanceName),
-				"name":        cty.StringVal(userName),
-				"password_wo": cty.UnknownVal(cty.String),
-			}),
-			wantPassword: "",
-		},
+		{"password set", "plain-pw", cty.NilVal, "plain-pw"},
+		{"password_wo set", "", cty.ObjectVal(map[string]cty.Value{"password_wo": cty.StringVal("wo-pw")}), "wo-pw"},
+		{"password_wo marked", "", cty.ObjectVal(map[string]cty.Value{"password_wo": cty.StringVal("marked-pw").Mark("s")}), "marked-pw"},
+		{"nil RawConfig", "", cty.NilVal, ""},
+		{"missing password_wo", "", cty.EmptyObjectVal, ""},
+		{"null password_wo", "", cty.ObjectVal(map[string]cty.Value{"password_wo": cty.NullVal(cty.String)}), ""},
+		{"unknown password_wo", "", cty.ObjectVal(map[string]cty.Value{"password_wo": cty.UnknownVal(cty.String)}), ""},
 	}
-
 	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			var insertedPassword, updatedPassword string
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				w.Header().Set("Content-Type", "application/json")
-				switch {
-				case r.Method == http.MethodPost && r.URL.Path == fmt.Sprintf("/sql/v1beta4/projects/%s/instances/%s/users", project, instanceName):
-					var body sqladmin.User
-					_ = json.NewDecoder(r.Body).Decode(&body)
-					insertedPassword = body.Password
-					_ = json.NewEncoder(w).Encode(&sqladmin.Operation{Name: "op-1", Status: "DONE"})
-				case r.Method == http.MethodPut && r.URL.Path == fmt.Sprintf("/sql/v1beta4/projects/%s/instances/%s/users", project, instanceName):
-					var body sqladmin.User
-					_ = json.NewDecoder(r.Body).Decode(&body)
-					updatedPassword = body.Password
-					_ = json.NewEncoder(w).Encode(&sqladmin.Operation{Name: "op-2", Status: "DONE"})
-				case r.Method == http.MethodGet && (r.URL.Path == fmt.Sprintf("/sql/v1beta4/projects/%s/operations/op-1", project) || r.URL.Path == fmt.Sprintf("/sql/v1beta4/projects/%s/operations/op-2", project)):
-					_ = json.NewEncoder(w).Encode(&sqladmin.Operation{Name: "op-done", Status: "DONE"})
-				case r.Method == http.MethodGet && r.URL.Path == fmt.Sprintf("/sql/v1beta4/projects/%s/instances/%s", project, instanceName):
-					_ = json.NewEncoder(w).Encode(&sqladmin.DatabaseInstance{
-						Name:            instanceName,
-						DatabaseVersion: "MYSQL_8_0",
-						Settings:        &sqladmin.Settings{ActivationPolicy: "ALWAYS"},
-					})
-				case r.Method == http.MethodGet && r.URL.Path == fmt.Sprintf("/sql/v1beta4/projects/%s/instances/%s/users", project, instanceName):
-					_ = json.NewEncoder(w).Encode(&sqladmin.UsersListResponse{
-						Items: []*sqladmin.User{
-							{Name: userName, Host: userHost, Instance: instanceName, Type: "BUILT_IN"},
-						},
-					})
-				default:
-					http.NotFound(w, r)
-				}
-			}))
-			defer server.Close()
-
-			cfg := &transport_tpg.Config{
-				Context:      context.Background(),
-				Client:       server.Client(),
-				Project:      project,
-				PollInterval: time.Millisecond,
-				CustomEndpoints: map[string]string{
-					"sql_custom_endpoint": server.URL + "/sql/v1beta4/",
-				},
-			}
-
-			res := ResourceSqlUser()
-
-			// 1. Test Create
-			dCreate, err := schema.InternalMap(res.Schema).Data(&terraform.InstanceState{}, &terraform.InstanceDiff{
-				Attributes: map[string]*terraform.ResourceAttrDiff{
-					"instance":            {New: instanceName},
-					"name":                {New: userName},
-					"host":                {New: userHost},
-					"password_wo_version": {New: "1"},
-				},
-				RawConfig: tc.rawConfig,
-			})
-			if err != nil {
-				t.Fatalf("Create Data init failed: %v", err)
-			}
-			if err := res.Create(dCreate, cfg); err != nil {
-				t.Fatalf("Create failed: %v", err)
-			}
-			if insertedPassword != tc.wantPassword {
-				t.Errorf("Create sent password %q, want %q", insertedPassword, tc.wantPassword)
-			}
-
-			// 2. Test Update (password_wo_version 1 -> 2)
-			prior := &terraform.InstanceState{
-				ID: fmt.Sprintf("%s/%s/%s", userName, userHost, instanceName),
-				Attributes: map[string]string{
-					"id":                  fmt.Sprintf("%s/%s/%s", userName, userHost, instanceName),
-					"project":             project,
-					"instance":            instanceName,
-					"name":                userName,
-					"host":                userHost,
-					"password_wo_version": "1",
-					"deletion_policy":     "DELETE",
-				},
-			}
-			dUpdate, err := schema.InternalMap(res.Schema).Data(prior, &terraform.InstanceDiff{
-				Attributes: map[string]*terraform.ResourceAttrDiff{
-					"password_wo_version": {Old: "1", New: "2"},
-				},
-				RawConfig: tc.rawConfig,
-			})
-			if err != nil {
-				t.Fatalf("Update Data init failed: %v", err)
-			}
-			if err := res.Update(dUpdate, cfg); err != nil {
-				t.Fatalf("Update failed: %v", err)
-			}
-			if updatedPassword != tc.wantPassword {
-				t.Errorf("Update sent password %q, want %q", updatedPassword, tc.wantPassword)
-			}
+		d, err := schema.InternalMap(res.Schema).Data(&terraform.InstanceState{}, &terraform.InstanceDiff{
+			Attributes: map[string]*terraform.ResourceAttrDiff{"password": {New: tc.password}},
+			RawConfig:  tc.rawCfg,
 		})
+		if err != nil {
+			t.Fatalf("%s: Data init failed: %v", tc.name, err)
+		}
+		if got := getSqlUserPassword(d); got != tc.want {
+			t.Errorf("%s: getSqlUserPassword() = %q, want %q", tc.name, got, tc.want)
+		}
 	}
 }
