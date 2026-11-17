@@ -48,8 +48,15 @@ func init() {
         Name: "{{ $.TerraformName }}_iam_binding",
         ProductName: "{{ $.ProductMetadata.Name }}",
         Type: registry.SchemaTypeIAMResource,
-        Schema: tpgiamresource.ResourceIamBinding({{ $.ResourceName }}IamSchema, {{ $.ResourceName }}IamUpdaterProducer, {{ $.ResourceName }}IdParseFunc{{ if $.IamPolicy.DeprecationMessage }}, tpgiamresource.IamWithDeprecationMessage("{{ $.IamPolicy.DeprecationMessage }}"){{- end }}{{ if $.IamPolicy.MaxBackoffTimeoutSeconds }}, tpgiamresource.IamWithMaxBackoffSeconds({{ $.IamPolicy.MaxBackoffTimeoutSeconds }}){{- end }}),
+        Schema: New{{ $.ResourceName }}IamBindingResource(),
     }.Register()
+{{- if $.IamPolicy.BindingListResource.ShouldGenerate }}
+	registry.FrameworkListResource{
+		Name:        "{{ $.TerraformName }}_iam_binding",
+		ProductName: "{{ $.ProductMetadata.Name }}",
+		Func:        New{{ $.ResourceName -}}IamBindingListResource,
+	}.Register()
+{{- end }}
     registry.Schema{
         Name: "{{ $.TerraformName }}_iam_member",
         ProductName: "{{ $.ProductMetadata.Name }}",
@@ -77,6 +84,24 @@ func init() {
     }.Register()
 }
 {{- end }}
+
+// New{{ $.ResourceName }}IamBindingListResource returns the {{ $.TerraformName }}_iam_binding
+// managed resource. It is shared by the managed resource registration and the 
+// list resource, so both stay in sync.
+func New{{ $.ResourceName }}IamBindingListResource() *schema.Resource {
+    return tpgiamresource.ResourceIamBindingList(
+        {{ $.ResourceName }}IamSchema,
+        {{ $.ResourceName }}IamUpdaterProducer,
+        {{ $.ResourceName }}IdParseFunc,
+        tpgiamresource.IamWithParentResourceIdentity({{ $.ResourceName }}IamParentParentResourceIdentityParser),
+		{{- if $.IamPolicy.DeprecationMessage }}
+		tpgiamresource.IamWithDeprecationMessage("{{ $.IamPolicy.DeprecationMessage }}"),
+		{{- end }}
+		{{- if $.IamPolicy.MaxBackoffTimeoutSeconds }}
+		tpgiamresource.IamWithMaxBackoffSeconds({{ $.IamPolicy.MaxBackoffTimeoutSeconds }}),
+		{{- end }}
+    )
+}
 
 // New{{ $.ResourceName }}IamMemberResource returns the {{ $.TerraformName }}_iam_member
 // managed resource. It is shared by the managed resource registration and the 
