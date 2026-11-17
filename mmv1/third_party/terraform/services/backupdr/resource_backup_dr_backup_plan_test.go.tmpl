@@ -328,7 +328,6 @@ func TestAccBackupDRBackupPlan_mvbp(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       envvar.GetTestProjectFromEnv(),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -340,8 +339,12 @@ func TestAccBackupDRBackupPlan_mvbp(t *testing.T) {
 				Config: testAccBackupDRBackupPlan_mvbp(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("google_backup_dr_backup_plan.bp", "backup_vault_service_account"),
+					resource.TestCheckResourceAttr("google_backup_dr_backup_plan.bp", "backup_rules.0.backup_vault", ""),
 					resource.TestCheckResourceAttrSet("google_backup_dr_backup_plan.bp", "backup_rules.1.backup_vault"),
-					resource.TestCheckResourceAttrSet("google_backup_dr_backup_plan.bp", "backup_rules.1.backup_vault_service_account"),
+					resource.TestCheckResourceAttrPair(
+						"google_backup_dr_backup_plan.bp", "backup_rules.1.backup_vault_service_account",
+						"google_backup_dr_backup_vault.secondary_vault", "service_account",
+					),
 				),
 			},
 			{
@@ -360,9 +363,37 @@ func TestAccBackupDRBackupPlan_mvbp(t *testing.T) {
 					},
 				},
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_backup_dr_backup_plan.bp", "backup_rules.0.backup_vault", ""),
 					resource.TestCheckResourceAttr("google_backup_dr_backup_plan.bp", "backup_rules.1.backup_retention_days", "21"),
 					resource.TestCheckResourceAttrSet("google_backup_dr_backup_plan.bp", "backup_rules.1.backup_vault"),
-					resource.TestCheckResourceAttrSet("google_backup_dr_backup_plan.bp", "backup_rules.1.backup_vault_service_account"),
+					resource.TestCheckResourceAttrPair(
+						"google_backup_dr_backup_plan.bp", "backup_rules.1.backup_vault_service_account",
+						"google_backup_dr_backup_vault.secondary_vault", "service_account",
+					),
+				),
+			},
+			{
+				ResourceName:      "google_backup_dr_backup_plan.bp",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBackupDRBackupPlan_mvbpReplace(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(
+							"google_backup_dr_backup_plan.bp",
+							plancheck.ResourceActionReplace,
+						),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_backup_dr_backup_plan.bp", "backup_rules.0.backup_vault", ""),
+					resource.TestCheckResourceAttrSet("google_backup_dr_backup_plan.bp", "backup_rules.1.backup_vault"),
+					resource.TestCheckResourceAttrPair(
+						"google_backup_dr_backup_plan.bp", "backup_rules.1.backup_vault_service_account",
+						"google_backup_dr_backup_vault.primary_vault", "service_account",
+					),
 				),
 			},
 			{
@@ -380,12 +411,15 @@ resource "google_backup_dr_backup_vault" "primary_vault" {
   location                                   = "us-central1"
   backup_vault_id                            = "tf-test-bv-pri-%{random_suffix}"
   backup_minimum_enforced_retention_duration = "100000s"
+  ignore_inactive_datasources                = true
 }
 
 resource "google_backup_dr_backup_vault" "secondary_vault" {
   location                                   = "us-central1"
   backup_vault_id                            = "tf-test-bv-sec-%{random_suffix}"
   backup_minimum_enforced_retention_duration = "100000s"
+  ignore_inactive_datasources                = true
+  depends_on                                 = [google_backup_dr_backup_vault.primary_vault]
 }
 
 resource "google_backup_dr_backup_plan" "bp" {
@@ -435,12 +469,15 @@ resource "google_backup_dr_backup_vault" "primary_vault" {
   location                                   = "us-central1"
   backup_vault_id                            = "tf-test-bv-pri-%{random_suffix}"
   backup_minimum_enforced_retention_duration = "100000s"
+  ignore_inactive_datasources                = true
 }
 
 resource "google_backup_dr_backup_vault" "secondary_vault" {
   location                                   = "us-central1"
   backup_vault_id                            = "tf-test-bv-sec-%{random_suffix}"
   backup_minimum_enforced_retention_duration = "100000s"
+  ignore_inactive_datasources                = true
+  depends_on                                 = [google_backup_dr_backup_vault.primary_vault]
 }
 
 resource "google_backup_dr_backup_plan" "bp" {
@@ -468,6 +505,64 @@ resource "google_backup_dr_backup_plan" "bp" {
     rule_id               = "rule-secondary-vault"
     backup_retention_days = 21
     backup_vault          = google_backup_dr_backup_vault.secondary_vault.id
+
+    standard_schedule {
+      recurrence_type = "WEEKLY"
+      days_of_week    = ["SUNDAY"]
+      time_zone       = "UTC"
+
+      backup_window {
+        start_hour_of_day = 6
+        end_hour_of_day   = 12
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccBackupDRBackupPlan_mvbpReplace(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_backup_dr_backup_vault" "primary_vault" {
+  location                                   = "us-central1"
+  backup_vault_id                            = "tf-test-bv-pri-%{random_suffix}"
+  backup_minimum_enforced_retention_duration = "100000s"
+  ignore_inactive_datasources                = true
+}
+
+resource "google_backup_dr_backup_vault" "secondary_vault" {
+  location                                   = "us-central1"
+  backup_vault_id                            = "tf-test-bv-sec-%{random_suffix}"
+  backup_minimum_enforced_retention_duration = "100000s"
+  ignore_inactive_datasources                = true
+  depends_on                                 = [google_backup_dr_backup_vault.primary_vault]
+}
+
+resource "google_backup_dr_backup_plan" "bp" {
+  location       = "us-central1"
+  backup_plan_id = "tf-test-bp-mvbp-%{random_suffix}"
+  resource_type  = "compute.googleapis.com/Instance"
+  backup_vault   = google_backup_dr_backup_vault.primary_vault.id
+
+  backup_rules {
+    rule_id               = "rule-primary"
+    backup_retention_days = 7
+
+    standard_schedule {
+      recurrence_type = "DAILY"
+      time_zone       = "UTC"
+
+      backup_window {
+        start_hour_of_day = 0
+        end_hour_of_day   = 6
+      }
+    }
+  }
+
+  backup_rules {
+    rule_id               = "rule-secondary-vault"
+    backup_retention_days = 21
+    backup_vault          = google_backup_dr_backup_vault.primary_vault.id
 
     standard_schedule {
       recurrence_type = "WEEKLY"

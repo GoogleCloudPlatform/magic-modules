@@ -1,0 +1,37 @@
+package backupdr
+
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+)
+
+func TestBackupDRBackupPlan_backupRulesBackupVaultForceNew(t *testing.T) {
+	t.Parallel()
+
+	rulesSchema, ok := ResourceBackupDRBackupPlan().Schema["backup_rules"]
+	if !ok {
+		t.Fatalf("expected backup_rules in ResourceBackupDRBackupPlan schema")
+	}
+	ruleElem, ok := rulesSchema.Elem.(*schema.Resource)
+	if !ok || ruleElem == nil {
+		t.Fatalf("expected backup_rules.Elem to be *schema.Resource")
+	}
+	bvField, ok := ruleElem.Schema["backup_vault"]
+	if !ok {
+		t.Fatalf("expected backup_vault in backup_rules schema")
+	}
+	if !bvField.ForceNew {
+		t.Fatalf("expected backup_rules.backup_vault.ForceNew = true, got false")
+	}
+	bvsaField, ok := ruleElem.Schema["backup_vault_service_account"]
+	if !ok {
+		t.Fatalf("expected backup_vault_service_account in backup_rules schema")
+	}
+	if !bvsaField.Computed || bvsaField.Optional || bvsaField.Required {
+		t.Fatalf("expected backup_rules.backup_vault_service_account to be Computed-only")
+	}
+}
+{{- end }}
