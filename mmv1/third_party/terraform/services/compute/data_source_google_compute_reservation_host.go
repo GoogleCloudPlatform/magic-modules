@@ -3,39 +3,52 @@ package compute
 import (
 	"fmt"
 	neturl "net/url"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
+var (
+	computeReservationHostZonalSelfLinkRegex        = regexp.MustCompile(`(?:^|/)projects/([^/]+)/zones/([^/]+)/(?:reservations|hosts)/[^/]+`)
+	computeReservationHostZonalPartialSelfLinkRegex = regexp.MustCompile(`(?:^|/)zones/([^/]+)/(?:reservations|hosts)/[^/]+`)
+)
+
 func DataSourceGoogleComputeReservationHost() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceGoogleComputeReservationHostRead,
+		Read:          dataSourceGoogleComputeReservationHostRead,
+		UseJSONNumber: true,
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The name or resource ID of the host.",
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringIsNotWhiteSpace,
+				Description:  "The name, resource ID, or self-link of the host.",
 			},
 			"reservation": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The name of the parent reservation.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringIsNotWhiteSpace,
+				Description:  "The name or self-link of the parent reservation.",
 			},
 			"reservation_block": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				RequiredWith: []string{"reservation"},
+				ValidateFunc: validation.StringIsNotWhiteSpace,
 				Description:  "The name of the parent reservation block. Requires `reservation` to be set.",
 			},
 			"reservation_sub_block": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				RequiredWith: []string{"reservation", "reservation_block"},
+				ValidateFunc: validation.StringIsNotWhiteSpace,
 				Description:  "The name of the parent reservation sub-block. Requires `reservation` and `reservation_block` to be set.",
 			},
 			"zone": {
@@ -49,6 +62,11 @@ func DataSourceGoogleComputeReservationHost() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				Description: "The project in which the resource belongs.",
+			},
+			"description": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "An optional description of this resource.",
 			},
 			"kind": {
 				Type:        schema.TypeString,
@@ -88,53 +106,49 @@ func DataSourceGoogleComputeReservationHost() *schema.Resource {
 				Computed:    true,
 				Description: "The state of the host.",
 			},
-			"status": computeReservationHostStatusSchema(),
-		},
-	}
-}
-
-func computeReservationHostStatusSchema() *schema.Schema {
-	return &schema.Schema{
-		Type:        schema.TypeList,
-		Computed:    true,
-		Description: "The status of the host.",
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"physical_topology": {
-					Type:        schema.TypeList,
-					Computed:    true,
-					Description: "The physical topology of the host, if present.",
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							"cluster": {
-								Type:        schema.TypeString,
-								Computed:    true,
-								Description: "The cluster name of the reservation sub-block.",
-							},
-							"block": {
-								Type:        schema.TypeString,
-								Computed:    true,
-								Description: "The unique identifier of the capacity block within the cluster.",
-							},
-							"sub_block": {
-								Type:        schema.TypeString,
-								Computed:    true,
-								Description: "The unique identifier of the capacity sub-block within the capacity block.",
-							},
-							"host": {
-								Type:        schema.TypeString,
-								Computed:    true,
-								Description: "The unique identifier of the capacity host within the capacity sub-block.",
+			"status": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "The status of the host.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"physical_topology": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The physical topology of the host, if present.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"cluster": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The cluster name of the host.",
+									},
+									"block": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The unique identifier of the capacity block within the cluster.",
+									},
+									"sub_block": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The unique identifier of the capacity sub-block within the capacity block.",
+									},
+									"host": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The unique identifier of the capacity host within the capacity sub-block.",
+									},
+								},
 							},
 						},
-					},
-				},
-				"running_instances": {
-					Type:        schema.TypeList,
-					Computed:    true,
-					Description: "The URIs of the instances currently running on this host.",
-					Elem: &schema.Schema{
-						Type: schema.TypeString,
+						"running_instances": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The URIs of the instances currently running on this host.",
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
 					},
 				},
 			},
@@ -149,12 +163,17 @@ func dataSourceGoogleComputeReservationHostRead(d *schema.ResourceData, meta int
 		return err
 	}
 
-	project, err := tpgresource.GetProject(d, config)
+	association, err := buildComputeReservationHostAssociation(d)
 	if err != nil {
 		return err
 	}
 
-	zone, err := tpgresource.GetZone(d, config)
+	hostName, err := extractComputeReservationHostScopeName("name", d.Get("name").(string), "hosts")
+	if err != nil {
+		return err
+	}
+
+	project, zone, err := resolveComputeReservationHostProjectAndZone(d, config, "reservation", "name")
 	if err != nil {
 		return err
 	}
@@ -164,17 +183,13 @@ func dataSourceGoogleComputeReservationHostRead(d *schema.ResourceData, meta int
 		billingProject = bp
 	}
 
-	association, err := buildComputeReservationHostAssociation(d)
-	if err != nil {
-		return err
+	baseURL := strings.TrimRight(transport_tpg.BaseUrl(Product, config), "/") + "/"
+	var rawURL string
+	if association == "" {
+		rawURL = fmt.Sprintf("%sprojects/%s/zones/%s/hosts/%s", baseURL, neturl.PathEscape(project), neturl.PathEscape(zone), neturl.PathEscape(hostName))
+	} else {
+		rawURL = fmt.Sprintf("%sprojects/%s/zones/%s/%s/hosts/%s", baseURL, neturl.PathEscape(project), neturl.PathEscape(zone), neturl.PathEscape(association), neturl.PathEscape(hostName))
 	}
-
-	hostName := tpgresource.GetResourceNameFromSelfLink(strings.TrimSpace(d.Get("name").(string)))
-	if hostName == "" {
-		return fmt.Errorf("name must not be empty")
-	}
-
-	rawURL := buildComputeReservationHostURL(transport_tpg.BaseUrl(Product, config), project, zone, association, hostName)
 
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
@@ -190,55 +205,146 @@ func dataSourceGoogleComputeReservationHostRead(d *schema.ResourceData, meta int
 		return fmt.Errorf("Host %s not found", hostName)
 	}
 
-	if resource, ok := res["resource"].(map[string]interface{}); ok {
-		res = resource
+	canonicalName := hostName
+	if v, ok := res["name"].(string); ok && v != "" {
+		canonicalName = v
+		if err := d.Set("name", v); err != nil {
+			return fmt.Errorf("Error setting name: %w", err)
+		}
 	}
 
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error setting project: %s", err)
+		return fmt.Errorf("Error setting project: %w", err)
 	}
 	if err := d.Set("zone", zone); err != nil {
-		return fmt.Errorf("Error setting zone: %s", err)
+		return fmt.Errorf("Error setting zone: %w", err)
+	}
+	if err := d.Set("description", res["description"]); err != nil {
+		return fmt.Errorf("Error setting description: %w", err)
 	}
 	if err := d.Set("kind", res["kind"]); err != nil {
-		return fmt.Errorf("Error setting kind: %s", err)
+		return fmt.Errorf("Error setting kind: %w", err)
 	}
 	if err := d.Set("resource_id", flattenComputeReservationHostResourceID(res["id"])); err != nil {
-		return fmt.Errorf("Error setting resource_id: %s", err)
+		return fmt.Errorf("Error setting resource_id: %w", err)
 	}
 	if err := d.Set("creation_timestamp", res["creationTimestamp"]); err != nil {
-		return fmt.Errorf("Error setting creation_timestamp: %s", err)
+		return fmt.Errorf("Error setting creation_timestamp: %w", err)
 	}
 	if err := d.Set("self_link", res["selfLink"]); err != nil {
-		return fmt.Errorf("Error setting self_link: %s", err)
+		return fmt.Errorf("Error setting self_link: %w", err)
 	}
 	if err := d.Set("self_link_with_id", res["selfLinkWithId"]); err != nil {
-		return fmt.Errorf("Error setting self_link_with_id: %s", err)
-	}
-	if err := d.Set("alias_links", flattenComputeReservationHostStringList(res["aliasLinks"])); err != nil {
-		return fmt.Errorf("Error setting alias_links: %s", err)
-	}
-	if err := d.Set("state", res["state"]); err != nil {
-		return fmt.Errorf("Error setting state: %s", err)
-	}
-	if err := d.Set("status", flattenComputeReservationHostStatus(res["status"])); err != nil {
-		return fmt.Errorf("Error setting status: %s", err)
+		return fmt.Errorf("Error setting self_link_with_id: %w", err)
 	}
 
-	d.SetId(buildComputeReservationHostID(project, zone, association, hostName))
+	aliasLinks := []string{}
+	if v, ok := res["aliasLinks"].([]interface{}); ok {
+		aliasLinks = tpgresource.ConvertStringArr(v)
+	}
+	if err := d.Set("alias_links", aliasLinks); err != nil {
+		return fmt.Errorf("Error setting alias_links: %w", err)
+	}
+	if err := d.Set("state", res["state"]); err != nil {
+		return fmt.Errorf("Error setting state: %w", err)
+	}
+	if err := d.Set("status", flattenComputeReservationHostStatus(res["status"])); err != nil {
+		return fmt.Errorf("Error setting status: %w", err)
+	}
+
+	if association == "" {
+		d.SetId(fmt.Sprintf("projects/%s/zones/%s/hosts/%s", project, zone, canonicalName))
+	} else {
+		d.SetId(fmt.Sprintf("projects/%s/zones/%s/%s/hosts/%s", project, zone, association, canonicalName))
+	}
 	return nil
+}
+
+func resolveComputeReservationHostProjectAndZone(d *schema.ResourceData, config *transport_tpg.Config, selfLinkFields ...string) (string, string, error) {
+	var project, zone string
+	if v, ok := d.GetOk("project"); ok {
+		project = strings.TrimSpace(v.(string))
+		if project == "" {
+			return "", "", fmt.Errorf("project must not be empty")
+		}
+	}
+	if v, ok := d.GetOk("zone"); ok {
+		var err error
+		zone, err = extractComputeReservationHostScopeName("zone", v.(string), "zones")
+		if err != nil {
+			return "", "", err
+		}
+	}
+
+	for _, field := range selfLinkFields {
+		if project != "" && zone != "" {
+			break
+		}
+		v, ok := d.GetOk(field)
+		if !ok {
+			continue
+		}
+		raw := strings.TrimSpace(v.(string))
+		if parts := computeReservationHostZonalSelfLinkRegex.FindStringSubmatch(raw); parts != nil {
+			if project == "" {
+				project = parts[1]
+			}
+			if zone == "" {
+				zone = parts[2]
+			}
+			continue
+		}
+		if zone == "" {
+			if parts := computeReservationHostZonalPartialSelfLinkRegex.FindStringSubmatch(raw); parts != nil {
+				zone = parts[1]
+			}
+		}
+	}
+
+	var err error
+	if project == "" {
+		project, err = tpgresource.GetProject(d, config)
+		if err != nil {
+			return "", "", err
+		}
+	}
+	if zone == "" {
+		zone, err = tpgresource.GetZone(d, config)
+		if err != nil {
+			return "", "", err
+		}
+	}
+	return project, zone, nil
+}
+
+func extractComputeReservationHostScopeName(field, raw, collection string) (string, error) {
+	name := tpgresource.GetResourceNameFromSelfLink(strings.TrimSpace(raw))
+	if name == "" || name == collection {
+		return "", fmt.Errorf("%s must not be empty", field)
+	}
+	return name, nil
 }
 
 func buildComputeReservationHostAssociation(d *schema.ResourceData) (string, error) {
 	var reservation, reservationBlock, reservationSubBlock string
+	var err error
 	if v, ok := d.GetOk("reservation"); ok {
-		reservation = tpgresource.GetResourceNameFromSelfLink(strings.TrimSpace(v.(string)))
+		reservation, err = extractComputeReservationHostScopeName("reservation", v.(string), "reservations")
+		if err != nil {
+			return "", err
+		}
 	}
 	if v, ok := d.GetOk("reservation_block"); ok {
-		reservationBlock = tpgresource.GetResourceNameFromSelfLink(strings.TrimSpace(v.(string)))
+		reservationBlock, err = extractComputeReservationHostScopeName("reservation_block", v.(string), "reservationBlocks")
+		if err != nil {
+			return "", err
+		}
 	}
 	if v, ok := d.GetOk("reservation_sub_block"); ok {
-		reservationSubBlock = tpgresource.GetResourceNameFromSelfLink(strings.TrimSpace(v.(string)))
+		reservationSubBlock, err = extractComputeReservationHostScopeName("reservation_sub_block", v.(string), "reservationSubBlocks")
+		if err != nil {
+			return "", err
+		}
 	}
 
 	return formatComputeReservationHostAssociation(reservation, reservationBlock, reservationSubBlock)
@@ -265,63 +371,28 @@ func formatComputeReservationHostAssociation(reservation, reservationBlock, rese
 	return strings.Join(parts, "/"), nil
 }
 
-func buildComputeReservationHostURL(baseURL, project, zone, association, hostName string) string {
-	escapedProject := neturl.PathEscape(project)
-	escapedZone := neturl.PathEscape(zone)
-	escapedHost := neturl.PathEscape(hostName)
-	if association == "" {
-		return fmt.Sprintf("%sprojects/%s/zones/%s/hosts/%s", baseURL, escapedProject, escapedZone, escapedHost)
-	}
-	return fmt.Sprintf("%sprojects/%s/zones/%s/%s/hosts/%s", baseURL, escapedProject, escapedZone, neturl.PathEscape(association), escapedHost)
-}
-
-func buildComputeReservationHostID(project, zone, association, hostName string) string {
-	if association == "" {
-		return fmt.Sprintf("projects/%s/zones/%s/hosts/%s", project, zone, hostName)
-	}
-	return fmt.Sprintf("projects/%s/zones/%s/%s/hosts/%s", project, zone, association, hostName)
-}
-
 func flattenComputeReservationHostResourceID(v interface{}) string {
 	if v == nil {
 		return ""
 	}
-	if s, ok := v.(string); ok {
-		return s
-	}
-	return fmt.Sprintf("%v", v)
-}
-
-func flattenComputeReservationHostStringList(v interface{}) []string {
-	if v == nil {
-		return []string{}
-	}
-	switch items := v.(type) {
-	case []string:
-		out := make([]string, len(items))
-		copy(out, items)
-		return out
-	case []interface{}:
-		out := make([]string, 0, len(items))
-		for _, item := range items {
-			if s, ok := item.(string); ok {
-				out = append(out, s)
-			}
-		}
-		return out
+	switch val := v.(type) {
+	case string:
+		return val
+	case float64:
+		return strconv.FormatFloat(val, 'f', 0, 64)
 	default:
-		return []string{}
+		return fmt.Sprintf("%v", v)
 	}
 }
 
 func flattenComputeReservationHostStatus(v interface{}) []map[string]interface{} {
 	statusMap, ok := v.(map[string]interface{})
-	if !ok || statusMap == nil {
+	if !ok || len(statusMap) == 0 {
 		return nil
 	}
 
 	var topologyList []map[string]interface{}
-	if ptMap, ok := statusMap["physicalTopology"].(map[string]interface{}); ok && ptMap != nil {
+	if ptMap, ok := statusMap["physicalTopology"].(map[string]interface{}); ok && len(ptMap) > 0 {
 		topologyList = []map[string]interface{}{
 			{
 				"cluster":   ptMap["cluster"],
@@ -332,10 +403,15 @@ func flattenComputeReservationHostStatus(v interface{}) []map[string]interface{}
 		}
 	}
 
+	runningInstances := []string{}
+	if rawInstances, ok := statusMap["runningInstances"].([]interface{}); ok {
+		runningInstances = tpgresource.ConvertStringArr(rawInstances)
+	}
+
 	return []map[string]interface{}{
 		{
 			"physical_topology": topologyList,
-			"running_instances": flattenComputeReservationHostStringList(statusMap["runningInstances"]),
+			"running_instances": runningInstances,
 		},
 	}
 }

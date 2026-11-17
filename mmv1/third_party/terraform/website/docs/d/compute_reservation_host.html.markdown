@@ -19,7 +19,7 @@ data "google_compute_reservation_host" "host" {
   reservation           = "my-reservation"
   reservation_block     = "my-reservation-block"
   reservation_sub_block = "my-reservation-sub-block"
-  zone                  = "us-central1-a"
+  zone                  = "us-west1-a"
 }
 
 output "host_state" {
@@ -35,25 +35,27 @@ output "host_status" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name or resource ID of the host.
+* `name` - (Required) The name, resource ID, or self-link of the host. When looked up by numeric resource ID or self-link, `name` is updated in state to the canonical RFC1035 host name returned by the API.
 
 - - -
 
-* `reservation` - (Optional) The name of the parent reservation. When omitted, queries the top-level zonal host collection.
+* `reservation` - (Optional) The name or self-link of the parent reservation. When omitted, queries the top-level zonal host collection.
 
 * `reservation_block` - (Optional) The name of the parent reservation block. Requires `reservation` to be set.
 
 * `reservation_sub_block` - (Optional) The name of the parent reservation sub-block. Requires `reservation` and `reservation_block` to be set.
 
-* `zone` - (Optional) The zone where the host resides. If it is not provided, the provider zone is used.
+* `zone` - (Optional) The zone where the host resides. If it is not provided, any zone in a `reservation` or `name` self-link is used before falling back to the provider zone.
 
-* `project` - (Optional) The project in which the resource belongs. If it is not provided, the provider project is used.
+* `project` - (Optional) The project in which the resource belongs. If it is not provided, any project in a `reservation` or `name` self-link is used before falling back to the provider project.
 
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
 
-* `id` - The identifier for the resource with format `projects/{{project}}/zones/{{zone}}/hosts/{{name}}` or `projects/{{project}}/zones/{{zone}}/{{association}}/hosts/{{name}}`.
+* `id` - The identifier for the resource with format `projects/{{project}}/zones/{{zone}}/hosts/{{name}}` or `projects/{{project}}/zones/{{zone}}/reservations/{{reservation}}[/reservationBlocks/{{reservation_block}}[/reservationSubBlocks/{{reservation_sub_block}}]]/hosts/{{name}}`.
+
+* `description` - An optional description of this resource.
 
 * `kind` - Type of the resource. Always `compute#host` for hosts.
 
@@ -79,7 +81,7 @@ In addition to the arguments listed above, the following computed attributes are
 
 <a name="nested_physical_topology"></a>The `physical_topology` block contains:
 
-* `cluster` - The cluster name of the reservation sub-block.
+* `cluster` - The cluster name of the host.
 
 * `block` - The unique identifier of the capacity block within the cluster.
 
