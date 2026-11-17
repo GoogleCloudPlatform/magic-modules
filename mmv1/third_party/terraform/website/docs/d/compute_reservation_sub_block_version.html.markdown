@@ -8,6 +8,8 @@ description: |-
 
 Get SBOM software component versions for a Google Compute Engine Reservation Sub-Block (`reservationSubBlocks.getVersion`).
 
+~> **Note:** Each read or refresh of this data source dispatches an asynchronous `POST .../getVersion` zonal operation against an active SBOM-supported reservation sub-block and waits for the operation to complete before reading the component version metadata.
+
 For more information see the [official documentation](https://cloud.google.com/compute/docs/instances/reserving-zonal-resources)
 and the [API](https://cloud.google.com/compute/docs/reference/rest/v1/reservationSubBlocks/getVersion).
 
@@ -31,29 +33,29 @@ output "current_versions" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name or resource ID of the reservation sub-block.
+* `name` - (Required) The name, resource ID, or self-link of the reservation sub-block.
 
-* `reservation_block` - (Required) The name of the parent reservation block.
+* `reservation_block` - (Required) The name or self-link of the parent reservation block.
 
-* `reservation` - (Required) The name of the parent reservation.
+* `reservation` - (Required) The name or self-link of the parent reservation.
+
+* `sbom_selections` - (Required) The SBOM selection to return. Possible values include `SBOM_SELECTION_CURRENT` and `SBOM_SELECTION_TARGET`. Exactly one value must be specified.
 
 - - -
 
-* `sbom_selections` - (Optional) The SBOM selections to return. Possible values include `SBOM_SELECTION_CURRENT` and `SBOM_SELECTION_TARGET`.
+* `zone` - (Optional) The zone where the reservation sub-block resides. If it is not provided, any zone in a `reservation`, `reservation_block`, or `name` self-link is used before falling back to the provider zone.
 
-* `zone` - (Optional) The zone where the reservation sub-block resides. If it is not provided, the provider zone is used.
-
-* `project` - (Optional) The project in which the resource belongs. If it is not provided, the provider project is used.
+* `project` - (Optional) The project in which the resource belongs. If it is not provided, any project in a `reservation`, `reservation_block`, or `name` self-link is used before falling back to the provider project.
 
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are exported:
 
-* `id` - The identifier for the resource with format `projects/{{project}}/zones/{{zone}}/reservations/{{reservation}}/reservationBlocks/{{reservation_block}}/reservationSubBlocks/{{name}}/getVersion`.
+* `id` - The identifier for the resource with format `projects/{{project}}/zones/{{zone}}/reservations/{{reservation}}/reservationBlocks/{{reservation_block}}/reservationSubBlocks/{{name}}/getVersion/{{sbom_selection}}`.
 
-* `current_component_versions` - A map of component names to their currently-applied versions or identifiers from `inline_sbom_info`.
+* `current_component_versions` - A map of component names to their currently-applied versions or identifiers (populated when `SBOM_SELECTION_CURRENT` is requested).
 
-* `target_component_versions` - A map of component names to their target versions or identifiers from `inline_sbom_info`.
+* `target_component_versions` - A map of component names to their target versions or identifiers (populated when `SBOM_SELECTION_TARGET` is requested).
 
 ## Timeouts
 
