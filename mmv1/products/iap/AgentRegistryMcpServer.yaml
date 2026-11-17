@@ -42,8 +42,6 @@ samples:
     external_providers: [time]
     steps:
       - name: agent_registry_mcp_server_basic
-        resource_id_vars:
-          mcp_server_id: mcp-server-id
         test_env_vars:
           org_id: ORG_ID
 parameters:

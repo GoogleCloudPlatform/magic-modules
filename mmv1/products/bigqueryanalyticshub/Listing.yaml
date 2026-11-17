@@ -154,10 +154,6 @@ samples:
         resource_id_vars:
           data_exchange_id: my_data_exchange
           listing_id: my_listing
-          description: example listing for multiregion
-        test_vars_overrides:
-          # for backward compatible
-          description: '"example listing for multiregion" + randomSuffix'
 virtual_fields:
   - name: delete_commercial
     type: Boolean

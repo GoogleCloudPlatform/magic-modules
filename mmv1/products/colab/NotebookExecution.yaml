@@ -50,7 +50,6 @@ samples:
           runtime_template_name: 'runtime-template-name'
           bucket: 'my_bucket'
         test_env_vars:
-          project_id: 'PROJECT_NAME'
           service_account: 'SERVICE_ACCT'
   - name: 'colab_notebook_execution_custom_env'
     primary_resource_id: 'notebook-execution'
@@ -60,7 +59,6 @@ samples:
           network_name: 'colab-test-default'
           bucket: 'my_bucket'
         test_env_vars:
-          project_id: 'PROJECT_NAME'
           service_account: 'SERVICE_ACCT'
   - name: 'colab_notebook_execution_workbench_runtime_custom_container'
     primary_resource_id: 'notebook-execution'
@@ -69,7 +67,6 @@ samples:
         resource_id_vars:
           bucket: 'my_bucket'
         test_env_vars:
-          project_id: 'PROJECT_NAME'
           service_account: 'SERVICE_ACCT'
   - name: 'colab_notebook_execution_workbench_runtime_custom_container_no_tag'
     primary_resource_id: 'notebook-execution'
@@ -78,7 +75,6 @@ samples:
         resource_id_vars:
           bucket: 'my_bucket'
         test_env_vars:
-          project_id: 'PROJECT_NAME'
           service_account: 'SERVICE_ACCT'
   - name: 'colab_notebook_execution_workbench_runtime_vm'
     primary_resource_id: 'notebook-execution'
@@ -87,7 +83,6 @@ samples:
         resource_id_vars:
           bucket: 'my_bucket'
         test_env_vars:
-          project_id: 'PROJECT_NAME'
           service_account: 'SERVICE_ACCT'
   - name: 'colab_notebook_execution_workbench_runtime_vm_name'
     primary_resource_id: 'notebook-execution'
@@ -96,7 +91,6 @@ samples:
         resource_id_vars:
           bucket: 'my_bucket'
         test_env_vars:
-          project_id: 'PROJECT_NAME'
           service_account: 'SERVICE_ACCT'
   - name: 'colab_notebook_execution_full'
     min_version: beta
@@ -109,7 +103,6 @@ samples:
           runtime_template_name: 'runtime-template-name'
           bucket: 'my_bucket'
         test_env_vars:
-          project_id: 'PROJECT_NAME'
           service_account: 'SERVICE_ACCT'
   - name: 'colab_notebook_execution_dataform'
     min_version: beta
@@ -127,7 +120,6 @@ samples:
           bucket: 'my_bucket'
           key_name: 'my-crypto-key'
         test_env_vars:
-          project_id: 'PROJECT_NAME'
           service_account: 'SERVICE_ACCT'
         test_vars_overrides:
           key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'

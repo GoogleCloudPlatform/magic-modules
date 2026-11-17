@@ -76,7 +76,6 @@ samples:
           resource_name: thirdparty-datastore
         test_env_vars:
           region: REGION
-          project: PROJECT
   - name: vmware_engine_datastore_filestore
     primary_resource_id: example_filestore
     # Update tests take care of both create and update - Datastore deletion requires some additional setup
@@ -85,14 +84,8 @@ samples:
       - name: vmware_engine_datastore_filestore
         resource_id_vars:
           resource_name: filestore-datastore
-          network_name: default
-        test_vars_overrides:
-          # for backward compatible
-          network_name: '"default" + randomSuffix'
         test_env_vars:
-          region: REGION
           zone: ZONE
-          project: PROJECT
   - name: vmware_engine_datastore_netapp
     primary_resource_id: example_netapp
     # Update tests take care of both create and update - Datastore deletion requires some additional setup
@@ -101,13 +94,8 @@ samples:
       - name: vmware_engine_datastore_netapp
         resource_id_vars:
           resource_name: netapp-datastore
-          network_name: default
-        test_vars_overrides:
-          # for backward compatible
-          network_name: '"default" + randomSuffix'
         test_env_vars:
           region: REGION
-          project: PROJECT
 parameters:
   - name: location
     type: String

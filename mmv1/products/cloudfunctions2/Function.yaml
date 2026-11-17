@@ -73,7 +73,6 @@ samples:
         test_env_vars:
           project: PROJECT_NAME
         test_vars_overrides:
-          location: '"us-central1"'
           zip_path: '"./test-fixtures/function-source.zip"'
         # ignore these fields during import step
         ignore_read_extra:
@@ -93,8 +92,6 @@ samples:
           project: PROJECT_NAME
         test_vars_overrides:
           zip_path: '"./test-fixtures/function-source-pubsub.zip"'
-          primary_resource_id: '"terraform-test"'
-          location: '"us-central1"'
         # ignore these fields during import step
         ignore_read_extra:
           - build_config.0.source.0.storage_source.0.object
@@ -112,8 +109,6 @@ samples:
         test_env_vars:
           project: PROJECT_NAME
         test_vars_overrides:
-          primary_resource_id: '"terraform-test"'
-          location: '"us-central1"'
           zip_path: '"./test-fixtures/function-source.zip"'
         # ignore these fields during import step
         ignore_read_extra:
@@ -136,7 +131,6 @@ samples:
           project: PROJECT_NAME
         test_vars_overrides:
           zip_path: '"./test-fixtures/function-source-eventarc-gcs.zip"'
-          primary_resource_id: '"terraform-test"'
         # ignore these fields during import step
         ignore_read_extra:
           - build_config.0.source.0.storage_source.0.object
@@ -158,7 +152,6 @@ samples:
           project: PROJECT_NAME
         test_vars_overrides:
           zip_path: '"./test-fixtures/function-source-eventarc-gcs.zip"'
-          primary_resource_id: '"terraform-test"'
         # ignore these fields during import step
         ignore_read_extra:
           - build_config.0.source.0.storage_source.0.object
@@ -176,7 +169,6 @@ samples:
         test_env_vars:
           project: PROJECT_NAME
         test_vars_overrides:
-          location: '"us-central1"'
           zip_path: '"./test-fixtures/function-source.zip"'
         # ignore these fields during import step
         ignore_read_extra:
@@ -197,7 +189,6 @@ samples:
         test_env_vars:
           project: PROJECT_NAME
         test_vars_overrides:
-          location: '"us-central1"'
           zip_path: '"./test-fixtures/function-source.zip"'
           # ignore these fields during import step
           # for backward compatible
@@ -220,7 +211,6 @@ samples:
         test_env_vars:
           project: PROJECT_NAME
         test_vars_overrides:
-          location: '"us-central1"'
           zip_path: '"./test-fixtures/function-source.zip"'
           # ignore these fields during import step
           # for backward compatible
@@ -240,7 +230,6 @@ samples:
         test_env_vars:
           project: PROJECT_NAME
         test_vars_overrides:
-          location: '"us-central1"'
           zip_path: '"./test-fixtures/function-source.zip"'
           # ignore these fields during import step
           # for backward compatible
@@ -261,7 +250,6 @@ samples:
           function: function-cmek
           bucket_name: gcf-source
           zip_path: function-source.zip
-          kms_service_name: cloudkms.googleapis.com
           cmek-repo: cmek-repo
           unencoded-ar-repo: ar-repo
           kms_key_name: cmek-key
@@ -269,17 +257,15 @@ samples:
           project: PROJECT_NAME
         test_vars_overrides:
           kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
-          location: '"us-central1"'
           zip_path: '"./test-fixtures/function-source.zip"'
-          # ignore these fields during import step
-          # for backward compatible
-          kms_service_name: '"cloudkms.googleapis.com" + randomSuffix'
+        # ignore these fields during import step
         ignore_read_extra:
           - build_config.0.source.0.storage_source.0.object
           - build_config.0.source.0.storage_source.0.bucket
   - name: cloudfunctions2_cmek_docs
     primary_resource_id: function
     min_version: beta
+    # this example file will cause IAM conflicts between tests if used to make a test
     exclude_test: true
     steps:
       - name: cloudfunctions2_cmek_docs
@@ -288,15 +274,10 @@ samples:
           function: function-cmek
           bucket_name: gcf-source
           zip_path: function-source.zip
-          kms_service_name: cloudkms.googleapis.com
           cmek-repo: cmek-repo
           unencoded-ar-repo: ar-repo
           kms_key_name: cmek-key
           project: my-project-name
-        # this example file will cause IAM conflicts between tests if used to make a test
-        test_vars_overrides:
-          # for backward compatible
-          kms_service_name: '"cloudkms.googleapis.com" + randomSuffix'
   - name: cloudfunctions2_automatic_base_image_update
     primary_resource_id: function
     min_version: beta
@@ -313,8 +294,6 @@ samples:
           project: PROJECT_NAME
         test_vars_overrides:
           zip_path: '"./test-fixtures/function-source-pubsub.zip"'
-          primary_resource_id: '"terraform-test"'
-          location: '"europe-west6"'
         # ignore these fields during import step
         ignore_read_extra:
           - build_config.0.source.0.storage_source.0.object
@@ -335,8 +314,6 @@ samples:
           project: PROJECT_NAME
         test_vars_overrides:
           zip_path: '"./test-fixtures/function-source-pubsub.zip"'
-          primary_resource_id: '"terraform-test"'
-          location: '"europe-west6"'
         # ignore these fields during import step
         ignore_read_extra:
           - build_config.0.source.0.storage_source.0.object
@@ -352,7 +329,6 @@ samples:
         test_env_vars:
           project: PROJECT_NAME
         test_vars_overrides:
-          location: '"us-central1"'
           zip_path: '"./test-fixtures/function-source.zip"'
         # ignore these fields during import step
         ignore_read_extra:

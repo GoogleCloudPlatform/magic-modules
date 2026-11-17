@@ -99,7 +99,6 @@ samples:
         resource_id_vars:
           reservation_name: 'gce-shared-reservation'
         test_env_vars:
-          project: 'PROJECT_NAME'
           org_id: 'ORG_ID'
           billing_account: 'BILLING_ACCT'
         ignore_read_extra:
@@ -114,7 +113,6 @@ samples:
         resource_id_vars:
           reservation_name: 'gce-shared-reservation-beta'
         test_env_vars:
-          project: 'PROJECT_NAME'
           org_id: 'ORG_ID'
           billing_account: 'BILLING_ACCT'
         min_version: 'beta'

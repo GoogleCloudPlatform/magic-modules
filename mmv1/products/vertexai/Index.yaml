@@ -57,10 +57,6 @@ samples:
           display_name: test-index
           bucket_name: vertex-ai-index-test
           kms_key_name: kms-name
-        vars:
-          region: 'us-central1'
-        test_env_vars:
-          project: PROJECT_NAME
         test_vars_overrides:
           kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
         ignore_read_extra:
@@ -73,13 +69,6 @@ samples:
         resource_id_vars:
           display_name: test-index
           bucket_name: vertex-ai-index-test
-          kms_key_name: kms-name
-        vars:
-          region: 'us-central1'
-        test_env_vars:
-          project: PROJECT_NAME
-        test_vars_overrides:
-          kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
         ignore_read_extra:
           - metadata.0.contents_delta_uri
           - metadata.0.is_complete_overwrite

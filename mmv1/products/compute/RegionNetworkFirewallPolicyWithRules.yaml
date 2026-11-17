@@ -50,12 +50,9 @@ samples:
       - name: 'compute_region_network_firewall_policy_with_rules_full'
         resource_id_vars:
           address_group: 'address-group'
-          network: 'network'
           fw_policy: 'fw-policy'
           tag_key: 'tag-key'
           tag_value: 'tag-value'
-        test_env_vars:
-          org_id: 'ORG_ID'
   - name: 'compute_region_network_firewall_policy_with_rules_roce'
     primary_resource_id: 'policy'
     steps:

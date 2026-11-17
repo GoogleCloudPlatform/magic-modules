@@ -31,7 +31,6 @@ samples:
       - name: contact_center_insights_qa_scorecard_revision_basic
         resource_id_vars:
           scorecard_id: qa-scorecard
-          revision_id: qa-revision
 parameters:
   - name: location
     type: String

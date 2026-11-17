@@ -113,9 +113,6 @@ samples:
     primary_resource_id: 'custom_masking_routine'
     steps:
       - name: 'bigquery_routine_data_governance_type'
-        resource_id_vars:
-          dataset_id: 'dataset_id'
-          routine_id: 'routine_id'
   - name: 'bigquery_routine_remote_function'
     primary_resource_id: 'remote_function'
     exclude_test: true

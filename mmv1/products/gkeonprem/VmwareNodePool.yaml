@@ -48,8 +48,6 @@ samples:
         resource_id_vars:
           name: my-nodepool
           cluster: my-cluster
-        test_env_vars:
-          project: fake-backend-360322
   - name: gkeonprem_vmware_node_pool_full
     primary_resource_id: nodepool-full
     steps:
@@ -57,8 +55,6 @@ samples:
         resource_id_vars:
           name: my-nodepool
           cluster: my-cluster
-        test_env_vars:
-          project: fake-backend-360322
 parameters:
   - name: name
     type: String

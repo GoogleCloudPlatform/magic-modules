@@ -47,11 +47,8 @@ samples:
         resource_id_vars:
           folder_display_name: folder-name
           display_name: basic_custom_module
-          sleep: ""
         test_env_vars:
           org_id: ORG_ID
-        test_vars_overrides:
-          sleep: "true"
   - name: scc_management_folder_security_health_analytics_custom_module_full
     primary_resource_id: example
     external_providers: [random, time]
@@ -61,11 +58,8 @@ samples:
         resource_id_vars:
           folder_display_name: folder-name
           display_name: full_custom_module
-          sleep: ""
         test_env_vars:
           org_id: ORG_ID
-        test_vars_overrides:
-          sleep: "true"
 parameters:
   - name: folder
     type: String

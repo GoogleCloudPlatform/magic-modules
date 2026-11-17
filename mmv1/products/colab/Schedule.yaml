@@ -49,7 +49,6 @@ samples:
           bucket: 'my_bucket'
           runtime_template_name: 'runtime-template'
         test_env_vars:
-          project_id: 'PROJECT_NAME'
           location: 'REGION'
           service_account: 'SERVICE_ACCT'
         ignore_read_extra:
@@ -65,7 +64,6 @@ samples:
           bucket: 'my_bucket'
           runtime_template_name: 'runtime-template'
         test_env_vars:
-          project_id: 'PROJECT_NAME'
           location: 'REGION'
           service_account: 'SERVICE_ACCT'
         ignore_read_extra:
@@ -84,7 +82,6 @@ samples:
         resource_id_vars:
           display_name: 'full-schedule'
           bucket: 'my_bucket'
-          network_name: 'colab-test-default'
           runtime_template_name: 'runtime-template'
           secret: 'secret'
           dataform_repository: 'dataform-repository'
@@ -119,8 +116,6 @@ samples:
           max_concurrent_run_count: 2
           cron: '*/5 * * * *'
         test_env_vars:
-          project_id: 'PROJECT_NAME'
-          location: 'REGION'
           service_account: 'SERVICE_ACCT'
         test_vars_overrides:
           key_name: 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'

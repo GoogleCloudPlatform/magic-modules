@@ -36,8 +36,6 @@ samples:
           saas_name: example-saas
           unitkind_name: example-unitkind
           unit_name: example-unit
-        test_env_vars:
-          project: PROJECT_NAME
         ignore_read_extra:
           - conditions
           - state

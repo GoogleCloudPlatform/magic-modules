@@ -54,8 +54,6 @@ samples:
       - name: gkehub_scope_basic
         resource_id_vars:
           resource_name: my-scope
-        test_env_vars:
-          project: PROJECT_NAME
 parameters:
 properties:
   - name: scopeId

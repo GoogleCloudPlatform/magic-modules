@@ -51,15 +51,11 @@ samples:
           deployment_name: "example-deployment"
           framework_name: "example-framework"
           cloudcontrol_name: "example-cloudcontrol"
-        test_env_vars:
-          org_id: "ORG_ID"
       - name: "cloudsecuritycompliance_framework_deployment_project_update"
         resource_id_vars:
           deployment_name: "example-deployment"
           framework_name: "example-framework"
           cloudcontrol_name: "example-cloudcontrol"
-        test_env_vars:
-          org_id: "ORG_ID"
   - name: "cloudsecuritycompliance_framework_deployment_folder_creation"
     primary_resource_id: "example"
     steps:

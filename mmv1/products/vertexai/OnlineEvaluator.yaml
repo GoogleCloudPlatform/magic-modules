@@ -54,8 +54,6 @@ samples:
         resource_id_vars:
           evaluator_name: online-evaluator
           engine_name: reasoning-engine
-        test_env_vars:
-          project: PROJECT_NAME
   - name: vertex_ai_online_evaluator_full
     primary_resource_id: evaluator
     steps:
@@ -64,8 +62,6 @@ samples:
           evaluator_name: online-evaluator
           engine_name: reasoning-engine
           metric_name: eval-metric
-        test_env_vars:
-          project: PROJECT_NAME
 parameters:
   - name: region
     type: String

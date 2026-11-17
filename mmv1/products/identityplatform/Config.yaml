@@ -50,7 +50,6 @@ samples:
     steps:
       - name: identity_platform_config_basic
         resource_id_vars:
-          instance_name: memory-cache
           project_id: my-project
           quota_start_time: "2014-10-02T15:01:23Z"
         test_env_vars:

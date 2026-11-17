@@ -41,8 +41,6 @@ samples:
     primary_resource_id: basic_entry_link
     steps:
       - name: dataplex_entry_link_basic
-        resource_id_vars:
-          entry_link_name: entry_link_basic
         test_env_vars:
           project_number: PROJECT_NUMBER
   - name: dataplex_entry_link_full
@@ -50,8 +48,6 @@ samples:
     external_providers: [time]
     steps:
       - name: dataplex_entry_link_full
-        resource_id_vars:
-          entry_link_name: my_entry_link_full
         test_env_vars:
           project_number: PROJECT_NUMBER
   - name: dataplex_entry_link_with_aspect
@@ -60,8 +56,6 @@ samples:
       - name: dataplex_entry_link_with_aspect
         ignore_read_extra:
           - aspects
-        resource_id_vars:
-          entry_link_name: my_entry_link_full_with_aspect
         test_env_vars:
           project_number: PROJECT_NUMBER
           project_id: PROJECT_NAME

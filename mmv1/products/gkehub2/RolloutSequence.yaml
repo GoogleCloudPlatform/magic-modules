@@ -246,10 +246,7 @@ samples:
         resource_id_vars:
           rollout_sequence_id: 'rs-user-triggered'
           project_id: 'rs-project'
-          network_name: 'rs-network'
-          subnetwork_name: 'rs-subnet'
           cluster_name: 'rs-cluster'
-          membership_id: 'rs-membership'
         vars:
           min_node_version: null
         test_env_vars:
@@ -261,10 +258,7 @@ samples:
         resource_id_vars:
           rollout_sequence_id: 'rs-user-triggered'
           project_id: 'rs-project'
-          network_name: 'rs-network'
-          subnetwork_name: 'rs-subnet'
           cluster_name: 'rs-cluster'
-          membership_id: 'rs-membership'
         vars:
           min_node_version: 'data.google_container_engine_versions.versions.release_channel_latest_version["REGULAR"]'
         test_env_vars:

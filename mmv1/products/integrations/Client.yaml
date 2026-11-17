@@ -55,9 +55,8 @@ samples:
           key_ring_name: my-keyring
           crypto_key_name: my-crypto-key
         test_vars_overrides:
-          key_ring_name: '"tftest-shared-keyring-1"'
-          crypto_key_name: '"tftest-shared-key-1"'
-          kms_key: kms.BootstrapKMSKeyInLocation(t, "us-east1")
+          key_ring_name: kms.SharedKeyRing
+          crypto_key_name: tpgresource.GetResourceNameFromSelfLink(kms.BootstrapKMSKeyInLocation(t, "us-east1").CryptoKey.Name)
 parameters:
   - name: location
     type: String

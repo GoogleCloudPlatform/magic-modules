@@ -141,9 +141,3 @@ samples:
       - name: "compute_region_composite_health_check_basic"
         resource_id_vars:
           name: "test-composite-health-check"
-          description: "Example composite health check basic"
-        test_vars_overrides:
-          # for backward compatible
-          description: '"Example composite health check basic" + randomSuffix'
-        test_env_vars:
-          project: 'PROJECT_NAME'

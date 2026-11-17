@@ -50,7 +50,6 @@ samples:
         resource_id_vars:
           backup_vault_id: bv-app-update
           instance_backup_plan_id: bp-app-update-vm
-          disk_backup_plan_id: bp-app-update-disk
           auto_protection_policy_id: app-update
       - name: backup_dr_auto_protection_policy_full_update
         resource_id_vars:
