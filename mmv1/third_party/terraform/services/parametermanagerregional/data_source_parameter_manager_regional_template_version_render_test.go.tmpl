@@ -2,9 +2,12 @@ package parametermanagerregional_test
 {{- if ne $.TargetVersionName "ga" }}
 
 import (
+	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/parametermanagerregional"
@@ -19,52 +22,254 @@ func TestAccDataSourceParameterManagerRegionalTemplateVersionRender_basic(t *tes
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckParameterManagerRegionalRegionalTemplateDestroyProducer(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy: func(s *terraform.State) error {
+			if err := testAccCheckParameterManagerRegionalRegionalTemplateVersionDestroyProducer(t)(s); err != nil {
+				return err
+			}
+			if err := testAccCheckParameterManagerRegionalRegionalTemplateDestroyProducer(t)(s); err != nil {
+				return err
+			}
+			return testAccCheckParameterManagerRegionalRegionalParameterDestroyProducer(t)(s)
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccParameterManagerRegionalTemplateVersionRender_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.google_parameter_manager_regional_template_version_render.rendered", "rendered_template_data", "database:\n  host: 10.0.0.1\n  port: 5432\n"),
-					resource.TestCheckResourceAttr("data.google_parameter_manager_regional_template_version_render.rendered", "template_data", "database:\n  host: {{"{{"}}.host{{"}}"}}\n  port: {{"{{"}}.port{{"}}"}}\n"),
+					// YAML render using full .id on template (omitting location so location extraction is verified) and parameter_version #1
+					resource.TestCheckResourceAttrPair(
+						"data.google_parameter_manager_regional_template_version_render.rendered_by_id", "name",
+						"google_parameter_manager_regional_template_version.tmpl_ver", "name",
+					),
+					resource.TestCheckResourceAttrPair(
+						"data.google_parameter_manager_regional_template_version_render.rendered_by_id", "template",
+						"google_parameter_manager_regional_template.tmpl", "id",
+					),
+					resource.TestCheckResourceAttr("data.google_parameter_manager_regional_template_version_render.rendered_by_id", "location", "us-central1"),
+					resource.TestCheckResourceAttr("data.google_parameter_manager_regional_template_version_render.rendered_by_id", "template_format", "TEMPLATE_FORMAT_YAML"),
+					resource.TestCheckResourceAttr("data.google_parameter_manager_regional_template_version_render.rendered_by_id", "template_data", "database:\n  host: {{"{{"}}.host{{"}}"}}\n  port: {{"{{"}}.port{{"}}"}}\n"),
+					resource.TestCheckResourceAttr("data.google_parameter_manager_regional_template_version_render.rendered_by_id", "rendered_template_data", "database:\n  host: 10.0.0.1\n  port: 5432\n"),
+					// YAML render of the SAME regional template_version against parameter_version #2 using short .template_id + location
+					resource.TestCheckResourceAttrPair(
+						"data.google_parameter_manager_regional_template_version_render.rendered_by_short_name", "name",
+						"google_parameter_manager_regional_template_version.tmpl_ver", "name",
+					),
+					resource.TestCheckResourceAttrPair(
+						"data.google_parameter_manager_regional_template_version_render.rendered_by_short_name", "template",
+						"google_parameter_manager_regional_template.tmpl", "template_id",
+					),
+					resource.TestCheckResourceAttr("data.google_parameter_manager_regional_template_version_render.rendered_by_short_name", "location", "us-central1"),
+					resource.TestCheckResourceAttr("data.google_parameter_manager_regional_template_version_render.rendered_by_short_name", "template_format", "TEMPLATE_FORMAT_YAML"),
+					resource.TestCheckResourceAttr("data.google_parameter_manager_regional_template_version_render.rendered_by_short_name", "template_data", "database:\n  host: {{"{{"}}.host{{"}}"}}\n  port: {{"{{"}}.port{{"}}"}}\n"),
+					resource.TestCheckResourceAttr("data.google_parameter_manager_regional_template_version_render.rendered_by_short_name", "rendered_template_data", "database:\n  host: 10.0.0.2\n  port: 6432\n"),
+					testAccCheckDataSourceParameterManagerRegionalTemplateVersionRenderDistinctIDs(
+						"data.google_parameter_manager_regional_template_version_render.rendered_by_id",
+						"data.google_parameter_manager_regional_template_version_render.rendered_by_short_name",
+					),
+					// JSON format render
+					resource.TestCheckResourceAttrPair(
+						"data.google_parameter_manager_regional_template_version_render.rendered_json", "name",
+						"google_parameter_manager_regional_template_version.tmpl_json_ver", "name",
+					),
+					resource.TestCheckResourceAttr("data.google_parameter_manager_regional_template_version_render.rendered_json", "template_format", "TEMPLATE_FORMAT_JSON"),
+					resource.TestCheckResourceAttr("data.google_parameter_manager_regional_template_version_render.rendered_json", "template_data", "{\"host\":\"{{"{{"}}.host{{"}}"}}\",\"port\":{{"{{"}}.port{{"}}"}}}"),
+					resource.TestCheckResourceAttr("data.google_parameter_manager_regional_template_version_render.rendered_json", "rendered_template_data", "{\"host\":\"10.0.0.1\",\"port\":5432}"),
 				),
+			},
+			{
+				Config:      testAccParameterManagerRegionalTemplateVersionRender_disabled(context),
+				ExpectError: regexp.MustCompile("(?i)disabled"),
 			},
 		},
 	})
 }
 
+func testAccCheckDataSourceParameterManagerRegionalTemplateVersionRenderDistinctIDs(first, second string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs1, ok := s.RootModule().Resources[first]
+		if !ok {
+			return fmt.Errorf("data source not found: %s", first)
+		}
+		rs2, ok := s.RootModule().Resources[second]
+		if !ok {
+			return fmt.Errorf("data source not found: %s", second)
+		}
+		if rs1.Primary.ID == "" || rs2.Primary.ID == "" {
+			return fmt.Errorf("expected non-empty data source IDs, got %q and %q", rs1.Primary.ID, rs2.Primary.ID)
+		}
+		if rs1.Primary.ID == rs2.Primary.ID {
+			return fmt.Errorf("expected distinct IDs when rendering against different parameter_versions, both got %q", rs1.Primary.ID)
+		}
+		return nil
+	}
+}
+
 func testAccParameterManagerRegionalTemplateVersionRender_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_parameter_manager_regional_parameter" "param" {
-  parameter_id = "tf_test_reg_param_%{random_suffix}"
+  provider     = google-beta
+  parameter_id = "tf-test-reg-param-%{random_suffix}"
   location     = "us-central1"
   format       = "YAML"
 }
 
-resource "google_parameter_manager_regional_parameter_version" "param_ver" {
+resource "google_parameter_manager_regional_parameter_version" "param_ver_1" {
+  provider             = google-beta
   parameter            = google_parameter_manager_regional_parameter.param.id
-  parameter_version_id = "v1"
+  parameter_version_id = "tf-test-rpv1-%{random_suffix}"
   parameter_data       = "host: 10.0.0.1\nport: 5432\n"
 }
 
+resource "google_parameter_manager_regional_parameter_version" "param_ver_2" {
+  provider             = google-beta
+  parameter            = google_parameter_manager_regional_parameter.param.id
+  parameter_version_id = "tf-test-rpv2-%{random_suffix}"
+  parameter_data       = "host: 10.0.0.2\nport: 6432\n"
+}
+
+resource "google_parameter_manager_regional_parameter" "param_json" {
+  provider     = google-beta
+  parameter_id = "tf-test-reg-param-json-%{random_suffix}"
+  location     = "us-central1"
+  format       = "JSON"
+}
+
+resource "google_parameter_manager_regional_parameter_version" "param_json_ver" {
+  provider             = google-beta
+  parameter            = google_parameter_manager_regional_parameter.param_json.id
+  parameter_version_id = "tf-test-rpv-json-%{random_suffix}"
+  parameter_data       = "{\"host\":\"10.0.0.1\",\"port\":5432}"
+}
+
 resource "google_parameter_manager_regional_template" "tmpl" {
-  template_id = "tf_test_reg_tmpl_%{random_suffix}"
+  provider    = google-beta
+  template_id = "tf-test-reg-tmpl-%{random_suffix}"
   location    = "us-central1"
   format      = "TEMPLATE_FORMAT_YAML"
 }
 
 resource "google_parameter_manager_regional_template_version" "tmpl_ver" {
-  template            = google_parameter_manager_regional_template.tmpl.id
-  template_version_id = "v1"
-  payload {
-    template_data = "database:\n  host: {{"{{"}}.host{{"}}"}}\n  port: {{"{{"}}.port{{"}}"}}\n"
-  }
+  provider            = google-beta
+  location            = "us-central1"
+  template            = google_parameter_manager_regional_template.tmpl.template_id
+  template_version_id = "tf-test-rtv-%{random_suffix}"
+  template_data       = "database:\n  host: {{"{{"}}.host{{"}}"}}\n  port: {{"{{"}}.port{{"}}"}}\n"
 }
 
-data "google_parameter_manager_regional_template_version_render" "rendered" {
+resource "google_parameter_manager_regional_template" "tmpl_json" {
+  provider    = google-beta
+  template_id = "tf-test-reg-tmpl-json-%{random_suffix}"
+  location    = "us-central1"
+  format      = "TEMPLATE_FORMAT_JSON"
+}
+
+resource "google_parameter_manager_regional_template_version" "tmpl_json_ver" {
+  provider            = google-beta
+  location            = "us-central1"
+  template            = google_parameter_manager_regional_template.tmpl_json.template_id
+  template_version_id = "tf-test-rtv-json-%{random_suffix}"
+  template_data       = "{\"host\":\"{{"{{"}}.host{{"}}"}}\",\"port\":{{"{{"}}.port{{"}}"}}}"
+}
+
+data "google_parameter_manager_regional_template_version_render" "rendered_by_id" {
+  provider            = google-beta
   template            = google_parameter_manager_regional_template.tmpl.id
   template_version_id = google_parameter_manager_regional_template_version.tmpl_ver.template_version_id
-  parameter_version   = google_parameter_manager_regional_parameter_version.param_ver.name
+  parameter_version   = google_parameter_manager_regional_parameter_version.param_ver_1.name
+}
+
+data "google_parameter_manager_regional_template_version_render" "rendered_by_short_name" {
+  provider            = google-beta
+  location            = "us-central1"
+  template            = google_parameter_manager_regional_template.tmpl.template_id
+  template_version_id = google_parameter_manager_regional_template_version.tmpl_ver.template_version_id
+  parameter_version   = google_parameter_manager_regional_parameter_version.param_ver_2.name
+}
+
+data "google_parameter_manager_regional_template_version_render" "rendered_json" {
+  provider            = google-beta
+  location            = "us-central1"
+  template            = google_parameter_manager_regional_template.tmpl_json.template_id
+  template_version_id = google_parameter_manager_regional_template_version.tmpl_json_ver.template_version_id
+  parameter_version   = google_parameter_manager_regional_parameter_version.param_json_ver.name
+}
+`, context)
+}
+
+func testAccParameterManagerRegionalTemplateVersionRender_disabled(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_parameter_manager_regional_parameter" "param" {
+  provider     = google-beta
+  parameter_id = "tf-test-reg-param-%{random_suffix}"
+  location     = "us-central1"
+  format       = "YAML"
+}
+
+resource "google_parameter_manager_regional_parameter_version" "param_ver_1" {
+  provider             = google-beta
+  parameter            = google_parameter_manager_regional_parameter.param.id
+  parameter_version_id = "tf-test-rpv1-%{random_suffix}"
+  parameter_data       = "host: 10.0.0.1\nport: 5432\n"
+}
+
+resource "google_parameter_manager_regional_parameter_version" "param_ver_2" {
+  provider             = google-beta
+  parameter            = google_parameter_manager_regional_parameter.param.id
+  parameter_version_id = "tf-test-rpv2-%{random_suffix}"
+  parameter_data       = "host: 10.0.0.2\nport: 6432\n"
+}
+
+resource "google_parameter_manager_regional_parameter" "param_json" {
+  provider     = google-beta
+  parameter_id = "tf-test-reg-param-json-%{random_suffix}"
+  location     = "us-central1"
+  format       = "JSON"
+}
+
+resource "google_parameter_manager_regional_parameter_version" "param_json_ver" {
+  provider             = google-beta
+  parameter            = google_parameter_manager_regional_parameter.param_json.id
+  parameter_version_id = "tf-test-rpv-json-%{random_suffix}"
+  parameter_data       = "{\"host\":\"10.0.0.1\",\"port\":5432}"
+}
+
+resource "google_parameter_manager_regional_template" "tmpl" {
+  provider    = google-beta
+  template_id = "tf-test-reg-tmpl-%{random_suffix}"
+  location    = "us-central1"
+  format      = "TEMPLATE_FORMAT_YAML"
+}
+
+resource "google_parameter_manager_regional_template_version" "tmpl_ver" {
+  provider            = google-beta
+  location            = "us-central1"
+  template            = google_parameter_manager_regional_template.tmpl.template_id
+  template_version_id = "tf-test-rtv-%{random_suffix}"
+  disabled            = true
+  template_data       = "database:\n  host: {{"{{"}}.host{{"}}"}}\n  port: {{"{{"}}.port{{"}}"}}\n"
+}
+
+resource "google_parameter_manager_regional_template" "tmpl_json" {
+  provider    = google-beta
+  template_id = "tf-test-reg-tmpl-json-%{random_suffix}"
+  location    = "us-central1"
+  format      = "TEMPLATE_FORMAT_JSON"
+}
+
+resource "google_parameter_manager_regional_template_version" "tmpl_json_ver" {
+  provider            = google-beta
+  location            = "us-central1"
+  template            = google_parameter_manager_regional_template.tmpl_json.template_id
+  template_version_id = "tf-test-rtv-json-%{random_suffix}"
+  template_data       = "{\"host\":\"{{"{{"}}.host{{"}}"}}\",\"port\":{{"{{"}}.port{{"}}"}}}"
+}
+
+data "google_parameter_manager_regional_template_version_render" "rendered_disabled" {
+  provider            = google-beta
+  template            = google_parameter_manager_regional_template.tmpl.id
+  template_version_id = google_parameter_manager_regional_template_version.tmpl_ver.template_version_id
+  parameter_version   = google_parameter_manager_regional_parameter_version.param_ver_1.name
+  depends_on          = [google_parameter_manager_regional_template_version.tmpl_ver]
 }
 `, context)
 }
