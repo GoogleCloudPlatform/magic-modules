@@ -719,6 +719,10 @@ resource "google_ces_app" "ces_app_voice" {
     }
   }
 
+  model_settings {
+    model = "gemini-3.1-flash-live"
+  }
+
   time_zone_settings {
     time_zone = "America/Los_Angeles"
   }
@@ -771,6 +775,10 @@ resource "google_ces_app" "ces_app_voice" {
       voice_instruction     = "Speak in a friendly and concise tone."
       preview_text          = "Hello, this is an updated preview."
     }
+  }
+
+  model_settings {
+    model = "gemini-3.1-flash-live"
   }
 
   time_zone_settings {
