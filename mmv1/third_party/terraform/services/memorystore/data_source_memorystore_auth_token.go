@@ -10,6 +10,8 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
+var memorystoreAuthTokenInstanceRegex = regexp.MustCompile("^projects/([^/]+)/locations/([^/]+)/instances/([^/]+)$")
+
 func DataSourceMemorystoreAuthToken() *schema.Resource {
 	// Generate datasource schema from resource
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceMemorystoreAuthToken().Schema)
@@ -28,29 +30,37 @@ func dataSourceMemorystoreAuthTokenRead(d *schema.ResourceData, meta interface{}
 	config := meta.(*transport_tpg.Config)
 
 	instance := d.Get("instance").(string)
-	instanceRegex := regexp.MustCompile("projects/([^/]+)/locations/([^/]+)/instances/([^/]+)")
-	if instanceRegex.MatchString(instance) {
-		parts := instanceRegex.FindStringSubmatch(instance)
+	if parts := memorystoreAuthTokenInstanceRegex.FindStringSubmatch(instance); parts != nil {
 		if d.Get("project") == "" {
-			d.Set("project", parts[1])
+			if err := d.Set("project", parts[1]); err != nil {
+				return fmt.Errorf("Error setting project: %s", err)
+			}
 		}
 		if d.Get("location") == "" {
-			d.Set("location", parts[2])
+			if err := d.Set("location", parts[2]); err != nil {
+				return fmt.Errorf("Error setting location: %s", err)
+			}
 		}
-		d.Set("instance", parts[3])
+		if err := d.Set("instance", parts[3]); err != nil {
+			return fmt.Errorf("Error setting instance: %s", err)
+		}
 	}
 
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
-	d.Set("project", project)
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
 
 	location, err := tpgresource.GetLocation(d, config)
 	if err != nil {
 		return err
 	}
-	d.Set("location", location)
+	if err := d.Set("location", location); err != nil {
+		return fmt.Errorf("Error setting location: %s", err)
+	}
 
 	tokenId := tpgresource.GetResourceNameFromSelfLink(d.Get("token_id").(string))
 	if err := d.Set("token_id", tokenId); err != nil {

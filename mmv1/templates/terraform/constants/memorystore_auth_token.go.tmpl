@@ -1,14 +1,14 @@
 {{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
-// LatestMemorystoreAuthToken selects the AuthToken entry with the highest sequential
+// latestMemorystoreAuthToken selects the AuthToken resource name with the highest sequential
 // "version-N" ID from a ListAuthTokens response slice, because :addAuthToken returns
 // the parent TokenAuthUser rather than the newly created token.
-func LatestMemorystoreAuthToken(rawTokens interface{}) (map[string]interface{}, error) {
+func latestMemorystoreAuthToken(rawTokens interface{}) (string, error) {
 	tokens, ok := rawTokens.([]interface{})
 	if !ok || len(tokens) == 0 {
-		return nil, fmt.Errorf("no authTokens returned")
+		return "", fmt.Errorf("no authTokens returned")
 	}
 
-	var latestToken map[string]interface{}
+	var latestName string
 	maxVersion := -1
 	for _, t := range tokens {
 		tm, ok := t.(map[string]interface{})
@@ -24,15 +24,15 @@ func LatestMemorystoreAuthToken(rawTokens interface{}) (map[string]interface{}, 
 		if n, err := fmt.Sscanf(tokenId, "version-%d", &vNum); err == nil && n == 1 && tokenId == fmt.Sprintf("version-%d", vNum) {
 			if vNum > maxVersion {
 				maxVersion = vNum
-				latestToken = tm
+				latestName = name
 			}
-		} else if latestToken == nil {
-			latestToken = tm
+		} else if latestName == "" {
+			latestName = name
 		}
 	}
-	if latestToken == nil {
-		return nil, fmt.Errorf("AuthToken response missing name attribute")
+	if latestName == "" {
+		return "", fmt.Errorf("AuthToken response missing name attribute")
 	}
-	return latestToken, nil
+	return latestName, nil
 }
 {{- end }}

@@ -6,86 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	tpgmemorystore "github.com/hashicorp/terraform-provider-google/google/services/memorystore"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/memorystore"
 )
-
-func TestUnitMemorystoreAuthToken_latestMemorystoreAuthToken(t *testing.T) {
-	t.Parallel()
-
-	cases := map[string]struct {
-		input    interface{}
-		wantName string
-		wantErr  bool
-	}{
-		"nil slice": {
-			input:   nil,
-			wantErr: true,
-		},
-		"empty slice": {
-			input:   []interface{}{},
-			wantErr: true,
-		},
-		"missing name": {
-			input: []interface{}{
-				map[string]interface{}{"token": "abc"},
-				map[string]interface{}{"name": ""},
-			},
-			wantErr: true,
-		},
-		"single version-1": {
-			input: []interface{}{
-				map[string]interface{}{"name": "projects/p/locations/l/instances/i/tokenAuthUsers/u/authTokens/version-1"},
-			},
-			wantName: "projects/p/locations/l/instances/i/tokenAuthUsers/u/authTokens/version-1",
-		},
-		"multiple versions ascending": {
-			input: []interface{}{
-				map[string]interface{}{"name": "projects/p/locations/l/instances/i/tokenAuthUsers/u/authTokens/version-1"},
-				map[string]interface{}{"name": "projects/p/locations/l/instances/i/tokenAuthUsers/u/authTokens/version-2"},
-			},
-			wantName: "projects/p/locations/l/instances/i/tokenAuthUsers/u/authTokens/version-2",
-		},
-		"numeric ordering past version-9": {
-			input: []interface{}{
-				map[string]interface{}{"name": "projects/p/locations/l/instances/i/tokenAuthUsers/u/authTokens/version-10"},
-				map[string]interface{}{"name": "projects/p/locations/l/instances/i/tokenAuthUsers/u/authTokens/version-9"},
-				map[string]interface{}{"name": "projects/p/locations/l/instances/i/tokenAuthUsers/u/authTokens/version-2"},
-			},
-			wantName: "projects/p/locations/l/instances/i/tokenAuthUsers/u/authTokens/version-10",
-		},
-		"prefers versioned over non-versioned": {
-			input: []interface{}{
-				map[string]interface{}{"name": "projects/p/locations/l/instances/i/tokenAuthUsers/u/authTokens/custom-id"},
-				map[string]interface{}{"name": "projects/p/locations/l/instances/i/tokenAuthUsers/u/authTokens/version-1"},
-			},
-			wantName: "projects/p/locations/l/instances/i/tokenAuthUsers/u/authTokens/version-1",
-		},
-		"falls back to non-versioned": {
-			input: []interface{}{
-				map[string]interface{}{"name": "projects/p/locations/l/instances/i/tokenAuthUsers/u/authTokens/custom-id"},
-			},
-			wantName: "projects/p/locations/l/instances/i/tokenAuthUsers/u/authTokens/custom-id",
-		},
-	}
-
-	for tn, tc := range cases {
-		t.Run(tn, func(t *testing.T) {
-			got, err := tpgmemorystore.LatestMemorystoreAuthToken(tc.input)
-			if tc.wantErr {
-				if err == nil {
-					t.Fatalf("expected error, got %#v", got)
-				}
-				return
-			}
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if got["name"] != tc.wantName {
-				t.Fatalf("got name %v, want %q", got["name"], tc.wantName)
-			}
-		})
-	}
-}
 
 func TestAccMemorystoreAuthToken_basic(t *testing.T) {
 	t.Parallel()

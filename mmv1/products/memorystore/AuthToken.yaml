@@ -60,7 +60,6 @@ parameters:
     type: String
     description: The location of the Memorystore instance.
     required: true
-    immutable: true
     url_param_only: true
   - name: instance
     type: ResourceRef
@@ -68,14 +67,12 @@ parameters:
     imports: instanceId
     description: The ID or resource name of the Memorystore instance.
     required: true
-    immutable: true
     url_param_only: true
     diff_suppress_func: tpgresource.CompareResourceNames
   - name: userId
     type: String
     description: The unique ID (username) of the Token Auth User.
     required: true
-    immutable: true
     url_param_only: true
     diff_suppress_func: tpgresource.CompareResourceNames
 properties:
@@ -92,7 +89,6 @@ properties:
       If specified, Terraform acquires and manages the existing active token with this ID (such as the initial `version-1` token automatically created with the instance or user) and returns an error if it does not exist.
       If omitted, a new token version will be created on the server.
     default_from_api: true
-    immutable: true
     diff_suppress_func: tpgresource.CompareResourceNames
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
   - name: name
@@ -110,5 +106,10 @@ properties:
     output: true
   - name: state
     type: String
-    description: The current state of the Auth Token.
+    description: |
+      The current state of the Auth Token.
+      Possible values:
+      ACTIVE
+      CREATING
+      DELETING
     output: true

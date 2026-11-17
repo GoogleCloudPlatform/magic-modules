@@ -8,6 +8,10 @@ description: |-
 
 Get information about an Auth Token associated with a Google Cloud Memorystore Token Auth User. For more details refer to the [API documentation](https://cloud.google.com/memorystore/docs/valkey/reference/rest/v1/projects.locations.instances.tokenAuthUsers.authTokens).
 
+~> **Warning:** All attributes including the following potentially sensitive
+values will be stored in the raw state as plain text: `token`.
+[Read more about sensitive data in state](https://developer.hashicorp.com/terraform/language/manage-sensitive-data).
+
 ## Example Usage
 
 ```hcl
@@ -33,15 +37,15 @@ The following arguments are supported:
 
 * `token_id` -
   (Required)
-  The ID of the auth token (e.g. `version-1`), or its full resource name.
+  The ID of the auth token (for example, `version-1`), or its full resource name.
 
 * `location` -
   (Optional)
-  The location of the Memorystore instance. If not provided, the provider region is used.
+  The location of the Memorystore instance. When `instance` is provided as a full resource name (`projects/{project}/locations/{location}/instances/{instance}`), `location` is inferred from `instance` if not explicitly set, otherwise falling back to the provider region.
 
 * `project` -
   (Optional)
-  The ID of the project in which the resource belongs. If not provided, the provider project is used.
+  The ID of the project in which the resource belongs. When `instance` is provided as a full resource name (`projects/{project}/locations/{location}/instances/{instance}`), `project` is inferred from `instance` if not explicitly set, otherwise falling back to the provider project.
 
 ## Attributes Reference
 
