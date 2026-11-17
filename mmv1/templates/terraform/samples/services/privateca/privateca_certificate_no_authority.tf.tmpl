@@ -7,7 +7,7 @@ resource "google_privateca_ca_pool" "default" {
 resource "google_privateca_certificate_authority" "default" {
   location = "us-central1"
   pool = google_privateca_ca_pool.default.name
-  certificate_authority_id = "my-authority"
+  certificate_authority_id = "{{index $.ResourceIdVars "certificate_authority_id"}}"
   config {
     subject_config {
       subject {
