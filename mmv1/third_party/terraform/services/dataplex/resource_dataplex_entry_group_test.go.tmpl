@@ -4,7 +4,9 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+{{- if ne $.TargetVersionName "ga" }}
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+{{- end }}
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -70,6 +72,8 @@ resource "google_dataplex_entry_group" "test_entry_group" {
 `, context)
 }
 
+{{- if ne $.TargetVersionName "ga" }}
+
 func TestAccDataplexEntryGroup_type(t *testing.T) {
 	t.Parallel()
 
@@ -80,7 +84,7 @@ func TestAccDataplexEntryGroup_type(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckDataplexEntryGroupDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -139,6 +143,7 @@ func TestAccDataplexEntryGroup_type(t *testing.T) {
 func testAccDataplexEntryGroup_typeContextSet(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_dataplex_entry_group" "test_entry_group" {
+  provider       = google-beta
   entry_group_id = "tf-test-entry-group%{random_suffix}"
   project        = "%{project_name}"
   location       = "us-central1"
@@ -152,6 +157,7 @@ resource "google_dataplex_entry_group" "test_entry_group" {
 func testAccDataplexEntryGroup_typeContextSetUpdated(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_dataplex_entry_group" "test_entry_group" {
+  provider       = google-beta
   entry_group_id = "tf-test-entry-group%{random_suffix}"
   project        = "%{project_name}"
   location       = "us-central1"
@@ -165,6 +171,7 @@ resource "google_dataplex_entry_group" "test_entry_group" {
 func testAccDataplexEntryGroup_typeDefault(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_dataplex_entry_group" "test_entry_group" {
+  provider       = google-beta
   entry_group_id = "tf-test-entry-group%{random_suffix}"
   project        = "%{project_name}"
   location       = "us-central1"
@@ -173,3 +180,4 @@ resource "google_dataplex_entry_group" "test_entry_group" {
 }
 `, context)
 }
+{{- end }}

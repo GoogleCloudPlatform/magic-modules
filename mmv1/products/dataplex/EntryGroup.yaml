@@ -65,6 +65,15 @@ samples:
           entry_group_name: entry-group-full
         test_env_vars:
           project_name: PROJECT_NAME
+  - name: dataplex_entry_group_context_set
+    primary_resource_id: test_entry_group_context_set
+    min_version: beta
+    steps:
+      - name: dataplex_entry_group_context_set
+        resource_id_vars:
+          entry_group_name: entry-group-context-set
+        test_env_vars:
+          project_name: PROJECT_NAME
 parameters:
   - name: location
     type: String
@@ -123,4 +132,5 @@ properties:
       The type of this EntryGroup. The default value is an empty string.
       Recognised values include:
       * `context-set`: EntryGroup containing context set data assets.
+    min_version: beta
     immutable: true
