@@ -613,10 +613,12 @@ properties:
       information relevant to the app's details or intended usages.
   - name: modelSettings
     type: NestedObject
+    default_from_api: true
     description: Model settings contains various configurations for the LLM model.
     properties:
       - name: model
         type: String
+        default_from_api: true
         description: |-
           The LLM model that the agent should use.
           If not set, the agent will inherit the model from its parent agent.
