@@ -19,19 +19,23 @@ references:
   guides:
     Parameter templates overview: https://cloud.google.com/secret-manager/parameter-manager/docs/parameter-templates-overview
   api: https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.templates.versions
-docs:
-min_version: beta
 base_url: projects/{{project}}/locations/global/templates/{{template}}/versions
+min_version: beta
 self_link: projects/{{project}}/locations/global/templates/{{template}}/versions/{{template_version_id}}
 create_url: projects/{{project}}/locations/global/templates/{{template}}/versions?template_version_id={{template_version_id}}
 update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/global/templates/{{template}}/versions/{{template_version_id}}
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
+sweeper:
+  parent:
+    resource_type: google_parameter_manager_template
+    parent_field: name
+    parent_field_extract_name: true
+    child_field: template
+custom_code:
+  encoder: templates/terraform/encoders/parameter_manager_template_version.go.tmpl
+  post_create: templates/terraform/post_create/parameter_manager_template_version.go.tmpl
 samples:
   - name: template_version_basic
     primary_resource_id: template-version-basic
@@ -40,23 +44,37 @@ samples:
       - name: template_version_basic
         resource_id_vars:
           template_id: template
-          template_version_id: template_version
+          template_version_id: template-version
         vars:
           disabled: null
       - name: template_version_basic
         resource_id_vars:
           template_id: template
-          template_version_id: template_version
+          template_version_id: template-version
         vars:
           disabled: true
         ignore_read_extra:
-          - payload
+          - template_data
       - name: template_version_basic
         resource_id_vars:
           template_id: template
-          template_version_id: template_version
+          template_version_id: template-version
         vars:
           disabled: false
+      - name: template_version_basic
+        resource_id_vars:
+          template_id: template
+          template_version_id: template-version
+        vars:
+          disabled: true
+        ignore_read_extra:
+          - template_data
+      - name: template_version_basic
+        resource_id_vars:
+          template_id: template
+          template_version_id: template-version
+        vars:
+          disabled: null
   - name: template_version_with_json_format
     primary_resource_id: template-version-with-json-format
     min_version: beta
@@ -64,15 +82,45 @@ samples:
       - name: template_version_with_json_format
         resource_id_vars:
           template_id: template
-          template_version_id: template_version
+          template_version_id: template-version
+  - name: template_version_disabled
+    primary_resource_id: template-version-disabled
+    min_version: beta
+    exclude_basic_doc: true
+    steps:
+      - name: template_version_disabled
+        config_path: templates/terraform/samples/services/parametermanager/template_version_basic.tf.tmpl
+        resource_id_vars:
+          template_id: template
+          template_version_id: template-version
+        test_env_vars:
+          project: PROJECT_NAME
+        vars:
+          disabled: true
+        ignore_read_extra:
+          - template_data
+      - name: template_version_disabled
+        config_path: templates/terraform/samples/services/parametermanager/template_version_basic.tf.tmpl
+        resource_id_vars:
+          template_id: template
+          template_version_id: template-version
+        test_env_vars:
+          project: PROJECT_NAME
+        vars:
+          disabled: false
 parameters:
   - name: template
     type: String
     description: |
-      ID of the Parameter Manager Template resource.
+      The Template resource to attach the Template Version to. This can be either the
+      `template_id` or the full resource name in the format
+      `projects/{{project}}/locations/global/templates/{{template_id}}`.
     url_param_only: true
     required: true
     immutable: true
+    diff_suppress_func: tpgresource.CompareResourceNames
+    validation:
+      regex: ^(projects/[^/\s]+/locations/global/templates/[^/\s]+|[^/\s]+)$
   - name: templateVersionId
     type: String
     description: |
@@ -101,11 +149,14 @@ properties:
     type: Boolean
     send_empty_value: true
     description: |
-      The current state of the Template Version. This field is only applicable for updating Template Version.
+      The current state of the Template Version. When set to `true`, the Template Version is
+      disabled and API reads (including `terraform import` of an already-disabled version) omit
+      `template_data` until re-enabled.
   - name: payload
     type: NestedObject
     description: |
       The payload content of the Template Version.
+    flatten_object: true
     required: true
     immutable: true
     custom_flatten: templates/terraform/custom_flatten/template_version_payload.go.tmpl

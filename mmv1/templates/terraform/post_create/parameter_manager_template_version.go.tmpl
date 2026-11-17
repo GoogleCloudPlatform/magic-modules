@@ -1,0 +1,35 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+// CreateTemplateVersion always creates the resource in ENABLED state; apply disabled=true via PATCH when set on create.
+if v, ok := d.GetOk("disabled"); ok && v.(bool) {
+	disableURL, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{ $.SelfLinkUri }}")
+	if err != nil {
+		return err
+	}
+	disableURL, err = transport_tpg.AddQueryParams(disableURL, map[string]string{"updateMask": "disabled"})
+	if err != nil {
+		return err
+	}
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "PATCH",
+		Project:   billingProject,
+		RawURL:    disableURL,
+		UserAgent: userAgent,
+		Body:      map[string]interface{}{"disabled": true},
+		Timeout:   d.Timeout(schema.TimeoutCreate),
+	})
+	if err != nil {
+		return fmt.Errorf("Error disabling {{ $.Name }} %q after create: %s", d.Id(), err)
+	}
+}

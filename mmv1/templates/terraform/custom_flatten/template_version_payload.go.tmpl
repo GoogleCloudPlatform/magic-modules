@@ -11,20 +11,39 @@
 	limitations under the License.
 */ -}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	if v == nil {
-		return d.Get("payload")
-	}
-	original := v.(map[string]interface{})
-	if len(original) == 0 {
-		return d.Get("payload")
-	}
-	transformed := make(map[string]interface{})
-	if dataVal, ok := original["data"]; ok && dataVal != nil {
-		data, err := base64.StdEncoding.DecodeString(dataVal.(string))
-		if err != nil {
-			return err
+	// Parameter Manager omits payload on GET when disabled is true (BASIC view);
+	// preserve prior template_data in state when disabled so refresh does not trigger a ForceNew diff.
+	preserveIfDisabled := func() interface{} {
+		if d == nil {
+			return nil
 		}
-		transformed["template_data"] = string(data)
+		if disabled, ok := d.Get("disabled").(bool); ok && disabled {
+			if existing, ok := d.GetOk("template_data"); ok {
+				return []interface{}{map[string]interface{}{
+					"template_data": existing,
+				}}
+			}
+		}
+		return nil
 	}
-	return []interface{}{transformed}
+
+	if v == nil {
+		return preserveIfDisabled()
+	}
+	original, ok := v.(map[string]interface{})
+	if !ok || len(original) == 0 {
+		return preserveIfDisabled()
+	}
+	dataStr, ok := original["data"].(string)
+	if !ok {
+		return preserveIfDisabled()
+	}
+	data, err := base64.StdEncoding.DecodeString(dataStr)
+	if err != nil {
+		log.Printf("[WARN] Failed to decode {{ $.ResourceMetadata.Name }} payload data: %v", err)
+		return nil
+	}
+	return []interface{}{map[string]interface{}{
+		"template_data": string(data),
+	}}
 }
