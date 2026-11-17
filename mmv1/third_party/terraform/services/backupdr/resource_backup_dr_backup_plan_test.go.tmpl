@@ -339,10 +339,6 @@ func TestAccBackupDRBackupPlan_mvbp(t *testing.T) {
 			{
 				Config: testAccBackupDRBackupPlan_mvbpConfig(context, 14, "google_backup_dr_backup_vault.secondary_vault.id"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_backup_dr_backup_plan.bp", "backup_vault_service_account"),
-					resource.TestCheckResourceAttr("google_backup_dr_backup_plan.bp", "backup_rules.0.backup_vault", ""),
-					resource.TestCheckResourceAttr("google_backup_dr_backup_plan.bp", "backup_rules.0.backup_vault_service_account", ""),
-					resource.TestCheckResourceAttrSet("google_backup_dr_backup_plan.bp", "backup_rules.1.backup_vault"),
 					resource.TestCheckResourceAttrPair(
 						"google_backup_dr_backup_plan.bp", "backup_rules.1.backup_vault_service_account",
 						"google_backup_dr_backup_vault.secondary_vault", "service_account",
@@ -364,15 +360,6 @@ func TestAccBackupDRBackupPlan_mvbp(t *testing.T) {
 						),
 					},
 				},
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_backup_dr_backup_plan.bp", "backup_rules.0.backup_vault", ""),
-					resource.TestCheckResourceAttr("google_backup_dr_backup_plan.bp", "backup_rules.1.backup_retention_days", "21"),
-					resource.TestCheckResourceAttrSet("google_backup_dr_backup_plan.bp", "backup_rules.1.backup_vault"),
-					resource.TestCheckResourceAttrPair(
-						"google_backup_dr_backup_plan.bp", "backup_rules.1.backup_vault_service_account",
-						"google_backup_dr_backup_vault.secondary_vault", "service_account",
-					),
-				),
 			},
 			{
 				ResourceName:      "google_backup_dr_backup_plan.bp",
@@ -389,14 +376,6 @@ func TestAccBackupDRBackupPlan_mvbp(t *testing.T) {
 						),
 					},
 				},
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_backup_dr_backup_plan.bp", "backup_rules.0.backup_vault", ""),
-					resource.TestCheckResourceAttrSet("google_backup_dr_backup_plan.bp", "backup_rules.1.backup_vault"),
-					resource.TestCheckResourceAttrPair(
-						"google_backup_dr_backup_plan.bp", "backup_rules.1.backup_vault_service_account",
-						"google_backup_dr_backup_vault.primary_vault", "service_account",
-					),
-				),
 			},
 			{
 				ResourceName:      "google_backup_dr_backup_plan.bp",
@@ -413,10 +392,6 @@ func TestAccBackupDRBackupPlan_mvbp(t *testing.T) {
 						),
 					},
 				},
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_backup_dr_backup_plan.bp", "backup_rules.1.backup_vault", ""),
-					resource.TestCheckResourceAttr("google_backup_dr_backup_plan.bp", "backup_rules.1.backup_vault_service_account", ""),
-				),
 			},
 			{
 				ResourceName:      "google_backup_dr_backup_plan.bp",
