@@ -1712,21 +1712,35 @@ func stripInitializeParams(instanceMap map[string]interface{}) {
 // on identity_type (true for AGENT_IDENTITY, false for SERVICE_ACCOUNT), whereas
 // an explicit false disables certificates even for AGENT_IDENTITY.
 func isWorkloadIdentityCertConfigured(d tpgresource.TerraformResourceData) bool {
-	rawConfig := d.GetRawConfig()
-	if !rawConfig.IsNull() && rawConfig.IsKnown() && rawConfig.Type().IsObjectType() && rawConfig.Type().HasAttribute("workload_identity_config") {
-		wicConfig := rawConfig.GetAttr("workload_identity_config")
-		if wicConfig.IsKnown() && !wicConfig.IsNull() && wicConfig.CanIterateElements() {
-			if wicConfig.LengthInt() == 0 {
-				return false
+	rawConfig, _ := d.GetRawConfig().Unmark()
+	if !rawConfig.IsNull() {
+		if !rawConfig.IsKnown() || !rawConfig.Type().IsObjectType() || !rawConfig.Type().HasAttribute("workload_identity_config") {
+			return false
+		}
+		wicConfig, _ := rawConfig.GetAttr("workload_identity_config").Unmark()
+		if !wicConfig.IsKnown() || wicConfig.IsNull() || !wicConfig.CanIterateElements() || wicConfig.LengthInt() == 0 {
+			return false
+		}
+		elem, _ := wicConfig.AsValueSlice()[0].Unmark()
+		if !elem.IsKnown() || elem.IsNull() || !elem.Type().IsObjectType() || !elem.Type().HasAttribute("identity_certificate_enabled") {
+			return false
+		}
+		attr, _ := elem.GetAttr("identity_certificate_enabled").Unmark()
+		return attr.IsKnown() && !attr.IsNull()
+	}
+	if rawProvider, ok := d.(interface{ RawValues() map[string]interface{} }); ok {
+		if rawValues := rawProvider.RawValues(); rawValues != nil {
+			if wicSlice, ok := rawValues["workload_identity_config"].([]interface{}); ok && len(wicSlice) > 0 {
+				if wicElem, ok := wicSlice[0].(map[string]interface{}); ok {
+					val, exists := wicElem["identity_certificate_enabled"]
+					return exists && val != nil
+				}
 			}
-			elem := wicConfig.AsValueSlice()[0]
-			if !elem.IsNull() && elem.Type().IsObjectType() && elem.Type().HasAttribute("identity_certificate_enabled") {
-				return !elem.GetAttr("identity_certificate_enabled").IsNull()
-			}
+			return false
 		}
 	}
-	_, ok := d.GetOk("workload_identity_config.0.identity_certificate_enabled")
-	return ok || d.HasChange("workload_identity_config.0.identity_certificate_enabled")
+	_, ok := d.GetOkExists("workload_identity_config.0.identity_certificate_enabled")
+	return ok
 }
 
 func expandWorkloadIdentityConfig(d tpgresource.TerraformResourceData) map[string]interface{} {
@@ -1734,29 +1748,49 @@ func expandWorkloadIdentityConfig(d tpgresource.TerraformResourceData) map[strin
 	if !ok {
 		return nil
 	}
-	s := iek.([]interface{})
-	if len(s) == 0 || s[0] == nil {
+	s, ok := iek.([]interface{})
+	if !ok || len(s) == 0 || s[0] == nil {
 		return nil
 	}
 
-	wicRes := s[0].(map[string]interface{})
+	wicRes, ok := s[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
 	wicMap := map[string]interface{}{}
-	if v, ok := wicRes["identity"]; ok && v != nil && v.(string) != "" {
-		wicMap["identity"] = v.(string)
+	if v, ok := wicRes["identity"].(string); ok && v != "" {
+		wicMap["identity"] = v
 	}
 	if isWorkloadIdentityCertConfigured(d) {
-		wicMap["identityCertificateEnabled"] = wicRes["identity_certificate_enabled"].(bool)
+		if v, ok := wicRes["identity_certificate_enabled"].(bool); ok {
+			wicMap["identityCertificateEnabled"] = v
+		}
 	}
 	{{- if ne $.TargetVersionName "ga" }}
-	if v, ok := wicRes["identity_type"]; ok && v != nil && v.(string) != "" {
-		wicMap["identityType"] = v.(string)
+	if v, ok := wicRes["identity_type"].(string); ok && v != "" {
+		wicMap["identityType"] = v
 	}
 	{{- end }}
+	if len(wicMap) == 0 {
+		return nil
+	}
 	return wicMap
 }
 
 func flattenWorkloadIdentityConfig(v map[string]interface{}) []map[string]interface{} {
-	if v == nil {
+	if len(v) == 0 {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"identity":                     v["identity"],
+			"identity_certificate_enabled": v["identityCertificateEnabled"],
+		},
+	}
+}
+
+func flattenInstanceWorkloadIdentityConfig(v map[string]interface{}) []map[string]interface{} {
+	if len(v) == 0 {
 		return nil
 	}
 	return []map[string]interface{}{

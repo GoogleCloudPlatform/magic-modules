@@ -1778,10 +1778,15 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
 	}
 	if wic := expandWorkloadIdentityConfig(d); wic != nil {
-		instanceProperties.WorkloadIdentityConfig = &compute.WorkloadIdentityConfig{
-			Identity:                   wic["identity"].(string),
-			IdentityCertificateEnabled: wic["identityCertificateEnabled"].(bool),
+		wicTyped := &compute.WorkloadIdentityConfig{}
+		if v, ok := wic["identity"].(string); ok {
+			wicTyped.Identity = v
 		}
+		if v, ok := wic["identityCertificateEnabled"].(bool); ok {
+			wicTyped.IdentityCertificateEnabled = v
+			wicTyped.ForceSendFields = append(wicTyped.ForceSendFields, "IdentityCertificateEnabled")
+		}
+		instanceProperties.WorkloadIdentityConfig = wicTyped
 	}
 	if cic := expandConfidentialInstanceConfig(d); cic != nil {
 		instanceProperties.ConfidentialInstanceConfig = &compute.ConfidentialInstanceConfig{

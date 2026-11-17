@@ -196,43 +196,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 	}
 
 	sa := d.Get("service_account").([]interface{})
-	if len(sa) == 0 {
-		hasAgentIdentity := false
-		if wic, ok := instanceBody["workloadIdentityConfig"].(map[string]interface{}); ok && wic != nil {
-			if idType, ok := wic["identityType"].(string); ok && idType == "AGENT_IDENTITY" {
-				hasAgentIdentity = true
-			}
-		}
-		if !hasAgentIdentity {
-			var miWic map[string]interface{}
-			if props, ok := miRes["instanceProperties"].(map[string]interface{}); ok && props != nil {
-				if w, ok := props["workloadIdentityConfig"].(map[string]interface{}); ok {
-					miWic = w
-				}
-			}
-			if miWic == nil {
-				if props, ok := miRes["sourceInstanceProperties"].(map[string]interface{}); ok && props != nil {
-					if w, ok := props["workloadIdentityConfig"].(map[string]interface{}); ok {
-						miWic = w
-					}
-				}
-			}
-			if miWic != nil {
-				if idType, ok := miWic["identityType"].(string); ok && idType == "AGENT_IDENTITY" {
-					hasAgentIdentity = true
-				}
-			}
-		}
-
-		if !hasAgentIdentity {
-			// ServiceAccount is required when the image is from a different project
-			instanceBody["serviceAccounts"] = []interface{}{
-				map[string]interface{}{
-					"email": "default",
-				},
-			}
-		}
-	}
+	adjustInstanceFromMachineImageWorkloadIdentityConfig(instanceBody, miRes, len(sa) > 0)
 
 	disks, err := adjustInstanceFromMachineImageDisks(d, config, miRes, project)
 	if err != nil {
@@ -483,6 +447,67 @@ func flattenSourceMachineImageEncryptionKey(key map[string]interface{}) []map[st
 	}
 
 	return []map[string]interface{}{m}
+}
+
+// adjustInstanceFromMachineImageWorkloadIdentityConfig reconciles workload_identity_config
+// and default serviceAccounts injection on google_compute_instance_from_machine_image
+// against the source machine image's instanceProperties, checking instance-level overrides
+// before falling back to machine-image inheritance.
+func adjustInstanceFromMachineImageWorkloadIdentityConfig(instanceBody, miRes map[string]interface{}, hasServiceAccount bool) {
+	miProps, _ := miRes["instanceProperties"].(map[string]interface{})
+	miWic, _ := miProps["workloadIdentityConfig"].(map[string]interface{})
+
+	wic, hasWic := instanceBody["workloadIdentityConfig"].(map[string]interface{})
+	var id, idType string
+	var hasID, hasIDType, hasCert bool
+	if hasWic && len(wic) > 0 {
+		id, hasID = wic["identity"].(string)
+		idType, hasIDType = wic["identityType"].(string)
+		_, hasCert = wic["identityCertificateEnabled"]
+	}
+
+	effectiveIDType := ""
+	if hasIDType && idType != "" {
+		effectiveIDType = idType
+	} else if hasID && id != "" {
+		effectiveIDType = "IDENTITY_TYPE_UNSPECIFIED"
+	} else if miWic != nil {
+		effectiveIDType, _ = miWic["identityType"].(string)
+	}
+
+	if miWic != nil {
+		miID, _ := miWic["identity"].(string)
+		if hasWic && len(wic) > 0 {
+			if miID != "" && (!hasID || id == "") && (effectiveIDType == "AGENT_IDENTITY" || effectiveIDType == "SERVICE_ACCOUNT") {
+				wic["identity"] = ""
+			}
+			if _, miHasCert := miWic["identityCertificateEnabled"]; miHasCert && !hasCert && ((hasIDType && idType != "") || (hasID && id != "")) {
+				wic["identityCertificateEnabled"] = (effectiveIDType == "AGENT_IDENTITY")
+			}
+			if miType, _ := miWic["identityType"].(string); miType != "" && miType != "IDENTITY_TYPE_UNSPECIFIED" && hasID && id != "" && (!hasIDType || idType == "") {
+				wic["identityType"] = "IDENTITY_TYPE_UNSPECIFIED"
+			}
+		} else if effectiveIDType == "AGENT_IDENTITY" && miID != "" && miWic["resourceDelegation"] == nil && miWic["signedDelegationRuleReceipt"] == nil {
+			instanceBody["workloadIdentityConfig"] = map[string]interface{}{
+				"identity": "",
+			}
+		}
+	}
+
+	if !hasServiceAccount {
+		if effectiveIDType == "AGENT_IDENTITY" {
+			if miSAs, ok := miProps["serviceAccounts"].([]interface{}); ok && len(miSAs) > 0 {
+				instanceBody["serviceAccounts"] = []interface{}{}
+			}
+		} else {
+			// ServiceAccount is required when the image is from a different project
+			instanceBody["serviceAccounts"] = []interface{}{
+				map[string]interface{}{
+					"email": "default",
+				},
+			}
+		}
+	}
 }
 
 func init() {

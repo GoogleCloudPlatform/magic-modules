@@ -235,7 +235,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		}
 	}
 
-	if wicMap := expandWorkloadIdentityConfig(d); wicMap != nil {
+	if wicMap := expandWorkloadIdentityConfig(d); len(wicMap) > 0 {
 		wic := &compute.WorkloadIdentityConfig{}
 		if v, ok := wicMap["identity"].(string); ok {
 			wic.Identity = v
