@@ -241,6 +241,7 @@ func resourceComputeInstanceFromTemplateCreate(d *schema.ResourceData, meta inte
 			instance["partnerMetadata"] = partnerMetadataConverted
 		}
 	}
+	adjustInstanceFromTemplateWorkloadIdentityConfig(instance, it, len(d.Get("service_account").([]interface{})) > 0)
 	{{- end }}
 
 	delete(instance, "canIpForward")
@@ -431,6 +432,54 @@ func adjustInstanceFromTemplateDisks(d *schema.ResourceData, config *transport_t
 
 	return disks, nil
 }
+
+{{- if ne $.TargetVersionName "ga" }}
+// adjustInstanceFromTemplateWorkloadIdentityConfig reconciles workload_identity_config
+// overrides on google_compute_instance_from_template against the source template's
+// properties because GCE merges workloadIdentityConfig subfields via leaf-level JSON
+// field masks when sourceInstanceTemplate is specified.
+func adjustInstanceFromTemplateWorkloadIdentityConfig(instance, it map[string]interface{}, hasServiceAccount bool) {
+	wic, ok := instance["workloadIdentityConfig"].(map[string]interface{})
+	if !ok || len(wic) == 0 {
+		return
+	}
+	itProps, _ := it["properties"].(map[string]interface{})
+	tplWic, _ := itProps["workloadIdentityConfig"].(map[string]interface{})
+
+	id, hasID := wic["identity"].(string)
+	idType, hasIDType := wic["identityType"].(string)
+	_, hasCert := wic["identityCertificateEnabled"]
+
+	effectiveIDType := ""
+	if hasIDType && idType != "" {
+		effectiveIDType = idType
+	} else if hasID && id != "" {
+		effectiveIDType = "IDENTITY_TYPE_UNSPECIFIED"
+	} else if tplWic != nil {
+		effectiveIDType, _ = tplWic["identityType"].(string)
+	}
+
+	if tplWic != nil {
+		if tplID, _ := tplWic["identity"].(string); tplID != "" && (!hasID || id == "") {
+			if effectiveIDType == "AGENT_IDENTITY" || effectiveIDType == "SERVICE_ACCOUNT" {
+				wic["identity"] = ""
+			}
+		}
+		if _, tplHasCert := tplWic["identityCertificateEnabled"]; tplHasCert && !hasCert && ((hasIDType && idType != "") || (hasID && id != "")) {
+			wic["identityCertificateEnabled"] = (effectiveIDType == "AGENT_IDENTITY")
+		}
+		if tplType, _ := tplWic["identityType"].(string); tplType != "" && tplType != "IDENTITY_TYPE_UNSPECIFIED" && hasID && id != "" && (!hasIDType || idType == "") {
+			wic["identityType"] = "IDENTITY_TYPE_UNSPECIFIED"
+		}
+	}
+
+	if effectiveIDType == "AGENT_IDENTITY" && !hasServiceAccount {
+		if tplSAs, ok := itProps["serviceAccounts"].([]interface{}); ok && len(tplSAs) > 0 {
+			instance["serviceAccounts"] = []interface{}{}
+		}
+	}
+}
+{{- end }}
 
 func init() {
 	registry.Schema{
