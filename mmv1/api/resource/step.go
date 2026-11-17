@@ -18,9 +18,11 @@ import (
 	"fmt"
 	"io/fs"
 	"log"
+	"maps"
 	"net/url"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"text/template" // NOLINT
@@ -52,6 +54,7 @@ var (
 	testEnvVarUsageRegexp    = regexp.MustCompile(`{{index \$\.TestEnvVars "([a-zA-Z_]*)"}}`)
 	varUsageRegexp           = regexp.MustCompile(`{{index \$\.Vars "([a-zA-Z_]*)"}}`)
 	resourceIdVarUsageRegexp = regexp.MustCompile(`{{index \$\.ResourceIdVars "([a-zA-Z_]*)"}}`)
+	testPlaceholderRegexp    = regexp.MustCompile(`%\{([^{}]+)\}`)
 )
 
 type Step struct {
@@ -141,9 +144,11 @@ type Step struct {
 
 	DocumentationHCLText string            `yaml:"-"`
 	TestHCLText          string            `yaml:"-"`
+	IamHCLText           string            `yaml:"-"`
 	OicsHCLText          string            `yaml:"-"`
 	PrimaryResourceId    string            `yaml:"-"`
 	TestContextVars      map[string]string `yaml:"-"`
+	hclLoaded            bool
 }
 
 // StepVars is a map of template variable names to string values that preserves
@@ -224,14 +229,64 @@ func (s *Step) TestDependencies(resourcePrefixPkgMap map[string]string) map[stri
 	return deps
 }
 
+func (s *Step) usedPlaceholders() map[string]bool {
+	used := make(map[string]bool)
+	for _, match := range testPlaceholderRegexp.FindAllStringSubmatch(s.TestHCLText, -1) {
+		used[match[1]] = true
+	}
+	for _, match := range testPlaceholderRegexp.FindAllStringSubmatch(s.IamHCLText, -1) {
+		used[match[1]] = true
+	}
+	return used
+}
+
 func (s *Step) Validate(rName, sName string) (es []error) {
-	for k := range s.Vars {
+	for _, k := range slices.Sorted(maps.Keys(s.Vars)) {
 		if _, exists := s.ResourceIdVars[k]; exists {
 			es = append(es, fmt.Errorf("variable key '%s' cannot exist in both 'vars' and 'resource_id_vars' for step '%s' in sample '%s' of resource '%s'", k, s.Name, sName, rName))
 		}
 	}
 	if s.Name == "" {
 		es = append(es, fmt.Errorf("missing `name` for one step in test sample %s in resource %s", sName, rName))
+	}
+
+	for _, k := range slices.Sorted(maps.Keys(s.OicsVarsOverrides)) {
+		_, inVars := s.Vars[k]
+		_, inResourceIdVars := s.ResourceIdVars[k]
+		if !inVars && !inResourceIdVars {
+			es = append(es, fmt.Errorf("unused variable %q in 'oics_vars_overrides' (not defined in 'vars' or 'resource_id_vars') for step %q in sample %q of resource %q", k, s.Name, sName, rName))
+		}
+	}
+
+	if s.hclLoaded {
+		used := s.usedPlaceholders()
+		for _, k := range slices.Sorted(maps.Keys(s.Vars)) {
+			if !used[k] {
+				es = append(es, fmt.Errorf("unused variable %q in 'vars' for step %q in sample %q of resource %q", k, s.Name, sName, rName))
+			}
+		}
+		for _, k := range slices.Sorted(maps.Keys(s.ResourceIdVars)) {
+			if !used[k] {
+				es = append(es, fmt.Errorf("unused variable %q in 'resource_id_vars' for step %q in sample %q of resource %q", k, s.Name, sName, rName))
+			}
+		}
+		for _, k := range slices.Sorted(maps.Keys(s.TestEnvVars)) {
+			if !used[k] {
+				es = append(es, fmt.Errorf("unused variable %q in 'test_env_vars' for step %q in sample %q of resource %q", k, s.Name, sName, rName))
+			}
+		}
+		for _, k := range slices.Sorted(maps.Keys(s.TestVarsOverrides)) {
+			if !used[k] {
+				es = append(es, fmt.Errorf("unused variable %q in 'test_vars_overrides' for step %q in sample %q of resource %q", k, s.Name, sName, rName))
+			}
+		}
+		for _, k := range slices.Sorted(maps.Keys(s.OicsVarsOverrides)) {
+			_, inVars := s.Vars[k]
+			_, inResourceIdVars := s.ResourceIdVars[k]
+			if (inVars || inResourceIdVars) && !used[k] {
+				es = append(es, fmt.Errorf("unused variable %q in 'oics_vars_overrides' for step %q in sample %q of resource %q", k, s.Name, sName, rName))
+			}
+		}
 	}
 
 	return es
@@ -356,6 +411,7 @@ func (s *Step) SetHCLText(sysfs fs.FS) {
 	s.TestHCLText = re1.ReplaceAllString(s.TestHCLText, "")
 	s.TestHCLText = re2.ReplaceAllString(s.TestHCLText, "")
 	s.TestHCLText = SubstituteTestPaths(s.TestHCLText)
+	s.hclLoaded = true
 
 	// Reset the step
 	s.ResourceIdVars = originalResourceIdVars
