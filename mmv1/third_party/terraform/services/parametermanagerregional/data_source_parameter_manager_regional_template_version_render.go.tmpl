@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"strings"
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -14,6 +15,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+var parameterManagerRegionalTemplateReferenceRegex = regexp.MustCompile(`^projects/([^/\s]+)/locations/([^/\s]+)/templates/([^/\s]+)$`)
 
 func DataSourceParameterManagerRegionalTemplateVersionRender() *schema.Resource {
 	return &schema.Resource{
@@ -30,9 +33,8 @@ func DataSourceParameterManagerRegionalTemplateVersionRender() *schema.Resource 
 				Computed: true,
 			},
 			"template": {
-				Type:             schema.TypeString,
-				Required:         true,
-				DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"template_version_id": {
 				Type:     schema.TypeString,
@@ -56,12 +58,58 @@ func DataSourceParameterManagerRegionalTemplateVersionRender() *schema.Resource 
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"disabled": {
-				Type:     schema.TypeBool,
+			"template_format": {
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
+		UseJSONNumber: true,
 	}
+}
+
+func resolveParameterManagerRegionalTemplateReference(d *schema.ResourceData, config *transport_tpg.Config) (string, string, string, error) {
+	dTemplate, ok := d.Get("template").(string)
+	if !ok {
+		return "", "", "", fmt.Errorf("wrong type for template field (%T), expected string", d.Get("template"))
+	}
+	if dTemplate == "" {
+		return "", "", "", fmt.Errorf("template field cannot be empty")
+	}
+
+	parts := parameterManagerRegionalTemplateReferenceRegex.FindStringSubmatch(dTemplate)
+	if len(parts) == 4 {
+		project := parts[1]
+		location := parts[2]
+		if dProject, ok := d.Get("project").(string); !ok {
+			return "", "", "", fmt.Errorf("wrong type for project (%T), expected string", d.Get("project"))
+		} else if dProject != "" && dProject != project {
+			return "", "", "", fmt.Errorf("project field value (%s) does not match project of regional template (%s).", dProject, project)
+		}
+		if dLocation, ok := d.Get("location").(string); !ok {
+			return "", "", "", fmt.Errorf("wrong type for location (%T), expected string", d.Get("location"))
+		} else if dLocation != "" && dLocation != location {
+			return "", "", "", fmt.Errorf("location field value (%s) does not match location of regional template (%s).", dLocation, location)
+		}
+		return project, location, parts[3], nil
+	}
+
+	if strings.ContainsAny(dTemplate, "/ \t\n\r") {
+		return "", "", "", fmt.Errorf("invalid template reference (%s), expected template_id or projects/{project}/locations/{location}/templates/{template_id}", dTemplate)
+	}
+
+	dLocation, ok := d.Get("location").(string)
+	if !ok {
+		return "", "", "", fmt.Errorf("wrong type for location (%T), expected string", d.Get("location"))
+	}
+	if dLocation == "" {
+		return "", "", "", fmt.Errorf("location must be set when providing only regional template name")
+	}
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return "", "", "", fmt.Errorf("error fetching project for regional template: %s", err)
+	}
+	return project, dLocation, dTemplate, nil
 }
 
 func dataSourceParameterManagerRegionalTemplateVersionRenderRead(d *schema.ResourceData, meta interface{}) error {
@@ -71,46 +119,15 @@ func dataSourceParameterManagerRegionalTemplateVersionRenderRead(d *schema.Resou
 		return err
 	}
 
-	templateRegex := regexp.MustCompile("projects/(.+)/locations/(.+)/templates/(.+)$")
-	dTemplate, ok := d.Get("template").(string)
-	if !ok {
-		return fmt.Errorf("wrong type for template field (%T), expected string", d.Get("template"))
-	}
-
-	parts := templateRegex.FindStringSubmatch(dTemplate)
-	var project string
-
-	if len(parts) == 4 {
-		project = parts[1]
-		if dProject, ok := d.Get("project").(string); !ok {
-			return fmt.Errorf("wrong type for project (%T), expected string", d.Get("project"))
-		} else if dProject != "" && dProject != project {
-			return fmt.Errorf("project field value (%s) does not match project of regional template (%s).", dProject, project)
-		}
-
-		if dLocation, ok := d.Get("location").(string); !ok {
-			return fmt.Errorf("wrong type for location (%T), expected string", d.Get("location"))
-		} else if dLocation != "" && dLocation != parts[2] {
-			return fmt.Errorf("location field value (%s) does not match location of regional template (%s).", dLocation, parts[2])
-		}
-
-		if err := d.Set("location", parts[2]); err != nil {
-			return fmt.Errorf("error setting location: %s", err)
-		}
-		if err := d.Set("template", parts[3]); err != nil {
-			return fmt.Errorf("error setting template: %s", err)
-		}
-	} else {
-		project, err = tpgresource.GetProject(d, config)
-		if err != nil {
-			return fmt.Errorf("error fetching project for regional template: %s", err)
-		}
-		if dLocation, ok := d.Get("location").(string); ok && dLocation == "" {
-			return fmt.Errorf("location must be set when providing only regional template name")
-		}
+	project, location, templateID, err := resolveParameterManagerRegionalTemplateReference(d, config)
+	if err != nil {
+		return err
 	}
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("error setting project: %s", err)
+	}
+	if err := d.Set("location", location); err != nil {
+		return fmt.Errorf("error setting location: %s", err)
 	}
 
 	dTemplateVersionId, ok := d.Get("template_version_id").(string)
@@ -123,20 +140,39 @@ func dataSourceParameterManagerRegionalTemplateVersionRenderRead(d *schema.Resou
 		return fmt.Errorf("wrong type for parameter version field (%T), expected string", d.Get("parameter_version"))
 	}
 
-	baseURL, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ParameterManagerRegionalBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/templates/{{"{{"}}template{{"}}"}}/versions/{{"{{"}}template_version_id{{"}}"}}:render")
+	endpointBase, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config))
+	if err != nil {
+		return err
+	}
+	if strings.Contains(endpointBase, "{{"{{"}}location{{"}}"}}") {
+		return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", endpointBase)
+	}
+
+	baseURL := fmt.Sprintf("%sprojects/%s/locations/%s/templates/%s/versions/%s:render",
+		endpointBase,
+		url.PathEscape(project),
+		url.PathEscape(location),
+		url.PathEscape(templateID),
+		url.PathEscape(dTemplateVersionId),
+	)
+
+	reqURL, err := transport_tpg.AddQueryParams(baseURL, map[string]string{
+		"parameter_version": dParameterVersion,
+	})
 	if err != nil {
 		return err
 	}
 
-	params := url.Values{}
-	params.Set("parameter_version", dParameterVersion)
-	reqURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
+	billingProject := project
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
 
 	headers := make(http.Header)
 	regionalTemplateVersion, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
-		Project:   project,
+		Project:   billingProject,
 		RawURL:    reqURL,
 		UserAgent: userAgent,
 		Headers:   headers,
@@ -145,22 +181,19 @@ func dataSourceParameterManagerRegionalTemplateVersionRenderRead(d *schema.Resou
 		return fmt.Errorf("error retrieving rendered parameter manager regional template version: %s", err.Error())
 	}
 
-	isDisabled, ok := regionalTemplateVersion["disabled"]
-	if ok && isDisabled.(bool) {
-		return fmt.Errorf("regional template version %s is in DISABLED state.", dTemplateVersionId)
-	}
-
-	nameValue, ok := regionalTemplateVersion["templateVersion"]
-	if !ok {
+	nameStr, ok := regionalTemplateVersion["templateVersion"].(string)
+	if !ok || nameStr == "" {
 		return fmt.Errorf("read response didn't contain critical fields. Read may not have succeeded.")
 	}
 
-	if err := d.Set("name", nameValue.(string)); err != nil {
+	if err := d.Set("name", nameStr); err != nil {
 		return fmt.Errorf("error reading regionalTemplateVersion: %s", err)
 	}
 
-	if err := d.Set("disabled", false); err != nil {
-		return fmt.Errorf("error setting disabled: %s", err)
+	if templateFormat, ok := regionalTemplateVersion["templateFormat"].(string); ok {
+		if err := d.Set("template_format", templateFormat); err != nil {
+			return fmt.Errorf("error setting template_format: %s", err)
+		}
 	}
 
 	if payloadMap, ok := regionalTemplateVersion["payload"].(map[string]interface{}); ok && payloadMap != nil {
@@ -185,7 +218,7 @@ func dataSourceParameterManagerRegionalTemplateVersionRenderRead(d *schema.Resou
 		}
 	}
 
-	d.SetId(nameValue.(string))
+	d.SetId(fmt.Sprintf("%s?parameter_version=%s", nameStr, dParameterVersion))
 	return nil
 }
 

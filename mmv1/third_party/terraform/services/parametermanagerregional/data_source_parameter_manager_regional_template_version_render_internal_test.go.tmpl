@@ -1,0 +1,182 @@
+package parametermanagerregional
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"strings"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func TestUnitDataSourceParameterManagerRegionalTemplateVersionRender_resolveTemplateReference(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		name           string
+		raw            map[string]interface{}
+		providerProj   string
+		wantProject    string
+		wantLocation   string
+		wantTemplateID string
+		wantTemplate   string
+		wantErrSubstr  string
+	}{
+		{
+			name: "short template_id with location and provider project",
+			raw: map[string]interface{}{
+				"location":            "us-central1",
+				"template":            "my-regional-template",
+				"template_version_id": "v1",
+				"parameter_version":   "projects/default-proj/locations/us-central1/parameters/p1/versions/v1",
+			},
+			providerProj:   "default-proj",
+			wantProject:    "default-proj",
+			wantLocation:   "us-central1",
+			wantTemplateID: "my-regional-template",
+			wantTemplate:   "my-regional-template",
+		},
+		{
+			name: "short template_id with explicit project and location",
+			raw: map[string]interface{}{
+				"project":             "explicit-proj",
+				"location":            "europe-west1",
+				"template":            "my-regional-template",
+				"template_version_id": "v1",
+				"parameter_version":   "projects/explicit-proj/locations/europe-west1/parameters/p1/versions/v1",
+			},
+			providerProj:   "default-proj",
+			wantProject:    "explicit-proj",
+			wantLocation:   "europe-west1",
+			wantTemplateID: "my-regional-template",
+			wantTemplate:   "my-regional-template",
+		},
+		{
+			name: "full regional template resource name extracts project and location and preserves template in state",
+			raw: map[string]interface{}{
+				"template":            "projects/tmpl-proj/locations/us-central1/templates/my-regional-template",
+				"template_version_id": "v1",
+				"parameter_version":   "projects/tmpl-proj/locations/us-central1/parameters/p1/versions/v1",
+			},
+			providerProj:   "default-proj",
+			wantProject:    "tmpl-proj",
+			wantLocation:   "us-central1",
+			wantTemplateID: "my-regional-template",
+			wantTemplate:   "projects/tmpl-proj/locations/us-central1/templates/my-regional-template",
+		},
+		{
+			name: "full regional template resource name with matching explicit project and location",
+			raw: map[string]interface{}{
+				"project":             "tmpl-proj",
+				"location":            "us-central1",
+				"template":            "projects/tmpl-proj/locations/us-central1/templates/my-regional-template",
+				"template_version_id": "v1",
+				"parameter_version":   "projects/tmpl-proj/locations/us-central1/parameters/p1/versions/v1",
+			},
+			providerProj:   "default-proj",
+			wantProject:    "tmpl-proj",
+			wantLocation:   "us-central1",
+			wantTemplateID: "my-regional-template",
+			wantTemplate:   "projects/tmpl-proj/locations/us-central1/templates/my-regional-template",
+		},
+		{
+			name: "project mismatch between explicit project and full regional template reference",
+			raw: map[string]interface{}{
+				"project":             "other-proj",
+				"template":            "projects/tmpl-proj/locations/us-central1/templates/my-regional-template",
+				"template_version_id": "v1",
+				"parameter_version":   "projects/tmpl-proj/locations/us-central1/parameters/p1/versions/v1",
+			},
+			providerProj:  "default-proj",
+			wantErrSubstr: "project field value (other-proj) does not match project of regional template (tmpl-proj)",
+		},
+		{
+			name: "location mismatch between explicit location and full regional template reference",
+			raw: map[string]interface{}{
+				"location":            "us-east1",
+				"template":            "projects/tmpl-proj/locations/us-central1/templates/my-regional-template",
+				"template_version_id": "v1",
+				"parameter_version":   "projects/tmpl-proj/locations/us-central1/parameters/p1/versions/v1",
+			},
+			providerProj:  "default-proj",
+			wantErrSubstr: "location field value (us-east1) does not match location of regional template (us-central1)",
+		},
+		{
+			name: "missing location when using short template_id",
+			raw: map[string]interface{}{
+				"template":            "my-regional-template",
+				"template_version_id": "v1",
+				"parameter_version":   "projects/default-proj/locations/us-central1/parameters/p1/versions/v1",
+			},
+			providerProj:  "default-proj",
+			wantErrSubstr: "location must be set when providing only regional template name",
+		},
+		{
+			name: "missing project when using short template_id",
+			raw: map[string]interface{}{
+				"location":            "us-central1",
+				"template":            "my-regional-template",
+				"template_version_id": "v1",
+				"parameter_version":   "projects/tmpl-proj/locations/us-central1/parameters/p1/versions/v1",
+			},
+			providerProj:  "",
+			wantErrSubstr: "error fetching project for regional template",
+		},
+		{
+			name: "unanchored prefix in regional template reference rejected",
+			raw: map[string]interface{}{
+				"template":            "extra/projects/tmpl-proj/locations/us-central1/templates/my-regional-template",
+				"template_version_id": "v1",
+				"parameter_version":   "projects/tmpl-proj/locations/us-central1/parameters/p1/versions/v1",
+			},
+			providerProj:  "default-proj",
+			wantErrSubstr: "invalid template reference",
+		},
+		{
+			name: "version path passed to template field rejected",
+			raw: map[string]interface{}{
+				"template":            "projects/tmpl-proj/locations/us-central1/templates/my-regional-template/versions/v1",
+				"template_version_id": "v1",
+				"parameter_version":   "projects/tmpl-proj/locations/us-central1/parameters/p1/versions/v1",
+			},
+			providerProj:  "default-proj",
+			wantErrSubstr: "invalid template reference",
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			d := schema.TestResourceDataRaw(t, DataSourceParameterManagerRegionalTemplateVersionRender().Schema, tc.raw)
+			cfg := &transport_tpg.Config{Project: tc.providerProj}
+
+			gotProject, gotLocation, gotTemplateID, err := resolveParameterManagerRegionalTemplateReference(d, cfg)
+			if tc.wantErrSubstr != "" {
+				if err == nil {
+					t.Fatalf("expected error containing %q, got nil (project=%q, location=%q, templateID=%q)", tc.wantErrSubstr, gotProject, gotLocation, gotTemplateID)
+				}
+				if !strings.Contains(err.Error(), tc.wantErrSubstr) {
+					t.Fatalf("expected error containing %q, got %q", tc.wantErrSubstr, err.Error())
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if gotProject != tc.wantProject {
+				t.Errorf("project = %q, want %q", gotProject, tc.wantProject)
+			}
+			if gotLocation != tc.wantLocation {
+				t.Errorf("location = %q, want %q", gotLocation, tc.wantLocation)
+			}
+			if gotTemplateID != tc.wantTemplateID {
+				t.Errorf("templateID = %q, want %q", gotTemplateID, tc.wantTemplateID)
+			}
+			if gotStateTemplate := d.Get("template").(string); gotStateTemplate != tc.wantTemplate {
+				t.Errorf("d.Get(\"template\") = %q, want %q", gotStateTemplate, tc.wantTemplate)
+			}
+		})
+	}
+}
+{{- end }}
