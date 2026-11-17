@@ -834,11 +834,11 @@ The `specific_reservation` block supports:
 
 <a name="nested_workload_identity_config"></a>The `workload_identity_config` block supports:
 
-* `identity` - (Optional) Identity SPIFFE id.
+* `identity` - (Optional) Identity SPIFFE id. Required unless `identity_type` is specified in [Beta](../guides/provider_versions.html.markdown); must be omitted when `identity_type` is `AGENT_IDENTITY`.
 
-* `identity_certificate_enabled` - (Optional) Specifies whether identity certificates are enabled.
+* `identity_certificate_enabled` - (Optional) Specifies whether identity certificates are enabled. Required unless `identity_type` is specified in [Beta](../guides/provider_versions.html.markdown); when omitted with `identity_type`, defaults to `true` for `AGENT_IDENTITY` and `false` for `SERVICE_ACCOUNT`.
 
-* `identity_type` - (Optional, [Beta](../guides/provider_versions.html.markdown)) The type of identity to use. Possible values include: `IDENTITY_TYPE_UNSPECIFIED`, `SERVICE_ACCOUNT`, and `AGENT_IDENTITY`.
+* `identity_type` - (Optional, [Beta](../guides/provider_versions.html.markdown)) The type of identity to use, such as `SERVICE_ACCOUNT` or `AGENT_IDENTITY`. Note that `service_account` cannot be configured when `identity_type` is `AGENT_IDENTITY`. See the [Compute Engine instanceTemplates REST reference](https://cloud.google.com/compute/docs/reference/rest/beta/instanceTemplates) for supported values.
 
 ## Attributes Reference
 

@@ -127,14 +127,6 @@ var (
 		"shielded_instance_config.0.enable_vtpm",
 		"shielded_instance_config.0.enable_integrity_monitoring",
 	}
-
-	workloadIdentityConfigKeys = []string{
-		"workload_identity_config.0.identity",
-		"workload_identity_config.0.identity_certificate_enabled",
-		{{- if ne $.TargetVersionName "ga" }}
-		"workload_identity_config.0.identity_type",
-		{{- end }}
-	}
 )
 
 // This checks if the project provided in subnetwork's self_link matches
@@ -174,6 +166,12 @@ func ValidateSubnetworkProjectFunc(d tpgresource.TerraformResourceDiff) error {
 func forceNewIfNetworkIPNotUpdatable(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	// separate func to allow unit testing
 	return forceNewIfNetworkIPNotUpdatableFunc(d)
+}
+
+func workloadIdentityConfigForceNewCustomDiff() schema.CustomizeDiffFunc {
+	return customdiff.ForceNewIf("workload_identity_config", func(_ context.Context, d *schema.ResourceDiff, meta interface{}) bool {
+		return d.Id() != "" && d.HasChange("workload_identity_config")
+	})
 }
 
 func forceNewIfNetworkIPNotUpdatableFunc(d tpgresource.TerraformResourceDiff) error {
@@ -1754,31 +1752,34 @@ be from 0 to 999,999,999 inclusive.`,
 				Type:        schema.TypeList,
 				MaxItems:    1,
 				Optional:    true,
-				ForceNew:    true,
 				Description: `Workload identity config.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"identity": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Computed:     true,
-							ForceNew:     true,
-							Description:  `Identity SPIFFE id.`,
+							Type:        schema.TypeString,
+							Optional:    true,
+							{{- if ne $.TargetVersionName "ga" }}
+							Computed:    true,
+							{{- end }}
+							ForceNew:    true,
+							Description: `Identity SPIFFE id.`,
 						},
 						"identity_certificate_enabled": {
-							Type:         schema.TypeBool,
-							Optional:     true,
-							Computed:     true,
-							ForceNew:     true,
-							Description:  `Specifies whether identity certificates are enabled.`,
+							Type:        schema.TypeBool,
+							Optional:    true,
+							{{- if ne $.TargetVersionName "ga" }}
+							Computed:    true,
+							{{- end }}
+							ForceNew:    true,
+							Description: `Specifies whether identity certificates are enabled.`,
 						},
 						{{- if ne $.TargetVersionName "ga" }}
 						"identity_type": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Computed:     true,
-							ForceNew:     true,
-							Description:  `The type of identity to use.`,
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							ForceNew:    true,
+							Description: `The type of identity to use.`,
 						},
 						{{- end }}
 					},
@@ -1805,6 +1806,7 @@ be from 0 to 999,999,999 inclusive.`,
 			customdiff.ForceNewIf("boot_disk.0.initialize_params.0.provisioned_iops", func(_ context.Context, d *schema.ResourceDiff, meta interface{}) bool {
 				return d.HasChange("boot_disk.0.initialize_params.0.provisioned_iops") && !strings.Contains(d.Get("boot_disk.0.initialize_params.0.type").(string), "hyperdisk")
 			}),
+			workloadIdentityConfigForceNewCustomDiff(),
 			validateSubnetworkProject,
 			forceNewIfNetworkIPNotUpdatable,
 			tpgresource.SetLabelsDiff,
