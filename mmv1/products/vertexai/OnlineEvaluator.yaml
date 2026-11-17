@@ -206,6 +206,24 @@ properties:
                       required: true
                       immutable: true
                       description: The value to compare against.
+                - name: serviceVersion
+                  type: NestedObject
+                  immutable: true
+                  description: |
+                    Filter on the version that served a trace (`service.version`
+                    OTel resource attribute). At most one is allowed. On Vertex AI
+                    Agent Engine, this is the runtime revision id, currently set only
+                    for agents created via v1beta1.
+                  properties:
+                    - name: values
+                      type: Array
+                      required: true
+                      immutable: true
+                      description: |
+                        The values to match exactly (case-sensitive). Requires 1 to 20
+                        values, each at most 128 characters long.
+                      item_type:
+                        type: String
       - name: sessionScope
         type: NestedObject
         immutable: true
@@ -365,6 +383,24 @@ properties:
                       required: true
                       immutable: true
                       description: The value to compare against.
+                - name: serviceVersion
+                  type: NestedObject
+                  immutable: true
+                  description: |
+                    Filter on the versions that served a session (`service.version`
+                    OTel resource attribute); matches if any of them is listed. At most
+                    one is allowed. On Vertex AI Agent Engine, this is the runtime
+                    revision id, currently set only for agents created via v1beta1.
+                  properties:
+                    - name: values
+                      type: Array
+                      required: true
+                      immutable: true
+                      description: |
+                        The values to match exactly (case-sensitive). Requires 1 to 20
+                        values, each at most 128 characters long.
+                      item_type:
+                        type: String
   - name: metricSources
     type: Array
     required: true
