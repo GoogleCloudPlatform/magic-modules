@@ -258,6 +258,8 @@ func (s *Step) Validate(rName, sName string) (es []error) {
 		}
 	}
 
+	// TestSampleSetUp skips steps above TargetVersionName (e.g. min_version: beta
+	// during GA builds), whereas Validate runs on all steps; skip unloaded steps.
 	if s.hclLoaded {
 		used := s.usedPlaceholders()
 		for _, k := range slices.Sorted(maps.Keys(s.Vars)) {
