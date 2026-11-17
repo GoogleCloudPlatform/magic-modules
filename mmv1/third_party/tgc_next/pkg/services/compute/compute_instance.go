@@ -448,7 +448,6 @@ func ResourceComputeInstance() *schema.Resource {
 			"network_interface": {
 				Type:        schema.TypeList,
 				Required:    true,
-				ForceNew:    true,
 				Description: `The networks attached to the instance.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -472,7 +471,6 @@ func ResourceComputeInstance() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Computed:         true,
-							ForceNew:         true,
 							DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 							Description:      `The URL of the network attachment that this interface should connect to in the following format: projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}.`,
 						},
@@ -480,14 +478,12 @@ func ResourceComputeInstance() *schema.Resource {
 						"enable_vpc_scoped_dns": {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							ForceNew:    true,
 							Description: `If true, DNS resolution will be enabled over this interface. Only valid with network_attachment.`,
 						},
 
 						"service_class_id": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							ForceNew:    true,
 							Description: `Producer Service's Service class Id for the region of this network interface. Can only be used with network_attachment. It is not possible to use on its own; however, network_attachment can be used without service_class_id.`,
 						},
 
@@ -500,7 +496,6 @@ func ResourceComputeInstance() *schema.Resource {
 						"vlan": {
 							Type:         schema.TypeInt,
 							Optional:     true,
-							ForceNew:     true,
 							ValidateFunc: validation.IntBetween(2, 255),
 							Description:  `VLAN tag of a dynamic network interface, must be an integer in the range from 2 to 255 inclusively.`,
 						},
@@ -535,7 +530,6 @@ func ResourceComputeInstance() *schema.Resource {
 						"nic_type": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ForceNew:     true,
 							ValidateFunc: validation.StringInSlice([]string{"GVNIC", "VIRTIO_NET", "IDPF", "MRDMA", "IRDMA"}, false),
 							Description:  `The type of vNIC to be used on this interface. Possible values:GVNIC, VIRTIO_NET, IDPF, MRDMA, and IRDMA`,
 						},
@@ -627,21 +621,18 @@ func ResourceComputeInstance() *schema.Resource {
 										Type:        schema.TypeString,
 										Optional:    true,
 										Computed:    true,
-										ForceNew:    true,
 										Description: `The first IPv6 address of the external IPv6 range associated with this instance, prefix length is stored in externalIpv6PrefixLength in ipv6AccessConfig. To use a static external IP address, it must be unused and in the same region as the instance's zone. If not specified, Google Cloud will automatically assign an external IPv6 address from the instance's subnetwork.`,
 									},
 									"external_ipv6_prefix_length": {
 										Type:        schema.TypeString,
 										Optional:    true,
 										Computed:    true,
-										ForceNew:    true,
 										Description: `The prefix length of the external IPv6 range.`,
 									},
 									"name": {
 										Type:        schema.TypeString,
 										Optional:    true,
 										Computed:    true,
-										ForceNew:    true,
 										Description: `The name of this access configuration. In ipv6AccessConfigs, the recommended name is External IPv6.`,
 									},
 									"security_policy": {
@@ -670,7 +661,6 @@ func ResourceComputeInstance() *schema.Resource {
 						"queue_count": {
 							Type:        schema.TypeInt,
 							Optional:    true,
-							ForceNew:    true,
 							Description: `The networking queue count that's specified by users for the network interface. Both Rx and Tx queues will be set to this number. It will be empty if not specified.`,
 						},
 

@@ -198,7 +198,7 @@ func forceNewIfNetworkInterfaceNotUpdatableFunc(d tpgresource.TerraformResourceD
 	}
 
 	if newCount == 0 {
-		if d.HasChange("network_interface") {
+		if rd == nil || d.HasChange("network_interface") {
 			return d.ForceNew("network_interface")
 		}
 		return nil
@@ -220,10 +220,7 @@ func forceNewIfNetworkInterfaceNotUpdatableFunc(d tpgresource.TerraformResourceD
 			if d.HasChange(vlanKey) {
 				return d.ForceNew(vlanKey)
 			}
-			if d.HasChange("network_interface") {
-				return d.ForceNew("network_interface")
-			}
-			continue
+			return d.ForceNew("network_interface")
 		}
 		if d.HasChange(vlanKey) {
 			if err := d.ForceNew(vlanKey); err != nil {
@@ -235,40 +232,129 @@ func forceNewIfNetworkInterfaceNotUpdatableFunc(d tpgresource.TerraformResourceD
 		oldNA, newNA := d.GetChange(naKey)
 		oldNAStr, _ := oldNA.(string)
 		newNAStr, _ := newNA.(string)
-		newSubStr, _ := d.Get(prefix + ".subnetwork").(string)
-		newNetStr, _ := d.Get(prefix + ".network").(string)
 		if rd != nil && !rd.NewValueKnown(naKey) {
 			if d.HasChange(naKey) {
 				if err := d.ForceNew(naKey); err != nil {
 					return err
 				}
+			} else if d.HasChange("network_interface") {
+				return d.ForceNew("network_interface")
 			}
-		} else if d.HasChange(naKey) && newNAStr != "" && !tpgresource.CompareSelfLinkOrResourceName("", oldNAStr, newNAStr, nil) {
+		} else if d.HasChange(naKey) && !tpgresource.CompareSelfLinkOrResourceName("", oldNAStr, newNAStr, nil) {
 			if err := d.ForceNew(naKey); err != nil {
 				return err
 			}
-		} else if oldNAStr != "" && newNAStr == "" && (newSubStr != "" || newNetStr != "") {
-			if d.HasChange(prefix + ".subnetwork") {
-				if err := d.ForceNew(prefix + ".subnetwork"); err != nil {
-					return err
+		} else if oldNAStr != "" {
+			// network_attachment is Optional+Computed: when omitted from HCL while switching to
+			// subnetwork/network, SDKv2 retains oldNAStr in diff, so inspect subnetwork/network/subnetwork_project.
+			for _, switchField := range []string{"subnetwork", "network"} {
+				switchKey := prefix + "." + switchField
+				oldVal, newVal := d.GetChange(switchKey)
+				oldStr, _ := oldVal.(string)
+				newStr, _ := newVal.(string)
+				if rd != nil && !rd.NewValueKnown(switchKey) {
+					if d.HasChange(switchKey) {
+						if err := d.ForceNew(switchKey); err != nil {
+							return err
+						}
+					} else if d.HasChange("network_interface") {
+						return d.ForceNew("network_interface")
+					}
+				} else if d.HasChange(switchKey) && !tpgresource.CompareSelfLinkOrResourceName("", oldStr, newStr, nil) {
+					if err := d.ForceNew(switchKey); err != nil {
+						return err
+					}
 				}
-			} else if d.HasChange(prefix + ".network") {
-				if err := d.ForceNew(prefix + ".network"); err != nil {
+			}
+			subProjKey := prefix + ".subnetwork_project"
+			if rd != nil && !rd.NewValueKnown(subProjKey) {
+				if d.HasChange(subProjKey) {
+					if err := d.ForceNew(subProjKey); err != nil {
+						return err
+					}
+				} else if d.HasChange("network_interface") {
+					return d.ForceNew("network_interface")
+				}
+			} else if d.HasChange(subProjKey) {
+				if err := d.ForceNew(subProjKey); err != nil {
 					return err
 				}
 			}
 		}
 
-		scKey := prefix + ".service_class_id"
-		if rd != nil && !rd.NewValueKnown(scKey) {
-			if d.HasChange(scKey) {
-				if err := d.ForceNew(scKey); err != nil {
+		for _, field := range []string{"service_class_id", "enable_vpc_scoped_dns", "nic_type", "queue_count"} {
+			fieldKey := prefix + "." + field
+			if d.HasChange(fieldKey) {
+				if err := d.ForceNew(fieldKey); err != nil {
 					return err
 				}
+			} else if rd != nil && !rd.NewValueKnown(fieldKey) && d.HasChange("network_interface") {
+				return d.ForceNew("network_interface")
 			}
-		} else if d.HasChange(scKey) {
-			if err := d.ForceNew(scKey); err != nil {
-				return err
+		}
+
+		iacPrefix := prefix + ".ipv6_access_config"
+		iacCountKey := iacPrefix + ".#"
+		if rd != nil && !rd.NewValueKnown(iacCountKey) {
+			if d.HasChange(iacPrefix) {
+				if err := d.ForceNew(iacPrefix); err != nil {
+					return err
+				}
+			} else if d.HasChange("network_interface") {
+				return d.ForceNew("network_interface")
+			}
+		} else {
+			oldIacCountRaw, newIacCountRaw := d.GetChange(iacCountKey)
+			oldIacCount, _ := oldIacCountRaw.(int)
+			newIacCount, _ := newIacCountRaw.(int)
+			maxIacCount := oldIacCount
+			if newIacCount > maxIacCount {
+				maxIacCount = newIacCount
+			}
+			for k := 0; k < maxIacCount; k++ {
+				iacElemPrefix := fmt.Sprintf("%s.%d", iacPrefix, k)
+				extIpv6Key := iacElemPrefix + ".external_ipv6"
+				oldExtIpv6, newExtIpv6 := d.GetChange(extIpv6Key)
+				oldExtIpv6Str, _ := oldExtIpv6.(string)
+				newExtIpv6Str, _ := newExtIpv6.(string)
+				if rd != nil && !rd.NewValueKnown(extIpv6Key) {
+					if d.HasChange(extIpv6Key) {
+						if err := d.ForceNew(extIpv6Key); err != nil {
+							return err
+						}
+					} else if d.HasChange(iacPrefix) {
+						if err := d.ForceNew(iacPrefix); err != nil {
+							return err
+						}
+					} else if d.HasChange("network_interface") {
+						return d.ForceNew("network_interface")
+					}
+				} else if d.HasChange(extIpv6Key) && !ipv6RepresentationDiffSuppress(extIpv6Key, oldExtIpv6Str, newExtIpv6Str, nil) {
+					if err := d.ForceNew(extIpv6Key); err != nil {
+						return err
+					}
+				}
+
+				for _, subField := range []string{"external_ipv6_prefix_length", "name"} {
+					subKey := iacElemPrefix + "." + subField
+					if rd != nil && !rd.NewValueKnown(subKey) {
+						if d.HasChange(subKey) {
+							if err := d.ForceNew(subKey); err != nil {
+								return err
+							}
+						} else if d.HasChange(iacPrefix) {
+							if err := d.ForceNew(iacPrefix); err != nil {
+								return err
+							}
+						} else if d.HasChange("network_interface") {
+							return d.ForceNew("network_interface")
+						}
+					} else if d.HasChange(subKey) {
+						if err := d.ForceNew(subKey); err != nil {
+							return err
+						}
+					}
+				}
 			}
 		}
 
@@ -851,7 +937,6 @@ func ResourceComputeInstance() *schema.Resource {
 						"enable_vpc_scoped_dns": {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							ForceNew:    true,
 							Description: `If true, DNS resolution will be enabled over this interface. Only valid with network_attachment.`,
 						},
 
@@ -897,7 +982,6 @@ func ResourceComputeInstance() *schema.Resource {
 						"nic_type": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ForceNew:     true,
 							ValidateFunc: validation.StringInSlice([]string{"GVNIC", "VIRTIO_NET", "IDPF", "MRDMA", "IRDMA", "IDPF"}, false),
 							Description:  `The type of vNIC to be used on this interface. Possible values:GVNIC, VIRTIO_NET, IDPF, MRDMA, IRDMA and IDPF`,
 						},
@@ -1024,7 +1108,6 @@ func ResourceComputeInstance() *schema.Resource {
 										Type:             schema.TypeString,
 										Optional:         true,
 										Computed:         true,
-										ForceNew:         true,
 										DiffSuppressFunc: ipv6RepresentationDiffSuppress,
 										Description:      `The first IPv6 address of the external IPv6 range associated with this instance, prefix length is stored in externalIpv6PrefixLength in ipv6AccessConfig. To use a static external IP address, it must be unused and in the same region as the instance's zone. If not specified, Google Cloud will automatically assign an external IPv6 address from the instance's subnetwork.`,
 									},
@@ -1032,14 +1115,12 @@ func ResourceComputeInstance() *schema.Resource {
 										Type:        schema.TypeString,
 										Optional:    true,
 										Computed:    true,
-										ForceNew:    true,
 										Description: `The prefix length of the external IPv6 range.`,
 									},
 									"name": {
 										Type:        schema.TypeString,
 										Optional:    true,
 										Computed:    true,
-										ForceNew:    true,
 										Description: `The name of this access configuration. In ipv6AccessConfigs, the recommended name is External IPv6.`,
 									},
 									{{- if ne $.TargetVersionName "ga" }}
@@ -1079,7 +1160,6 @@ func ResourceComputeInstance() *schema.Resource {
 						"queue_count": {
 							Type:        schema.TypeInt,
 							Optional:    true,
-							ForceNew:    true,
 							Description: `The networking queue count that's specified by users for the network interface. Both Rx and Tx queues will be set to this number. It will be empty if not specified.`,
 						},
 
@@ -3219,13 +3299,13 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 			if flattenNetworkInterfaceInt64(instNi["vlan"]) == 0 {
 				return fmt.Errorf("Cannot delete non-dynamic network interface at index %d in place", i)
 			}
+			if nicName, _ := instNi["name"].(string); nicName == "" {
+				return fmt.Errorf("Instance networkInterface at index %d had empty name", i)
+			}
 		}
 		for i := len(instNics) - 1; i >= len(networkInterfaces); i-- {
 			instNi := instNics[i].(map[string]interface{})
-			nicName, _ := instNi["name"].(string)
-			if nicName == "" {
-				return fmt.Errorf("Instance networkInterface at index %d had empty name", i)
-			}
+			nicName := instNi["name"].(string)
 			if err := computeInstanceDeleteNetworkInterface(d, config, nicName, project, userAgent); err != nil {
 				return err
 			}

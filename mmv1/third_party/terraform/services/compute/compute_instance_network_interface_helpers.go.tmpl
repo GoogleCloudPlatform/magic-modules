@@ -297,7 +297,7 @@ func computeInstanceMapSecurityPoliciesCreate(d tpgresource.TerraformResourceDat
 	securityPolicies := make(map[string][]string)
 	configs := d.Get("network_interface").([]interface{})
 	vnicId := -1
-	for _, raw := range configs {
+	for i, raw := range configs {
 		data := raw.(map[string]interface{})
 		vlan, _ := data["vlan"].(int)
 		var nicName string
@@ -305,9 +305,12 @@ func computeInstanceMapSecurityPoliciesCreate(d tpgresource.TerraformResourceDat
 			vnicId++
 			nicName = fmt.Sprintf("nic%d", vnicId)
 		} else {
+			if vnicId < 0 {
+				return nil, fmt.Errorf("dynamic network_interface at index %d (vlan %d) must follow a non-dynamic parent network_interface", i, vlan)
+			}
 			nicName = fmt.Sprintf("nic%d.%d", vnicId, vlan)
 		}
-		secPolicy := data["security_policy"].(string)
+		secPolicy, _ := data["security_policy"].(string)
 		err := validateSecurityPolicy(data)
 		if err != nil {
 			return securityPolicies, err
@@ -325,17 +328,44 @@ func computeInstanceMapSecurityPoliciesUpdate(d tpgresource.TerraformResourceDat
 	securityPolicies := make(map[string][]string)
 	configs := d.Get("network_interface").([]interface{})
 	vnicId := -1
-	for _, raw := range configs {
+	lastParentNic := ""
+	for i, raw := range configs {
 		data := raw.(map[string]interface{})
 		vlan, _ := data["vlan"].(int)
+		stateName, _ := data["name"].(string)
+		parentNicName, _ := data["parent_nic_name"].(string)
 		var nicName string
 		if vlan == 0 {
 			vnicId++
-			nicName = fmt.Sprintf("nic%d", vnicId)
+			if stateName != "" {
+				nicName = stateName
+			} else {
+				nicName = fmt.Sprintf("nic%d", vnicId)
+			}
+			lastParentNic = nicName
 		} else {
-			nicName = fmt.Sprintf("nic%d.%d", vnicId, vlan)
+			if parentNicName != "" {
+				lastParentNic = parentNicName
+			} else {
+				for idx := 0; idx < len(stateName); idx++ {
+					if stateName[idx] == '.' {
+						if idx > 0 {
+							lastParentNic = stateName[:idx]
+						}
+						break
+					}
+				}
+			}
+			if stateName != "" {
+				nicName = stateName
+			} else {
+				if lastParentNic == "" {
+					return nil, fmt.Errorf("cannot determine parent_nic_name for dynamic network_interface at index %d (vlan %d)", i, vlan)
+				}
+				nicName = fmt.Sprintf("%s.%d", lastParentNic, vlan)
+			}
 		}
-		secPolicy := data["security_policy"].(string)
+		secPolicy, _ := data["security_policy"].(string)
 		err := validateSecurityPolicy(data)
 		if err != nil {
 			return securityPolicies, err
@@ -349,9 +379,11 @@ func computeInstanceMapSecurityPoliciesUpdate(d tpgresource.TerraformResourceDat
 }
 
 func validateSecurityPolicy(rawNetworkInterface map[string]interface{}) error {
-	acessConfigs := expandAccessConfigs(rawNetworkInterface["access_config"].([]interface{}))
-	ipv6AccessConfigs := expandIpv6AccessConfigs(rawNetworkInterface["ipv6_access_config"].([]interface{}))
-	secPolicy := rawNetworkInterface["security_policy"].(string)
+	accessRaw, _ := rawNetworkInterface["access_config"].([]interface{})
+	ipv6AccessRaw, _ := rawNetworkInterface["ipv6_access_config"].([]interface{})
+	acessConfigs := expandAccessConfigs(accessRaw)
+	ipv6AccessConfigs := expandIpv6AccessConfigs(ipv6AccessRaw)
+	secPolicy, _ := rawNetworkInterface["security_policy"].(string)
 
 	if secPolicy != "" && len(acessConfigs) == 0 && len(ipv6AccessConfigs) == 0 {
 		return fmt.Errorf("Error setting security policy to the instance since at least one access config must exist")

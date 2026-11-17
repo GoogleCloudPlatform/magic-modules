@@ -5880,7 +5880,7 @@ func TestAccComputeInstance_dynamicNic(t *testing.T) {
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.1.vlan", "2"),
 				),
 			},
-			computeInstanceImportStep(context["zone"].(string), context["instance_name"].(string), []string{"allow_stopping_for_update"}),
+			computeInstanceImportStep(context["zone"].(string), context["instance_name"].(string), []string{}),
 			{
 				// Add a second trailing dynamic VLAN NIC (nic0.3) in place via instances.addNetworkInterface
 				Config: testAccComputeInstance_dynamicNic2(context),
@@ -5901,7 +5901,7 @@ func TestAccComputeInstance_dynamicNic(t *testing.T) {
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.2.vlan", "3"),
 				),
 			},
-			computeInstanceImportStep(context["zone"].(string), context["instance_name"].(string), []string{"allow_stopping_for_update"}),
+			computeInstanceImportStep(context["zone"].(string), context["instance_name"].(string), []string{}),
 			{
 				// Remove both trailing dynamic VLAN NICs (nic0.2, nic0.3) in place via instances.deleteNetworkInterface
 				Config: testAccComputeInstance_dynamicNicBaseOnly(context),
@@ -5917,6 +5917,7 @@ func TestAccComputeInstance_dynamicNic(t *testing.T) {
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.0.name", "nic0"),
 				),
 			},
+			computeInstanceImportStep(context["zone"].(string), context["instance_name"].(string), []string{}),
 			{
 				// Re-add a trailing dynamic VLAN NIC (nic0.4) in place from 1-NIC state
 				Config: testAccComputeInstance_dynamicNicSingleTrailing(context, 4),
@@ -5934,6 +5935,7 @@ func TestAccComputeInstance_dynamicNic(t *testing.T) {
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.1.vlan", "4"),
 				),
 			},
+			computeInstanceImportStep(context["zone"].(string), context["instance_name"].(string), []string{}),
 		},
 	})
 }
@@ -6015,6 +6017,7 @@ func TestAccComputeInstance_dynamicNicNonDynamicForceNew(t *testing.T) {
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.2.vlan", "2"),
 				),
 			},
+			computeInstanceImportStep(context["zone"].(string), context["instance_name"].(string), []string{}),
 			{
 				// Step 4: Remove trailing dynamic NIC nic1.2 in place -> back to [nic0, nic1]
 				Config: testAccComputeInstance_dynamicNicTwoRegular(context, "subnetwork1", "subnetwork2"),
@@ -6029,6 +6032,7 @@ func TestAccComputeInstance_dynamicNicNonDynamicForceNew(t *testing.T) {
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.#", "2"),
 				),
 			},
+			computeInstanceImportStep(context["zone"].(string), context["instance_name"].(string), []string{}),
 			{
 				// Step 5: Reorder non-dynamic NICs [subnetwork2, subnetwork1] -> must replace the VM
 				Config: testAccComputeInstance_dynamicNicTwoRegular(context, "subnetwork2", "subnetwork1"),
@@ -6158,6 +6162,7 @@ resource "google_compute_subnetwork" "subnetwork1" {
 resource "google_compute_network" "network2" {
   name                    = "%{instance_name}-network2"
   auto_create_subnetworks = false
+  depends_on              = [google_compute_network.network1]
 }
 
 resource "google_compute_subnetwork" "subnetwork2" {
@@ -6165,11 +6170,13 @@ resource "google_compute_subnetwork" "subnetwork2" {
   network       = google_compute_network.network2.id
   region        = "%{region}"
   ip_cidr_range = "10.2.0.0/16"
+  depends_on    = [google_compute_subnetwork.subnetwork1]
 }
 
 resource "google_compute_network" "network3" {
   name                    = "%{instance_name}-network3"
   auto_create_subnetworks = false
+  depends_on              = [google_compute_network.network2]
 }
 
 resource "google_compute_subnetwork" "subnetwork3" {
@@ -6177,6 +6184,7 @@ resource "google_compute_subnetwork" "subnetwork3" {
   network       = google_compute_network.network3.id
   region        = "%{region}"
   ip_cidr_range = "10.3.0.0/16"
+  depends_on    = [google_compute_subnetwork.subnetwork2]
 }
 `, context)
 }
@@ -6277,11 +6285,17 @@ resource "google_compute_instance" "foobar" {
 }
 
 func testAccComputeInstance_dynamicNicSingleTrailing(context map[string]interface{}, vlan int) string {
-	return testAccComputeInstance_dynamicNicNetworks(context) + fmt.Sprintf(`
+	cfgContext := map[string]interface{}{
+		"instance_name": context["instance_name"],
+		"region":        context["region"],
+		"zone":          context["zone"],
+		"vlan":          vlan,
+	}
+	return testAccComputeInstance_dynamicNicNetworks(cfgContext) + acctest.Nprintf(`
 resource "google_compute_instance" "foobar" {
-	name         = %q
+	name         = "%{instance_name}"
 	machine_type = "e2-standard-4"
-	zone         = %q
+	zone         = "%{zone}"
 
 	boot_disk {
 		initialize_params {
@@ -6295,18 +6309,25 @@ resource "google_compute_instance" "foobar" {
 
 	network_interface {
 		subnetwork = google_compute_subnetwork.subnetwork2.id
-		vlan       = %d
+		vlan       = %{vlan}
 	}
 }
-`, context["instance_name"], context["zone"], vlan)
+`, cfgContext)
 }
 
 func testAccComputeInstance_dynamicNicTwoRegular(context map[string]interface{}, firstSub, secondSub string) string {
-	return testAccComputeInstance_dynamicNicNetworks(context) + fmt.Sprintf(`
+	cfgContext := map[string]interface{}{
+		"instance_name": context["instance_name"],
+		"region":        context["region"],
+		"zone":          context["zone"],
+		"first_sub":     firstSub,
+		"second_sub":    secondSub,
+	}
+	return testAccComputeInstance_dynamicNicNetworks(cfgContext) + acctest.Nprintf(`
 resource "google_compute_instance" "foobar" {
-	name         = %q
+	name         = "%{instance_name}"
 	machine_type = "e2-standard-4"
-	zone         = %q
+	zone         = "%{zone}"
 
 	boot_disk {
 		initialize_params {
@@ -6315,14 +6336,14 @@ resource "google_compute_instance" "foobar" {
 	}
 
 	network_interface { # nic0
-		subnetwork = google_compute_subnetwork.%s.id
+		subnetwork = google_compute_subnetwork.%{first_sub}.id
 	}
 
 	network_interface { # nic1
-		subnetwork = google_compute_subnetwork.%s.id
+		subnetwork = google_compute_subnetwork.%{second_sub}.id
 	}
 }
-`, context["instance_name"], context["zone"], firstSub, secondSub)
+`, cfgContext)
 }
 
 func testAccComputeInstance_dynamicNicTwoRegularPlusTrailing(context map[string]interface{}) string {

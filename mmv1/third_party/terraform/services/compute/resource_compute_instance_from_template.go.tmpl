@@ -46,8 +46,12 @@ func computeInstanceFromTemplateSchema() map[string]*schema.Schema {
 	}
 	s["network_interface"].ForceNew = true
 	niSchema := s["network_interface"].Elem.(*schema.Resource).Schema
-	for _, field := range []string{"vlan", "network_attachment", "service_class_id"} {
+	for _, field := range []string{"vlan", "network_attachment", "enable_vpc_scoped_dns", "service_class_id", "nic_type", "queue_count"} {
 		niSchema[field].ForceNew = true
+	}
+	iacSchema := niSchema["ipv6_access_config"].Elem.(*schema.Resource).Schema
+	for _, field := range []string{"external_ipv6", "external_ipv6_prefix_length", "name"} {
+		iacSchema[field].ForceNew = true
 	}
 
 	// Remove deprecated/removed fields that are never d.Set. We can't
