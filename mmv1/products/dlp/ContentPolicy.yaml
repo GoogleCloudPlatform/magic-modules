@@ -1015,7 +1015,6 @@ properties:
               type: Enum
               description: |
                 If set, the verdict will be returned to the user.
-                Possible values: ["ALLOW", "BLOCK"]
               enum_values:
                 - ALLOW
                 - BLOCK
@@ -1028,7 +1027,6 @@ properties:
         type: Enum
         description: |
           If set, the verdict will be returned to the user.
-          Possible values: ["ALLOW", "BLOCK"]
         enum_values:
           - ALLOW
           - BLOCK
@@ -1041,7 +1039,6 @@ properties:
         type: Enum
         description: |
           If set, the verdict will be returned to the user.
-          Possible values: ["ALLOW", "BLOCK"]
         enum_values:
           - ALLOW
           - BLOCK
@@ -1054,7 +1051,6 @@ properties:
         type: Enum
         description: |
           If set, the verdict will be returned to the user.
-          Possible values: ["ALLOW", "BLOCK"]
         enum_values:
           - ALLOW
           - BLOCK
@@ -1067,7 +1063,6 @@ properties:
         type: Enum
         description: |
           If set, the verdict will be returned to the user.
-          Possible values: ["ALLOW", "BLOCK"]
         enum_values:
           - ALLOW
           - BLOCK

@@ -80,7 +80,7 @@ properties:
   - name: 'accessType'
     type: Enum
     description: |
-      The access type for this SFTP server. Possible values: INTERNAL, EXTERNAL
+      The access type for this SFTP server.
     required: true
     enum_values:
       - 'INTERNAL'
