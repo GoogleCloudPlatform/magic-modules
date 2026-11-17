@@ -1,0 +1,60 @@
+if metadata, ok := res["metadata"].(map[string]interface{}); ok {
+	var activeVersion map[string]interface{}
+	if versions, ok := metadata["versions"].([]interface{}); ok {
+		currentVersionId, hasCurrentVersion := icebergViewJsonInt(metadata["current-version-id"])
+		if hasCurrentVersion {
+			for _, v := range versions {
+				if vm, ok := v.(map[string]interface{}); ok {
+					if vid, ok := icebergViewJsonInt(vm["version-id"]); ok && vid == currentVersionId {
+						activeVersion = vm
+						break
+					}
+				}
+			}
+		}
+		if activeVersion == nil && len(versions) > 0 {
+			if vm, ok := versions[len(versions)-1].(map[string]interface{}); ok {
+				activeVersion = vm
+			}
+		}
+		if activeVersion != nil {
+			res["view-version"] = activeVersion
+		}
+	}
+
+	if schemas, ok := metadata["schemas"].([]interface{}); ok {
+		targetSchemaId := -1
+		hasTargetSchema := false
+		if activeVersion != nil {
+			targetSchemaId, hasTargetSchema = icebergViewJsonInt(activeVersion["schema-id"])
+		}
+		if !hasTargetSchema {
+			targetSchemaId, hasTargetSchema = icebergViewJsonInt(metadata["current-schema-id"])
+		}
+		if hasTargetSchema {
+			for _, s := range schemas {
+				if sm, ok := s.(map[string]interface{}); ok {
+					if sid, ok := icebergViewJsonInt(sm["schema-id"]); ok && sid == targetSchemaId {
+						res["schema"] = sm
+						break
+					}
+				}
+			}
+		}
+		if _, ok := res["schema"]; !ok && len(schemas) > 0 {
+			res["schema"] = schemas[0]
+		}
+	}
+
+	res["location"] = metadata["location"]
+	res["properties"] = metadata["properties"]
+	res["view-uuid"] = metadata["view-uuid"]
+}
+
+// Extract name from ID if not present in response
+if _, ok := res["name"]; !ok {
+	if id := d.Id(); id != "" {
+		parts := strings.Split(id, "/")
+		res["name"] = parts[len(parts)-1]
+	}
+}

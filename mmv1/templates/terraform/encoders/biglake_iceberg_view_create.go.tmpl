@@ -1,0 +1,15 @@
+	// CreateViewRequest requires "schema-id" inside "view-version". Since
+	// schema_id is server-assigned (output-only), default it to -1 (which
+	// references the newly created schema) unless schema["schema-id"] is set.
+	if vv, ok := obj["view-version"].(map[string]interface{}); ok {
+		if _, hasSchemaId := vv["schema-id"]; !hasSchemaId {
+			schemaId := interface{}(-1)
+			if sm, hasSchema := obj["schema"].(map[string]interface{}); hasSchema {
+				if sid, ok := sm["schema-id"]; ok {
+					schemaId = sid
+				}
+			}
+			vv["schema-id"] = schemaId
+		}
+	}
+	return obj, nil

@@ -1,0 +1,71 @@
+	// Accumulate the metadata update actions of a CommitViewRequest.
+	updateActions := []interface{}{}
+
+	if d.HasChange("properties") {
+		oldProp, newProp := d.GetChange("properties")
+		oldMap := oldProp.(map[string]interface{})
+		newMap := newProp.(map[string]interface{})
+
+		removals := []string{}
+		for k := range oldMap {
+			if icebergViewIgnoredProperties[k] {
+				continue
+			}
+			if _, ok := newMap[k]; !ok {
+				removals = append(removals, k)
+			}
+		}
+
+		updates := map[string]string{}
+		for k, v := range newMap {
+			if icebergViewIgnoredProperties[k] {
+				continue
+			}
+			updates[k] = v.(string)
+		}
+
+		updateActions = append(updateActions,
+			map[string]interface{}{
+				"action":  "set-properties",
+				"updates": updates,
+			},
+			map[string]interface{}{
+				"action":   "remove-properties",
+				"removals": removals,
+			},
+		)
+	}
+
+	if d.HasChange("schema") || d.HasChange("view_version") {
+		schemaMap, hasSchema := obj["schema"].(map[string]interface{})
+		vvMap, hasVV := obj["view-version"].(map[string]interface{})
+		if hasSchema && hasVV {
+			delete(schemaMap, "schema-id")
+			delete(vvMap, "timestamp-ms")
+			// Use version-id 0 as a placeholder so the server assigns the next
+			// sequential version ID without colliding with existing version 1,
+			// and schema-id -1 to reference the schema from add-schema above.
+			vvMap["version-id"] = 0
+			vvMap["schema-id"] = -1
+
+			updateActions = append(updateActions,
+				map[string]interface{}{
+					"action": "add-schema",
+					"schema": schemaMap,
+				},
+				map[string]interface{}{
+					"action":       "add-view-version",
+					"view-version": vvMap,
+				},
+				map[string]interface{}{
+					"action":          "set-current-view-version",
+					"view-version-id": -1,
+				},
+			)
+		}
+	}
+
+	return map[string]interface{}{
+		"requirements": []interface{}{},
+		"updates":      updateActions,
+	}, nil
