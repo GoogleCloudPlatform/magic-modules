@@ -3,7 +3,9 @@ package compute
 import (
 	"fmt"
 	"reflect"
+	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -12,14 +14,25 @@ import (
 var DEFAULT_SCRATCH_DISK_SIZE_GB = 375
 var VALID_SCRATCH_DISK_SIZES_GB = []int{375, 3000, 3500, 7000, 14000}
 
+func aliasIpRangeNetmask(cidr string) string {
+	idx := strings.LastIndex(cidr, "/")
+	if idx == -1 {
+		return ""
+	}
+	return cidr[idx:]
+}
+
 // FlattenAliasIpRangeHTTP replaces the legacy SDK-dependent flattenAliasIpRange.
 // It operates directly on API JSON response maps, allowing all direct-HTTP compute resources to share it.
 func FlattenAliasIpRangeHTTP(d *schema.ResourceData, ranges []interface{}, i int) []map[string]interface{} {
 	prefix := fmt.Sprintf("network_interface.%d", i)
 
-	configData := []map[string]interface{}{}
-	for _, item := range d.Get(prefix + ".alias_ip_range").([]interface{}) {
-		configData = append(configData, item.(map[string]interface{}))
+	configRaw, _ := d.Get(prefix + ".alias_ip_range").([]interface{})
+	configData := make([]map[string]interface{}, 0, len(configRaw))
+	for _, item := range configRaw {
+		if m, ok := item.(map[string]interface{}); ok && m != nil {
+			configData = append(configData, m)
+		}
 	}
 
 	apiData := make([]map[string]interface{}, 0, len(ranges))
@@ -38,12 +51,85 @@ func FlattenAliasIpRangeHTTP(d *schema.ResourceData, ranges []interface{}, i int
 		})
 	}
 
-	// Preserve config ordering to prevent permadiffs
-	sorted, err := tpgresource.SortMapsByConfigOrder(configData, apiData, "ip_cidr_range")
-	if err != nil {
-		return apiData
+	// Preserve config ordering to prevent permadiffs, handling both explicit CIDRs
+	// and netmask-only entries (e.g. "/32") across named secondary ranges and primary ranges.
+	matched := make([]map[string]interface{}, len(configData))
+	usedAPI := make([]bool, len(apiData))
+
+	// Pass 1: exact match on (ip_cidr_range, subnetwork_range_name) for non-netmask entries.
+	for cfgIdx, cfg := range configData {
+		cfgCidr, _ := cfg["ip_cidr_range"].(string)
+		cfgRangeName, _ := cfg["subnetwork_range_name"].(string)
+		if strings.HasPrefix(cfgCidr, "/") {
+			continue
+		}
+		for apiIdx, api := range apiData {
+			if usedAPI[apiIdx] {
+				continue
+			}
+			apiCidr, _ := api["ip_cidr_range"].(string)
+			apiRangeName, _ := api["subnetwork_range_name"].(string)
+			if apiCidr == cfgCidr && apiRangeName == cfgRangeName {
+				matched[cfgIdx] = api
+				usedAPI[apiIdx] = true
+				break
+			}
+		}
 	}
-	return sorted
+
+	// Pass 2: netmask match on (subnetwork_range_name, netmask) for netmask-only entries.
+	// Also handles instance templates where the API returns a netmask (e.g. "/24").
+	for cfgIdx, cfg := range configData {
+		if matched[cfgIdx] != nil {
+			continue
+		}
+		cfgCidr, _ := cfg["ip_cidr_range"].(string)
+		cfgRangeName, _ := cfg["subnetwork_range_name"].(string)
+		if !strings.HasPrefix(cfgCidr, "/") {
+			continue
+		}
+		for apiIdx, api := range apiData {
+			if usedAPI[apiIdx] {
+				continue
+			}
+			apiCidr, _ := api["ip_cidr_range"].(string)
+			apiRangeName, _ := api["subnetwork_range_name"].(string)
+			if apiRangeName == cfgRangeName && aliasIpRangeNetmask(apiCidr) == cfgCidr {
+				matched[cfgIdx] = api
+				usedAPI[apiIdx] = true
+				break
+			}
+		}
+	}
+
+	// Pass 3: compact matched slots, then append any remaining unmatched API entries
+	// sorted deterministically by (ip_cidr_range, subnetwork_range_name).
+	result := make([]map[string]interface{}, 0, len(apiData))
+	for _, m := range matched {
+		if m != nil {
+			result = append(result, m)
+		}
+	}
+
+	unmatched := make([]map[string]interface{}, 0)
+	for apiIdx, api := range apiData {
+		if !usedAPI[apiIdx] {
+			unmatched = append(unmatched, api)
+		}
+	}
+	sort.Slice(unmatched, func(a, b int) bool {
+		aCidr, _ := unmatched[a]["ip_cidr_range"].(string)
+		bCidr, _ := unmatched[b]["ip_cidr_range"].(string)
+		if aCidr != bCidr {
+			return aCidr < bCidr
+		}
+		aName, _ := unmatched[a]["subnetwork_range_name"].(string)
+		bName, _ := unmatched[b]["subnetwork_range_name"].(string)
+		return aName < bName
+	})
+	result = append(result, unmatched...)
+
+	return result
 }
 
 func FlattenDisksHTTP(disks []interface{}, d *schema.ResourceData, defaultProject string) ([]map[string]interface{}, error) {

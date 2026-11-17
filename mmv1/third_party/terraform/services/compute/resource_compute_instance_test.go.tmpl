@@ -1,6 +1,7 @@
 package compute_test
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -10,6 +11,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/go-cty/cty"
+	sdkschema "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	sdkterraform "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -183,12 +187,14 @@ func TestValidateInstanceMetadata(t *testing.T) {
 
 func TestCheckForCommonAliasIp(t *testing.T) {
 	type testCase struct {
+		name     string
 		old, new []interface{}
 		expected []interface{}
 	}
 
 	testCases := []testCase{
 		{
+			name: "common primary cidr",
 			old: []interface{}{
 				map[string]interface{}{"ipCidrRange": "10.0.0.0/24"},
 				map[string]interface{}{"ipCidrRange": "10.0.1.0/24"},
@@ -202,6 +208,7 @@ func TestCheckForCommonAliasIp(t *testing.T) {
 			},
 		},
 		{
+			name: "common second range cidr",
 			old: []interface{}{
 				map[string]interface{}{"ipCidrRange": "172.16.0.0/24"},
 				map[string]interface{}{"ipCidrRange": "10.0.1.0/24"},
@@ -215,6 +222,7 @@ func TestCheckForCommonAliasIp(t *testing.T) {
 			},
 		},
 		{
+			name: "no common ranges",
 			old: []interface{}{
 				map[string]interface{}{"ipCidrRange": "10.0.0.0/24"},
 				map[string]interface{}{"ipCidrRange": "10.0.1.0/24"},
@@ -225,13 +233,500 @@ func TestCheckForCommonAliasIp(t *testing.T) {
 			},
 			expected: []interface{}{},
 		},
+		{
+			name: "same cidr but different subnetworkRangeName is not common",
+			old: []interface{}{
+				map[string]interface{}{"ipCidrRange": "172.16.0.1/32", "subnetworkRangeName": "range-a"},
+			},
+			new: []interface{}{
+				map[string]interface{}{"ipCidrRange": "172.16.0.1/32", "subnetworkRangeName": "range-b"},
+			},
+			expected: []interface{}{},
+		},
+		{
+			name: "netmask matches existing allocated range by subnetworkRangeName and mask",
+			old: []interface{}{
+				map[string]interface{}{"ipCidrRange": "240.14.16.0/32", "subnetworkRangeName": "range-a"},
+				map[string]interface{}{"ipCidrRange": "240.20.16.0/32", "subnetworkRangeName": "range-b"},
+			},
+			new: []interface{}{
+				map[string]interface{}{"ipCidrRange": "/32", "subnetworkRangeName": "range-b"},
+				map[string]interface{}{"ipCidrRange": "/32", "subnetworkRangeName": "range-c"},
+			},
+			expected: []interface{}{
+				map[string]interface{}{"ipCidrRange": "240.20.16.0/32", "subnetworkRangeName": "range-b"},
+			},
+		},
+		{
+			name: "missing ipCidrRange key does not panic",
+			old: []interface{}{
+				map[string]interface{}{"subnetworkRangeName": "range-a"},
+				nil,
+			},
+			new: []interface{}{
+				map[string]interface{}{"subnetworkRangeName": "range-b"},
+			},
+			expected: []interface{}{},
+		},
 	}
 
 	for _, tc := range testCases {
-		oldInterface := map[string]interface{}{"aliasIpRanges": tc.old}
-		newInterface := map[string]interface{}{"aliasIpRanges": tc.new}
-		result := tpgcompute.CheckForCommonAliasIp(oldInterface, newInterface)
-		assert.Equal(t, tc.expected, result)
+		t.Run(tc.name, func(t *testing.T) {
+			oldInterface := map[string]interface{}{"aliasIpRanges": tc.old}
+			newInterface := map[string]interface{}{"aliasIpRanges": tc.new}
+			result := tpgcompute.CheckForCommonAliasIp(oldInterface, newInterface)
+			assert.Equal(t, tc.expected, result)
+		})
+	}
+}
+
+func TestResolveAliasIpRanges(t *testing.T) {
+	cases := []struct {
+		name             string
+		oldRanges        []interface{}
+		newRanges        []interface{}
+		expectedResolved []interface{}
+		expectedCommon   []interface{}
+	}{
+		{
+			name: "remove group A, keep group B shifted to index 0",
+			oldRanges: []interface{}{
+				map[string]interface{}{"ipCidrRange": "240.14.16.0/32", "subnetworkRangeName": "range-a-1"},
+				map[string]interface{}{"ipCidrRange": "240.14.16.1/32", "subnetworkRangeName": "range-a-2"},
+				map[string]interface{}{"ipCidrRange": "240.20.16.0/32", "subnetworkRangeName": "range-b-1"},
+				map[string]interface{}{"ipCidrRange": "240.20.16.1/32", "subnetworkRangeName": "range-b-2"},
+			},
+			newRanges: []interface{}{
+				map[string]interface{}{"ipCidrRange": "/32", "subnetworkRangeName": "range-b-1"},
+				map[string]interface{}{"ipCidrRange": "/32", "subnetworkRangeName": "range-b-2"},
+			},
+			expectedResolved: []interface{}{
+				map[string]interface{}{"ipCidrRange": "240.20.16.0/32", "subnetworkRangeName": "range-b-1"},
+				map[string]interface{}{"ipCidrRange": "240.20.16.1/32", "subnetworkRangeName": "range-b-2"},
+			},
+			expectedCommon: []interface{}{
+				map[string]interface{}{"ipCidrRange": "240.20.16.0/32", "subnetworkRangeName": "range-b-1"},
+				map[string]interface{}{"ipCidrRange": "240.20.16.1/32", "subnetworkRangeName": "range-b-2"},
+			},
+		},
+		{
+			name: "remove group A, keep group B, add group C",
+			oldRanges: []interface{}{
+				map[string]interface{}{"ipCidrRange": "240.14.16.0/32", "subnetworkRangeName": "range-a-1"},
+				map[string]interface{}{"ipCidrRange": "240.20.16.0/32", "subnetworkRangeName": "range-b-1"},
+			},
+			newRanges: []interface{}{
+				map[string]interface{}{"ipCidrRange": "/32", "subnetworkRangeName": "range-b-1"},
+				map[string]interface{}{"ipCidrRange": "/32", "subnetworkRangeName": "range-c-1"},
+			},
+			expectedResolved: []interface{}{
+				map[string]interface{}{"ipCidrRange": "240.20.16.0/32", "subnetworkRangeName": "range-b-1"},
+				map[string]interface{}{"ipCidrRange": "/32", "subnetworkRangeName": "range-c-1"},
+			},
+			expectedCommon: []interface{}{
+				map[string]interface{}{"ipCidrRange": "240.20.16.0/32", "subnetworkRangeName": "range-b-1"},
+			},
+		},
+		{
+			name: "multiple /32 in same subnetworkRangeName consume distinct old entries",
+			oldRanges: []interface{}{
+				map[string]interface{}{"ipCidrRange": "240.14.16.0/32", "subnetworkRangeName": "range-a"},
+				map[string]interface{}{"ipCidrRange": "240.20.16.0/32", "subnetworkRangeName": "range-b"},
+				map[string]interface{}{"ipCidrRange": "240.20.16.1/32", "subnetworkRangeName": "range-b"},
+			},
+			newRanges: []interface{}{
+				map[string]interface{}{"ipCidrRange": "/32", "subnetworkRangeName": "range-b"},
+				map[string]interface{}{"ipCidrRange": "/32", "subnetworkRangeName": "range-b"},
+				map[string]interface{}{"ipCidrRange": "/32", "subnetworkRangeName": "range-b"},
+			},
+			expectedResolved: []interface{}{
+				map[string]interface{}{"ipCidrRange": "240.20.16.0/32", "subnetworkRangeName": "range-b"},
+				map[string]interface{}{"ipCidrRange": "240.20.16.1/32", "subnetworkRangeName": "range-b"},
+				map[string]interface{}{"ipCidrRange": "/32", "subnetworkRangeName": "range-b"},
+			},
+			expectedCommon: []interface{}{
+				map[string]interface{}{"ipCidrRange": "240.20.16.0/32", "subnetworkRangeName": "range-b"},
+				map[string]interface{}{"ipCidrRange": "240.20.16.1/32", "subnetworkRangeName": "range-b"},
+			},
+		},
+		{
+			name: "mixed /32 before explicit CIDR matches explicit first without stealing",
+			oldRanges: []interface{}{
+				map[string]interface{}{"ipCidrRange": "10.10.10.2/32"},
+				map[string]interface{}{"ipCidrRange": "10.10.10.5/32"},
+			},
+			newRanges: []interface{}{
+				map[string]interface{}{"ipCidrRange": "/32"},
+				map[string]interface{}{"ipCidrRange": "10.10.10.2/32"},
+				map[string]interface{}{"ipCidrRange": "/32"},
+			},
+			expectedResolved: []interface{}{
+				map[string]interface{}{"ipCidrRange": "10.10.10.5/32"},
+				map[string]interface{}{"ipCidrRange": "10.10.10.2/32"},
+				map[string]interface{}{"ipCidrRange": "/32"},
+			},
+			expectedCommon: []interface{}{
+				map[string]interface{}{"ipCidrRange": "10.10.10.2/32"},
+				map[string]interface{}{"ipCidrRange": "10.10.10.5/32"},
+			},
+		},
+		{
+			name: "remove all ranges",
+			oldRanges: []interface{}{
+				map[string]interface{}{"ipCidrRange": "10.0.1.0/24"},
+			},
+			newRanges:        []interface{}{},
+			expectedResolved: []interface{}{},
+			expectedCommon:   []interface{}{},
+		},
+		{
+			name: "pure reorder retains all ranges",
+			oldRanges: []interface{}{
+				map[string]interface{}{"ipCidrRange": "10.1.1.0/24", "subnetworkRangeName": "r1"},
+				map[string]interface{}{"ipCidrRange": "10.1.2.0/24", "subnetworkRangeName": "r2"},
+			},
+			newRanges: []interface{}{
+				map[string]interface{}{"ipCidrRange": "10.1.2.0/24", "subnetworkRangeName": "r2"},
+				map[string]interface{}{"ipCidrRange": "10.1.1.0/24", "subnetworkRangeName": "r1"},
+			},
+			expectedResolved: []interface{}{
+				map[string]interface{}{"ipCidrRange": "10.1.2.0/24", "subnetworkRangeName": "r2"},
+				map[string]interface{}{"ipCidrRange": "10.1.1.0/24", "subnetworkRangeName": "r1"},
+			},
+			expectedCommon: []interface{}{
+				map[string]interface{}{"ipCidrRange": "10.1.2.0/24", "subnetworkRangeName": "r2"},
+				map[string]interface{}{"ipCidrRange": "10.1.1.0/24", "subnetworkRangeName": "r1"},
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			resolved, common := tpgcompute.ResolveAliasIpRanges(tc.oldRanges, tc.newRanges)
+			assert.Equal(t, tc.expectedResolved, resolved)
+			assert.Equal(t, tc.expectedCommon, common)
+		})
+	}
+}
+
+func TestIpCidrRangeDiffSuppress(t *testing.T) {
+	// Direct calls with d == nil must remain compatible with existing callers/tests.
+	assert.True(t, tpgcompute.IpCidrRangeDiffSuppress("ip_cidr_range", "10.128.1.0/24", "/24", nil))
+	assert.False(t, tpgcompute.IpCidrRangeDiffSuppress("ip_cidr_range", "10.128.1.0/24", "/32", nil))
+	assert.False(t, tpgcompute.IpCidrRangeDiffSuppress("ip_cidr_range", "10.128.1.0/24", "10.128.2.0/24", nil))
+
+	aliasTestResource := &sdkschema.Resource{
+		Schema: map[string]*sdkschema.Schema{
+			"network_interface": {
+				Type:     sdkschema.TypeList,
+				Required: true,
+				Elem: &sdkschema.Resource{
+					Schema: map[string]*sdkschema.Schema{
+						"alias_ip_range": {
+							Type:     sdkschema.TypeList,
+							Optional: true,
+							Elem: &sdkschema.Resource{
+								Schema: map[string]*sdkschema.Schema{
+									"ip_cidr_range": {
+										Type:             sdkschema.TypeString,
+										Required:         true,
+										DiffSuppressFunc: tpgcompute.IpCidrRangeDiffSuppress,
+									},
+									"subnetwork_range_name": {
+										Type:     sdkschema.TypeString,
+										Optional: true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	cases := []struct {
+		name               string
+		stateAttrs         map[string]string
+		configRanges       []interface{}
+		rawConfig          cty.Value
+		expectCidr0HasDiff bool
+		expectDiffEmpty    bool
+	}{
+		{
+			name: "unchanged secondary subnetwork_range_name suppresses /32 diff",
+			stateAttrs: map[string]string{
+				"network_interface.#":                                        "1",
+				"network_interface.0.alias_ip_range.#":                       "1",
+				"network_interface.0.alias_ip_range.0.ip_cidr_range":         "240.20.16.0/32",
+				"network_interface.0.alias_ip_range.0.subnetwork_range_name": "range-a",
+			},
+			configRanges: []interface{}{
+				map[string]interface{}{"ip_cidr_range": "/32", "subnetwork_range_name": "range-a"},
+			},
+			expectCidr0HasDiff: false,
+			expectDiffEmpty:    true,
+		},
+		{
+			name: "unchanged primary range (empty subnetwork_range_name) suppresses /32 diff",
+			stateAttrs: map[string]string{
+				"network_interface.#":                                        "1",
+				"network_interface.0.alias_ip_range.#":                       "1",
+				"network_interface.0.alias_ip_range.0.ip_cidr_range":         "10.0.1.5/32",
+				"network_interface.0.alias_ip_range.0.subnetwork_range_name": "",
+			},
+			configRanges: []interface{}{
+				map[string]interface{}{"ip_cidr_range": "/32"},
+			},
+			expectCidr0HasDiff: false,
+			expectDiffEmpty:    true,
+		},
+		{
+			name: "secondary range-a to secondary range-b does not suppress /32 diff",
+			stateAttrs: map[string]string{
+				"network_interface.#":                                        "1",
+				"network_interface.0.alias_ip_range.#":                       "2",
+				"network_interface.0.alias_ip_range.0.ip_cidr_range":         "240.14.16.0/32",
+				"network_interface.0.alias_ip_range.0.subnetwork_range_name": "range-a",
+				"network_interface.0.alias_ip_range.1.ip_cidr_range":         "240.20.16.0/32",
+				"network_interface.0.alias_ip_range.1.subnetwork_range_name": "range-b",
+			},
+			configRanges: []interface{}{
+				map[string]interface{}{"ip_cidr_range": "/32", "subnetwork_range_name": "range-b"},
+			},
+			expectCidr0HasDiff: true,
+			expectDiffEmpty:    false,
+		},
+		{
+			name: "primary (empty) to secondary range-b does not suppress /32 diff",
+			stateAttrs: map[string]string{
+				"network_interface.#":                                        "1",
+				"network_interface.0.alias_ip_range.#":                       "1",
+				"network_interface.0.alias_ip_range.0.ip_cidr_range":         "10.0.1.5/32",
+				"network_interface.0.alias_ip_range.0.subnetwork_range_name": "",
+			},
+			configRanges: []interface{}{
+				map[string]interface{}{"ip_cidr_range": "/32", "subnetwork_range_name": "range-b"},
+			},
+			expectCidr0HasDiff: true,
+			expectDiffEmpty:    false,
+		},
+		{
+			name: "secondary range-a to primary (omitted subnetwork_range_name) does not suppress /32 diff",
+			stateAttrs: map[string]string{
+				"network_interface.#":                                        "1",
+				"network_interface.0.alias_ip_range.#":                       "1",
+				"network_interface.0.alias_ip_range.0.ip_cidr_range":         "240.14.16.0/32",
+				"network_interface.0.alias_ip_range.0.subnetwork_range_name": "range-a",
+			},
+			configRanges: []interface{}{
+				map[string]interface{}{"ip_cidr_range": "/32"},
+			},
+			expectCidr0HasDiff: true,
+			expectDiffEmpty:    false,
+		},
+		{
+			name: "inserting /32 before explicit CIDR does not suppress onto duplicate CIDR (#12180)",
+			stateAttrs: map[string]string{
+				"network_interface.#":                                        "1",
+				"network_interface.0.alias_ip_range.#":                       "1",
+				"network_interface.0.alias_ip_range.0.ip_cidr_range":         "10.10.10.2/32",
+				"network_interface.0.alias_ip_range.0.subnetwork_range_name": "",
+			},
+			configRanges: []interface{}{
+				map[string]interface{}{"ip_cidr_range": "/32"},
+				map[string]interface{}{"ip_cidr_range": "10.10.10.2/32"},
+			},
+			expectCidr0HasDiff: true,
+			expectDiffEmpty:    false,
+		},
+		{
+			name: "unknown subnetwork_range_name in RawConfig does not suppress /32 diff",
+			stateAttrs: map[string]string{
+				"network_interface.#":                                        "1",
+				"network_interface.0.alias_ip_range.#":                       "1",
+				"network_interface.0.alias_ip_range.0.ip_cidr_range":         "10.0.1.5/32",
+				"network_interface.0.alias_ip_range.0.subnetwork_range_name": "",
+			},
+			configRanges: []interface{}{
+				map[string]interface{}{"ip_cidr_range": "/32"},
+			},
+			rawConfig: cty.ObjectVal(map[string]cty.Value{
+				"network_interface": cty.ListVal([]cty.Value{
+					cty.ObjectVal(map[string]cty.Value{
+						"alias_ip_range": cty.ListVal([]cty.Value{
+							cty.ObjectVal(map[string]cty.Value{
+								"ip_cidr_range":         cty.StringVal("/32"),
+								"subnetwork_range_name": cty.UnknownVal(cty.String),
+							}),
+						}),
+					}),
+				}),
+			}),
+			expectCidr0HasDiff: true,
+			expectDiffEmpty:    false,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			state := &sdkterraform.InstanceState{ID: "test-inst", Attributes: tc.stateAttrs}
+			cfg := sdkterraform.NewResourceConfigRaw(map[string]interface{}{
+				"network_interface": []interface{}{
+					map[string]interface{}{
+						"alias_ip_range": tc.configRanges,
+					},
+				},
+			})
+			if tc.rawConfig != cty.NilVal {
+				cfg.CtyValue = tc.rawConfig
+			}
+
+			diff, err := aliasTestResource.SimpleDiff(context.Background(), state, cfg, nil)
+			assert.NoError(t, err)
+			assert.Equal(t, tc.expectDiffEmpty, diff == nil || diff.Empty(), "diff: %#v", diff)
+			_, hasCidr0Diff := diff.Attributes["network_interface.0.alias_ip_range.0.ip_cidr_range"]
+			assert.Equal(t, tc.expectCidr0HasDiff, hasCidr0Diff, "diff attributes: %#v", diff.Attributes)
+		})
+	}
+}
+
+func TestFlattenAliasIpRangeHTTP(t *testing.T) {
+	testSchema := map[string]*sdkschema.Schema{
+		"network_interface": {
+			Type:     sdkschema.TypeList,
+			Required: true,
+			Elem: &sdkschema.Resource{
+				Schema: map[string]*sdkschema.Schema{
+					"alias_ip_range": {
+						Type:     sdkschema.TypeList,
+						Optional: true,
+						Elem: &sdkschema.Resource{
+							Schema: map[string]*sdkschema.Schema{
+								"ip_cidr_range":         {Type: sdkschema.TypeString, Required: true},
+								"subnetwork_range_name": {Type: sdkschema.TypeString, Optional: true},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	cases := []struct {
+		name         string
+		stateRanges  []interface{}
+		apiRanges    []interface{}
+		expectedFlat []map[string]interface{}
+	}{
+		{
+			name: "multi /32 across named secondary ranges preserves config order",
+			stateRanges: []interface{}{
+				map[string]interface{}{"ip_cidr_range": "/32", "subnetwork_range_name": "range-b-1"},
+				map[string]interface{}{"ip_cidr_range": "/32", "subnetwork_range_name": "range-b-2"},
+				map[string]interface{}{"ip_cidr_range": "/32", "subnetwork_range_name": "range-c-1"},
+			},
+			apiRanges: []interface{}{
+				map[string]interface{}{"ipCidrRange": "240.30.16.0/32", "subnetworkRangeName": "range-c-1"},
+				map[string]interface{}{"ipCidrRange": "240.20.16.1/32", "subnetworkRangeName": "range-b-2"},
+				map[string]interface{}{"ipCidrRange": "240.20.16.0/32", "subnetworkRangeName": "range-b-1"},
+			},
+			expectedFlat: []map[string]interface{}{
+				{"ip_cidr_range": "240.20.16.0/32", "subnetwork_range_name": "range-b-1"},
+				{"ip_cidr_range": "240.20.16.1/32", "subnetwork_range_name": "range-b-2"},
+				{"ip_cidr_range": "240.30.16.0/32", "subnetwork_range_name": "range-c-1"},
+			},
+		},
+		{
+			name: "mixed /32 before explicit CIDR in primary range (#19765) preserves config order",
+			stateRanges: []interface{}{
+				map[string]interface{}{"ip_cidr_range": "/32", "subnetwork_range_name": ""},
+				map[string]interface{}{"ip_cidr_range": "10.10.10.2/32", "subnetwork_range_name": ""},
+			},
+			apiRanges: []interface{}{
+				map[string]interface{}{"ipCidrRange": "10.10.10.2/32"},
+				map[string]interface{}{"ipCidrRange": "10.10.10.5/32"},
+			},
+			expectedFlat: []map[string]interface{}{
+				{"ip_cidr_range": "10.10.10.5/32", "subnetwork_range_name": ""},
+				{"ip_cidr_range": "10.10.10.2/32", "subnetwork_range_name": ""},
+			},
+		},
+		{
+			name: "duplicate /32 in same primary range matches distinct API entries",
+			stateRanges: []interface{}{
+				map[string]interface{}{"ip_cidr_range": "/32", "subnetwork_range_name": ""},
+				map[string]interface{}{"ip_cidr_range": "/32", "subnetwork_range_name": ""},
+			},
+			apiRanges: []interface{}{
+				map[string]interface{}{"ipCidrRange": "10.0.1.2/32"},
+				map[string]interface{}{"ipCidrRange": "10.0.1.3/32"},
+			},
+			expectedFlat: []map[string]interface{}{
+				{"ip_cidr_range": "10.0.1.2/32", "subnetwork_range_name": ""},
+				{"ip_cidr_range": "10.0.1.3/32", "subnetwork_range_name": ""},
+			},
+		},
+		{
+			name:        "import (empty state) sorts deterministically by ip_cidr_range then subnetwork_range_name",
+			stateRanges: nil,
+			apiRanges: []interface{}{
+				map[string]interface{}{"ipCidrRange": "172.16.0.1/32", "subnetworkRangeName": "range-b"},
+				map[string]interface{}{"ipCidrRange": "10.1.0.1/32", "subnetworkRangeName": "range-a"},
+			},
+			expectedFlat: []map[string]interface{}{
+				{"ip_cidr_range": "10.1.0.1/32", "subnetwork_range_name": "range-a"},
+				{"ip_cidr_range": "172.16.0.1/32", "subnetwork_range_name": "range-b"},
+			},
+		},
+		{
+			name: "instance template netmasks in API response match config order",
+			stateRanges: []interface{}{
+				map[string]interface{}{"ip_cidr_range": "/24", "subnetwork_range_name": "range-b"},
+				map[string]interface{}{"ip_cidr_range": "/24", "subnetwork_range_name": "range-a"},
+			},
+			apiRanges: []interface{}{
+				map[string]interface{}{"ipCidrRange": "/24", "subnetworkRangeName": "range-a"},
+				map[string]interface{}{"ipCidrRange": "/24", "subnetworkRangeName": "range-b"},
+			},
+			expectedFlat: []map[string]interface{}{
+				{"ip_cidr_range": "/24", "subnetwork_range_name": "range-b"},
+				{"ip_cidr_range": "/24", "subnetwork_range_name": "range-a"},
+			},
+		},
+		{
+			name: "out-of-band deletion compacts matched slots and appends extra API entries",
+			stateRanges: []interface{}{
+				map[string]interface{}{"ip_cidr_range": "10.0.1.1/32", "subnetwork_range_name": "r1"},
+				map[string]interface{}{"ip_cidr_range": "10.0.1.2/32", "subnetwork_range_name": "r2"},
+			},
+			apiRanges: []interface{}{
+				map[string]interface{}{"ipCidrRange": "10.0.1.2/32", "subnetworkRangeName": "r2"},
+				map[string]interface{}{"ipCidrRange": "10.0.1.9/32", "subnetworkRangeName": "r3"},
+			},
+			expectedFlat: []map[string]interface{}{
+				{"ip_cidr_range": "10.0.1.2/32", "subnetwork_range_name": "r2"},
+				{"ip_cidr_range": "10.0.1.9/32", "subnetwork_range_name": "r3"},
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			raw := map[string]interface{}{
+				"network_interface": []interface{}{
+					map[string]interface{}{
+						"alias_ip_range": tc.stateRanges,
+					},
+				},
+			}
+			if tc.stateRanges == nil {
+				raw = map[string]interface{}{}
+			}
+			d := sdkschema.TestResourceDataRaw(t, testSchema, raw)
+			got := tpgcompute.FlattenAliasIpRangeHTTP(d, tc.apiRanges, 0)
+			assert.Equal(t, tc.expectedFlat, got)
+		})
 	}
 }
 
@@ -3000,6 +3495,215 @@ func TestAccComputeInstance_aliasIpRangeCommonAddresses(t *testing.T) {
 				),
 			},
 			computeInstanceImportStep("us-east1-d", instanceName, []string{"network_interface.0.alias_ip_range.0.ip_cidr_range", "network_interface.0.alias_ip_range.0.subnetwork_range_name", "network_interface.0.alias_ip_range.1.ip_cidr_range", "network_interface.0.alias_ip_range.1.subnetwork_range_name"}),
+		},
+	})
+}
+
+func TestAccComputeInstance_aliasIpRangeNetmaskShift(t *testing.T) {
+	t.Parallel()
+
+	var instance map[string]interface{}
+	savedGroupBIps := map[string]string{}
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	networkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	subnetName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	captureAliasIp := func(rangeName string) resource.TestCheckFunc {
+		return func(s *terraform.State) error {
+			nics, _ := instance["networkInterfaces"].([]interface{})
+			for _, rawNi := range nics {
+				ni, ok := rawNi.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				ranges, _ := ni["aliasIpRanges"].([]interface{})
+				for _, rawRange := range ranges {
+					air, ok := rawRange.(map[string]interface{})
+					if !ok {
+						continue
+					}
+					if name, _ := air["subnetworkRangeName"].(string); name == rangeName {
+						cidr, _ := air["ipCidrRange"].(string)
+						if cidr == "" {
+							return fmt.Errorf("empty ipCidrRange for %s", rangeName)
+						}
+						savedGroupBIps[rangeName] = cidr
+						return nil
+					}
+				}
+			}
+			return fmt.Errorf("alias ip range %s not found on instance", rangeName)
+		}
+	}
+
+	verifyPreservedAliasIp := func(rangeName string) resource.TestCheckFunc {
+		return func(s *terraform.State) error {
+			want, ok := savedGroupBIps[rangeName]
+			if !ok {
+				return fmt.Errorf("no saved IP recorded for %s", rangeName)
+			}
+			nics, _ := instance["networkInterfaces"].([]interface{})
+			for _, rawNi := range nics {
+				ni, ok := rawNi.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				ranges, _ := ni["aliasIpRanges"].([]interface{})
+				for _, rawRange := range ranges {
+					air, ok := rawRange.(map[string]interface{})
+					if !ok {
+						continue
+					}
+					if name, _ := air["subnetworkRangeName"].(string); name == rangeName {
+						got, _ := air["ipCidrRange"].(string)
+						if got != want {
+							return fmt.Errorf("alias ip range %s was reallocated: got %q, want preserved %q", rangeName, got, want)
+						}
+						return nil
+					}
+				}
+			}
+			return fmt.Errorf("preserved alias ip range %s not found on instance", rangeName)
+		}
+	}
+
+	verifyAliasIpCount := func(want int) resource.TestCheckFunc {
+		return func(s *terraform.State) error {
+			nics, _ := instance["networkInterfaces"].([]interface{})
+			if len(nics) == 0 {
+				return fmt.Errorf("instance has no network interfaces")
+			}
+			ni, _ := nics[0].(map[string]interface{})
+			ranges, _ := ni["aliasIpRanges"].([]interface{})
+			if len(ranges) != want {
+				return fmt.Errorf("expected %d aliasIpRanges, got %d (%v)", want, len(ranges), ranges)
+			}
+			return nil
+		}
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Step 1: Group A (range-a-1, range-a-2) + Group B (range-b-1, range-b-2) with "/32".
+				Config: testAccComputeInstance_aliasIpRangeNetmaskShift(networkName, subnetName, instanceName, []string{"range-a-1", "range-a-2", "range-b-1", "range-b-2"}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+					verifyAliasIpCount(4),
+					testAccCheckComputeInstanceHasAliasIpRange(&instance, "range-a-1", "/32"),
+					testAccCheckComputeInstanceHasAliasIpRange(&instance, "range-a-2", "/32"),
+					captureAliasIp("range-b-1"),
+					captureAliasIp("range-b-2"),
+				),
+			},
+			{
+				// Step 2: Remove Group A, shift Group B to indices 0..1, add Group C in one apply.
+				// Group B's allocated IPs must be preserved untouched.
+				Config: testAccComputeInstance_aliasIpRangeNetmaskShift(networkName, subnetName, instanceName, []string{"range-b-1", "range-b-2", "range-c-1", "range-c-2"}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+					verifyAliasIpCount(4),
+					verifyPreservedAliasIp("range-b-1"),
+					verifyPreservedAliasIp("range-b-2"),
+					testAccCheckComputeInstanceHasAliasIpRange(&instance, "range-c-1", "/32"),
+					testAccCheckComputeInstanceHasAliasIpRange(&instance, "range-c-2", "/32"),
+				),
+			},
+			{
+				// Step 3: Remove-only (drop Group C, retain Group B untouched).
+				Config: testAccComputeInstance_aliasIpRangeNetmaskShift(networkName, subnetName, instanceName, []string{"range-b-1", "range-b-2"}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+					verifyAliasIpCount(2),
+					verifyPreservedAliasIp("range-b-1"),
+					verifyPreservedAliasIp("range-b-2"),
+				),
+			},
+			computeInstanceImportStep("us-east1-d", instanceName, []string{}),
+			{
+				// Step 5: Transition from secondary range-b-1 to primary range (omitted subnetwork_range_name) with "/32".
+				Config: testAccComputeInstance_aliasIpRangeNetmaskShift(networkName, subnetName, instanceName, []string{""}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+					verifyAliasIpCount(1),
+					testAccCheckComputeInstanceHasAliasIpRange(&instance, "", "/32"),
+				),
+			},
+			computeInstanceImportStep("us-east1-d", instanceName, []string{}),
+			{
+				// Step 7: Remove all alias_ip_range blocks.
+				Config: testAccComputeInstance_aliasIpRangeNetmaskShift(networkName, subnetName, instanceName, nil),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+					verifyAliasIpCount(0),
+				),
+			},
+			computeInstanceImportStep("us-east1-d", instanceName, []string{}),
+		},
+	})
+}
+
+func TestAccComputeInstance_aliasIpRangeMixedNetmaskAndCidr(t *testing.T) {
+	t.Parallel()
+
+	var instance map[string]interface{}
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	networkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	subnetName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	verifyAliasIpCount := func(want int) resource.TestCheckFunc {
+		return func(s *terraform.State) error {
+			nics, _ := instance["networkInterfaces"].([]interface{})
+			if len(nics) == 0 {
+				return fmt.Errorf("instance has no network interfaces")
+			}
+			ni, _ := nics[0].(map[string]interface{})
+			ranges, _ := ni["aliasIpRanges"].([]interface{})
+			if len(ranges) != want {
+				return fmt.Errorf("expected %d aliasIpRanges, got %d (%v)", want, len(ranges), ranges)
+			}
+			return nil
+		}
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Step 1 (#19765): "/32" before explicit CIDR "10.10.10.2/32" in primary range.
+				Config: testAccComputeInstance_aliasIpRangeMixedPrimary(networkName, subnetName, instanceName, []string{"/32", "10.10.10.2/32"}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+					verifyAliasIpCount(2),
+					testAccCheckComputeInstanceHasAliasIpRange(&instance, "", "10.10.10.2/32"),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.0.alias_ip_range.1.ip_cidr_range", "10.10.10.2/32"),
+				),
+			},
+			{
+				// Step 2: Keep only the explicit CIDR.
+				Config: testAccComputeInstance_aliasIpRangeMixedPrimary(networkName, subnetName, instanceName, []string{"10.10.10.2/32"}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+					verifyAliasIpCount(1),
+					testAccCheckComputeInstanceHasAliasIpRange(&instance, "", "10.10.10.2/32"),
+				),
+			},
+			computeInstanceImportStep("us-east1-d", instanceName, []string{}),
+			{
+				// Step 4 (#12180): Insert "/32" before the existing explicit CIDR and add a second "/32".
+				Config: testAccComputeInstance_aliasIpRangeMixedPrimary(networkName, subnetName, instanceName, []string{"/32", "10.10.10.2/32", "/32"}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+					verifyAliasIpCount(3),
+					testAccCheckComputeInstanceHasAliasIpRange(&instance, "", "10.10.10.2/32"),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.0.alias_ip_range.1.ip_cidr_range", "10.10.10.2/32"),
+				),
+			},
 		},
 	})
 }
@@ -10675,6 +11379,121 @@ resource "google_compute_instance" "foobar" {
   }
 }
 `, network, subnet, instance)
+}
+
+func testAccComputeInstance_aliasIpRangeNetmaskShift(network, subnet, instance string, rangeNames []string) string {
+	var blocks strings.Builder
+	for _, rn := range rangeNames {
+		blocks.WriteString("    alias_ip_range {\n")
+		if rn != "" {
+			blocks.WriteString(fmt.Sprintf("      subnetwork_range_name = %q\n", rn))
+		}
+		blocks.WriteString("      ip_cidr_range = \"/32\"\n")
+		blocks.WriteString("    }\n")
+	}
+
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-13"
+  project = "debian-cloud"
+}
+
+resource "google_compute_network" "inst-test-network" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "inst-test-subnetwork" {
+  name          = "%s"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-east1"
+  network       = google_compute_network.inst-test-network.self_link
+  secondary_ip_range {
+    range_name    = "range-a-1"
+    ip_cidr_range = "172.16.0.0/24"
+  }
+  secondary_ip_range {
+    range_name    = "range-a-2"
+    ip_cidr_range = "172.16.1.0/24"
+  }
+  secondary_ip_range {
+    range_name    = "range-b-1"
+    ip_cidr_range = "172.16.2.0/24"
+  }
+  secondary_ip_range {
+    range_name    = "range-b-2"
+    ip_cidr_range = "172.16.3.0/24"
+  }
+  secondary_ip_range {
+    range_name    = "range-c-1"
+    ip_cidr_range = "172.16.4.0/24"
+  }
+  secondary_ip_range {
+    range_name    = "range-c-2"
+    ip_cidr_range = "172.16.5.0/24"
+  }
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-east1-d"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.inst-test-subnetwork.self_link
+%s  }
+}
+`, network, subnet, instance, blocks.String())
+}
+
+func testAccComputeInstance_aliasIpRangeMixedPrimary(network, subnet, instance string, cidrs []string) string {
+	var blocks strings.Builder
+	for _, cidr := range cidrs {
+		blocks.WriteString("    alias_ip_range {\n")
+		blocks.WriteString(fmt.Sprintf("      ip_cidr_range = %q\n", cidr))
+		blocks.WriteString("    }\n")
+	}
+
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-13"
+  project = "debian-cloud"
+}
+
+resource "google_compute_network" "inst-test-network" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "inst-test-subnetwork" {
+  name          = "%s"
+  ip_cidr_range = "10.10.0.0/16"
+  region        = "us-east1"
+  network       = google_compute_network.inst-test-network.self_link
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-east1-d"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.inst-test-subnetwork.self_link
+%s  }
+}
+`, network, subnet, instance, blocks.String())
 }
 
 func testAccComputeInstance_hostname(instance string) string {
