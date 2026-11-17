@@ -187,6 +187,7 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
 
 func testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_updateTest(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
+	orgTarget := envvar.GetTestOrgTargetFromEnv(t)
 
 	policyTitle := acctest.RandString(t, 10)
 	perimeterTitle := "tf_test_perimeter"
@@ -211,7 +212,7 @@ func testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_updateTest(t
 				},
 			},
 			{
-				Config: testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_ingressPolicyUpdate_step3(org, policyTitle, perimeterTitle, projectNumber),
+				Config: testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_ingressPolicyUpdate_step3(org, orgTarget, policyTitle, perimeterTitle, projectNumber),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction(
@@ -300,7 +301,7 @@ resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy
 }
 
 // step 3: switch identity_type, add resource sources and ingress_to resources (project, folder, org), and operations
-func testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_ingressPolicyUpdate_step3(org, policyTitle, perimeterTitleName, projectNumber string) string {
+func testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_ingressPolicyUpdate_step3(org, orgTarget, policyTitle, perimeterTitleName, projectNumber string) string {
 	return fmt.Sprintf(`
 %s
 
@@ -353,5 +354,5 @@ resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy
     }
   }
 }
-`, testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_destroy(org, policyTitle, perimeterTitleName), org, policyTitle, projectNumber, org, projectNumber, org)
+`, testAccAccessContextManagerServicePerimeterDryRunIngressPolicy_destroy(org, policyTitle, perimeterTitleName), org, policyTitle, projectNumber, orgTarget, projectNumber, orgTarget)
 }
