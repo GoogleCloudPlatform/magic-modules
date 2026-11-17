@@ -1,89 +1,70 @@
 package functions_test
 
 import (
-	"fmt"
 	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 func TestAccProviderFunction_zone_from_id(t *testing.T) {
 	t.Parallel()
 
-	zone := envvar.GetTestZoneFromEnv()
-	zoneRegex := regexp.MustCompile(fmt.Sprintf("^%s$", zone))
-
-	context := map[string]interface{}{
-		"function_name": "zone_from_id",
-		"output_name":   "zone",
-		"resource_name": fmt.Sprintf("tf-test-zone-id-func-%s", acctest.RandString(t, 10)),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
+	resource.UnitTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_8_0),
+		},
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				// Can get the zone from a resource's id in one step
-				// Uses google_compute_disk resource's id attribute with format projects/{{project}}/zones/{{zone}}/disks/{{name}}
-				Config: testProviderFunction_get_zone_from_resource_id(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchOutput(context["output_name"].(string), zoneRegex),
-				),
+				Config: `
+# terraform block required for provider function to be found
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+    }
+  }
+}
+
+output "from_resource_id" {
+  value = provider::google::zone_from_id("projects/my-project/zones/us-central1-a/disks/my-disk")
+}
+
+output "from_self_link" {
+  value = provider::google::zone_from_id("https://www.googleapis.com/compute/v1/projects/my-project/zones/europe-west1-b/disks/my-disk")
+}
+
+output "from_op_resource_name" {
+  value = provider::google::zone_from_id("//compute.googleapis.com/projects/my-project/zones/asia-east1-c/instances/my-instance")
+}
+`,
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectKnownOutputValue("from_resource_id", knownvalue.StringExact("us-central1-a")),
+					statecheck.ExpectKnownOutputValue("from_self_link", knownvalue.StringExact("europe-west1-b")),
+					statecheck.ExpectKnownOutputValue("from_op_resource_name", knownvalue.StringExact("asia-east1-c")),
+				},
 			},
 			{
-				// Can get the zone from a resource's self_link in one step
-				// Uses google_compute_disk resource's self_link attribute
-				Config: testProviderFunction_get_zone_from_resource_self_link(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchOutput(context["output_name"].(string), zoneRegex),
-				),
+				Config: `
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+    }
+  }
+}
+
+output "invalid" {
+  value = provider::google::zone_from_id("projects/my-project/regions/us-central1/subnetworks/my-subnet")
+}
+`,
+				ExpectError: regexp.MustCompile(`doesn't\s+contain\s+the\s+expected\s+pattern\s+"zones/\{zone\}/"`),
 			},
 		},
 	})
-}
-
-func testProviderFunction_get_zone_from_resource_id(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-# terraform block required for provider function to be found
-terraform {
-  required_providers {
-    google = {
-      source = "hashicorp/google"
-    }
-  }
-}
-
-resource "google_compute_disk" "default" {
-  name  = "%{resource_name}"
-}
-
-output "%{output_name}" {
-  value = provider::google::%{function_name}(google_compute_disk.default.id)
-}
-`, context)
-}
-
-func testProviderFunction_get_zone_from_resource_self_link(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-# terraform block required for provider function to be found
-terraform {
-  required_providers {
-    google = {
-      source = "hashicorp/google"
-    }
-  }
-}
-
-resource "google_compute_disk" "default" {
-  name  = "%{resource_name}"
-}
-
-output "%{output_name}" {
-  value = provider::google::%{function_name}(google_compute_disk.default.self_link)
-}
-`, context)
 }

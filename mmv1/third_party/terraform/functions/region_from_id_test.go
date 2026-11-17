@@ -1,91 +1,70 @@
 package functions_test
 
 import (
-	"fmt"
 	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 func TestAccProviderFunction_region_from_id(t *testing.T) {
 	t.Parallel()
 
-	region := envvar.GetTestRegionFromEnv()
-	regionRegex := regexp.MustCompile(fmt.Sprintf("^%s$", region))
-
-	context := map[string]interface{}{
-		"function_name": "region_from_id",
-		"output_name":   "region",
-		"resource_name": fmt.Sprintf("tf-test-region-id-func-%s", acctest.RandString(t, 10)),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
+	resource.UnitTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_8_0),
+		},
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				// Can get the region from a resource's id in one step
-				// Uses google_compute_node_template resource's id attribute with format projects/{{project}}/regions/{{region}}/nodeTemplates/{{name}}
-				Config: testProviderFunction_get_region_from_resource_id(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchOutput(context["output_name"].(string), regionRegex),
-				),
+				Config: `
+# terraform block required for provider function to be found
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+    }
+  }
+}
+
+output "from_resource_id" {
+  value = provider::google::region_from_id("projects/my-project/regions/us-central1/nodeTemplates/my-template")
+}
+
+output "from_self_link" {
+  value = provider::google::region_from_id("https://www.googleapis.com/compute/v1/projects/my-project/regions/europe-west2/nodeTemplates/my-template")
+}
+
+output "from_op_resource_name" {
+  value = provider::google::region_from_id("//compute.googleapis.com/projects/my-project/regions/asia-northeast1/subnetworks/my-subnet")
+}
+`,
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectKnownOutputValue("from_resource_id", knownvalue.StringExact("us-central1")),
+					statecheck.ExpectKnownOutputValue("from_self_link", knownvalue.StringExact("europe-west2")),
+					statecheck.ExpectKnownOutputValue("from_op_resource_name", knownvalue.StringExact("asia-northeast1")),
+				},
 			},
 			{
-				// Can get the region from a resource's self_link in one step
-				// Uses google_compute_node_template resource's self_link attribute
-				Config: testProviderFunction_get_region_from_resource_self_link(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchOutput(context["output_name"].(string), regionRegex),
-				),
+				Config: `
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+    }
+  }
+}
+
+output "invalid" {
+  value = provider::google::region_from_id("projects/my-project/zones/us-central1-a/disks/my-disk")
+}
+`,
+				ExpectError: regexp.MustCompile(`doesn't\s+contain\s+the\s+expected\s+pattern\s+"regions/\{region\}/"`),
 			},
 		},
 	})
-}
-
-func testProviderFunction_get_region_from_resource_id(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-# terraform block required for provider function to be found
-terraform {
-  required_providers {
-    google = {
-      source = "hashicorp/google"
-    }
-  }
-}
-
-resource "google_compute_node_template" "default" {
-  name      = "%{resource_name}"
-  node_type = "n1-node-96-624"
-}
-
-output "%{output_name}" {
-  value = provider::google::%{function_name}(google_compute_node_template.default.id)
-}
-`, context)
-}
-
-func testProviderFunction_get_region_from_resource_self_link(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-# terraform block required for provider function to be found
-terraform {
-  required_providers {
-    google = {
-      source = "hashicorp/google"
-    }
-  }
-}
-
-resource "google_compute_node_template" "default" {
-  name      = "%{resource_name}"
-  node_type = "n1-node-96-624"
-}
-
-output "%{output_name}" {
-  value = provider::google::%{function_name}(google_compute_node_template.default.self_link)
-}
-`, context)
 }

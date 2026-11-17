@@ -1,66 +1,81 @@
 package functions_test
 
 import (
-	"fmt"
 	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 func TestAccProviderFunction_region_from_zone(t *testing.T) {
 	t.Parallel()
 
-	projectZone := "us-central1-a"
-	projectRegion := "us-central1"
-	projectRegionRegex := regexp.MustCompile(fmt.Sprintf("^%s$", projectRegion))
-
-	context := map[string]interface{}{
-		"function_name":     "region_from_zone",
-		"output_name":       "zone",
-		"resource_name":     fmt.Sprintf("tf-test-region-from-zone-func-%s", acctest.RandString(t, 10)),
-		"resource_location": projectZone,
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
+	resource.UnitTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_8_0),
+		},
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testProviderFunction_get_region_from_zone(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchOutput(context["output_name"].(string), projectRegionRegex),
-				),
+				Config: `
+# terraform block required for provider function to be found
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+    }
+  }
+}
+
+output "standard_zone" {
+  value = provider::google::region_from_zone("us-central1-a")
+}
+
+output "multi_hyphen_zone" {
+  value = provider::google::region_from_zone("northamerica-northeast1-b")
+}
+`,
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectKnownOutputValue("standard_zone", knownvalue.StringExact("us-central1")),
+					statecheck.ExpectKnownOutputValue("multi_hyphen_zone", knownvalue.StringExact("northamerica-northeast1")),
+				},
+			},
+			{
+				Config: `
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+    }
+  }
+}
+
+output "invalid_zone" {
+  value = provider::google::region_from_zone("invalidzone")
+}
+`,
+				ExpectError: regexp.MustCompile(`is\s+not\s+a\s+valid\s+zone\s+name`),
+			},
+			{
+				Config: `
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+    }
+  }
+}
+
+output "empty_zone" {
+  value = provider::google::region_from_zone("")
+}
+`,
+				ExpectError: regexp.MustCompile(`cannot\s+be\s+empty`),
 			},
 		},
 	})
-}
-
-func testProviderFunction_get_region_from_zone(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-# terraform block required for provider function to be found
-terraform {
-	required_providers {
-		google = {
-		  source = "hashicorp/google"
-		}
-	}
-}
-
-resource "google_compute_disk" "default" {
-	name  = "%{resource_name}"
-	type  = "pd-ssd"
-	zone  = "%{resource_location}"
-	image = "debian-13-trixie-v20260827"
-	labels = {
-	  environment = "dev"
-	}
-	physical_block_size_bytes = 4096
-  }
-
-output "%{output_name}" {
-  value = provider::google::%{function_name}(google_compute_disk.default.zone)
-}
-`, context)
 }

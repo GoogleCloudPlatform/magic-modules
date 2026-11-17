@@ -1,91 +1,70 @@
 package functions_test
 
 import (
-	"fmt"
 	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/bigquery"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/pubsub"
 )
 
 func TestAccProviderFunction_project_from_id(t *testing.T) {
 	t.Parallel()
 
-	projectId := envvar.GetTestProjectFromEnv()
-	projectIdRegex := regexp.MustCompile(fmt.Sprintf("^%s$", projectId))
-
-	context := map[string]interface{}{
-		"function_name": "project_from_id",
-		"output_name":   "project_id",
-		"resource_name": fmt.Sprintf("tf_test_project_id_func_%s", acctest.RandString(t, 10)),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
+	resource.UnitTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_8_0),
+		},
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				// Can get the project from a resource's id in one step
-				// Uses google_pubsub_topic resource's id attribute with format projects/{{project}}/topics/{{name}}
-				Config: testProviderFunction_get_project_from_resource_id(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchOutput(context["output_name"].(string), projectIdRegex),
-				),
+				Config: `
+# terraform block required for provider function to be found
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+    }
+  }
+}
+
+output "from_resource_id" {
+  value = provider::google::project_from_id("projects/my-project/topics/my-topic")
+}
+
+output "from_self_link" {
+  value = provider::google::project_from_id("https://bigquery.googleapis.com/bigquery/v2/projects/my-bq-project/datasets/my_dataset")
+}
+
+output "from_op_resource_name" {
+  value = provider::google::project_from_id("//gkehub.googleapis.com/projects/my-op-project/locations/us-central1/memberships/my-membership")
+}
+`,
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectKnownOutputValue("from_resource_id", knownvalue.StringExact("my-project")),
+					statecheck.ExpectKnownOutputValue("from_self_link", knownvalue.StringExact("my-bq-project")),
+					statecheck.ExpectKnownOutputValue("from_op_resource_name", knownvalue.StringExact("my-op-project")),
+				},
 			},
 			{
-				// Can get the project from a resource's self_link in one step
-				// Uses google_bigquery_dataset resource's self_link attribute
-				Config: testProviderFunction_get_project_from_resource_self_link(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchOutput(context["output_name"].(string), projectIdRegex),
-				),
+				Config: `
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+    }
+  }
+}
+
+output "invalid" {
+  value = provider::google::project_from_id("organizations/123456789/locations/global")
+}
+`,
+				ExpectError: regexp.MustCompile(`doesn't\s+contain\s+the\s+expected\s+pattern\s+"projects/\{project\}/"`),
 			},
 		},
 	})
-}
-
-func testProviderFunction_get_project_from_resource_id(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-# terraform block required for provider function to be found
-terraform {
-  required_providers {
-    google = {
-      source = "hashicorp/google"
-    }
-  }
-}
-
-resource "google_pubsub_topic" "default" {
-  name = "%{resource_name}"
-}
-
-output "%{output_name}" {
-  value = provider::google::%{function_name}(google_pubsub_topic.default.id)
-}
-`, context)
-}
-
-func testProviderFunction_get_project_from_resource_self_link(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-# terraform block required for provider function to be found
-terraform {
-  required_providers {
-    google = {
-      source = "hashicorp/google"
-    }
-  }
-}
-
-resource "google_bigquery_dataset" "default" {
-  dataset_id  = "%{resource_name}"
-  description = "This dataset is made in an acceptance test"
-}
-
-output "%{output_name}" {
-  value = provider::google::%{function_name}(google_bigquery_dataset.default.self_link)
-}
-`, context)
 }

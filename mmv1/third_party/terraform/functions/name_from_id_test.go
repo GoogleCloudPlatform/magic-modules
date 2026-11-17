@@ -1,88 +1,70 @@
 package functions_test
 
 import (
-	"fmt"
 	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/pubsub"
 )
 
 func TestAccProviderFunction_name_from_id(t *testing.T) {
 	t.Parallel()
 
-	context := map[string]interface{}{
-		"function_name": "name_from_id",
-		"output_name":   "name",
-		"resource_name": fmt.Sprintf("tf-test-name-id-func-%s", acctest.RandString(t, 10)),
-	}
-
-	nameRegex := regexp.MustCompile(fmt.Sprintf("^%s$", context["resource_name"]))
-
-	acctest.VcrTest(t, resource.TestCase{
+	resource.UnitTest(t, resource.TestCase{
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_8_0),
+		},
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				// Can get the name from a resource's id in one step
-				// Uses google_pubsub_topic resource's id attribute with format projects/{{project}}/topics/{{name}}
-				Config: testProviderFunction_get_name_from_resource_id(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchOutput(context["output_name"].(string), nameRegex),
-				),
+				Config: `
+# terraform block required for provider function to be found
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+    }
+  }
+}
+
+output "from_resource_id" {
+  value = provider::google::name_from_id("projects/my-project/topics/tf-test-name-id-func")
+}
+
+output "from_self_link" {
+  value = provider::google::name_from_id("https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a/disks/tf-test-disk-name")
+}
+
+output "from_op_resource_name" {
+  value = provider::google::name_from_id("//gkehub.googleapis.com/projects/my-project/locations/us-central1/memberships/my-membership")
+}
+`,
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectKnownOutputValue("from_resource_id", knownvalue.StringExact("tf-test-name-id-func")),
+					statecheck.ExpectKnownOutputValue("from_self_link", knownvalue.StringExact("tf-test-disk-name")),
+					statecheck.ExpectKnownOutputValue("from_op_resource_name", knownvalue.StringExact("my-membership")),
+				},
 			},
 			{
-				// Can get the name from a resource's self_link in one step
-				// Uses google_compute_disk resource's self_link attribute
-				Config: testProviderFunction_get_name_from_resource_self_link(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchOutput(context["output_name"].(string), nameRegex),
-				),
+				Config: `
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+    }
+  }
+}
+
+output "invalid" {
+  value = provider::google::name_from_id("invalid-unslashed-id")
+}
+`,
+				ExpectError: regexp.MustCompile(`doesn't\s+contain\s+the\s+expected\s+pattern\s+"resourceType/\{name\}\$"`),
 			},
 		},
 	})
-}
-
-func testProviderFunction_get_name_from_resource_id(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-# terraform block required for provider function to be found
-terraform {
-  required_providers {
-    google = {
-      source = "hashicorp/google"
-    }
-  }
-}
-
-resource "google_pubsub_topic" "default" {
-  name = "%{resource_name}"
-}
-
-output "%{output_name}" {
-  value = provider::google::%{function_name}(google_pubsub_topic.default.id)
-}
-`, context)
-}
-
-func testProviderFunction_get_name_from_resource_self_link(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-# terraform block required for provider function to be found
-terraform {
-  required_providers {
-    google = {
-      source = "hashicorp/google"
-    }
-  }
-}
-
-resource "google_compute_disk" "default" {
-  name  = "%{resource_name}"
-}
-
-output "%{output_name}" {
-  value = provider::google::%{function_name}(google_compute_disk.default.self_link)
-}
-`, context)
 }
