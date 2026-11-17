@@ -1,0 +1,76 @@
+resource "google_project" "project" {
+  project_id      = "{{index $.ResourceIdVars "project_id"}}"
+  name            = "{{index $.ResourceIdVars "project_id"}}"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
+  deletion_policy = "DELETE"
+}
+
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+  depends_on      = [google_project.project]
+}
+
+resource "google_project_service" "apihub_service" {
+  project            = google_project.project.project_id
+  service            = "apihub.googleapis.com"
+  disable_on_destroy = false
+  depends_on         = [time_sleep.wait_60_seconds]
+}
+
+# An API hub instance requires a host project registration in the same location.
+resource "google_apihub_host_project_registration" "host_project_registration" {
+  project                      = google_project.project.project_id
+  location                     = "us-central1"
+  host_project_registration_id = google_project.project.project_id
+  gcp_project                  = "projects/${google_project.project.project_id}"
+
+  depends_on = [google_project_service.apihub_service]
+}
+
+# Attributes can only be created in a project with an API hub instance.
+resource "google_apihub_api_hub_instance" "apihub_instance" {
+  project  = google_project.project.project_id
+  location = "us-central1"
+
+  config {
+    disable_search = true
+  }
+
+  timeouts {
+    create = "60m"
+  }
+
+  depends_on = [google_apihub_host_project_registration.host_project_registration]
+}
+
+resource "google_apihub_attribute" "{{$.PrimaryResourceId}}" {
+  project      = google_project.project.project_id
+  location     = "us-central1"
+  attribute_id = "{{index $.ResourceIdVars "attribute_id"}}"
+  display_name = "{{index $.Vars "display_name"}}"
+  description  = "{{index $.Vars "description"}}"
+  scope        = "VERSION"
+  data_type    = "ENUM"
+  cardinality  = {{index $.Vars "cardinality"}}
+
+  allowed_values {
+    id           = "{{index $.Vars "first_value_id"}}"
+    display_name = "{{index $.Vars "first_value_display_name"}}"
+    description  = "{{index $.Vars "first_value_description"}}"
+  }
+
+  allowed_values {
+    id           = "value-2"
+    display_name = "Value 2"
+    description  = "{{index $.Vars "second_value_description"}}"
+  }
+
+  allowed_values {
+    id           = "{{index $.Vars "third_value_id"}}"
+    display_name = "{{index $.Vars "third_value_display_name"}}"
+    description  = "{{index $.Vars "third_value_description"}}"
+  }
+
+  depends_on = [google_apihub_api_hub_instance.apihub_instance]
+}
