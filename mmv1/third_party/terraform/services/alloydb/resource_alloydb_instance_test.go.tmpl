@@ -2014,7 +2014,6 @@ resource "google_alloydb_instance" "default" {
   }
 
   network_config {
-    enable_public_ip   = false
     public_dns_enabled = true
     authorized_external_networks {
       cidr_range = "%{cidr_range}"
@@ -2072,7 +2071,7 @@ resource "google_alloydb_instance" "default" {
   }
 
   network_config {
-    enable_public_ip = false
+    public_dns_enabled = false
   }
 }
 

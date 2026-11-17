@@ -467,12 +467,26 @@ properties:
     properties:
       - name: authorizedExternalNetworks
         type: Array
+        exact_version: ga
         description: |
           A list of external networks authorized to access this instance. This
           field is only allowed to be set when `enable_public_ip` is set to
           true.
         required_with:
           - networkConfig.0.enablePublicIp
+        item_type:
+          type: NestedObject
+          properties:
+            - name: cidrRange
+              type: String
+              description: CIDR range for one authorized network of the instance.
+      - name: authorizedExternalNetworks
+        type: Array
+        exact_version: beta
+        description: |
+          A list of external networks authorized to access this instance. This
+          field is only allowed to be set when `enable_public_ip` is set to
+          true (or when `public_dns_enabled` is set to true in `google-beta`).
         item_type:
           type: NestedObject
           properties:
@@ -497,8 +511,7 @@ properties:
           enabled on AlloyDB Express instances. When it's enabled, the instance's
           DNS name is exported as `network_info.public_dns_name`. Turning Public
           DNS on or off can't be combined with changes that restart the instance
-          in the same apply. To use `authorized_external_networks` with Public
-          DNS instead of a public IP, also set `enable_public_ip` to `false`.
+          in the same apply.
       - name: allocatedIpRangeOverride
         type: String
         immutable: true
