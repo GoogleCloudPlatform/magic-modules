@@ -1,12 +1,12 @@
 package alloydb_test
 
 import (
-{{- if ne $.TargetVersionName "ga" }}
-	"regexp"
-{{- end }}
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+{{- if ne $.TargetVersionName "ga" }}
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+{{- end }}
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/alloydb"
@@ -1961,9 +1961,16 @@ func TestAccAlloydbInstance_expressPublicDnsAndUpgrade(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location", "labels", "terraform_labels"},
 			},
 			{
-				// A standard cluster can't be converted back to an Express cluster.
-				Config:      testAccAlloydbInstance_expressPublicDns(downgradeContext),
-				ExpectError: regexp.MustCompile("can't be changed from false to true"),
+				// A standard cluster can't be converted back to an Express cluster, so enabling
+				// express_config again plans a replacement.
+				Config:             testAccAlloydbInstance_expressPublicDns(downgradeContext),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PostApplyPreRefresh: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_alloydb_cluster.default", plancheck.ResourceActionReplace),
+					},
+				},
 			},
 		},
 	})

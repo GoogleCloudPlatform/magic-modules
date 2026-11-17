@@ -493,11 +493,12 @@ properties:
         type: Boolean
         min_version: beta
         description: |
-          Whether Public DNS is enabled for the instance. Only supported on
-          AlloyDB Express instances. When Public DNS is enabled, the instance's
-          DNS name is exported as `network_info.public_dns_name`. To use
-          `authorized_external_networks` with Public DNS, set
-          `enable_public_ip` to `false`.
+          Whether Public DNS is enabled for the instance. Public DNS can only be
+          enabled on AlloyDB Express instances. When it's enabled, the instance's
+          DNS name is exported as `network_info.public_dns_name`. Turning Public
+          DNS on or off can't be combined with changes that restart the instance
+          in the same apply. To use `authorized_external_networks` with Public
+          DNS instead of a public IP, also set `enable_public_ip` to `false`.
       - name: allocatedIpRangeOverride
         type: String
         immutable: true
