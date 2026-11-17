@@ -1,0 +1,401 @@
+package compute
+
+import (
+	"context"
+	"reflect"
+	"testing"
+
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+)
+
+func TestHasTerminationTimeChanged(t *testing.T) {
+	t.Parallel()
+	cases := map[string]struct {
+		Old, New map[string]interface{}
+		Expect   bool
+	}{
+		"empty": {
+			Old:    map[string]interface{}{"termination_time": ""},
+			New:    map[string]interface{}{"termination_time": ""},
+			Expect: false,
+		},
+		"new": {
+			Old:    map[string]interface{}{"termination_time": ""},
+			New:    map[string]interface{}{"termination_time": "2025-01-31T15:04:05Z"},
+			Expect: true,
+		},
+		"changed": {
+			Old:    map[string]interface{}{"termination_time": "2025-01-30T15:04:05Z"},
+			New:    map[string]interface{}{"termination_time": "2025-01-31T15:04:05Z"},
+			Expect: true,
+		},
+		"same": {
+			Old:    map[string]interface{}{"termination_time": "2025-01-30T15:04:05Z"},
+			New:    map[string]interface{}{"termination_time": "2025-01-30T15:04:05Z"},
+			Expect: false,
+		},
+	}
+	for tn, tc := range cases {
+		if hasTerminationTimeChanged(tc.Old, tc.New) != tc.Expect {
+			t.Errorf("%s: expected %t for whether termination time matched for old = %q, new = %q", tn, tc.Expect, tc.Old, tc.New)
+		}
+	}
+}
+
+type rawConfigMockResourceData struct {
+	tpgresource.ResourceDataMock
+	rawConfig cty.Value
+	rawValues map[string]interface{}
+}
+
+func (m *rawConfigMockResourceData) GetRawConfig() cty.Value {
+	return m.rawConfig
+}
+
+func (m *rawConfigMockResourceData) RawValues() map[string]interface{} {
+	return m.rawValues
+}
+
+func TestIsWorkloadIdentityCertConfigured(t *testing.T) {
+	t.Parallel()
+
+	elemType := cty.Object(map[string]cty.Type{
+		"identity":                     cty.String,
+		"identity_certificate_enabled": cty.Bool,
+	})
+	rootType := cty.Object(map[string]cty.Type{
+		"workload_identity_config": cty.List(elemType),
+	})
+
+	cases := map[string]struct {
+		d      tpgresource.TerraformResourceData
+		expect bool
+	}{
+		"raw_config_explicit_true": {
+			d: &rawConfigMockResourceData{
+				rawConfig: cty.ObjectVal(map[string]cty.Value{
+					"workload_identity_config": cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							"identity":                     cty.NullVal(cty.String),
+							"identity_certificate_enabled": cty.True,
+						}),
+					}),
+				}),
+			},
+			expect: true,
+		},
+		"raw_config_explicit_false": {
+			d: &rawConfigMockResourceData{
+				rawConfig: cty.ObjectVal(map[string]cty.Value{
+					"workload_identity_config": cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							"identity":                     cty.NullVal(cty.String),
+							"identity_certificate_enabled": cty.False,
+						}),
+					}),
+				}),
+			},
+			expect: true,
+		},
+		"raw_config_omitted_null": {
+			d: &rawConfigMockResourceData{
+				ResourceDataMock: tpgresource.ResourceDataMock{
+					FieldsInSchema: map[string]interface{}{
+						"workload_identity_config.0.identity_certificate_enabled": true,
+					},
+				},
+				rawConfig: cty.ObjectVal(map[string]cty.Value{
+					"workload_identity_config": cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							"identity":                     cty.StringVal("ns/p/sa/id"),
+							"identity_certificate_enabled": cty.NullVal(cty.Bool),
+						}),
+					}),
+				}),
+			},
+			expect: false,
+		},
+		"raw_config_unknown_attr": {
+			d: &rawConfigMockResourceData{
+				rawConfig: cty.ObjectVal(map[string]cty.Value{
+					"workload_identity_config": cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							"identity":                     cty.NullVal(cty.String),
+							"identity_certificate_enabled": cty.UnknownVal(cty.Bool),
+						}),
+					}),
+				}),
+			},
+			expect: false,
+		},
+		"raw_config_unknown_elem": {
+			d: &rawConfigMockResourceData{
+				rawConfig: cty.ObjectVal(map[string]cty.Value{
+					"workload_identity_config": cty.ListVal([]cty.Value{
+						cty.UnknownVal(elemType),
+					}),
+				}),
+			},
+			expect: false,
+		},
+		"raw_config_marked_sensitive_false": {
+			d: &rawConfigMockResourceData{
+				rawConfig: cty.ObjectVal(map[string]cty.Value{
+					"workload_identity_config": cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							"identity":                     cty.NullVal(cty.String),
+							"identity_certificate_enabled": cty.False.Mark("sensitive"),
+						}),
+					}).Mark("sensitive"),
+				}),
+			},
+			expect: true,
+		},
+		"raw_config_empty_list": {
+			d: &rawConfigMockResourceData{
+				rawConfig: cty.ObjectVal(map[string]cty.Value{
+					"workload_identity_config": cty.ListValEmpty(elemType),
+				}),
+			},
+			expect: false,
+		},
+		"raw_config_unknown_root": {
+			d: &rawConfigMockResourceData{
+				rawConfig: cty.UnknownVal(rootType),
+			},
+			expect: false,
+		},
+		"tgc_next_raw_values_explicit_false": {
+			d: &rawConfigMockResourceData{
+				rawConfig: cty.NullVal(cty.String),
+				rawValues: map[string]interface{}{
+					"workload_identity_config": []interface{}{
+						map[string]interface{}{
+							"identity":                     nil,
+							"identity_certificate_enabled": false,
+						},
+					},
+				},
+			},
+			expect: true,
+		},
+		"tgc_next_raw_values_omitted_nil": {
+			d: &rawConfigMockResourceData{
+				ResourceDataMock: tpgresource.ResourceDataMock{
+					FieldsInSchema: map[string]interface{}{
+						"workload_identity_config.0.identity_certificate_enabled": false,
+					},
+				},
+				rawConfig: cty.NullVal(cty.String),
+				rawValues: map[string]interface{}{
+					"workload_identity_config": []interface{}{
+						map[string]interface{}{
+							"identity":                     "ns/p/sa/id",
+							"identity_certificate_enabled": nil,
+						},
+					},
+				},
+			},
+			expect: false,
+		},
+		"mock_fallback_explicit_false": {
+			d: &tpgresource.ResourceDataMock{
+				FieldsInSchema: map[string]interface{}{
+					"workload_identity_config.0.identity_certificate_enabled": false,
+				},
+			},
+			expect: true,
+		},
+		"mock_fallback_omitted": {
+			d: &tpgresource.ResourceDataMock{
+				FieldsInSchema: map[string]interface{}{},
+			},
+			expect: false,
+		},
+	}
+
+	for name, tc := range cases {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			got := isWorkloadIdentityCertConfigured(tc.d)
+			if got != tc.expect {
+				t.Fatalf("isWorkloadIdentityCertConfigured() = %v, want %v", got, tc.expect)
+			}
+		})
+	}
+}
+
+func TestExpandAndFlattenWorkloadIdentityConfig(t *testing.T) {
+	t.Parallel()
+
+	// Empty block returns nil
+	emptyMock := &tpgresource.ResourceDataMock{
+		FieldsInSchema: map[string]interface{}{
+			"workload_identity_config": []interface{}{
+				map[string]interface{}{
+					"identity":                     "",
+					"identity_certificate_enabled": false,
+				},
+			},
+		},
+	}
+	if got := expandWorkloadIdentityConfig(emptyMock); got != nil {
+		t.Fatalf("expandWorkloadIdentityConfig(empty) = %#v, want nil", got)
+	}
+
+	// Explicit false certificate is preserved
+	falseCertMock := &tpgresource.ResourceDataMock{
+		FieldsInSchema: map[string]interface{}{
+			"workload_identity_config": []interface{}{
+				map[string]interface{}{
+					"identity":                     "ns/p/sa/id",
+					"identity_certificate_enabled": false,
+					{{- if ne $.TargetVersionName "ga" }}
+					"identity_type":                "AGENT_IDENTITY",
+					{{- end }}
+				},
+			},
+			"workload_identity_config.0.identity_certificate_enabled": false,
+		},
+	}
+	gotExpand := expandWorkloadIdentityConfig(falseCertMock)
+	wantExpand := map[string]interface{}{
+		"identity":                   "ns/p/sa/id",
+		"identityCertificateEnabled": false,
+		{{- if ne $.TargetVersionName "ga" }}
+		"identityType":               "AGENT_IDENTITY",
+		{{- end }}
+	}
+	if !reflect.DeepEqual(gotExpand, wantExpand) {
+		t.Fatalf("expandWorkloadIdentityConfig(falseCert) = %#v, want %#v", gotExpand, wantExpand)
+	}
+
+	if got := flattenWorkloadIdentityConfig(nil); got != nil {
+		t.Fatalf("flattenWorkloadIdentityConfig(nil) = %#v, want nil", got)
+	}
+	if got := flattenWorkloadIdentityConfig(map[string]interface{}{}); got != nil {
+		t.Fatalf("flattenWorkloadIdentityConfig({}) = %#v, want nil", got)
+	}
+
+	apiMap := map[string]interface{}{
+		"identity":                   "spiffe://example",
+		"identityCertificateEnabled": true,
+		"identityType":               "AGENT_IDENTITY",
+	}
+	gotInstFlatten := flattenInstanceWorkloadIdentityConfig(apiMap)
+	wantInstFlatten := []map[string]interface{}{
+		{
+			"identity":                     "spiffe://example",
+			"identity_certificate_enabled": true,
+			{{- if ne $.TargetVersionName "ga" }}
+			"identity_type":                "AGENT_IDENTITY",
+			{{- end }}
+		},
+	}
+	if !reflect.DeepEqual(gotInstFlatten, wantInstFlatten) {
+		t.Fatalf("flattenInstanceWorkloadIdentityConfig() = %#v, want %#v", gotInstFlatten, wantInstFlatten)
+	}
+
+	// Ensure template schemas can safely d.Set flattened responses containing identityType.
+	tplData := schema.TestResourceDataRaw(t, ResourceComputeInstanceTemplate().Schema, map[string]interface{}{})
+	if err := tplData.Set("workload_identity_config", flattenWorkloadIdentityConfig(apiMap)); err != nil {
+		t.Fatalf("ResourceComputeInstanceTemplate d.Set(workload_identity_config) failed: %v", err)
+	}
+	regTplData := schema.TestResourceDataRaw(t, ResourceComputeRegionInstanceTemplate().Schema, map[string]interface{}{})
+	if err := regTplData.Set("workload_identity_config", FlattenWorkloadIdentityConfigHTTP(apiMap)); err != nil {
+		t.Fatalf("ResourceComputeRegionInstanceTemplate d.Set(workload_identity_config) failed: %v", err)
+	}
+}
+
+func TestComputeInstanceWorkloadIdentityConfigForceNewCustomizeDiff(t *testing.T) {
+	t.Parallel()
+
+	instanceRes := ResourceComputeInstance()
+	if instanceRes.Schema["workload_identity_config"].ForceNew {
+		t.Fatalf("workload_identity_config outer schema must not set static ForceNew: true (enforced via CustomizeDiff)")
+	}
+
+	newTestRes := func() *schema.Resource {
+		return &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"name":                     {Type: schema.TypeString, Required: true, ForceNew: true},
+				"workload_identity_config": ResourceComputeInstance().Schema["workload_identity_config"],
+			},
+			CustomizeDiff: workloadIdentityConfigForceNewCustomDiff(),
+		}
+	}
+
+	priorWithWic := &terraform.InstanceState{
+		ID: "projects/my-proj/zones/us-central1-a/instances/my-vm",
+		Attributes: map[string]string{
+			"id":                           "projects/my-proj/zones/us-central1-a/instances/my-vm",
+			"name":                         "my-vm",
+			"workload_identity_config.#":   "1",
+			"workload_identity_config.0.identity": "ns/p/sa/id",
+			"workload_identity_config.0.identity_certificate_enabled": "true",
+			{{- if ne $.TargetVersionName "ga" }}
+			"workload_identity_config.0.identity_type": "IDENTITY_TYPE_UNSPECIFIED",
+			{{- end }}
+		},
+	}
+
+	// 1. Removing workload_identity_config block (1 -> 0) triggers ForceNew replacement.
+	removedCfg := terraform.NewResourceConfigRaw(map[string]interface{}{
+		"name": "my-vm",
+	})
+	diff, err := newTestRes().Diff(context.Background(), priorWithWic, removedCfg, nil)
+	if err != nil {
+		t.Fatalf("unexpected error from Diff on block removal: %v", err)
+	}
+	if diff == nil || !diff.RequiresNew() {
+		t.Fatalf("expected RequiresNew() == true when workload_identity_config is removed, got diff: %#v", diff)
+	}
+
+	// 2. Adding an empty workload_identity_config {} block (0 -> 1) triggers ForceNew replacement.
+	priorWithoutWic := &terraform.InstanceState{
+		ID: "projects/my-proj/zones/us-central1-a/instances/my-vm",
+		Attributes: map[string]string{
+			"id":                         "projects/my-proj/zones/us-central1-a/instances/my-vm",
+			"name":                       "my-vm",
+			"workload_identity_config.#": "0",
+		},
+	}
+	emptyAddCfg := terraform.NewResourceConfigRaw(map[string]interface{}{
+		"name": "my-vm",
+		"workload_identity_config": []interface{}{
+			map[string]interface{}{},
+		},
+	})
+	addDiff, err := newTestRes().Diff(context.Background(), priorWithoutWic, emptyAddCfg, nil)
+	if err != nil {
+		t.Fatalf("unexpected error from Diff on empty block addition: %v", err)
+	}
+	if addDiff == nil || !addDiff.RequiresNew() {
+		t.Fatalf("expected RequiresNew() == true when empty workload_identity_config block is added, got diff: %#v", addDiff)
+	}
+
+	// 3. Unchanged workload_identity_config does not trigger replacement.
+	unchangedCfg := terraform.NewResourceConfigRaw(map[string]interface{}{
+		"name": "my-vm",
+		"workload_identity_config": []interface{}{
+			map[string]interface{}{
+				"identity":                     "ns/p/sa/id",
+				"identity_certificate_enabled": true,
+				{{- if ne $.TargetVersionName "ga" }}
+				"identity_type":                "IDENTITY_TYPE_UNSPECIFIED",
+				{{- end }}
+			},
+		},
+	})
+	unchangedDiff, err := newTestRes().Diff(context.Background(), priorWithWic, unchangedCfg, nil)
+	if err != nil {
+		t.Fatalf("unexpected error from Diff when unchanged: %v", err)
+	}
+	if unchangedDiff != nil && unchangedDiff.RequiresNew() {
+		t.Fatalf("expected RequiresNew() == false when workload_identity_config is unchanged, got diff: %#v", unchangedDiff.Attributes)
+	}
+}
