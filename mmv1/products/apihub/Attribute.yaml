@@ -1,0 +1,184 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Attribute
+description: |-
+  An attribute in the API Hub. An attribute is a name value pair which can be
+  attached to different resources in the API hub based on the scope of the
+  attribute. Attributes can either be pre-defined by the API Hub or created by
+  users.
+base_url: projects/{{project}}/locations/{{location}}/attributes
+self_link: projects/{{project}}/locations/{{location}}/attributes/{{attribute_id}}
+create_url: projects/{{project}}/locations/{{location}}/attributes?attributeId={{attribute_id}}
+update_mask: true
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/attributes/{{attribute_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/attributes/{{attribute_id}}
+autogen_status: QXR0cmlidXRlQXV0b2dlblYyQWdlbnQ=
+samples:
+  - name: apihub_attribute_basic
+    primary_resource_id: default
+    steps:
+      - name: apihub_attribute_basic
+        resource_id_vars:
+          attribute_id: example-attribute
+      - name: apihub_attribute_basic_update
+        resource_id_vars:
+          attribute_id: example-attribute
+  - name: apihub_attribute_enum
+    primary_resource_id: default
+    steps:
+      - name: apihub_attribute_enum
+        resource_id_vars:
+          attribute_id: example-enum-attribute
+      - name: apihub_attribute_enum_update
+        resource_id_vars:
+          attribute_id: example-enum-attribute
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: >-
+      Resource ID segment making up resource `name`. It identifies the resource
+      within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: attributeId
+    type: String
+    required: true
+    description: |-
+      The ID to use for the attribute, which will become the final component
+      of the attribute's resource name. This field is optional.
+
+      * If provided, the same will be used. The service will throw an error if
+      the specified id is already used by another attribute resource in the API
+      hub.
+      * If not provided, a system generated id will be used.
+
+      This value should be 4-500 characters, and valid characters
+      are /[a-z][A-Z][0-9]-_/.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: allowedValues
+    type: Array
+    description: |-
+      The list of allowed values when the attribute value is of type enum.
+      This is required when the data_type of the attribute is ENUM.
+      The maximum number of allowed values of an attribute will be 1000.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: description
+          type: String
+          description: The detailed description of the allowed value.
+        - name: displayName
+          type: String
+          required: true
+          description: The display name of the allowed value.
+        - name: id
+          type: String
+          required: true
+          description: |-
+            The ID of the allowed value.
+            * If provided, the same will be used. The service will throw an error if
+            the specified id is already used by another allowed value in the same
+            attribute resource.
+            * If not provided, a system generated id derived from the display name
+            will be used. In this case, the service will handle conflict resolution
+            by adding a system generated suffix in case of duplicates.
+
+            This value should be 3-500 characters, and valid characters
+            are /[a-z][A-Z][0-9]-_/.
+        - name: immutable
+          type: Boolean
+          description: |-
+            When set to true, the allowed value cannot be updated or deleted by the
+            user. It can only be true for System defined attributes.
+  - name: cardinality
+    type: Integer
+    default_from_api: true
+    description: |-
+      The maximum number of values that the attribute can have when associated
+      with an API Hub resource.
+      Cardinality 1 would represent a single-valued attribute. It must not be
+      less than 1 or greater than 20. If not specified, the cardinality would be
+      set to 1 by default and represent a single-valued attribute.
+      Cardinality can only be increased during an update.
+  - name: createTime
+    type: String
+    description: The time at which the attribute was created.
+    output: true
+  - name: dataType
+    type: String
+    required: true
+    immutable: true
+    description: |-
+      The type of the data of the attribute.
+      Possible values:
+      ENUM
+      JSON
+      STRING
+      URI
+  - name: definitionType
+    type: String
+    description: |-
+      The definition type of the attribute.
+      Possible values:
+      SYSTEM_DEFINED
+      USER_DEFINED
+    output: true
+  - name: description
+    type: String
+    description: The description of the attribute.
+  - name: displayName
+    type: String
+    required: true
+    description: The display name of the attribute.
+  - name: mandatory
+    type: Boolean
+    description: |-
+      When mandatory is true, the attribute is mandatory for the resource
+      specified in the scope. Only System defined attributes can be mandatory.
+    output: true
+  - name: name
+    type: String
+    description: |-
+      Identifier. The name of the attribute in the API Hub.
+
+      Format:
+      `projects/{project}/locations/{location}/attributes/{attribute}`
+    output: true
+  - name: scope
+    type: String
+    required: true
+    immutable: true
+    description: |-
+      The scope of the attribute. It represents the resource in the API Hub to
+      which the attribute can be linked.
+      Possible values:
+      API
+      VERSION
+      SPEC
+      API_OPERATION
+      DEPLOYMENT
+      DEPENDENCY
+      DEFINITION
+      EXTERNAL_API
+      PLUGIN
+  - name: updateTime
+    type: String
+    description: The time at which the attribute was last updated.
+    output: true

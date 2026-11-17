@@ -1,0 +1,21 @@
+resource "google_apihub_attribute" "{{$.PrimaryResourceId}}" {
+  location     = "us-central1"
+  attribute_id = "{{index $.ResourceIdVars "attribute_id"}}"
+  display_name = "Example Enum Attribute"
+  description  = "Initial enum attribute description"
+  scope        = "VERSION"
+  data_type    = "ENUM"
+  cardinality  = 2
+
+  allowed_values {
+    id           = "value-1"
+    display_name = "Value 1"
+    description  = "First allowed value"
+    immutable    = false
+  }
+
+  allowed_values {
+    id           = "value-2"
+    display_name = "Value 2"
+  }
+}
