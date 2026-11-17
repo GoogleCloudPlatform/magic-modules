@@ -89,7 +89,7 @@ func init() {
 // managed resource. It is shared by the managed resource registration and the 
 // list resource, so both stay in sync.
 func New{{ $.ResourceName }}IamBindingListResource() *schema.Resource {
-    return tpgiamresource.ResourceIamBindingList(
+    return tpgiamresource.ResourceIamBinding(
         {{ $.ResourceName }}IamSchema,
         {{ $.ResourceName }}IamUpdaterProducer,
         {{ $.ResourceName }}IdParseFunc,
