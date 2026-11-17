@@ -12,19 +12,20 @@
 # limitations under the License.
 
 ---
-name: 'Share'
+name: Share
 description: |
-  A Share in Application Design Center.
+  A catalog share between spaces in Application Design Center.
 references:
   guides:
-    'Share a catalog with a space': 'https://cloud.google.com/application-design-center/docs/manage-catalogs#share-a-catalog-with-a-space'
-  api: 'https://cloud.google.com/application-design-center/docs/reference/rest/v1/projects.locations.spaces.catalogs.shares'
-base_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/shares'
-create_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/shares?shareId={{share_id}}'
-self_link: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/shares/{{share_id}}'
+    Application Design Center Overview: https://cloud.google.com/application-design-center/docs/overview
+    Share a catalog with a space: https://cloud.google.com/application-design-center/docs/manage-catalogs#share-a-catalog-with-a-space
+  api: https://cloud.google.com/application-design-center/docs/reference/rest/v1/projects.locations.spaces.catalogs.shares
+base_url: projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/shares
 immutable: true
+self_link: projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/shares/{{share_id}}
+create_url: projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/shares?shareId={{share_id}}
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/shares/{{share_id}}'
+  - projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/shares/{{share_id}}
 autogen_async: true
 samples:
   - name: designcenter_share_basic
@@ -43,52 +44,51 @@ samples:
           space: BootstrapDesignCenterSpace(t)
           catalog: BootstrapDesignCenterCatalog(t)
           destination_space: BootstrapDesignCenterDestinationSpace(t)
-
 parameters:
-  - name: 'location'
-    type: 'String'
+  - name: location
+    type: String
     description: |
       The location of the share.
     required: true
     url_param_only: true
-  - name: 'space'
-    type: 'String'
+  - name: space
+    type: String
     description: |
       The space for the share.
     required: true
     url_param_only: true
-  - name: 'catalog'
-    type: 'String'
+  - name: catalog
+    type: String
     description: |
       The catalog for the share.
     required: true
     url_param_only: true
-  - name: 'share_id'
-    type: 'String'
+  - name: share_id
+    type: String
     description: |
       The ID of the share.
     required: true
     url_param_only: true
 properties:
-  - name: 'name'
-    type: 'String'
+  - name: name
+    type: String
     description: |
-      Identifier. The name of the share.
+      The name of the share.
       Format: `projects/{project}/locations/{location}/spaces/{space}/catalogs/{catalog}/shares/{share}`
     output: true
-  - name: 'destinationSpace'
-    type: 'String'
+  - name: destinationSpace
+    type: String
     description: |
       The space to which the catalog is shared.
       Format: `projects/{project}/locations/{location}/spaces/{space}`
     required: true
-  - name: 'state'
-    type: 'String'
+  - name: state
+    type: String
     description: |
       The state of the share, which indicates whether the catalog is in sync. Possible values include `IN_SYNC` and `OUT_OF_SYNC`.
     output: true
-  - name: 'createTime'
-    type: 'Time'
+  - name: createTime
+    type: Time
     description: |
       The share creation timestamp.
     output: true
