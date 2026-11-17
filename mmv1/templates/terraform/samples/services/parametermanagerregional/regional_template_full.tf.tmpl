@@ -4,11 +4,5 @@ resource "google_parameter_manager_regional_template" "{{$.PrimaryResourceId}}" 
   template_id = "{{index $.ResourceIdVars "template_id"}}"
   format      = "TEMPLATE_FORMAT_JSON"
 
-  labels = {
-    key1 = "val1"
-    key2 = "{{index $.Vars "key2"}}"
-    key3 = "{{index $.Vars "key3"}}"
-    key4 = "val4"
-    key5 = "val5"
-  }
+  labels = {{index $.Vars "labels"}}
 }
