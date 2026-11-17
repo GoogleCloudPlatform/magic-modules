@@ -1,0 +1,37 @@
+resource "google_design_center_application_template" "example" {
+  project                 = "{{index $.Vars "project"}}"
+  location                = "us-central1"
+  space                   = "{{index $.Vars "space"}}"
+  application_template_id = "{{index $.ResourceIdVars "application_template_id"}}"
+  composition_type        = "COMPOSITE"
+
+  root_input_variables {
+    variable      = "location"
+    component_uri = "projects/{{index $.Vars "project"}}/locations/us-central1/spaces/{{index $.Vars "space"}}/applicationTemplates/{{index $.ResourceIdVars "application_template_id"}}/components/example-component"
+  }
+
+  root_output_variables {
+    variable      = "apphub_service_uri"
+    component_uri = "projects/{{index $.Vars "project"}}/locations/us-central1/spaces/{{index $.Vars "space"}}/applicationTemplates/{{index $.ResourceIdVars "application_template_id"}}/components/example-component"
+  }
+}
+
+resource "google_design_center_component" "component" {
+  project                      = "{{index $.Vars "project"}}"
+  location                     = "us-central1"
+  space                        = "{{index $.Vars "space"}}"
+  application_template         = google_design_center_application_template.example.application_template_id
+  component_id                 = "example-component"
+  display_name                 = "Example Component"
+  shared_template_revision_uri = "projects/gcpdesigncenter/locations/us-central1/spaces/googlespace/sharedTemplates/1b5e09c8-780f-484e-b8ed-c7178f4e4342/revisions/r-24"
+
+  parameters {
+    key   = "service_name"
+    value = jsonencode("example-service")
+  }
+
+  parameters {
+    key   = "location"
+    value = jsonencode("us-central1")
+  }
+}

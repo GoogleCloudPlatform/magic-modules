@@ -12,182 +12,231 @@
 # limitations under the License.
 
 ---
-name: 'ApplicationTemplate'
-base_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates'
-create_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates?applicationTemplateId={{application_template_id}}'
-self_link: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template_id}}'
-update_verb: 'PATCH'
-update_mask: true
-async:
-  actions: []
+name: ApplicationTemplate
 description: |
   Application template in Application Design Center.
+references:
+  guides:
+    Application Design Center Overview: https://cloud.google.com/application-design-center/docs/overview
+    Design an application template: https://cloud.google.com/application-design-center/docs/design-application-templates
+  api: https://cloud.google.com/application-design-center/docs/reference/rest/v1/projects.locations.spaces.applicationTemplates
+base_url: projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates
+self_link: projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template_id}}
+create_url: projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates?applicationTemplateId={{application_template_id}}
+update_mask: true
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template_id}}'
+  - projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template_id}}
+# ApplicationTemplate CRUD methods are synchronous; override product.yaml async defaults.
+async:
+  actions: []
 samples:
-  - name: 'designcenter_application_template_basic'
-    primary_resource_id: 'example'
+  - name: designcenter_application_template_basic
+    primary_resource_id: example
     steps:
-      - name: 'designcenter_application_template_basic'
+      - name: designcenter_application_template_basic
         resource_id_vars:
-          application_template_id: 'example-template'
+          application_template_id: example-template
         vars:
-          project: 'my-project-name'
-          space: 'example-space'
+          project: my-project-name
+          space: example-space
         test_vars_overrides:
-          project: 'BootstrapDesignCenterProject(t)'
-          space: 'BootstrapDesignCenterSpace(t)'
-      - name: 'designcenter_application_template_update'
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+  - name: designcenter_application_template_standard
+    primary_resource_id: example
+    exclude_basic_doc: true
+    steps:
+      - name: designcenter_application_template_standard
         resource_id_vars:
-          application_template_id: 'example-template'
+          application_template_id: example-std-template
         vars:
-          project: 'my-project-name'
-          space: 'example-space'
+          project: my-project-name
+          space: example-space
         test_vars_overrides:
-          project: 'BootstrapDesignCenterProject(t)'
-          space: 'BootstrapDesignCenterSpace(t)'
-
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+      - name: designcenter_application_template_standard_unset
+        resource_id_vars:
+          application_template_id: example-std-template
+        vars:
+          project: my-project-name
+          space: example-space
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+  - name: designcenter_application_template_full
+    primary_resource_id: example
+    exclude_basic_doc: true
+    steps:
+      - name: designcenter_application_template_full
+        resource_id_vars:
+          application_template_id: example-full-template
+        vars:
+          project: my-project-name
+          space: example-space
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+      - name: designcenter_application_template_update
+        resource_id_vars:
+          application_template_id: example-full-template
+        vars:
+          project: my-project-name
+          space: example-space
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+      - name: designcenter_application_template_unset
+        resource_id_vars:
+          application_template_id: example-full-template
+        vars:
+          project: my-project-name
+          space: example-space
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
 parameters:
-  - type: String
-    name: 'location'
+  - name: location
+    type: String
     description: |
       The location of the application template.
     required: true
-    url_param_only: true
     immutable: true
-  - type: String
-    name: 'space'
+    url_param_only: true
+  - name: space
+    type: String
     description: |
-      The space of the application template.
+      The ID of the space for the application template.
     required: true
-    url_param_only: true
     immutable: true
-  - type: String
-    name: 'application_template_id'
+    url_param_only: true
+  - name: application_template_id
+    type: String
     description: |
       The ID of the application template.
     required: true
+    immutable: true
     url_param_only: true
-    immutable: true
 properties:
-  - type: String
-    name: 'name'
+  - name: name
+    type: String
     description: |
-      Identifier. The resource name of the ApplicationTemplate. Format: `projects/{project}/locations/{location}/spaces/{space}/applicationTemplates/{application_template_id}`
+      The resource name of the application template.
+      Format: `projects/{project}/locations/{location}/spaces/{space}/applicationTemplates/{application_template}`
     output: true
-  - type: String
-    name: 'displayName'
+  - name: displayName
+    type: String
     description: |
-      Optional. User-defined display name.
-  - type: String
-    name: 'description'
+      User-defined display name.
+  - name: description
+    type: String
     description: |
-      Optional. User-defined description.
-  - type: Array
-    name: 'applicationParameters'
+      User-defined description.
+  - name: applicationParameters
+    type: Array
     description: |
-      Optional. Parameters to apply to all components in an application, such
-      as the project ID and region.
+      Parameters to apply to all components in an application, such as the
+      project ID and region.
     item_type:
       type: NestedObject
       properties:
-        - type: String
-          name: 'key'
-          description: 'The key of the parameter.'
+        - name: key
+          type: String
+          description: |
+            The key of the parameter.
           required: true
-        - type: JsonValue
-          name: 'value'
-          description: 'The value of the parameter, as a JSON-encoded string. Use `jsonencode()` to set it.'
+        - name: value
+          type: JsonValue
+          description: |
+            The value of the parameter, as a JSON-encoded string. Use
+            `jsonencode()` to set it.
           send_empty_value: true
-  - type: Enum
-    name: 'compositionType'
-    default_from_api: true
+  - name: compositionType
+    type: String
     description: |
-      Optional. Composition type of the template.
+      Composition type of the template. Possible values include `STANDARD` and
+      `COMPOSITE`. See the [REST API documentation](https://cloud.google.com/application-design-center/docs/reference/rest/Shared.Types/ApplicationCompositionType)
+      for all supported values.
+    default_from_api: true
     immutable: true
-    enum_values:
-      - 'STANDARD'
-      - 'COMPOSITE'
-  - type: Array
-    name: 'rootInputVariables'
-    default_from_api: true
+  - name: rootInputVariables
+    type: Array
     description: |
-      Optional. Root level input variables of the application template. For
-      `STANDARD` templates, the API fills these in from the components.
+      Root level input variables of the application template. For `STANDARD`
+      templates with `inputs_as_root_module_variables` enabled, the API
+      populates these automatically from the components.
+    default_from_api: true
     item_type:
       type: NestedObject
       properties:
-        - type: String
-          name: 'variable'
-          description: 'The name of the variable.'
+        - name: variable
+          type: String
+          description: |
+            The name of the variable.
           required: true
-        - type: String
-          name: 'componentUri'
-          description: 'The URI of the component that the variable belongs to.'
+        - name: componentUri
+          type: String
+          description: |
+            The URI of the component that the variable belongs to.
           required: true
-  - type: Array
-    name: 'rootOutputVariables'
-    default_from_api: true
+  - name: rootOutputVariables
+    type: Array
     description: |
-      Optional. Root level output variables of the application template. For
-      `STANDARD` templates, the API fills these in from the components.
+      Root level output variables of the application template. For `STANDARD`
+      templates with `inputs_as_root_module_variables` enabled, the API
+      populates these automatically from the components.
+    default_from_api: true
     item_type:
       type: NestedObject
       properties:
-        - type: String
-          name: 'variable'
-          description: 'The name of the variable.'
+        - name: variable
+          type: String
+          description: |
+            The name of the variable.
           required: true
-        - type: String
-          name: 'componentUri'
-          description: 'The URI of the component that the variable belongs to.'
+        - name: componentUri
+          type: String
+          description: |
+            The URI of the component that the variable belongs to.
           required: true
-  - type: NestedObject
-    name: 'saasRuntimeContext'
+  - name: saasRuntimeContext
+    type: NestedObject
     description: |
-      Optional. SaaS runtime context for the application template.
+      SaaS runtime context for the application template.
     properties:
-      - type: Array
-        name: 'saasNames'
+      - name: saasNames
+        type: Array
         description: |
           The SaaS names, in the format
           `projects/{project}/locations/{location}/saas/{saas}`.
+        required: true
         item_type:
           type: String
-  - type: Boolean
-    name: 'inputsAsRootModuleVariables'
-    default_from_api: true
+  - name: inputsAsRootModuleVariables
+    type: Boolean
     description: |
-      Optional. Inputs as root module variables.
-  - type: String
-    name: 'iacFormat'
+      Whether to expose all component input variables as root-level Terraform
+      module variables. Only supported for `STANDARD` composition type
+      templates.
+    send_empty_value: true
+  - name: iacFormat
+    type: String
+    description: |
+      IaC format of the application template.
     output: true
+  - name: latestRevision
+    type: String
     description: |
-      Output only. IaC format.
-  - type: String
-    name: 'serializedApplicationTemplate'
+      Latest revision of the application template.
     output: true
-    ignore_read: true
+  - name: createTime
+    type: Time
     description: |
-      Output only. Serialized application template.
-  - type: String
-    name: 'latestRevision'
+      The time the application template was created.
     output: true
+  - name: updateTime
+    type: Time
     description: |
-      Output only. Latest revision.
-  - type: String
-    name: 'artifactLocation'
+      The time the application template was last updated.
     output: true
-    ignore_read: true
-    description: |
-      Output only. Artifact location.
-  - type: Time
-    name: 'createTime'
-    output: true
-    description: |
-      Output only. The time the resource was created.
-  - type: Time
-    name: 'updateTime'
-    output: true
-    description: |
-      Output only. The time the resource was last updated.
