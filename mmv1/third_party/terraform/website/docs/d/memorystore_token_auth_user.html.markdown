@@ -32,11 +32,11 @@ The following arguments are supported:
 
 * `location` -
   (Optional)
-  The location of the Memorystore instance. If not provided, the provider region is used.
+  The location of the Memorystore instance. When `instance` is provided as a full resource name (`projects/{project}/locations/{location}/instances/{instance}`), `location` is inferred from `instance` if not explicitly set, otherwise falling back to the provider region.
 
 * `project` -
   (Optional)
-  The ID of the project in which the resource belongs. If it is not provided, the provider project is used.
+  The ID of the project in which the resource belongs. When `instance` is provided as a full resource name (`projects/{project}/locations/{location}/instances/{instance}`), `project` is inferred from `instance` if not explicitly set, otherwise falling back to the provider project.
 
 ## Attributes Reference
 

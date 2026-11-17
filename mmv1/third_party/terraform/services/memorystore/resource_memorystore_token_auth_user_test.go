@@ -78,7 +78,10 @@ resource "google_memorystore_token_auth_user" "user-basic" {
 }
 
 func testAccMemorystoreTokenAuthUser_invalidUserId(context map[string]interface{}, userId string) string {
-	context["user_id"] = userId
+	cfgContext := map[string]interface{}{
+		"random_suffix": context["random_suffix"],
+		"user_id":       userId,
+	}
 	return acctest.Nprintf(`
 resource "google_memorystore_instance" "instance" {
   instance_id                 = "tf-test-ms-instance-%{random_suffix}"
@@ -94,5 +97,5 @@ resource "google_memorystore_token_auth_user" "user-invalid" {
   location                    = "europe-west4"
   user_id                     = "%{user_id}"
 }
-`, context)
+`, cfgContext)
 }

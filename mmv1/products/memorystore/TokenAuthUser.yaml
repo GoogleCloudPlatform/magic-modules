@@ -50,7 +50,6 @@ parameters:
     type: String
     description: The location of the Memorystore instance.
     required: true
-    immutable: true
     url_param_only: true
   - name: instance
     type: ResourceRef
@@ -58,7 +57,6 @@ parameters:
     imports: instanceId
     description: The ID or resource name of the Memorystore instance.
     required: true
-    immutable: true
     url_param_only: true
     diff_suppress_func: tpgresource.CompareResourceNames
   - name: userId
@@ -67,7 +65,6 @@ parameters:
       The unique ID (username) of the Token Auth User.
       The `default` user cannot be managed with this resource.
     required: true
-    immutable: true
     url_param_only: true
     validation:
       function: 'verify.StringNotInSlice([]string{"default"}, false)'
@@ -78,5 +75,11 @@ properties:
     output: true
   - name: state
     type: String
-    description: The current state of the Token Auth User.
+    description: |
+      The current state of the Token Auth User.
+      Possible values:
+      ACTIVE
+      CREATING
+      UPDATING
+      DELETING
     output: true
