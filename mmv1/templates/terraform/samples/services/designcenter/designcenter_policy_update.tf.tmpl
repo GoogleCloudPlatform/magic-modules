@@ -17,22 +17,4 @@ resource "google_design_center_policy" "example" {
     condition_key   = "environment"
     condition_value = "STAGING"
   }
-
-  cloud_control_configs {
-    cloud_control = "projects/${data.google_project.project.number}/locations/global/cloudControls/builtin-cloud-logging-storage-locations"
-
-    parameters {
-      key   = "cloudLoggingStorageLocations"
-      value = jsonencode(["us-central1"])
-    }
-  }
-
-  cloud_control_configs {
-    cloud_control = "projects/${data.google_project.project.number}/locations/global/cloudControls/builtin-big-query-regulatory-settings"
-
-    parameters {
-      key   = "framework"
-      value = jsonencode("US_DATA_BOUNDARY_AND_SUPPORT")
-    }
-  }
 }
