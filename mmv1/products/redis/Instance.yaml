@@ -89,10 +89,8 @@ samples:
       - name: redis_instance_full_with_persistence_config
         resource_id_vars:
           instance_name: ha-memory-cache-persis
-          network_name: redis-test-network
           prevent_destroy: "true"
         test_vars_overrides:
-          network_name: compute.BootstrapSharedTestNetwork(t, "redis-full-persis")
           prevent_destroy: "false"
         oics_vars_overrides:
           prevent_destroy: "false"

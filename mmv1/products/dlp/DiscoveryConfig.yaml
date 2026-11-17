@@ -47,7 +47,6 @@ samples:
       - name: dlp_discovery_config_basic
         test_env_vars:
           project: PROJECT_NAME
-          location: REGION
   - name: dlp_discovery_config_actions
     primary_resource_id: actions
     exclude_test: true

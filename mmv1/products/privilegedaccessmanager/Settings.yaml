@@ -53,8 +53,6 @@ samples:
     exclude_test: true
     steps:
       - name: privileged_access_manager_settings_basic
-        test_env_vars:
-          project: PROJECT_NAME
 parameters:
   - name: location
     type: String

@@ -42,11 +42,9 @@ samples:
       - name: 'chronicle_feed_gcs'
         resource_id_vars:
           resource_name: test-feeds
-          description: test-feeds-description
         test_env_vars:
           chronicle_id: 'CHRONICLE_ID'
           project_name: 'PROJECT_NAME'
-          project_number: 'PROJECT_NUMBER'
         ignore_read_extra:
           - 'feed_service_account'
   - name: 'chronicle_feed_https_push'
@@ -55,7 +53,6 @@ samples:
       - name: 'chronicle_feed_https_push'
         resource_id_vars:
           resource_name: test-feeds
-          description: test-feeds-description
         test_env_vars:
           chronicle_id: 'CHRONICLE_ID'
           project_name: 'PROJECT_NAME'

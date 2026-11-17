@@ -72,10 +72,7 @@ samples:
       - name: gemini_repository_group_basic
         resource_id_vars:
           repository_group_id: example-repository-group
-          git_repository_link_id: example-git-repository-link-id
-          cri_id: cri-example
           repository_resource: projects/example-project/locations/us-central1/connections/example-connection/gitRepositoryLinks/example-repo
-          connection_id: example-connection-id
 parameters:
   - name: location
     type: String

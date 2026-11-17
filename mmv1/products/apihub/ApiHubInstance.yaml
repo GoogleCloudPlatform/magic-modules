@@ -50,8 +50,6 @@ samples:
     exclude_test: true
     steps:
       - name: apihub_api_hub_instance_basic
-        resource_id_vars:
-          instance_id: test-instance-basic
   - name: apihub_api_hub_instance_full
     primary_resource_id: apihub-instance-search
     exclude_test: true

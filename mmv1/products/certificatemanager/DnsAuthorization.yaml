@@ -49,7 +49,6 @@ samples:
       - name: certificate_manager_dns_authorization_basic
         resource_id_vars:
           dns_auth_name: dns-auth
-          zone_name: my-zone
           subdomain: subdomain
         test_vars_overrides:
           # for backward compatible
@@ -60,7 +59,6 @@ samples:
       - name: certificate_manager_dns_authorization_regional
         resource_id_vars:
           dns_auth_name: dns-auth
-          zone_name: my-zone
           subdomain: subdomain
         test_vars_overrides:
           # for backward compatible

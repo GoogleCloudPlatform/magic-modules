@@ -42,8 +42,6 @@ samples:
           backup_vault_id: bv-bpa
           backup_plan_id: bp-bpa-test
           account_id: my-custom
-        test_env_vars:
-          project: PROJECT_NAME
   - name: backup_dr_bpa_filestore
     primary_resource_id: my-backup-plan-association-filestore
     steps:
@@ -53,8 +51,6 @@ samples:
           filestore_instance_id: test-instance-bpa
           backup_vault_id: bv-bpa-filestore
           backup_plan_id: bp-bpa-filestore
-        test_env_vars:
-          project: PROJECT_NAME
   - name: backup_dr_bpa_netapp
     primary_resource_id: my-backup-plan-association-netapp
     steps:
@@ -69,8 +65,6 @@ samples:
         test_vars_overrides:
           network_name: servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", servicenetworking.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))
           netapp_volume_id: '"tf_test_test_volume_bpa" + randomSuffix'
-        test_env_vars:
-          project: PROJECT_NAME
 parameters:
   - name: location
     type: String

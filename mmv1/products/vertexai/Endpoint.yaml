@@ -58,8 +58,6 @@ samples:
     steps:
       - name: vertex_ai_endpoint_network
         resource_id_vars:
-          name: vertex_ai_endpoint
-          project: vertex-ai
           endpoint_name: endpoint-name
           address_name: address-name
           kms_key_name: kms-name

@@ -47,7 +47,6 @@ samples:
       - name: iam_access_boundary_policy_basic
         resource_id_vars:
           policy_name: my-ab-policy
-          account_id: svc-acc
           project_id: my-project
           access_level_title: chromeos_no_lock
         test_env_vars:

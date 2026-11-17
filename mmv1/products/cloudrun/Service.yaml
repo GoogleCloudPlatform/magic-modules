@@ -76,16 +76,12 @@ samples:
       - name: 'cloud_run_service_basic'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-srv'
-        test_env_vars:
-          project: 'PROJECT_NAME'
   - name: 'cloud_run_service_gpu'
     primary_resource_id: 'default'
     steps:
       - name: 'cloud_run_service_gpu'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-srv'
-        test_env_vars:
-          project: 'PROJECT_NAME'
   - name: 'cloud_run_service_sql'
     primary_resource_id: 'default'
     steps:
@@ -107,8 +103,6 @@ samples:
       - name: 'cloud_run_service_noauth'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-srv'
-        test_env_vars:
-          project: 'PROJECT_NAME'
   - name: 'cloud_run_service_multiple_environment_variables'
     primary_resource_id: 'default'
     exclude_basic_doc: true
@@ -116,8 +110,6 @@ samples:
       - name: 'cloud_run_service_multiple_environment_variables'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-srv'
-        test_env_vars:
-          project: 'PROJECT_NAME'
         ignore_read_extra:
           - 'autogenerate_revision_name'
   - name: 'cloud_run_service_secret_environment_variables'
@@ -131,8 +123,6 @@ samples:
         test_vars_overrides:
           # for backward compatible
           secret_id: '"secret" + randomSuffix'
-        test_env_vars:
-          project: 'PROJECT_NAME'
         ignore_read_extra:
           - 'autogenerate_revision_name'
   - name: 'cloud_run_service_secret_volumes'
@@ -146,8 +136,6 @@ samples:
         test_vars_overrides:
           # for backward compatible
           secret_id: '"secret" + randomSuffix'
-        test_env_vars:
-          project: 'PROJECT_NAME'
         ignore_read_extra:
           - 'autogenerate_revision_name'
   - name: 'cloud_run_service_probes'
@@ -162,8 +150,6 @@ samples:
       - name: 'cloud_run_service_readiness_probe'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-srv-rp'
-        test_env_vars:
-          project: 'PROJECT_NAME'
   - name: 'cloud_run_service_multicontainer'
     primary_resource_id: 'default'
     min_version: 'beta'
@@ -171,24 +157,18 @@ samples:
       - name: 'cloud_run_service_multicontainer'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-srv'
-        test_env_vars:
-          project: 'PROJECT_NAME'
   - name: 'cloud_run_service_iap'
     primary_resource_id: 'default'
     steps:
       - name: 'cloud_run_service_iap'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-srv'
-        test_env_vars:
-          project: 'PROJECT_NAME'
   - name: 'cloud_run_service_sandbox'
     primary_resource_id: 'default'
     steps:
       - name: 'cloud_run_service_sandbox'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-srv'
-        test_env_vars:
-          project: 'PROJECT_NAME'
 virtual_fields:
   - name: 'autogenerate_revision_name'
     description: |

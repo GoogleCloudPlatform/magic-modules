@@ -42,22 +42,12 @@ samples:
     primary_resource_id: basic
     steps:
       - name: dlp_inspect_template_basic
-        resource_id_vars:
-          template: temp
-        test_vars_overrides:
-          # for backward compatible
-          template: '"temp" + randomSuffix'
         test_env_vars:
           project: PROJECT_NAME
   - name: dlp_inspect_template_custom_type
     primary_resource_id: custom
     steps:
       - name: dlp_inspect_template_custom_type
-        resource_id_vars:
-          template: temp
-        test_vars_overrides:
-          # for backward compatible
-          template: '"temp" + randomSuffix'
         test_env_vars:
           project: PROJECT_NAME
   - name: dlp_inspect_template_custom_type_surrogate

@@ -59,7 +59,6 @@ samples:
     steps:
       - name: vertex_ai_index_endpoint_deployed_index_basic
         resource_id_vars:
-          endpoint_name: endpoint-name
           network_name: network-name
           deployed_index_id: deployed_index_id
           display_name: vertex-deployed-index
@@ -76,7 +75,6 @@ samples:
     steps:
       - name: vertex_ai_index_endpoint_deployed_index_basic_two
         resource_id_vars:
-          endpoint_name: endpoint-name
           network_name: network-name
           deployed_index_id: deployed_index_id
           display_name: vertex-deployed-index

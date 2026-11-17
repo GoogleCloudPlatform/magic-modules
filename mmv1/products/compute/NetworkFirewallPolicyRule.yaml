@@ -110,7 +110,6 @@ samples:
           forwarding_rule: 'forwarding-rule'
           global_assoc: 'global-policy-assoc'
         test_env_vars:
-          org_id: 'ORG_ID'
           project_name: PROJECT_NAME
 parameters:
   - name: firewallPolicy

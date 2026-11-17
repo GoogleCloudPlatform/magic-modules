@@ -59,7 +59,6 @@ samples:
         resource_id_vars:
           entry_id: entry-basic
           entry_group_name: entry-group-basic
-          aspect_type_name: aspect-type-basic
           entry_type_name: entry-type-basic
         test_env_vars:
           project_number: PROJECT_NUMBER

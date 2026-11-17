@@ -62,12 +62,6 @@ samples:
     primary_resource_id: primary
     steps:
       - name: network_connectivity_spoke_router_appliance_basic
-        resource_id_vars:
-          network_name: basic-network
-          subnetwork_name: basic-subnetwork
-          instance_name: basic-instance
-          hub_name: basic-hub1
-          spoke_name: basic-spoke
   - name: network_connectivity_spoke_vpn_tunnel_basic
     primary_resource_id: tunnel1
     skip_vcr: true

@@ -228,7 +228,6 @@ samples:
         min_version: 'beta'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-zip-service'
-          targz_path: './test-fixtures/function-source.tar.gz'
         ignore_read_extra:
           - 'deletion_protection'
   - name: 'cloudrunv2_service_emptydir_disk'

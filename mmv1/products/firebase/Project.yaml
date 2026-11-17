@@ -63,7 +63,6 @@ samples:
       - name: firebase_project_basic
         min_version: beta
         resource_id_vars:
-          instance_name: memory-cache
           project_name: my-project
         test_env_vars:
           org_id: ORG_ID

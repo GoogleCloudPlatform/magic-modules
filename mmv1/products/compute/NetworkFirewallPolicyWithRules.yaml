@@ -46,7 +46,6 @@ samples:
         resource_id_vars:
           address_group: 'address-group'
           fw_policy: 'fw-policy'
-          network: 'network'
           tag_key: 'tag-key'
           tag_value: 'tag-value'
           security_profile_group: 'spg'

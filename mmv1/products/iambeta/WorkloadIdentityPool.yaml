@@ -87,8 +87,6 @@ samples:
       - name: iam_workload_identity_pool_full_trust_domain_mode_with_default_shared_ca
         resource_id_vars:
           workload_identity_pool_id: example-pool
-        test_env_vars:
-          project: PROJECT_NUMBER
 parameters:
 properties:
   - name: workloadIdentityPoolId

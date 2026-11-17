@@ -48,7 +48,6 @@ samples:
           ha_vpn_gateway_name: 'ha-vpn'
           network_name: 'network-1'
           external_gateway_name: 'external-gateway'
-          global_address_name: 'global-address'
           router_name: 'ha-vpn-router1'
           subnetwork1_name: 'ha-vpn-subnet-1'
           subnetwork2_name: 'ha-vpn-subnet-2'

@@ -46,7 +46,6 @@ samples:
     steps:
       - name: "ces_tool_data_store_tool_engine_source_basic"
         resource_id_vars:
-          tool_display_name: 'ces_tool_data_store_tool_engine_source_basic'
           app_display_name: 'my-app'
           tool_id: 'ces_tool_basic2'
           app_id: 'app-id'
@@ -57,7 +56,6 @@ samples:
     steps:
       - name: "ces_tool_google_search_tool_basic"
         resource_id_vars:
-          tool_display_name: 'ces_tool_google_search_tool_basic'
           app_display_name: 'my-app'
           tool_id: 'ces_tool_basic3'
           app_id: 'app-id'
@@ -66,7 +64,6 @@ samples:
     steps:
       - name: "ces_tool_python_function_basic"
         resource_id_vars:
-          tool_display_name: 'ces_tool_python_function_basic'
           app_display_name: 'my-app'
           tool_id: 'ces_tool_basic4'
           app_id: 'app-id'

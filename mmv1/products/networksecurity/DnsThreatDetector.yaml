@@ -44,8 +44,6 @@ samples:
         resource_id_vars:
           resource_name: my-threat-detector
           vpc_name: my-vpc
-        test_env_vars:
-          project: PROJECT_NAME
 parameters:
   - name: name
     type: String

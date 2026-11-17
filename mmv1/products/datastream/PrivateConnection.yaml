@@ -74,11 +74,6 @@ samples:
     primary_resource_id: default
     steps:
       - name: datastream_private_connection_psc_interface
-        test_env_vars:
-          project: PROJECT_NAME
-          project_number: PROJECT_NUMBER
-          org_id: ORG_ID
-          billing_account: BILLING_ACCT
         resource_id_vars:
           private_connection_id: my-connection
           network_attachment_name: my-network-attachment

@@ -70,15 +70,10 @@ samples:
           display_name: '"Test Notification Channel" + randomSuffix'
   - name: notification_channel_sensitive
     primary_resource_id: default
+    # sensitive labels will fail the import verification step.
     exclude_test: true
     steps:
       - name: notification_channel_sensitive
-        resource_id_vars:
-          display_name: Sensitive Notification Channel test
-          # sensitive labels will fail the import verification step.
-        test_vars_overrides:
-          # for backward compatible
-          display_name: '"Sensitive Notification Channel test" + randomSuffix'
 virtual_fields:
   - name: force_delete
     description: |

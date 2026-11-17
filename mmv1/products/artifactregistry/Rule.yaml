@@ -48,7 +48,6 @@ samples:
           repository_id: my-repository
           desc: example docker repository
           rule_id: my-repo-rule-id
-          name: my-repo-rule-name
         test_vars_overrides:
           desc: '"example docker repository"'
   - name: artifact_registry_rule_full
@@ -59,7 +58,6 @@ samples:
           repository_id: my-repository
           desc: example docker repository
           rule_id: my-repo-rule-full-id
-          name: my-repo-rule-name
         test_vars_overrides:
           desc: '"example docker repository"'
 parameters:

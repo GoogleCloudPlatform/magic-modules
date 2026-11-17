@@ -35,13 +35,6 @@ samples:
     steps:
       - name: backup_dr_service_config
         exclude_import_test: true
-        resource_id_vars:
-          resource_type: compute.googleapis.com/Instance
-        test_vars_overrides:
-          # for backward compatible
-          resource_type: '"compute.googleapis.com/Instance" + randomSuffix'
-        test_env_vars:
-          project: PROJECT_NAME
 parameters:
   - name: location
     type: String
