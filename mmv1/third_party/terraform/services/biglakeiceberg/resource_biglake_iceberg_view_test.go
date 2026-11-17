@@ -71,13 +71,13 @@ resource "google_biglake_iceberg_catalog" "catalog" {
 
 resource "google_biglake_iceberg_namespace" "namespace" {
   catalog      = google_biglake_iceberg_catalog.catalog.name
-  namespace_id = "my_namespace_%{random_suffix}"
+  namespace_id = "tf_test_my_namespace_%{random_suffix}"
 }
 
 resource "google_biglake_iceberg_view" "my_iceberg_view" {
   catalog   = google_biglake_iceberg_catalog.catalog.name
   namespace = google_biglake_iceberg_namespace.namespace.namespace_id
-  name      = "my_view_%{random_suffix}"
+  name      = "tf_test_my_view_%{random_suffix}"
 
   schema {
     type = "struct"
@@ -138,13 +138,13 @@ resource "google_biglake_iceberg_catalog" "catalog" {
 
 resource "google_biglake_iceberg_namespace" "namespace" {
   catalog      = google_biglake_iceberg_catalog.catalog.name
-  namespace_id = "my_namespace_%{random_suffix}"
+  namespace_id = "tf_test_my_namespace_%{random_suffix}"
 }
 
 resource "google_biglake_iceberg_view" "my_iceberg_view" {
   catalog   = google_biglake_iceberg_catalog.catalog.name
   namespace = google_biglake_iceberg_namespace.namespace.namespace_id
-  name      = "my_view_%{random_suffix}"
+  name      = "tf_test_my_view_%{random_suffix}"
 
   schema {
     type = "struct"

@@ -65,7 +65,10 @@
 		}
 	}
 
-	return map[string]interface{}{
-		"requirements": []interface{}{},
-		"updates":      updateActions,
-	}, nil
+	if len(updateActions) > 0 {
+		return map[string]interface{}{
+			"requirements": []interface{}{},
+			"updates":      updateActions,
+		}, nil
+	}
+	return nil, nil
