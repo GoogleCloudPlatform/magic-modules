@@ -2,19 +2,28 @@ package compute
 
 import (
 	"fmt"
+	"maps"
 	neturl "net/url"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
+var (
+	computeHostVersionZonalSelfLinkRegex        = regexp.MustCompile(`(?:^|/)projects/([^/]+)/zones/([^/]+)/(?:reservations|hosts)/[^/]+`)
+	computeHostVersionZonalPartialSelfLinkRegex = regexp.MustCompile(`(?:^|/)zones/([^/]+)/(?:reservations|hosts)/[^/]+`)
+)
+
 func DataSourceGoogleComputeHostVersion() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceGoogleComputeHostVersionRead,
+		Read:          dataSourceGoogleComputeHostVersionRead,
+		UseJSONNumber: true,
 
 		Timeouts: &schema.ResourceTimeout{
 			Read: schema.DefaultTimeout(20 * time.Minute),
@@ -22,34 +31,41 @@ func DataSourceGoogleComputeHostVersion() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:        schema.TypeString,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringIsNotWhiteSpace,
+				Description:  "The name or resource ID of the host.",
+			},
+			"sbom_selections": {
+				Type:        schema.TypeList,
 				Required:    true,
-				Description: "The name or resource ID of the host.",
+				MinItems:    1,
+				MaxItems:    1,
+				Description: "The SBOM selection to return. Possible values include `SBOM_SELECTION_CURRENT` and `SBOM_SELECTION_TARGET`. Exactly one value must be specified.",
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validation.StringIsNotEmpty,
+				},
 			},
 			"reservation": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The name of the parent reservation.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringIsNotWhiteSpace,
+				Description:  "The name or self-link of the parent reservation.",
 			},
 			"reservation_block": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				RequiredWith: []string{"reservation"},
+				ValidateFunc: validation.StringIsNotWhiteSpace,
 				Description:  "The name of the parent reservation block. Requires `reservation` to be set.",
 			},
 			"reservation_sub_block": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				RequiredWith: []string{"reservation", "reservation_block"},
+				ValidateFunc: validation.StringIsNotWhiteSpace,
 				Description:  "The name of the parent reservation sub-block. Requires `reservation` and `reservation_block` to be set.",
-			},
-			"sbom_selections": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				Description: "The SBOM selections to return. Possible values include `SBOM_SELECTION_CURRENT` and `SBOM_SELECTION_TARGET`. See https://cloud.google.com/compute/docs/reference/rest/v1/hosts/getVersion for details.",
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
 			},
 			"zone": {
 				Type:        schema.TypeString,
@@ -90,12 +106,17 @@ func dataSourceGoogleComputeHostVersionRead(d *schema.ResourceData, meta interfa
 		return err
 	}
 
-	project, err := tpgresource.GetProject(d, config)
+	association, err := buildComputeHostVersionAssociation(d)
 	if err != nil {
 		return err
 	}
 
-	zone, err := tpgresource.GetZone(d, config)
+	hostName, err := extractComputeHostVersionScopeName("name", d.Get("name").(string), "hosts")
+	if err != nil {
+		return err
+	}
+
+	project, zone, err := resolveComputeHostVersionProjectAndZone(d, config, "reservation", "name")
 	if err != nil {
 		return err
 	}
@@ -105,18 +126,21 @@ func dataSourceGoogleComputeHostVersionRead(d *schema.ResourceData, meta interfa
 		billingProject = bp
 	}
 
-	association, err := buildComputeHostVersionAssociation(d)
-	if err != nil {
-		return err
+	selections := tpgresource.ConvertStringArr(d.Get("sbom_selections").([]interface{}))
+	if len(selections) != 1 || selections[0] == "" {
+		return fmt.Errorf("exactly one non-empty sbom_selections value must be specified")
 	}
+	selection := selections[0]
 
-	hostName := tpgresource.GetResourceNameFromSelfLink(strings.TrimSpace(d.Get("name").(string)))
-	if hostName == "" {
-		return fmt.Errorf("name must not be empty")
+	baseURL := strings.TrimRight(transport_tpg.BaseUrl(Product, config), "/") + "/"
+	var rawURL, id string
+	if association == "" {
+		rawURL = fmt.Sprintf("%sprojects/%s/zones/%s/hosts/%s/getVersion", baseURL, neturl.PathEscape(project), neturl.PathEscape(zone), neturl.PathEscape(hostName))
+		id = fmt.Sprintf("projects/%s/zones/%s/hosts/%s/getVersion/%s", project, zone, hostName, selection)
+	} else {
+		rawURL = fmt.Sprintf("%sprojects/%s/zones/%s/%s/hosts/%s/getVersion", baseURL, neturl.PathEscape(project), neturl.PathEscape(zone), neturl.PathEscape(association), neturl.PathEscape(hostName))
+		id = fmt.Sprintf("projects/%s/zones/%s/%s/hosts/%s/getVersion/%s", project, zone, association, hostName, selection)
 	}
-
-	rawURL := buildComputeHostVersionURL(transport_tpg.BaseUrl(Product, config), project, zone, association, hostName)
-	body := expandComputeHostVersionSbomSelectionsBody(d)
 
 	op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
@@ -124,8 +148,10 @@ func dataSourceGoogleComputeHostVersionRead(d *schema.ResourceData, meta interfa
 		Project:   billingProject,
 		RawURL:    rawURL,
 		UserAgent: userAgent,
-		Body:      body,
-		Timeout:   d.Timeout(schema.TimeoutRead),
+		Body: map[string]interface{}{
+			"sbomSelections": selections,
+		},
+		Timeout: d.Timeout(schema.TimeoutRead),
 	})
 	if err != nil {
 		return fmt.Errorf("Error getting version for Host %s: %w", hostName, err)
@@ -145,32 +171,107 @@ func dataSourceGoogleComputeHostVersionRead(d *schema.ResourceData, meta interfa
 	}
 
 	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error setting project: %s", err)
+		return fmt.Errorf("Error setting project: %w", err)
 	}
 	if err := d.Set("zone", zone); err != nil {
-		return fmt.Errorf("Error setting zone: %s", err)
+		return fmt.Errorf("Error setting zone: %w", err)
 	}
 	if err := d.Set("current_component_versions", currentVersions); err != nil {
-		return fmt.Errorf("Error setting current_component_versions: %s", err)
+		return fmt.Errorf("Error setting current_component_versions: %w", err)
 	}
 	if err := d.Set("target_component_versions", targetVersions); err != nil {
-		return fmt.Errorf("Error setting target_component_versions: %s", err)
+		return fmt.Errorf("Error setting target_component_versions: %w", err)
 	}
 
-	d.SetId(buildComputeHostVersionID(project, zone, association, hostName))
+	d.SetId(id)
 	return nil
+}
+
+func resolveComputeHostVersionProjectAndZone(d *schema.ResourceData, config *transport_tpg.Config, selfLinkFields ...string) (string, string, error) {
+	var project, zone string
+	if v, ok := d.GetOk("project"); ok {
+		project = strings.TrimSpace(v.(string))
+		if project == "" {
+			return "", "", fmt.Errorf("project must not be empty")
+		}
+	}
+	if v, ok := d.GetOk("zone"); ok {
+		var err error
+		zone, err = extractComputeHostVersionScopeName("zone", v.(string), "zones")
+		if err != nil {
+			return "", "", err
+		}
+	}
+
+	for _, field := range selfLinkFields {
+		if project != "" && zone != "" {
+			break
+		}
+		v, ok := d.GetOk(field)
+		if !ok {
+			continue
+		}
+		raw := strings.TrimSpace(v.(string))
+		if parts := computeHostVersionZonalSelfLinkRegex.FindStringSubmatch(raw); parts != nil {
+			if project == "" {
+				project = parts[1]
+			}
+			if zone == "" {
+				zone = parts[2]
+			}
+			continue
+		}
+		if zone == "" {
+			if parts := computeHostVersionZonalPartialSelfLinkRegex.FindStringSubmatch(raw); parts != nil {
+				zone = parts[1]
+			}
+		}
+	}
+
+	var err error
+	if project == "" {
+		project, err = tpgresource.GetProject(d, config)
+		if err != nil {
+			return "", "", err
+		}
+	}
+	if zone == "" {
+		zone, err = tpgresource.GetZone(d, config)
+		if err != nil {
+			return "", "", err
+		}
+	}
+	return project, zone, nil
+}
+
+func extractComputeHostVersionScopeName(field, raw, collection string) (string, error) {
+	name := tpgresource.GetResourceNameFromSelfLink(strings.TrimSpace(raw))
+	if name == "" || name == collection {
+		return "", fmt.Errorf("%s must not be empty", field)
+	}
+	return name, nil
 }
 
 func buildComputeHostVersionAssociation(d *schema.ResourceData) (string, error) {
 	var reservation, reservationBlock, reservationSubBlock string
+	var err error
 	if v, ok := d.GetOk("reservation"); ok {
-		reservation = tpgresource.GetResourceNameFromSelfLink(strings.TrimSpace(v.(string)))
+		reservation, err = extractComputeHostVersionScopeName("reservation", v.(string), "reservations")
+		if err != nil {
+			return "", err
+		}
 	}
 	if v, ok := d.GetOk("reservation_block"); ok {
-		reservationBlock = tpgresource.GetResourceNameFromSelfLink(strings.TrimSpace(v.(string)))
+		reservationBlock, err = extractComputeHostVersionScopeName("reservation_block", v.(string), "reservationBlocks")
+		if err != nil {
+			return "", err
+		}
 	}
 	if v, ok := d.GetOk("reservation_sub_block"); ok {
-		reservationSubBlock = tpgresource.GetResourceNameFromSelfLink(strings.TrimSpace(v.(string)))
+		reservationSubBlock, err = extractComputeHostVersionScopeName("reservation_sub_block", v.(string), "reservationSubBlocks")
+		if err != nil {
+			return "", err
+		}
 	}
 
 	return formatComputeHostVersionAssociation(reservation, reservationBlock, reservationSubBlock)
@@ -197,56 +298,21 @@ func formatComputeHostVersionAssociation(reservation, reservationBlock, reservat
 	return strings.Join(parts, "/"), nil
 }
 
-func buildComputeHostVersionURL(baseURL, project, zone, association, hostName string) string {
-	escapedProject := neturl.PathEscape(project)
-	escapedZone := neturl.PathEscape(zone)
-	escapedHost := neturl.PathEscape(hostName)
-	if association == "" {
-		return fmt.Sprintf("%sprojects/%s/zones/%s/hosts/%s/getVersion", baseURL, escapedProject, escapedZone, escapedHost)
-	}
-	return fmt.Sprintf("%sprojects/%s/zones/%s/%s/hosts/%s/getVersion", baseURL, escapedProject, escapedZone, neturl.PathEscape(association), escapedHost)
-}
-
-func buildComputeHostVersionID(project, zone, association, hostName string) string {
-	if association == "" {
-		return fmt.Sprintf("projects/%s/zones/%s/hosts/%s/getVersion", project, zone, hostName)
-	}
-	return fmt.Sprintf("projects/%s/zones/%s/%s/hosts/%s/getVersion", project, zone, association, hostName)
-}
-
-func expandComputeHostVersionSbomSelectionsBody(d *schema.ResourceData) map[string]interface{} {
-	body := map[string]interface{}{}
-	if v, ok := d.GetOk("sbom_selections"); ok {
-		rawList := v.([]interface{})
-		selections := make([]string, 0, len(rawList))
-		for _, item := range rawList {
-			if s, ok := item.(string); ok && s != "" {
-				selections = append(selections, s)
-			}
-		}
-		if len(selections) > 0 {
-			body["sbomSelections"] = selections
-		}
-	}
-	return body
-}
-
 func waitForComputeHostVersionOperation(config *transport_tpg.Config, rawOp map[string]interface{}, project, zone, activity, userAgent string, timeout time.Duration) (map[string]interface{}, map[string]interface{}, error) {
 	if rawOp == nil {
 		return nil, nil, fmt.Errorf("empty operation response while %s", activity)
 	}
-	if innerOp, ok := rawOp["operation"].(map[string]interface{}); ok && innerOp != nil {
-		rawOp = innerOp
-	}
 	if z, ok := rawOp["zone"].(string); !ok || z == "" {
-		rawOp["zone"] = zone
+		opCopy := make(map[string]interface{}, len(rawOp)+1)
+		maps.Copy(opCopy, rawOp)
+		opCopy["zone"] = zone
+		rawOp = opCopy
 	}
 
 	w := &ComputeOperationWaiter{
 		Config:    config,
 		UserAgent: userAgent,
 		Context:   config.Context,
-		Op:        rawOp,
 		Project:   project,
 	}
 	if err := w.SetOp(rawOp); err != nil {
@@ -256,35 +322,50 @@ func waitForComputeHostVersionOperation(config *transport_tpg.Config, rawOp map[
 		return nil, nil, err
 	}
 
-	return flattenComputeHostVersionOperationMetadata(w.Op)
+	currentVersions, targetVersions := flattenComputeHostVersionOperationMetadata(w.Op)
+	return currentVersions, targetVersions, nil
 }
 
-func flattenComputeHostVersionOperationMetadata(op map[string]interface{}) (map[string]interface{}, map[string]interface{}, error) {
+func flattenComputeHostVersionOperationMetadata(op map[string]interface{}) (map[string]interface{}, map[string]interface{}) {
 	currentVersions := map[string]interface{}{}
 	targetVersions := map[string]interface{}{}
 
 	if op == nil {
-		return currentVersions, targetVersions, nil
+		return currentVersions, targetVersions
 	}
 	metaMap, ok := op["getVersionOperationMetadata"].(map[string]interface{})
 	if !ok || metaMap == nil {
-		return currentVersions, targetVersions, nil
+		return currentVersions, targetVersions
 	}
 	sbomInfo, ok := metaMap["inlineSbomInfo"].(map[string]interface{})
 	if !ok || sbomInfo == nil {
-		return currentVersions, targetVersions, nil
+		return currentVersions, targetVersions
 	}
 	if cur, ok := sbomInfo["currentComponentVersions"].(map[string]interface{}); ok && cur != nil {
 		for k, v := range cur {
-			currentVersions[k] = fmt.Sprintf("%v", v)
+			if v == nil {
+				continue
+			}
+			if s, ok := v.(string); ok {
+				currentVersions[k] = s
+			} else {
+				currentVersions[k] = fmt.Sprintf("%v", v)
+			}
 		}
 	}
 	if tgt, ok := sbomInfo["targetComponentVersions"].(map[string]interface{}); ok && tgt != nil {
 		for k, v := range tgt {
-			targetVersions[k] = fmt.Sprintf("%v", v)
+			if v == nil {
+				continue
+			}
+			if s, ok := v.(string); ok {
+				targetVersions[k] = s
+			} else {
+				targetVersions[k] = fmt.Sprintf("%v", v)
+			}
 		}
 	}
-	return currentVersions, targetVersions, nil
+	return currentVersions, targetVersions
 }
 
 func init() {
