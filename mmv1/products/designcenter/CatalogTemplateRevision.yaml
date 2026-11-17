@@ -12,26 +12,21 @@
 # limitations under the License.
 
 ---
-name: "CatalogTemplateRevision"
-description: "A revision of a CatalogTemplate."
-base_url: "projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template}}/revisions"
-create_url: "projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template}}/revisions?catalogTemplateRevisionId={{revision_id}}"
-self_link: "projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template}}/revisions/{{revision_id}}"
+name: CatalogTemplateRevision
+description: |
+  A revision of a CatalogTemplate.
+references:
+  guides:
+    Application Design Center Overview: https://docs.cloud.google.com/application-design-center/docs/overview
+    Manage, publish, and share catalogs: https://docs.cloud.google.com/application-design-center/docs/manage-catalogs
+  api: https://docs.cloud.google.com/application-design-center/docs/reference/rest/v1/projects.locations.spaces.catalogs.templates.revisions
+base_url: projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template}}/revisions
 immutable: true
+self_link: projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template}}/revisions/{{revision_id}}
+create_url: projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template}}/revisions?catalogTemplateRevisionId={{revision_id}}
 import_format:
-  - "projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template}}/revisions/{{revision_id}}"
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
+  - projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template}}/revisions/{{revision_id}}
 autogen_async: true
-async:
-  actions: ['create', 'delete']
-  type: "OpAsync"
-  operation:
-    base_url: "{{op_id}}"
-  result:
-    resource_inside_response: true
 samples:
   - name: designcenter_catalog_template_revision_basic
     primary_resource_id: example
@@ -67,99 +62,134 @@ samples:
           catalog: BootstrapDesignCenterCatalog(t)
           catalog_template: BootstrapDesignCenterApplicationCatalogTemplate(t)
           application_template_revision: BootstrapDesignCenterApplicationTemplateRevisionURI(t)
-
+  - name: designcenter_catalog_template_revision_full
+    primary_resource_id: example
+    exclude_basic_doc: true
+    steps:
+      - name: designcenter_catalog_template_revision_full
+        resource_id_vars:
+          revision_id: example-full-revision
+        vars:
+          project: my-project-name
+          space: example-space
+          catalog: example-catalog
+          catalog_template: example-catalog-template
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          catalog: BootstrapDesignCenterCatalog(t)
+          catalog_template: BootstrapDesignCenterCatalogTemplate(t)
 parameters:
-  - name: "location"
-    type: "String"
+  - name: location
+    type: String
+    description: |
+      The location of the resource.
     required: true
-    immutable: true
     url_param_only: true
-    description: "The location of the resource."
-  - name: "space"
-    type: "String"
+  - name: space
+    type: String
+    description: |
+      The space of the resource.
     required: true
-    immutable: true
     url_param_only: true
-    description: "The space of the resource."
-  - name: "catalog"
-    type: "String"
+  - name: catalog
+    type: String
+    description: |
+      The catalog of the resource.
     required: true
-    immutable: true
     url_param_only: true
-    description: "The catalog of the resource."
-  - name: "catalog_template"
-    type: "String"
+  - name: catalog_template
+    type: String
+    description: |
+      The catalog template of the resource.
     required: true
-    immutable: true
     url_param_only: true
-    description: "The catalog template of the resource."
-  - name: "revision_id"
-    type: "String"
+  - name: revision_id
+    type: String
+    description: |
+      The ID of the revision.
     required: true
-    immutable: true
     url_param_only: true
-    description: "The ID of the revision."
 properties:
-  - name: "name"
-    type: "String"
+  - name: name
+    type: String
+    description: |
+      The resource name of the revision.
+      Format: `projects/{project}/locations/{location}/spaces/{space}/catalogs/{catalog}/templates/{catalog_template}/revisions/{revision_id}`
     output: true
-    description: "The resource name of the revision."
-  - name: "description"
-    type: "String"
-    immutable: true
-    description: "The description of the revision."
-  - name: "type"
-    type: "String"
-    immutable: true
-    description: "The type of the component template revision."
-  - name: "gitSource"
-    type: "NestedObject"
-    immutable: true
-    description: "Git repository source for the template revision."
+  - name: description
+    type: String
+    description: |
+      The description of the revision.
+  - name: type
+    type: String
+    description: |
+      The Application Design Center template type. Possible values include
+      `SERVICE`, `WORKLOAD`, `ASSET`, `STANDARD_APPLICATION_TEMPLATE`,
+      `COMPOSITE_APPLICATION_TEMPLATE`, and `HELM_CHART`.
+    default_from_api: true
+  - name: gitSource
+    type: NestedObject
+    description: |
+      Git repository source for the template revision.
+    exactly_one_of:
+      - git_source
+      - application_template_revision_source
     properties:
-      - name: "repo"
-        type: "String"
+      - name: repo
+        type: String
+        description: |
+          The GitHub repository in `<owner>/<repo>` format (for example,
+          `GoogleCloudPlatform/terraform-google-cloud-run`).
         required: true
-        immutable: true
-        description: "The Git repository URI."
-      - name: "dir"
-        type: "String"
-        immutable: true
-        description: "The directory path within the Git repository."
-      - name: "refTag"
-        type: "String"
+      - name: dir
+        type: String
+        description: |
+          The directory path within the Git repository.
+      - name: refTag
+        type: String
+        description: |
+          The Git reference tag or branch.
         required: true
-        immutable: true
-        description: "The Git reference tag or branch."
-      - name: "commitSha"
-        type: "String"
+      - name: commitSha
+        type: String
+        description: |
+          The commit SHA resolved from the reference tag.
         output: true
-        description: "The commit SHA resolved from the reference tag."
-  - name: "applicationTemplateRevisionSource"
-    type: "String"
-    immutable: true
-    description: "The application template revision source URI."
-  - name: "annotations"
-    type: "KeyValueAnnotations"
-    immutable: true
-    description: "The annotations of the revision."
-  - name: "state"
-    type: "String"
+  - name: applicationTemplateRevisionSource
+    type: String
+    description: |
+      The application template revision source URI.
+      Format: `projects/{project}/locations/{location}/spaces/{space}/applicationTemplates/{application_template}/revisions/{revision}`
+    exactly_one_of:
+      - git_source
+      - application_template_revision_source
+  - name: annotations
+    type: KeyValueAnnotations
+    description: |
+      The annotations of the revision.
+  - name: state
+    type: String
+    description: |
+      The state of the revision.
     output: true
-    description: "The state of the revision."
-  - name: "uuid"
-    type: "String"
+  - name: uuid
+    type: String
+    description: |
+      The unique identifier of the revision.
     output: true
-    description: "The unique identifier of the revision."
-  - name: "templateCategory"
-    type: "String"
+  - name: templateCategory
+    type: String
+    description: |
+      The category of the parent catalog template.
     output: true
-    description: "The category of the parent catalog template."
-  - name: "createTime"
-    type: "Time"
+  - name: createTime
+    type: Time
+    description: |
+      The creation time of the revision.
     output: true
-    description: "The creation time of the revision."
-  - name: "updateTime"
-    type: "Time"
+  - name: updateTime
+    type: Time
+    description: |
+      The last update time of the revision.
     output: true
-    description: "The last update time of the revision."

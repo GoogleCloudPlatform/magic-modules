@@ -5,8 +5,6 @@ resource "google_design_center_catalog_template_revision" "{{$.PrimaryResourceId
   catalog          = "{{index $.Vars "catalog"}}"
   catalog_template = "{{index $.Vars "catalog_template"}}"
   revision_id      = "{{index $.ResourceIdVars "revision_id"}}"
-  description      = "Example catalog template revision"
-  type             = "SERVICE"
 
   git_source {
     repo    = "GoogleCloudPlatform/terraform-google-cloud-run"
