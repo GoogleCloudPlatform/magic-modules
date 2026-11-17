@@ -37,6 +37,24 @@ var defaultFromApiConflictAllowlist = []string{
 	"Rule.rule_id",
 }
 
+// Existing Enum fields with empty enum_values, grandfathered to avoid breaking existing schemas.
+// Do not add new fields to this list.
+var emptyEnumValuesAllowlist = []string{
+	"FutureReservation.status.amendment_status",
+	"FutureReservation.status.last_known_good_state.procurement_status",
+}
+
+// Existing output-only fields that also set send_empty_value, grandfathered to avoid changing existing schemas.
+// Do not add new fields to this list.
+var sendEmptyValueOutputAllowlist = []string{
+	"AppVersion.snapshot.tools.open_api_tool.api_authentication.service_agent_id_token_auth_config",
+	"AuthProvider.auth_provider_type_params.ge_auth_provider",
+	"NetworkFirewallPolicyWithRules.predefined_rules.enable_logging",
+	"RegionNetworkFirewallPolicyWithRules.predefined_rules.enable_logging",
+	"Tool.open_api_tool.api_authentication.service_agent_id_token_auth_config",
+	"Tool.remote_agent_tool.api_authentication.service_agent_id_token_auth_config",
+}
+
 // Represents a property type
 type Type struct {
 	Name string `yaml:"name,omitempty"`
@@ -531,6 +549,20 @@ func (t *Type) Validate(rName string) (es []error) {
 
 	if t.Output && (t.IsA("Enum") || (t.IsA("Array") && t.ItemType != nil && t.ItemType.IsA("Enum"))) {
 		es = append(es, fmt.Errorf("property %s cannot be an output-only Enum in resource %s; use String instead", fullFieldPath, rName))
+	}
+
+	fieldKey := fmt.Sprintf("%s.%s", rName, fullFieldPath)
+	if !t.isExcluded() && t.IsA("Enum") && len(t.EnumValues) == 0 && !slices.Contains(emptyEnumValuesAllowlist, fieldKey) {
+		es = append(es, fmt.Errorf("property %s of type Enum must specify non-empty enum_values in resource %s", fullFieldPath, rName))
+	}
+
+	if !t.isExcluded() && (t.IsA("Enum") || (t.IsA("Array") && t.ItemType != nil && t.ItemType.IsA("Enum"))) &&
+		strings.Contains(strings.ToLower(t.Description), "possible values:") {
+		es = append(es, fmt.Errorf("property %s cannot manually include 'Possible values:' in description in resource %s; enum_values are appended automatically", fullFieldPath, rName))
+	}
+
+	if !t.isExcluded() && t.SendEmptyValue && t.Output && !slices.Contains(sendEmptyValueOutputAllowlist, fieldKey) {
+		es = append(es, fmt.Errorf("property %s cannot set both send_empty_value and output in resource %s", fullFieldPath, rName))
 	}
 
 	if t.DefaultFromApi && t.Required {
