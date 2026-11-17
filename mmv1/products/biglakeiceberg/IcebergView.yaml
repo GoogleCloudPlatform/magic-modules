@@ -40,7 +40,7 @@ import_format:
 supports_indirect_user_project_override: true
 custom_code:
   encoder: templates/terraform/encoders/biglake_iceberg_view_create.go.tmpl
-  update_encoder: templates/terraform/encoders/biglake_iceberg_view.go.tmpl
+  update_encoder: templates/terraform/encoders/biglake_iceberg_view_update.go.tmpl
   constants: templates/terraform/constants/biglake_iceberg_view.go.tmpl
   post_read: templates/terraform/post_read/biglake_iceberg_view.go.tmpl
 samples:

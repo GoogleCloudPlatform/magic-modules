@@ -18,7 +18,7 @@
 
 		updates := map[string]string{}
 		for k, v := range newMap {
-			if icebergViewIgnoredProperties[k] {
+			if icebergViewIgnoredProperties[k] && oldMap[k] == v {
 				continue
 			}
 			updates[k] = v.(string)

@@ -188,7 +188,8 @@ resource "google_biglake_iceberg_view" "my_iceberg_view" {
   }
 
   properties = {
-    key = "updated"
+    key                                = "updated"
+    "write.metadata.compression-codec" = "none"
   }
 }
 `, context)
