@@ -1,0 +1,89 @@
+{{- if ne $.TargetVersionName "ga" }}
+// Use granular networkConfig field masks and an isolated minimal request body when
+// public_dns_enabled is involved so unmasked Computed/server-managed fields (such as
+// enablePublicIp or observabilityConfig on Express instances) are not sent, and
+// in-place Public DNS updates are not combined with non-in-place updates.
+if d.HasChange("network_config") && (d.HasChange("network_config.0.public_dns_enabled") || d.Get("network_config.0.public_dns_enabled").(bool)) {
+	var netSubMasks []string
+	if d.HasChange("network_config.0.public_dns_enabled") {
+		netSubMasks = append(netSubMasks, "networkConfig.publicDnsEnabled")
+	}
+	if d.HasChange("network_config.0.authorized_external_networks") {
+		netSubMasks = append(netSubMasks, "networkConfig.authorizedExternalNetworks")
+	}
+	if d.HasChange("network_config.0.enable_public_ip") {
+		netSubMasks = append(netSubMasks, "networkConfig.enablePublicIp")
+	}
+	if d.HasChange("network_config.0.enable_outbound_public_ip") {
+		netSubMasks = append(netSubMasks, "networkConfig.enableOutboundPublicIp")
+	}
+
+	if len(netSubMasks) > 0 {
+		oldNetworkConfig, _ := d.GetChange("network_config")
+		publicDnsUrl, err := transport_tpg.AddQueryParams(strings.Split(url, "?updateMask=")[0], map[string]string{"updateMask": strings.Join(netSubMasks, ",")})
+		if err != nil {
+			_ = d.Set("network_config", oldNetworkConfig)
+			return err
+		}
+		netCfg := obj["networkConfig"]
+		if netCfg == nil {
+			netCfg = map[string]interface{}{}
+		}
+		patchObj := map[string]interface{}{
+			"networkConfig": netCfg,
+		}
+		if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+			billingProject = bp
+		}
+
+		for attempt := 0; attempt < 2; attempt++ {
+			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:               config,
+				Method:               "PATCH",
+				Project:              billingProject,
+				RawURL:               publicDnsUrl,
+				UserAgent:            userAgent,
+				Body:                 patchObj,
+				Timeout:              d.Timeout(schema.TimeoutUpdate),
+				Headers:              headers,
+				ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{IsAlloyDbInstanceUpdatingError},
+			})
+			if err != nil {
+				if attempt == 0 {
+					_ = d.Set("network_config", oldNetworkConfig)
+				}
+				return fmt.Errorf("Error updating Instance network_config %q: %s", d.Id(), err)
+			}
+
+			err = AlloydbOperationWaitTime(
+				config, res, project, "Updating Instance network_config", userAgent,
+				d.Timeout(schema.TimeoutUpdate))
+			if err == nil {
+				break
+			}
+			if attempt == 1 || !strings.Contains(err.Error(), "Error code 13") {
+				return err
+			}
+			log.Printf("[DEBUG] Retrying Instance network_config update for %q after transient internal LRO error: %s", d.Id(), err)
+		}
+
+		delete(obj, "networkConfig")
+		index := 0
+		for _, label := range updateMask {
+			if label != "networkConfig" {
+				updateMask[index] = label
+				index++
+			}
+		}
+		updateMask = updateMask[:index]
+
+		if len(updateMask) > 0 {
+			url = strings.Split(url, "?updateMask=")[0]
+			url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+			if err != nil {
+				return err
+			}
+		}
+	}
+}
+{{- end }}

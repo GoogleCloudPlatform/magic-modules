@@ -64,6 +64,8 @@ custom_code:
   pre_create: templates/terraform/pre_create/alloydb_cluster.go.tmpl
   pre_update: templates/terraform/pre_update/alloydb_cluster.go.tmpl
   pre_delete: templates/terraform/pre_delete/alloydb_cluster.go.tmpl
+error_retry_predicates:
+  - IsAlloyDbInstanceUpdatingError
 samples:
   - name: alloydb_cluster_basic
     primary_resource_id: default
@@ -725,5 +727,22 @@ properties:
         type: Boolean
         description: |
           Indicates whether Dataplex integration is enabled for the cluster.
+        required: true
+        send_empty_value: true
+  - name: expressConfig
+    type: NestedObject
+    min_version: beta
+    description: |
+      Configuration for AlloyDB Express edition. Setting `enabled` to `true` on cluster creation
+      provisions an AlloyDB Express cluster. Updating `enabled` from `true` to `false` upgrades
+      an AlloyDB Express cluster to a standard cluster in-place; downgrading from `false` to
+      `true` is not supported.
+    default_from_api: true
+    custom_flatten: templates/terraform/custom_flatten/alloydb_cluster_express_config.go.tmpl
+    properties:
+      - name: enabled
+        type: Boolean
+        description: |
+          Whether the cluster is an AlloyDB Express cluster.
         required: true
         send_empty_value: true

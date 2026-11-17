@@ -58,6 +58,7 @@ custom_code:
   constants: templates/terraform/constants/alloydb_instance.go.tmpl
   decoder: templates/terraform/decoders/alloydb_instance.go.tmpl
   pre_create: templates/terraform/pre_create/alloydb_instance.go.tmpl
+  pre_update: templates/terraform/pre_update/alloydb_instance.go.tmpl
   pre_delete: templates/terraform/pre_delete/alloydb_instance.go.tmpl
   custom_import: templates/terraform/custom_import/alloydb_instance.go.tmpl
   # Decoder reads Terraform state via d.Get; skip during CAI→HCL (no state).
@@ -468,9 +469,7 @@ properties:
         description: |
           A list of external networks authorized to access this instance. This
           field is only allowed to be set when `enable_public_ip` is set to
-          true.
-        required_with:
-          - networkConfig.0.enablePublicIp
+          true (or when `public_dns_enabled` is set to true in `google-beta`).
         item_type:
           type: NestedObject
           properties:
@@ -487,6 +486,13 @@ properties:
         type: Boolean
         description: |
           Enabling outbound public ip for the instance.
+      - name: publicDnsEnabled
+        type: Boolean
+        min_version: beta
+        send_empty_value: true
+        description: |
+          Whether Public DNS is enabled for the instance. Only supported on
+          AlloyDB Express primary instances.
       - name: allocatedIpRangeOverride
         type: String
         immutable: true
@@ -538,3 +544,16 @@ properties:
           in Terraform, please remove the "connection-pooling-" prefix and use
           underscores instead of dashes in the name. For example,
           "connection-pooling-pool-mode" would be "pool_mode".
+  - name: networkInfo
+    type: NestedObject
+    min_version: beta
+    output: true
+    description: |
+      Public network metadata for the instance, such as its Public DNS domain name.
+    properties:
+      - name: publicDnsName
+        type: String
+        output: true
+        description: |
+          The Public DNS domain name (FQDN) of the instance, populated when
+          `network_config.public_dns_enabled` is `true`.

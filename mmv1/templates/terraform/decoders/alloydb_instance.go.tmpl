@@ -8,6 +8,9 @@ if networkConfig == nil {
 for apiName, tfName := range map[string]string{
 	"enablePublicIp":         "network_config.0.enable_public_ip",
 	"enableOutboundPublicIp": "network_config.0.enable_outbound_public_ip",
+{{- if ne $.TargetVersionName "ga" }}
+	"publicDnsEnabled":       "network_config.0.public_dns_enabled",
+{{- end }}
 } {
 	if v, exists := networkConfig[apiName]; !exists || v == nil {
 		networkConfig[apiName] = d.Get(tfName)
