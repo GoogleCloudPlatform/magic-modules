@@ -15,9 +15,10 @@ resource "google_compute_network" "net2" {
 resource "google_compute_dhcp_options_config" "{{$.PrimaryResourceId}}" {
   provider = google-beta
 
-  name        = "{{index $.ResourceIdVars "dhcp_options_config_name"}}"
-  region      = "us-central1"
-  description = "Updated DHCP options configuration"
+  name            = "{{index $.ResourceIdVars "dhcp_options_config_name"}}"
+  region          = "us-central1"
+  description     = "Updated DHCP options configuration"
+  deletion_policy = "FORCE"
 
   lease_time_sec             = 7200
   domain_name                = "prod.example.com"
@@ -29,6 +30,11 @@ resource "google_compute_dhcp_options_config" "{{$.PrimaryResourceId}}" {
   boot_file_ipv4_name        = "ipxe.efi"
   boot_file_ipv6_url         = "http://[2001:db8::40]/boot.img"
   boot_file_ipv6_parameters  = ["console=ttyS0,115200"]
+
+  associations {
+    name    = "assoc-1"
+    network = google_compute_network.net1.id
+  }
 
   associations {
     name    = "assoc-2"

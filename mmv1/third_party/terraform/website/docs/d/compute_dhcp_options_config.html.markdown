@@ -4,7 +4,7 @@ description: |-
   Get a specific Compute Engine DHCP options configuration within a region.
 ---
 
-# google\_compute\_dhcp\_options\_config
+# google_compute_dhcp_options_config
 
 Get a specific Compute Engine DHCP options configuration within a region.
 
@@ -45,4 +45,4 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-See [google_compute_dhcp_options_config](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_dhcp_options_config#attributes-reference) resource for details of all the available attributes.
+See [google_compute_dhcp_options_config](https://registry.terraform.io/providers/hashicorp/google-beta/latest/docs/resources/compute_dhcp_options_config#argument-reference) resource for details of all the available attributes.

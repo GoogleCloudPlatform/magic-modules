@@ -26,7 +26,7 @@ func DataSourceGoogleComputeDhcpOptionsConfig() *schema.Resource {
 func dataSourceGoogleComputeDhcpOptionsConfigRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	name := d.Get("name").(string)
+	name := tpgresource.GetResourceNameFromSelfLink(d.Get("name").(string))
 
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
@@ -36,6 +36,16 @@ func dataSourceGoogleComputeDhcpOptionsConfigRead(d *schema.ResourceData, meta i
 	region, err := tpgresource.GetRegion(d, config)
 	if err != nil {
 		return err
+	}
+
+	if err := d.Set("project", project); err != nil {
+		return fmt.Errorf("Error setting project: %s", err)
+	}
+	if err := d.Set("region", region); err != nil {
+		return fmt.Errorf("Error setting region: %s", err)
+	}
+	if err := d.Set("name", name); err != nil {
+		return fmt.Errorf("Error setting name: %s", err)
 	}
 
 	id := fmt.Sprintf("projects/%s/regions/%s/dhcpOptionsConfigs/%s", project, region, name)
@@ -49,6 +59,8 @@ func dataSourceGoogleComputeDhcpOptionsConfigRead(d *schema.ResourceData, meta i
 	if d.Id() == "" {
 		return fmt.Errorf("%s not found", id)
 	}
+	// resourceComputeDhcpOptionsConfigRead sets deletion_policy to the resource default ("DELETE"),
+	// which does not apply to read-only data sources.
 	if err := d.Set("deletion_policy", nil); err != nil {
 		return fmt.Errorf("Error setting deletion_policy: %s", err)
 	}

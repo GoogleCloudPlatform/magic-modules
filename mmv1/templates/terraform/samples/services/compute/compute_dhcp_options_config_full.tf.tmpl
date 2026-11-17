@@ -8,9 +8,10 @@ resource "google_compute_network" "net1" {
 resource "google_compute_dhcp_options_config" "{{$.PrimaryResourceId}}" {
   provider = google-beta
 
-  name        = "{{index $.ResourceIdVars "dhcp_options_config_name"}}"
-  region      = "us-central1"
-  description = "Initial DHCP options configuration"
+  name            = "{{index $.ResourceIdVars "dhcp_options_config_name"}}"
+  region          = "us-central1"
+  description     = "Initial DHCP options configuration"
+  deletion_policy = "FORCE"
 
   lease_time_sec             = 3600
   domain_name                = "corp.example.com"

@@ -328,6 +328,7 @@ service/compute-sole-tenancy:
   - google_compute_node_template
 service/compute-vpc:
   resources:
+  - google_compute_dhcp_options_config
   - google_compute_network
   - google_compute_route
   - google_compute_subnetwork.*

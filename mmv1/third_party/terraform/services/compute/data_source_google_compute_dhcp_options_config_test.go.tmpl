@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
@@ -20,6 +21,7 @@ func TestAccDataSourceGoogleComputeDhcpOptionsConfig_basic(t *testing.T) {
 	context := map[string]interface{}{
 		"config_name":  configName,
 		"network_name": networkName,
+		"region":       envvar.GetTestRegionFromEnv(),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -30,6 +32,8 @@ func TestAccDataSourceGoogleComputeDhcpOptionsConfig_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleComputeDhcpOptionsConfig_basic(context),
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.google_compute_dhcp_options_config.explicit", "region", context["region"].(string)),
+					// deletion_policy is a client-side lifecycle field on the resource and cleared on the data source.
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_dhcp_options_config.explicit",
 						"google_compute_dhcp_options_config.default",
@@ -40,15 +44,6 @@ func TestAccDataSourceGoogleComputeDhcpOptionsConfig_basic(t *testing.T) {
 						"google_compute_dhcp_options_config.default",
 						[]string{"deletion_policy"},
 					),
-					resource.TestCheckResourceAttr("data.google_compute_dhcp_options_config.explicit", "name", configName),
-					resource.TestCheckResourceAttr("data.google_compute_dhcp_options_config.explicit", "region", "us-central1"),
-					resource.TestCheckResourceAttr("data.google_compute_dhcp_options_config.explicit", "description", "DHCP options config for datasource test"),
-					resource.TestCheckResourceAttr("data.google_compute_dhcp_options_config.explicit", "lease_time_sec", "3600"),
-					resource.TestCheckResourceAttr("data.google_compute_dhcp_options_config.explicit", "domain_name", "corp.example.com"),
-					resource.TestCheckResourceAttr("data.google_compute_dhcp_options_config.explicit", "associations.#", "1"),
-					resource.TestCheckResourceAttrSet("data.google_compute_dhcp_options_config.explicit", "dhcp_options_config_id"),
-					resource.TestCheckResourceAttrSet("data.google_compute_dhcp_options_config.explicit", "creation_timestamp"),
-					resource.TestCheckResourceAttrSet("data.google_compute_dhcp_options_config.explicit", "self_link"),
 				),
 			},
 		},
@@ -68,7 +63,7 @@ resource "google_compute_dhcp_options_config" "default" {
   provider = google-beta
 
   name            = "%{config_name}"
-  region          = "us-central1"
+  region          = "%{region}"
   description     = "DHCP options config for datasource test"
   deletion_policy = "FORCE"
 

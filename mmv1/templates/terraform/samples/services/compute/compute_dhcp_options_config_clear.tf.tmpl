@@ -15,6 +15,7 @@ resource "google_compute_network" "net2" {
 resource "google_compute_dhcp_options_config" "{{$.PrimaryResourceId}}" {
   provider = google-beta
 
-  name   = "{{index $.ResourceIdVars "dhcp_options_config_name"}}"
-  region = "us-central1"
+  name            = "{{index $.ResourceIdVars "dhcp_options_config_name"}}"
+  region          = "us-central1"
+  deletion_policy = "DELETE"
 }
