@@ -1,0 +1,39 @@
+// The :addAuthToken LRO response returns the parent TokenAuthUser rather than the newly
+// created AuthToken, and the server auto-assigns the sequential version-N ID. List the
+// user's tokens while still holding the per-user mutex to find the newly minted token.
+listUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.BaseUrl}}")
+if err != nil {
+	d.SetId("")
+	return err
+}
+listRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	Project:   billingProject,
+	RawURL:    listUrl,
+	UserAgent: userAgent,
+	Headers:   headers,
+})
+if err != nil {
+	d.SetId("")
+	return fmt.Errorf("Error listing authTokens for %s: %s", listUrl, err)
+}
+
+matchedToken, err := LatestRedisClusterAuthToken(listRes["authTokens"])
+if err != nil {
+	d.SetId("")
+	return fmt.Errorf("Error finding created AuthToken for %s: %s", listUrl, err)
+}
+
+tokenName := matchedToken["name"].(string)
+tokenId := tpgresource.GetResourceNameFromSelfLink(tokenName)
+if err := d.Set("token_id", tokenId); err != nil {
+	d.SetId("")
+	return fmt.Errorf("Error setting token_id: %s", err)
+}
+id, err = tpgresource.ReplaceVars(d, config, "{{$.GetIdFormat}}")
+if err != nil {
+	d.SetId("")
+	return fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)

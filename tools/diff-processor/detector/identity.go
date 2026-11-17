@@ -3,6 +3,9 @@ package detector
 import (
 	"bufio"
 	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -160,10 +163,72 @@ func checkImportTest(resourcePath string) (bool, error) {
 		if err != nil {
 			return true, err
 		}
-		// Updated to check for the actual ImportStateKind configuration
-		if strings.Contains(string(content), "ImportStateKind: resource.ImportBlockWithResourceIdentity,") {
+		if hasValidIdentityImportStep(content) {
 			return false, nil
 		}
 	}
 	return true, nil
+}
+
+func hasValidIdentityImportStep(content []byte) bool {
+	fset := token.NewFileSet()
+	file, err := parser.ParseFile(fset, "", content, 0)
+	if err != nil {
+		return false
+	}
+
+	found := false
+	ast.Inspect(file, func(n ast.Node) bool {
+		if found {
+			return false
+		}
+		compLit, ok := n.(*ast.CompositeLit)
+		if !ok {
+			return true
+		}
+
+		hasIdentityKind := false
+		hasImportState := false
+		hasRefreshState := false
+
+		for _, elt := range compLit.Elts {
+			kv, ok := elt.(*ast.KeyValueExpr)
+			if !ok {
+				continue
+			}
+			keyIdent, ok := kv.Key.(*ast.Ident)
+			if !ok {
+				continue
+			}
+			switch keyIdent.Name {
+			case "ImportStateKind":
+				switch v := kv.Value.(type) {
+				case *ast.SelectorExpr:
+					if v.Sel.Name == "ImportBlockWithResourceIdentity" {
+						hasIdentityKind = true
+					}
+				case *ast.Ident:
+					if v.Name == "ImportBlockWithResourceIdentity" {
+						hasIdentityKind = true
+					}
+				}
+			case "ImportState":
+				if ident, ok := kv.Value.(*ast.Ident); ok && ident.Name == "true" {
+					hasImportState = true
+				}
+			case "RefreshState":
+				if ident, ok := kv.Value.(*ast.Ident); ok && ident.Name == "true" {
+					hasRefreshState = true
+				}
+			}
+		}
+
+		if hasIdentityKind && hasImportState && !hasRefreshState {
+			found = true
+			return false
+		}
+		return true
+	})
+
+	return found
 }

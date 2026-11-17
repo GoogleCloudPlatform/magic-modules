@@ -234,14 +234,9 @@ properties:
                                     item_type:
                                       type: String
                                   - name: 'subfields'
-                                    type: String
+                                    type: JsonValue
                                     description: |-
                                       Optional. Recursive property for nested schema structures, encoded as a JSON string representing a list of Field objects.
-                                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                                    validation:
-                                      function: 'validation.StringIsJSON'
-                                    custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-                                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                                   - name: 'category'
                                     type: String
                                     description: |-
@@ -392,14 +387,9 @@ properties:
                                     item_type:
                                       type: String
                                   - name: 'subfields'
-                                    type: String
+                                    type: JsonValue
                                     description: |-
                                       Optional. Recursive property for nested schema structures, encoded as a JSON string representing a list of Field objects.
-                                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                                    validation:
-                                      function: 'validation.StringIsJSON'
-                                    custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-                                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                                   - name: 'category'
                                     type: String
                                     description: |-
@@ -798,14 +788,9 @@ properties:
                                     item_type:
                                       type: String
                                   - name: 'subfields'
-                                    type: String
+                                    type: JsonValue
                                     description: |-
                                       Optional. Recursive property for nested schema structures, encoded as a JSON string representing a list of Field objects.
-                                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                                    validation:
-                                      function: 'validation.StringIsJSON'
-                                    custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-                                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                                   - name: 'category'
                                     type: String
                                     description: |-
@@ -956,14 +941,9 @@ properties:
                                     item_type:
                                       type: String
                                   - name: 'subfields'
-                                    type: String
+                                    type: JsonValue
                                     description: |-
                                       Optional. Recursive property for nested schema structures, encoded as a JSON string representing a list of Field objects.
-                                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                                    validation:
-                                      function: 'validation.StringIsJSON'
-                                    custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-                                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                                   - name: 'category'
                                     type: String
                                     description: |-

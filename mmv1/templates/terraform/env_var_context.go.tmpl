@@ -32,6 +32,8 @@
 		"{{$varKey}}": envvar.GetTestVmwareengineProjectFromEnv(t),
 		{{- else if eq $varVal "ZONE" }}
 		"{{$varKey}}": envvar.GetTestZoneFromEnv(),
+		{{- else if eq $varVal "ORG_UNIT_ID" }}
+		"{{$varKey}}": envvar.GetTestOrgUnitIdFromEnv(t),
 		{{- end }}
 	{{- end }}
 	{{- if and $.HasNewLine (gt (len $.TestEnvVars) 0)}}

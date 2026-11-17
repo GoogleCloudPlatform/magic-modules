@@ -619,9 +619,9 @@ The following arguments are supported:
   (Optional)
   The maximum number of audit violations to be stored in a constraint. If not set, the  default of 20 will be used.
 
-  * `deployment_configs` -
+* `deployment_configs` -
   (Optional)
-  Map of deployment configs to deployments ("admission", "audit", "mutation").
+  Map of deployment configs to deployments ("admission", "audit", "mutation"). Structure is [documented below](#nested_deployment_configs).
 
 * `policy_content` -
   (Optional)

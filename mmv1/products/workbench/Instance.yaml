@@ -112,7 +112,7 @@ samples:
           - 'update_time'
   - name: 'workbench_instance_full'
     primary_resource_id: 'instance'
-    region_override: 'us-east1-b'
+    region_override: 'us-central1-a'
     steps:
       - name: 'workbench_instance_full'
         resource_id_vars:
@@ -125,7 +125,7 @@ samples:
           project_id: 'PROJECT_NAME'
           service_account: 'SERVICE_ACCT'
         test_vars_overrides:
-          'key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-east1").CryptoKey.Name'
+          'key_name': 'kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
         ignore_read_extra:
           - 'gce_setup.0.vm_image'
           - 'gce_setup.0.boot_disk.0.disk_type'

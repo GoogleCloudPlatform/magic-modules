@@ -1,0 +1,22 @@
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
+func checkInboundSamlSsoProfileOperation(res map[string]interface{}, activity string) (map[string]interface{}, error) {
+	if opErr, ok := res["error"]; ok && opErr != nil {
+		return nil, fmt.Errorf("Error %s: %v", activity, opErr)
+	}
+	done, _ := res["done"].(bool)
+	if !done {
+		if metadata, ok := res["metadata"].(map[string]interface{}); ok {
+			state, _ := metadata["state"].(string)
+			if state == "awaiting-multi-party-approval" {
+				return nil, fmt.Errorf("Error %s: operation is awaiting multi-party approval (metadata.state=%q); approve the request in Google Admin Console before importing or refreshing the resource", activity, state)
+			}
+			if state != "" {
+				return nil, fmt.Errorf("Error %s: operation did not complete synchronously (done=false, metadata.state=%q)", activity, state)
+			}
+		}
+		return nil, fmt.Errorf("Error %s: operation did not complete synchronously (done=false)", activity)
+	}
+	resp, _ := res["response"].(map[string]interface{})
+	return resp, nil
+}
+{{- end }}

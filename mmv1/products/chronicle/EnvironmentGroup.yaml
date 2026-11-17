@@ -33,9 +33,15 @@ samples:
     primary_resource_id: sample
     steps:
       - name: "chronicle_environmentgroup_basic"
+        vars:
+          display_name: "myEnvironmentGroup"
+          description: "My Environment Description"
         test_env_vars:
           chronicle_id: 'CHRONICLE_ID'
-      - name: "chronicle_environmentgroup_full"
+      - name: "chronicle_environmentgroup_basic"
+        vars:
+          display_name: "myEnvironmentGroup1"
+          description: "My Environment Description1"
         test_env_vars:
           chronicle_id: 'CHRONICLE_ID'
 parameters:

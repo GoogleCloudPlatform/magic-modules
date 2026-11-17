@@ -397,12 +397,16 @@ service/deploymentmanager:
   resources:
   - google_deployment_manager_.*
   - google_runtimeconfig_.*
+service/designcenter:
+  resources:
+  - google_design_center_.*
 service/developerconnect:
   resources:
   - google_developer_connect_.*
   - google_cloudbuildv2_.*
 service/dialogflow:
   resources:
+  - google_dialogflow_companion_agent
   - google_dialogflow_conversation_profile
   - google_dialogflow_sip_trunk
 service/dialogflow-cx:

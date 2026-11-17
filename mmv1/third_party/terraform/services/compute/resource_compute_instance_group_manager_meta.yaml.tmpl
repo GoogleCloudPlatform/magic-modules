@@ -41,6 +41,9 @@ fields:
   - field: 'project'
   - api_field: 'resourcePolicies.workloadPolicy'
   - api_field: 'selfLink'
+{{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'serviceAccount'
+{{- end }}
   - api_field: 'standbyPolicy.initialDelaySec'
   - api_field: 'standbyPolicy.mode'
   - field: 'stateful_disk.delete_rule'
@@ -75,6 +78,7 @@ fields:
   - api_field: 'updatePolicy.maxUnavailable.percent'
     field: 'update_policy.max_unavailable_percent'
 {{- if ne $.TargetVersionName "ga" }}
+  - api_field: 'updatePolicy.allowedActions'
   - api_field: 'updatePolicy.minReadySec'
 {{- end }}
   - api_field: 'updatePolicy.minimalAction'

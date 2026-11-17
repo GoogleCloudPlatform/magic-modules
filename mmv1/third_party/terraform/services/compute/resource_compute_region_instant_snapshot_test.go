@@ -11,6 +11,8 @@ import (
 )
 
 func TestAccComputeRegionInstantSnapshot_basicFeatures(t *testing.T) {
+	t.Parallel()
+
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 	}
@@ -34,6 +36,8 @@ func TestAccComputeRegionInstantSnapshot_basicFeatures(t *testing.T) {
 }
 
 func TestAccComputeRegionInstantSnapshot_labelsUpdate(t *testing.T) {
+	t.Parallel()
+
 	context_1 := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"label_key":     "test-1",

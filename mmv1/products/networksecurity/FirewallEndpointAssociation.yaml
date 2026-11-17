@@ -136,11 +136,6 @@ properties:
       Whether reconciling is in progress, recommended per https://google.aip.dev/128.
     output: true
   - name: state
-    type: Enum
+    type: String
     description: The current state of the endpoint.
     output: true
-    enum_values:
-      - ACTIVE
-      - CREATING
-      - DELETING
-      - INACTIVE

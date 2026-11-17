@@ -35,11 +35,9 @@ resource "google_container_cluster" "primary" {
   name     = "my-gke-cluster"
   location = "us-central1"
 
-  # We can't create a cluster with no node pool defined, but we want to only use
-  # separately managed node pools. So we create the smallest possible default
-  # node pool and immediately delete it.
-  remove_default_node_pool = true
-  initial_node_count       = 1
+  # Required prior to GKE 1.36.4-gke.1469000 to use separately managed node pools
+  # remove_default_node_pool = true
+  # initial_node_count       = 1
 }
 
 resource "google_container_node_pool" "primary_preemptible_nodes" {
@@ -132,6 +130,26 @@ resource "google_container_cluster" "primary" {
 ```
 
 ~> **Note:** If you omit the `control_plane_soak_duration` field completely, GKE bypasses the two-step feature and performs a standard one-step upgrade. You must specify a duration between 6 hours and 7 days.
+
+## Example Usage - GKE Cluster with KCP_HPA Logging
+
+```hcl
+resource "google_container_cluster" "primary" {
+  name               = "gke-logging-cluster"
+  location           = "us-central1-a"
+  initial_node_count = 1
+
+  # Enable KCP_HPA logging along with system components
+  logging_config {
+    enable_components = ["SYSTEM_COMPONENTS", "KCP_HPA"]
+  }
+
+  # To disable KCP_HPA logging, remove it from the enable_components list:
+  # logging_config {
+  #   enable_components = ["SYSTEM_COMPONENTS"]
+  # }
+}
+```
 
 ## Argument Reference
 
@@ -241,7 +259,10 @@ for more information.
 
 * `initial_node_count` - (Optional) The number of nodes to create in this
 cluster's default node pool. In regional or multi-zonal clusters, this is the
-number of nodes per zone. Must be set if `node_pool` is not set. If you're using
+number of nodes per zone. When omitted (or set to `0`) with no `node_config` or
+`node_pool` blocks defined, the cluster is created without a default node pool.
+This requires a GKE version that supports clusters without a default node pool
+(`1.36.4-gke.1469000+`). For older GKE versions, if you're using
 `google_container_node_pool` objects with no default node pool, you'll need to
 set this to a value of at least `1`, alongside setting
 `remove_default_node_pool` to `true`.
@@ -317,6 +338,8 @@ region are guaranteed to support the same version.
 * `network_policy` - (Optional) Configuration options for the
     [NetworkPolicy](https://kubernetes.io/docs/concepts/services-networking/networkpolicies/)
     feature. Structure is [documented below](#nested_network_policy).
+
+* `network_performance_config` - (Optional) Network bandwidth tier configuration. Structure is [documented below](#nested_network_performance_config).
 
 * `node_config` -  (Optional) Parameters used in creating the default node pool.
     Generally, this field should not be used at the same time as a
@@ -401,10 +424,14 @@ channel. Structure is [documented below](#nested_release_channel).
 Configuration options for the auto-upgrade patch type feature, which provide more control over the speed of automatic upgrades of your GKE clusters.
 Structure is [documented below](#nested_gke_auto_upgrade_config).
 
-* `remove_default_node_pool` - (Optional) If `true`, deletes the default node
-    pool upon cluster creation. If you're using `google_container_node_pool`
-    resources with no default node pool, this should be set to `true`, alongside
-    setting `initial_node_count` to at least `1`.
+* `remove_default_node_pool` - (Optional, Deprecated) If `true`, deletes the default node
+    pool upon cluster creation. On GKE versions that support clusters without a
+    default node pool, you can instead omit `initial_node_count` and
+    `node_config` (or set `initial_node_count` to `0`) to skip creating the
+    default node pool without setting this field. For older GKE versions, if
+    you're using `google_container_node_pool` resources with no default node
+    pool, this should be set to `true`, alongside setting `initial_node_count`
+    to at least `1`.
 
 * `resource_labels` - (Optional) The GCE resource labels (a map of key/value pairs) to be applied to the cluster.
 
@@ -763,6 +790,8 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 
 * `management` - (Optional) NodeManagement configuration for this NodePool. Structure is [documented below](#nested_management).
 
+* `upgrade_settings` - (Optional) Specifies the upgrade settings for NAP created node pools. Structure is [documented below](#nested_upgrade_settings).
+
 <a name="nested_management"></a>The `management` block supports:
 
 * `auto_upgrade` - (Optional) Specifies whether node auto-upgrade is enabled for the node pool. If enabled, node auto-upgrade helps keep the nodes in your node pool up to date with the latest release version of Kubernetes.
@@ -770,8 +799,6 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 * `auto_repair` - (Optional) Specifies whether the node auto-repair is enabled for the node pool. If enabled, the nodes in this node pool will be monitored and, if they fail health checks too many times, an automatic repair action will be triggered.
 
 This block also contains several computed attributes, documented below.
-
-* `upgrade_settings` - (Optional) Specifies the upgrade settings for NAP created node pools. Structure is [documented below](#nested_upgrade_settings).
 
 <a name="nested_upgrade_settings"></a>The `upgrade_settings` block supports:
 
@@ -803,8 +830,7 @@ This block also contains several computed attributes, documented below.
 
 <a name="nested_logging_config"></a>The `logging_config` block supports:
 
-*  `enable_components` - (Required) The GKE components exposing logs. Supported values include:
-`SYSTEM_COMPONENTS`, `KCP_VPA`, `APISERVER`, `CONTROLLER_MANAGER`, `SCHEDULER`, and `WORKLOADS`.
+*  `enable_components` - (Required) The GKE components exposing logs. Supported values include: `SYSTEM_COMPONENTS`, `APISERVER`, `CONTROLLER_MANAGER`, `SCHEDULER`, `WORKLOADS`, `KCP_VPA`, `KCP_CONNECTION`, `KCP_SSHD`, and `KCP_HPA`.
 
 <a name="nested_monitoring_config"></a>The `monitoring_config` block supports:
 
@@ -1132,6 +1158,8 @@ The `master_authorized_networks_config.cidr_blocks` block supports:
 
 * `confidential_nodes` - (Optional) Configuration for Confidential Nodes feature. Structure is [documented below](#nested_confidential_nodes).
 
+* `consolidation_delay` - (Optional) Duration after which the Cluster Autoscaler can scale down underutilized nodes in the node pool. Requires autoscaling to be enabled on the node pool. The default node pool created from the top-level `node_config` of `google_container_cluster` doesn't have autoscaling, so set this field in `node_pool` blocks or in `google_container_node_pool` instead. If not set, nodes are scaled down according to the cluster's autoscaling profile (see [`cluster_autoscaling.autoscaling_profile`](#nested_cluster_autoscaling)). The GKE API doesn't support unsetting this field, so removing it from the configuration leaves the current value unchanged. A duration in seconds with up to nine fractional digits, ending with 's'. Example: `"600s"`. See [`--consolidation-delay`](https://cloud.google.com/sdk/gcloud/reference/container/node-pools/update#--consolidation-delay) for the supported GKE versions.
+
 * `disk_size_gb` - (Optional) Size of the disk attached to each node, specified
     in GB. The smallest allowed disk size is 10GB. Defaults to 100GB. This is being migrated to `boot_disk.size_gb`, and must match if specified in both places.
     Prefer configuring `boot_disk`.
@@ -1224,8 +1252,6 @@ gvnic {
 
 * `local_ssd_count` - (Optional) The amount of local SSD disks that will be
     attached to each cluster node. Defaults to 0.
-
-* `network_performance_config` - (Optional) Network bandwidth tier configuration. Structure is [documented below](#network_performance_config).
 
 * `machine_type` - (Optional) The name of a Google Compute Engine machine type.
     Defaults to `e2-medium`. To create a custom machine type, value should be set as specified
@@ -1387,6 +1413,8 @@ sole_tenant_config {
 
 * `data_cache_count` (Optional) - Number of raw-block local NVMe SSD disks to be attached to the node utilized for GKE Data Cache. If zero, then GKE Data Cache will not be enabled in the nodes.
 
+* `ephemeral_capacity_gb` - (Optional) Number of gigabytes of local SSD capacity to use for ephemeral storage in mixed local SSD mode. The remaining capacity is available for raw block storage.
+
 <a name="nested_fast_socket"></a>The `fast_socket` block supports:
 
 * `enabled` (Required) - Whether or not the NCCL Fast Socket is enabled
@@ -1426,6 +1454,10 @@ sole_tenant_config {
 
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 
+~> **Note:** `gpu_driver_installation_config` and `gpu_sharing_config` are updated in place. Changing
+`type`, `count` or `gpu_partition_size` recreates the node pool, because the GKE API does not support
+updating them on an existing node pool.
+
 * `type` (Required) - The accelerator type resource to expose to this instance. E.g. `nvidia-tesla-k80`.
 
 * `count` (Required) - The number of the guest accelerator cards exposed to this instance.
@@ -1454,7 +1486,7 @@ sole_tenant_config {
 
 * `max_shared_clients_per_gpu` (Required) - The maximum number of containers that can share a GPU.
 
-<a name="network_performance_config"></a>The `network_performance_config` block supports:
+<a name="nested_network_performance_config"></a>The `network_performance_config` block supports:
 
 * `total_egress_bandwidth_tier` (Required) - Specifies the total network bandwidth tier for NodePools in the cluster.
 
@@ -1499,7 +1531,7 @@ workload_identity_config {
 
 * `network_tags` (Optional) - The network tag config for the cluster's automatically provisioned node pools. Structure is [documented below](#nested_network_tags).
 
-* `linux_node_config` (Optional) -  Linux system configuration for the cluster's automatically provisioned node pools. Only `cgroup_mode` and `node_kernel_module_loading` fields are supported in `node_pool_auto_config`. Structure is [documented below](#nested_linux_node_config).
+* `linux_node_config` (Optional) -  Linux system configuration for the cluster's automatically provisioned node pools. Only `cgroup_mode` and `node_kernel_module_loading` fields are supported in `node_pool_auto_config`. Structure is [documented below](#nested_node_pool_auto_config_linux_node_config).
 
 <a name="nested_node_kubelet_config"></a>The `node_kubelet_config` block supports:
 
@@ -1517,16 +1549,28 @@ node_pool_auto_config {
 }
 ```
 
-<a name="nested_node_pool_defaults"></a>The `node_pool_defaults` block supports:
-* `node_config_defaults` (Optional) - Subset of NodeConfig message that has defaults.
+<a name="nested_node_pool_auto_config_linux_node_config"></a>The `linux_node_config` block supports:
 
-The `node_config_defaults` block supports:
+* `cgroup_mode` - (Optional) Possible cgroup modes that can be used.
+    Accepted values are:
+    * `CGROUP_MODE_UNSPECIFIED`: CGROUP_MODE_UNSPECIFIED is when unspecified cgroup configuration is used. The default for the GKE node OS image will be used.
+    * `CGROUP_MODE_V1`: CGROUP_MODE_V1 specifies to use cgroupv1 for the cgroup configuration on the node image.
+    * `CGROUP_MODE_V2`: CGROUP_MODE_V2 specifies to use cgroupv2 for the cgroup configuration on the node image.
+
+* `node_kernel_module_loading` - (Optional) Settings for kernel module loading. Structure is [documented below](#nested_node_kernel_module_loading_config).
+
+<a name="nested_node_pool_defaults"></a>The `node_pool_defaults` block supports:
+* `node_config_defaults` (Optional) - Subset of NodeConfig message that has defaults. Structure is [documented below](#nested_node_config_defaults).
+
+<a name="nested_node_config_defaults"></a>The `node_config_defaults` block supports:
 
 * `insecure_kubelet_readonly_port_enabled` (Optional) Controls whether the kubelet read-only port is enabled for newly created node pools in the cluster. It is strongly recommended to set this to `FALSE`. Possible values: `TRUE`, `FALSE`.
 
 * `logging_variant` (Optional) The type of logging agent that is deployed by default for newly created node pools in the cluster. Valid values include DEFAULT and MAX_THROUGHPUT. See [Increasing logging agent throughput](https://cloud.google.com/stackdriver/docs/solutions/gke/managing-logs#throughput) for more information.
 
 * `gcfs_config` (Optional) The default Google Container Filesystem (GCFS) configuration at the cluster level. e.g. enable [image streaming](https://cloud.google.com/kubernetes-engine/docs/how-to/image-streaming) across all the node pools within the cluster. Structure is [documented below](#nested_gcfs_config).
+
+* `containerd_config` (Optional) - Parameters for containerd configuration. Structure is [documented below](#nested_containerd_config).
 
 <a name="nested_notification_config"></a>The `notification_config` block supports:
 
@@ -1906,6 +1950,22 @@ linux_node_config {
 
 * `custom_node_init` - (Optional) Custom node init settings. Structure is [documented below](#nested_custom_node_init).
 
+* `transparent_hugepage_enabled` - (Optional) The Linux kernel transparent hugepage setting.
+    Accepted values are:
+    * `TRANSPARENT_HUGEPAGE_ENABLED_ALWAYS`: Transparent hugepage is enabled system wide.
+    * `TRANSPARENT_HUGEPAGE_ENABLED_MADVISE`: Transparent hugepage is enabled inside MADV_HUGEPAGE regions. This is the default kernel configuration.
+    * `TRANSPARENT_HUGEPAGE_ENABLED_NEVER`: Transparent hugepage is disabled.
+    * `TRANSPARENT_HUGEPAGE_ENABLED_UNSPECIFIED`: Default value. GKE will not modify the kernel configuration.
+
+* `transparent_hugepage_defrag` - (Optional) The Linux kernel transparent hugepage defrag setting.
+    Accepted values are:
+    * `TRANSPARENT_HUGEPAGE_DEFRAG_ALWAYS`: An application requesting THP will stall on allocation failure and directly reclaim pages and compact memory in an effort to allocate a THP immediately.
+    * `TRANSPARENT_HUGEPAGE_DEFRAG_DEFER`: An application will wake kswapd in the background to reclaim pages and wake kcompactd to compact memory so that THP is available in the near future. It is the responsibility of khugepaged to then install the THP pages later.
+    * `TRANSPARENT_HUGEPAGE_DEFRAG_DEFER_WITH_MADVISE`: An application will enter direct reclaim and compaction like always, but only for regions that have used madvise(MADV_HUGEPAGE); all other regions will wake kswapd in the background to reclaim pages and wake kcompactd to compact memory so that THP is available in the near future.
+    * `TRANSPARENT_HUGEPAGE_DEFRAG_MADVISE`: An application will enter direct reclaim and compaction like always, but only for regions that have used madvise(MADV_HUGEPAGE); all other regions will wake kswapd in the background to reclaim pages and wake kcompactd to compact memory so that THP is available in the near future.
+    * `TRANSPARENT_HUGEPAGE_DEFRAG_NEVER`: An application will never enter direct reclaim or compaction.
+    * `TRANSPARENT_HUGEPAGE_DEFRAG_UNSPECIFIED`: Default value. GKE will not modify the kernel configuration.
+
 <a name="nested_swap_config"></a>The `swap_config` block supports:
 
 * `enabled` - (Optional) Enables or disables swap for the node pool.
@@ -1947,22 +2007,6 @@ linux_node_config {
 * `hugepage_size_2m` - (Optional) Amount of 2M hugepages.
 
 * `hugepage_size_1g` - (Optional) Amount of 1G hugepages.
-
-* `transparent_hugepage_enabled` - (Optional) The Linux kernel transparent hugepage setting.
-    Accepted values are:
-    * `TRANSPARENT_HUGEPAGE_ENABLED_ALWAYS`: Transparent hugepage is enabled system wide.
-    * `TRANSPARENT_HUGEPAGE_ENABLED_MADVISE`: Transparent hugepage is enabled inside MADV_HUGEPAGE regions. This is the default kernel configuration.
-    * `TRANSPARENT_HUGEPAGE_ENABLED_NEVER`: Transparent hugepage is disabled.
-    * `TRANSPARENT_HUGEPAGE_ENABLED_UNSPECIFIED`: Default value. GKE will not modify the kernel configuration.
-
-* `transparent_hugepage_defrag` - (Optional) The Linux kernel transparent hugepage defrag setting.
-    Accepted values are:
-    * `TRANSPARENT_HUGEPAGE_DEFRAG_ALWAYS`: An application requesting THP will stall on allocation failure and directly reclaim pages and compact memory in an effort to allocate a THP immediately.
-    * `TRANSPARENT_HUGEPAGE_DEFRAG_DEFER`: An application will wake kswapd in the background to reclaim pages and wake kcompactd to compact memory so that THP is available in the near future. It is the responsibility of khugepaged to then install the THP pages later.
-    * `TRANSPARENT_HUGEPAGE_DEFRAG_DEFER_WITH_MADVISE`: An application will enter direct reclaim and compaction like always, but only for regions that have used madvise(MADV_HUGEPAGE); all other regions will wake kswapd in the background to reclaim pages and wake kcompactd to compact memory so that THP is available in the near future.
-    * `TRANSPARENT_HUGEPAGE_DEFRAG_MADVISE`: An application will enter direct reclaim and compaction like always, but only for regions that have used madvise(MADV_HUGEPAGE); all other regions will wake kswapd in the background to reclaim pages and wake kcompactd to compact memory so that THP is available in the near future.
-    * `TRANSPARENT_HUGEPAGE_DEFRAG_NEVER`: An application will never enter direct reclaim or compaction.
-    * `TRANSPARENT_HUGEPAGE_DEFRAG_UNSPECIFIED`: Default value. GKE will not modify the kernel configuration.
 
 <a name="nested_node_kernel_module_loading_config"></a>The `node_kernel_module_loading` block supports:
 

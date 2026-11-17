@@ -46,23 +46,34 @@ samples:
           logging_saved_query_name: my-saved-query
         test_env_vars:
           project: PROJECT_NAME
+        vars:
+          description: A saved query
+          visibility: SHARED
   - name: logging_saved_query_no_description
     primary_resource_id: saved_query
     exclude_basic_doc: true
     steps:
       - name: logging_saved_query_no_description
+        config_path: templates/terraform/samples/services/logging/logging_saved_query_basic.tf.tmpl
         resource_id_vars:
           logging_saved_query_name: my-saved-query-no-description
         test_env_vars:
           project: PROJECT_NAME
+        vars:
+          description: null
+          visibility: SHARED
   - name: logging_saved_query_private
     primary_resource_id: saved_query
     steps:
       - name: logging_saved_query_private
+        config_path: templates/terraform/samples/services/logging/logging_saved_query_basic.tf.tmpl
         resource_id_vars:
           logging_saved_query_name: my-saved-query-private
         test_env_vars:
           project: PROJECT_NAME
+        vars:
+          description: A saved query
+          visibility: PRIVATE
   - name: logging_saved_query_summary_fields
     primary_resource_id: saved_query
     steps:

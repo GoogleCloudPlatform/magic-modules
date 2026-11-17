@@ -99,13 +99,9 @@ properties:
     sensitive: true
     ignore_read: true
   - name: state
-    type: Enum
+    type: String
     description: |
       The current state of the scim token.
       * ACTIVE: The token is active and may be used to provision users and groups.
       * DELETED: The token is soft-deleted. Soft-deleted tokens are permanently deleted after approximately 30 days.
     output: true
-    enum_values:
-      - STATE_UNSPECIFIED
-      - ACTIVE
-      - DELETED

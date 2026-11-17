@@ -13,6 +13,8 @@ import (
 )
 
 func TestAccComputeSnapshotRecycleBinPolicy_basic(t *testing.T) {
+	t.Parallel()
+
 	context := map[string]interface{}{
 		"project_id":      acctest.RandString(t, 10),
 		"org_id":          envvar.GetTestOrgFromEnv(t),

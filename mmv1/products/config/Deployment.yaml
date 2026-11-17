@@ -21,7 +21,6 @@ docs:
 base_url: projects/{{project}}/locations/{{location}}/deployments
 self_link: projects/{{project}}/locations/{{location}}/deployments/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/deployments?deploymentId={{name}}
-delete_url: projects/{{project}}/locations/{{location}}/deployments/{{name}}?force={{force_destroy}}
 update_mask: true
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/deployments/{{name}}
@@ -31,6 +30,7 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+autogen_async: true
 async:
   type: OpAsync
   operation:
@@ -38,7 +38,10 @@ async:
   actions: [create, delete, update]
   result:
     resource_inside_response: false
-autogen_async: true
+sweeper:
+  query_string: "?force=true&deletePolicy=DELETE"
+custom_code:
+  pre_delete: templates/terraform/pre_delete/force_delete.go.tmpl
 samples:
   - name: config_deployment_basic
     primary_resource_id: default
@@ -79,11 +82,9 @@ properties:
       - name: gcsSource
         type: String
         description: URI of a GCS object containing the zipped Terraform blueprint.
-        exactly_one_of: [gcsSource, gitSource]
       - name: gitSource
         type: NestedObject
         description: Public Git repository containing the blueprint.
-        exactly_one_of: [gcsSource, gitSource]
         properties:
           - name: repo
             type: String

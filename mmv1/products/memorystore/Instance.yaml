@@ -32,6 +32,8 @@ sweeper:
     - region: us-central1
     - region: us-west1
     - region: us-east4
+    - region: northamerica-south1
+    - region: europe-north1
 timeouts:
   insert_minutes: 60
   update_minutes: 120
@@ -80,7 +82,7 @@ samples:
           kms_key_name: my-key
         test_vars_overrides:
           prevent_destroy: "false"
-          kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-east4").CryptoKey.Name
+          kms_key_name: kms.BootstrapKMSKeyInLocation(t, "northamerica-south1").CryptoKey.Name
         ignore_read_extra:
           - update_time
   - name: memorystore_instance_persistence_aof
@@ -145,6 +147,24 @@ samples:
           deletion_protection_enabled: "false"
         oics_vars_overrides:
           deletion_protection_enabled: "false"
+  - name: memorystore_instance_auto_created_endpoints_ipv6
+    primary_resource_id: instance-ipv6
+    min_version: beta
+    steps:
+      - name: memorystore_instance_auto_created_endpoints_ipv6
+        min_version: beta
+        resource_id_vars:
+          instance_name: ipv6-instance
+          policy_name: my-policy
+          subnet_name: my-subnet
+          network_name: my-network
+          prevent_destroy: "true"
+        test_vars_overrides:
+          prevent_destroy: "false"
+        oics_vars_overrides:
+          prevent_destroy: "false"
+        ignore_read_extra:
+          - update_time
 virtual_fields:
   - name: desired_psc_auto_connections
     description: '`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead `terraform import` will only work with desired_auto_created_endpoints`.'
@@ -178,6 +198,17 @@ virtual_fields:
           name: network
           description: "Required. The consumer network where the IP address resides, in the form of\nprojects/{project_id}/global/networks/{network_id}. "
           required: true
+        - type: Enum
+          name: ip_version
+          description: |
+            Immutable. The IP version that the consumer endpoint will use.
+            Default value is `IPV4`.
+          min_version: beta
+          immutable: true
+          default_from_api: true
+          enum_values:
+            - IPV4
+            - IPV6
 parameters:
   - name: location
     type: String
@@ -565,6 +596,22 @@ properties:
         enum_values:
           - MULTI_ZONE
           - SINGLE_ZONE
+      - name: zones
+        type: Array
+        description: |
+          Specify the zones of a multi-zone instance where Memorystore
+          instance allocates resources. This flag isn't applicable for single-zone
+          instances.
+        immutable: true
+        item_type:
+          type: String
+      - name: activeZones
+        type: Array
+        description: |
+          The exact list of zones where the instance currently has active VMs.
+        output: true
+        item_type:
+          type: String
   - name: deletionProtectionEnabled
     type: Boolean
     update_id: deletionProtectionEnabled
@@ -614,16 +661,17 @@ properties:
                     description: Output only. The service attachment which is the target of the PSC connection, in the form of projects/{project-id}/regions/{region}/serviceAttachments/{service-attachment-id}.
                     output: true
                   - name: connectionType
-                    type: Enum
+                    type: String
                     description: "Output Only. Type of a PSC Connection. \n Possible values:\n CONNECTION_TYPE_DISCOVERY \n CONNECTION_TYPE_PRIMARY \n CONNECTION_TYPE_READER"
                     output: true
-                    enum_values:
-                      - CONNECTION_TYPE_READER
-                      - CONNECTION_TYPE_PRIMARY
-                      - CONNECTION_TYPE_DISCOVERY
                   - name: port
                     type: Integer
                     description: Output only. Ports of the exposed endpoint.
+                    output: true
+                  - name: ipVersion
+                    type: String
+                    description: The IP version of the PSC connection. Possible values are `IPV4` and `IPV6`.
+                    min_version: beta
                     output: true
   - name: crossInstanceReplicationConfig
     type: NestedObject
@@ -777,23 +825,21 @@ properties:
           description: Output only. The service attachment which is the target of the PSC connection, in the form of projects/{project-id}/regions/{region}/serviceAttachments/{service-attachment-id}.
           output: true
         - name: pscConnectionStatus
-          type: Enum
+          type: String
           description: "Output Only. The status of the PSC connection: whether a connection exists and ACTIVE or it no longer exists. \n Possible values:\n ACTIVE \n NOT_FOUND"
           output: true
-          enum_values:
-            - ACTIVE
-            - NOT_FOUND
         - name: connectionType
-          type: Enum
+          type: String
           description: "Output Only. Type of a PSC Connection. \n Possible values:\n CONNECTION_TYPE_DISCOVERY \n CONNECTION_TYPE_PRIMARY \n CONNECTION_TYPE_READER"
           output: true
-          enum_values:
-            - CONNECTION_TYPE_READER
-            - CONNECTION_TYPE_PRIMARY
-            - CONNECTION_TYPE_DISCOVERY
         - name: port
           type: Integer
           description: Output only. Ports of the exposed endpoint.
+          output: true
+        - name: ipVersion
+          type: String
+          description: The IP version of the PSC connection. Possible values are `IPV4` and `IPV6`.
+          min_version: beta
           output: true
   - name: gcsSource
     type: NestedObject

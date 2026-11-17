@@ -1,14 +1,25 @@
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-    if v == nil {
-    	return ""
-    }
+	if v == nil {
+		return ""
+	}
 
-    // v should be a map[string]interface{} coming back from the API for google.protobuf.Struct.
-    b, err := json.Marshal(v)
-    if err != nil {
-    	// Flatten signature can't return an error; best effort fallback.
-	return ""
-    }
+	// v should be a map[string]interface{} coming back from the API for google.protobuf.Struct.
+	if mapValue, ok := v.(map[string]interface{}); ok {
+		vCopy := make(map[string]interface{}, len(mapValue))
+		for key, value := range mapValue {
+			if key == "createTime" || key == "updateTime" || key == "ruleTypeMetadata" {
+				continue
+			}
+			vCopy[key] = value
+		}
+		v = vCopy
+	}
 
-    return string(b)
+	b, err := json.Marshal(v)
+	if err != nil {
+		// Flatten signature can't return an error; best effort fallback.
+		return ""
+	}
+
+	return string(b)
 }

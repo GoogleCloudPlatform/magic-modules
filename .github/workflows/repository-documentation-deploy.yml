@@ -7,6 +7,14 @@ on:
     branches:
       - main
 
+# Only one deploy runs at a time. If several commits land on main in quick
+# succession, an in-progress deploy is allowed to finish and only the newest
+# pending run is kept; intermediate pending runs are cancelled, since each
+# deploy publishes the full site from the latest main.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-22.04

@@ -15,7 +15,6 @@
 name: Release
 description: A version to be propagated and deployed to Units. It points to a specific version of a Blueprint that can be applied to Units, for example, via a Rollout.
 base_url: projects/{{project}}/locations/{{location}}/releases
-min_version: beta
 self_link: projects/{{project}}/locations/{{location}}/releases/{{release_id}}
 create_url: projects/{{project}}/locations/{{location}}/releases?releaseId={{release_id}}
 update_mask: true
@@ -25,16 +24,23 @@ import_format:
   - projects/{{project}}/locations/{{location}}/releases/{{release_id}}
 autogen_status: UmVsZWFzZQ==
 autogen_async: false
+# DeleteRelease returns before the resource is removed (no long-running
+# operation); poll until GET returns 404 so destroy completes only once the
+# Release is gone.
+async:
+  type: PollAsync
+  actions: [delete]
+  check_response_func_existence: transport_tpg.PollCheckForExistence
+  check_response_func_absence: transport_tpg.PollCheckForAbsence
+  suppress_error: false
 samples:
   - name: saas_runtime_release_basic
     primary_resource_id: example
-    min_version: beta
     bootstrap_iam:
       - member: serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com
         role: roles/saasservicemgmt.serviceAgent
     steps:
       - name: saas_runtime_release_basic
-        min_version: beta
         resource_id_vars:
           saas_name: example-saas
           unitkind_name: example-unitkind

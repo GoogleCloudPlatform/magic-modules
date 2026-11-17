@@ -1,0 +1,63 @@
+resource "google_vertex_ai_evaluation_item" "{{$.PrimaryResourceId}}" {
+  region               = "us-central1"
+  display_name         = "{{index $.ResourceIdVars "display_name"}}"
+  evaluation_item_type = "REQUEST"
+
+  labels = {
+    env  = "test"
+    team = "evaluation"
+  }
+
+  metadata = jsonencode({
+    author  = "terraform-test"
+    version = "1.0"
+  })
+
+  evaluation_request {
+    prompt {
+      text = "What is the capital of France?"
+    }
+    golden_response {
+      candidate = "ground-truth"
+      text      = "Paris"
+    }
+    candidate_responses {
+      candidate = "model-a"
+      text      = "Paris"
+    }
+    candidate_responses {
+      candidate = "model-b"
+      value = jsonencode({
+        response = "Paris"
+      })
+    }
+    candidate_responses {
+      candidate = "model-c"
+      agent_data = jsonencode({
+        agents = {
+          agent_1 = {
+            agentId     = "agent_1"
+            agentType   = "LlmAgent"
+            description = "Assistant"
+            instruction = "Be helpful"
+          }
+        }
+      })
+    }
+    rubrics {
+      name         = "test_rubric_group"
+      group_id     = "test_rubric_group_id"
+      display_name = "Test Rubric Group"
+      rubrics {
+        rubric_id  = "test_rubric_1"
+        type       = "SUMMARIZATION_QUALITY"
+        importance = "HIGH"
+        content {
+          property {
+            description = "The model response is concise and accurate."
+          }
+        }
+      }
+    }
+  }
+}

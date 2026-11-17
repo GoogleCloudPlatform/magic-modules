@@ -1,9 +1,16 @@
 package sql
 
 import (
+	"context"
+	"reflect"
+	"strings"
 	"testing"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
 func TestMaintenanceVersionDiffSuppress(t *testing.T) {
@@ -224,6 +231,59 @@ func TestDatabaseVersionDiffSuppress(t *testing.T) {
 	}
 }
 
+func TestDatabaseCenterIntegrationDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New       string
+		AppData        map[string]interface{}
+		ShouldSuppress bool
+	}{
+		"replica with unset configuration should suppress diff against inherited state": {
+			Old: "DISABLED",
+			New: "",
+			AppData: map[string]interface{}{
+				"master_instance_name": "primary-instance",
+			},
+			ShouldSuppress: true,
+		},
+		"replica with explicit configuration should not suppress diff": {
+			Old: "DISABLED",
+			New: "ENABLED",
+			AppData: map[string]interface{}{
+				"master_instance_name": "primary-instance",
+			},
+			ShouldSuppress: false,
+		},
+		"primary instance with unset configuration should not suppress diff": {
+			Old:            "DISABLED",
+			New:            "",
+			AppData:        map[string]interface{}{},
+			ShouldSuppress: false,
+		},
+		"primary instance with explicit configuration should not suppress diff": {
+			Old:            "DISABLED",
+			New:            "ENABLED",
+			AppData:        map[string]interface{}{},
+			ShouldSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		tc := tc
+		t.Run(tn, func(t *testing.T) {
+			t.Parallel()
+			rd := schema.TestResourceDataRaw(t, map[string]*schema.Schema{
+				"master_instance_name": {
+					Type:     schema.TypeString,
+					Optional: true,
+				},
+			}, tc.AppData)
+			if databaseCenterIntegrationDiffSuppress("database_center_integration", tc.Old, tc.New, rd) != tc.ShouldSuppress {
+				t.Fatalf("%q => %q (AppData=%v) expect DiffSuppress to return %t", tc.Old, tc.New, tc.AppData, tc.ShouldSuppress)
+			}
+		})
+	}
+}
+
 func TestDenyMaintenancePeriodDateDiffSuppress(t *testing.T) {
 	cases := map[string]struct {
 		Old, New       string
@@ -289,5 +349,356 @@ func TestDenyMaintenancePeriodDateDiffSuppress(t *testing.T) {
 				t.Fatalf("%q => %q expect DiffSuppress to return %t", tc.Old, tc.New, tc.ShouldSuppress)
 			}
 		})
+	}
+}
+
+func TestBlueGreenDeployment_SkipGreenComparisonFields(t *testing.T) {
+	requiredSkipFields := []string{
+		"root_password",
+		"root_password_wo_version",
+		"name",
+		"blue_green_deployment",
+		"instance_type",
+		"master_instance_name",
+		"replica_configuration",
+		"replica_names",
+		"replication_cluster",
+	}
+
+	for _, field := range requiredSkipFields {
+		if !skipGreenComparisonFields[field] {
+			t.Errorf("expected skipGreenComparisonFields[%q] to be true, got false", field)
+		}
+	}
+}
+
+func TestBlueGreenDeployment_CompareConfiguredField_SensitiveRedaction(t *testing.T) {
+	testSchema := map[string]*schema.Schema{
+		"root_password": {
+			Type:      schema.TypeString,
+			Optional:  true,
+			Sensitive: true,
+		},
+		"root_password_wo_version": {
+			Type:     schema.TypeInt,
+			Optional: true,
+		},
+		"secret_token": {
+			Type:      schema.TypeString,
+			Optional:  true,
+			Sensitive: true,
+		},
+		"nested_secret_block": {
+			Type:     schema.TypeList,
+			Optional: true,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"nested_secret": {
+						Type:      schema.TypeString,
+						Optional:  true,
+						Sensitive: true,
+					},
+				},
+			},
+		},
+	}
+
+	var capturedDiff *schema.ResourceDiff
+	res := &schema.Resource{
+		Schema: testSchema,
+		CustomizeDiff: func(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+			capturedDiff = d
+			return nil
+		},
+	}
+
+	schemaBlock := res.CoreConfigSchema()
+	impliedType := schemaBlock.ImpliedType()
+
+	configuredPassword := "super-secret-new-password"
+	configuredToken := "confidential-token-abc"
+	configuredNestedSecret := "nested-classified-xyz"
+
+	proposedNewStateVal := cty.ObjectVal(map[string]cty.Value{
+		"root_password":            cty.StringVal(configuredPassword),
+		"root_password_wo_version": cty.NumberIntVal(2),
+		"secret_token":             cty.StringVal(configuredToken),
+		"nested_secret_block": cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"nested_secret": cty.StringVal(configuredNestedSecret),
+			}),
+		}),
+	})
+
+	priorState, err := res.ShimInstanceStateFromValue(cty.NullVal(impliedType))
+	if err != nil {
+		t.Fatalf("ShimInstanceStateFromValue failed: %v", err)
+	}
+	priorState.RawState = cty.NullVal(impliedType)
+	priorState.RawPlan = proposedNewStateVal
+	priorState.RawConfig = proposedNewStateVal
+
+	cfg := terraform.NewResourceConfigShimmed(proposedNewStateVal, schemaBlock)
+	_, err = res.SimpleDiff(context.Background(), priorState, cfg, nil)
+	if err != nil {
+		t.Fatalf("SimpleDiff failed: %v", err)
+	}
+
+	if capturedDiff == nil {
+		t.Fatal("expected CustomizeDiff to capture ResourceDiff, got nil")
+	}
+
+	greenData := res.Data(nil)
+	_ = greenData.Set("root_password", "old-blue-password")
+	_ = greenData.Set("root_password_wo_version", 1)
+	_ = greenData.Set("secret_token", "green-token-different")
+	_ = greenData.Set("nested_secret_block", []interface{}{
+		map[string]interface{}{
+			"nested_secret": "green-nested-different",
+		},
+	})
+
+	var mismatches []string
+
+	// 1. root_password and root_password_wo_version should be skipped and produce 0 mismatches
+	compareConfiguredField("root_password", proposedNewStateVal.GetAttr("root_password"), testSchema["root_password"], capturedDiff, greenData, &mismatches)
+	compareConfiguredField("root_password_wo_version", proposedNewStateVal.GetAttr("root_password_wo_version"), testSchema["root_password_wo_version"], capturedDiff, greenData, &mismatches)
+
+	if len(mismatches) != 0 {
+		t.Errorf("expected 0 mismatches for skipped password fields, got: %v", mismatches)
+	}
+
+	// 2. Sensitive top-level field should be redacted in mismatches
+	compareConfiguredField("secret_token", proposedNewStateVal.GetAttr("secret_token"), testSchema["secret_token"], capturedDiff, greenData, &mismatches)
+	// 3. Sensitive nested field should be redacted in mismatches
+	compareConfiguredField("nested_secret_block", proposedNewStateVal.GetAttr("nested_secret_block"), testSchema["nested_secret_block"], capturedDiff, greenData, &mismatches)
+
+	expectedMismatches := []string{
+		"secret_token (configured: (sensitive), green instance: (sensitive))",
+		"nested_secret_block.0.nested_secret (configured: (sensitive), green instance: (sensitive))",
+	}
+
+	if len(mismatches) != len(expectedMismatches) {
+		t.Fatalf("expected %d mismatches, got %d: %v", len(expectedMismatches), len(mismatches), mismatches)
+	}
+
+	for i, exp := range expectedMismatches {
+		if mismatches[i] != exp {
+			t.Errorf("mismatch[%d] = %q; want %q", i, mismatches[i], exp)
+		}
+	}
+
+	// 4. Verify that plaintext secret values NEVER appear in any mismatch message
+	joinedMismatches := strings.Join(mismatches, " ")
+	sensitiveValues := []string{
+		configuredPassword,
+		"old-blue-password",
+		configuredToken,
+		"green-token-different",
+		configuredNestedSecret,
+		"green-nested-different",
+	}
+	for _, secret := range sensitiveValues {
+		if strings.Contains(joinedMismatches, secret) {
+			t.Errorf("security violation: plaintext secret %q leaked in mismatches: %s", secret, joinedMismatches)
+		}
+	}
+}
+
+func TestFlattenAndExpandSqlServerPasswordValidationPolicy(t *testing.T) {
+	t.Parallel()
+
+	if got := flattenSqlServerPasswordValidationPolicy(nil); got != nil {
+		t.Fatalf("expected nil for nil input, got %#v", got)
+	}
+	if got := expandSqlServerPasswordValidationPolicy(nil); got != nil {
+		t.Fatalf("expected nil for empty input, got %#v", got)
+	}
+
+	expandedEnabled := expandSqlServerPasswordValidationPolicy([]interface{}{
+		map[string]interface{}{
+			"enable_password_policy":  true,
+			"password_minimum_length": 10,
+			"password_history_length": 5,
+			"password_minimum_age":    "86400s",
+			"password_maximum_age":    "2592000s",
+		},
+	})
+	wantEnabled := &sqladmin.SqlServerPasswordValidationPolicy{
+		EnablePasswordPolicy:  true,
+		PasswordMinimumLength: 10,
+		PasswordHistoryLength: 5,
+		PasswordMinimumAge:    "86400s",
+		PasswordMaximumAge:    "2592000s",
+		ForceSendFields:       []string{"EnablePasswordPolicy"},
+	}
+	if !reflect.DeepEqual(expandedEnabled, wantEnabled) {
+		t.Fatalf("expand enabled got %#v, want %#v", expandedEnabled, wantEnabled)
+	}
+
+	flattened := flattenSqlServerPasswordValidationPolicy(expandedEnabled)
+	wantFlattened := []map[string]interface{}{
+		{
+			"enable_password_policy":  true,
+			"password_minimum_length": int64(10),
+			"password_history_length": int64(5),
+			"password_minimum_age":    "86400s",
+			"password_maximum_age":    "2592000s",
+		},
+	}
+	if !reflect.DeepEqual(flattened, wantFlattened) {
+		t.Fatalf("flatten got %#v, want %#v", flattened, wantFlattened)
+	}
+
+	expandedDisabled := expandSqlServerPasswordValidationPolicy([]interface{}{
+		map[string]interface{}{
+			"enable_password_policy":  false,
+			"password_minimum_length": 0,
+			"password_history_length": 0,
+			"password_minimum_age":    "",
+			"password_maximum_age":    "",
+		},
+	})
+	wantDisabled := &sqladmin.SqlServerPasswordValidationPolicy{
+		EnablePasswordPolicy: false,
+		ForceSendFields:      []string{"EnablePasswordPolicy"},
+		NullFields: []string{
+			"PasswordMinimumLength",
+			"PasswordHistoryLength",
+			"PasswordMinimumAge",
+			"PasswordMaximumAge",
+		},
+	}
+	if !reflect.DeepEqual(expandedDisabled, wantDisabled) {
+		t.Fatalf("expand disabled got %#v, want %#v", expandedDisabled, wantDisabled)
+	}
+}
+
+func TestSqlServerPasswordValidationPolicyDiffSuppress(t *testing.T) {
+	t.Parallel()
+
+	res := ResourceSqlDatabaseInstance()
+	schemaBlock := res.CoreConfigSchema()
+	meta := &transport_tpg.Config{Project: "test-project", Region: "us-central1"}
+
+	priorState := &terraform.InstanceState{
+		ID: "replica-instance",
+		Attributes: map[string]string{
+			"name":                 "replica-instance",
+			"project":              "test-project",
+			"region":               "us-central1",
+			"database_version":     "SQLSERVER_2022_STANDARD",
+			"master_instance_name": "primary-instance",
+			"settings.#":           "1",
+			"settings.0.tier":      "db-custom-1-3840",
+			"settings.0.sql_server_password_validation_policy.#":                         "1",
+			"settings.0.sql_server_password_validation_policy.0.enable_password_policy":  "true",
+			"settings.0.sql_server_password_validation_policy.0.password_minimum_length": "10",
+			"settings.0.sql_server_password_validation_policy.0.password_history_length": "5",
+			"settings.0.sql_server_password_validation_policy.0.password_minimum_age":    "86400s",
+			"settings.0.sql_server_password_validation_policy.0.password_maximum_age":    "2592000s",
+		},
+	}
+
+	// 1. Replica omitting sql_server_password_validation_policy in HCL suppresses inherited diff
+	replicaOmittedCfgVal, err := schemaBlock.CoerceValue(cty.ObjectVal(map[string]cty.Value{
+		"name":                 cty.StringVal("replica-instance"),
+		"project":              cty.StringVal("test-project"),
+		"region":               cty.StringVal("us-central1"),
+		"database_version":     cty.StringVal("SQLSERVER_2022_STANDARD"),
+		"master_instance_name": cty.StringVal("primary-instance"),
+		"settings": cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"tier": cty.StringVal("db-custom-1-3840"),
+			}),
+		}),
+	}))
+	if err != nil {
+		t.Fatalf("CoerceValue failed: %v", err)
+	}
+	priorState.RawConfig = replicaOmittedCfgVal
+	diff, err := res.SimpleDiff(context.Background(), priorState, terraform.NewResourceConfigShimmed(replicaOmittedCfgVal, schemaBlock), meta)
+	if err != nil {
+		t.Fatalf("SimpleDiff failed: %v", err)
+	}
+	for k := range diff.Attributes {
+		if strings.Contains(k, "sql_server_password_validation_policy") {
+			t.Fatalf("expected replica diff on %q to be suppressed when omitted in config, got %#v", k, diff.Attributes[k])
+		}
+	}
+
+	// 2. Primary instance omitting sql_server_password_validation_policy in HCL does NOT suppress diff
+	primaryPriorState := &terraform.InstanceState{
+		ID: "primary-instance",
+		Attributes: map[string]string{
+			"name":             "primary-instance",
+			"project":          "test-project",
+			"region":           "us-central1",
+			"database_version": "SQLSERVER_2022_STANDARD",
+			"settings.#":       "1",
+			"settings.0.tier":  "db-custom-1-3840",
+			"settings.0.sql_server_password_validation_policy.#":                         "1",
+			"settings.0.sql_server_password_validation_policy.0.enable_password_policy":  "true",
+			"settings.0.sql_server_password_validation_policy.0.password_minimum_length": "10",
+		},
+	}
+	primaryOmittedCfgVal, err := schemaBlock.CoerceValue(cty.ObjectVal(map[string]cty.Value{
+		"name":             cty.StringVal("primary-instance"),
+		"project":          cty.StringVal("test-project"),
+		"region":           cty.StringVal("us-central1"),
+		"database_version": cty.StringVal("SQLSERVER_2022_STANDARD"),
+		"settings": cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"tier": cty.StringVal("db-custom-1-3840"),
+			}),
+		}),
+	}))
+	if err != nil {
+		t.Fatalf("CoerceValue failed: %v", err)
+	}
+	primaryPriorState.RawConfig = primaryOmittedCfgVal
+	primaryDiff, err := res.SimpleDiff(context.Background(), primaryPriorState, terraform.NewResourceConfigShimmed(primaryOmittedCfgVal, schemaBlock), meta)
+	if err != nil {
+		t.Fatalf("SimpleDiff failed: %v", err)
+	}
+	if _, ok := primaryDiff.Attributes["settings.0.sql_server_password_validation_policy.#"]; !ok {
+		t.Fatalf("expected primary instance to produce diff on settings.0.sql_server_password_validation_policy.# when block is removed")
+	}
+
+	// 3. Replica explicitly setting sql_server_password_validation_policy in HCL does NOT suppress diff
+	replicaExplicitCfgVal, err := schemaBlock.CoerceValue(cty.ObjectVal(map[string]cty.Value{
+		"name":                 cty.StringVal("replica-instance"),
+		"project":              cty.StringVal("test-project"),
+		"region":               cty.StringVal("us-central1"),
+		"database_version":     cty.StringVal("SQLSERVER_2022_STANDARD"),
+		"master_instance_name": cty.StringVal("primary-instance"),
+		"settings": cty.ListVal([]cty.Value{
+			cty.ObjectVal(map[string]cty.Value{
+				"tier": cty.StringVal("db-custom-1-3840"),
+				"sql_server_password_validation_policy": cty.ListVal([]cty.Value{
+					cty.ObjectVal(map[string]cty.Value{
+						"enable_password_policy": cty.BoolVal(false),
+					}),
+				}),
+			}),
+		}),
+	}))
+	if err != nil {
+		t.Fatalf("CoerceValue failed: %v", err)
+	}
+	priorState.RawConfig = replicaExplicitCfgVal
+	replicaExplicitDiff, err := res.SimpleDiff(context.Background(), priorState, terraform.NewResourceConfigShimmed(replicaExplicitCfgVal, schemaBlock), meta)
+	if err != nil {
+		t.Fatalf("SimpleDiff failed: %v", err)
+	}
+	if _, ok := replicaExplicitDiff.Attributes["settings.0.sql_server_password_validation_policy.0.enable_password_policy"]; !ok {
+		t.Fatalf("expected explicit replica config to produce diff on enable_password_policy")
+	}
+
+	// 4. NilVal RawConfig fallback does not panic
+	dFallback := res.Data(nil)
+	_ = dFallback.Set("master_instance_name", "primary-instance")
+	if !sqlServerPasswordValidationPolicyDiffSuppress("settings.0.sql_server_password_validation_policy.#", "1", "0", dFallback) {
+		t.Fatalf("expected replica fallback with empty policy to suppress diff")
 	}
 }

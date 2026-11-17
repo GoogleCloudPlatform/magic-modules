@@ -58,6 +58,7 @@ samples:
         resource_id_vars:
           instance_name: 'bt-instance'
           cluster_id: 'bt-cluster'
+          app_profile_name: 'bt-profile'
 parameters:
   - name: 'instance'
     type: String

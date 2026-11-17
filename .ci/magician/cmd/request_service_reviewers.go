@@ -23,7 +23,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler/labeler"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // requestServiceReviewersCmd represents the requestServiceReviewers command

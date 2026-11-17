@@ -87,6 +87,7 @@ samples:
           template_metadata_custom_llm_response_safety_error_code: 401
           template_metadata_enforcement_type: INSPECT_ONLY
           template_metadata_filter_version_selector_alias: FILTER_VERSION_ALIAS_LATEST
+          template_metadata_data_residency_compliant: true
         test_vars_overrides:
           templateId: '"modelarmor3"'
           location: '"us"'
@@ -102,6 +103,7 @@ samples:
           template_metadata_custom_llm_response_safety_error_code: 401
           template_metadata_enforcement_type: '"INSPECT_ONLY"'
           template_metadata_filter_version_selector_alias: '"FILTER_VERSION_ALIAS_LATEST"'
+          template_metadata_data_residency_compliant: true
   - name: modelarmor_template_filter_version_selector
     primary_resource_id: template-filter-version-selector
     steps:
@@ -111,13 +113,13 @@ samples:
           location: us-central1
           filter_config_rai_settings_rai_filters_0_filter_type: HATE_SPEECH
           filter_config_rai_settings_rai_filters_0_confidence_level: HIGH
-          template_metadata_filter_version_selector_version: v1
+          template_metadata_filter_version_selector_version: v3
         test_vars_overrides:
           templateId: '"modelarmor5"'
           location: '"us-central1"'
           filter_config_rai_settings_rai_filters_0_filter_type: '"HATE_SPEECH"'
           filter_config_rai_settings_rai_filters_0_confidence_level: '"HIGH"'
-          template_metadata_filter_version_selector_version: '"v1"'
+          template_metadata_filter_version_selector_version: '"v3"'
   - name: modelarmor_template_label
     primary_resource_id: template-label-advanced-config
     steps:
@@ -285,6 +287,74 @@ properties:
               LOW_AND_ABOVE
               MEDIUM_AND_ABOVE
               HIGH
+      - name: filterRuleSettings
+        type: NestedObject
+        description: |-
+          Settings for customizing filter rules. Note: This field is not supported in
+          FloorSetting and Streaming Sanitization APIs.
+        properties:
+          - name: ruleSets
+            type: Array
+            description: List of rule sets to be applied to filters.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: filterTypes
+                  type: Array
+                  description: |-
+                    List of filters this rule set is applied to.
+                    Possible values:
+                    PROMPT_INJECTION_AND_JAILBREAK
+                    RESPONSIBLE_AI
+                  required: true
+                  item_type:
+                    type: String
+                - name: rules
+                  type: Array
+                  description: Set of rules to be applied to filterTypes.
+                  required: true
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: exclusionRule
+                        type: NestedObject
+                        description: |-
+                          The rule that specifies conditions when filter detections are excluded from
+                          results.
+                        properties:
+                          - name: matchingScope
+                            type: String
+                            description: |-
+                              Specifies the scope of the input that should be matched against the
+                              exclusion rule. If unspecified, defaults to MATCHING_SCOPE_PARTIAL_MATCH.
+                              Possible values:
+                              MATCHING_SCOPE_FULL_MATCH
+                              MATCHING_SCOPE_PARTIAL_MATCH
+                          - name: dictionary
+                            type: NestedObject
+                            description: Dictionary which defines the rule.
+                            properties:
+                              - name: wordList
+                                type: NestedObject
+                                description: Message defining a list of words or phrases.
+                                properties:
+                                  - name: words
+                                    type: Array
+                                    description: |-
+                                      Words or phrases defining the dictionary. The dictionary must contain at
+                                      least one phrase and every phrase must contain at least two characters that
+                                      are letters or digits.
+                                    required: true
+                                    item_type:
+                                      type: String
+                          - name: regex
+                            type: NestedObject
+                            description: Regular expression which defines the rule.
+                            properties:
+                              - name: pattern
+                                type: String
+                                description: The regular expression pattern.
+                                required: true
   - name: templateMetadata
     type: NestedObject
     description: Message describing TemplateMetadata
@@ -371,3 +441,13 @@ properties:
             description: |-
               Pins the template to a specific, immutable filter version. Expected
               format is a case-sensitive string such as 'v1' or 'v2'.
+      - name: dataResidencyCompliant
+        type: Boolean
+        description: |-
+          Indicates whether the template is subject to data residency compliance. If
+          true (default for new templates), the template is subject to data residency
+          compliance. If false, the template bypasses data residency compliance
+          checks. If unset, the value is determined by the API; templates created
+          before data residency enforcement may report false.
+        default_from_api: true
+        custom_expand: templates/terraform/custom_expand/modelarmor_template_data_residency_compliant.go.tmpl

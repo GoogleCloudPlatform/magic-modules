@@ -52,6 +52,19 @@ After applying this configuration:
   - This should only be necessary until uploading new models is supported in the provider.
 - (Org only) Enroll the org in the Premium tier of Security Control Center
 - (Org only) Enable Compliance Manager https://cloud.google.com/security-command-center/docs/compliance-manager-enable
+- Cross-project Artifact Registry reader grant for SaaS Runtime (ALM) UnitKind / Release tests:
+    Grant the test runner service account and/or ALM service agent read access to the external test image repository:
+    ```
+    gcloud artifacts repositories add-iam-policy-binding test-repo \
+        --project=<project> \
+        --location=us-central1 \
+        --member="serviceAccount:<test-service-account>" \
+        --role="roles/artifactregistry.reader"
+    gcloud iam service-accounts add-iam-policy-binding <service-account> \
+        --project=<project> \
+        --member="serviceAccount:<test-service-account>" \
+        --role="roles/iam.serviceAccountUser"
+    ```
 
 Quotas that will need to be adjusted to support all tests:
 - Project quota for the new service account

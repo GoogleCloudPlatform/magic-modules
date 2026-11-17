@@ -88,12 +88,8 @@ properties:
         required: true
         description: Whether the data source is enabled for export.
       - name: latestExportJobState
-        type: Enum
+        type: String
         output: true
-        enum_values:
-          - 'LATEST_EXPORT_JOB_STATE_UNSPECIFIED'
-          - 'LATEST_EXPORT_JOB_STATE_SUCCESS'
-          - 'LATEST_EXPORT_JOB_STATE_FAILED'
         description: The latest export job state.
       - name: retentionDays
         type: Integer
@@ -119,12 +115,8 @@ properties:
         required: true
         description: Whether the data source is enabled for export.
       - name: latestExportJobState
-        type: Enum
+        type: String
         output: true
-        enum_values:
-          - 'LATEST_EXPORT_JOB_STATE_UNSPECIFIED'
-          - 'LATEST_EXPORT_JOB_STATE_SUCCESS'
-          - 'LATEST_EXPORT_JOB_STATE_FAILED'
         description: The latest export job state.
       - name: retentionDays
         type: Integer
@@ -161,12 +153,8 @@ properties:
         required: true
         description: Whether the data source is enabled for export.
       - name: latestExportJobState
-        type: Enum
+        type: String
         output: true
-        enum_values:
-          - 'LATEST_EXPORT_JOB_STATE_UNSPECIFIED'
-          - 'LATEST_EXPORT_JOB_STATE_SUCCESS'
-          - 'LATEST_EXPORT_JOB_STATE_FAILED'
         description: The latest export job state.
       - name: retentionDays
         type: Integer
@@ -192,12 +180,8 @@ properties:
         required: true
         description: Whether the data source is enabled for export.
       - name: latestExportJobState
-        type: Enum
+        type: String
         output: true
-        enum_values:
-          - 'LATEST_EXPORT_JOB_STATE_UNSPECIFIED'
-          - 'LATEST_EXPORT_JOB_STATE_SUCCESS'
-          - 'LATEST_EXPORT_JOB_STATE_FAILED'
         description: The latest export job state.
       - name: retentionDays
         type: Integer
@@ -223,12 +207,8 @@ properties:
         required: true
         description: Whether the data source is enabled for export.
       - name: latestExportJobState
-        type: Enum
+        type: String
         output: true
-        enum_values:
-          - 'LATEST_EXPORT_JOB_STATE_UNSPECIFIED'
-          - 'LATEST_EXPORT_JOB_STATE_SUCCESS'
-          - 'LATEST_EXPORT_JOB_STATE_FAILED'
         description: The latest export job state.
       - name: retentionDays
         type: Integer

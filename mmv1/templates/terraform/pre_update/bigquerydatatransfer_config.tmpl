@@ -28,6 +28,9 @@ if d.HasChange("schedule") {
 if d.HasChange("schedule_options") {
   updateMask = append(updateMask, "scheduleOptions")
 }
+if d.HasChange("schedule_options_v2") {
+  updateMask = append(updateMask, "scheduleOptionsV2")
+}
 if d.HasChange("email_preferences") {
   updateMask = append(updateMask, "emailPreferences")
 }

@@ -402,6 +402,7 @@ properties:
                           - MATCHING_TYPE_FULL_MATCH
                           - MATCHING_TYPE_PARTIAL_MATCH
                           - MATCHING_TYPE_INVERSE_MATCH
+                          - MATCHING_TYPE_RULE_SPECIFIC
                       - name: dictionary
                         type: NestedObject
                         description: Dictionary which defines the rule.
@@ -521,6 +522,65 @@ properties:
                                 type: Integer
                                 description: |
                                   Number of characters after the finding to consider.
+                      - name: excludeByImageFindings
+                        type: NestedObject
+                        description: |
+                          The rule to exclude image findings based on spatial relationships with other image findings.
+                        properties:
+                          - name: infoTypes
+                            type: Array
+                            description: |
+                              A list of image-supported infoTypes to be used as context for the exclusion rule.
+                            required: true
+                            item_type:
+                              type: NestedObject
+                              properties:
+                                - name: name
+                                  type: String
+                                  description: |
+                                    Name of the information type.
+                                  required: true
+                                - name: version
+                                  type: String
+                                  description: |
+                                    Version name for this InfoType.
+                                - name: sensitivityScore
+                                  type: NestedObject
+                                  description: |
+                                    Optional custom sensitivity for this InfoType.
+                                  properties:
+                                    - name: score
+                                      type: Enum
+                                      description: |
+                                        The sensitivity score applied to the resource.
+                                      required: true
+                                      enum_values:
+                                        - SENSITIVITY_LOW
+                                        - SENSITIVITY_MODERATE
+                                        - SENSITIVITY_HIGH
+                          - name: imageContainmentType
+                            type: NestedObject
+                            description: |
+                              Specifies the required spatial relationship between the bounding boxes of the target finding and the context infoType findings.
+                            properties:
+                              - name: encloses
+                                type: NestedObject
+                                description: Defines a condition where one bounding box encloses another.
+                                send_empty_value: true
+                                allow_empty_object: true
+                                properties: []
+                              - name: fullyInside
+                                type: NestedObject
+                                description: Defines a condition where one bounding box is fully inside another.
+                                send_empty_value: true
+                                allow_empty_object: true
+                                properties: []
+                              - name: overlaps
+                                type: NestedObject
+                                description: Defines a condition for overlapping bounding boxes.
+                                send_empty_value: true
+                                allow_empty_object: true
+                                properties: []
       - name: customInfoTypes
         type: Array
         description: |
@@ -654,6 +714,19 @@ properties:
                   description: |
                     Resource name of the requested StoredInfoType, for example `organizations/433245324/storedInfoTypes/432452342`
                     or `projects/project-id/storedInfoTypes/432452342`.
+                  required: true
+            - name: metadataKeyValueExpression
+              type: NestedObject
+              description: |
+                Configuration for a custom infoType that detects key-value pairs in the metadata matching the specified regular expressions.
+              properties:
+                - name: keyRegex
+                  type: String
+                  description: The regular expression for the key.
+                  required: true
+                - name: valueRegex
+                  type: String
+                  description: The regular expression for the value.
                   required: true
   - name: allowLimitedAvailabilityInfoTypes
     type: Boolean

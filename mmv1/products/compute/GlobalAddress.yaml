@@ -39,6 +39,8 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 include_in_tgc_next: true
+api_version:
+  ga: '2026-11-01'
 custom_code:
   pre_create: 'templates/terraform/pre_create/compute_global_address.go.tmpl'
   post_create: 'templates/terraform/post_create/labels.tmpl'
@@ -140,6 +142,10 @@ properties:
       * VPC_PEERING - for peer networks
 
       * PRIVATE_SERVICE_CONNECT - for ([Beta](../guides/provider_versions.html.markdown)) only) Private Service Connect networks
+
+      * PASSTHROUGH_LOAD_BALANCER_AVAILABILITY_GROUP0 - for Global External Passthrough Network Load Balancers
+
+      * PASSTHROUGH_LOAD_BALANCER_AVAILABILITY_GROUP1 - for Global External Passthrough Network Load Balancers
   - name: 'network'
     type: ResourceRef
     description: |

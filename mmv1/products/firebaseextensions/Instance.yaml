@@ -164,7 +164,7 @@ properties:
         min_version: beta
         output: true
   - name: state
-    type: Enum
+    type: String
     description: |
       The current state of the Extension Instance.
         DEPLOYING:
@@ -183,12 +183,6 @@ properties:
           Config remains so the Instance can be restored.
     min_version: beta
     output: true
-    enum_values:
-      - DEPLOYING
-      - UNINSTALLING
-      - ACTIVE
-      - ERRORED
-      - PAUSED
   - name: errorStatus
     type: NestedObject
     description: |

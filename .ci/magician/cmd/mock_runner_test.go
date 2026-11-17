@@ -110,7 +110,10 @@ func (mr *mockRunner) Walk(root string, fn filepath.WalkFunc) error {
 }
 
 func (mr *mockRunner) ReadFile(name string) (string, error) {
-	return mr.fileContents[name], nil
+	if data, ok := mr.fileContents[name]; ok {
+		return data, nil
+	}
+	return "", os.ErrNotExist
 }
 
 func (mr *mockRunner) WriteFile(name, data string) error {

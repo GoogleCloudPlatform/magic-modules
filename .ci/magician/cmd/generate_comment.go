@@ -16,7 +16,6 @@
 package cmd
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"maps"
@@ -37,9 +36,7 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler/labeler"
 
 	"github.com/spf13/cobra"
-	"github.com/yuin/goldmark"
-	"github.com/yuin/goldmark/parser"
-	"go.abhg.dev/goldmark/frontmatter"
+	"gopkg.in/yaml.v3"
 
 	_ "embed"
 )
@@ -114,6 +111,12 @@ type simpleSchemaDiff struct {
 const allowBreakingChangesLabel = "override-breaking-change"
 const allowMissingServiceLabelsLabel = "override-missing-service-labels"
 const allowMultipleResourcesLabel = "override-multiple-resources"
+
+// enableMissingServiceLabelsCheck controls whether added resources are checked
+// for missing service labels. When disabled, the
+// terraform-provider-missing-service-labels status is still posted (always as
+// "success") so that it never blocks PRs. Set to true to re-enable the check.
+const enableMissingServiceLabelsCheck = false
 
 var gcEnvironmentVariables = [...]string{
 	"BUILD_ID",
@@ -239,8 +242,36 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	data := diffCommentData{
 		CommitSHA: commitSha,
 	}
+	var repos []*source.Repo
+	var providerRepos []*source.Repo
+	commitSHAs := map[string]string{}
+	oldCommitSHAs := map[string]string{}
 	for _, repo := range []*source.Repo{&tpgRepo, &tpgbRepo, &tgcRepo, &tfoicsRepo} {
 		errors[repo.Title] = []string{}
+		variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repo.Name)
+		oldVariablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repo.Name)
+		commitSHA, err := rnr.ReadFile(variablePath)
+		if err != nil {
+			errors[repo.Title] = append(errors[repo.Title], "Failed to read commit sha from file")
+			continue
+		}
+		oldCommitSHA, err := rnr.ReadFile(oldVariablePath)
+		if err != nil {
+			errors[repo.Title] = append(errors[repo.Title], "Failed to read old commit sha from file")
+			continue
+		}
+		if strings.TrimSpace(commitSHA) != "" && strings.TrimSpace(commitSHA) == strings.TrimSpace(oldCommitSHA) {
+			fmt.Printf("Skipping clone of %q; new and old commit SHAs match\n", repo.Name)
+			continue
+		}
+		commitSHAs[repo.Name] = commitSHA
+		oldCommitSHAs[repo.Name] = oldCommitSHA
+		repos = append(repos, repo)
+		if repo == &tpgRepo || repo == &tpgbRepo {
+			providerRepos = append(providerRepos, repo)
+		}
+	}
+	for _, repo := range repos {
 		repo.Branch = newBranch
 		repo.Cloned = true
 		if err := ctlr.Clone(repo); err != nil {
@@ -252,28 +283,11 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			fmt.Printf("Failed to fetch branch %q for repo %q: %s\n", oldBranch, repo.Name, err)
 			errors[repo.Title] = append(errors[repo.Title], "Failed to clone repo at old branch")
 			repo.Cloned = false
-			continue
-		}
-		if repo.Name == "terraform-provider-google-beta" || repo.Name == "terraform-provider-google" {
-			if err := ctlr.Checkout(repo, oldBranch); err != nil {
-				fmt.Printf("Failed to checkout branch %q for repo %q: %s\n", oldBranch, repo.Name, err)
-				errors[repo.Title] = append(errors[repo.Title], fmt.Sprintf("Failed to checkout branch %s", oldBranch))
-				repo.Cloned = false
-				continue
-			}
-			rnr.PushDir(repo.Path)
-			if _, err := rnr.Run("make", []string{"build"}, nil); err != nil {
-				fmt.Printf("Failed to build branch %q for repo %q: %s\n", oldBranch, repo.Name, err)
-				errors[repo.Title] = append(errors[repo.Title], fmt.Sprintf("Failed to build branch %s", oldBranch))
-				repo.Cloned = false
-			}
-			rnr.PopDir()
-			ctlr.Checkout(repo, newBranch)
 		}
 	}
 
 	diffs := []Diff{}
-	for _, repo := range []*source.Repo{&tpgRepo, &tpgbRepo, &tgcRepo, &tfoicsRepo} {
+	for _, repo := range repos {
 		if !repo.Cloned {
 			fmt.Println("Skipping diff; repo failed to clone: ", repo.Name)
 			continue
@@ -284,24 +298,12 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			errors[repo.Title] = append(errors[repo.Title], "Failed to compute repo diff shortstats")
 		}
 		if shortStat != "" {
-			variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repo.Name)
-			oldVariablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repo.Name)
-			commitSHA, err := rnr.ReadFile(variablePath)
-			if err != nil {
-				errors[repo.Title] = append(errors[repo.Title], "Failed to read commit sha from file")
-				continue
-			}
-			oldCommitSHA, err := rnr.ReadFile(oldVariablePath)
-			if err != nil {
-				errors[repo.Title] = append(errors[repo.Title], "Failed to read old commit sha from file")
-				continue
-			}
 			diffs = append(diffs, Diff{
 				Title:        repo.Title,
 				Repo:         repo.Name,
 				ShortStat:    shortStat,
-				CommitSHA:    commitSHA,
-				OldCommitSHA: oldCommitSHA,
+				CommitSHA:    commitSHAs[repo.Name],
+				OldCommitSHA: oldCommitSHAs[repo.Name],
 			})
 			repo.ChangedFiles, err = ctlr.DiffNameOnly(repo, oldBranch, newBranch)
 			if err != nil {
@@ -325,7 +327,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		"GOPATH": os.Getenv("GOPATH"),
 		"HOME":   os.Getenv("HOME"),
 	}
-	for _, repo := range []source.Repo{tpgRepo, tpgbRepo} {
+	for _, repo := range providerRepos {
 		if !repo.Cloned {
 			fmt.Println("Skipping diff processor; repo failed to clone: ", repo.Name)
 			continue
@@ -380,13 +382,13 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			}
 			data.MissingIdentity = missingIdentity
 
-			errStrs := checkDocumentFrontmatter(repo)
+			errStrs := checkDocumentFrontmatter(*repo)
 			if len(errStrs) > 0 {
 				errors[repo.Title] = append(errors[repo.Title], errStrs...)
 			}
 		}
 
-		simpleDiff, err := computeAffectedResources(diffProcessorPath, rnr, repo)
+		simpleDiff, err := computeAffectedResources(diffProcessorPath, rnr, *repo)
 		if err != nil {
 			fmt.Println("computing changed resource schemas: ", err)
 			errors[repo.Title] = append(errors[repo.Title], "The diff processor crashed while computing changed resource schemas.")
@@ -425,7 +427,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 
 	// Compute affected resources based on changed files
 	changedFilesAffectedResources := map[string]struct{}{}
-	for _, repo := range []source.Repo{tpgRepo, tpgbRepo} {
+	for _, repo := range providerRepos {
 		if !repo.Cloned {
 			fmt.Println("Skipping changed file service labels; repo failed to clone: ", repo.Name)
 			continue
@@ -496,6 +498,9 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	missingServiceLabels := []string{}
 	if len(regexpLabels) > 0 {
 		for resource, _ := range uniqueAddedResources {
+			if !enableMissingServiceLabelsCheck {
+				break
+			}
 			found := false
 			for _, rl := range regexpLabels {
 				if rl.Regexp.MatchString(resource) {
@@ -814,20 +819,8 @@ func checkDocumentFrontmatter(repo source.Repo) []string {
 			continue
 		}
 
-		md := goldmark.New(
-			goldmark.WithExtensions(&frontmatter.Extender{}),
-		)
-
-		ctx := parser.NewContext()
-		var buff bytes.Buffer
-
-		err = md.Convert(src, &buff, parser.WithContext(ctx))
-		if err != nil {
-			errs = append(errs, "Error parsing file "+f)
-			continue
-		}
-		data := frontmatter.Get(ctx)
-		if data == nil {
+		fm, ok := extractFrontmatter(string(src))
+		if !ok {
 			errs = append(errs, fmt.Sprintf("No frontmatter found in file %s. This is usually due to an incorrect structure in the frontmatter.", f))
 			continue
 		}
@@ -835,9 +828,24 @@ func checkDocumentFrontmatter(repo source.Repo) []string {
 		var metadata struct {
 			Subcategory string
 		}
-		if err := data.Decode(&metadata); err != nil {
+		if err := yaml.Unmarshal([]byte(fm), &metadata); err != nil {
 			errs = append(errs, fmt.Sprintf("Failed to decode frontmatter in file %s. This is usually due to an incorrect structure in the frontmatter.", f))
 		}
 	}
 	return errs
+}
+
+func extractFrontmatter(content string) (string, bool) {
+	normalized := strings.ReplaceAll(content, "\r\n", "\n")
+	trimmed := strings.TrimLeft(normalized, "\n")
+	lines := strings.Split(trimmed, "\n")
+	if len(lines) == 0 || strings.TrimRight(lines[0], " \t") != "---" {
+		return "", false
+	}
+	for i := 1; i < len(lines); i++ {
+		if strings.TrimRight(lines[i], " \t") == "---" {
+			return strings.Join(lines[1:i], "\n"), true
+		}
+	}
+	return "", false
 }

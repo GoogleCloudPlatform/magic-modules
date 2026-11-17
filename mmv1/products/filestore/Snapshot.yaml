@@ -92,14 +92,10 @@ properties:
     description: |
       A description of the snapshot with 2048 characters or less. Requests with longer descriptions will be rejected.
   - name: state
-    type: Enum
+    type: String
     description: |
       The snapshot state.
     output: true
-    enum_values:
-      - CREATING
-      - READY
-      - DELETING
   - name: createTime
     type: Time
     description: |

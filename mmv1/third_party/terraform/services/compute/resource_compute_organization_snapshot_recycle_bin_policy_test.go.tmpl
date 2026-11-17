@@ -74,6 +74,9 @@ func TestAccComputeOrganizationSnapshotRecycleBinPolicy_basic(t *testing.T) {
 }
 
 func testAccComputeOrganizationSnapshotRecycleBinPolicyReset(t *testing.T, org string) {
+	if acctest.IsVcrReplaying() {
+		return
+	}
 	config := acctest.GoogleProviderConfig(t)
 	baseUrl := transport_tpg.BaseUrl(registry.GetProduct("compute"), config)
 	url := fmt.Sprintf("%sorganizations/%s/global/snapshotRecycleBinPolicy", baseUrl, org)

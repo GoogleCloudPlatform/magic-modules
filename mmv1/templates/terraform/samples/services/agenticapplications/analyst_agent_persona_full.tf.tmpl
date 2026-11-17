@@ -132,16 +132,18 @@ resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourc
   }
 
   mcp_data_sources {
-    server_url      = "https://mcp.example.com"
-    display_name    = "Sample MCP Source"
-    description     = "Sample MCP data source description"
-    enabled         = true
-    prompt          = "Use this server for queries"
-    api_key_name    = "x-api-key"
-    api_key_header  = "x-api-key-header"
-    client_id       = "sample-client-id"
-    client_secret   = "sample-client-secret"
-    oauth_token_url = "https://example.com/oauth/token"
+    server_url        = "https://mcp.example.com"
+    display_name      = "Sample MCP Source"
+    description       = "Sample MCP data source description"
+    enabled           = true
+    prompt            = "Use this server for queries"
+    api_key_name      = "x-api-key"
+    api_key_header    = "x-api-key-header"
+    client_id         = "sample-client-id"
+    client_secret     = "sample-client-secret"
+    oauth_token_url   = "https://example.com/oauth/token"
+    session_id_header = "X-Session-Id"
+    task_id_header    = "X-Task-Id"
   }
 
   resources {

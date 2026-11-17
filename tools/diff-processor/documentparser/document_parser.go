@@ -8,10 +8,12 @@ import (
 )
 
 var (
-	fieldNameRegex      = regexp.MustCompile("[\\*|-]\\s+`([a-z0-9_\\./]+)`") // * `xxx`
-	nestedObjectRegex   = regexp.MustCompile(`<a\s+name="([a-z0-9_]+)">`)     // <a name="xxx">
-	nestedHashTagRegex  = regexp.MustCompile(`\(#(nested_[a-z0-9_]+)\)`)      // #(nested_xxx)
-	horizontalLineRegex = regexp.MustCompile("- - -|-{3,}")                   // - - - or ---
+	// * `xxx` or - `xxx` unindented at the start of a line
+	fieldNameRegex     = regexp.MustCompile("(?m)^[*-][ \\t]+`([a-z0-9_\\./]+)`")
+	nestedObjectRegex  = regexp.MustCompile(`<a\s+name="([a-z0-9_]+)">`) // <a name="xxx">
+	nestedHashTagRegex = regexp.MustCompile(`\(#(nested_[a-z0-9_]+)\)`)  // #(nested_xxx)
+	// - - - or --- on its own line
+	horizontalLineRegex = regexp.MustCompile(`(?m)^[ \t]*(?:- - -|-{3,})[ \t]*$`)
 
 	sectionSeparator = "## "
 )
@@ -126,7 +128,6 @@ func (d *DocumentParser) bfs(root *node, nestedBlock map[string]string) error {
 	for len(queue) > 0 {
 		l := len(queue)
 		for _, cur := range queue {
-			// the separator should always at the beginning of the line
 			parts := splitWithRegexp(cur.text, fieldNameRegex)
 			for _, p := range parts[1:] {
 				p = strings.ReplaceAll(p, "\n", "")

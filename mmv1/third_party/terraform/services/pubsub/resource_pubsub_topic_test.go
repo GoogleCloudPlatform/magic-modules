@@ -102,7 +102,7 @@ func TestAccPubsubTopic_schema(t *testing.T) {
 				Config: testAccPubsubTopic_updateWithNewSchema(topic, schema2),
 			},
 			{
-				Config: testAccPubsubTopic_updateWithNewSchema(topic, ""),
+				Config: testAccPubsubTopic_withoutSchema(topic),
 			},
 			{
 				ResourceName:      "google_pubsub_topic.bar",
@@ -345,6 +345,49 @@ func TestAccPubsubTopic_javascriptUdfUpdate(t *testing.T) {
 	})
 }
 
+func TestAccPubsubTopic_compressionUpdate(t *testing.T) {
+	t.Parallel()
+
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+	functionName := "my_func"
+	code := "function my_func(message, metadata) {return null;}"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubTopic_compressionSettings(topic, "ZLIB", "COMPRESS", false),
+			},
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportStateId:     topic,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccPubsubTopic_compressionSettings(topic, "ZLIB", "DECOMPRESS", true),
+			},
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportStateId:     topic,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccPubsubTopic_javascriptUdfSettings(topic, functionName, code),
+			},
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportStateId:     topic,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccPubsubTopic_tags(t *testing.T) {
 	t.Parallel()
 
@@ -433,8 +476,7 @@ resource "google_pubsub_topic" "bar" {
 }
 
 func testAccPubsubTopic_updateWithNewSchema(topic, schema string) string {
-	if schema != "" {
-		return fmt.Sprintf(`
+	return fmt.Sprintf(`
 resource "google_pubsub_schema" "foo" {
 	name = "%s"
 	type = "PROTOCOL_BUFFER"
@@ -449,13 +491,14 @@ resource "google_pubsub_topic" "bar" {
   }
 }
 `, schema, topic)
-	} else {
-		return fmt.Sprintf(`
-		resource "google_pubsub_topic" "bar" {
-			name = "%s"
-		}
-		`, topic)
-	}
+}
+
+func testAccPubsubTopic_withoutSchema(topic string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "bar" {
+  name = "%s"
+}
+`, topic)
 }
 
 func testAccPubsubTopic_updateWithKinesisIngestionSettings(topic string) string {
@@ -667,6 +710,22 @@ resource "google_pubsub_topic" "foo" {
 	}
 }
 	`, topic, functionName, code)
+}
+
+func testAccPubsubTopic_compressionSettings(topic, compressionAlgorithm, compressionMode string, disabled bool) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%s"
+
+  message_transforms {
+    disabled = %t
+    compression {
+      compression_algorithm = "%s"
+      compression_mode      = "%s"
+    }
+  }
+}
+`, topic, disabled, compressionAlgorithm, compressionMode)
 }
 
 func testAccPubsubTopic_tags(context map[string]interface{}) string {

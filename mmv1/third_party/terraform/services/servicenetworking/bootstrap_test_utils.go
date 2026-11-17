@@ -3,6 +3,7 @@ package servicenetworking
 import (
 	"fmt"
 	"log"
+	"os"
 	"testing"
 	"time"
 
@@ -62,6 +63,10 @@ func NewServiceNetworkSettings(options ...func(*ServiceNetworkSettings)) *Servic
 //
 // testId specifies the test for which a shared network and a global address are used/initialized.
 func BootstrapSharedServiceNetworkingConnection(t *testing.T, testId string, params ...func(*ServiceNetworkSettings)) string {
+	networkName := tpgcompute.SharedTestNetworkPrefix + testId
+	if os.Getenv("VCR_PATH") != "" && os.Getenv("VCR_MODE") == "REPLAYING" {
+		return networkName
+	}
 	settings := NewServiceNetworkSettings(params...)
 	parentService := "services/" + settings.ParentService
 	projectId := envvar.GetTestProjectFromEnv()
@@ -78,7 +83,6 @@ func BootstrapSharedServiceNetworkingConnection(t *testing.T, testId string, par
 		t.Fatalf("Error getting project: %s", err)
 	}
 
-	networkName := tpgcompute.SharedTestNetworkPrefix + testId
 	networkId := fmt.Sprintf("projects/%v/global/networks/%v", project.ProjectNumber, networkName)
 	globalAddressName := tpgcompute.BootstrapSharedTestGlobalAddress(t, testId, tpgcompute.AddressWithPrefixLength(settings.PrefixLength))
 

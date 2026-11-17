@@ -20,8 +20,10 @@ resource "google_iam_workforce_pool_provider" "{{$.PrimaryResourceId}}" {
       }
     }
     web_sso_config {
-      response_type             = "CODE"
-      assertion_claims_behavior = "MERGE_USER_INFO_OVER_ID_TOKEN_CLAIMS"
+      response_type             = "{{index $.Vars "response_type"}}"
+      assertion_claims_behavior = "{{index $.Vars "assertion_claims_behavior"}}"
     }
+    jwks_json = "{{index $.Vars "jwks_json"}}"
   }
+  detailed_audit_logging = {{index $.Vars "detailed_audit_logging"}}
 }

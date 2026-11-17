@@ -402,8 +402,6 @@ properties:
         required: true
         description: Target a Synthetic Monitor GCFv2 Instance
         immutable: true
-        exactly_one_of:
-          - cloud_function_v2
         properties:
           - name: name
             type: String

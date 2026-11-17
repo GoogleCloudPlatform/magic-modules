@@ -199,11 +199,8 @@ properties:
               type: Integer
               output: true
             - name: faultResponse
-              type: Enum
+              type: String
               output: true
-              enum_values:
-                - 'NONE'
-                - 'DISABLE_PORT'
         - name: adminEnabled
           type: Boolean
           output: true

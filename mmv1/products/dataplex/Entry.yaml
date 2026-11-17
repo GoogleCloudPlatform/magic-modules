@@ -189,13 +189,8 @@ properties:
               description: |
                 The time when the Aspect was last modified.
             - name: data
-              type: String
+              type: JsonValue
               required: true
-              state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-              custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-              validation:
-                function: validation.StringIsJSON
               description: |
                 The content of the aspect in JSON form, according to its aspect type schema. The maximum size of the field is 120KB (encoded as UTF-8).
   - name: parentEntry

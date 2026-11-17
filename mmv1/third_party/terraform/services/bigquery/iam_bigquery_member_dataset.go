@@ -16,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
-	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
@@ -86,7 +85,7 @@ func (u *BigqueryDatasetIamMemberUpdater) GetResourceIamPolicy() (*cloudresource
 		UserAgent: userAgent,
 	})
 	if err != nil {
-		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
+		return nil, fmt.Errorf("Error retrieving IAM policy for %s: %w", u.DescribeResource(), err)
 	}
 
 	policy, err := accessToPolicyForIamMember(res["access"])
@@ -112,7 +111,7 @@ func GetCurrentResourceAccess(u *BigqueryDatasetIamMemberUpdater) ([]interface{}
 		UserAgent: userAgent,
 	})
 	if err != nil {
-		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
+		return nil, fmt.Errorf("Error retrieving IAM policy for %s: %w", u.DescribeResource(), err)
 	}
 
 	var access []interface{}

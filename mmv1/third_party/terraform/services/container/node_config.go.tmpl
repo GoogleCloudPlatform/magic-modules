@@ -317,7 +317,6 @@ func schemaNodeConfig() *schema.Schema {
 					Type:     schema.TypeList,
 					Optional: true,
 					Computed: true,
-					ForceNew: true,
 					Description: `List of the type and count of accelerator cards attached to the instance.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
@@ -339,14 +338,12 @@ func schemaNodeConfig() *schema.Schema {
 								MaxItems:     1,
 								Optional:     true,
 								Computed:     true,
-								ForceNew:     true,
 								Description:  `Configuration for auto installation of GPU driver.`,
 								Elem: &schema.Resource{
 									Schema: map[string]*schema.Schema{
 										"gpu_driver_version": {
 											Type:         schema.TypeString,
 											Required:     true,
-											ForceNew:     true,
 											Description:  `Mode for how the GPU driver is installed.`,
 											ValidateFunc: validation.StringInSlice([]string{"GPU_DRIVER_VERSION_UNSPECIFIED", "INSTALLATION_DISABLED", "DEFAULT", "LATEST"}, false),
 										},
@@ -363,20 +360,17 @@ func schemaNodeConfig() *schema.Schema {
 								Type:         schema.TypeList,
 								MaxItems:     1,
 								Optional:     true,
-								ForceNew:     true,
 								Description:  `Configuration for GPU sharing.`,
 								Elem: &schema.Resource{
 									Schema: map[string]*schema.Schema{
 										"gpu_sharing_strategy": {
 											Type:        schema.TypeString,
 											Required:    true,
-											ForceNew:    true,
 											Description: `The type of GPU sharing strategy to enable on the GPU node. Possible values are described in the API package (https://pkg.go.dev/google.golang.org/api/container/v1#GPUSharingConfig)`,
 										},
 										"max_shared_clients_per_gpu": {
 											Type:        schema.TypeInt,
 											Required:    true,
-											ForceNew:    true,
 											Description: `The maximum number of containers that can share a GPU.`,
 										},
 									},
@@ -488,6 +482,13 @@ func schemaNodeConfig() *schema.Schema {
                 ForceNew:     true,
                 ValidateFunc: validation.IntAtLeast(0),
                 Description:  `Number of local SSDs to be utilized for GKE Data Cache. Uses NVMe interfaces.`,
+              },
+              "ephemeral_capacity_gb": {
+                Type:         schema.TypeInt,
+                Optional:     true,
+                ForceNew:     true,
+                ValidateFunc: validation.IntAtLeast(0),
+                Description:  `Number of gigabytes of local SSD capacity to use for ephemeral storage in mixed local SSD mode. The remaining capacity is available for raw block storage.`,
               },
             },
           },
@@ -1507,6 +1508,15 @@ func schemaNodeConfig() *schema.Schema {
 					ForceNew:    true,
 					Description: `Enables Flex Start provisioning model for the node pool`,
 				},
+				"consolidation_delay": {
+					Type:     schema.TypeString,
+					Optional: true,
+					// The GKE API doesn't support unsetting this field, so a value removed
+					// from the configuration is kept as-is in state.
+					Computed:         true,
+					DiffSuppressFunc: tpgresource.DurationDiffSuppress,
+					Description:      `Duration after which the Cluster Autoscaler can scale down underutilized nodes in the node pool. Requires autoscaling to be enabled on the node pool. If not set, nodes are scaled down according to the cluster's autoscaling profile. The GKE API doesn't support unsetting this field, so removing it from the configuration leaves the current value unchanged. A duration in seconds with up to nine fractional digits, ending with 's'. Example: "600s".`,
+				},
 			},
 		},
 	}
@@ -1642,6 +1652,40 @@ func expandNodeConfigDefaults(configured interface{}) *container.NodeConfigDefau
 	return nodeConfigDefaults
 }
 
+func expandGuestAccelerator(v interface{}) []*container.AcceleratorConfig {
+	accels := v.([]interface{})
+	guestAccelerators := make([]*container.AcceleratorConfig, 0, len(accels))
+	for _, raw := range accels {
+		data := raw.(map[string]interface{})
+		if data["count"].(int) == 0 {
+			continue
+		}
+		guestAcceleratorConfig := &container.AcceleratorConfig{
+			AcceleratorCount: int64(data["count"].(int)),
+			AcceleratorType:  data["type"].(string),
+			GpuPartitionSize: data["gpu_partition_size"].(string),
+		}
+
+		if v, ok := data["gpu_driver_installation_config"]; ok && len(v.([]interface{})) > 0 {
+			gpuDriverInstallationConfig := data["gpu_driver_installation_config"].([]interface{})[0].(map[string]interface{})
+			guestAcceleratorConfig.GpuDriverInstallationConfig = &container.GPUDriverInstallationConfig{
+				GpuDriverVersion: gpuDriverInstallationConfig["gpu_driver_version"].(string),
+			}
+		}
+
+		if v, ok := data["gpu_sharing_config"]; ok && len(v.([]interface{})) > 0 {
+			gpuSharingConfig := data["gpu_sharing_config"].([]interface{})[0].(map[string]interface{})
+			guestAcceleratorConfig.GpuSharingConfig = &container.GPUSharingConfig{
+				GpuSharingStrategy:     gpuSharingConfig["gpu_sharing_strategy"].(string),
+				MaxSharedClientsPerGpu: int64(gpuSharingConfig["max_shared_clients_per_gpu"].(int)),
+			}
+		}
+
+		guestAccelerators = append(guestAccelerators, guestAcceleratorConfig)
+	}
+	return guestAccelerators
+}
+
 func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *container.NodeConfig {
 	nodeConfigs := v.([]interface{})
 	nc := &container.NodeConfig{
@@ -1671,37 +1715,7 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 	}
 
 	if v, ok := nodeConfig["guest_accelerator"]; ok {
-		accels := v.([]interface{})
-		guestAccelerators := make([]*container.AcceleratorConfig, 0, len(accels))
-		for _, raw := range accels {
-			data := raw.(map[string]interface{})
-			if data["count"].(int) == 0 {
-				continue
-			}
-			guestAcceleratorConfig := &container.AcceleratorConfig{
-				AcceleratorCount: int64(data["count"].(int)),
-				AcceleratorType:  data["type"].(string),
-				GpuPartitionSize: data["gpu_partition_size"].(string),
-			}
-
-			if v, ok := data["gpu_driver_installation_config"]; ok && len(v.([]interface{})) > 0 {
-				gpuDriverInstallationConfig := data["gpu_driver_installation_config"].([]interface{})[0].(map[string]interface{})
-				guestAcceleratorConfig.GpuDriverInstallationConfig = &container.GPUDriverInstallationConfig{
-					GpuDriverVersion: gpuDriverInstallationConfig["gpu_driver_version"].(string),
-				}
-			}
-
-			if v, ok := data["gpu_sharing_config"]; ok && len(v.([]interface{})) > 0 {
-				gpuSharingConfig := data["gpu_sharing_config"].([]interface{})[0].(map[string]interface{})
-				guestAcceleratorConfig.GpuSharingConfig = &container.GPUSharingConfig{
-					GpuSharingStrategy: gpuSharingConfig["gpu_sharing_strategy"].(string),
-					MaxSharedClientsPerGpu: int64(gpuSharingConfig["max_shared_clients_per_gpu"].(int)),
-				}
-			}
-
-			guestAccelerators = append(guestAccelerators, guestAcceleratorConfig)
-		}
-		nc.Accelerators = guestAccelerators
+		nc.Accelerators = expandGuestAccelerator(v)
 	}
 
 	if v, ok := nodeConfig["disk_size_gb"]; ok {
@@ -1752,7 +1766,9 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 		if ok {
 			nc.EphemeralStorageLocalSsdConfig.DataCacheCount = int64(dataCacheCount.(int))
 		}
-
+		if ephemeralCapacityGb, ok := conf["ephemeral_capacity_gb"]; ok {
+			nc.EphemeralStorageLocalSsdConfig.EphemeralCapacityGb = int64(ephemeralCapacityGb.(int))
+		}
 	}
 
 	if v, ok := nodeConfig["secondary_boot_disks"]; ok && len(v.([]interface{})) > 0 {
@@ -2029,6 +2045,10 @@ func expandNodeConfig(d *schema.ResourceData, prefix string, v interface{}) *con
 
 	if v,ok := nodeConfig["flex_start"]; ok {
 		nc.FlexStart = v.(bool)
+	}
+
+	if v, ok := nodeConfig["consolidation_delay"]; ok {
+		nc.ConsolidationDelay = v.(string)
 	}
 
 	{{ if ne $.TargetVersionName `ga` -}}
@@ -3119,6 +3139,7 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"advanced_machine_features": flattenAdvancedMachineFeaturesConfig(c.AdvancedMachineFeatures),
 		"max_run_duration": 		 c.MaxRunDuration,
 		"flex_start":				 c.FlexStart,
+		"consolidation_delay":       c.ConsolidationDelay,
 		"sole_tenant_config":        flattenSoleTenantConfig(c.SoleTenantConfig),
 		"fast_socket":               flattenFastSocket(c.FastSocket),
 		"resource_manager_tags":     flattenResourceManagerTags(c.ResourceManagerTags),
@@ -3249,10 +3270,14 @@ func flattenLocalNvmeSsdBlockConfig(c *container.LocalNvmeSsdBlockConfig) []map[
 func flattenEphemeralStorageLocalSsdConfig(c *container.EphemeralStorageLocalSsdConfig) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	if c != nil {
-		result = append(result, map[string]interface{}{
+		conf := map[string]interface{}{
 			"local_ssd_count": c.LocalSsdCount,
 			"data_cache_count": c.DataCacheCount,
-		})
+		}
+		if c.EphemeralCapacityGb > 0 {
+			conf["ephemeral_capacity_gb"] = c.EphemeralCapacityGb
+		}
+		result = append(result, conf)
 	}
 	return result
 }
@@ -4053,6 +4078,39 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 		}
 
+		if d.HasChange(prefix + "node_config.0.consolidation_delay") {
+			if v, ok := d.GetOk(prefix + "node_config.0.consolidation_delay"); ok {
+				req := &container.UpdateNodePoolRequest{
+					Name:               name,
+					ConsolidationDelay: v.(string),
+				}
+
+				updateF := func() error {
+					clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
+					if config.UserProjectOverride {
+						clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
+					}
+					op, err := clusterNodePoolsUpdateCall.Do()
+					if err != nil {
+						return err
+					}
+
+					// Wait until it's updated
+					return ContainerOperationWait(config, op,
+						nodePoolInfo.project,
+						nodePoolInfo.location,
+						"updating GKE node pool consolidation_delay", userAgent,
+						timeout)
+				}
+
+				if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
+					return err
+				}
+
+				log.Printf("[INFO] Updated consolidation_delay for node pool %s", name)
+			}
+		}
+
 		if d.HasChange(prefix + "node_config.0.taint_config") {
 			if _, ok := d.GetOk(prefix + "node_config.0.taint_config"); ok {
 				req := &container.UpdateNodePoolRequest{
@@ -4594,6 +4652,36 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			log.Printf("[INFO] Updated gvnic for node pool %s", name)
+		}
+
+		if d.HasChange(prefix + "node_config.0.guest_accelerator") {
+			req := &container.UpdateNodePoolRequest{
+				NodePoolId:   name,
+				Accelerators: expandGuestAccelerator(d.Get(prefix + "node_config.0.guest_accelerator")),
+			}
+			updateF := func() error {
+				clusterNodePoolsUpdateCall := NewClient(config, userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
+				if config.UserProjectOverride {
+					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
+				}
+				op, err := clusterNodePoolsUpdateCall.Do()
+				if err != nil {
+					return err
+				}
+
+				// Wait until it's updated
+				return ContainerOperationWait(config, op,
+					nodePoolInfo.project,
+					nodePoolInfo.location,
+					"updating GKE node pool guest_accelerator", userAgent,
+					timeout)
+			}
+
+			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
+				return err
+			}
+
+			log.Printf("[INFO] Updated guest_accelerator for node pool %s", name)
 		}
 
 		if d.HasChange(prefix + "node_config.0.kubelet_config") {

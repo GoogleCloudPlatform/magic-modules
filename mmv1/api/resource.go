@@ -454,6 +454,10 @@ type Resource struct {
 
 	// Runtime contains information about the currently-running generation process.
 	Runtime Runtime `yaml:"-"`
+
+	// Map of provider version (e.g. ga, beta, nightly) to the MV API version
+	// string to be attached in all request headers.
+	ApiVersions map[string]string `yaml:"api_version,omitempty"`
 }
 
 type TestConfig struct {
@@ -635,6 +639,12 @@ func (r *Resource) Validate() (es []error) {
 		es = append(es, fmt.Errorf("value on `update_verb` should be one of %#v", allowed))
 	}
 
+	for k := range r.ApiVersions {
+		if !slices.Contains(product.ORDER, k) {
+			es = append(es, fmt.Errorf("invalid provider version %q in `api_version` for resource %s; must be one of %v", k, r.Name, product.ORDER))
+		}
+	}
+
 	for _, property := range google.Concat(r.AllProperties(), r.VirtualFields) {
 		es = append(es, property.Validate(r.Name)...)
 	}
@@ -701,6 +711,27 @@ func (r Resource) ServiceVersion() string {
 		return extractVersionFromBaseUrl(r.CaiBaseUrl)
 	}
 	return extractVersionFromBaseUrl(r.BaseUrl)
+}
+
+// ApiVersion returns the MV API version for TargetVersionName, falling back
+// to the closest lower version in product.ORDER (matching VersionObjOrClosest).
+func (r Resource) ApiVersion() string {
+	if len(r.ApiVersions) == 0 {
+		return ""
+	}
+	name := r.TargetVersionName
+	if name == "" {
+		name = product.ORDER[0]
+	}
+	if v, ok := r.ApiVersions[name]; ok {
+		return v
+	}
+	for i := slices.Index(product.ORDER, name) - 1; i >= 0; i-- {
+		if v, ok := r.ApiVersions[product.ORDER[i]]; ok {
+			return v
+		}
+	}
+	return ""
 }
 
 func extractVersionFromBaseUrl(baseUrl string) string {
@@ -1333,9 +1364,9 @@ func (r Resource) NotInVersion(version *product.Version) bool {
 	return version.CompareTo(r.MinVersionObj()) < 0
 }
 
-// Recurses through all nested properties and parameters and changes their
-// 'exclude' instance variable if the property is at a version below the
-// one that is passed in.
+// Recurses through all nested properties, parameters, and virtual fields and
+// changes their 'exclude' instance variable if the property is at a version
+// below the one that is passed in.
 func (r *Resource) ExcludeIfNotInVersion(version *product.Version) {
 	r.populateMaxVersionSchema() // set before filtering exclusions out of schema
 
@@ -1354,9 +1385,18 @@ func (r *Resource) ExcludeIfNotInVersion(version *product.Version) {
 			p.ExcludeIfNotInVersion(version)
 		}
 	}
+
+	if r.VirtualFields != nil {
+		for _, p := range r.VirtualFields {
+			p.ExcludeIfNotInVersion(version)
+		}
+	}
 }
 
 func (r *Resource) populateMaxVersionSchema() {
+	if r.maxVersionSchema != nil {
+		return
+	}
 	maxSchemaResource := &Resource{
 		Name:            r.Name,
 		MinVersion:      r.MinVersion,
@@ -1924,7 +1964,7 @@ func (r Resource) IamSelfLinkIdentifiers() []string {
 func (r Resource) IamResourceProperties() []*Type {
 	urlProperties := make([]*Type, 0)
 	for _, param := range r.IamResourceParams() {
-		if param == "project" || param == "organization" {
+		if param == "project" {
 			continue
 		}
 

@@ -301,3 +301,33 @@ properties:
   - name: description
     type: String
     description: A description provided by the user for the job. Its max length is 1024 bytes when Unicode-encoded.
+  - name: loggingConfig
+    type: NestedObject
+    description: Logging configuration.
+    immutable: true
+    properties:
+      - name: logActions
+        type: Array
+        required: true
+        description: |
+          Specifies the actions to be logged.
+          Possible values include `TRANSFORM`.
+          See [LoggingConfig](https://cloud.google.com/storage/docs/batch-operations/reference/rest/v1/projects.locations.jobs#LoggingConfig) for allowed values.
+        immutable: true
+        item_type:
+          type: String
+      - name: logActionStates
+        type: Array
+        required: true
+        description: |
+          States in which Action are logged.If empty, no logs are generated.
+          Possible values include `SUCCEEDED`, `FAILED`.
+          See [LoggingConfig](https://cloud.google.com/storage/docs/batch-operations/reference/rest/v1/projects.locations.jobs#LoggingConfig) for allowed values.
+        immutable: true
+        item_type:
+          type: String
+  - name: dryRun
+    type: Boolean
+    description: |
+      If true, the job runs in dry run mode, returning the total object count and, if the object configuration is a prefix list, the bytes found from source. No transformations are performed.
+    immutable: true

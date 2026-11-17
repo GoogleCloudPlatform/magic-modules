@@ -1,0 +1,10 @@
+resource "google_design_center_component" "example" {
+  project                           = "{{index $.Vars "project"}}"
+  location                          = "us-central1"
+  space                             = "{{index $.Vars "space"}}"
+  application_template              = "{{index $.Vars "composite_application_template"}}"
+  component_id                      = "{{index $.ResourceIdVars "component_id"}}"
+  display_name                      = "Example Composite Component"
+  application_template_revision_uri = "{{index $.Vars "application_template_revision_uri"}}"
+  use_as_root_module                = true
+}

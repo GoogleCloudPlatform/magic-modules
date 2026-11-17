@@ -26,5 +26,6 @@ resource "google_model_armor_template" "template-template-metadata" {
     filter_version_selector {
       alias = "{{index $.ResourceIdVars "template_metadata_filter_version_selector_alias"}}"
     }
+    data_residency_compliant                 = {{index $.ResourceIdVars "template_metadata_data_residency_compliant"}}
   }
 }

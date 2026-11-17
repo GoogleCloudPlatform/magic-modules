@@ -8,7 +8,6 @@ replace github.com/GoogleCloudPlatform/magic-modules/mmv1 => ../../mmv1
 
 require (
 	github.com/spf13/cobra v1.10.1
-	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 

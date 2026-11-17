@@ -103,7 +103,7 @@ properties:
     validation:
       function: ValidateWorkloadIdentityPoolId
   - name: state
-    type: Enum
+    type: String
     description: |
       The state of the pool.
       * `STATE_UNSPECIFIED`: State unspecified.
@@ -115,10 +115,6 @@ properties:
         use existing tokens to access resources. If the pool is undeleted, existing tokens grant
         access again.
     output: true
-    enum_values:
-      - STATE_UNSPECIFIED
-      - ACTIVE
-      - DELETED
   - name: displayName
     type: String
     description: A display name for the pool. Cannot exceed 32 characters.

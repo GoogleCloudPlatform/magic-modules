@@ -42,6 +42,9 @@ res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 	Body:      obj,
 	Timeout:   d.Timeout(schema.TimeoutDelete),
 	Headers:   headers,
+{{- if $.ErrorRetryPredicates }}
+	ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{ join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
 })
 
 if err != nil {

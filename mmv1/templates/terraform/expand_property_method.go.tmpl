@@ -155,6 +155,36 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
   }
   return req, nil
 }
+      {{- else if $.IsA "JsonValue" }}
+  b := []byte(v.(string))
+  if len(b) == 0 {
+    return nil, nil
+  }
+  var j interface{}
+  if err := json.Unmarshal(b, &j); err != nil {
+    return nil, err
+  }
+  return j, nil
+}
+      {{- else if and ($.IsA "Array") ($.ItemType.IsA "JsonValue") }}
+  l := v.([]interface{})
+  req := make([]interface{}, 0, len(l))
+  for _, raw := range l {
+    if raw == nil {
+      return nil, fmt.Errorf("Invalid value for {{ underscore $.Name }}: nil")
+    }
+    b := []byte(raw.(string))
+    if len(b) == 0 {
+      continue
+    }
+    var j interface{}
+    if err := json.Unmarshal(b, &j); err != nil {
+      return nil, err
+    }
+    req = append(req, j)
+  }
+  return req, nil
+}
       {{- else }}
   return v, nil
 }
