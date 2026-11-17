@@ -51,6 +51,20 @@ func TestAccBiglakeIcebergIcebergView_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"catalog", "namespace"},
 			},
+			{
+				Config: testAccBiglakeIcebergIcebergView_updateDropDialect(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_biglake_iceberg_view.my_iceberg_view", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_biglake_iceberg_view.my_iceberg_view",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"catalog", "namespace"},
+			},
 		},
 	})
 }
@@ -190,6 +204,75 @@ resource "google_biglake_iceberg_view" "my_iceberg_view" {
   properties = {
     key                                = "updated"
     "write.metadata.compression-codec" = "none"
+  }
+}
+`, context)
+}
+
+func testAccBiglakeIcebergIcebergView_updateDropDialect(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_storage_bucket" "bucket" {
+  name                        = "tf-test-my-bucket-%{random_suffix}"
+  location                    = "us-central1"
+  force_destroy               = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_biglake_iceberg_catalog" "catalog" {
+  name         = google_storage_bucket.bucket.name
+  catalog_type = "CATALOG_TYPE_GCS_BUCKET"
+}
+
+resource "google_biglake_iceberg_namespace" "namespace" {
+  catalog      = google_biglake_iceberg_catalog.catalog.name
+  namespace_id = "tf_test_my_namespace_%{random_suffix}"
+}
+
+resource "google_biglake_iceberg_view" "my_iceberg_view" {
+  catalog   = google_biglake_iceberg_catalog.catalog.name
+  namespace = google_biglake_iceberg_namespace.namespace.namespace_id
+  name      = "tf_test_my_view_%{random_suffix}"
+
+  schema {
+    type = "struct"
+    fields {
+      id       = 1
+      name     = "id"
+      type     = "long"
+      required = true
+    }
+    fields {
+      id   = 2
+      name = "tags"
+      type = jsonencode({
+        type               = "list"
+        "element-id"       = 3
+        element            = "string"
+        "element-required" = false
+      })
+      required = false
+    }
+    fields {
+      id       = 4
+      name     = "label"
+      type     = "string"
+      required = false
+    }
+  }
+
+  view_version {
+    default_namespace = [google_biglake_iceberg_namespace.namespace.namespace_id]
+    representations {
+      type    = "sql"
+      sql     = "SELECT id, tags, label FROM base_table"
+      dialect = "spark"
+    }
+  }
+
+  properties = {
+    key                                = "updated"
+    "write.metadata.compression-codec" = "none"
+    "replace.drop-dialect.allowed"     = "true"
   }
 }
 `, context)
