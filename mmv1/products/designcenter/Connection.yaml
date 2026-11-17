@@ -12,18 +12,24 @@
 # limitations under the License.
 
 ---
-name: 'Connection'
-base_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component}}/connections'
-self_link: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component}}/connections/{{connection_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component}}/connections?connectionId={{connection_id}}'
-update_verb: 'PATCH'
-update_mask: true
-async:
-  actions: []
+name: Connection
 description: |
   A connection between two components in an Application Design Center Application Template.
+references:
+  guides:
+    Application Design Center Overview: https://cloud.google.com/application-design-center/docs/overview
+    Design an application template: https://cloud.google.com/application-design-center/docs/design-application-templates
+  api: https://cloud.google.com/application-design-center/docs/reference/rest/v1/projects.locations.spaces.applicationTemplates.components.connections
+base_url: projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component}}/connections
+self_link: projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component}}/connections/{{connection_id}}
+create_url: projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component}}/connections?connectionId={{connection_id}}
+update_mask: true
+update_verb: PATCH
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component}}/connections/{{connection_id}}'
+  - projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/components/{{component}}/connections/{{connection_id}}
+# Connection CRUD methods are synchronous; override product.yaml async defaults.
+async:
+  actions: []
 samples:
   - name: designcenter_connection_basic
     primary_resource_id: example
@@ -58,105 +64,127 @@ samples:
           application_template: BootstrapDesignCenterApplicationTemplate(t)
           component: BootstrapDesignCenterComponent(t)
           destination_component_uri: BootstrapDesignCenterDestinationComponentURI(t)
+      - name: designcenter_connection_update2
+        resource_id_vars:
+          connection_id: example-connection
+        vars:
+          project: my-project-name
+          space: my-space
+          application_template: my-application-template
+          component: my-source-component
+          destination_component_uri: projects/my-project-name/locations/us-central1/spaces/my-space/applicationTemplates/my-application-template/components/my-dest-component
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          application_template: BootstrapDesignCenterApplicationTemplate(t)
+          component: BootstrapDesignCenterComponent(t)
+          destination_component_uri: BootstrapDesignCenterDestinationComponentURI(t)
 parameters:
-  - name: 'location'
+  - name: location
     type: String
     description: |
       The location of the space.
     required: true
-    url_param_only: true
     immutable: true
-  - name: 'space'
+    url_param_only: true
+  - name: space
     type: String
     description: |
       The ID of the space.
     required: true
-    url_param_only: true
     immutable: true
-  - name: 'application_template'
+    url_param_only: true
+  - name: application_template
     type: String
     description: |
       The ID of the application template.
     required: true
-    url_param_only: true
     immutable: true
-  - name: 'component'
+    url_param_only: true
+  - name: component
     type: String
     description: |
       The ID of the component.
     required: true
-    url_param_only: true
     immutable: true
-  - name: 'connection_id'
+    url_param_only: true
+  - name: connection_id
     type: String
     description: |
       The ID of the connection.
     required: true
-    url_param_only: true
     immutable: true
+    url_param_only: true
 properties:
-  - name: 'name'
+  - name: name
     type: String
     description: |
-      The resource name of the Connection. Format: projects/{project}/locations/{location}/spaces/{space}/applicationTemplates/{application_template}/components/{component}/connections/{connection_id}
+      The resource name of the connection.
+      Format: `projects/{project}/locations/{location}/spaces/{space}/applicationTemplates/{application_template}/components/{component}/connections/{connection_id}`
     output: true
-  - name: 'createTime'
+  - name: createTime
     type: Time
     description: |
-      Create time stamp.
+      Connection creation timestamp.
     output: true
-  - name: 'updateTime'
+  - name: updateTime
     type: Time
     description: |
-      Update time stamp.
+      Connection update timestamp.
     output: true
-  - name: 'destinationComponentUri'
+  - name: destinationComponentUri
     type: String
     description: |
       The component URI that the connection points to.
+      Format: `projects/{project}/locations/{location}/spaces/{space}/applicationTemplates/{application_template}/components/{component}`
     required: true
-  - name: 'sourceComponentParameters'
+    immutable: true
+  - name: sourceComponentParameters
     type: Array
     description: |
-      Parameters associated with the source component. When unset, the
-      API fills these in from the connected components.
+      Parameters associated with the source component. When both parameter lists
+      are unset on creation, the API fills these in from the connected
+      components.
     default_from_api: true
     item_type:
       type: NestedObject
       properties:
-        - name: 'key'
+        - name: key
           type: String
           description: |
             The key of the parameter.
           required: true
-        - name: 'value'
+        - name: value
           type: JsonValue
           description: |
             The value of the parameter, as a JSON-encoded string. Use
             `jsonencode()` to set it.
           send_empty_value: true
-  - name: 'destinationComponentParameters'
+  - name: destinationComponentParameters
     type: Array
     description: |
-      Parameters associated with the destination component. When unset,
-      the API fills these in from the connected components.
+      Parameters associated with the destination component. When both parameter
+      lists are unset on creation, the API fills these in from the connected
+      components.
     default_from_api: true
     item_type:
       type: NestedObject
       properties:
-        - name: 'key'
+        - name: key
           type: String
           description: |
             The key of the parameter.
           required: true
-        - name: 'value'
+        - name: value
           type: JsonValue
           description: |
             The value of the parameter, as a JSON-encoded string. Use
             `jsonencode()` to set it.
           send_empty_value: true
-  - name: 'dependencyType'
+  - name: dependencyType
     type: String
     description: |
-      The dependency type of the connection.
+      The dependency type of the connection. Possible values include
+      `CONNECTION_DEPENDENCY_TYPE_DATA` and
+      `CONNECTION_DEPENDENCY_TYPE_LOGICAL`.
     output: true
