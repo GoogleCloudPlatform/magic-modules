@@ -1,0 +1,10 @@
+resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourceId}}" {
+  project                       = "{{index $.TestEnvVars "project_number"}}"
+  location                      = "us"
+  analyst_agent_persona_id      = "{{index $.ResourceIdVars "persona_id"}}"
+  display_name                  = "Test Analyst Persona Experimental Features"
+  display_description           = "Sample analyst agent persona description"
+  model_description             = "Sample model description"
+  role                          = "ANALYST_ROLE_GENERIC_FINANCE_ANALYST"
+  experimental_features_enabled = true
+}
