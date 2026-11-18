@@ -59,9 +59,6 @@ samples:
         test_vars_overrides:
           # for backward compatible
           target: '"projects/980109375338" + randomSuffix'
-        test_env_vars:
-          org_id: ORG_ID
-          billing_account: BILLING_ACCT
 parameters:
   - name: location
     type: String

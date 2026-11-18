@@ -186,6 +186,14 @@ properties:
                     description: |
                       Specifies that matches are case sensitive. The default value is true.
                     default_value: true
+                  - name: type
+                    type: Enum
+                    description: |
+                      Specifies how to match against the name. If not specified, a default value of "EXACT" is used.
+                    default_value: EXACT
+                    enum_values:
+                      - EXACT
+                      - REGULAR_EXPRESSION
         - name: action
           type: NestedObject
           description: |
@@ -241,6 +249,10 @@ properties:
               type: String
               description: |
                 Specifies the timeout for selected route.
+            - name: idleTimeout
+              type: String
+              description: |
+                Specifies the idle timeout for the selected route. The idle timeout is defined as the period in which there are no bytes sent or received on either the upstream or downstream connection. If not set, the default idle timeout is 1 hour. If set to 0s, the timeout will be disabled.
             - name: retryPolicy
               type: NestedObject
               description: |

@@ -56,9 +56,6 @@ samples:
           deletion_protection: "true"
           network_name: default
           subnetwork_name: default
-        test_env_vars:
-          project: PROJECT_NAME
-          location: global
         test_vars_overrides:
           deletion_protection: "false"
           network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")
@@ -129,17 +126,11 @@ properties:
     output: true
     properties:
       - name: code
-        type: Enum
+        type: String
         description: |
           Code describes the state of a RBAC Role Binding resource.
         min_version: beta
         output: true
-        enum_values:
-          - CODE_UNSPECIFIED
-          - CREATING
-          - READY
-          - DELETING
-          - UPDATING
   - name: user
     type: String
     description: |

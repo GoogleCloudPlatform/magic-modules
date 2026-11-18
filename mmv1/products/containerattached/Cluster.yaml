@@ -36,6 +36,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+sweeper:
+  query_string: "?ignore_errors=true"
 autogen_async: true
 async:
   type: OpAsync

@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/services/compute"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/dns"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/networkconnectivity"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccComputeRouterNat_basic(t *testing.T) {
@@ -818,8 +819,6 @@ func testAccCheckComputeRouterNatDestroyProducer(t *testing.T) func(s *terraform
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
 
-		routersService := compute.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).Routers
-
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_compute_router" {
 				continue
@@ -835,9 +834,19 @@ func testAccCheckComputeRouterNatDestroyProducer(t *testing.T) func(s *terraform
 				return err
 			}
 
-			routerName := rs.Primary.Attributes["router"]
+			routerName := rs.Primary.Attributes["name"]
+			if routerName == "" {
+				routerName = rs.Primary.ID
+			}
 
-			_, err = routersService.Get(project, region, routerName).Do()
+			url := fmt.Sprintf("%sprojects/%s/regions/%s/routers/%s", transport_tpg.BaseUrl(compute.Product, config), project, region, routerName)
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   project,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
 
 			if err == nil {
 				return fmt.Errorf("Error, Router %s in region %s still exists", routerName, region)
@@ -851,8 +860,6 @@ func testAccCheckComputeRouterNatDestroyProducer(t *testing.T) func(s *terraform
 func testAccCheckComputeRouterNatDelete(t *testing.T, n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		config := acctest.GoogleProviderConfig(t)
-
-		routersService := compute.DEPRECATED_LegacyApiaryClient(config, config.UserAgent).Routers
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "google_compute_router_nat" {
@@ -872,16 +879,27 @@ func testAccCheckComputeRouterNatDelete(t *testing.T, n string) resource.TestChe
 			name := rs.Primary.Attributes["name"]
 			routerName := rs.Primary.Attributes["router"]
 
-			router, err := routersService.Get(project, region, routerName).Do()
+			url := fmt.Sprintf("%sprojects/%s/regions/%s/routers/%s", transport_tpg.BaseUrl(compute.Product, config), project, region, routerName)
+			router, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   project,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
 
 			if err != nil {
 				return fmt.Errorf("Error Reading Router %s: %s", routerName, err)
 			}
 
-			nats := router.Nats
-			for _, nat := range nats {
-				if nat.Name == name {
-					return fmt.Errorf("Nat %s still exists on router %s/%s", name, region, router.Name)
+			nats, _ := router["nats"].([]interface{})
+			for _, rawNat := range nats {
+				nat, ok := rawNat.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				if nat["name"] == name {
+					return fmt.Errorf("Nat %s still exists on router %s/%s", name, region, router["name"])
 				}
 			}
 		}
@@ -1208,35 +1226,35 @@ resource "google_compute_router_nat" "foobar" {
 func testAccComputeRouterNatUpdateEndpointType(routerName string, endpointType string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
-  name = "%[1]s-net"
+  name = "%s-net"
 }
 
 resource "google_compute_subnetwork" "foobar" {
-  name          = "%[1]s-subnet"
+  name          = "%s-subnet"
   network       = google_compute_network.foobar.self_link
   ip_cidr_range = "10.0.0.0/16"
   region        = "us-central1"
 }
 
 resource "google_compute_router" "foobar" {
-  name    = "%[1]s"
+  name    = "%s"
   region  = google_compute_subnetwork.foobar.region
   network = google_compute_network.foobar.self_link
 }
 
 resource "google_compute_router_nat" "foobar" {
-  name                               = "%[1]s"
+  name                               = "%s"
   router                             = google_compute_router.foobar.name
   region                             = google_compute_router.foobar.region
   nat_ip_allocate_option             = "AUTO_ONLY"
   source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
-  endpoint_types                     = [ "%[2]s" ]
+  endpoint_types                     = [ "%s" ]
   log_config {
     enable = true
     filter = "ERRORS_ONLY"
   }
 }
-`, routerName, endpointType)
+`, routerName, routerName, routerName, routerName, endpointType)
 }
 
 func testAccComputeRouterNatUpdateToNatIPsId(routerName string) string {

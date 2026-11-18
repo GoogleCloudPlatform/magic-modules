@@ -48,6 +48,15 @@ var vcrMergeCmd = &cobra.Command{
 }
 
 func execVCRMerge(gh GithubClient, sha string, baseBranch string, runner source.Runner) error {
+	if message, err := gh.GetCommitMessage("GoogleCloudPlatform", "magic-modules", sha); err == nil {
+		if prNumber := parsePRNumberFromCommitMessage(message); prNumber != "" {
+			if pr, err := gh.GetPullRequest(prNumber); err == nil && pr.MergeCommitSha == sha {
+				mergeCassettes("gs://ci-vcr-cassettes", baseBranch, fmt.Sprintf("refs/heads/auto-pr-%d", pr.Number), runner)
+				mergeCassettes("gs://ci-vcr-cassettes/beta", baseBranch, fmt.Sprintf("refs/heads/auto-pr-%d", pr.Number), runner)
+				return nil
+			}
+		}
+	}
 	arr, err := gh.GetPullRequests("closed", baseBranch, "updated", "desc")
 	if err != nil {
 		return fmt.Errorf("error getting pull requests: %w", err)

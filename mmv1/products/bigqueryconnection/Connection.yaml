@@ -147,6 +147,28 @@ samples:
       - name: bigquery_connection_spark
         resource_id_vars:
           connection_id: my-connection
+  - name: bigquery_connection_salesforce_data_cloud
+    primary_resource_id: connection
+    region_override: US
+    skip_test: 'Requires a Salesforce partner project; unavailable in CI.'
+    steps:
+      - name: bigquery_connection_salesforce_data_cloud
+        resource_id_vars:
+          connection_id: my-connection
+      - name: bigquery_connection_salesforce_data_cloud_cache
+        resource_id_vars:
+          connection_id: my-connection
+        vars:
+          instance_uri: https://updated-instance.my.salesforce.com
+          tenant_id: updated-tenant-id
+          cache_enabled: "true"
+      - name: bigquery_connection_salesforce_data_cloud_cache
+        resource_id_vars:
+          connection_id: my-connection
+        vars:
+          instance_uri: https://updated-instance.my.salesforce.com
+          tenant_id: updated-tenant-id
+          cache_enabled: "false"
   - name: bigquery_connection_sql_with_cmek
     primary_resource_id: bq-connection-cmek
     bootstrap_iam:
@@ -268,6 +290,7 @@ properties:
       - cloud_resource
       - spark
       - configuration
+      - salesforce_data_cloud
     properties:
       - name: instanceId
         type: String
@@ -318,6 +341,7 @@ properties:
       - cloud_resource
       - spark
       - configuration
+      - salesforce_data_cloud
     properties:
       - name: accessRole
         type: NestedObject
@@ -346,6 +370,7 @@ properties:
       - cloud_resource
       - spark
       - configuration
+      - salesforce_data_cloud
     properties:
       - name: application
         type: String
@@ -385,6 +410,7 @@ properties:
       - cloud_resource
       - spark
       - configuration
+      - salesforce_data_cloud
     properties:
       - name: database
         type: String
@@ -425,6 +451,7 @@ properties:
       - cloud_resource
       - spark
       - configuration
+      - salesforce_data_cloud
     properties:
       - name: serviceAccountId
         type: String
@@ -442,6 +469,7 @@ properties:
       - cloud_resource
       - spark
       - configuration
+      - salesforce_data_cloud
     properties:
       - name: serviceAccountId
         type: String
@@ -461,6 +489,49 @@ properties:
           - name: dataprocCluster
             type: String
             description: Resource name of an existing Dataproc Cluster to act as a Spark History Server for the connection if the form of projects/[projectId]/regions/[region]/clusters/[cluster_name].
+  - name: salesforceDataCloud
+    type: NestedObject
+    description: |
+      Connection properties specific to Salesforce Data Cloud.
+      This connection type is intended for use only by Salesforce partner projects.
+    update_mask_fields:
+      - salesforce_data_cloud.instance_uri
+      - salesforce_data_cloud.tenant_id
+      - salesforce_data_cloud.cross_cloud_cache_options.enabled
+    exactly_one_of:
+      - cloud_sql
+      - aws
+      - azure
+      - cloud_spanner
+      - cloud_resource
+      - spark
+      - configuration
+      - salesforce_data_cloud
+    properties:
+      - name: instanceUri
+        type: String
+        required: true
+        description: The URL to the user's Salesforce Data Cloud instance.
+      - name: tenantId
+        type: String
+        required: true
+        description: The ID of the user's Salesforce tenant.
+      - name: identity
+        type: String
+        description: A unique Google-owned and Google-generated service account identity for the connection.
+        output: true
+      - name: crossCloudCacheOptions
+        type: NestedObject
+        required: true
+        description: Configuration options for cross-cloud caching of data and metadata files.
+        properties:
+          - name: enabled
+            type: Boolean
+            description: |
+              Whether cross-cloud caching is enabled for queries through BigQuery.
+              When enabled, read data and metadata are cached, which can improve performance
+              and reduce network egress costs for cross-cloud queries.
+            send_empty_value: true
   - name: configuration
     type: NestedObject
     description: |
@@ -475,6 +546,7 @@ properties:
       - cloud_resource
       - spark
       - configuration
+      - salesforce_data_cloud
     properties:
       - name: connectorId
         type: String

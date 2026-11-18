@@ -101,6 +101,8 @@ parameters:
     immutable: true
     resource: AccessLevel
     imports: name
+    validation:
+      regex: '^accessPolicies/[^/]+/accessLevels/[^/]+$'
 properties:
   - name: ipSubnetworks
     type: Array

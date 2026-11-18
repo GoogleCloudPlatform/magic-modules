@@ -18,9 +18,11 @@ import (
 	"fmt"
 	"io/fs"
 	"log"
+	"maps"
 	"net/url"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"text/template" // NOLINT
@@ -52,6 +54,7 @@ var (
 	testEnvVarUsageRegexp    = regexp.MustCompile(`{{index \$\.TestEnvVars "([a-zA-Z_]*)"}}`)
 	varUsageRegexp           = regexp.MustCompile(`{{index \$\.Vars "([a-zA-Z_]*)"}}`)
 	resourceIdVarUsageRegexp = regexp.MustCompile(`{{index \$\.ResourceIdVars "([a-zA-Z_]*)"}}`)
+	testPlaceholderRegexp    = regexp.MustCompile(`%\{([^{}]+)\}`)
 )
 
 type Step struct {
@@ -74,7 +77,7 @@ type Step struct {
 	// A value of `null` (or `~` / `"null"`) sets the test context variable to `nil`
 	// and omits the attribute line (or renders unquoted HCL `null` when inline) in
 	// documentation and OiCS configs.
-	Vars map[string]string `yaml:"vars,omitempty"`
+	Vars StepVars `yaml:"vars,omitempty"`
 
 	// Some variables need to hold special values during tests, and cannot
 	// be inferred by Open in Cloud Shell.  For instance, org_id
@@ -96,6 +99,7 @@ type Step struct {
 	//  - IDENTITY_USER
 	//  - CHRONICLE_ID
 	//  - VMWAREENGINE_PROJECT
+	//  - ORG_UNIT_ID
 	// This list corresponds to the `get*FromEnv` methods in provider_test.go.
 	TestEnvVars map[string]string `yaml:"test_env_vars,omitempty"`
 
@@ -140,41 +144,36 @@ type Step struct {
 
 	DocumentationHCLText string            `yaml:"-"`
 	TestHCLText          string            `yaml:"-"`
+	IamHCLText           string            `yaml:"-"`
 	OicsHCLText          string            `yaml:"-"`
 	PrimaryResourceId    string            `yaml:"-"`
 	TestContextVars      map[string]string `yaml:"-"`
+	hclLoaded            bool
 }
 
-// UnmarshalYAML implements a custom YAML unmarshaler for Step so that explicit
-// YAML null values (`field: null` or `field: ~`) in `vars` are preserved as
-// `"null"` rather than being decoded as empty strings (`""`).
-func (s *Step) UnmarshalYAML(value *yaml.Node) error {
-	type stepAlias Step
-	aliasObj := (*stepAlias)(s)
+// StepVars is a map of template variable names to string values that preserves
+// explicit YAML null scalars (`field: null` or `field: ~`) as `"null"` rather
+// than decoding them as empty strings (`""`).
+type StepVars map[string]string
 
-	if err := value.Decode(aliasObj); err != nil {
+func (v *StepVars) UnmarshalYAML(value *yaml.Node) error {
+	var raw map[string]*string
+	if err := value.Decode(&raw); err != nil {
 		return err
 	}
-
-	if value.Kind == yaml.MappingNode {
-		for i := 0; i+1 < len(value.Content); i += 2 {
-			keyNode := value.Content[i]
-			valNode := value.Content[i+1]
-			if keyNode.Value == "vars" && valNode.Kind == yaml.MappingNode {
-				for j := 0; j+1 < len(valNode.Content); j += 2 {
-					varKey := valNode.Content[j].Value
-					varVal := valNode.Content[j+1]
-					if varVal.Kind == yaml.ScalarNode && varVal.Tag == "!!null" {
-						if s.Vars == nil {
-							s.Vars = make(map[string]string)
-						}
-						s.Vars[varKey] = "null"
-					}
-				}
-			}
+	if raw == nil {
+		*v = nil
+		return nil
+	}
+	out := make(StepVars, len(raw))
+	for k, val := range raw {
+		if val == nil {
+			out[k] = "null"
+		} else {
+			out[k] = *val
 		}
 	}
-
+	*v = out
 	return nil
 }
 
@@ -197,8 +196,14 @@ func (s *Step) TestDependencies(resourcePrefixPkgMap map[string]string) map[stri
 		if strings.HasPrefix(val, "kms.") {
 			deps["services/kms"] = ""
 		}
+		if strings.HasPrefix(val, "resourcemanager.") {
+			deps["services/resourcemanager"] = ""
+		}
 		if strings.HasPrefix(val, "servicenetworking.") {
 			deps["services/servicenetworking"] = ""
+		}
+		if strings.HasPrefix(val, "tags.") {
+			deps["services/tags"] = ""
 		}
 	}
 	matches := hclResourceRegexp.FindAllStringSubmatch(s.TestHCLText, -1)
@@ -224,14 +229,66 @@ func (s *Step) TestDependencies(resourcePrefixPkgMap map[string]string) map[stri
 	return deps
 }
 
+func (s *Step) usedPlaceholders() map[string]bool {
+	used := make(map[string]bool)
+	for _, match := range testPlaceholderRegexp.FindAllStringSubmatch(s.TestHCLText, -1) {
+		used[match[1]] = true
+	}
+	for _, match := range testPlaceholderRegexp.FindAllStringSubmatch(s.IamHCLText, -1) {
+		used[match[1]] = true
+	}
+	return used
+}
+
 func (s *Step) Validate(rName, sName string) (es []error) {
-	for k := range s.Vars {
+	for _, k := range slices.Sorted(maps.Keys(s.Vars)) {
 		if _, exists := s.ResourceIdVars[k]; exists {
 			es = append(es, fmt.Errorf("variable key '%s' cannot exist in both 'vars' and 'resource_id_vars' for step '%s' in sample '%s' of resource '%s'", k, s.Name, sName, rName))
 		}
 	}
 	if s.Name == "" {
 		es = append(es, fmt.Errorf("missing `name` for one step in test sample %s in resource %s", sName, rName))
+	}
+
+	for _, k := range slices.Sorted(maps.Keys(s.OicsVarsOverrides)) {
+		_, inVars := s.Vars[k]
+		_, inResourceIdVars := s.ResourceIdVars[k]
+		if !inVars && !inResourceIdVars {
+			es = append(es, fmt.Errorf("unused variable %q in 'oics_vars_overrides' (not defined in 'vars' or 'resource_id_vars') for step %q in sample %q of resource %q", k, s.Name, sName, rName))
+		}
+	}
+
+	// TestSampleSetUp skips steps above TargetVersionName (e.g. min_version: beta
+	// during GA builds), whereas Validate runs on all steps; skip unloaded steps.
+	if s.hclLoaded {
+		used := s.usedPlaceholders()
+		for _, k := range slices.Sorted(maps.Keys(s.Vars)) {
+			if !used[k] {
+				es = append(es, fmt.Errorf("unused variable %q in 'vars' for step %q in sample %q of resource %q", k, s.Name, sName, rName))
+			}
+		}
+		for _, k := range slices.Sorted(maps.Keys(s.ResourceIdVars)) {
+			if !used[k] {
+				es = append(es, fmt.Errorf("unused variable %q in 'resource_id_vars' for step %q in sample %q of resource %q", k, s.Name, sName, rName))
+			}
+		}
+		for _, k := range slices.Sorted(maps.Keys(s.TestEnvVars)) {
+			if !used[k] {
+				es = append(es, fmt.Errorf("unused variable %q in 'test_env_vars' for step %q in sample %q of resource %q", k, s.Name, sName, rName))
+			}
+		}
+		for _, k := range slices.Sorted(maps.Keys(s.TestVarsOverrides)) {
+			if !used[k] {
+				es = append(es, fmt.Errorf("unused variable %q in 'test_vars_overrides' for step %q in sample %q of resource %q", k, s.Name, sName, rName))
+			}
+		}
+		for _, k := range slices.Sorted(maps.Keys(s.OicsVarsOverrides)) {
+			_, inVars := s.Vars[k]
+			_, inResourceIdVars := s.ResourceIdVars[k]
+			if (inVars || inResourceIdVars) && !used[k] {
+				es = append(es, fmt.Errorf("unused variable %q in 'oics_vars_overrides' for step %q in sample %q of resource %q", k, s.Name, sName, rName))
+			}
+		}
 	}
 
 	return es
@@ -275,6 +332,7 @@ func (s *Step) SetHCLText(sysfs fs.FS) {
 		"PAP_DESCRIPTION":      "description",
 		"CHRONICLE_ID":         "00000000-0000-0000-0000-000000000000",
 		"VMWAREENGINE_PROJECT": "my-vmwareengine-project",
+		"ORG_UNIT_ID":          "03abcxyz",
 	}
 
 	// Apply doc defaults to test_env_vars from YAML
@@ -355,6 +413,7 @@ func (s *Step) SetHCLText(sysfs fs.FS) {
 	s.TestHCLText = re1.ReplaceAllString(s.TestHCLText, "")
 	s.TestHCLText = re2.ReplaceAllString(s.TestHCLText, "")
 	s.TestHCLText = SubstituteTestPaths(s.TestHCLText)
+	s.hclLoaded = true
 
 	// Reset the step
 	s.ResourceIdVars = originalResourceIdVars

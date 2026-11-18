@@ -50,7 +50,6 @@ samples:
           service_project_attachment_id: project-1
         test_env_vars:
           org_id: ORG_ID
-          host_project: PROJECT_NAME
   - name: service_project_attachment_full
     primary_resource_id: example2
     external_providers: [random, time]
@@ -61,7 +60,6 @@ samples:
           service_project_attachment_id: project-1
         test_env_vars:
           org_id: ORG_ID
-          host_project: PROJECT_NAME
 parameters:
   - name: serviceProjectAttachmentId
     type: String
@@ -95,12 +93,7 @@ properties:
     description: Output only. A globally unique identifier (in UUID4 format) for the `ServiceProjectAttachment`.
     output: true
   - name: state
-    type: Enum
+    type: String
     description: |
       ServiceProjectAttachment state.
     output: true
-    enum_values:
-      - STATE_UNSPECIFIED
-      - CREATING
-      - ACTIVE
-      - DELETING

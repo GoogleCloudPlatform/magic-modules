@@ -1,0 +1,9 @@
+resource "google_bigquery_connection" "{{$.PrimaryResourceId}}" {
+  connection_id = "{{index $.ResourceIdVars "connection_id"}}"
+  location      = "US"
+
+  salesforce_data_cloud {
+    instance_uri = "my-instance.c360a.salesforce.com"
+    tenant_id    = "tenant-id"
+  }
+}

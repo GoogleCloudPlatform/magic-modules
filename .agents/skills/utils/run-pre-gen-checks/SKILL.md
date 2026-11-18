@@ -12,14 +12,14 @@ description: "Run fast static checks that don't require generating downstreams, 
 
 - **Submodule Check:** Verifies no unauthorized git submodules are present (`git submodule status --recursive`).
 - **Go Formatting Check:** Verifies all tracked Go files are properly formatted (`gofmt -l`).
-- **Template Validation:** Runs `version-guard` and `unused-tmpl` checks via `tools/template-check`.
+- **Template Validation:** Runs `version-guard` and `unused-tmpl` checks via `tools/template-check` on modified `.tmpl` files.
 - **YAML Linting Check:** Lints modified product YAML files against `.yamllint` (if `yamllint` is installed).
 - **MMv1 Unit Tests:** Runs core unit tests in `mmv1` (`go test ./...`).
-- **Tools & CI Unit Tests:** Runs unit tests for `tools/go-changelog`, `tools/issue-labeler`, `tools/template-check`, `tools/test-reader`, and `.ci/magician`.
+- **Tools & CI Unit Tests:** Diff-scoped unit tests for `tools/go-changelog`, `tools/issue-labeler`, `tools/template-check`, `tools/test-reader`, `.ci/magician`, and `.agents/scripts` (only runs suites for modified tool/CI files, or all suites when `--all` is passed).
 
 ## Prerequisites
 
-- You must be operating in the `magic-modules` root directory.
+- Operating inside the `magic-modules` repository or worktree.
 - `go` (v1.26+) and `git` must be installed and configured. Optionally `yamllint` for YAML checks.
 
 ## Execution Steps
@@ -30,6 +30,12 @@ Execute the script to run all pre-generation static checks and unit tests in par
 
 ```bash
 ./.agents/skills/utils/run-pre-gen-checks/scripts/run_pre_gen_checks.sh
+```
+
+Pass `--all` if you want to force running unit tests across all internal tools and CI automation regardless of whether they were modified:
+
+```bash
+./.agents/skills/utils/run-pre-gen-checks/scripts/run_pre_gen_checks.sh --all
 ```
 
 ### 2. Output and Verification

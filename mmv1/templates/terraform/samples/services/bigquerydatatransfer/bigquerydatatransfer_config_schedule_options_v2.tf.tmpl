@@ -1,0 +1,49 @@
+resource "google_pubsub_topic" "event_driven" {
+  name = "{{index $.ResourceIdVars "topic_name"}}"
+}
+
+resource "google_pubsub_subscription" "event_driven" {
+  name  = "{{index $.ResourceIdVars "subscription_name"}}"
+  topic = google_pubsub_topic.event_driven.id
+}
+
+resource "google_storage_bucket" "event_driven" {
+  name                        = "{{index $.ResourceIdVars "bucket_name"}}"
+  location                    = "US"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+resource "google_bigquery_dataset" "event_driven" {
+  dataset_id    = "{{index $.ResourceIdVars "dataset_id"}}"
+  friendly_name = "foo"
+  description   = "bar"
+  location      = "US"
+}
+
+resource "google_bigquery_table" "event_driven" {
+  deletion_protection = false
+  dataset_id          = google_bigquery_dataset.event_driven.dataset_id
+  table_id            = "my_table"
+  schema              = "[{\"name\":\"name\",\"type\":\"STRING\"}]"
+}
+
+resource "google_bigquery_data_transfer_config" "{{$.PrimaryResourceId}}" {
+  display_name           = "{{index $.ResourceIdVars "display_name"}}"
+  location               = google_bigquery_dataset.event_driven.location
+  data_source_id         = "google_cloud_storage"
+  destination_dataset_id = google_bigquery_dataset.event_driven.dataset_id
+
+  schedule_options_v2 {
+    event_driven_schedule {
+      pubsub_subscription = google_pubsub_subscription.event_driven.id
+    }
+  }
+
+  params = {
+    data_path_template              = "${google_storage_bucket.event_driven.url}/*.json"
+    destination_table_name_template = google_bigquery_table.event_driven.table_id
+    file_format                     = "JSON"
+    write_disposition               = "APPEND"
+  }
+}

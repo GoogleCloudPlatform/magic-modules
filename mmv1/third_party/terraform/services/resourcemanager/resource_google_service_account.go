@@ -189,6 +189,7 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 		"Creating Service Account",
 		d.Timeout(schema.TimeoutCreate),
 		3, // Number of consecutive occurences.
+		config.SleepUnit,
 	)
 
 	// We can't guarantee complete consistency even after polling,
@@ -382,6 +383,7 @@ func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}
 		"Updating Service Account",
 		1*time.Minute,
 		3, // Number of consecutive occurences.
+		config.SleepUnit,
 	)
 
 	if err != nil {

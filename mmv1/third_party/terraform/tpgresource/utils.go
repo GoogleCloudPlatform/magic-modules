@@ -8,26 +8,28 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"maps"
 	"math/rand/v2"
 	"net"
 	"net/url"
 	"reflect"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
-	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/go-cty/cty"
 	fwDiags "github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"golang.org/x/exp/maps"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -243,8 +245,8 @@ func GetRouterLockName(region string, router string) string {
 }
 
 func IsFailedPreconditionError(err error) bool {
-	gerr, ok := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error)
-	if !ok {
+	var gerr *googleapi.Error
+	if !errors.As(err, &gerr) {
 		return false
 	}
 	if gerr == nil {
@@ -262,8 +264,8 @@ func IsFailedPreconditionError(err error) bool {
 }
 
 func IsQuotaError(err error) bool {
-	gerr, ok := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error)
-	if !ok {
+	var gerr *googleapi.Error
+	if !errors.As(err, &gerr) {
 		return false
 	}
 	if gerr == nil {
@@ -276,18 +278,9 @@ func IsQuotaError(err error) bool {
 }
 
 func IsConflictError(err error) bool {
-	if e, ok := err.(*googleapi.Error); ok && (e.Code == 409 || e.Code == 412) {
+	var gErr *googleapi.Error
+	if errors.As(err, &gErr) && gErr != nil && (gErr.Code == 409 || gErr.Code == 412) {
 		return true
-	} else if !ok && errwrap.ContainsType(err, &googleapi.Error{}) {
-		e := errwrap.GetType(err, &googleapi.Error{}).(*googleapi.Error)
-		if e.Code == 409 || e.Code == 412 {
-			return true
-		}
-	} else if gErr := (*googleapi.Error)(nil); errors.As(err, &gErr) {
-		// For cases where the error is not wrapped by errwrap such in 409 IAM concurrency errors.
-		if gErr.Code == 409 || gErr.Code == 412 {
-			return true
-		}
 	}
 	return false
 }
@@ -383,8 +376,7 @@ func SortStringsByConfigOrder(configData, apiData []string) ([]string, error) {
 
 	// Sort set config indexes and convert to a slice of strings. This removes items present in the config
 	// but not present in the API response.
-	configIndexes := maps.Keys(byConfigIndex)
-	sort.Ints(configIndexes)
+	configIndexes := slices.Sorted(maps.Keys(byConfigIndex))
 	result := []string{}
 	for _, index := range configIndexes {
 		result = append(result, byConfigIndex[index])
@@ -1136,4 +1128,66 @@ func LocationFromId(id string) string {
 		return GetRegionFromZone(match[1])
 	}
 	return ""
+}
+
+// CanonicalizeIp parses an IP address string and returns its canonical format,
+// or the original value if parsing fails or if v is empty/non-string.
+func CanonicalizeIp(v interface{}) interface{} {
+	if v == nil {
+		return v
+	}
+	if strVal, ok := v.(string); ok && strVal != "" {
+		if ip := net.ParseIP(strVal); ip != nil {
+			return ip.String()
+		}
+	}
+	return v
+}
+
+func Retry(timeout, sleepUnit time.Duration, f retry.RetryFunc) error {
+	return RetryContext(context.Background(), timeout, sleepUnit, f)
+}
+
+func RetryContext(ctx context.Context, timeout, sleepUnit time.Duration, f retry.RetryFunc) error {
+	if sleepUnit <= 0 || sleepUnit == time.Second {
+		return retry.RetryContext(ctx, timeout, f)
+	}
+
+	var resultErr error
+	var resultErrMu sync.Mutex
+
+	c := &retry.StateChangeConf{
+		Pending:      []string{"retryableerror"},
+		Target:       []string{"success"},
+		Timeout:      timeout,
+		PollInterval: sleepUnit,
+		Refresh: func() (interface{}, string, error) {
+			rerr := f()
+
+			resultErrMu.Lock()
+			defer resultErrMu.Unlock()
+
+			if rerr == nil {
+				resultErr = nil
+				return 42, "success", nil
+			}
+
+			resultErr = rerr.Err
+
+			if rerr.Retryable {
+				return 42, "retryableerror", nil
+			}
+			return nil, "quit", rerr.Err
+		},
+	}
+
+	_, waitErr := c.WaitForStateContext(ctx)
+
+	resultErrMu.Lock()
+	defer resultErrMu.Unlock()
+
+	if resultErr == nil {
+		return waitErr
+	}
+	return resultErr
 }

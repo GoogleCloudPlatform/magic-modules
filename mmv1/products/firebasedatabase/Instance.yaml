@@ -131,11 +131,8 @@ properties:
       - DEFAULT_DATABASE
       - USER_DATABASE
   - name: state
-    type: Enum
+    type: String
     description: |
       The current database state. Set desired_state to :DISABLED to disable the database and :ACTIVE to reenable the database
     min_version: beta
     output: true
-    enum_values:
-      - ACTIVE
-      - DISABLED

@@ -7,7 +7,6 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//mmv1/google",
-        "@org_golang_x_exp//slices",
     ],
 )
 

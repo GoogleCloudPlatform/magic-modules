@@ -145,6 +145,14 @@ samples:
           database_id: 'text-search-database-id'
         test_env_vars:
           project_id: 'PROJECT_NAME'
+  - name: 'firestore_index_search_index_options'
+    primary_resource_id: 'my-index'
+    steps:
+      - name: 'firestore_index_search_index_options'
+        resource_id_vars:
+          database_id: 'search-index-options-db'
+        test_env_vars:
+          project_id: 'PROJECT_NAME'
   - name: 'firestore_index_suppress_geojson_indexing'
     primary_resource_id: 'my-index'
     steps:
@@ -225,6 +233,26 @@ properties:
     type: Boolean
     default_from_api: true
     description: Whether it is an unique index. Unique index ensures all values for the indexed field(s) are unique across documents.
+  - name: 'searchIndexOptions'
+    type: NestedObject
+    immutable: true
+    default_from_api: true
+    description: |
+      Optional. Options to configure the search index.
+    properties:
+      - name: 'textLanguage'
+        type: String
+        immutable: true
+        default_from_api: true
+        description: |
+          Optional. The language code used to parse all text fields included in the search index,
+          for example, "en", "es", "jp".
+      - name: 'textLanguageOverrideFieldPath'
+        type: String
+        immutable: true
+        default_from_api: true
+        description: |
+          Optional. The path to the field that records the text language override of each document.
   - name: 'fields'
     type: Array
     description: |

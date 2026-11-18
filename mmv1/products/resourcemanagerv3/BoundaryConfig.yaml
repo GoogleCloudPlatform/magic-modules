@@ -47,6 +47,8 @@ create_verb: 'PATCH'
 update_url: '{{parent}}/boundaryConfig'
 update_verb: 'PATCH'
 update_mask: true
+error_retry_predicates:
+  - 'transport_tpg.IsResourceManagerBoundaryRetryableError'
 # The API has no Delete method. Rather than orphan the configuration, destroy
 # clears the managed field via PATCH. See the custom_delete template below.
 custom_code:

@@ -210,13 +210,10 @@ properties:
             Name of the secure tag, created with TagManager's TagValue API.
           diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
         - name: 'state'
-          type: Enum
+          type: String
           description: |
             State of the secure tag, either EFFECTIVE or INEFFECTIVE. A secure tag is INEFFECTIVE when it is deleted or its network is deleted.
           output: true
-          enum_values:
-            - 'EFFECTIVE'
-            - 'INEFFECTIVE'
   - name: 'disabled'
     type: Boolean
     description: |

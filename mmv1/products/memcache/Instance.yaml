@@ -54,13 +54,10 @@ samples:
     steps:
       - name: memcache_instance_basic_test
         resource_id_vars:
-          address_name: address
           instance_name: test-instance
           network_name: test-network
         test_vars_overrides:
           network_name: servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")
-          # for backward compatible
-          address_name: '"address" + randomSuffix'
 virtual_fields:
   - name: deletion_protection
     type: Boolean
@@ -79,6 +76,8 @@ parameters:
       The region of the Memcache instance. If it is not provided, the provider region is used.
     immutable: true
     url_param_only: true
+    # region is a URL parameter not returned as a top-level field by the API
+    ignore_read: true
     default_from_api: true
 properties:
   - name: name

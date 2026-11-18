@@ -28,6 +28,7 @@ sweeper:
     - region: us-central1
     - region: us-west1
     - region: us-east1
+    - region: northamerica-south1
 async:
   actions: []
 parameters:

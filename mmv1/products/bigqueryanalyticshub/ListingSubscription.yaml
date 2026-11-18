@@ -49,10 +49,6 @@ samples:
           data_exchange_id: my_data_exchange
           listing_id: my_listing
           destination_dataset_id: destination_dataset
-          description: example data exchange
-        test_vars_overrides:
-          # for backward compatible
-          description: '"example data exchange" + randomSuffix'
   - name: bigquery_analyticshub_listing_subscription_multiregion
     primary_resource_id: subscription
     exclude_test: true
@@ -62,10 +58,6 @@ samples:
           data_exchange_id: my_data_exchange
           listing_id: my_listing
           destination_dataset_id: destination_dataset
-          description: example listing multiregion subscription
-        test_vars_overrides:
-          # for backward compatible
-          description: '"example listing multiregion subscription" + randomSuffix'
   - name: bigquery_analyticshub_listing_subscription_pubsub
     primary_resource_id: subscription
     region_override: US

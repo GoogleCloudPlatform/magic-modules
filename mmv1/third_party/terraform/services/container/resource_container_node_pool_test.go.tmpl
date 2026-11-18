@@ -1837,6 +1837,169 @@ func TestAccContainerNodePool_withGPU(t *testing.T) {
 	})
 }
 
+func TestAccContainerNodePool_gpuSharingConfigUpdate(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(t, 10))
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_gpuSharingConfig(cluster, np, networkName, subnetworkName, 2),
+			},
+			{
+				ResourceName:      "google_container_node_pool.np",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Updating max_shared_clients_per_gpu must happen in place, not by recreating the node pool.
+			{
+				Config: testAccContainerNodePool_gpuSharingConfig(cluster, np, networkName, subnetworkName, 4),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_node_pool.np", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.guest_accelerator.0.gpu_sharing_config.0.max_shared_clients_per_gpu", "4"),
+				),
+			},
+			{
+				ResourceName:      "google_container_node_pool.np",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Dropping the block is also an in-place update; the post-apply plan is only empty if the
+			// API actually cleared the sharing config.
+			{
+				Config: testAccContainerNodePool_guestAcceleratorNoSharing(cluster, np, networkName, subnetworkName, 1),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_node_pool.np", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.guest_accelerator.0.gpu_sharing_config.#", "0"),
+				),
+			},
+			{
+				ResourceName:      "google_container_node_pool.np",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// count and type stay ForceNew: the GKE API rejects updating them in place.
+			{
+				Config: testAccContainerNodePool_guestAcceleratorNoSharing(cluster, np, networkName, subnetworkName, 2),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_node_pool.np", plancheck.ResourceActionReplace),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.guest_accelerator.0.count", "2"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccContainerNodePool_gpuDriverInstallationConfigUpdate(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(t, 10))
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_gpuDriverInstallationConfig(cluster, np, networkName, subnetworkName, "DEFAULT"),
+			},
+			{
+				ResourceName:      "google_container_node_pool.np",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Updating gpu_driver_version must happen in place, not by recreating the node pool.
+			{
+				Config: testAccContainerNodePool_gpuDriverInstallationConfig(cluster, np, networkName, subnetworkName, "LATEST"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_node_pool.np", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.guest_accelerator.0.gpu_driver_installation_config.0.gpu_driver_version", "LATEST"),
+				),
+			},
+			{
+				ResourceName:      "google_container_node_pool.np",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccContainerNodePool_guestAccelerator(cluster, np, networkName, subnetworkName string, count int, driverVersion, gpuSharingConfig string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "cluster" {
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 1
+  deletion_protection = false
+  network             = "%s"
+  subnetwork          = "%s"
+}
+
+resource "google_container_node_pool" "np" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+
+  node_config {
+    machine_type = "n1-standard-2"
+
+    guest_accelerator {
+      type  = "nvidia-tesla-t4"
+      count = %d
+      gpu_driver_installation_config {
+        gpu_driver_version = "%s"
+      }
+%s
+    }
+  }
+}
+`, cluster, networkName, subnetworkName, np, count, driverVersion, gpuSharingConfig)
+}
+
+func testAccContainerNodePool_gpuSharingConfig(cluster, np, networkName, subnetworkName string, maxSharedClientsPerGpu int) string {
+	return testAccContainerNodePool_guestAccelerator(cluster, np, networkName, subnetworkName, 1, "DEFAULT", fmt.Sprintf(`
+      gpu_sharing_config {
+        gpu_sharing_strategy       = "TIME_SHARING"
+        max_shared_clients_per_gpu = %d
+      }`, maxSharedClientsPerGpu))
+}
+
+func testAccContainerNodePool_guestAcceleratorNoSharing(cluster, np, networkName, subnetworkName string, count int) string {
+	return testAccContainerNodePool_guestAccelerator(cluster, np, networkName, subnetworkName, count, "DEFAULT", "")
+}
+
+func testAccContainerNodePool_gpuDriverInstallationConfig(cluster, np, networkName, subnetworkName, driverVersion string) string {
+	return testAccContainerNodePool_guestAccelerator(cluster, np, networkName, subnetworkName, 1, driverVersion, "")
+}
+
 func TestAccContainerNodePool_withRDMA(t *testing.T) {
 	t.Parallel()
 
@@ -2798,6 +2961,73 @@ resource "google_container_node_pool" "np" {
     ephemeral_storage_local_ssd_config {
 	  local_ssd_count = 0
       data_cache_count = 1
+    }
+  }
+}
+`, cluster, networkName, subnetworkName, np)
+}
+
+func TestAccContainerNodePool_ephemeralStorageLocalSsdConfigWithEphemeralCapacityGb(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_ephemeralStorageLocalSsdConfigWithEphemeralCapacityGb(cluster, np, networkName, subnetworkName),
+			},
+			{
+				ResourceName:      "google_container_node_pool.np",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccContainerNodePool_ephemeralStorageLocalSsdConfigWithEphemeralCapacityGb(cluster, np, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+	location       = "us-central1-a"
+	version_prefix = "1.37"
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
+  initial_node_count = 1
+  deletion_protection = false
+  network            = "%s"
+  subnetwork         = "%s"
+
+  node_config {
+    machine_type = "n2-standard-4"
+    ephemeral_storage_local_ssd_config {
+      local_ssd_count       = 1
+      ephemeral_capacity_gb = 100
+    }
+  }
+}
+
+resource "google_container_node_pool" "np" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+
+  node_config {
+    machine_type = "n2-standard-4"
+    ephemeral_storage_local_ssd_config {
+      local_ssd_count       = 1
+      ephemeral_capacity_gb = 200
     }
   }
 }
@@ -5679,7 +5909,7 @@ resource "google_container_node_pool" "np" {
   node_config {
     guest_accelerator {
       count = 0
-      type  = "nvidia-tesla-p100"
+      type  = "nvidia-tesla-t4"
     }
     machine_type = "n1-highmem-4"
   }
@@ -5707,12 +5937,12 @@ resource "google_container_node_pool" "np" {
   node_config {
     guest_accelerator {
       count = 0
-      type  = "nvidia-tesla-p100"
+      type  = "nvidia-tesla-t4"
     }
 
     guest_accelerator {
       count = %d
-      type  = "nvidia-tesla-p100"
+      type  = "nvidia-tesla-t4"
     }
     machine_type = "n1-highmem-4"
   }
@@ -5740,12 +5970,12 @@ resource "google_container_node_pool" "np" {
   node_config {
     guest_accelerator {
       count = 0
-      type  = "nvidia-tesla-p100"
+      type  = "nvidia-tesla-t4"
     }
 
     guest_accelerator {
       count = 1
-      type  = "nvidia-tesla-p100"
+      type  = "nvidia-tesla-t4"
     }
 
     guest_accelerator {
@@ -6209,7 +6439,7 @@ resource "google_container_node_pool" "np" {
 `, clusterName, networkName, subnetworkName, np)
 }
 
-func TestAccContainerNodePool_withFlexStart(t *testing.T) {
+func TestAccContainerNodePool_withFlexStartAndConsolidationDelay(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
@@ -6223,12 +6453,30 @@ func TestAccContainerNodePool_withFlexStart(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerNodePool_withFlexStart(clusterName, np, networkName, subnetworkName),
+				Config: testAccContainerNodePool_withFlexStartAndConsolidationDelay(clusterName, np, networkName, subnetworkName, "600s"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.machine_type", "n4-standard-2"),
 					resource.TestCheckResourceAttr("google_container_node_pool.np",
 						"node_config.0.reservation_affinity.0.consume_reservation_type", "NO_RESERVATION"),
 					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.flex_start", "true"),
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.consolidation_delay", "600s"),
+				),
+			},
+			{
+				ResourceName:            "google_container_node_pool.np",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"node_config.0.taint"},
+			},
+			{
+				Config: testAccContainerNodePool_withFlexStartAndConsolidationDelay(clusterName, np, networkName, subnetworkName, "1200s"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_node_pool.np", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.consolidation_delay", "1200s"),
 				),
 			},
 			{
@@ -6241,7 +6489,7 @@ func TestAccContainerNodePool_withFlexStart(t *testing.T) {
 	})
 }
 
-func testAccContainerNodePool_withFlexStart(clusterName, np, networkName, subnetworkName string) string {
+func testAccContainerNodePool_withFlexStartAndConsolidationDelay(clusterName, np, networkName, subnetworkName, consolidationDelay string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
   location = "us-east1-b"
@@ -6271,10 +6519,15 @@ resource "google_container_node_pool" "np" {
     total_max_node_count = 1
   }
 
+  upgrade_settings {
+    strategy = "SHORT_LIVED"
+  }
+
   node_config {
    	machine_type = "n4-standard-2"
 	flex_start = true
 	max_run_duration = "604800s"
+	consolidation_delay = "%s"
 
 	reservation_affinity {
       consume_reservation_type = "NO_RESERVATION"
@@ -6287,7 +6540,7 @@ resource "google_container_node_pool" "np" {
 	}
   }
 }
-`, clusterName, networkName, subnetworkName, np)
+`, clusterName, networkName, subnetworkName, np, consolidationDelay)
 }
 
 func TestAccContainerNodePool_tpuTopology(t *testing.T) {
@@ -7329,28 +7582,28 @@ func TestAccContainerNodePool_storagePools(t *testing.T) {
 func testAccContainerNodePool_storagePools(cluster, np, networkName, subnetworkName, storagePoolResourceName, location string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "cluster" {
-  name                = "%[1]s"
-  location            = "%[6]s"
+  name                = "%s"
+  location            = "%s"
   initial_node_count  = 1
   deletion_protection = false
-  network             = "%[3]s"
-  subnetwork          = "%[4]s"
+  network             = "%s"
+  subnetwork          = "%s"
 }
 
 resource "google_container_node_pool" "np" {
-  name               = "%[2]s"
-  location           = "%[6]s"
+  name               = "%s"
+  location           = "%s"
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 1
 
   node_config {
     machine_type  = "c3-standard-4"
     image_type    = "COS_CONTAINERD"
-    storage_pools = ["%[5]s"]
+    storage_pools = ["%s"]
     disk_type     = "hyperdisk-balanced"
   }
 }
-`, cluster, np, networkName, subnetworkName, storagePoolResourceName, location)
+`, cluster, location, networkName, subnetworkName, np, location, storagePoolResourceName)
 }
 
 
@@ -7410,18 +7663,18 @@ provider "google" {
 
 resource "google_container_cluster" "cluster" {
   provider            = google.user-project-override
-  name                = "%[1]s"
-  location            = "%[6]s"
+  name                = "%s"
+  location            = "%s"
   initial_node_count  = 1
   deletion_protection = false
-  network             = "%[3]s"
-  subnetwork          = "%[4]s"
+  network             = "%s"
+  subnetwork          = "%s"
 }
 
 resource "google_container_node_pool" "np" {
   provider           = google.user-project-override
-  name               = "%[2]s"
-  location           = "%[6]s"
+  name               = "%s"
+  location           = "%s"
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 1
 
@@ -7429,21 +7682,21 @@ resource "google_container_node_pool" "np" {
     machine_type  = "c3-standard-4"
     disk_size_gb  = 50
     disk_type     = "hyperdisk-balanced"
-    storage_pools = ["%[5]s"]
+    storage_pools = ["%s"]
   }
 }
-`, cluster, np, networkName, subnetworkName, storagePoolResourceName, location)
+`, cluster, location, networkName, subnetworkName, np, location, storagePoolResourceName)
 }
 
 func testAccContainerNodePool_acceleratorNetworkProfile_manual(clusterName, npName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "main_net" {
-  name                    = "%[1]s-main-net"
+  name                    = "%s-main-net"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "main_subnet" {
-  name                     = "%[1]s-main-subnet"
+  name                     = "%s-main-subnet"
   network                  = google_compute_network.main_net.name
   ip_cidr_range            = "10.0.0.0/24"
   region                   = "us-east1"
@@ -7452,19 +7705,19 @@ resource "google_compute_subnetwork" "main_subnet" {
 
 // The Additional Network
 resource "google_compute_network" "add_net" {
-  name                    = "%[1]s-add-net"
+  name                    = "%s-add-net"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "add_subnet" {
-  name          = "%[1]s-add-subnet"
+  name          = "%s-add-subnet"
   network       = google_compute_network.add_net.name
   ip_cidr_range = "10.1.0.0/24"
   region        = "us-east1"
 }
 
 resource "google_container_cluster" "cluster" {
-  name     = "%[1]s"
+  name     = "%s"
   location = "us-east1-d"
   
   network    = google_compute_network.main_net.id
@@ -7486,7 +7739,7 @@ resource "google_container_cluster" "cluster" {
 }
 
 resource "google_container_node_pool" "np" {
-  name     = "%[2]s"
+  name     = "%s"
   cluster  = google_container_cluster.cluster.id
   location = "us-east1-d"
   initial_node_count = 0
@@ -7526,18 +7779,18 @@ resource "google_container_node_pool" "np" {
     }
   }
 }
-`, clusterName, npName)
+`, clusterName, clusterName, clusterName, clusterName, clusterName, npName)
 }
 
 func testAccContainerNodePool_acceleratorNetworkProfile_basic(clusterName, npName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "main_net" {
-  name                    = "%[1]s-main-net"
+  name                    = "%s-main-net"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "main_subnet" {
-  name                     = "%[1]s-main-subnet"
+  name                     = "%s-main-subnet"
   network                  = google_compute_network.main_net.name
   ip_cidr_range            = "10.0.0.0/24"
   region                   = "us-east1"
@@ -7545,7 +7798,7 @@ resource "google_compute_subnetwork" "main_subnet" {
 }
 
 resource "google_container_cluster" "cluster" {
-  name     = "%[1]s"
+  name     = "%s"
   location = "us-east1-d"
   
   network    = google_compute_network.main_net.id
@@ -7566,7 +7819,7 @@ resource "google_container_cluster" "cluster" {
 }
 
 resource "google_container_node_pool" "np" {
-  name     = "%[2]s"
+  name     = "%s"
   cluster  = google_container_cluster.cluster.id
   location = "us-east1-d"
   initial_node_count = 0
@@ -7601,18 +7854,18 @@ resource "google_container_node_pool" "np" {
 
   // TEST CHANGE: Removing network_config entirely
 }
-`, clusterName, npName)
+`, clusterName, clusterName, clusterName, npName)
 }
 
 func testAccContainerNodePool_acceleratorNetworkProfile_auto(clusterName, npName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "main_net" {
-  name                    = "%[1]s-main-net"
+  name                    = "%s-main-net"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "main_subnet" {
-  name                     = "%[1]s-main-subnet"
+  name                     = "%s-main-subnet"
   network                  = google_compute_network.main_net.name
   ip_cidr_range            = "10.0.0.0/24"
   region                   = "us-east1"
@@ -7620,7 +7873,7 @@ resource "google_compute_subnetwork" "main_subnet" {
 }
 
 resource "google_container_cluster" "cluster" {
-  name     = "%[1]s"
+  name     = "%s"
   location = "us-east1-d"
   
   network    = google_compute_network.main_net.id
@@ -7641,7 +7894,7 @@ resource "google_container_cluster" "cluster" {
 }
 
 resource "google_container_node_pool" "np" {
-  name     = "%[2]s"
+  name     = "%s"
   cluster  = google_container_cluster.cluster.id
   location = "us-east1-d"
   initial_node_count = 0
@@ -7679,7 +7932,7 @@ resource "google_container_node_pool" "np" {
     accelerator_network_profile = "auto"
   }
 }
-`, clusterName, npName)
+`, clusterName, clusterName, clusterName, npName)
 }
 
 func TestAccContainerNodePool_acceleratorNetworkProfile_Lifecycle(t *testing.T) {
@@ -8218,25 +8471,25 @@ data "google_container_engine_versions" "central1c" {
 }
 
 resource "google_compute_network" "main_net" {
-  name                    = "%[1]s-main-net"
+  name                    = "%s-main-net"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "main_subnet" {
-  name          = "%[1]s-main-subnet"
+  name          = "%s-main-subnet"
   network       = google_compute_network.main_net.name
   ip_cidr_range = "10.0.0.0/24"
   region        = "us-east1"
 }
 
 resource "google_compute_network" "add_net" {
-  name                     = "%[1]s-add-net"
+  name                     = "%s-add-net"
   auto_create_subnetworks  = false
   enable_ula_internal_ipv6 = true
 }
 
 resource "google_compute_subnetwork" "add_subnet" {
-  name             = "%[1]s-add-subnet"
+  name             = "%s-add-subnet"
   network          = google_compute_network.add_net.name
   region           = "us-east1"
   stack_type       = "IPV6_ONLY"
@@ -8244,7 +8497,7 @@ resource "google_compute_subnetwork" "add_subnet" {
 }
 
 resource "google_container_cluster" "cluster" {
-  name               = "%[1]s"
+  name               = "%s"
   location           = "us-east1-d"
   initial_node_count = 1
 
@@ -8267,7 +8520,7 @@ resource "google_container_cluster" "cluster" {
 }
 
 resource "google_container_node_pool" "np" {
-  name               = "%[2]s"
+  name               = "%s"
   location           = "us-east1-d"
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 1
@@ -8285,7 +8538,7 @@ resource "google_container_node_pool" "np" {
     }
   }
 }
-`, clusterName, npName)
+`, clusterName, clusterName, clusterName, clusterName, clusterName, npName)
 }
 {{- end }}
 

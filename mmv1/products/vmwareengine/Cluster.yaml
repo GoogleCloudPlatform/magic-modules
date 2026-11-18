@@ -99,7 +99,6 @@ samples:
           # for backward compatible
           svc_ip_cidr: '"10.0.0.0/24" + randomSuffix'
         test_env_vars:
-          region: REGION
           zone: ZONE
   - name: vmware_engine_cluster_nfs_datastore_netapp
     primary_resource_id: vmw-ext-cluster
@@ -112,7 +111,6 @@ samples:
           private_cloud_id: sample-pc
           network_id: pc-nw
           management_cluster_id: sample-mgmt-cluster
-          filestore_instance_id: test-fs-filestore
           datastore_id: ext-fs-datastore
           svc_ip_cidr: 10.0.0.0/24
         test_vars_overrides:
@@ -165,16 +163,10 @@ properties:
       System-generated unique identifier for the resource.
     output: true
   - name: state
-    type: Enum
+    type: String
     description: |
       State of the Cluster.
     output: true
-    enum_values:
-      - ACTIVE
-      - CREATING
-      - UPDATING
-      - DELETING
-      - REPAIRING
   - name: nodeTypeConfigs
     type: Map
     description: |

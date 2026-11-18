@@ -113,7 +113,6 @@ samples:
         resource_id_vars:
           forwarding_rule_name: 'website-forwarding-rule'
           backend_name: 'website-backend'
-          network_name: 'website-net'
         ignore_read_extra:
           - 'port_range'
   - name: 'forwarding_rule_externallb_byoipv6'
@@ -123,7 +122,6 @@ samples:
         resource_id_vars:
           forwarding_rule_name: 'byoipv6-forwarding-rule'
           backend_name: 'website-backend'
-          network_name: 'website-net'
           ip_address: '"2600:1901:4457:1::/96"'
           ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp"'
         test_vars_overrides:

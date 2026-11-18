@@ -55,8 +55,6 @@ samples:
           destination_project: projects/24240755850
         test_vars_overrides:
           destination_project: '"projects/24240755850"'
-        test_env_vars:
-          project: PROJECT_NAME
 parameters:
   - name: location
     type: String

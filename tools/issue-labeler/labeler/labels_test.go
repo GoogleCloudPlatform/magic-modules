@@ -3,10 +3,10 @@ package labeler
 import (
 	"reflect"
 	"regexp"
+	"slices"
 	"testing"
 
 	"github.com/google/go-github/v68/github"
-	"golang.org/x/exp/slices"
 )
 
 func TestExtractAffectedResources(t *testing.T) {

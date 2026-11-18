@@ -27,6 +27,7 @@ sweeper:
     - region: us-central1
     - region: us-west1
     - region: us-east4
+    - region: northamerica-south1
 parameters:
   - name: location
     type: String

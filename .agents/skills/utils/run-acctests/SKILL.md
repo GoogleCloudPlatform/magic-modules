@@ -27,7 +27,7 @@ cd "${GOPATH:-$HOME/go}/src/github.com/hashicorp/$REPO" && pwd
 ```
 
 ### 2. Run the test
-Stream `TF_LOG=DEBUG` output to a log file so failures can be parsed.
+List all `func TestAcc` functions in the target test file (`grep '^func TestAcc' <test_file>`) and explicitly run each relevant test. Stream `TF_LOG=DEBUG` output to a log file so failures can be parsed.
 
 ```bash
 TF_LOG=DEBUG make testacc TEST=./$PKG_DIR/services/<SERVICE_NAME> TESTARGS='-run=<TEST_NAME>$$' > test_output_$VERSION.log 2>&1

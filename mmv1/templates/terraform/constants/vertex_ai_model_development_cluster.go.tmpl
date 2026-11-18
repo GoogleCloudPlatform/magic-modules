@@ -1,0 +1,186 @@
+func vertexAiModelDevelopmentClusterGkeVersionMatches(actual, target string) bool {
+	if actual == target {
+		return true
+	}
+	if actual == "" || target == "" {
+		return false
+	}
+
+	targetParts := strings.SplitN(target, "-", 2)
+	targetVer := targetParts[0]
+	hasTargetSuffix := len(targetParts) > 1
+	targetSuffix := ""
+	if hasTargetSuffix {
+		targetSuffix = targetParts[1]
+	}
+
+	targetDots := strings.Split(targetVer, ".")
+	if len(targetDots) < 2 {
+		return actual == target
+	}
+	targetMajor := targetDots[0]
+	targetMinor := targetDots[1]
+	hasTargetPatch := len(targetDots) >= 3
+	targetPatch := ""
+	if hasTargetPatch {
+		targetPatch = targetDots[2]
+	}
+
+	actualParts := strings.SplitN(actual, "-", 2)
+	actualVer := actualParts[0]
+	hasActualSuffix := len(actualParts) > 1
+	actualSuffix := ""
+	if hasActualSuffix {
+		actualSuffix = actualParts[1]
+	}
+
+	actualDots := strings.Split(actualVer, ".")
+	if len(actualDots) < 2 {
+		return actual == target
+	}
+	actualMajor := actualDots[0]
+	actualMinor := actualDots[1]
+	hasActualPatch := len(actualDots) >= 3
+	actualPatch := ""
+	if hasActualPatch {
+		actualPatch = actualDots[2]
+	}
+
+	if targetMajor != actualMajor || targetMinor != actualMinor {
+		return false
+	}
+
+	if hasTargetPatch {
+		if !hasActualPatch || targetPatch != actualPatch {
+			return false
+		}
+	}
+
+	if hasTargetSuffix {
+		if !hasActualSuffix || targetSuffix != actualSuffix {
+			return false
+		}
+	}
+
+	return true
+}
+
+func vertexAiModelDevelopmentClusterGkeVersionDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if new == "-" {
+		if strings.Contains(k, "node_pool_versions.") {
+			if old == "" || d == nil {
+				return false
+			}
+			oldCp, newCp := d.GetChange("orchestrator_spec.0.kubernetes_spec.0.control_plane_version")
+			oldCpStr, _ := oldCp.(string)
+			newCpStr, _ := newCp.(string)
+			if oldCpStr == "" {
+				return false
+			}
+			if newCpStr == "" || newCpStr == "-" || vertexAiModelDevelopmentClusterGkeVersionMatches(oldCpStr, newCpStr) {
+				return old == oldCpStr
+			}
+			return false
+		}
+		return old != ""
+	}
+	return vertexAiModelDevelopmentClusterGkeVersionMatches(old, new)
+}
+
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
+type vertexAiModelDevelopmentClusterGetter interface {
+	GetOk(string) (interface{}, bool)
+	GetRawConfig() cty.Value
+}
+
+func vertexAiModelDevelopmentClusterNodePoolVersionsConfigured(d vertexAiModelDevelopmentClusterGetter) bool {
+	if d == nil {
+		return false
+	}
+	rawConfig := d.GetRawConfig()
+	if rawConfig.IsNull() {
+		rawVersions, ok := d.GetOk("orchestrator_spec.0.kubernetes_spec.0.node_pool_versions")
+		if !ok {
+			return false
+		}
+		versionsMap, ok := rawVersions.(map[string]interface{})
+		return ok && len(versionsMap) > 0
+	}
+	npv, err := cty.GetAttrPath("orchestrator_spec").IndexInt(0).GetAttr("kubernetes_spec").IndexInt(0).GetAttr("node_pool_versions").Apply(rawConfig)
+	if err != nil || npv.IsNull() || !npv.IsKnown() {
+		return false
+	}
+	return npv.CanIterateElements() && npv.LengthInt() > 0
+}
+
+func validateVertexAIModelDevelopmentClusterNodePoolVersions(d vertexAiModelDevelopmentClusterGetter) error {
+	if !vertexAiModelDevelopmentClusterNodePoolVersionsConfigured(d) {
+		return nil
+	}
+	rawVersions, ok := d.GetOk("orchestrator_spec.0.kubernetes_spec.0.node_pool_versions")
+	if !ok {
+		return nil
+	}
+	versionsMap, ok := rawVersions.(map[string]interface{})
+	if !ok || len(versionsMap) == 0 {
+		return nil
+	}
+
+	poolIDSet := make(map[string]struct{})
+	if rawNodePools, ok := d.GetOk("node_pools"); ok {
+		if npList, ok := rawNodePools.([]interface{}); ok {
+			for _, item := range npList {
+				if npMap, ok := item.(map[string]interface{}); ok {
+					if id, ok := npMap["id"].(string); ok && id != "" {
+						poolIDSet[id] = struct{}{}
+					}
+				}
+			}
+		}
+	}
+
+	var unknownPools []string
+	for k := range versionsMap {
+		if _, exists := poolIDSet[k]; !exists {
+			unknownPools = append(unknownPools, k)
+		}
+	}
+	if len(unknownPools) > 0 {
+		sort.Strings(unknownPools)
+		return fmt.Errorf("orchestrator_spec.0.kubernetes_spec.0.node_pool_versions contains unknown node pool ID(s) not present in the cluster's node pools: %s", strings.Join(unknownPools, ", "))
+	}
+
+	var missingPools []string
+	for id := range poolIDSet {
+		if _, exists := versionsMap[id]; !exists {
+			missingPools = append(missingPools, id)
+		}
+	}
+	if len(missingPools) > 0 {
+		sort.Strings(missingPools)
+		return fmt.Errorf("orchestrator_spec.0.kubernetes_spec.0.node_pool_versions must include all node pool IDs in the cluster; missing: %s", strings.Join(missingPools, ", "))
+	}
+
+	return nil
+}
+
+func resourceVertexAIModelDevelopmentClusterCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	if !vertexAiModelDevelopmentClusterNodePoolVersionsConfigured(diff) {
+		return nil
+	}
+	if !diff.NewValueKnown("orchestrator_spec.0.kubernetes_spec.0.node_pool_versions") ||
+		!diff.NewValueKnown("node_pools") {
+		return nil
+	}
+	if rawNodePools, ok := diff.GetOk("node_pools"); ok {
+		if npList, ok := rawNodePools.([]interface{}); ok {
+			for i := range npList {
+				if !diff.NewValueKnown(fmt.Sprintf("node_pools.%d.id", i)) {
+					return nil
+				}
+			}
+		}
+	}
+	return validateVertexAIModelDevelopmentClusterNodePoolVersions(diff)
+}
+{{- end }}

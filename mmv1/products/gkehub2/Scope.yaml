@@ -54,8 +54,6 @@ samples:
       - name: gkehub_scope_basic
         resource_id_vars:
           resource_name: my-scope
-        test_env_vars:
-          project: PROJECT_NAME
 parameters:
 properties:
   - name: scopeId
@@ -97,16 +95,10 @@ properties:
     output: true
     properties:
       - name: code
-        type: Enum
+        type: String
         description: |
           Code describes the state of a Scope resource.
         output: true
-        enum_values:
-          - CODE_UNSPECIFIED
-          - CREATING
-          - READY
-          - DELETING
-          - UPDATING
   - name: namespaceLabels
     type: KeyValuePairs
     description: |

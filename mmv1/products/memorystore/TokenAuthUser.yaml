@@ -1,0 +1,85 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: TokenAuthUser
+description: Represents a Token Auth User for a Google Cloud Memorystore instance.
+references:
+  guides:
+    Official Documentation: https://cloud.google.com/memorystore/docs/valkey/
+  api: https://cloud.google.com/memorystore/docs/valkey/reference/rest/v1/projects.locations.instances.tokenAuthUsers
+docs:
+  note: |
+    Removing a `google_memorystore_token_auth_user` resource from the Terraform configuration deletes the user and revokes all of its tokens.
+
+    The `default` user is automatically created when token-based authentication (`TOKEN_AUTH`) is enabled on an instance and is lifecycle-bound to the instance; it cannot be created or deleted via `google_memorystore_token_auth_user`. To view the `default` user's metadata, use the `google_memorystore_token_auth_user` data source.
+supports_indirect_user_project_override: true
+immutable: true
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/tokenAuthUsers
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/tokenAuthUsers/{{user_id}}
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}:addTokenAuthUser
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/tokenAuthUsers/{{user_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/tokenAuthUsers/{{user_id}}
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+custom_code:
+  encoder: templates/terraform/encoders/memorystore_token_auth_user.go.tmpl
+samples:
+  - name: memorystore_token_auth_user_basic
+    primary_resource_id: user-basic
+    steps:
+      - name: memorystore_token_auth_user_basic
+        resource_id_vars:
+          instance_name: user-basic-instance
+          user_id: user-basic-user
+parameters:
+  - name: location
+    type: String
+    description: The location of the Memorystore instance.
+    required: true
+    url_param_only: true
+  - name: instance
+    type: ResourceRef
+    resource: Instance
+    imports: instanceId
+    description: The ID or resource name of the Memorystore instance.
+    required: true
+    url_param_only: true
+    diff_suppress_func: tpgresource.CompareResourceNames
+  - name: userId
+    type: String
+    description: |
+      The unique ID (username) of the Token Auth User.
+      The `default` user cannot be managed with this resource.
+    required: true
+    url_param_only: true
+    validation:
+      function: 'verify.StringNotInSlice([]string{"default"}, false)'
+properties:
+  - name: name
+    type: String
+    description: The full resource name of the Token Auth User.
+    output: true
+  - name: state
+    type: String
+    description: |
+      The current state of the Token Auth User.
+      Possible values:
+      ACTIVE
+      CREATING
+      UPDATING
+      DELETING
+    output: true

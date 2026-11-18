@@ -54,7 +54,6 @@ samples:
           # using a hyphen "-"" because underscore is not a valid instance ID
           instance-id: storage-resize-images
           bucket_id: bucket-id
-          service-account-id: s-a
           location: us-central1
         test_env_vars:
           project_id: PROJECT_NAME
@@ -164,7 +163,7 @@ properties:
         min_version: beta
         output: true
   - name: state
-    type: Enum
+    type: String
     description: |
       The current state of the Extension Instance.
         DEPLOYING:
@@ -183,12 +182,6 @@ properties:
           Config remains so the Instance can be restored.
     min_version: beta
     output: true
-    enum_values:
-      - DEPLOYING
-      - UNINSTALLING
-      - ACTIVE
-      - ERRORED
-      - PAUSED
   - name: errorStatus
     type: NestedObject
     description: |

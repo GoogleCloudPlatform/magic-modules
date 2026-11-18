@@ -15,8 +15,7 @@ package product
 
 import (
 	"log"
-
-	"golang.org/x/exp/slices"
+	"slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )

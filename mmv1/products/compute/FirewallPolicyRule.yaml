@@ -71,8 +71,6 @@ samples:
           folder: 'folder'
           fw_policy: 'fw-policy'
           network: 'network'
-          tag_key: 'tag-key'
-          tag_value: 'tag-value'
         test_vars_overrides:
           # for backward compatible
           folder: '"folder" + randomSuffix'
@@ -86,9 +84,6 @@ samples:
         resource_id_vars:
           folder: 'folder'
           fw_policy: 'fw-policy'
-          network: 'network'
-          tag_key: 'tag-key'
-          tag_value: 'tag-value'
         test_vars_overrides:
           # for backward compatible
           folder: '"folder" + randomSuffix'
@@ -310,13 +305,10 @@ properties:
                 Name of the secure tag, created with TagManager's TagValue API.
               diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
             - name: 'state'
-              type: Enum
+              type: String
               description: |
                 State of the secure tag, either EFFECTIVE or INEFFECTIVE. A secure tag is INEFFECTIVE when it is deleted or its network is deleted.
               output: true
-              enum_values:
-                - 'EFFECTIVE'
-                - 'INEFFECTIVE'
   - name: 'action'
     type: String
     description: 'The Action to perform when the client connection triggers the rule. Valid actions are "allow", "deny", "goto_next" and "apply_security_profile_group".'
@@ -386,13 +378,10 @@ properties:
             Name of the secure tag, created with TagManager's TagValue API.
           diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
         - name: 'state'
-          type: Enum
+          type: String
           description: |
             State of the secure tag, either EFFECTIVE or INEFFECTIVE. A secure tag is INEFFECTIVE when it is deleted or its network is deleted.
           output: true
-          enum_values:
-            - 'EFFECTIVE'
-            - 'INEFFECTIVE'
   - name: 'disabled'
     type: Boolean
     send_empty_value: true

@@ -67,9 +67,6 @@ samples:
         test_vars_overrides:
           # for backward compatible
           policy_orchestrator_id: '"po" + randomSuffix'
-        test_env_vars:
-          project_number: PROJECT_NUMBER
-          project: PROJECT_NAME
 parameters:
   - name: policyOrchestratorId
     type: String

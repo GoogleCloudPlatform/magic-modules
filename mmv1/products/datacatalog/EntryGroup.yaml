@@ -39,18 +39,21 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+exclude_sweeper: true
 deprecation_message: '`google_data_catalog_entry_group` is deprecated and will be removed in a future major release. Use `google_dataplex_entry_group` instead. For steps to transition your Data Catalog users, workloads, and content to Dataplex Catalog, see https://cloud.google.com/dataplex/docs/transition-to-dataplex-catalog.'
 custom_code:
   custom_import: templates/terraform/custom_import/data_catalog_entry_group.go.tmpl
 samples:
   - name: data_catalog_entry_group_basic
     primary_resource_id: basic_entry_group
+    skip_test: 'Data Catalog has been deprecated and shut down'
     steps:
       - name: data_catalog_entry_group_basic
         resource_id_vars:
           entry_group_id: my_group
   - name: data_catalog_entry_group_full
     primary_resource_id: basic_entry_group
+    skip_test: 'Data Catalog has been deprecated and shut down'
     steps:
       - name: data_catalog_entry_group_full
         resource_id_vars:

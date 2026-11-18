@@ -26,7 +26,6 @@ import (
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"gopkg.in/yaml.v3"
 )
 
 // Generates configs to be shown as examples in docs and outputted as tests
@@ -127,6 +126,7 @@ type Examples struct {
 	//  - IDENTITY_USER
 	//  - CHRONICLE_ID
 	//  - VMWAREENGINE_PROJECT
+	//  - ORG_UNIT_ID
 	// This list corresponds to the `get*FromEnv` methods in provider_test.go.
 	TestEnvVars map[string]string `yaml:"test_env_vars,omitempty"`
 
@@ -183,12 +183,9 @@ type Examples struct {
 }
 
 // Set default value for fields
-func (e *Examples) UnmarshalYAML(value *yaml.Node) error {
+func (e *Examples) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type exampleAlias Examples
-	aliasObj := (*exampleAlias)(e)
-
-	err := value.Decode(aliasObj)
-	if err != nil {
+	if err := unmarshal((*exampleAlias)(e)); err != nil {
 		return err
 	}
 
@@ -280,6 +277,7 @@ func (e *Examples) LoadHCLText(sysfs fs.FS) (err error) {
 		"PAP_DESCRIPTION":      "description",
 		"CHRONICLE_ID":         "00000000-0000-0000-0000-000000000000",
 		"VMWAREENGINE_PROJECT": "my-vmwareengine-project",
+		"ORG_UNIT_ID":          "03abcxyz",
 	}
 
 	// Apply doc defaults to test_env_vars from YAML

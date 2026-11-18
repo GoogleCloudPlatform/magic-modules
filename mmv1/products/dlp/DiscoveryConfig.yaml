@@ -47,7 +47,6 @@ samples:
       - name: dlp_discovery_config_basic
         test_env_vars:
           project: PROJECT_NAME
-          location: REGION
   - name: dlp_discovery_config_actions
     primary_resource_id: actions
     exclude_test: true
@@ -67,6 +66,8 @@ samples:
     primary_resource_id: org_folder_paused
     steps:
       - name: dlp_discovery_config_org_folder_paused
+        resource_id_vars:
+          folder_name: my-folder
         test_env_vars:
           project: PROJECT_NAME
           organization: ORG_ID

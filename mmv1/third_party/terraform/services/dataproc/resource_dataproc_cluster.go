@@ -1,6 +1,7 @@
 package dataproc
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -10,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -66,6 +68,7 @@ var (
 		"cluster_config.0.gce_cluster_config.0.reservation_affinity",
 		"cluster_config.0.gce_cluster_config.0.node_group_affinity",
 		"cluster_config.0.gce_cluster_config.0.confidential_instance_config",
+		"cluster_config.0.gce_cluster_config.0.multi_zone_config",
 	}
 
 	schieldedInstanceConfigKeys = []string{
@@ -124,6 +127,9 @@ var (
 		"cluster_config.0.endpoint_config",
 		"cluster_config.0.dataproc_metric_config",
 		"cluster_config.0.auxiliary_node_groups",
+		"cluster_config.0.master_flexible_config",
+		"cluster_config.0.worker_flexible_config",
+		"cluster_config.0.secondary_worker_flexible_config",
 	}
 )
 
@@ -205,6 +211,7 @@ func ResourceDataprocCluster() *schema.Resource {
 			tpgresource.DefaultProviderProject,
 			// User labels are not supported in Dataproc Virtual Cluster
 			tpgresource.SetLabelsDiffWithoutAttributionLabel,
+			secondaryWorkerFlexibleConfigForceNew,
 		),
 
 		SchemaVersion: 1,
@@ -627,12 +634,13 @@ func ResourceDataprocCluster() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 
 									"zone": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										Computed:     true,
-										AtLeastOneOf: gceClusterConfigKeys,
-										ForceNew:     true,
-										Description:  `The GCP zone where your data is stored and used (i.e. where the master and the worker nodes will be created in). If region is set to 'global' (default) then zone is mandatory, otherwise GCP is able to make use of Auto Zone Placement to determine this automatically for you. Note: This setting additionally determines and restricts which computing resources are available for use with other configs such as cluster_config.master_config.machine_type and cluster_config.worker_config.machine_type.`,
+										Type:          schema.TypeString,
+										Optional:      true,
+										Computed:      true,
+										AtLeastOneOf:  gceClusterConfigKeys,
+										ForceNew:      true,
+										ConflictsWith: []string{"cluster_config.0.gce_cluster_config.0.multi_zone_config"},
+										Description:   `The GCP zone where your data is stored and used (i.e. where the master and the worker nodes will be created in). If region is set to 'global' (default) then zone is mandatory, otherwise GCP is able to make use of Auto Zone Placement to determine this automatically for you. Note: This setting additionally determines and restricts which computing resources are available for use with other configs such as cluster_config.master_config.machine_type and cluster_config.worker_config.machine_type.`,
 									},
 
 									"network": {
@@ -835,6 +843,25 @@ func ResourceDataprocCluster() *schema.Resource {
 													ValidateFunc: validation.StringInSlice([]string{"SEV", "SEV_SNP", "TDX"}, false),
 													ForceNew:     true,
 													Description:  `Defines the type of Confidential Compute technology to use.`,
+												},
+											},
+										},
+									},
+									"multi_zone_config": {
+										Type:          schema.TypeList,
+										Optional:      true,
+										ForceNew:      true,
+										AtLeastOneOf:  gceClusterConfigKeys,
+										MaxItems:      1,
+										ConflictsWith: []string{"cluster_config.0.gce_cluster_config.0.zone"},
+										Description:   `Configuration for multi-zonal clusters that can create instances across multiple Zones within the Region.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"target_shape": {
+													Type:        schema.TypeString,
+													Required:    true,
+													ForceNew:    true,
+													Description: `The distribution shape of the nodes in the multi-zonal cluster. Valid values are "ANY".`,
 												},
 											},
 										},
@@ -2430,6 +2457,138 @@ by Dataproc`,
 								},
 							},
 						},
+						"master_flexible_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							AtLeastOneOf: clusterConfigKeys,
+							Computed:     true,
+							MaxItems:     1,
+							Description:  `The configuration for the master flexible instance group in High Obtainability (HO) mode.`,
+							ConflictsWith: []string{
+								"cluster_config.0.master_config",
+								"cluster_config.0.gce_cluster_config.0.zone",
+							},
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"num_instances": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Default:      1,
+										ForceNew:     true,
+										ValidateFunc: validation.IntInSlice([]int{1}),
+										Description:  `Specifies the number of master instances to create. In High Obtainability (HO) mode, this must be 1. Defaults to 1. Changing this forces a new resource to be created.`,
+									},
+									"core_count": {
+										Type:         schema.TypeInt,
+										Required:     true,
+										ForceNew:     true,
+										ValidateFunc: validation.IntInSlice([]int{2, 4, 8, 16, 32}),
+										Description:  `The number of vCPUs per instance. Must be a power of 2: 2, 4, 8, 16, or 32. Changing this forces a new resource to be created.`,
+									},
+									"hardware_class": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										ForceNew:     true,
+										Default:      "STANDARD",
+										ValidateFunc: validation.StringInSlice([]string{"STANDARD", "PERFORMANCE"}, false),
+										Description:  `The hardware class of instances. Allowed values are "STANDARD" and "PERFORMANCE". Defaults to "STANDARD". Changing this forces a new resource to be created.`,
+									},
+									"boot_disk_size_gb": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										ForceNew:    true,
+										Description: `The boot disk size in GB. Changing this forces a new resource to be created.`,
+									},
+								},
+							},
+						},
+						"worker_flexible_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							AtLeastOneOf: clusterConfigKeys,
+							Computed:     true,
+							MaxItems:     1,
+							Description:  `The configuration for the worker flexible instance group in High Obtainability (HO) mode.`,
+							ConflictsWith: []string{
+								"cluster_config.0.worker_config",
+								"cluster_config.0.gce_cluster_config.0.zone",
+							},
+							RequiredWith: []string{"cluster_config.0.master_flexible_config"},
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"num_instances": {
+										Type:         schema.TypeInt,
+										Required:     true,
+										ValidateFunc: validation.IntAtLeast(2),
+										Description:  `Specifies the number of worker instances to create. Represents the desired capacity of the group and is updatable in place.`,
+									},
+									"core_count": {
+										Type:         schema.TypeInt,
+										Required:     true,
+										ForceNew:     true,
+										ValidateFunc: validation.IntInSlice([]int{2, 4, 8, 16, 32}),
+										Description:  `The number of vCPUs per instance. Must be a power of 2: 2, 4, 8, 16, or 32. Changing this forces a new resource to be created.`,
+									},
+									"hardware_class": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										ForceNew:     true,
+										Default:      "STANDARD",
+										ValidateFunc: validation.StringInSlice([]string{"STANDARD", "PERFORMANCE"}, false),
+										Description:  `The hardware class of instances. Allowed values are "STANDARD" and "PERFORMANCE". Defaults to "STANDARD". Changing this forces a new resource to be created.`,
+									},
+									"boot_disk_size_gb": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										ForceNew:    true,
+										Description: `The boot disk size in GB. Changing this forces a new resource to be created.`,
+									},
+								},
+							},
+						},
+						"secondary_worker_flexible_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							AtLeastOneOf: clusterConfigKeys,
+							Computed:     true,
+							MaxItems:     1,
+							Description:  `The configuration for the secondary worker flexible instance group in High Obtainability (HO) mode.`,
+							ConflictsWith: []string{
+								"cluster_config.0.preemptible_worker_config",
+								"cluster_config.0.gce_cluster_config.0.zone",
+							},
+							RequiredWith: []string{"cluster_config.0.master_flexible_config"},
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"num_instances": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Default:      0,
+										ValidateFunc: validation.IntAtLeast(0),
+										Description:  `Specifies the number of secondary worker instances to create. Represents the desired capacity of the group and is updatable in place. Defaults to 0; can be scaled down to 0.`,
+									},
+									"core_count": {
+										Type:         schema.TypeInt,
+										Required:     true,
+										ValidateFunc: validation.IntInSlice([]int{2, 4, 8, 16, 32}),
+										Description:  `The number of vCPUs per instance. Must be a power of 2: 2, 4, 8, 16, or 32. Changing this on an existing secondary worker group forces a new resource to be created.`,
+									},
+									"hardware_class": {
+										Type:         schema.TypeString,
+										Optional:     true,
+										Default:      "STANDARD",
+										ValidateFunc: validation.StringInSlice([]string{"STANDARD", "PERFORMANCE"}, false),
+										Description:  `The hardware class of instances. Allowed values are "STANDARD" and "PERFORMANCE". Defaults to "STANDARD". Changing this on an existing secondary worker group forces a new resource to be created.`,
+									},
+									"boot_disk_size_gb": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										Computed:    true,
+										Description: `The boot disk size in GB. Changing this on an existing secondary worker group forces a new resource to be created.`,
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -2439,6 +2598,56 @@ by Dataproc`,
 		},
 		UseJSONNumber: true,
 	}
+}
+
+// secondaryWorkerFlexibleConfigForceNew forces replacement for known
+// secondary_worker_flexible_config shape changes that Dataproc can't make in
+// place: a changed shape on an existing group, or a group added after creation
+// with a shape that differs from worker_flexible_config. Shape values that are
+// unknown until apply also force replacement.
+func secondaryWorkerFlexibleConfigForceNew(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	const sec = "cluster_config.0.secondary_worker_flexible_config"
+	oldSec, newSec := d.GetChange(sec)
+	if d.Id() == "" || len(newSec.([]interface{})) == 0 {
+		return nil
+	}
+	// The block is Optional+Computed: when it is not in config, nothing changes.
+	if raw := d.GetRawConfig(); !raw.IsNull() && raw.IsKnown() {
+		block, err := cty.GetAttrPath("cluster_config").IndexInt(0).GetAttr("secondary_worker_flexible_config").Apply(raw)
+		if err != nil || block.IsNull() || (block.IsKnown() && block.LengthInt() == 0) {
+			return nil
+		}
+	}
+	added := len(oldSec.([]interface{})) == 0
+	for _, field := range []string{"core_count", "hardware_class", "boot_disk_size_gb"} {
+		key := sec + ".0." + field
+		current, want := d.GetChange(key)
+		if added {
+			// If the value is unknown until apply, replace now: a planned update can't
+			// become a replacement during apply. (An unknown worker_flexible_config
+			// value already forces replacement through its own ForceNew.)
+			if !d.NewValueKnown(key) {
+				return d.ForceNew(sec)
+			}
+			current = d.Get("cluster_config.0.worker_flexible_config.0." + field)
+		} else if !d.NewValueKnown(key) {
+			// An unknown value reads as empty, so it only counts as a change when the
+			// old value is set. Otherwise it is left to the API.
+			if current != 0 && current != "" {
+				if err := d.ForceNew(key); err != nil {
+					return err
+				}
+			}
+			continue
+		}
+		if current == want || current == 0 || current == "" || want == 0 || want == "" {
+			continue
+		}
+		if err := d.ForceNew(key); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // We need to pull metrics' schema out so we can use it to make a set hash func
@@ -2848,6 +3057,60 @@ func expandClusterConfig(d *schema.ResourceData, config *transport_tpg.Config) (
 		log.Println("[INFO] got auxiliary node group config")
 		conf.AuxiliaryNodeGroups = expandAuxiliaryNodeGroupsConfig(v)
 	}
+
+	if cfg, ok := configOptions(d, "cluster_config.0.master_flexible_config"); ok {
+		log.Println("[INFO] got master_flexible_config")
+		conf.MasterFlexibleConfig = &dataproc.FlexibleInstanceGroupConfig{}
+		if v, ok := cfg["num_instances"]; ok {
+			conf.MasterFlexibleConfig.NumInstances = int64(v.(int))
+		}
+		if v, ok := cfg["core_count"]; ok {
+			conf.MasterFlexibleConfig.CoreCount = int64(v.(int))
+		}
+		if v, ok := cfg["hardware_class"]; ok {
+			conf.MasterFlexibleConfig.HardwareClass = v.(string)
+		}
+		if v, ok := cfg["boot_disk_size_gb"]; ok {
+			conf.MasterFlexibleConfig.BootDiskSizeGb = int64(v.(int))
+		}
+	}
+
+	if cfg, ok := configOptions(d, "cluster_config.0.worker_flexible_config"); ok {
+		log.Println("[INFO] got worker_flexible_config")
+		conf.WorkerFlexibleConfig = &dataproc.FlexibleInstanceGroupConfig{}
+		if v, ok := cfg["num_instances"]; ok {
+			conf.WorkerFlexibleConfig.NumInstances = int64(v.(int))
+		}
+		if v, ok := cfg["core_count"]; ok {
+			conf.WorkerFlexibleConfig.CoreCount = int64(v.(int))
+		}
+		if v, ok := cfg["hardware_class"]; ok {
+			conf.WorkerFlexibleConfig.HardwareClass = v.(string)
+		}
+		if v, ok := cfg["boot_disk_size_gb"]; ok {
+			conf.WorkerFlexibleConfig.BootDiskSizeGb = int64(v.(int))
+		}
+	}
+
+	if cfg, ok := configOptions(d, "cluster_config.0.secondary_worker_flexible_config"); ok {
+		log.Println("[INFO] got secondary_worker_flexible_config")
+		conf.SecondaryWorkerFlexibleConfig = &dataproc.FlexibleInstanceGroupConfig{}
+		if v, ok := cfg["num_instances"]; ok {
+			conf.SecondaryWorkerFlexibleConfig.NumInstances = int64(v.(int))
+			if conf.SecondaryWorkerFlexibleConfig.NumInstances == 0 {
+				conf.SecondaryWorkerFlexibleConfig.ForceSendFields = append(conf.SecondaryWorkerFlexibleConfig.ForceSendFields, "NumInstances")
+			}
+		}
+		if v, ok := cfg["core_count"]; ok {
+			conf.SecondaryWorkerFlexibleConfig.CoreCount = int64(v.(int))
+		}
+		if v, ok := cfg["hardware_class"]; ok {
+			conf.SecondaryWorkerFlexibleConfig.HardwareClass = v.(string)
+		}
+		if v, ok := cfg["boot_disk_size_gb"]; ok {
+			conf.SecondaryWorkerFlexibleConfig.BootDiskSizeGb = int64(v.(int))
+		}
+	}
 	return conf, nil
 }
 
@@ -3006,6 +3269,13 @@ func expandGceClusterConfig(d *schema.ResourceData, config *transport_tpg.Config
 		}
 		if v, ok := cfgCic["confidential_instance_type"]; ok && v.(string) != "" {
 			conf.ConfidentialInstanceConfig.ConfidentialInstanceType = v.(string)
+		}
+	}
+	if v, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.multi_zone_config"); ok {
+		cfgMzc := v.([]interface{})[0].(map[string]interface{})
+		conf.MultiZoneConfig = &dataproc.MultiZoneConfig{}
+		if v, ok := cfgMzc["target_shape"]; ok {
+			conf.MultiZoneConfig.TargetShape = v.(string)
 		}
 	}
 	return conf, nil
@@ -3439,6 +3709,51 @@ func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) err
 		updMask = append(updMask, "config.secondary_worker_config.num_instances")
 	}
 
+	if d.HasChange("cluster_config.0.worker_flexible_config.0.num_instances") {
+		desiredNumWorks := d.Get("cluster_config.0.worker_flexible_config.0.num_instances").(int)
+		cluster.Config.WorkerFlexibleConfig = &dataproc.FlexibleInstanceGroupConfig{
+			NumInstances:    int64(desiredNumWorks),
+			ForceSendFields: []string{"NumInstances"},
+		}
+
+		updMask = append(updMask, "config.worker_flexible_config.num_instances")
+	}
+
+	if d.HasChange("cluster_config.0.secondary_worker_flexible_config") {
+		const secPrefix = "cluster_config.0.secondary_worker_flexible_config.0."
+		sec := &dataproc.FlexibleInstanceGroupConfig{
+			NumInstances:    int64(d.Get(secPrefix + "num_instances").(int)),
+			ForceSendFields: []string{"NumInstances"},
+		}
+		updMask = append(updMask, "config.secondary_worker_flexible_config.num_instances")
+
+		// Dataproc only updates num_instances in place, and a secondary group added
+		// after creation gets the worker_flexible_config shape. Send any shape field
+		// that differs from that so the API rejects the update rather than ignoring it.
+		oldSec, _ := d.GetChange("cluster_config.0.secondary_worker_flexible_config")
+		current := func(field string) interface{} {
+			if len(oldSec.([]interface{})) == 0 {
+				return d.Get("cluster_config.0.worker_flexible_config.0." + field)
+			}
+			old, _ := d.GetChange(secPrefix + field)
+			return old
+		}
+		if v := d.Get(secPrefix + "core_count").(int); v != current("core_count").(int) {
+			sec.CoreCount = int64(v)
+			updMask = append(updMask, "config.secondary_worker_flexible_config.core_count")
+		}
+		if v := d.Get(secPrefix + "hardware_class").(string); v != current("hardware_class").(string) {
+			sec.HardwareClass = v
+			updMask = append(updMask, "config.secondary_worker_flexible_config.hardware_class")
+		}
+		// boot_disk_size_gb is Optional+Computed: 0 means unset.
+		if v := d.Get(secPrefix + "boot_disk_size_gb").(int); v != 0 && v != current("boot_disk_size_gb").(int) {
+			sec.BootDiskSizeGb = int64(v)
+			updMask = append(updMask, "config.secondary_worker_flexible_config.boot_disk_size_gb")
+		}
+		cluster.Config.SecondaryWorkerFlexibleConfig = sec
+	}
+
 	if d.HasChange("cluster_config.0.autoscaling_config") {
 		desiredPolicy := d.Get("cluster_config.0.autoscaling_config.0.policy_uri").(string)
 		cluster.Config.AutoscalingConfig = &dataproc.AutoscalingConfig{
@@ -3501,6 +3816,8 @@ func resourceDataprocClusterUpdate(d *schema.ResourceData, meta interface{}) err
 		patch.UpdateMask(strings.Join(updMask, ","))
 		op, err := patch.Do()
 		if err != nil {
+			// Nothing was changed, so keep the prior state instead of the planned values.
+			d.Partial(true)
 			return err
 		}
 
@@ -3725,11 +4042,59 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 		"encryption_config":         flattenEncryptionConfig(d, cfg.EncryptionConfig),
 		"autoscaling_config":        flattenAutoscalingConfig(d, cfg.AutoscalingConfig),
 		"security_config":           flattenSecurityConfig(d, cfg.SecurityConfig),
-		"preemptible_worker_config": flattenPreemptibleInstanceGroupConfig(d, cfg.SecondaryWorkerConfig),
+		"preemptible_worker_config": flattenPreemptibleInstanceGroupConfig(d, cfg.SecondaryWorkerConfig, cfg.SecondaryWorkerFlexibleConfig),
 		"metastore_config":          flattenMetastoreConfig(d, cfg.MetastoreConfig),
 		"lifecycle_config":          flattenLifecycleConfig(d, cfg.LifecycleConfig),
 		"endpoint_config":           flattenEndpointConfig(d, cfg.EndpointConfig),
 		"dataproc_metric_config":    flattenDataprocMetricConfig(d, cfg.DataprocMetricConfig),
+	}
+
+	if cfg.MasterFlexibleConfig != nil {
+		data["master_flexible_config"] = []map[string]interface{}{
+			{
+				"num_instances":     cfg.MasterFlexibleConfig.NumInstances,
+				"core_count":        cfg.MasterFlexibleConfig.CoreCount,
+				"hardware_class":    cfg.MasterFlexibleConfig.HardwareClass,
+				"boot_disk_size_gb": cfg.MasterFlexibleConfig.BootDiskSizeGb,
+			},
+		}
+	}
+
+	if cfg.WorkerFlexibleConfig != nil {
+		data["worker_flexible_config"] = []map[string]interface{}{
+			{
+				"num_instances":     cfg.WorkerFlexibleConfig.NumInstances,
+				"core_count":        cfg.WorkerFlexibleConfig.CoreCount,
+				"hardware_class":    cfg.WorkerFlexibleConfig.HardwareClass,
+				"boot_disk_size_gb": cfg.WorkerFlexibleConfig.BootDiskSizeGb,
+			},
+		}
+	}
+
+	if cfg.SecondaryWorkerFlexibleConfig != nil {
+		bootDiskSizeGb := cfg.SecondaryWorkerFlexibleConfig.BootDiskSizeGb
+		// For a secondary group added after creation, the API reports the boot disk
+		// size only in secondaryWorkerConfig.diskConfig.
+		if bootDiskSizeGb == 0 && cfg.SecondaryWorkerConfig != nil && cfg.SecondaryWorkerConfig.DiskConfig != nil {
+			bootDiskSizeGb = cfg.SecondaryWorkerConfig.DiskConfig.BootDiskSizeGb
+		}
+		data["secondary_worker_flexible_config"] = []map[string]interface{}{
+			{
+				"num_instances":     cfg.SecondaryWorkerFlexibleConfig.NumInstances,
+				"core_count":        cfg.SecondaryWorkerFlexibleConfig.CoreCount,
+				"hardware_class":    cfg.SecondaryWorkerFlexibleConfig.HardwareClass,
+				"boot_disk_size_gb": bootDiskSizeGb,
+			},
+		}
+	} else if old, ok := d.Get("cluster_config.0.secondary_worker_flexible_config").([]interface{}); ok && len(old) > 0 && old[0] != nil {
+		// A secondary group added after creation is omitted from the API response
+		// once it is scaled to 0. Keep the block in state with 0 instances.
+		sec := map[string]interface{}{}
+		for k, v := range old[0].(map[string]interface{}) {
+			sec[k] = v
+		}
+		sec["num_instances"] = 0
+		data["secondary_worker_flexible_config"] = []interface{}{sec}
 	}
 
 	if len(cfg.InitializationActions) > 0 {
@@ -4060,18 +4425,29 @@ func flattenGceClusterConfig(d *schema.ResourceData, gcc *dataproc.GceClusterCon
 			},
 		}
 	}
+	if gcc.MultiZoneConfig != nil {
+		gceConfig["multi_zone_config"] = []map[string]interface{}{
+			{
+				"target_shape": gcc.MultiZoneConfig.TargetShape,
+			},
+		}
+	}
 
 	return []map[string]interface{}{gceConfig}
 }
 
-func flattenPreemptibleInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.InstanceGroupConfig) []map[string]interface{} {
+func flattenPreemptibleInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.InstanceGroupConfig, flexCfg *dataproc.FlexibleInstanceGroupConfig) []map[string]interface{} {
 	// if num_instances is 0, icg will always be returned nil. This means the
 	// server has discarded diskconfig etc. However, the only way to remove the
 	// preemptible group is to set the size to 0, because it's O+C. Many users
 	// won't remove the rest of the config (eg disk config). Therefore, we need to
 	// preserve the other set fields by using the old state to stop users from
 	// getting a diff.
-	if icg == nil {
+	// In High Obtainability (HO) mode (when secondary_worker_flexible_config is
+	// used), preemptible_worker_config cannot be configured in HCL and is only
+	// populated as a computed reflection of the resolved secondary worker group.
+	// Do not copy stale state when secondary_worker_flexible_config scales to 0.
+	if icg == nil && flexCfg == nil {
 		icgSchema := d.Get("cluster_config.0.preemptible_worker_config")
 		log.Printf("[DEBUG] state of preemptible is %#v", icgSchema)
 		if v, ok := icgSchema.([]interface{}); ok && len(v) > 0 {

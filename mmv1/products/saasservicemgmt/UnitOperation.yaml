@@ -38,10 +38,8 @@ samples:
     bootstrap_iam:
       - member: serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com
         role: roles/saasservicemgmt.serviceAgent
-    min_version: beta
     steps:
       - name: saas_runtime_unit_operation_basic
-        min_version: beta
         ignore_read_extra:
           - etag
           - error_category
@@ -54,7 +52,6 @@ samples:
           provision_operation_name: provision-unit-operation
           release_name: example-release
           saas_name: example-saas
-          tenant_name: example-tenant
           tenant_project_name: tenant
           unit_name: example-unit
           unitkind_name: vm-unitkind

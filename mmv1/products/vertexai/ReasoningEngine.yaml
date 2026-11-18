@@ -31,6 +31,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 60
+sweeper:
+  query_string: "?force=true"
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -44,8 +46,13 @@ samples:
     exclude_basic_doc: true
     steps:
       - name: 'vertex_ai_reasoning_engine_deletion_policy'
+        config_path: 'templates/terraform/samples/services/vertexai/vertex_ai_reasoning_engine_basic.tf.tmpl'
         resource_id_vars:
           name: 'reasoning-engine'
+        vars:
+          description: 'A reasoning engine with deletion policy'
+          labels: null
+          deletion_policy: 'FORCE'
         ignore_read_extra:
           - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_basic'
@@ -55,6 +62,10 @@ samples:
       - name: 'vertex_ai_reasoning_engine_basic'
         resource_id_vars:
           name: 'reasoning-engine'
+        vars:
+          description: 'A basic reasoning engine'
+          labels: '{"key" = "value"}'
+          deletion_policy: null
         ignore_read_extra:
           - 'deletion_policy'
   - name: 'vertex_ai_reasoning_engine_source_based_deployment'
@@ -248,7 +259,7 @@ properties:
         description: |
           Optional. The OSS agent framework used to develop the agent.
       - name: 'classMethods'
-        type: String
+        type: JsonValue
         description: |
           Optional. Declarations for object class methods in OpenAPI
           specification format.
@@ -498,11 +509,6 @@ properties:
             }
           ])
           ```
-        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-        custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-        validation:
-          function: 'validation.StringIsJSON'
       - name: 'deploymentSpec'
         type: NestedObject
         default_from_api: true
@@ -866,15 +872,10 @@ properties:
                   Required. Configuration for the Agent Development Kit (ADK).
                 properties:
                   - name: 'jsonConfig'
-                    type: String
+                    type: JsonValue
                     required: true
                     description: |-
                       Required. The value of the ADK config in JSON format.
-                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                    custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-                    validation:
-                      function: 'validation.StringIsJSON'
               - name: 'inlineSource'
                 type: NestedObject
                 description: |-
@@ -916,15 +917,10 @@ properties:
         description: |-
           Optional. The resource name of the linked ExampleStore.
       - name: 'agentCard'
-        type: String
+        type: JsonValue
         min_version: 'beta'
         description: |-
           Optional. The A2A Agent Card for the agent (if available).
-        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-        custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-        validation:
-          function: 'validation.StringIsJSON'
       - name: 'buildSpec'
         type: NestedObject
         description: |-
@@ -1007,9 +1003,6 @@ properties:
             properties:
               - name: 'defaultTtl'
                 type: String
-                exactly_one_of:
-                  - defaultTtl
-                  - granularTtlConfig
                 description: |-
                   The default TTL duration of the memories in the Memory Bank.
               - name: 'granularTtlConfig'
@@ -1060,9 +1053,6 @@ properties:
                       - name: 'managedMemoryTopic'
                         type: NestedObject
                         # Note: exactly_one_of within array elements is not enforced client-side by MM; relies on backend API server validation.
-                        exactly_one_of:
-                          - managedMemoryTopic
-                          - customMemoryTopic
                         description: |-
                           Optional. Managed memory topic.
                         properties:
@@ -1189,14 +1179,9 @@ properties:
                                                 description: |-
                                                   The name of the function to call.
                                               - name: 'args'
-                                                type: String
+                                                type: JsonValue
                                                 description: |-
                                                   The function parameters and values in JSON object format.
-                                                state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                                                custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                                                custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-                                                validation:
-                                                  function: 'validation.StringIsJSON'
                                           - name: 'functionResponse'
                                             type: NestedObject
                                             description: |-
@@ -1212,14 +1197,9 @@ properties:
                                                   The name of the function to call.
                                                 required: true
                                               - name: 'response'
-                                                type: String
+                                                type: JsonValue
                                                 description: |-
                                                   The function response in JSON object format.
-                                                state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                                                custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                                                custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-                                                validation:
-                                                  function: 'validation.StringIsJSON'
                                           - name: 'executableCode'
                                             type: NestedObject
                                             description: |-
@@ -1306,6 +1286,19 @@ properties:
                                                       description: |-
                                                         Transcript of the word.
                                                       required: true
+                                          - name: 'speechMetadata'
+                                            type: NestedObject
+                                            description: |-
+                                              Turn-level metadata for speech generation. May be set alongside `text` to attach speaker and style information to a text part.
+                                            properties:
+                                              - name: 'speaker'
+                                                type: String
+                                                description: |-
+                                                  Identifies which speaker is speaking this turn.
+                                              - name: 'style'
+                                                type: String
+                                                description: |-
+                                                  Natural language description of the vocal style (e.g., "cheerful").
                       - name: 'generatedMemories'
                         type: Array
                         description: |-
@@ -1359,15 +1352,10 @@ properties:
                           Required. Unique ID identifying the memory schema.
                         required: true
                       - name: 'memorySchema'
-                        type: String
+                        type: JsonValue
                         api_name: 'schema'
                         description: |-
                           Optional. The memory schema defined as an OpenAPI Schema Object JSON string.
-                        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                        custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-                        validation:
-                          function: 'validation.StringIsJSON'
       - name: 'exampleStoreConfig'
         type: NestedObject
         min_version: 'beta'

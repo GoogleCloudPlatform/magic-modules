@@ -25,10 +25,9 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
-
-	"golang.org/x/exp/slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
@@ -59,6 +58,7 @@ func NewTerraformGoogleConversion(product *api.Product, versionName string, star
 	}
 
 	if product != nil {
+		t.Product.ImportPath = ImportPathFromVersion(versionName)
 		for _, r := range t.Product.Objects {
 			r.ImportPath = ImportPathFromVersion(versionName)
 		}
@@ -132,6 +132,20 @@ func (tgc TerraformGoogleConversion) GenerateResource(object api.Resource, templ
 	templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
 }
 
+func (tgc TerraformGoogleConversion) GenerateProduct(outputFolder string) {
+	productName := tgc.Product.ApiName
+	targetFolder := path.Join(outputFolder, "converters/google/resources/services", productName)
+	if _, err := os.Stat(targetFolder); os.IsNotExist(err) {
+		return
+	}
+
+	targetFile := path.Join("converters/google/resources/services", productName, "product.go")
+	targetFilePath := path.Join(outputFolder, targetFile)
+	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName, tgc.templateFS)
+	templateData.GenerateProductFile(targetFilePath, *tgc.Product)
+	tgc.replaceImportPath(outputFolder, targetFile)
+}
+
 // Generate the IAM policy for this object. This is used to query and test
 // IAM policies separately from the resource itself
 // Docs are generated for the terraform provider, not here.
@@ -193,7 +207,6 @@ func (tgc TerraformGoogleConversion) CompileCommonFiles(outputFolder string, pro
 	resourceConverters := map[string]string{
 		"converters/google/resources/resource_converters.go":                            "third_party/tgc/resource_converters.go.tmpl",
 		"converters/google/resources/services/bigquery/iam_bigquery_dataset.go":         "third_party/terraform/services/bigquery/iam_bigquery_dataset.go.tmpl",
-		"converters/google/resources/services/compute/client.go":                        "third_party/terraform/services/compute/client.go.tmpl",
 		"converters/google/resources/services/compute/compute_instance.go":              "third_party/tgc/services/compute/compute_instance.go.tmpl",
 		"converters/google/resources/services/compute/compute_instance_helpers.go":      "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
 		"converters/google/resources/services/compute/compute_instance_http_helpers.go": "third_party/terraform/services/compute/compute_instance_http_helpers.go.tmpl",
@@ -217,6 +230,7 @@ func (tgc TerraformGoogleConversion) CompileCommonFiles(outputFolder string, pro
 			}
 		}
 		tgc.CompileFileList(outputFolder, filteredFiles, *templateData, products)
+		tgc.GenerateProduct(outputFolder)
 	} else {
 		// Shared compilation
 		tgc.generateCaiIamResources(products)
@@ -398,7 +412,6 @@ func (tgc TerraformGoogleConversion) CopyCommonFiles(outputFolder string, genera
 		"converters/google/resources/services/storage/storage_bucket.go":                        "third_party/tgc/services/storage/storage_bucket.go",
 		"converters/google/resources/services/cloudfunctions/cloudfunctions_function.go":        "third_party/tgc/services/cloudfunctions/cloudfunctions_function.go",
 		"converters/google/resources/services/cloudfunctions/cloudfunctions_cloud_function.go":  "third_party/tgc/services/cloudfunctions/cloudfunctions_cloud_function.go",
-		"converters/google/resources/services/bigquery/product.go":                              "third_party/tgc/services/bigquery/product.go",
 		"converters/google/resources/services/bigquery/bigquery_table.go":                       "third_party/tgc/services/bigquery/bigquery_table.go",
 		"converters/google/resources/services/bigtable/bigtable_cluster.go":                     "third_party/tgc/services/bigtable/bigtable_cluster.go",
 		"converters/google/resources/services/bigtable/bigtable_instance.go":                    "third_party/tgc/services/bigtable/bigtable_instance.go",
@@ -414,10 +427,6 @@ func (tgc TerraformGoogleConversion) CopyCommonFiles(outputFolder string, genera
 		"converters/google/resources/services/resourcemanager/project_service.go":               "third_party/tgc/services/resourcemanager/project_service.go",
 		"converters/google/resources/services/monitoring/monitoring_slo_helper.go":              "third_party/tgc/services/monitoring/monitoring_slo_helper.go",
 		"converters/google/resources/services/resourcemanager/service_account.go":               "third_party/tgc/services/resourcemanager/service_account.go",
-		"converters/google/resources/services/compute/product.go":                               "third_party/tgc/services/compute/product.go",
-		"converters/google/resources/services/kms/product.go":                                   "third_party/tgc/services/kms/product.go",
-		"converters/google/resources/services/pubsub/product.go":                                "third_party/tgc/services/pubsub/product.go",
-		"converters/google/resources/services/spanner/product.go":                               "third_party/tgc/services/spanner/product.go",
 		"converters/google/resources/services/compute/image.go":                                 "third_party/terraform/services/compute/image.go",
 		"converters/google/resources/services/compute/disk_type.go":                             "third_party/terraform/services/compute/disk_type.go",
 		"converters/google/resources/services/kms/client.go":                                    "third_party/terraform/services/kms/client.go",

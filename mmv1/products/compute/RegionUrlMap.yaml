@@ -142,7 +142,6 @@ samples:
           l7_xlb_backend_service: 'l7-xlb-backend-service'
           regional_l7_xlb_map: 'regional-l7-xlb-map'
           l7_xlb_proxy: 'l7-xlb-proxy'
-          l7_xlb_forwarding_rule: 'l7-xlb-forwarding-rule'
   - name: 'region_url_map_path_template_match'
     primary_resource_id: 'urlmap'
     steps:

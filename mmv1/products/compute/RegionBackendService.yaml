@@ -1773,7 +1773,7 @@ properties:
     type: String
     description: |
       URL to networkservices.ServiceLbPolicy resource.
-      Can only be set if load balancing scheme is EXTERNAL_MANAGED or INTERNAL_MANAGED.
+      Can only be set if load balancing scheme is EXTERNAL_MANAGED, INTERNAL_MANAGED or INTERNAL_SELF_MANAGED.
       The service lb policy must be regional and in the same region as the backend service.
   - name: 'tlsSettings'
     type: NestedObject
@@ -1805,15 +1805,9 @@ properties:
             - name: 'dnsName'
               type: String
               description: The SAN specified as a DNS Name.
-              exactly_one_of:
-                - tlsSettings.0.uniform_resource_identifier
-                - tlsSettings.0.dns_name
             - name: 'uniformResourceIdentifier'
               type: String
               description: The SAN specified as a URI.
-              exactly_one_of:
-                - tlsSettings.0.uniform_resource_identifier
-                - tlsSettings.0.dns_name
       - name: 'authenticationConfig'
         type: String
         description: |

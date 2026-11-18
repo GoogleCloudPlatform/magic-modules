@@ -25,7 +25,6 @@ import (
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"github.com/otiai10/copy"
 )
 
 // Code generator for a library converting GCP CAI objects to Terraform state.
@@ -75,14 +74,12 @@ func (cai2hcl CaiToTerraformConversion) CopyCommonFiles(outputFolder string, gen
 	if cai2hcl.Product != nil {
 		srcDir := filepath.Join("third_party/cai2hcl/services", cai2hcl.Product.ApiName)
 		dstDir := filepath.Join(outputFolder, "services", cai2hcl.Product.ApiName)
-		if err := copy.Copy(srcDir, dstDir); err != nil && !errors.Is(err, os.ErrNotExist) {
+		if err := copyDir(srcDir, dstDir, nil); err != nil && !errors.Is(err, os.ErrNotExist) {
 			log.Println(fmt.Errorf("error copying service directory %v: %v", srcDir, err))
 		}
 	} else {
-		if err := copy.Copy("third_party/cai2hcl", outputFolder, copy.Options{
-			Skip: func(srcinfo os.FileInfo, src, dest string) (bool, error) {
-				return strings.Contains(src, "/services/"), nil
-			},
+		if err := copyDir("third_party/cai2hcl", outputFolder, func(src string) bool {
+			return strings.Contains(src, "/services/")
 		}); err != nil {
 			log.Println(fmt.Errorf("error copying directory %v: %v", outputFolder, err))
 		}

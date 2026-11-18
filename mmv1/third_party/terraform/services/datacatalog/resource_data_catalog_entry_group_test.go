@@ -9,6 +9,7 @@ import (
 
 func TestAccDataCatalogEntryGroup_update(t *testing.T) {
 	t.Parallel()
+	t.Skip("Data Catalog has been deprecated and shut down")
 
 	randomSuffix := acctest.RandString(t, 10)
 

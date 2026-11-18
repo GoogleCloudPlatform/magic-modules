@@ -1,0 +1,41 @@
+func isDiscoveryEngineEmailPrincipal(p string) bool {
+	return strings.Contains(p, "@") && !strings.Contains(p, "/")
+}
+
+func discoveryEngineUserPrincipalsMatch(a, b string) bool {
+	if a == b {
+		return true
+	}
+	return isDiscoveryEngineEmailPrincipal(a) && isDiscoveryEngineEmailPrincipal(b) && strings.EqualFold(a, b)
+}
+
+func discoveryEngineUserPrincipalDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	return discoveryEngineUserPrincipalsMatch(old, new)
+}
+
+func checkDiscoveryEngineUserLicenseBatchErrors(opRes map[string]interface{}) error {
+	if opRes == nil {
+		return nil
+	}
+	rawSamples, ok := opRes["errorSamples"].([]interface{})
+	if !ok || len(rawSamples) == 0 {
+		return nil
+	}
+	var msgs []string
+	for _, sample := range rawSamples {
+		if m, ok := sample.(map[string]interface{}); ok {
+			msg, _ := m["message"].(string)
+			if code, hasCode := m["code"]; hasCode && msg != "" {
+				msgs = append(msgs, fmt.Sprintf("(code %v) %s", code, msg))
+			} else if msg != "" {
+				msgs = append(msgs, msg)
+			} else {
+				b, _ := json.Marshal(m)
+				msgs = append(msgs, string(b))
+			}
+		} else {
+			msgs = append(msgs, fmt.Sprintf("%v", sample))
+		}
+	}
+	return fmt.Errorf("batchUpdateUserLicenses reported per-user error(s): %s", strings.Join(msgs, "; "))
+}

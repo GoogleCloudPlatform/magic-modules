@@ -12,11 +12,10 @@ location          = "us-central1"
 
 resource "google_vertex_ai_tensorboard_run" "{{$.PrimaryResourceId}}" {
   location          = "us-central1"
-  display_name      = "sample run"
+  display_name      = "{{index $.Vars "display_name"}}"
+  description       = "{{index $.Vars "description"}}"
   tensorboard       = basename(google_vertex_ai_tensorboard.tensorboard.id)
   experiment        = google_vertex_ai_tensorboard_experiment.experiment.tensorboard_experiment_id
   tensorboard_run_id = "{{index $.ResourceIdVars "tensorboardRunId"}}"
-  labels            = {
-    "key" : "value"
-  }
+  labels            = {{index $.Vars "labels"}}
 }

@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/go-version"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
@@ -57,36 +56,41 @@ var (
 				// This should be kept Optional. Expressing the
 				// parent with no entries and omitting the
 				// parent entirely are semantically different.
-				Optional: true,
-				Elem:     cidrBlockConfig,
-				Description: `External networks that can access the Kubernetes cluster master through HTTPS.`,
+				Optional:         true,
+				Elem:             cidrBlockConfig,
+				DiffSuppressFunc: containerClusterMasterAuthorizedNetworksConfigSuppress,
+				Description:      `External networks that can access the Kubernetes cluster master through HTTPS.`,
 			},
 			"gcp_public_cidrs_access_enabled": {
-				Type: schema.TypeBool,
-				Optional: true,
-				Computed: true,
-				Description: `Whether Kubernetes master is accessible via Google Compute Engine Public IPs.`,
+				Type:             schema.TypeBool,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: containerClusterMasterAuthorizedNetworksConfigSuppress,
+				Description:      `Whether Kubernetes master is accessible via Google Compute Engine Public IPs.`,
 			},
 			"private_endpoint_enforcement_enabled": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Computed: 	 true,
-				Description: `Whether authorized networks is enforced on the private endpoint or not. Defaults to false.`,
+				Type:             schema.TypeBool,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: containerClusterMasterAuthorizedNetworksConfigSuppress,
+				Description:      `Whether authorized networks is enforced on the private endpoint or not. Defaults to false.`,
 			},
 		},
 	}
 	cidrBlockConfig = &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"cidr_block": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.IsCIDRNetwork(0, 32),
-				Description: `External network that can access Kubernetes master through HTTPS. Must be specified in CIDR notation.`,
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateFunc:     validation.IsCIDRNetwork(0, 32),
+				DiffSuppressFunc: containerClusterMasterAuthorizedNetworksConfigSuppress,
+				Description:      `External network that can access Kubernetes master through HTTPS. Must be specified in CIDR notation.`,
 			},
 			"display_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Description: `Field for users to identify CIDR blocks.`,
+				Type:             schema.TypeString,
+				Optional:         true,
+				DiffSuppressFunc: containerClusterMasterAuthorizedNetworksConfigSuppress,
+				Description:      `Field for users to identify CIDR blocks.`,
 			},
 		},
 	}
@@ -228,6 +232,24 @@ func isBeenEnabled(_ context.Context, old, new, _ interface{}) bool {
 	return false
 }
 
+func suppressDiffForDnsConfig(k, oldValue, newValue string, d *schema.ResourceData) bool {
+	if suppressDiffForAutopilot(k, oldValue, newValue, d) {
+		return true
+	}
+	// If ever set, the API permanently returns an empty block in the response
+	if k == "dns_config.#" && oldValue == "1" && newValue == "0" {
+		clusterDns, _ := d.GetChange("dns_config.0.cluster_dns")
+		clusterDnsScope, _ := d.GetChange("dns_config.0.cluster_dns_scope")
+		clusterDnsDomain, _ := d.GetChange("dns_config.0.cluster_dns_domain")
+		avpcDomain, _ := d.GetChange("dns_config.0.additive_vpc_scope_dns_domain")
+		return (clusterDns == "" || clusterDns == "PROVIDER_UNSPECIFIED") &&
+			(clusterDnsScope == "" || clusterDnsScope == "DNS_SCOPE_UNSPECIFIED") &&
+			clusterDnsDomain == "" &&
+			avpcDomain == ""
+	}
+	return false
+}
+
 func suppressDiffForClusterDns(k, o, n string, d *schema.ResourceData) bool {
 	if o == "" && n == "PROVIDER_UNSPECIFIED" {
 		return true
@@ -236,7 +258,7 @@ func suppressDiffForClusterDns(k, o, n string, d *schema.ResourceData) bool {
 }
 
 func suppressDiffForClusterDnsScope(k, o, n string, d *schema.ResourceData) bool {
-	if o == "" && n == "DNS_SCOPE_UNSPECIFIED" {
+	if (o == "" && n == "DNS_SCOPE_UNSPECIFIED") || (o == "DNS_SCOPE_UNSPECIFIED" && n == "") {
 		return true
 	}
 	return false
@@ -529,6 +551,7 @@ func ResourceContainerCluster() *schema.Resource {
 							AtLeastOneOf: addonsConfigKeys,
 							MaxItems:     1,
 							Description:  `The status of the Parallelstore CSI driver addon, which allows the usage of Parallelstore instances as volumes. Defaults to disabled; set enabled = true to enable.`,
+							Deprecated:   "`addons_config.parallelstore_csi_driver_config` is deprecated and will be removed in a future major release. Use `addons_config.lustre_csi_driver_config` instead.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"enabled": {
@@ -973,7 +996,7 @@ func ResourceContainerCluster() *schema.Resource {
 													Optional:     true,
 													Computed:     true,
 													Description:  `Update strategy of the node pool.`,
-													ValidateFunc: validation.StringInSlice([]string{"NODE_POOL_UPDATE_STRATEGY_UNSPECIFIED", "BLUE_GREEN", "SURGE"}, false),
+													ValidateFunc: validation.StringInSlice([]string{"NODE_POOL_UPDATE_STRATEGY_UNSPECIFIED", "BLUE_GREEN", "SURGE", "SHORT_LIVED"}, false),
 												},
 												"blue_green_settings": {
 													Type:        schema.TypeList,
@@ -1138,11 +1161,10 @@ func ResourceContainerCluster() *schema.Resource {
 				Optional:    true,
 				ForceNew:    true,
 				Description: `Whether to enable Cloud TPU resources in this cluster.`,
+				Deprecated:  "`enable_tpu` is deprecated and will be removed in a future major release. Configure TPUs using `google_container_node_pool` instead. See https://docs.cloud.google.com/kubernetes-engine/docs/how-to/tpus#terraform",
 {{- if ne $.TargetVersionName "ga" }}
 				ConflictsWith: []string{"tpu_config"},
-				Computed: true,
-				// TODO: deprecate when tpu_config is correctly returned by the API
-				// Deprecated: "Deprecated in favor of tpu_config",
+				Computed:      true,
 {{- end }}
 			},
 
@@ -1153,6 +1175,7 @@ func ResourceContainerCluster() *schema.Resource {
 				Computed:    true,
 				MaxItems:    1,
 				Description: `TPU configuration for the cluster.`,
+				Deprecated:  "`tpu_config` is deprecated and will be removed in a future major release. Configure TPUs using `google_container_node_pool` instead. See https://docs.cloud.google.com/kubernetes-engine/docs/how-to/tpus#terraform",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
@@ -1235,10 +1258,11 @@ func ResourceContainerCluster() *schema.Resource {
 			},
 
 			"initial_node_count": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				ForceNew:    true,
-				Description: `The number of nodes to create in this cluster's default node pool. In regional or multi-zonal clusters, this is the number of nodes per zone. Must be set if node_pool is not set. If you're using google_container_node_pool objects with no default node pool, you'll need to set this to a value of at least 1, alongside setting remove_default_node_pool to true.`,
+				Type:             schema.TypeInt,
+				Optional:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: containerClusterInitialNodeCountDiffSuppress,
+				Description:      `The number of nodes to create in this cluster's default node pool. In regional or multi-zonal clusters, this is the number of nodes per zone. When omitted (or set to 0) with no node_config or node_pool blocks defined, the cluster is created without a default node pool. This requires a GKE version that supports clusters without a default node pool (1.36.4-gke.1469000+). For older GKE versions, if you're using google_container_node_pool objects with no default node pool, you'll need to set this to a value of at least 1, alongside setting remove_default_node_pool to true.`,
 			},
 
 			"logging_config": {
@@ -1803,12 +1827,13 @@ func ResourceContainerCluster() *schema.Resource {
 			},
 
 			"master_authorized_networks_config": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				Computed:    true,
-				MaxItems:    1,
-				Elem:        masterAuthorizedNetworksConfig,
-				Description: `The desired configuration options for master authorized networks. Omit the nested cidr_blocks attribute to disallow external access (except the cluster node IPs, which GKE automatically whitelists).`,
+				Type:             schema.TypeList,
+				Optional:         true,
+				Computed:         true,
+				MaxItems:         1,
+				Elem:             masterAuthorizedNetworksConfig,
+				DiffSuppressFunc: containerClusterMasterAuthorizedNetworksConfigSuppress,
+				Description:      `The desired configuration options for master authorized networks. Omit the nested cidr_blocks attribute to disallow external access (except the cluster node IPs, which GKE automatically whitelists).`,
 			},
 
 			"min_master_version": {
@@ -1883,7 +1908,7 @@ func ResourceContainerCluster() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				MaxItems:    1,
-				Description: `Node pool configs that apply to all auto-provisioned node pools in autopilot clusters and node auto-provisioning enabled clusters.`,
+				Description: `Node pool configs that apply to all auto-provisioned node pools in autopilot clusters, node auto-provisioning enabled clusters, and node pools auto-created by ComputeClasses in Standard clusters.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"node_kubelet_config": schemaNodePoolAutoConfigNodeKubeletConfig(),
@@ -2261,9 +2286,10 @@ func ResourceContainerCluster() *schema.Resource {
 			},
 
 			"remove_default_node_pool": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: `If true, deletes the default node pool upon cluster creation. If you're using google_container_node_pool resources with no default node pool, this should be set to true, alongside setting initial_node_count to at least 1.`,
+				Type:          schema.TypeBool,
+				Optional:      true,
+				Deprecated:    "On newer cluster versions (1.36.4-gke.1469000+) omit initial_node_count and node_config (or set initial_node_count = 0) instead.",
+				Description:   `If true, deletes the default node pool upon cluster creation. On GKE versions that support clusters without a default node pool, you can instead omit initial_node_count and node_config (or set initial_node_count to 0) to skip creating the default node pool without setting this field. For older GKE versions, if you're using google_container_node_pool resources with no default node pool, this should be set to true, alongside setting initial_node_count to at least 1.`,
 				ConflictsWith: []string{"enable_autopilot"},
 			},
 
@@ -2764,7 +2790,7 @@ func ResourceContainerCluster() *schema.Resource {
 				Type:        schema.TypeList,
 				Optional:    true,
 				MaxItems:    1,
-				DiffSuppressFunc: suppressDiffForAutopilot,
+				DiffSuppressFunc: suppressDiffForDnsConfig,
 				Description: `Configuration for Cloud DNS for Kubernetes Engine.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -3452,10 +3478,6 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		cluster.UserManagedKeysConfig = expandUserManagedKeysConfig(v)
 	}
 
-	if err := validateNodePoolAutoConfig(cluster); err != nil {
-		return err
-	}
-
 	if v, ok := d.GetOk("security_posture_config"); ok {
 		cluster.SecurityPostureConfig = expandSecurityPostureConfig(v)
 	}
@@ -3589,11 +3611,15 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			},
 		})
 		if err != nil {
-			return errwrap.Wrapf("Error deleting default node pool: {{"{{"}}err{{"}}"}}", err)
-		}
-		err = ContainerOperationWait(config, op, project, location, "removing default node pool", userAgent, d.Timeout(schema.TimeoutCreate))
-		if err != nil {
-			return errwrap.Wrapf("Error while waiting to delete default node pool: {{"{{"}}err{{"}}"}}", err)
+			if !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+				return fmt.Errorf("Error deleting default node pool: %w", err)
+			}
+			log.Printf("[WARN] Container cluster %q default node pool already removed, no change", d.Id())
+		} else {
+			err = ContainerOperationWait(config, op, project, location, "removing default node pool", userAgent, d.Timeout(schema.TimeoutCreate))
+			if err != nil {
+				return fmt.Errorf("Error while waiting to delete default node pool: %w", err)
+			}
 		}
 	}
 
@@ -3632,12 +3658,12 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			},
 		})
 		if err != nil {
-			return errwrap.Wrapf(fmt.Sprintf("Error updating cluster for %v: {{"{{"}}err{{"}}"}}", update.ForceSendFields), err)
+			return fmt.Errorf("Error updating cluster for %v: %w", update.ForceSendFields, err)
 		}
 
 		err = ContainerOperationWait(config, op, project, location, "updating enable private endpoint", userAgent, d.Timeout(schema.TimeoutCreate))
 		if err != nil {
-			return errwrap.Wrapf(fmt.Sprintf("Error while waiting on cluster update for %v: {{"{{"}}err{{"}}"}}", update.ForceSendFields), err)
+			return fmt.Errorf("Error while waiting on cluster update for %v: %w", update.ForceSendFields, err)
 		}
 	}
 
@@ -3664,12 +3690,12 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			},
 		})
 		if err != nil {
-			return errwrap.Wrapf("Error updating AdditionalPodRangesConfig: {{"{{"}}err{{"}}"}}", err)
+			return fmt.Errorf("Error updating AdditionalPodRangesConfig: %w", err)
 		}
 
 		err = ContainerOperationWait(config, op, project, location, "updating AdditionalPodRangesConfig", userAgent, d.Timeout(schema.TimeoutCreate))
 		if err != nil {
-			return errwrap.Wrapf("Error while waiting to update AdditionalPodRangesConfig: {{"{{"}}err{{"}}"}}", err)
+			return fmt.Errorf("Error while waiting to update AdditionalPodRangesConfig: %w", err)
 		}
 	}
 
@@ -3692,12 +3718,12 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			},
 		})
 		if err != nil {
-			return errwrap.Wrapf("Error updating LinuxNodeConfig: {{"{{"}}err{{"}}"}}", err)
+			return fmt.Errorf("Error updating LinuxNodeConfig: %w", err)
 		}
 
 		err = ContainerOperationWait(config, op, project, location, "updating LinuxNodeConfig", userAgent, d.Timeout(schema.TimeoutCreate))
 		if err != nil {
-			return errwrap.Wrapf("Error while waiting to update LinuxNodeConfig: {{"{{"}}err{{"}}"}}", err)
+			return fmt.Errorf("Error while waiting to update LinuxNodeConfig: %w", err)
 		}
 	}
 
@@ -4173,7 +4199,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			return fmt.Errorf("timeout exhausted before starting %s", updateDescription)
 		}
 
-		err := retry.RetryContext(config.Context, remaining, func() *retry.RetryError {
+		err := tpgresource.RetryContext(config.Context, remaining, config.SleepUnit, func() *retry.RetryError {
 			var apiErr error
 			op, apiErr = doCall()
 			if apiErr != nil {
@@ -4299,9 +4325,13 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if d.HasChange("dns_config") {
+		dnsConfig := expandDnsConfig(d.Get("dns_config"))
+		if dnsConfig == nil {
+			dnsConfig = &container.DNSConfig{}
+		}
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
-				DesiredDnsConfig: expandDnsConfig(d.Get("dns_config")),
+				DesiredDnsConfig: dnsConfig,
 			},
 		}
 
@@ -5255,13 +5285,13 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		op, err := clusterNodePoolDeleteCall.Do()
 		if err != nil {
 			if !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
-				return errwrap.Wrapf("Error deleting default node pool: {{"{{"}}err{{"}}"}}", err)
+				return fmt.Errorf("Error deleting default node pool: %w", err)
 			}
 			log.Printf("[WARN] Container cluster %q default node pool already removed, no change", d.Id())
 		} else {
 			err = ContainerOperationWait(config, op, project, location, "removing default node pool", userAgent, d.Timeout(schema.TimeoutUpdate))
 			if err != nil {
-				return errwrap.Wrapf("Error deleting default node pool: {{"{{"}}err{{"}}"}}", err)
+				return fmt.Errorf("Error deleting default node pool: %w", err)
 			}
 		}
 	}
@@ -5762,7 +5792,7 @@ func resourceContainerClusterDelete(d *schema.ResourceData, meta interface{}) er
 
 	var op *container.Operation
 	var count = 0
-	err = retry.Retry(30*time.Second, func() *retry.RetryError {
+	err = tpgresource.Retry(30*time.Second, config.SleepUnit, func() *retry.RetryError {
 		count++
 
 		name := containerClusterFullName(project, location, clusterName)
@@ -5808,7 +5838,7 @@ var containerClusterRestingStates = RestingStates{
 
 // returns a state with no error if the state is a resting state, and the last state with an error otherwise
 func containerClusterAwaitRestingState(config *transport_tpg.Config, project, location, clusterName, userAgent string, timeout time.Duration) (state string, err error) {
-	err = retry.Retry(timeout, func() *retry.RetryError {
+	err = tpgresource.Retry(timeout, config.SleepUnit, func() *retry.RetryError {
 		name := containerClusterFullName(project, location, clusterName)
 		clusterGetCall := NewClient(config, userAgent).Projects.Locations.Clusters.Get(name)
 		if config.UserProjectOverride {
@@ -9018,10 +9048,25 @@ func containerClusterApiDictatedPrivateEndpointField(k string, d privateClusterC
 	return containerClusterIpEndpointsDisabled(d)
 }
 
+// Suppress diffs on master_authorized_networks_config and its nested fields when
+// control_plane_endpoints_config.ip_endpoints_config.enabled = false. With IP endpoints
+// disabled, expandControlPlaneEndpointsConfig returns early without sending
+// master_authorized_networks_config and GKE does not return it, so any configured block
+// would permanently diff against the state.
+func containerClusterMasterAuthorizedNetworksConfigSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if d == nil {
+		return false
+	}
+	return containerClusterIpEndpointsDisabled(d)
+}
+
 // containerClusterIpEndpointsDisabled reports whether control_plane_endpoints_config
 // turns off IP access (ip_endpoints_config.enabled = false). IP endpoints are enabled by
 // default, so this is only true when the block is present and explicitly disabled.
 func containerClusterIpEndpointsDisabled(d privateClusterConfigDiffSuppressData) bool {
+	if d == nil {
+		return false
+	}
 	if v, ok := d.GetOk("control_plane_endpoints_config.0.ip_endpoints_config.#"); !ok || v.(int) == 0 {
 		return false
 	}
@@ -9190,19 +9235,6 @@ func BinaryAuthorizationDiffSuppress(k, old, new string, r *schema.ResourceData)
 	return false
 }
 
-func validateNodePoolAutoConfig(cluster *container.Cluster) error {
-	if cluster == nil || cluster.NodePoolAutoConfig == nil {
-		return nil
-	}
-	if cluster.NodePoolAutoConfig != nil && cluster.NodePoolAutoConfig.NetworkTags != nil && len(cluster.NodePoolAutoConfig.NetworkTags.Tags) > 0 {
-		if (cluster.Autopilot == nil || !cluster.Autopilot.Enabled) && (cluster.Autoscaling == nil || !cluster.Autoscaling.EnableNodeAutoprovisioning) {
-			return fmt.Errorf("node_pool_auto_config network tags can only be set if enable_autopilot or cluster_autoscaling is enabled")
-		}
-	}
-
-	return nil
-}
-
 func containerClusterSurgeSettingsCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	if v, ok := d.GetOk("cluster_autoscaling.0.auto_provisioning_defaults.0.upgrade_settings.0.strategy"); ok {
 		if v != "SURGE" {
@@ -9273,6 +9305,17 @@ func containerClusterSkipNodePoolRefreshCustomizeDiff(_ context.Context, diff *s
 		return fmt.Errorf("skip_node_pool_refresh cannot be true when inline node_pool blocks are defined; use google_container_node_pool resources instead, or unset skip_node_pool_refresh")
 	}
 	return nil
+}
+
+func containerClusterInitialNodeCountDiffSuppress(_, old, new string, d *schema.ResourceData) bool {
+	if d == nil || d.Id() == "" {
+		return false
+	}
+	rawConfig := d.GetRawConfig()
+	if rawConfig.IsNull() || !rawConfig.IsKnown() || !rawConfig.Type().HasAttribute("initial_node_count") {
+		return false
+	}
+	return rawConfig.GetAttr("initial_node_count").IsNull()
 }
 
 func containerClusterNodeVersionCustomizeDiffFunc(diff tpgresource.TerraformResourceDiff) error {

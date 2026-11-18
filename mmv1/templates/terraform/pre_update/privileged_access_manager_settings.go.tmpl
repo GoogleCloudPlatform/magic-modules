@@ -1,4 +1,4 @@
-baseUrlForEtag, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}")
+baseUrlForEtag, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.SelfLinkUri}}")
 if err != nil {
     return err
 }

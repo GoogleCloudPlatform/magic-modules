@@ -1,0 +1,45 @@
+resource "google_design_center_component" "example" {
+  project                           = "{{index $.Vars "project"}}"
+  location                          = "us-central1"
+  space                             = "{{index $.Vars "space"}}"
+  application_template              = "{{index $.Vars "composite_application_template"}}"
+  component_id                      = "{{index $.ResourceIdVars "component_id"}}"
+  display_name                      = "Updated Example Composite Component"
+  application_template_revision_uri = "{{index $.Vars "application_template_revision_uri"}}"
+  use_as_root_module                = false
+
+  application_info {
+    apphub_application_id = "example-apphub-application"
+    display_name          = "Example App Hub Application"
+    deployment_region     = "us-central1"
+
+    scope {
+      type = "REGIONAL"
+    }
+
+    attributes {
+      criticality {
+        type = "HIGH"
+      }
+
+      environment {
+        type = "STAGING"
+      }
+
+      developer_owners {
+        display_name = "Example Developer"
+        email        = "developer@example.com"
+      }
+
+      operator_owners {
+        display_name = "Example Operator"
+        email        = "operator@example.com"
+      }
+
+      business_owners {
+        display_name = "Example Business Owner"
+        email        = "business@example.com"
+      }
+    }
+  }
+}

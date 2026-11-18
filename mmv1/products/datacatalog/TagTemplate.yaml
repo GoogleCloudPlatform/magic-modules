@@ -50,6 +50,7 @@ custom_code:
 samples:
   - name: data_catalog_tag_template_basic
     primary_resource_id: basic_tag_template
+    skip_test: 'Data Catalog has been deprecated and shut down'
     steps:
       - name: data_catalog_tag_template_basic
         resource_id_vars:

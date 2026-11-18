@@ -169,16 +169,11 @@ properties:
       Timestamp when this PipelineJob was most recently updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
     output: true
   - name: 'pipelineSpec'
-    type: String
+    type: JsonValue
     description: |
       The spec of the pipeline. This is a JSON object that describes the pipeline.
     default_from_api: true
-    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
     diff_suppress_func: 'vertexAIPipelineJobPipelineSpecDiffSuppress'
-    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
-    validation:
-      function: 'validation.StringIsJSON'
   - name: 'state'
     type: String
     description: |
@@ -384,11 +379,10 @@ properties:
               An eTag used to perform consistent read-modify-write updates.
             output: true
           - name: 'metadata'
-            type: String
+            type: JsonValue
             description: |
               Properties of the Context.
             output: true
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
           - name: 'createTime'
             type: String
             description: |
@@ -448,11 +442,10 @@ properties:
               An eTag used to perform consistent read-modify-write updates.
             output: true
           - name: 'metadata'
-            type: String
+            type: JsonValue
             description: |
               Properties of the Context.
             output: true
-            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
           - name: 'createTime'
             type: String
             description: |

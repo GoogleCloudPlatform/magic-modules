@@ -56,7 +56,7 @@ func TestAccConfigDeployment_basic(t *testing.T) {
 func testAccConfigDeployment_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_service_account" "sa" {
-  account_id   = "im-basic-test-sa-%{random_suffix}"
+  account_id   = "tf-test-im-basic-%{random_suffix}"
   display_name = "Infra Manager Basic Test SA"
 }
 
@@ -91,7 +91,7 @@ resource "google_config_deployment" "basic" {
     }
     input_values {
       variable_name = "network_name"
-      input_value   = jsonencode("test-network-%{random_suffix}")
+      input_value   = jsonencode("tf-test-network-%{random_suffix}")
     }
   }
 
@@ -106,7 +106,7 @@ resource "google_config_deployment" "basic" {
 func testAccConfigDeployment_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_service_account" "sa" {
-  account_id   = "im-basic-test-sa-%{random_suffix}"
+  account_id   = "tf-test-im-basic-%{random_suffix}"
   display_name = "Infra Manager Basic Test SA"
 }
 
@@ -160,7 +160,7 @@ resource "google_config_deployment" "basic" {
     }
     input_values {
       variable_name = "network_name"
-      input_value   = jsonencode("test-network-%{random_suffix}")
+      input_value   = jsonencode("tf-test-network-%{random_suffix}")
     }
   }
 
@@ -201,7 +201,7 @@ func TestAccConfigDeployment_full(t *testing.T) {
 func testAccConfigDeployment_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_service_account" "sa" {
-  account_id   = "im-full-test-sa-%{random_suffix}"
+  account_id   = "tf-test-im-full-%{random_suffix}"
   display_name = "Infra Manager Full Test SA"
 }
 
@@ -218,7 +218,7 @@ resource "google_project_iam_member" "storage_viewer" {
 }
 
 resource "google_storage_bucket" "blueprint_bucket" {
-  name          = "im-blueprint-bucket-%{random_suffix}"
+  name          = "tf-test-im-blueprint-bucket-%{random_suffix}"
   location      = "US"
   force_destroy = true
 }
@@ -230,7 +230,7 @@ resource "google_storage_bucket_object" "blueprint_object" {
 }
 
 resource "google_storage_bucket" "artifacts_bucket" {
-  name          = "im-artifacts-bucket-%{random_suffix}"
+  name          = "tf-test-im-artifacts-bucket-%{random_suffix}"
   location      = "US"
   force_destroy = true
 }
@@ -254,7 +254,7 @@ resource "google_config_deployment" "full" {
     
     input_values {
       variable_name = "instance_name"
-      input_value   = jsonencode("test-instance-%{random_suffix}")
+      input_value   = jsonencode("tf-test-instance-%{random_suffix}")
     }
   }
 

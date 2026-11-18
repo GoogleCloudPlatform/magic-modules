@@ -50,30 +50,38 @@ error_retry_predicates:
 samples:
   - name: 'bigquerydatatransfer_config_scheduled_query'
     primary_resource_id: 'query_config'
+    # Scheduled queries are covered by the handwritten TestAccBigqueryDataTransferConfig tests.
     exclude_test: true
     steps:
       - name: 'bigquerydatatransfer_config_scheduled_query'
         resource_id_vars:
           display_name: 'my-query'
           dataset_id: 'my_dataset'
-  - name: 'bigquerydatatransfer_config_cmek'
-    primary_resource_id: 'query_config_cmek'
-    exclude_test: true
-    steps:
-      - name: 'bigquerydatatransfer_config_cmek'
-        resource_id_vars:
-          dataset_id: 'example_dataset'
           key_name: 'example-key'
           keyring_name: 'example-keyring'
-          display_name: 'display-name'
-  - name: 'bigquerydatatransfer_config_salesforce'
-    primary_resource_id: 'salesforce_config'
-    exclude_test: true
+  - name: 'bigquerydatatransfer_config_schedule_options_v2'
+    primary_resource_id: 'event_driven_config'
+    bootstrap_iam:
+      - member: 'serviceAccount:service-{project_number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com'
+        role: 'roles/iam.serviceAccountTokenCreator'
+      - member: 'serviceAccount:service-{project_number}@gcp-sa-bigquerydatatransfer.iam.gserviceaccount.com'
+        role: 'roles/pubsub.subscriber'
     steps:
-      - name: 'bigquerydatatransfer_config_salesforce'
+      - name: 'bigquerydatatransfer_config_schedule_options_v2'
         resource_id_vars:
-          display_name: 'my-salesforce-config'
+          display_name: 'my-event-driven-config'
           dataset_id: 'my_dataset'
+          bucket_name: 'my-bucket'
+          topic_name: 'my-topic'
+          subscription_name: 'my-subscription'
+      - name: 'bigquerydatatransfer_config_schedule_options_v2_update'
+        resource_id_vars:
+          display_name: 'my-event-driven-config'
+          dataset_id: 'my_dataset'
+          bucket_name: 'my-bucket'
+          topic_name: 'my-topic'
+          subscription_name: 'my-subscription'
+          updated_subscription_name: 'my-subscription-updated'
 parameters:
   - name: 'location'
     type: String
@@ -129,10 +137,14 @@ properties:
       https://cloud.google.com/appengine/docs/flexible/python/scheduling-jobs-with-cron-yaml#the_schedule_format
       NOTE: The minimum interval time between recurring transfers depends
       on the data source; refer to the documentation for your data source.
+    conflicts:
+      - 'schedule_options_v2'
   - name: 'scheduleOptions'
     type: NestedObject
     description: |
       Options customizing the data transfer schedule.
+    conflicts:
+      - 'schedule_options_v2'
     properties:
       - name: 'disableAutoScheduling'
         type: Boolean
@@ -169,6 +181,32 @@ properties:
           - 'schedule_options.0.disable_auto_scheduling'
           - 'schedule_options.0.start_time'
           - 'schedule_options.0.end_time'
+  - name: 'scheduleOptionsV2'
+    type: NestedObject
+    description: |
+      Options customizing the type of data transfer schedule.
+      Only the event-driven schedule is exposed here; time-based and manual
+      schedules are configured through the `schedule` and `schedule_options`
+      fields instead. This field cannot be used together with `schedule` or
+      `schedule_options`.
+    conflicts:
+      - 'schedule'
+      - 'schedule_options'
+    properties:
+      - name: 'eventDrivenSchedule'
+        type: NestedObject
+        required: true
+        description: |
+          Event-driven transfer schedule options. If set, the transfer will be
+          scheduled upon events arriving.
+        properties:
+          - name: 'pubsubSubscription'
+            type: String
+            description: |
+              Pub/Sub subscription name used to receive events. Only the
+              Google Cloud Storage data source supports this option. Format:
+              projects/{project}/subscriptions/{subscription}.
+            required: true
   - name: 'emailPreferences'
     type: NestedObject
     description: |

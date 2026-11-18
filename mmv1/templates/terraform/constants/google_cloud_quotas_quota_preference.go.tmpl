@@ -6,3 +6,33 @@ func QuotaPreferredValueDiffSuppress(k, old, new string, d *schema.ResourceData)
 	
 	return (oldEmpty && n == "0") || (o == "0" && newEmpty)
 }
+
+// ignore_safety_checks is a comma-separated list sent as the repeated
+// ignoreSafetyChecks query parameter.
+func splitQuotaPreferenceIgnoreSafetyChecks(v string) []string {
+	var checks []string
+	for _, check := range strings.Split(v, ",") {
+		checks = append(checks, strings.TrimSpace(check))
+	}
+	return checks
+}
+
+func validateQuotaPreferenceIgnoreSafetyChecks(v interface{}, k string) (ws []string, errs []error) {
+	value := v.(string)
+	if value == "" {
+		return
+	}
+	checks := splitQuotaPreferenceIgnoreSafetyChecks(value)
+	for _, check := range checks {
+		switch check {
+		case "QUOTA_DECREASE_BELOW_USAGE", "QUOTA_DECREASE_PERCENTAGE_TOO_HIGH":
+		case "QUOTA_SAFETY_CHECK_UNSPECIFIED":
+			if len(checks) > 1 {
+				errs = append(errs, fmt.Errorf("%q: QUOTA_SAFETY_CHECK_UNSPECIFIED cannot be combined with other values", k))
+			}
+		default:
+			errs = append(errs, fmt.Errorf("%q contains an invalid value %q, expected a comma-separated list of QUOTA_SAFETY_CHECK_UNSPECIFIED, QUOTA_DECREASE_BELOW_USAGE, QUOTA_DECREASE_PERCENTAGE_TOO_HIGH", k, check))
+		}
+	}
+	return
+}

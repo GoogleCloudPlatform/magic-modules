@@ -41,8 +41,6 @@ samples:
         resource_id_vars:
           backup_vault_id: backup-vault-simple-test
           backup_plan_id: backup-plan-simple-test
-        test_env_vars:
-          project: :PROJECT_NAME
   - name: backup_dr_backup_plan_for_disk_resource
     primary_resource_id: my-disk-backup-plan-1
     steps:
@@ -50,8 +48,6 @@ samples:
         resource_id_vars:
           backup_vault_id: backup-vault-disk-test
           backup_plan_id: backup-plan-disk-test
-        test_env_vars:
-          project: :PROJECT_NAME
   - name: backup_dr_backup_plan_for_csql_resource
     primary_resource_id: my-csql-backup-plan-1
     steps:
@@ -59,8 +55,6 @@ samples:
         resource_id_vars:
           backup_vault_id: backup-vault-csql-test
           backup_plan_id: backup-plan-csql-test
-        test_env_vars:
-          project: :PROJECT_NAME
   - name: backup_dr_backup_plan_for_filestore_resource
     primary_resource_id: my-filestore-backup-plan-1
     steps:
@@ -68,8 +62,13 @@ samples:
         resource_id_vars:
           backup_vault_id: backup-vault-filestore-test
           backup_plan_id: backup-plan-filestore-test
-        test_env_vars:
-          project: :PROJECT_NAME
+  - name: backup_dr_backup_plan_for_netapp_volume
+    primary_resource_id: my-netapp-backup-plan-1
+    steps:
+      - name: backup_dr_backup_plan_for_netapp_volume
+        resource_id_vars:
+          backup_vault_id: backup-vault-netapp-test
+          backup_plan_id: backup-plan-netapp-test
 parameters:
   - name: location
     type: String
@@ -96,6 +95,11 @@ properties:
     send_empty_value: true
     description: |
       The description allows for additional details about `BackupPlan` and its use cases to be provided.
+  - name: labels
+    type: KeyValueLabels
+    immutable: true
+    description: |
+      This collection of key/value pairs allows for custom labels to be supplied by the user.
   - name: backupVault
     type: String
     description: |
@@ -119,7 +123,7 @@ properties:
     type: String
     description: |
       The resource type to which the `BackupPlan` will be applied.
-      Examples include, "compute.googleapis.com/Instance", "compute.googleapis.com/Disk", "sqladmin.googleapis.com/Instance", "alloydb.googleapis.com/Cluster", "file.googleapis.com/Instance" and "storage.googleapis.com/Bucket".
+      Examples include, "compute.googleapis.com/Instance", "compute.googleapis.com/Disk", "sqladmin.googleapis.com/Instance", "alloydb.googleapis.com/Cluster", "file.googleapis.com/Instance", "netapp.googleapis.com/Volume" and "storage.googleapis.com/Bucket".
     required: true
   - name: createTime
     type: String

@@ -98,6 +98,23 @@ Replace `LIST_RESOURCE_NAME` according to the pull request content. For example:
 ```
 ~~~
 {{< /tab >}}
+{{< tab "New action" >}}
+Write your release note in the following format:
+
+~~~markdown
+```release-note:new-action
+`ACTION_NAME`
+```
+~~~
+
+Replace `ACTION_NAME` according to the pull request content. For example:
+
+~~~markdown
+```release-note:new-action
+`google_compute_instance_reset`
+```
+~~~
+{{< /tab >}}
 {{< tab "Other" >}}
 ### Choose a release note type
 For each release note block, choose an appropriate type from the following list:

@@ -119,6 +119,19 @@ samples:
           persona_id: audit_trail
         test_env_vars:
           project_number: PROJECT_NUMBER
+  - name: analyst_agent_persona_mcp_headers
+    primary_resource_id: example
+    steps:
+      - name: analyst_agent_persona_mcp_headers
+        resource_id_vars:
+          persona_id: mcp-headers
+        test_env_vars:
+          project_number: PROJECT_NUMBER
+      - name: analyst_agent_persona_mcp_headers_update
+        resource_id_vars:
+          persona_id: mcp-headers
+        test_env_vars:
+          project_number: PROJECT_NUMBER
 
 parameters:
   - name: location
@@ -811,10 +824,51 @@ properties:
         - name: prompt
           type: String
           description: The custom prompt for the MCP agent.
+        - name: requestHeaders
+          type: Array
+          description: |-
+            Additional HTTP headers sent on every request to the MCP server, for
+            example a static header required by an API gateway. Headers managed by the
+            agent take precedence and cannot be set here. When empty, no additional
+            headers are sent.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: dynamicValue
+                type: String
+                description: |-
+                  A value the agent fills in for each request.
+                  Possible values:
+                  USER_ID
+              - name: headerName
+                type: String
+                required: true
+                description: |-
+                  The header name. Must be a valid HTTP field name (RFC 9110 token),
+                  unique ignoring case within the data source, and not a header managed
+                  by the agent (such as `Authorization`, `Content-Type`, `mcp-session-id`,
+                  or the configured API key, session ID, or task ID headers).
+              - name: value
+                type: String
+                description: |-
+                  A static value, sent as-is on every request. The value is stored and
+                  returned in plain text, so do not use it for credentials.
         - name: serverUrl
           type: String
           required: true
           description: The URL of the MCP server.
+        - name: sessionIdHeader
+          type: String
+          description: |-
+            The HTTP header name used to pass the agent session ID in MCP server
+            requests (defaults to `X-Session-Id` when unset). Must be a valid HTTP
+            header field name (RFC 9110 token).
+        - name: taskIdHeader
+          type: String
+          description: |-
+            The HTTP header name used to pass the agent task ID in MCP server
+            requests (defaults to `X-Task-Id` when unset). Must be a valid HTTP
+            header field name (RFC 9110 token).
   - name: modelDescription
     type: String
     description: The description of the persona review, used by the model.

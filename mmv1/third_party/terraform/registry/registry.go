@@ -7,6 +7,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/hashicorp/terraform-plugin-framework/action"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/list"
@@ -55,6 +56,8 @@ func GetProduct(name string) Product {
 }
 
 func ListProducts() []Product {
+	products.RLock()
+	defer products.RUnlock()
 	l := slices.Collect(maps.Values(products.m))
 	slices.SortFunc(l, func(a, b Product) int {
 		return strings.Compare(a.Name, b.Name)
@@ -102,8 +105,8 @@ type Schema struct {
 
 // Register adds the schema definition to the internal registry.
 func (s Schema) Register() {
-	products.Lock()
-	defer products.Unlock()
+	schemas.Lock()
+	defer schemas.Unlock()
 	if s.Type.IsDataSource() {
 		if _, ok := schemas.d[s.Name]; ok {
 			log.Fatalf("Duplicate registration attempt for data source %q", s.Name)
@@ -142,6 +145,8 @@ func Resource(name string) *schema.Resource {
 }
 
 func ResourceMap() map[string]*schema.Resource {
+	schemas.RLock()
+	defer schemas.RUnlock()
 	ret := map[string]*schema.Resource{}
 	for k, v := range schemas.r {
 		ret[k] = v.Schema
@@ -163,6 +168,8 @@ func DataSource(name string) *schema.Resource {
 }
 
 func DatasourceMap() map[string]*schema.Resource {
+	schemas.RLock()
+	defer schemas.RUnlock()
 	ret := map[string]*schema.Resource{}
 	for k, v := range schemas.d {
 		ret[k] = v.Schema
@@ -176,6 +183,7 @@ type frameworkRegistry struct {
 	resource   map[string]FrameworkResource
 	ephemeral  map[string]FrameworkEphemeralResource
 	list       map[string]FrameworkListResource
+	action     map[string]FrameworkAction
 }
 
 var framework = &frameworkRegistry{
@@ -183,6 +191,7 @@ var framework = &frameworkRegistry{
 	resource:   map[string]FrameworkResource{},
 	ephemeral:  map[string]FrameworkEphemeralResource{},
 	list:       map[string]FrameworkListResource{},
+	action:     map[string]FrameworkAction{},
 }
 
 type FrameworkDataSource struct {
@@ -313,6 +322,39 @@ func FrameworkListResourceFuncs() []func() list.ListResource {
 	var ret []func() list.ListResource
 	for _, r := range resources {
 		ret = append(ret, r.Func)
+	}
+	return ret
+}
+
+type FrameworkAction struct {
+	Name        string
+	ProductName string
+	Func        func() action.Action
+}
+
+func (a FrameworkAction) Register() {
+	framework.Lock()
+	defer framework.Unlock()
+	if _, ok := framework.action[a.Name]; ok {
+		log.Fatalf("Duplicate registration attempt for framework action %q", a.Name)
+	}
+	framework.action[a.Name] = a
+}
+
+func FrameworkActionFuncs() []func() action.Action {
+	framework.RLock()
+	defer framework.RUnlock()
+	var actions []FrameworkAction
+	for _, a := range framework.action {
+		actions = append(actions, a)
+	}
+	slices.SortFunc(actions, func(a, b FrameworkAction) int {
+		return strings.Compare(a.Name, b.Name)
+	})
+
+	var ret []func() action.Action
+	for _, a := range actions {
+		ret = append(ret, a.Func)
 	}
 	return ret
 }

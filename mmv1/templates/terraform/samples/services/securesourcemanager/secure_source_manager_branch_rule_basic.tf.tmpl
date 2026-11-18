@@ -15,7 +15,7 @@ resource "google_secure_source_manager_repository" "repository" {
     deletion_policy = "{{index $.ResourceIdVars "deletion_policy"}}"
 }
 
-resource "google_secure_source_manager_branch_rule" "basic" {
+resource "google_secure_source_manager_branch_rule" "{{$.PrimaryResourceId}}" {
     branch_rule_id = "{{index $.ResourceIdVars "branch_rule_id"}}"
     repository_id = google_secure_source_manager_repository.repository.repository_id
     location = google_secure_source_manager_repository.repository.location

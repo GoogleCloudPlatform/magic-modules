@@ -105,14 +105,18 @@ samples:
           threat_prevention_profile_name: 'tp-sec-profile'
           wildfire_profile_name: 'wf-sec-profile'
           wildfire_profile_updated_name: 'wf-sec-profile-updated'
+        vars:
+          wildfire_analysis_profile: 'google_network_security_security_profile.wildfire_profile_updated.id'
         test_env_vars:
           project: 'PROJECT_NAME'
-      - name: 'network_security_security_profile_group_wildfire_remove'
+      - name: 'network_security_security_profile_group_wildfire_update'
         resource_id_vars:
           security_profile_group_name: 'sec-profile-group'
           threat_prevention_profile_name: 'tp-sec-profile'
           wildfire_profile_name: 'wf-sec-profile'
           wildfire_profile_updated_name: 'wf-sec-profile-updated'
+        vars:
+          wildfire_analysis_profile: null
         test_env_vars:
           project: 'PROJECT_NAME'
 parameters:

@@ -1,5 +1,5 @@
 expandComputeFirewallPolicyAssociationFirewallPolicy(d.Get("firewall_policy"), d, config)
-url, err = tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}locations/global/firewallPolicies/{{"{{"}}firewall_policy{{"}}"}}/getAssociation?name={{"{{"}}name{{"}}"}}")
+url, err = tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"locations/global/firewallPolicies/{{"{{"}}firewall_policy{{"}}"}}/getAssociation?name={{"{{"}}name{{"}}"}}")
 if err != nil {
 	return err
 }
