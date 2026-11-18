@@ -233,6 +233,17 @@ func TestDetectExhaustiveMissingTests_SingleOptionalChildParentUnset(t *testing.
 				"oc_parent.opt_child": {
 					New: &schema.Schema{Type: schema.TypeString, Optional: true},
 				},
+				"text_format": {
+					New: &schema.Schema{
+						Type:     schema.TypeList,
+						Optional: true,
+						MaxItems: 1,
+						Elem:     &schema.Resource{},
+					},
+				},
+				"text_format.delimiter": {
+					New: &schema.Schema{Type: schema.TypeString, Optional: true, Default: "\n"},
+				},
 				"timeouts_config": {
 					New: &schema.Schema{
 						Type:     schema.TypeList,
@@ -263,10 +274,13 @@ func TestDetectExhaustiveMissingTests_SingleOptionalChildParentUnset(t *testing.
 		},
 	}
 
-	// Case 1: encryption_config is purely Optional with a single configurable child (kms_key),
-	// so removing encryption_config in Step 4 covers kms_key UNSET. By contrast:
+	// Case 1: encryption_config is purely Optional with a single defaultless configurable
+	// child (kms_key), so removing encryption_config in Step 4 covers kms_key UNSET.
+	// By contrast:
 	// - oc_parent is Optional+Computed, so omitting oc_parent retains prior state in SDKv2
 	//   rather than unsetting oc_parent.opt_child (which requires `oc_parent {}`);
+	// - text_format.delimiter has a schema Default, so `text_format {}` is non-empty in
+	//   SDKv2 and required to test reverting delimiter to its default before removing text_format;
 	// - timeouts_config has two optional children (connect_timeout and read_timeout), so
 	//   removing timeouts_config without swapping to read_timeout leaves connect_timeout UNSET MISSING.
 	baseSteps := []reader.Step{
@@ -277,6 +291,7 @@ func TestDetectExhaustiveMissingTests_SingleOptionalChildParentUnset(t *testing.
 						"name":                            "\"test-name\"",
 						"encryption_config.kms_key":       "\"k1\"",
 						"oc_parent.opt_child":             "\"oc1\"",
+						"text_format.delimiter":           "\",\"",
 						"timeouts_config.connect_timeout": "\"10s\"",
 						"timeouts_config.read_timeout":    "\"30s\"",
 						"fn_parent.fn_sole_child":         "\"fn-1\"",
@@ -291,6 +306,7 @@ func TestDetectExhaustiveMissingTests_SingleOptionalChildParentUnset(t *testing.
 						"name":                            "\"test-name\"",
 						"encryption_config.kms_key":       "\"k2\"",
 						"oc_parent.opt_child":             "\"oc2\"",
+						"text_format.delimiter":           "\";\"",
 						"timeouts_config.connect_timeout": "\"20s\"",
 						"timeouts_config.read_timeout":    "\"60s\"",
 						"fn_parent.fn_sole_child":         "\"fn-1\"",
@@ -346,15 +362,20 @@ func TestDetectExhaustiveMissingTests_SingleOptionalChildParentUnset(t *testing.
 	}
 	info := gotWithoutSwap["google_example_resource"]
 	if info == nil {
-		t.Fatalf("expected oc_parent.opt_child and timeouts_config.connect_timeout UNSET to remain MISSING")
+		t.Fatalf("expected oc_parent.opt_child, text_format.delimiter, and timeouts_config.connect_timeout UNSET to remain MISSING")
 	}
-	if diffStr := cmp.Diff([]string{"oc_parent.opt_child", "timeouts_config.connect_timeout"}, info.IncompleteFields); diffStr != "" {
-		t.Errorf("expected oc_parent.opt_child and timeouts_config.connect_timeout to be incomplete (-want +got):\n%s", diffStr)
+	wantIncomplete := []string{
+		"oc_parent.opt_child",
+		"text_format.delimiter",
+		"timeouts_config.connect_timeout",
+	}
+	if diffStr := cmp.Diff(wantIncomplete, info.IncompleteFields); diffStr != "" {
+		t.Errorf("IncompleteFields mismatch (-want +got):\n%s", diffStr)
 	}
 
-	// Case 2: Transitioning from `oc_parent { opt_child = "oc2" }` (Step 2) to
-	// `oc_parent {}` (Step 3) and swapping timeouts_config to `{ read_timeout = "60s" }`
-	// before removing timeouts_config covers both.
+	// Case 2: Transitioning Step 2 -> Step 3 via `oc_parent {}` and `text_format {}`
+	// (reverting delimiter to its default) and swapping timeouts_config to
+	// `{ read_timeout = "60s" }` before removing the blocks covers all three.
 	stepsWithSwap := []reader.Step{
 		baseSteps[0],
 		baseSteps[1],
@@ -365,6 +386,7 @@ func TestDetectExhaustiveMissingTests_SingleOptionalChildParentUnset(t *testing.
 						"name":                            "\"test-name\"",
 						"encryption_config.kms_key":       "\"k2\"",
 						"oc_parent":                       "{}",
+						"text_format":                     "{}",
 						"timeouts_config.connect_timeout": "\"20s\"",
 						"fn_parent.fn_sole_child":         "\"fn-1\"",
 					},
