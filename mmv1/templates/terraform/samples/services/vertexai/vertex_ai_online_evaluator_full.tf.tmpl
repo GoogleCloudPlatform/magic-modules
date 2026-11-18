@@ -86,6 +86,11 @@ resource "google_vertex_ai_online_evaluator" "{{$.PrimaryResourceId}}" {
           value               = 0
         }
       }
+      filter {
+        service_version {
+          values = ["v1"]
+        }
+      }
     }
   }
 
