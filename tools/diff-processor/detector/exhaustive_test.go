@@ -200,6 +200,225 @@ func TestDetectExhaustiveMissingTests_AntiShortcutMultiChildUnset(t *testing.T) 
 	}
 }
 
+func TestDetectExhaustiveMissingTests_SingleOptionalChildParentUnset(t *testing.T) {
+	schemaDiff := diff.SchemaDiff{
+		"google_example_resource": {
+			Fields: map[string]diff.FieldDiff{
+				"name": {
+					New: &schema.Schema{Type: schema.TypeString, Required: true, ForceNew: true},
+				},
+				"encryption_config": {
+					New: &schema.Schema{
+						Type:     schema.TypeList,
+						Optional: true,
+						MaxItems: 1,
+						Elem:     &schema.Resource{},
+					},
+				},
+				"encryption_config.kms_key": {
+					New: &schema.Schema{Type: schema.TypeString, Optional: true},
+				},
+				"encryption_config.state": {
+					New: &schema.Schema{Type: schema.TypeString, Computed: true},
+				},
+				"oc_parent": {
+					New: &schema.Schema{
+						Type:     schema.TypeList,
+						Optional: true,
+						Computed: true,
+						MaxItems: 1,
+						Elem:     &schema.Resource{},
+					},
+				},
+				"oc_parent.opt_child": {
+					New: &schema.Schema{Type: schema.TypeString, Optional: true},
+				},
+				"text_format": {
+					New: &schema.Schema{
+						Type:     schema.TypeList,
+						Optional: true,
+						MaxItems: 1,
+						Elem:     &schema.Resource{},
+					},
+				},
+				"text_format.delimiter": {
+					New: &schema.Schema{Type: schema.TypeString, Optional: true, Default: "\n"},
+				},
+				"timeouts_config": {
+					New: &schema.Schema{
+						Type:     schema.TypeList,
+						Optional: true,
+						MaxItems: 1,
+						Elem:     &schema.Resource{},
+					},
+				},
+				"timeouts_config.connect_timeout": {
+					New: &schema.Schema{Type: schema.TypeString, Optional: true},
+				},
+				"timeouts_config.read_timeout": {
+					New: &schema.Schema{Type: schema.TypeString, Optional: true},
+				},
+				"fn_parent": {
+					New: &schema.Schema{
+						Type:     schema.TypeList,
+						Optional: true,
+						MaxItems: 1,
+						ForceNew: true,
+						Elem:     &schema.Resource{},
+					},
+				},
+				"fn_parent.fn_sole_child": {
+					New: &schema.Schema{Type: schema.TypeString, Optional: true, ForceNew: true},
+				},
+			},
+		},
+	}
+
+	// Case 1: encryption_config is purely Optional with a single defaultless configurable
+	// child (kms_key), so removing encryption_config in Step 4 covers kms_key UNSET.
+	// By contrast:
+	// - oc_parent is Optional+Computed, so omitting oc_parent retains prior state in SDKv2
+	//   rather than unsetting oc_parent.opt_child (which requires `oc_parent {}`);
+	// - text_format.delimiter has a schema Default, so `text_format {}` is non-empty in
+	//   SDKv2 and required to test reverting delimiter to its default before removing text_format;
+	// - timeouts_config has two optional children (connect_timeout and read_timeout), so
+	//   removing timeouts_config without swapping to read_timeout leaves connect_timeout UNSET MISSING.
+	baseSteps := []reader.Step{
+		{
+			reader.ResourceBlock: {
+				"google_example_resource": {
+					"primary": {
+						"name":                            "\"test-name\"",
+						"encryption_config.kms_key":       "\"k1\"",
+						"oc_parent.opt_child":             "\"oc1\"",
+						"text_format.delimiter":           "\",\"",
+						"timeouts_config.connect_timeout": "\"10s\"",
+						"timeouts_config.read_timeout":    "\"30s\"",
+						"fn_parent.fn_sole_child":         "\"fn-1\"",
+					},
+				},
+			},
+		},
+		{
+			reader.ResourceBlock: {
+				"google_example_resource": {
+					"primary": {
+						"name":                            "\"test-name\"",
+						"encryption_config.kms_key":       "\"k2\"",
+						"oc_parent.opt_child":             "\"oc2\"",
+						"text_format.delimiter":           "\";\"",
+						"timeouts_config.connect_timeout": "\"20s\"",
+						"timeouts_config.read_timeout":    "\"60s\"",
+						"fn_parent.fn_sole_child":         "\"fn-1\"",
+					},
+				},
+			},
+		},
+		{
+			reader.ResourceBlock: {
+				"google_example_resource": {
+					"primary": {
+						"name":                            "\"test-name\"",
+						"encryption_config.kms_key":       "\"k2\"",
+						"timeouts_config.connect_timeout": "\"20s\"",
+						"fn_parent.fn_sole_child":         "\"fn-1\"",
+					},
+				},
+			},
+		},
+		{
+			reader.ResourceBlock: {
+				"google_example_resource": {
+					"primary": {
+						"name":                    "\"test-name\"",
+						"fn_parent.fn_sole_child": "\"fn-1\"",
+					},
+				},
+			},
+		},
+	}
+
+	basicTest := &reader.Test{
+		Name: "TestAccExample_basic",
+		Steps: []reader.Step{
+			{
+				reader.ResourceBlock: {
+					"google_example_resource": {
+						"primary": {
+							"name": "\"test-name\"",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	gotWithoutSwap, err := DetectExhaustiveMissingTests(schemaDiff, nil, []*reader.Test{
+		{Name: "TestAccExample_soleChild", Steps: baseSteps},
+		basicTest,
+	}, false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	info := gotWithoutSwap["google_example_resource"]
+	if info == nil {
+		t.Fatalf("expected oc_parent.opt_child, text_format.delimiter, and timeouts_config.connect_timeout UNSET to remain MISSING")
+	}
+	wantIncomplete := []string{
+		"oc_parent.opt_child",
+		"text_format.delimiter",
+		"timeouts_config.connect_timeout",
+	}
+	if diffStr := cmp.Diff(wantIncomplete, info.IncompleteFields); diffStr != "" {
+		t.Errorf("IncompleteFields mismatch (-want +got):\n%s", diffStr)
+	}
+
+	// Case 2: Transitioning Step 2 -> Step 3 via `oc_parent {}` and `text_format {}`
+	// (reverting delimiter to its default) and swapping timeouts_config to
+	// `{ read_timeout = "60s" }` before removing the blocks covers all three.
+	stepsWithSwap := []reader.Step{
+		baseSteps[0],
+		baseSteps[1],
+		{
+			reader.ResourceBlock: {
+				"google_example_resource": {
+					"primary": {
+						"name":                            "\"test-name\"",
+						"encryption_config.kms_key":       "\"k2\"",
+						"oc_parent":                       "{}",
+						"text_format":                     "{}",
+						"timeouts_config.connect_timeout": "\"20s\"",
+						"fn_parent.fn_sole_child":         "\"fn-1\"",
+					},
+				},
+			},
+		},
+		{
+			reader.ResourceBlock: {
+				"google_example_resource": {
+					"primary": {
+						"name":                         "\"test-name\"",
+						"timeouts_config.read_timeout": "\"60s\"",
+						"fn_parent.fn_sole_child":      "\"fn-1\"",
+					},
+				},
+			},
+		},
+		baseSteps[3],
+	}
+
+	gotCovered, err := DetectExhaustiveMissingTests(schemaDiff, nil, []*reader.Test{
+		{Name: "TestAccExample_soleChild", Steps: stepsWithSwap},
+		basicTest,
+	}, false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(gotCovered) != 0 {
+		t.Errorf("expected all fields covered once multi-child block swaps siblings, got:\n%s", FormatExhaustiveMarkdown(gotCovered))
+	}
+}
+
 func TestDetectExhaustiveMissingTests_CoreExemptions(t *testing.T) {
 	schemaDiff := diff.SchemaDiff{
 		"google_example_resource": {
