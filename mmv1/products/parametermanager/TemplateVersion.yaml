@@ -34,7 +34,6 @@ sweeper:
     parent_field_extract_name: true
     child_field: template
 custom_code:
-  encoder: templates/terraform/encoders/parameter_manager_template_version.go.tmpl
   post_create: templates/terraform/post_create/parameter_manager_template_version.go.tmpl
 samples:
   - name: template_version_basic
@@ -93,8 +92,6 @@ samples:
         resource_id_vars:
           template_id: template
           template_version_id: template-version
-        test_env_vars:
-          project: PROJECT_NAME
         vars:
           disabled: true
         ignore_read_extra:
@@ -104,23 +101,16 @@ samples:
         resource_id_vars:
           template_id: template
           template_version_id: template-version
-        test_env_vars:
-          project: PROJECT_NAME
         vars:
           disabled: false
 parameters:
   - name: template
     type: String
     description: |
-      The Template resource to attach the Template Version to. This can be either the
-      `template_id` or the full resource name in the format
-      `projects/{{project}}/locations/global/templates/{{template_id}}`.
+      ID of the Parameter Manager Template resource.
     url_param_only: true
     required: true
     immutable: true
-    diff_suppress_func: tpgresource.CompareResourceNames
-    validation:
-      regex: ^(projects/[^/\s]+/locations/global/templates/[^/\s]+|[^/\s]+)$
   - name: templateVersionId
     type: String
     description: |
