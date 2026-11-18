@@ -4,7 +4,7 @@
 # cloud_control_configs with the revision used by the framework.
 resource "google_assured_workloads_v2_workload" "{{$.PrimaryResourceId}}" {
   organization = "{{index $.TestEnvVars "org_id"}}"
-  location     = "us-central1"
+  location     = "us-east4"
   workload_id  = "{{index $.ResourceIdVars "workload_id"}}"
   description  = "US Data Boundary workload"
 
@@ -13,12 +13,12 @@ resource "google_assured_workloads_v2_workload" "{{$.PrimaryResourceId}}" {
   }
 
   framework {
-    framework         = "organizations/{{index $.TestEnvVars "org_id"}}/locations/us-central1/frameworks/builtin-us-data-boundary"
+    framework         = "organizations/{{index $.TestEnvVars "org_id"}}/locations/us-east4/frameworks/builtin-us-data-boundary"
     major_revision_id = 62
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/{{index $.TestEnvVars "org_id"}}/locations/us-central1/cloudControls/builtin-restrict-tls-versions"
+    cloud_control          = "organizations/{{index $.TestEnvVars "org_id"}}/locations/us-east4/cloudControls/builtin-restrict-tls-versions"
     cloud_control_revision = 2
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -32,7 +32,7 @@ resource "google_assured_workloads_v2_workload" "{{$.PrimaryResourceId}}" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/{{index $.TestEnvVars "org_id"}}/locations/us-central1/cloudControls/builtin-restrict-resource-locations"
+    cloud_control          = "organizations/{{index $.TestEnvVars "org_id"}}/locations/us-east4/cloudControls/builtin-restrict-resource-locations"
     cloud_control_revision = 9
     enforcement_mode       = "DETECTIVE"
     parameters {

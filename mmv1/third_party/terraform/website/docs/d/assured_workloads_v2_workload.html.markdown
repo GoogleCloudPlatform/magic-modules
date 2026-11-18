@@ -23,7 +23,7 @@ Using `organization`, `location`, and `workload_id`:
 ```hcl
 data "google_assured_workloads_v2_workload" "my_workload" {
   organization = "123456789"
-  location     = "us-central1"
+  location     = "us-east4"
   workload_id  = "my-workload-id"
 }
 ```
@@ -32,7 +32,7 @@ Or using the full resource `name`:
 
 ```hcl
 data "google_assured_workloads_v2_workload" "my_workload" {
-  name = "organizations/123456789/locations/us-central1/workloads/my-workload-id"
+  name = "organizations/123456789/locations/us-east4/workloads/my-workload-id"
 }
 ```
 
@@ -44,7 +44,7 @@ The following arguments are supported:
 
 * `organization` - (Optional) The ID of the parent organization of the workload, for example `123456789`. Required when `name` is not specified.
 
-* `location` - (Optional) The location of the workload, for example `us-central1`. Required when `name` is not specified.
+* `location` - (Optional) The location of the workload, for example `us-east4`. Required when `name` is not specified.
 
 * `workload_id` - (Optional) The unique identifier of the workload within the parent organization and location. Required when `name` is not specified.
 

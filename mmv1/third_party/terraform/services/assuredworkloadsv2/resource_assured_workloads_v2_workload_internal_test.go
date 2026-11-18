@@ -163,13 +163,13 @@ func TestAssuredWorkloadsV2ExpandCloudControlConfigs(t *testing.T) {
 
 	v := []interface{}{
 		map[string]interface{}{
-			"cloud_control":          "organizations/123/locations/us-central1/cloudControls/builtin-enable-axt",
+			"cloud_control":          "organizations/123/locations/us-east4/cloudControls/builtin-enable-axt",
 			"cloud_control_revision": 1,
 			"enforcement_mode":       "PREVENTIVE",
 			"parameters":             []interface{}{},
 		},
 		map[string]interface{}{
-			"cloud_control":          "organizations/123/locations/us-central1/cloudControls/example",
+			"cloud_control":          "organizations/123/locations/us-east4/cloudControls/example",
 			"cloud_control_revision": 2,
 			"enforcement_mode":       "DETECTIVE",
 			"parameters": []interface{}{
@@ -184,12 +184,12 @@ func TestAssuredWorkloadsV2ExpandCloudControlConfigs(t *testing.T) {
 	}
 	want := []interface{}{
 		map[string]interface{}{
-			"cloudControl":         "organizations/123/locations/us-central1/cloudControls/builtin-enable-axt",
+			"cloudControl":         "organizations/123/locations/us-east4/cloudControls/builtin-enable-axt",
 			"cloudControlRevision": 1,
 			"enforcementMode":      "PREVENTIVE",
 		},
 		map[string]interface{}{
-			"cloudControl":         "organizations/123/locations/us-central1/cloudControls/example",
+			"cloudControl":         "organizations/123/locations/us-east4/cloudControls/example",
 			"cloudControlRevision": 2,
 			"enforcementMode":      "DETECTIVE",
 			"parameters": []interface{}{
@@ -209,7 +209,7 @@ func TestAssuredWorkloadsV2ExpandCloudControlConfigsError(t *testing.T) {
 	m := withValue("string_value", "x")
 	m["number_value"] = 1.0
 	v := []interface{}{map[string]interface{}{
-		"cloud_control":          "organizations/123/locations/us-central1/cloudControls/example",
+		"cloud_control":          "organizations/123/locations/us-east4/cloudControls/example",
 		"cloud_control_revision": 1,
 		"enforcement_mode":       "DETECTIVE",
 		"parameters":             []interface{}{map[string]interface{}{"name": "p", "parameter_value": []interface{}{m}}},
@@ -325,7 +325,7 @@ func TestAssuredWorkloadsV2WorkloadIdFromName(t *testing.T) {
 		input string
 		want  string
 	}{
-		{"organizations/123/locations/us-central1/workloads/my-workload", "my-workload"},
+		{"organizations/123/locations/us-east4/workloads/my-workload", "my-workload"},
 		{"organizations/123/locations/europe/workloads/uuid-1234-5678", "uuid-1234-5678"},
 		{"invalid/name", ""},
 		{"", ""},
@@ -341,8 +341,8 @@ func TestAssuredWorkloadsV2WorkloadImport(t *testing.T) {
 	t.Parallel()
 
 	cases := []string{
-		"organizations/123/locations/us-central1/workloads/my-workload",
-		"123/us-central1/my-workload",
+		"organizations/123/locations/us-east4/workloads/my-workload",
+		"123/us-east4/my-workload",
 	}
 	for _, importId := range cases {
 		importId := importId
@@ -359,9 +359,9 @@ func TestAssuredWorkloadsV2WorkloadImport(t *testing.T) {
 			}
 			want := map[string]string{
 				"organization": "123",
-				"location":     "us-central1",
+				"location":     "us-east4",
 				"workload_id":  "my-workload",
-				"name":         "organizations/123/locations/us-central1/workloads/my-workload",
+				"name":         "organizations/123/locations/us-east4/workloads/my-workload",
 			}
 			for k, v := range want {
 				if got := res[0].Get(k).(string); got != v {
@@ -403,14 +403,14 @@ func TestDataSourceAssuredWorkloadsV2WorkloadSchema(t *testing.T) {
 		{
 			name: "valid name",
 			raw: map[string]interface{}{
-				"name": "organizations/123/locations/us-central1/workloads/my-workload",
+				"name": "organizations/123/locations/us-east4/workloads/my-workload",
 			},
 		},
 		{
 			name: "valid org location workload_id",
 			raw: map[string]interface{}{
 				"organization": "123",
-				"location":     "us-central1",
+				"location":     "us-east4",
 				"workload_id":  "my-workload",
 			},
 		},
@@ -429,7 +429,7 @@ func TestDataSourceAssuredWorkloadsV2WorkloadSchema(t *testing.T) {
 		{
 			name: "name conflicts with organization",
 			raw: map[string]interface{}{
-				"name":         "organizations/123/locations/us-central1/workloads/my-workload",
+				"name":         "organizations/123/locations/us-east4/workloads/my-workload",
 				"organization": "123",
 			},
 			wantErr: true,
@@ -463,7 +463,7 @@ func TestDataSourceAssuredWorkloadsV2WorkloadResolveId(t *testing.T) {
 	t.Parallel()
 
 	dsSchema := DataSourceAssuredWorkloadsV2Workload().Schema
-	wantName := "organizations/123/locations/us-central1/workloads/my-workload"
+	wantName := "organizations/123/locations/us-east4/workloads/my-workload"
 
 	t.Run("by name populates regional URL components", func(t *testing.T) {
 		t.Parallel()
@@ -479,7 +479,7 @@ func TestDataSourceAssuredWorkloadsV2WorkloadResolveId(t *testing.T) {
 		}
 		for k, want := range map[string]string{
 			"organization": "123",
-			"location":     "us-central1",
+			"location":     "us-east4",
 			"workload_id":  "my-workload",
 			"name":         wantName,
 		} {
@@ -493,7 +493,7 @@ func TestDataSourceAssuredWorkloadsV2WorkloadResolveId(t *testing.T) {
 		t.Parallel()
 		d := schema.TestResourceDataRaw(t, dsSchema, map[string]interface{}{
 			"organization": "123",
-			"location":     "us-central1",
+			"location":     "us-east4",
 			"workload_id":  "my-workload",
 		})
 		id, err := resolveDataSourceAssuredWorkloadsV2WorkloadId(d)
@@ -541,12 +541,12 @@ func sampleAssuredWorkloadsV2WorkloadResponse(name string) map[string]interface{
 		"createTime":                "2026-11-18T00:00:00Z",
 		"updateTime":                "2026-11-18T01:00:00Z",
 		"framework": map[string]interface{}{
-			"framework":       "organizations/123/locations/us-central1/frameworks/builtin-us-data-boundary",
+			"framework":       "organizations/123/locations/us-east4/frameworks/builtin-us-data-boundary",
 			"majorRevisionId": "62",
 		},
 		"cloudControlConfigs": []interface{}{
 			map[string]interface{}{
-				"cloudControl":         "organizations/123/locations/us-central1/cloudControls/builtin-apigee-regulatory-settings",
+				"cloudControl":         "organizations/123/locations/us-east4/cloudControls/builtin-apigee-regulatory-settings",
 				"cloudControlRevision": "2",
 				"enforcementMode":      "DETECTIVE",
 				"parameters": []interface{}{
@@ -565,12 +565,12 @@ func sampleAssuredWorkloadsV2WorkloadResponse(name string) map[string]interface{
 func TestDataSourceAssuredWorkloadsV2WorkloadRead(t *testing.T) {
 	t.Parallel()
 
-	workloadName := "organizations/123/locations/us-central1/workloads/my-workload"
+	workloadName := "organizations/123/locations/us-east4/workloads/my-workload"
 	var lastUserProject string
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		lastUserProject = req.Header.Get("X-Goog-User-Project")
-		if req.Method == "GET" && req.URL.Path == "/us-central1/v2/"+workloadName {
+		if req.Method == "GET" && req.URL.Path == "/us-east4/v2/"+workloadName {
 			_ = json.NewEncoder(w).Encode(sampleAssuredWorkloadsV2WorkloadResponse(workloadName))
 			return
 		}
@@ -606,7 +606,7 @@ func TestDataSourceAssuredWorkloadsV2WorkloadRead(t *testing.T) {
 		for k, want := range map[string]interface{}{
 			"name":                         workloadName,
 			"organization":                 "123",
-			"location":                     "us-central1",
+			"location":                     "us-east4",
 			"workload_id":                  "my-workload",
 			"description":                  "Sample workload",
 			"computed_target_resource":     "projects/123456789",
@@ -641,7 +641,7 @@ func TestDataSourceAssuredWorkloadsV2WorkloadRead(t *testing.T) {
 	t.Run("lookup by components", func(t *testing.T) {
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
 			"organization": "123",
-			"location":     "us-central1",
+			"location":     "us-east4",
 			"workload_id":  "my-workload",
 		})
 		if err := dataSourceAssuredWorkloadsV2WorkloadRead(d, cfg); err != nil {
@@ -652,7 +652,7 @@ func TestDataSourceAssuredWorkloadsV2WorkloadRead(t *testing.T) {
 
 	t.Run("not found returns error", func(t *testing.T) {
 		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
-			"name": "organizations/123/locations/us-central1/workloads/missing",
+			"name": "organizations/123/locations/us-east4/workloads/missing",
 		})
 		err := dataSourceAssuredWorkloadsV2WorkloadRead(d, cfg)
 		if err == nil || !strings.Contains(err.Error(), "not found") {
@@ -677,7 +677,7 @@ func TestResourceAssuredWorkloadsV2WorkloadLifecycle(t *testing.T) {
 			inputWorkloadID:    "",
 			wantQueryHasID:     false,
 			wantQueryID:        "",
-			serverWorkloadName: "organizations/123/locations/us-central1/workloads/server-gen-uuid",
+			serverWorkloadName: "organizations/123/locations/us-east4/workloads/server-gen-uuid",
 			wantWorkloadID:     "server-gen-uuid",
 		},
 		{
@@ -685,7 +685,7 @@ func TestResourceAssuredWorkloadsV2WorkloadLifecycle(t *testing.T) {
 			inputWorkloadID:    "user-assigned-id",
 			wantQueryHasID:     true,
 			wantQueryID:        "user-assigned-id",
-			serverWorkloadName: "organizations/123/locations/us-central1/workloads/user-assigned-id",
+			serverWorkloadName: "organizations/123/locations/us-east4/workloads/user-assigned-id",
 			wantWorkloadID:     "user-assigned-id",
 		},
 	}
@@ -709,7 +709,7 @@ func TestResourceAssuredWorkloadsV2WorkloadLifecycle(t *testing.T) {
 			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 				w.Header().Set("Content-Type", "application/json")
 				switch {
-				case req.Method == "POST" && req.URL.Path == "/us-central1/v2/organizations/123/locations/us-central1/workloads":
+				case req.Method == "POST" && req.URL.Path == "/us-east4/v2/organizations/123/locations/us-east4/workloads":
 					createQueryHasID = req.URL.Query().Has("workloadId")
 					createQueryID = req.URL.Query().Get("workloadId")
 					if err := json.NewDecoder(req.Body).Decode(&createBody); err != nil {
@@ -717,30 +717,30 @@ func TestResourceAssuredWorkloadsV2WorkloadLifecycle(t *testing.T) {
 						return
 					}
 					_ = json.NewEncoder(w).Encode(map[string]interface{}{
-						"name": "organizations/123/locations/us-central1/operations/create-op-1",
+						"name": "organizations/123/locations/us-east4/operations/create-op-1",
 						"done": false,
 					})
-				case req.Method == "GET" && req.URL.Path == "/us-central1/v1/organizations/123/locations/us-central1/operations/create-op-1":
+				case req.Method == "GET" && req.URL.Path == "/us-east4/v1/organizations/123/locations/us-east4/operations/create-op-1":
 					createOpPolled = true
 					createOpUserProject = req.Header.Get("X-Goog-User-Project")
 					_ = json.NewEncoder(w).Encode(map[string]interface{}{
-						"name":     "organizations/123/locations/us-central1/operations/create-op-1",
+						"name":     "organizations/123/locations/us-east4/operations/create-op-1",
 						"done":     true,
 						"response": sampleAssuredWorkloadsV2WorkloadResponse(tc.serverWorkloadName),
 					})
-				case req.Method == "GET" && req.URL.Path == "/us-central1/v2/"+tc.serverWorkloadName:
+				case req.Method == "GET" && req.URL.Path == "/us-east4/v2/"+tc.serverWorkloadName:
 					_ = json.NewEncoder(w).Encode(sampleAssuredWorkloadsV2WorkloadResponse(tc.serverWorkloadName))
-				case req.Method == "DELETE" && req.URL.Path == "/us-central1/v2/"+tc.serverWorkloadName:
+				case req.Method == "DELETE" && req.URL.Path == "/us-east4/v2/"+tc.serverWorkloadName:
 					deleteCalled = true
 					_ = json.NewEncoder(w).Encode(map[string]interface{}{
-						"name": "organizations/123/locations/us-central1/operations/delete-op-1",
+						"name": "organizations/123/locations/us-east4/operations/delete-op-1",
 						"done": false,
 					})
-				case req.Method == "GET" && req.URL.Path == "/us-central1/v1/organizations/123/locations/us-central1/operations/delete-op-1":
+				case req.Method == "GET" && req.URL.Path == "/us-east4/v1/organizations/123/locations/us-east4/operations/delete-op-1":
 					deleteOpPolled = true
 					deleteOpUserProject = req.Header.Get("X-Goog-User-Project")
 					_ = json.NewEncoder(w).Encode(map[string]interface{}{
-						"name": "organizations/123/locations/us-central1/operations/delete-op-1",
+						"name": "organizations/123/locations/us-east4/operations/delete-op-1",
 						"done": true,
 					})
 				default:
@@ -764,7 +764,7 @@ func TestResourceAssuredWorkloadsV2WorkloadLifecycle(t *testing.T) {
 			if err := d.Set("organization", "123"); err != nil {
 				t.Fatal(err)
 			}
-			if err := d.Set("location", "us-central1"); err != nil {
+			if err := d.Set("location", "us-east4"); err != nil {
 				t.Fatal(err)
 			}
 			if tc.inputWorkloadID != "" {
@@ -787,7 +787,7 @@ func TestResourceAssuredWorkloadsV2WorkloadLifecycle(t *testing.T) {
 			}
 			if err := d.Set("framework", []interface{}{
 				map[string]interface{}{
-					"framework":         "organizations/123/locations/us-central1/frameworks/builtin-us-data-boundary",
+					"framework":         "organizations/123/locations/us-east4/frameworks/builtin-us-data-boundary",
 					"major_revision_id": 62,
 				},
 			}); err != nil {
@@ -795,7 +795,7 @@ func TestResourceAssuredWorkloadsV2WorkloadLifecycle(t *testing.T) {
 			}
 			if err := d.Set("cloud_control_configs", []interface{}{
 				map[string]interface{}{
-					"cloud_control":          "organizations/123/locations/us-central1/cloudControls/builtin-apigee-regulatory-settings",
+					"cloud_control":          "organizations/123/locations/us-east4/cloudControls/builtin-apigee-regulatory-settings",
 					"cloud_control_revision": 2,
 					"enforcement_mode":       "DETECTIVE",
 				},

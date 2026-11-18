@@ -93,7 +93,7 @@ parameters:
   - name: location
     type: String
     description: |
-      The location of the workload, for example `us-central1`. Requests are
+      The location of the workload, for example `us-east4`. Requests are
       sent to the regional `{location}-assuredworkloads.googleapis.com`
       endpoint for this location.
     immutable: true
@@ -153,8 +153,8 @@ properties:
       - name: newProjectConfig
         type: NestedObject
         description: |
-          Configuration to provision a new Google Cloud project. The project is
-          deleted when the workload is deleted.
+          Configuration to provision a new Google Cloud project. Deleting the
+          workload does not delete the provisioned project.
         immutable: true
         exactly_one_of:
           - resource_config.0.existing_project
@@ -186,8 +186,8 @@ properties:
       - name: newFolderConfig
         type: NestedObject
         description: |
-          Configuration to provision a new Google Cloud folder. The folder is
-          deleted when the workload is deleted.
+          Configuration to provision a new Google Cloud folder. Deleting the
+          workload does not delete the provisioned folder.
         immutable: true
         exactly_one_of:
           - resource_config.0.existing_project

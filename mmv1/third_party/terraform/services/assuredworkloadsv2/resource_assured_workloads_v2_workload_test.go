@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/assuredworkloadsv2"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanagerv3"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -66,6 +67,19 @@ func testAccCheckAssuredWorkloadsV2WorkloadDestroyProducer(t *testing.T) func(s 
 			}
 			if !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 				return fmt.Errorf("error checking that AssuredWorkloadsV2Workload %s is destroyed: %s", url, err)
+			}
+
+			// Deleting a workload does not delete a folder or project created
+			// via new_folder_config or new_project_config, so clean it up here.
+			target := rs.Primary.Attributes["computed_target_resource"]
+			if rs.Primary.Attributes["resource_config.0.new_folder_config.#"] == "1" && strings.HasPrefix(target, "folders/") {
+				if _, err := resourcemanagerv3.NewClient(config, config.UserAgent).Folders.Delete(target).Do(); err != nil && !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+					return fmt.Errorf("error deleting provisioned folder %s: %s", target, err)
+				}
+			} else if rs.Primary.Attributes["resource_config.0.new_project_config.#"] == "1" && strings.HasPrefix(target, "projects/") {
+				if _, err := resourcemanagerv3.NewClient(config, config.UserAgent).Projects.Delete(target).Do(); err != nil && !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+					return fmt.Errorf("error deleting provisioned project %s: %s", target, err)
+				}
 			}
 		}
 		return nil
@@ -263,7 +277,7 @@ resource "google_project" "target" {
 
 resource "google_assured_workloads_v2_workload" "workload" {
   organization = "%{org_id}"
-  location     = "us-central1"
+  location     = "us-east4"
   workload_id  = "tf-test-%{random_suffix}"
   description  = "Terraform test workload on an existing project"
 
@@ -272,18 +286,18 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   framework {
-    framework         = "organizations/%{org_id}/locations/us-central1/frameworks/builtin-us-data-boundary"
+    framework         = "organizations/%{org_id}/locations/us-east4/frameworks/builtin-us-data-boundary"
     major_revision_id = 60
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-apigee-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-apigee-regulatory-settings"
     cloud_control_revision = 2
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-backup-dr-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-backup-dr-regulatory-settings"
     cloud_control_revision = 5
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -295,7 +309,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-cloud-logging-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-cloud-logging-regulatory-settings"
     cloud_control_revision = 9
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -307,7 +321,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-cloud-logging-storage-locations"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-cloud-logging-storage-locations"
     cloud_control_revision = 3
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -321,13 +335,13 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-cloud-monitoring-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-cloud-monitoring-regulatory-settings"
     cloud_control_revision = 2
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-dataplex-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-dataplex-regulatory-settings"
     cloud_control_revision = 8
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -339,37 +353,37 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-global-cloud-armor"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-global-cloud-armor"
     cloud_control_revision = 4
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-pubsub-subscription-transforms"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-pubsub-subscription-transforms"
     cloud_control_revision = 6
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-pubsub-topic-transforms"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-pubsub-topic-transforms"
     cloud_control_revision = 6
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-spanner-multi-region"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-spanner-multi-region"
     cloud_control_revision = 4
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-enable-spanner-advanced-service-controls"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-enable-spanner-advanced-service-controls"
     cloud_control_revision = 1
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-enforce-service-usage-restrictions"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-enforce-service-usage-restrictions"
     cloud_control_revision = 5
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -388,19 +402,19 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-firestore-disable-enhanced-text-search"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-firestore-disable-enhanced-text-search"
     cloud_control_revision = 2
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-gemini-enterprise-agent-platform-allow-all-compliant-apis"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-gemini-enterprise-agent-platform-allow-all-compliant-apis"
     cloud_control_revision = 2
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-looker-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-looker-regulatory-settings"
     cloud_control_revision = 6
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -412,7 +426,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-restrict-resource-locations"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-restrict-resource-locations"
     cloud_control_revision = 9
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -431,7 +445,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-restrict-tls-versions"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-restrict-tls-versions"
     cloud_control_revision = 1
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -463,7 +477,7 @@ resource "google_project" "target" {
 
 resource "google_assured_workloads_v2_workload" "workload" {
   organization = "%{org_id}"
-  location     = "us-central1"
+  location     = "us-east4"
   workload_id  = "tf-test-%{random_suffix}"
   description  = "Terraform test workload on an existing project"
 
@@ -472,18 +486,18 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   framework {
-    framework         = "organizations/%{org_id}/locations/us-central1/frameworks/builtin-us-data-boundary"
+    framework         = "organizations/%{org_id}/locations/us-east4/frameworks/builtin-us-data-boundary"
     major_revision_id = 62
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-apigee-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-apigee-regulatory-settings"
     cloud_control_revision = 2
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-backup-dr-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-backup-dr-regulatory-settings"
     cloud_control_revision = 6
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -495,7 +509,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-cloud-logging-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-cloud-logging-regulatory-settings"
     cloud_control_revision = 10
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -507,7 +521,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-cloud-logging-storage-locations"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-cloud-logging-storage-locations"
     cloud_control_revision = 5
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -521,13 +535,13 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-cloud-monitoring-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-cloud-monitoring-regulatory-settings"
     cloud_control_revision = 2
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-dataplex-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-dataplex-regulatory-settings"
     cloud_control_revision = 10
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -539,37 +553,37 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-global-cloud-armor"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-global-cloud-armor"
     cloud_control_revision = 4
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-pubsub-subscription-transforms"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-pubsub-subscription-transforms"
     cloud_control_revision = 6
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-pubsub-topic-transforms"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-pubsub-topic-transforms"
     cloud_control_revision = 6
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-spanner-multi-region"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-spanner-multi-region"
     cloud_control_revision = 4
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-enable-spanner-advanced-service-controls"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-enable-spanner-advanced-service-controls"
     cloud_control_revision = 2
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-enforce-service-usage-restrictions"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-enforce-service-usage-restrictions"
     cloud_control_revision = 5
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -588,19 +602,19 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-firestore-disable-enhanced-text-search"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-firestore-disable-enhanced-text-search"
     cloud_control_revision = 3
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-gemini-enterprise-agent-platform-allow-all-compliant-apis"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-gemini-enterprise-agent-platform-allow-all-compliant-apis"
     cloud_control_revision = 3
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-looker-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-looker-regulatory-settings"
     cloud_control_revision = 7
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -612,7 +626,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-restrict-resource-locations"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-restrict-resource-locations"
     cloud_control_revision = 9
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -631,7 +645,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-restrict-tls-versions"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-restrict-tls-versions"
     cloud_control_revision = 2
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -663,7 +677,7 @@ resource "google_project" "target" {
 
 resource "google_assured_workloads_v2_workload" "workload" {
   organization = "%{org_id}"
-  location     = "us-central1"
+  location     = "us-east4"
   workload_id  = "tf-test-%{random_suffix}"
   description  = "Terraform test workload on an existing project"
 
@@ -672,18 +686,18 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   framework {
-    framework         = "organizations/%{org_id}/locations/us-central1/frameworks/builtin-us-data-boundary"
+    framework         = "organizations/%{org_id}/locations/us-east4/frameworks/builtin-us-data-boundary"
     major_revision_id = 62
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-apigee-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-apigee-regulatory-settings"
     cloud_control_revision = 2
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-backup-dr-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-backup-dr-regulatory-settings"
     cloud_control_revision = 6
     enforcement_mode       = "PREVENTIVE"
     parameters {
@@ -695,7 +709,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-big-query-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-big-query-regulatory-settings"
     cloud_control_revision = 9
     enforcement_mode       = "PREVENTIVE"
     parameters {
@@ -707,13 +721,13 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-cloud-databases-contextstore-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-cloud-databases-contextstore-regulatory-settings"
     cloud_control_revision = 1
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-cloud-logging-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-cloud-logging-regulatory-settings"
     cloud_control_revision = 10
     enforcement_mode       = "PREVENTIVE"
     parameters {
@@ -725,7 +739,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-cloud-logging-storage-locations"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-cloud-logging-storage-locations"
     cloud_control_revision = 5
     enforcement_mode       = "PREVENTIVE"
     parameters {
@@ -739,13 +753,13 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-cloud-monitoring-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-cloud-monitoring-regulatory-settings"
     cloud_control_revision = 2
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-dataplex-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-dataplex-regulatory-settings"
     cloud_control_revision = 10
     enforcement_mode       = "PREVENTIVE"
     parameters {
@@ -757,49 +771,49 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-dataproc-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-dataproc-regulatory-settings"
     cloud_control_revision = 1
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-global-cloud-armor"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-global-cloud-armor"
     cloud_control_revision = 4
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-pubsub-subscription-transforms"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-pubsub-subscription-transforms"
     cloud_control_revision = 6
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-pubsub-topic-transforms"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-pubsub-topic-transforms"
     cloud_control_revision = 6
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-spanner-multi-region"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-spanner-multi-region"
     cloud_control_revision = 4
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-enable-axt"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-enable-axt"
     cloud_control_revision = 1
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-enable-spanner-advanced-service-controls"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-enable-spanner-advanced-service-controls"
     cloud_control_revision = 2
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-enforce-service-usage-restrictions"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-enforce-service-usage-restrictions"
     cloud_control_revision = 5
     enforcement_mode       = "PREVENTIVE"
     parameters {
@@ -818,19 +832,19 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-firestore-disable-enhanced-text-search"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-firestore-disable-enhanced-text-search"
     cloud_control_revision = 3
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-gemini-enterprise-agent-platform-allow-all-compliant-apis"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-gemini-enterprise-agent-platform-allow-all-compliant-apis"
     cloud_control_revision = 3
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-gemini-enterprise-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-gemini-enterprise-regulatory-settings"
     cloud_control_revision = 4
     enforcement_mode       = "PREVENTIVE"
     parameters {
@@ -842,13 +856,13 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-google-agent-platform-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-google-agent-platform-regulatory-settings"
     cloud_control_revision = 1
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-looker-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-looker-regulatory-settings"
     cloud_control_revision = 7
     enforcement_mode       = "PREVENTIVE"
     parameters {
@@ -860,13 +874,13 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-netapp-volumes-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-netapp-volumes-regulatory-settings"
     cloud_control_revision = 1
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-restrict-resource-locations"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-restrict-resource-locations"
     cloud_control_revision = 9
     enforcement_mode       = "PREVENTIVE"
     parameters {
@@ -885,7 +899,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-restrict-technical-support-services"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-restrict-technical-support-services"
     cloud_control_revision = 12
     enforcement_mode       = "PREVENTIVE"
     parameters {
@@ -897,7 +911,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-restrict-tls-versions"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-restrict-tls-versions"
     cloud_control_revision = 2
     enforcement_mode       = "PREVENTIVE"
     parameters {
@@ -929,7 +943,7 @@ resource "google_project" "target" {
 
 resource "google_assured_workloads_v2_workload" "workload" {
   organization = "%{org_id}"
-  location     = "us-central1"
+  location     = "us-east4"
   workload_id  = "tf-test-%{random_suffix}"
   description  = "Terraform test workload on an existing project"
 
@@ -938,20 +952,20 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   framework {
-    framework         = "organizations/%{org_id}/locations/us-central1/frameworks/builtin-us-data-boundary"
+    framework         = "organizations/%{org_id}/locations/us-east4/frameworks/builtin-us-data-boundary"
     major_revision_id = 62
   }
 
   kaj_enrollment_type = "KEY_ACCESS_TRANSPARENCY_DISABLED"
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-apigee-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-apigee-regulatory-settings"
     cloud_control_revision = 2
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-backup-dr-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-backup-dr-regulatory-settings"
     cloud_control_revision = 6
     enforcement_mode       = "PREVENTIVE"
     parameters {
@@ -963,7 +977,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-big-query-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-big-query-regulatory-settings"
     cloud_control_revision = 9
     enforcement_mode       = "PREVENTIVE"
     parameters {
@@ -975,13 +989,13 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-cloud-databases-contextstore-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-cloud-databases-contextstore-regulatory-settings"
     cloud_control_revision = 1
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-cloud-logging-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-cloud-logging-regulatory-settings"
     cloud_control_revision = 10
     enforcement_mode       = "PREVENTIVE"
     parameters {
@@ -993,7 +1007,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-cloud-logging-storage-locations"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-cloud-logging-storage-locations"
     cloud_control_revision = 5
     enforcement_mode       = "PREVENTIVE"
     parameters {
@@ -1007,13 +1021,13 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-cloud-monitoring-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-cloud-monitoring-regulatory-settings"
     cloud_control_revision = 2
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-dataplex-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-dataplex-regulatory-settings"
     cloud_control_revision = 10
     enforcement_mode       = "PREVENTIVE"
     parameters {
@@ -1025,49 +1039,49 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-dataproc-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-dataproc-regulatory-settings"
     cloud_control_revision = 1
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-global-cloud-armor"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-global-cloud-armor"
     cloud_control_revision = 4
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-pubsub-subscription-transforms"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-pubsub-subscription-transforms"
     cloud_control_revision = 6
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-pubsub-topic-transforms"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-pubsub-topic-transforms"
     cloud_control_revision = 6
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-spanner-multi-region"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-spanner-multi-region"
     cloud_control_revision = 4
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-enable-axt"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-enable-axt"
     cloud_control_revision = 1
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-enable-spanner-advanced-service-controls"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-enable-spanner-advanced-service-controls"
     cloud_control_revision = 2
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-enforce-service-usage-restrictions"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-enforce-service-usage-restrictions"
     cloud_control_revision = 5
     enforcement_mode       = "PREVENTIVE"
     parameters {
@@ -1086,19 +1100,19 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-firestore-disable-enhanced-text-search"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-firestore-disable-enhanced-text-search"
     cloud_control_revision = 3
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-gemini-enterprise-agent-platform-allow-all-compliant-apis"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-gemini-enterprise-agent-platform-allow-all-compliant-apis"
     cloud_control_revision = 3
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-gemini-enterprise-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-gemini-enterprise-regulatory-settings"
     cloud_control_revision = 4
     enforcement_mode       = "PREVENTIVE"
     parameters {
@@ -1110,13 +1124,13 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-google-agent-platform-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-google-agent-platform-regulatory-settings"
     cloud_control_revision = 1
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-looker-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-looker-regulatory-settings"
     cloud_control_revision = 7
     enforcement_mode       = "PREVENTIVE"
     parameters {
@@ -1128,13 +1142,13 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-netapp-volumes-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-netapp-volumes-regulatory-settings"
     cloud_control_revision = 1
     enforcement_mode       = "PREVENTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-restrict-resource-locations"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-restrict-resource-locations"
     cloud_control_revision = 9
     enforcement_mode       = "PREVENTIVE"
     parameters {
@@ -1153,7 +1167,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-restrict-technical-support-services"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-restrict-technical-support-services"
     cloud_control_revision = 12
     enforcement_mode       = "PREVENTIVE"
     parameters {
@@ -1165,7 +1179,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-restrict-tls-versions"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-restrict-tls-versions"
     cloud_control_revision = 2
     enforcement_mode       = "PREVENTIVE"
     parameters {
@@ -1190,7 +1204,7 @@ provider "google" {
 
 resource "google_assured_workloads_v2_workload" "workload" {
   organization = "%{org_id}"
-  location     = "us-central1"
+  location     = "us-east4"
 
   resource_config {
     new_folder_config {
@@ -1200,17 +1214,17 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   framework {
-    framework = "organizations/%{org_id}/locations/us-central1/frameworks/builtin-us-data-boundary"
+    framework = "organizations/%{org_id}/locations/us-east4/frameworks/builtin-us-data-boundary"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-apigee-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-apigee-regulatory-settings"
     cloud_control_revision = 2
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-backup-dr-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-backup-dr-regulatory-settings"
     cloud_control_revision = 6
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1222,7 +1236,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-cloud-logging-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-cloud-logging-regulatory-settings"
     cloud_control_revision = 10
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1234,7 +1248,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-cloud-logging-storage-locations"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-cloud-logging-storage-locations"
     cloud_control_revision = 5
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1248,13 +1262,13 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-cloud-monitoring-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-cloud-monitoring-regulatory-settings"
     cloud_control_revision = 2
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-dataplex-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-dataplex-regulatory-settings"
     cloud_control_revision = 10
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1266,37 +1280,37 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-global-cloud-armor"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-global-cloud-armor"
     cloud_control_revision = 4
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-pubsub-subscription-transforms"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-pubsub-subscription-transforms"
     cloud_control_revision = 6
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-pubsub-topic-transforms"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-pubsub-topic-transforms"
     cloud_control_revision = 6
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-spanner-multi-region"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-spanner-multi-region"
     cloud_control_revision = 4
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-enable-spanner-advanced-service-controls"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-enable-spanner-advanced-service-controls"
     cloud_control_revision = 2
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-enforce-service-usage-restrictions"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-enforce-service-usage-restrictions"
     cloud_control_revision = 5
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1315,19 +1329,19 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-firestore-disable-enhanced-text-search"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-firestore-disable-enhanced-text-search"
     cloud_control_revision = 3
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-gemini-enterprise-agent-platform-allow-all-compliant-apis"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-gemini-enterprise-agent-platform-allow-all-compliant-apis"
     cloud_control_revision = 3
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-looker-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-looker-regulatory-settings"
     cloud_control_revision = 7
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1339,7 +1353,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-restrict-resource-locations"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-restrict-resource-locations"
     cloud_control_revision = 9
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1358,7 +1372,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-restrict-tls-versions"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-restrict-tls-versions"
     cloud_control_revision = 2
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1389,7 +1403,7 @@ resource "google_folder" "target" {
 
 resource "google_assured_workloads_v2_workload" "workload" {
   organization = "%{org_id}"
-  location     = "us-central1"
+  location     = "us-east4"
   workload_id  = "tf-test-ef-%{random_suffix}"
 
   resource_config {
@@ -1397,18 +1411,18 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   framework {
-    framework         = "organizations/%{org_id}/locations/us-central1/frameworks/builtin-us-data-boundary"
+    framework         = "organizations/%{org_id}/locations/us-east4/frameworks/builtin-us-data-boundary"
     major_revision_id = 62
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-apigee-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-apigee-regulatory-settings"
     cloud_control_revision = 2
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-backup-dr-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-backup-dr-regulatory-settings"
     cloud_control_revision = 6
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1420,7 +1434,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-cloud-logging-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-cloud-logging-regulatory-settings"
     cloud_control_revision = 10
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1432,7 +1446,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-cloud-logging-storage-locations"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-cloud-logging-storage-locations"
     cloud_control_revision = 5
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1446,13 +1460,13 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-cloud-monitoring-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-cloud-monitoring-regulatory-settings"
     cloud_control_revision = 2
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-dataplex-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-dataplex-regulatory-settings"
     cloud_control_revision = 10
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1464,37 +1478,37 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-global-cloud-armor"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-global-cloud-armor"
     cloud_control_revision = 4
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-pubsub-subscription-transforms"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-pubsub-subscription-transforms"
     cloud_control_revision = 6
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-pubsub-topic-transforms"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-pubsub-topic-transforms"
     cloud_control_revision = 6
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-spanner-multi-region"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-spanner-multi-region"
     cloud_control_revision = 4
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-enable-spanner-advanced-service-controls"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-enable-spanner-advanced-service-controls"
     cloud_control_revision = 2
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-enforce-service-usage-restrictions"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-enforce-service-usage-restrictions"
     cloud_control_revision = 5
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1513,19 +1527,19 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-firestore-disable-enhanced-text-search"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-firestore-disable-enhanced-text-search"
     cloud_control_revision = 3
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-gemini-enterprise-agent-platform-allow-all-compliant-apis"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-gemini-enterprise-agent-platform-allow-all-compliant-apis"
     cloud_control_revision = 3
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-looker-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-looker-regulatory-settings"
     cloud_control_revision = 7
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1537,7 +1551,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-restrict-resource-locations"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-restrict-resource-locations"
     cloud_control_revision = 9
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1556,7 +1570,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-restrict-tls-versions"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-restrict-tls-versions"
     cloud_control_revision = 2
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1581,7 +1595,7 @@ provider "google" {
 
 resource "google_assured_workloads_v2_workload" "workload" {
   organization = "%{org_id}"
-  location     = "us-central1"
+  location     = "us-east4"
   workload_id  = "tf-test-np-%{random_suffix}"
 
   resource_config {
@@ -1593,18 +1607,18 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   framework {
-    framework         = "organizations/%{org_id}/locations/us-central1/frameworks/builtin-us-data-boundary"
+    framework         = "organizations/%{org_id}/locations/us-east4/frameworks/builtin-us-data-boundary"
     major_revision_id = 62
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-apigee-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-apigee-regulatory-settings"
     cloud_control_revision = 2
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-backup-dr-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-backup-dr-regulatory-settings"
     cloud_control_revision = 6
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1616,7 +1630,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-cloud-logging-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-cloud-logging-regulatory-settings"
     cloud_control_revision = 10
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1628,7 +1642,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-cloud-logging-storage-locations"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-cloud-logging-storage-locations"
     cloud_control_revision = 5
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1642,13 +1656,13 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-cloud-monitoring-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-cloud-monitoring-regulatory-settings"
     cloud_control_revision = 2
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-dataplex-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-dataplex-regulatory-settings"
     cloud_control_revision = 10
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1660,37 +1674,37 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-global-cloud-armor"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-global-cloud-armor"
     cloud_control_revision = 4
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-pubsub-subscription-transforms"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-pubsub-subscription-transforms"
     cloud_control_revision = 6
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-pubsub-topic-transforms"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-pubsub-topic-transforms"
     cloud_control_revision = 6
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-disable-spanner-multi-region"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-disable-spanner-multi-region"
     cloud_control_revision = 4
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-enable-spanner-advanced-service-controls"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-enable-spanner-advanced-service-controls"
     cloud_control_revision = 2
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-enforce-service-usage-restrictions"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-enforce-service-usage-restrictions"
     cloud_control_revision = 5
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1709,19 +1723,19 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-firestore-disable-enhanced-text-search"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-firestore-disable-enhanced-text-search"
     cloud_control_revision = 3
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-gemini-enterprise-agent-platform-allow-all-compliant-apis"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-gemini-enterprise-agent-platform-allow-all-compliant-apis"
     cloud_control_revision = 3
     enforcement_mode       = "DETECTIVE"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-looker-regulatory-settings"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-looker-regulatory-settings"
     cloud_control_revision = 7
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1733,7 +1747,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-restrict-resource-locations"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-restrict-resource-locations"
     cloud_control_revision = 9
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1752,7 +1766,7 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/builtin-restrict-tls-versions"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/builtin-restrict-tls-versions"
     cloud_control_revision = 2
     enforcement_mode       = "DETECTIVE"
     parameters {
@@ -1777,7 +1791,7 @@ provider "google" {
 
 resource "google_assured_workloads_v2_workload" "workload" {
   organization = "%{org_id}"
-  location     = "us-central1"
+  location     = "us-east4"
   workload_id  = "tf-test-pt-%{random_suffix}"
 
   resource_config {
@@ -1785,11 +1799,11 @@ resource "google_assured_workloads_v2_workload" "workload" {
   }
 
   framework {
-    framework = "organizations/%{org_id}/locations/us-central1/frameworks/builtin-us-data-boundary"
+    framework = "organizations/%{org_id}/locations/us-east4/frameworks/builtin-us-data-boundary"
   }
 
   cloud_control_configs {
-    cloud_control          = "organizations/%{org_id}/locations/us-central1/cloudControls/example-control"
+    cloud_control          = "organizations/%{org_id}/locations/us-east4/cloudControls/example-control"
     cloud_control_revision = 1
     enforcement_mode       = "DETECTIVE"
     parameters {
