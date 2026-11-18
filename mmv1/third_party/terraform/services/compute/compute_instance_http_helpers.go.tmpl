@@ -22,8 +22,13 @@ func aliasIpRangeNetmask(cidr string) string {
 	return cidr[idx:]
 }
 
-// FlattenAliasIpRangeHTTP replaces the legacy SDK-dependent flattenAliasIpRange.
-// It operates directly on API JSON response maps, allowing all direct-HTTP compute resources to share it.
+// FlattenAliasIpRangeHTTP aligns API aliasIpRanges back to the configured list order on Read
+// (stage 3 of 3, paired with IpCidrRangeDiffSuppress at Plan and ResolveAliasIpRanges at Update).
+// GCE returns aliasIpRanges in server-chosen order, so matching runs in two passes:
+//  1. Exact match on (ip_cidr_range, subnetwork_range_name) so a netmask entry like "/32"
+//     earlier in config cannot claim an explicit CIDR configured at a later index.
+//  2. Netmask match on (subnetwork_range_name, netmask) for netmask-only entries, consuming
+//     each API entry at most once.
 func FlattenAliasIpRangeHTTP(d *schema.ResourceData, ranges []interface{}, i int) []map[string]interface{} {
 	prefix := fmt.Sprintf("network_interface.%d", i)
 
@@ -51,12 +56,10 @@ func FlattenAliasIpRangeHTTP(d *schema.ResourceData, ranges []interface{}, i int
 		})
 	}
 
-	// Preserve config ordering to prevent permadiffs, handling both explicit CIDRs
-	// and netmask-only entries (e.g. "/32") across named secondary ranges and primary ranges.
 	matched := make([]map[string]interface{}, len(configData))
 	usedAPI := make([]bool, len(apiData))
 
-	// Pass 1: exact match on (ip_cidr_range, subnetwork_range_name) for non-netmask entries.
+	// Pass 1: exact match for explicit CIDRs.
 	for cfgIdx, cfg := range configData {
 		cfgCidr, _ := cfg["ip_cidr_range"].(string)
 		cfgRangeName, _ := cfg["subnetwork_range_name"].(string)
@@ -77,8 +80,7 @@ func FlattenAliasIpRangeHTTP(d *schema.ResourceData, ranges []interface{}, i int
 		}
 	}
 
-	// Pass 2: netmask match on (subnetwork_range_name, netmask) for netmask-only entries.
-	// Also handles instance templates where the API returns a netmask (e.g. "/24").
+	// Pass 2: match netmask-only entries (e.g. "/32" or "/24") by (subnetwork_range_name, netmask).
 	for cfgIdx, cfg := range configData {
 		if matched[cfgIdx] != nil {
 			continue
@@ -102,8 +104,6 @@ func FlattenAliasIpRangeHTTP(d *schema.ResourceData, ranges []interface{}, i int
 		}
 	}
 
-	// Pass 3: compact matched slots, then append any remaining unmatched API entries
-	// sorted deterministically by (ip_cidr_range, subnetwork_range_name).
 	result := make([]map[string]interface{}, 0, len(apiData))
 	for _, m := range matched {
 		if m != nil {
@@ -112,21 +112,30 @@ func FlattenAliasIpRangeHTTP(d *schema.ResourceData, ranges []interface{}, i int
 	}
 
 	unmatched := make([]map[string]interface{}, 0)
+	hasNetmaskOnly := false
 	for apiIdx, api := range apiData {
 		if !usedAPI[apiIdx] {
 			unmatched = append(unmatched, api)
+			if cidr, _ := api["ip_cidr_range"].(string); strings.HasPrefix(cidr, "/") {
+				hasNetmaskOnly = true
+			}
 		}
 	}
-	sort.Slice(unmatched, func(a, b int) bool {
-		aCidr, _ := unmatched[a]["ip_cidr_range"].(string)
-		bCidr, _ := unmatched[b]["ip_cidr_range"].(string)
-		if aCidr != bCidr {
-			return aCidr < bCidr
-		}
-		aName, _ := unmatched[a]["subnetwork_range_name"].(string)
-		bName, _ := unmatched[b]["subnetwork_range_name"].(string)
-		return aName < bName
-	})
+	// On VM instances (import or data source reads with empty config), sort concrete CIDRs for
+	// deterministic state. Instance templates return unallocated netmasks like "/24", so keep
+	// their stored API order on import and data source reads to avoid ForceNew replacement diffs.
+	if !hasNetmaskOnly {
+		sort.Slice(unmatched, func(a, b int) bool {
+			aCidr, _ := unmatched[a]["ip_cidr_range"].(string)
+			bCidr, _ := unmatched[b]["ip_cidr_range"].(string)
+			if aCidr != bCidr {
+				return aCidr < bCidr
+			}
+			aName, _ := unmatched[a]["subnetwork_range_name"].(string)
+			bName, _ := unmatched[b]["subnetwork_range_name"].(string)
+			return aName < bName
+		})
+	}
 	result = append(result, unmatched...)
 
 	return result
