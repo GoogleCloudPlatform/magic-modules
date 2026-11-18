@@ -146,3 +146,58 @@ resource "google_discovery_engine_assistant" "basic" {
 }
 `, context)
 }
+
+func TestAccDiscoveryEngineAssistant_intranetEngineExistingAssistant(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDiscoveryEngineAssistant_intranetEngineExistingAssistant(context),
+			},
+			{
+				ResourceName:            "google_discovery_engine_assistant.intranet",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "assistant_id"},
+			},
+		},
+	})
+}
+
+func testAccDiscoveryEngineAssistant_intranetEngineExistingAssistant(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_discovery_engine_search_engine" "intranet" {
+  location          = "global"
+  collection_id     = "default_collection"
+  engine_id         = "tf-test-intranet-engine%{random_suffix}"
+  display_name      = "tf-test-intranet-engine"
+  industry_vertical = "GENERIC"
+  app_type          = "APP_TYPE_INTRANET"
+  data_store_ids    = []
+  search_engine_config {
+    search_tier                = "SEARCH_TIER_ENTERPRISE"
+    required_subscription_tier = "SUBSCRIPTION_TIER_SEARCH_AND_ASSISTANT"
+    search_add_ons             = ["SEARCH_ADD_ON_LLM"]
+  }
+}
+
+resource "google_discovery_engine_assistant" "intranet" {
+  location      = "global"
+  collection_id = "default_collection"
+  engine_id     = google_discovery_engine_search_engine.intranet.engine_id
+  assistant_id  = "default_assistant"
+  display_name  = "tf-test-intranet-assistant"
+  description   = "Assistant created with the engine"
+  generation_config {
+    default_language = "en"
+  }
+}
+`, context)
+}

@@ -30,6 +30,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+custom_code:
+  pre_create: templates/terraform/pre_create/discoveryengine_assistant.go.tmpl
 samples:
   - name: discoveryengine_assistant_basic
     primary_resource_id: basic
@@ -169,6 +171,7 @@ properties:
               The supported values: 'FAIL_OPEN', 'FAIL_CLOSED'.
   - name: webGroundingType
     type: String
+    default_from_api: true
     description: |
       The type of web grounding to use.
       The supported values: 'WEB_GROUNDING_TYPE_DISABLED', 'WEB_GROUNDING_TYPE_GOOGLE_SEARCH', 'WEB_GROUNDING_TYPE_ENTERPRISE_WEB_SEARCH'.
