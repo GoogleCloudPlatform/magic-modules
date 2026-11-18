@@ -2564,39 +2564,6 @@ func TestAccContainerCluster_regionalWithNodeLocations(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
-func TestAccContainerCluster_withTpu(t *testing.T) {
-	t.Parallel()
-
-	// Skip in VCR until the test issue is resolved
-	// https://github.com/hashicorp/terraform-provider-google/issues/21968
-	acctest.SkipIfVcr(t)
-
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", acctest.RandString(t, 10))
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccContainerCluster_withTpu(containerNetName, clusterName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_container_cluster.with_tpu", "enable_tpu", "true"),
-				),
-			},
-			{
-				ResourceName:		 "google_container_cluster.with_tpu",
-				ImportState:		 true,
-				ImportStateVerify:	 true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
-			},
-		},
-	})
-}
-{{- end }}
-
 func TestAccContainerCluster_nodePoolWithUpgradeSettings(t *testing.T) {
 	t.Parallel()
 
@@ -7976,34 +7943,6 @@ func TestAccContainerCluster_withGatewayApiConfig(t *testing.T) {
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
-func TestAccContainerCluster_withTPUConfig(t *testing.T) {
-	t.Parallel()
-
-	// Skip in VCR until the test issue is resolved
-	// https://github.com/hashicorp/terraform-provider-google/issues/21993
-	acctest.SkipIfVcr(t)
-
-	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
-	containerNetName := fmt.Sprintf("tf-test-container-net-%s", acctest.RandString(t, 10))
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccContainerCluster_withTPUConfig(containerNetName, clusterName),
-			},
-			{
-				ResourceName:      "google_container_cluster.with_tpu_config",
-				ImportState:       true,
-				ImportStateVerify: true,
-				// TODO: remove when tpu_config can be read from the API
-				ImportStateVerifyIgnore: []string{"tpu_config", "deletion_protection"},
-			},
-		},
-	})
-}
-
 func TestAccContainerCluster_withProtectConfig(t *testing.T) {
 	t.Parallel()
 
@@ -11086,63 +11025,6 @@ resource "google_container_cluster" "with_node_locations" {
 `, clusterName, networkName, subnetworkName)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
-func testAccContainerCluster_withTpu(containerNetName string, clusterName string) string {
-	return fmt.Sprintf(`
-resource "google_compute_network" "container_network" {
-  name                    = "%s"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "container_subnetwork" {
-  name    = google_compute_network.container_network.name
-  network = google_compute_network.container_network.name
-  region  = "us-east1"
-
-  ip_cidr_range            = "10.0.35.0/24"
-  private_ip_google_access = true
-
-  secondary_ip_range {
-    range_name    = "pod"
-    ip_cidr_range = "10.1.0.0/19"
-  }
-
-  secondary_ip_range {
-    range_name    = "svc"
-    ip_cidr_range = "10.2.0.0/22"
-  }
-}
-
-resource "google_container_cluster" "with_tpu" {
-  name               = "%s"
-  location           = "us-east1-c"
-  initial_node_count = 1
-
-  enable_tpu = true
-
-  network         = google_compute_network.container_network.name
-  subnetwork      = google_compute_subnetwork.container_subnetwork.name
-  networking_mode = "VPC_NATIVE"
-
-  private_cluster_config {
-    enable_private_endpoint = true
-    enable_private_nodes    = true
-    master_ipv4_cidr_block  = "10.42.0.0/28"
-  }
-
-  master_authorized_networks_config {
-  }
-
-  ip_allocation_policy {
-    cluster_secondary_range_name  = google_compute_subnetwork.container_subnetwork.secondary_ip_range[0].range_name
-    services_secondary_range_name = google_compute_subnetwork.container_subnetwork.secondary_ip_range[1].range_name
-  }
-  deletion_protection = false
-}
-`, containerNetName, clusterName)
-}
-
-{{ end }}
 func testAccContainerCluster_withIntraNodeVisibility(clusterName, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_intranode_visibility" {
@@ -15734,65 +15616,6 @@ resource "google_container_cluster" "primary" {
 }
 `, name, name, name, networkName, subnetworkName)
 }
-
-{{ if ne $.TargetVersionName `ga` -}}
-func testAccContainerCluster_withTPUConfig(network, cluster string) string {
-	return fmt.Sprintf(`
-resource "google_compute_network" "container_network" {
-  name                    = "%s"
-  auto_create_subnetworks = false
-}
-
-resource "google_compute_subnetwork" "container_subnetwork" {
-  name                     = google_compute_network.container_network.name
-  network                  = google_compute_network.container_network.name
-  ip_cidr_range            = "10.0.36.0/24"
-  region                   = "us-east1"
-  private_ip_google_access = true
-
-  secondary_ip_range {
-    range_name    = "pod"
-    ip_cidr_range = "10.0.0.0/19"
-  }
-
-  secondary_ip_range {
-    range_name    = "svc"
-    ip_cidr_range = "10.0.32.0/22"
-  }
-}
-
-resource "google_container_cluster" "with_tpu_config" {
-  name               = "%s"
-  location           = "us-east1-b"
-  initial_node_count = 1
-
-
-  tpu_config {
-    enabled                = true
-    use_service_networking = true
-  }
-
-  network         = google_compute_network.container_network.name
-  subnetwork      = google_compute_subnetwork.container_subnetwork.name
-  networking_mode = "VPC_NATIVE"
-
-  private_cluster_config {
-    enable_private_endpoint = true
-    enable_private_nodes    = true
-    master_ipv4_cidr_block  = "10.42.0.0/28"
-  }
-  master_authorized_networks_config {
-  }
-
-  ip_allocation_policy {
-    cluster_secondary_range_name  = google_compute_subnetwork.container_subnetwork.secondary_ip_range[0].range_name
-    services_secondary_range_name = google_compute_subnetwork.container_subnetwork.secondary_ip_range[1].range_name
-  }
-  deletion_protection = false
-}
-`, network, cluster)
-}
-{{- end }}
 
 {{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerCluster_withProtectConfig(name, networkName, subnetworkName string) string {
