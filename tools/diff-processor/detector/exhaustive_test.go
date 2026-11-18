@@ -579,6 +579,149 @@ func TestDetectExhaustiveMissingTests_IncludeChangedFieldsFlag(t *testing.T) {
 	}
 }
 
+func TestDetectExhaustiveMissingTests_OwnResourceTestsPreferred(t *testing.T) {
+	schemaDiff := diff.SchemaDiff{
+		"google_my_widget": {
+			Fields: map[string]diff.FieldDiff{
+				"name": {
+					New: &schema.Schema{Type: schema.TypeString, Required: true, ForceNew: true},
+				},
+				"fn_opt": {
+					New: &schema.Schema{Type: schema.TypeString, Optional: true, ForceNew: true},
+				},
+				"helper_only_fn": {
+					New: &schema.Schema{Type: schema.TypeString, Optional: true, ForceNew: true},
+				},
+				"untested_opt": {
+					New: &schema.Schema{Type: schema.TypeString, Optional: true},
+				},
+			},
+		},
+	}
+
+	// Verify 3-level priority:
+	// 1. Own tests ahead of non-own helper tests (even when a helper test has a shorter name).
+	// 2. Shorter test name ahead of longer test name within each sub-group
+	//    (_full beats alphabetically-earlier _aardvarkLongName; _h beats _alphaLongHelper).
+	// 3. Alphabetical tie-breaker at equal length (_full beats _zeta, both len 20).
+	tests := []*reader.Test{
+		{
+			Name: "TestAccAlphaLongHelper_usesWidget",
+			Steps: []reader.Step{
+				{
+					reader.ResourceBlock: {
+						"google_my_widget": {
+							"helper": {
+								"name":           "\"w-helper-long\"",
+								"fn_opt":         "\"from-helper-long\"",
+								"helper_only_fn": "\"h-long\"",
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			Name: "TestAccZeta_h",
+			Steps: []reader.Step{
+				{
+					reader.ResourceBlock: {
+						"google_my_widget": {
+							"helper": {
+								"name":           "\"w-helper-short\"",
+								"helper_only_fn": "\"h-short\"",
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			Name: "TestAccMyWidget_aardvarkLongName",
+			Steps: []reader.Step{
+				{
+					reader.ResourceBlock: {
+						"google_my_widget": {
+							"primary": {
+								"name":   "\"w-aardvark\"",
+								"fn_opt": "\"v-aardvark\"",
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			Name: "TestAccMyWidget_zeta",
+			Steps: []reader.Step{
+				{
+					reader.ResourceBlock: {
+						"google_my_widget": {
+							"primary": {
+								"name":   "\"w-zeta\"",
+								"fn_opt": "\"v-zeta\"",
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			Name: "TestAccMyWidget_full",
+			Steps: []reader.Step{
+				{
+					reader.ResourceBlock: {
+						"google_my_widget": {
+							"primary": {
+								"name":   "\"w1\"",
+								"fn_opt": "\"v1\"",
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			Name: "TestAccMyWidget_basic",
+			Steps: []reader.Step{
+				{
+					reader.ResourceBlock: {
+						"google_my_widget": {
+							"primary": {
+								"name": "\"w2\"",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	got, err := DetectExhaustiveMissingTests(schemaDiff, nil, tests, false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	info := got["google_my_widget"]
+	if info == nil {
+		t.Fatalf("expected google_my_widget in results (untested_opt is incomplete)")
+	}
+	if diffStr := cmp.Diff([]string{"untested_opt"}, info.IncompleteFields); diffStr != "" {
+		t.Errorf("expected ONLY untested_opt to be incomplete (-want +got):\n%s", diffStr)
+	}
+	if info.Fields["name"].Set.CoveredBy != "TestAccMyWidget_full (step 1)" {
+		t.Errorf("expected name.Set covered by shortest/alphabetical own test TestAccMyWidget_full (step 1), got %+v", info.Fields["name"].Set)
+	}
+	if info.Fields["fn_opt"].Set.CoveredBy != "TestAccMyWidget_full (step 1)" {
+		t.Errorf("expected fn_opt.Set covered by TestAccMyWidget_full (step 1) ahead of longer _aardvarkLongName and equal-length _zeta, got %+v", info.Fields["fn_opt"].Set)
+	}
+	if info.Fields["fn_opt"].Unset.CoveredBy != "TestAccMyWidget_basic (step 1)" {
+		t.Errorf("expected fn_opt.Unset covered by own test TestAccMyWidget_basic (step 1) ahead of shorter helper TestAccZeta_h, got %+v", info.Fields["fn_opt"].Unset)
+	}
+	if info.Fields["helper_only_fn"].Set.CoveredBy != "TestAccZeta_h (step 1)" {
+		t.Errorf("expected helper_only_fn.Set covered by shorter helper test TestAccZeta_h (step 1), got %+v", info.Fields["helper_only_fn"].Set)
+	}
+}
+
 func TestDetectExhaustiveMissingTests_NullLifecycleUnsetSetChangedUnset(t *testing.T) {
 	schemaDiff := diff.SchemaDiff{
 		"google_example_resource": {
