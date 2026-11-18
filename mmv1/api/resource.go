@@ -2328,6 +2328,14 @@ func (r Resource) TestSamples() []*resource.Sample {
 }
 
 func (r Resource) TestSampleSetUp(sysfs fs.FS) {
+	var firstStep *resource.Step
+	var iamSampleBody string
+	if r.IamPolicy != nil && !r.IamPolicy.Exclude && r.IamPolicy.SampleConfigBody != "" {
+		if b, err := fs.ReadFile(sysfs, r.IamPolicy.SampleConfigBody); err == nil {
+			firstStep = r.FirstTestConfig().Step
+			iamSampleBody = string(b)
+		}
+	}
 	res := make(map[string]string)
 	for _, sample := range r.Samples {
 		sample.TargetVersionName = r.TargetVersionName
@@ -2344,6 +2352,9 @@ func (r Resource) TestSampleSetUp(sysfs fs.FS) {
 				step.ConfigPath = fmt.Sprintf("templates/terraform/samples/services/%s/%s.tf.tmpl", packageName, step.Name)
 			}
 			step.SetHCLText(sysfs)
+			if step == firstStep {
+				step.IamHCLText = iamSampleBody
+			}
 			configName := step.Name
 			if _, ok := res[step.Name]; !ok {
 				res[configName] = sample.Name
