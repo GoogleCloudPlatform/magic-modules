@@ -52,9 +52,21 @@ const (
 // attribute set on one says nothing about the same-named attribute on another.
 type Step map[BlockType]TypeLabels
 
+// StepPlanChecks records the PreApply plan checks configured on a single test
+// step via resource.ConfigPlanChecks.
+type StepPlanChecks struct {
+	// ResourceActions maps a resource address ("<resourceType>.<label>") to the
+	// expected plancheck.ResourceAction* selector name (for example,
+	// "ResourceActionUpdate" or "ResourceActionReplace").
+	ResourceActions map[string]string
+	ExpectNoDelete  bool
+	ExpectEmptyPlan bool
+}
+
 type Test struct {
-	Name  string
-	Steps []Step
+	Name       string
+	Steps      []Step
+	PlanChecks []StepPlanChecks
 }
 
 func (t *Test) String() string {
@@ -145,6 +157,8 @@ func readTestFunc(testFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, va
 	var errs []error
 	vars := make(map[string]*ast.CompositeLit, len(testFunc.Body.List))              // map of variable names to composite literal values in function body
 	contextVars := make(map[string]map[string]contextValue, len(testFunc.Body.List)) // map of variable names to context map values
+	localStringVars := make(map[string]string)
+	planCheckVars := make(map[string]StepPlanChecks)
 	for _, stmt := range testFunc.Body.List {
 		if exprStmt, ok := stmt.(*ast.ExprStmt); ok {
 			if callExpr, ok := exprStmt.X.(*ast.CallExpr); ok {
@@ -152,7 +166,7 @@ func readTestFunc(testFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, va
 				ident, isIdent := callExpr.Fun.(*ast.Ident)
 				selExpr, isSelExpr := callExpr.Fun.(*ast.SelectorExpr)
 				if isIdent && ident.Name == "VcrTest" || isSelExpr && selExpr.Sel.Name == "VcrTest" {
-					test, err := readVcrTestCall(callExpr, funcDecls, varDecls, contextVars)
+					test, err := readVcrTestCall(callExpr, funcDecls, varDecls, contextVars, localStringVars, planCheckVars)
 					if err != nil {
 						errs = append(errs, err)
 					}
@@ -162,14 +176,32 @@ func readTestFunc(testFunc *ast.FuncDecl, funcDecls map[string]*ast.FuncDecl, va
 			}
 		} else if assignStmt, ok := stmt.(*ast.AssignStmt); ok {
 			if len(assignStmt.Lhs) == 1 && len(assignStmt.Rhs) == 1 {
-				// For now, only allow single assignment variables for serial test maps
-				// and local context maps.
+				// For now, only allow single assignment variables for serial test maps,
+				// local context maps, local string variables, and ConfigPlanChecks structs.
 				if ident, ok := assignStmt.Lhs[0].(*ast.Ident); ok {
-					if rhsCompLit, ok := assignStmt.Rhs[0].(*ast.CompositeLit); ok {
+					if rhsLit, ok := assignStmt.Rhs[0].(*ast.BasicLit); ok && rhsLit.Kind == token.STRING {
+						if s, err := strconv.Unquote(rhsLit.Value); err == nil {
+							localStringVars[ident.Name] = s
+						}
+					} else if rhsCompLit, ok := assignStmt.Rhs[0].(*ast.CompositeLit); ok {
 						if isSerialTestMap(rhsCompLit) {
 							vars[ident.Name] = rhsCompLit
+						} else if isConfigPlanChecksCompLit(rhsCompLit) {
+							planCheckVars[ident.Name] = parseConfigPlanChecksCompLit(rhsCompLit, varDecls, localStringVars)
 						} else if ctxMap := parseContextMapCompLit(rhsCompLit); len(ctxMap) > 0 {
 							contextVars[ident.Name] = ctxMap
+						}
+					}
+				}
+			}
+		} else if declStmt, ok := stmt.(*ast.DeclStmt); ok {
+			if genDecl, ok := declStmt.Decl.(*ast.GenDecl); ok {
+				for _, spec := range genDecl.Specs {
+					if valueSpec, ok := spec.(*ast.ValueSpec); ok && len(valueSpec.Names) > 0 && len(valueSpec.Values) > 0 {
+						if basicLit, ok := valueSpec.Values[0].(*ast.BasicLit); ok && basicLit.Kind == token.STRING {
+							if s, err := strconv.Unquote(basicLit.Value); err == nil {
+								localStringVars[valueSpec.Names[0].Name] = s
+							}
 						}
 					}
 				}
@@ -330,12 +362,12 @@ func readSerialTestEltKeyValueExpr(eltKeyValueExpr *ast.KeyValueExpr, funcDecls 
 	return nil, fmt.Errorf("element key value expression with key %+v had non-ident value %+v", eltKeyValueExpr.Key, eltKeyValueExpr.Value)
 }
 
-func readVcrTestCall(vcrTestCall *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit, contextVars map[string]map[string]contextValue) (*Test, error) {
+func readVcrTestCall(vcrTestCall *ast.CallExpr, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit, contextVars map[string]map[string]contextValue, localStringVars map[string]string, planCheckVars map[string]StepPlanChecks) (*Test, error) {
 	for _, arg := range vcrTestCall.Args {
 		if vcrTestArgCompLit, ok := arg.(*ast.CompositeLit); ok {
 			if selExpr, ok := vcrTestArgCompLit.Type.(*ast.SelectorExpr); ok {
 				if ident, ok := selExpr.X.(*ast.Ident); ok && ident.Name == "resource" && selExpr.Sel.Name == "TestCase" {
-					return readTestCaseCompLit(vcrTestArgCompLit, funcDecls, varDecls, contextVars)
+					return readTestCaseCompLit(vcrTestArgCompLit, funcDecls, varDecls, contextVars, localStringVars, planCheckVars)
 				}
 			}
 		}
@@ -343,12 +375,12 @@ func readVcrTestCall(vcrTestCall *ast.CallExpr, funcDecls map[string]*ast.FuncDe
 	return nil, fmt.Errorf("failed to find TestCase in %v", vcrTestCall.Args)
 }
 
-func readTestCaseCompLit(testCaseCompLit *ast.CompositeLit, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit, contextVars map[string]map[string]contextValue) (*Test, error) {
+func readTestCaseCompLit(testCaseCompLit *ast.CompositeLit, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit, contextVars map[string]map[string]contextValue, localStringVars map[string]string, planCheckVars map[string]StepPlanChecks) (*Test, error) {
 	for _, elt := range testCaseCompLit.Elts {
 		if keyValueExpr, ok := elt.(*ast.KeyValueExpr); ok {
 			if ident, ok := keyValueExpr.Key.(*ast.Ident); ok && ident.Name == "Steps" {
 				if stepsCompLit, ok := keyValueExpr.Value.(*ast.CompositeLit); ok {
-					return readStepsCompLit(stepsCompLit, funcDecls, varDecls, contextVars)
+					return readStepsCompLit(stepsCompLit, funcDecls, varDecls, contextVars, localStringVars, planCheckVars)
 				}
 			}
 		}
@@ -356,7 +388,7 @@ func readTestCaseCompLit(testCaseCompLit *ast.CompositeLit, funcDecls map[string
 	return nil, fmt.Errorf("failed to find Steps in %v", testCaseCompLit.Elts)
 }
 
-func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit, contextVars map[string]map[string]contextValue) (*Test, error) {
+func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.FuncDecl, varDecls map[string]*ast.BasicLit, contextVars map[string]map[string]contextValue, localStringVars map[string]string, planCheckVars map[string]StepPlanChecks) (*Test, error) {
 	test := &Test{}
 	errs := make([]error, 0)
 	for _, elt := range stepsCompLit.Elts {
@@ -364,23 +396,35 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 			if shouldSkipStep(eltCompLit) {
 				continue
 			}
+			var hasConfig bool
+			var step Step
+			var stepPlanChecks StepPlanChecks
 			for _, eltCompLitElt := range eltCompLit.Elts {
 				if keyValueExpr, ok := eltCompLitElt.(*ast.KeyValueExpr); ok {
-					if ident, ok := keyValueExpr.Key.(*ast.Ident); ok && ident.Name == "Config" {
-						// A config is any expression that evaluates to a config
-						// string, and reads the same way here as it does in a
-						// config func's return statement.
-						configStr, err := readConfigFuncResult(keyValueExpr.Value, funcDecls, varDecls, contextVars)
-						if err != nil {
-							errs = append(errs, err)
+					if ident, ok := keyValueExpr.Key.(*ast.Ident); ok {
+						switch ident.Name {
+						case "Config":
+							// A config is any expression that evaluates to a config
+							// string, and reads the same way here as it does in a
+							// config func's return statement.
+							hasConfig = true
+							configStr, err := readConfigFuncResult(keyValueExpr.Value, funcDecls, varDecls, contextVars)
+							if err != nil {
+								errs = append(errs, err)
+							}
+							step, err = readConfigStr(configStr)
+							if err != nil {
+								errs = append(errs, err)
+							}
+						case "ConfigPlanChecks":
+							stepPlanChecks = readStepPlanChecksExpr(keyValueExpr.Value, varDecls, localStringVars, planCheckVars)
 						}
-						step, err := readConfigStr(configStr)
-						if err != nil {
-							errs = append(errs, err)
-						}
-						test.Steps = append(test.Steps, step)
 					}
 				}
+			}
+			if hasConfig {
+				test.Steps = append(test.Steps, step)
+				test.PlanChecks = append(test.PlanChecks, stepPlanChecks)
 			}
 		}
 	}
@@ -388,6 +432,98 @@ func readStepsCompLit(stepsCompLit *ast.CompositeLit, funcDecls map[string]*ast.
 		return test, fmt.Errorf("errors reading test steps: %v", errs)
 	}
 	return test, nil
+}
+
+func isConfigPlanChecksCompLit(compLit *ast.CompositeLit) bool {
+	selExpr, ok := compLit.Type.(*ast.SelectorExpr)
+	if !ok {
+		return false
+	}
+	ident, ok := selExpr.X.(*ast.Ident)
+	return ok && ident.Name == "resource" && selExpr.Sel.Name == "ConfigPlanChecks"
+}
+
+func readStepPlanChecksExpr(expr ast.Expr, varDecls map[string]*ast.BasicLit, localStringVars map[string]string, planCheckVars map[string]StepPlanChecks) StepPlanChecks {
+	switch v := expr.(type) {
+	case *ast.CompositeLit:
+		return parseConfigPlanChecksCompLit(v, varDecls, localStringVars)
+	case *ast.Ident:
+		if planCheckVars != nil {
+			return planCheckVars[v.Name]
+		}
+	}
+	return StepPlanChecks{}
+}
+
+func parseConfigPlanChecksCompLit(compLit *ast.CompositeLit, varDecls map[string]*ast.BasicLit, localStringVars map[string]string) StepPlanChecks {
+	var pc StepPlanChecks
+	for _, elt := range compLit.Elts {
+		kv, ok := elt.(*ast.KeyValueExpr)
+		if !ok {
+			continue
+		}
+		keyIdent, ok := kv.Key.(*ast.Ident)
+		if !ok || keyIdent.Name != "PreApply" {
+			continue
+		}
+		preApplySlice, ok := kv.Value.(*ast.CompositeLit)
+		if !ok {
+			continue
+		}
+		for _, checkElt := range preApplySlice.Elts {
+			callExpr, ok := checkElt.(*ast.CallExpr)
+			if !ok {
+				continue
+			}
+			selExpr, ok := callExpr.Fun.(*ast.SelectorExpr)
+			if !ok {
+				continue
+			}
+			switch selExpr.Sel.Name {
+			case "ExpectResourceAction":
+				if len(callExpr.Args) == 2 {
+					addr, okAddr := resolveStringExpr(callExpr.Args[0], varDecls, localStringVars)
+					actionSel, okAction := callExpr.Args[1].(*ast.SelectorExpr)
+					if okAddr && okAction && addr != "" {
+						if pc.ResourceActions == nil {
+							pc.ResourceActions = make(map[string]string)
+						}
+						pc.ResourceActions[addr] = actionSel.Sel.Name
+					}
+				}
+			case "ExpectNoDelete":
+				pc.ExpectNoDelete = true
+			case "ExpectEmptyPlan":
+				pc.ExpectEmptyPlan = true
+			}
+		}
+	}
+	return pc
+}
+
+func resolveStringExpr(expr ast.Expr, varDecls map[string]*ast.BasicLit, localStringVars map[string]string) (string, bool) {
+	switch v := expr.(type) {
+	case *ast.BasicLit:
+		if v.Kind == token.STRING {
+			if s, err := strconv.Unquote(v.Value); err == nil {
+				return s, true
+			}
+		}
+	case *ast.Ident:
+		if localStringVars != nil {
+			if s, ok := localStringVars[v.Name]; ok {
+				return s, true
+			}
+		}
+		if varDecls != nil {
+			if lit, ok := varDecls[v.Name]; ok && lit.Kind == token.STRING {
+				if s, err := strconv.Unquote(lit.Value); err == nil {
+					return s, true
+				}
+			}
+		}
+	}
+	return "", false
 }
 
 // Report whether a test step composite literal does not apply its config, so

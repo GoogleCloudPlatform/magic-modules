@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
 )
 
@@ -16,6 +17,11 @@ func TestAccCoveredResource(t *testing.T) {
 			},
 			{
 				Config: testAccCoveredResource_update(),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("covered_resource.resource", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 		},
 	})

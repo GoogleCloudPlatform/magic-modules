@@ -30,6 +30,7 @@ func buildSuggestedTestNote(
 	resourceName string,
 	fields map[string]*ExhaustiveFieldStatus,
 	incompleteFields []string,
+	skippedUpdateSteps []string,
 ) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, "Resource %q has %d field(s) with incomplete exhaustive lifecycle test coverage:\n", resourceName, len(incompleteFields))
@@ -46,6 +47,9 @@ func buildSuggestedTestNote(
 			missing = append(missing, string(TransitionUnset))
 		}
 		fmt.Fprintf(&b, "- %s: missing %s\n", fp, strings.Join(missing, ", "))
+	}
+	if len(skippedUpdateSteps) > 0 {
+		fmt.Fprintf(&b, "Skipped step transition(s) without an in-place update plancheck: %s\n", strings.Join(skippedUpdateSteps, "; "))
 	}
 	return b.String()
 }
@@ -88,6 +92,12 @@ func FormatExhaustiveMarkdown(results map[string]*ExhaustiveMissingTestInfo) str
 				formatTransitionCell(st.Modify),
 				formatTransitionCell(st.Unset),
 			)
+		}
+		if len(info.SkippedUpdateSteps) > 0 {
+			b.WriteString("\n> **Note:** Skipped step transition(s) without an in-place update plancheck (`plancheck.ResourceActionUpdate` required):\n")
+			for _, step := range info.SkippedUpdateSteps {
+				fmt.Fprintf(&b, "> - `%s`\n", step)
+			}
 		}
 	}
 	return b.String()
