@@ -1,0 +1,5 @@
+if d.Get("force_destroy").(bool) {
+	if err := deleteBackupsReferencingSpannerInstancePartition(d, config, userAgent, billingProject); err != nil {
+		return err
+	}
+}

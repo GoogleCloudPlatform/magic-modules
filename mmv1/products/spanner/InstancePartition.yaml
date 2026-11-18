@@ -44,7 +44,9 @@ async:
 autogen_async: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/spanner_instance_partition.go.tmpl
+  constants: templates/terraform/constants/spanner_instance_partition.go.tmpl
   pre_update: templates/terraform/pre_update/spanner_instance_partition.go.tmpl
+  pre_delete: templates/terraform/pre_delete/spanner_instance_partition.go.tmpl
 samples:
   - name: spanner_instance_partition_basic
     primary_resource_id: partition
@@ -60,6 +62,15 @@ samples:
         resource_id_vars:
           instance_name: test-instance
           partition_name: test-partition
+virtual_fields:
+  - name: force_destroy
+    description: |
+      When deleting an instance partition, this boolean option will delete all backups
+      that reference this instance partition, including backups created by a backup schedule.
+      The backups are deleted permanently. Databases that use the instance partition are
+      not deleted. Defaults to false.
+    type: Boolean
+    default_value: false
 parameters:
   - name: instance
     type: ResourceRef

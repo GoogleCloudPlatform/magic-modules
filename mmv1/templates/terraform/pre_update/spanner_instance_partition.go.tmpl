@@ -51,6 +51,11 @@ if d.HasChange("autoscaling_config") {
     }
 }
 
+// Only client-side fields changed. The API rejects an empty field mask.
+if len(fieldMask) == 0 {
+    return resourceSpannerInstancePartitionRead(d, meta)
+}
+
 // Add field_mask as a URL parameter
 url, err = transport_tpg.AddQueryParams(url, map[string]string{"field_mask": strings.Join(fieldMask, ",")})
 if err != nil {
