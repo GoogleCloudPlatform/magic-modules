@@ -15,27 +15,19 @@ func TestAccAlloydbCluster_expressUpgrade(t *testing.T) {
 
 	suffix := acctest.RandString(t, 10)
 	expressContext := map[string]interface{}{
-		"random_suffix":      suffix,
-		"express_enabled":    true,
-		"cluster_env":        "express",
-		"instance_cpu_count": 1,
-	}
-	resizedContext := map[string]interface{}{
-		"random_suffix":      suffix,
-		"cluster_env":        "express",
-		"instance_cpu_count": 2,
+		"random_suffix":   suffix,
+		"express_enabled": true,
+		"cluster_env":     "express",
 	}
 	upgradedContext := map[string]interface{}{
-		"random_suffix":      suffix,
-		"express_enabled":    false,
-		"cluster_env":        "upgraded",
-		"instance_cpu_count": 2,
+		"random_suffix":   suffix,
+		"express_enabled": false,
+		"cluster_env":     "upgraded",
 	}
 	downgradeContext := map[string]interface{}{
-		"random_suffix":      suffix,
-		"express_enabled":    true,
-		"cluster_env":        "upgraded",
-		"instance_cpu_count": 2,
+		"random_suffix":   suffix,
+		"express_enabled": true,
+		"cluster_env":     "upgraded",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -47,7 +39,7 @@ func TestAccAlloydbCluster_expressUpgrade(t *testing.T) {
 		),
 		Steps: []resource.TestStep{
 			{
-				// Create an AlloyDB Express cluster and 1-vCPU primary instance.
+				// Create an AlloyDB Express cluster and primary instance.
 				Config: testAccAlloydbCluster_expressConfig(expressContext),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "express_config.0.enabled", "true"),
@@ -62,13 +54,10 @@ func TestAccAlloydbCluster_expressUpgrade(t *testing.T) {
 			},
 			{
 				// Omitting the express_config block must not change an Express cluster.
-				// Resize the primary instance to 2 vCPUs before upgrading so the edition-upgrade
-				// migration VM uses n2-highmem-2 instead of c4a-highmem-1 (which can stock out zonally).
-				Config: testAccAlloydbCluster_expressConfigOmitted(resizedContext),
+				Config: testAccAlloydbCluster_expressConfigOmitted(expressContext),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "express_config.0.enabled", "true"),
 					resource.TestCheckResourceAttr("data.google_alloydb_cluster.default", "express_config.0.enabled", "true"),
-					resource.TestCheckResourceAttr("google_alloydb_instance.default", "machine_config.0.cpu_count", "2"),
 				),
 			},
 			{
@@ -108,7 +97,7 @@ func testAccAlloydbCluster_expressConfig(context map[string]interface{}) string 
 resource "google_alloydb_cluster" "default" {
   provider         = google-beta
   cluster_id       = "tf-test-alloydb-cluster%{random_suffix}"
-  location         = "asia-east1"
+  location         = "europe-west2"
   database_version = "POSTGRES_18"
 
   labels = {
@@ -131,15 +120,10 @@ resource "google_alloydb_cluster" "default" {
 }
 
 resource "google_alloydb_instance" "default" {
-  provider          = google-beta
-  cluster           = google_alloydb_cluster.default.name
-  instance_id       = "tf-test-alloydb-instance%{random_suffix}"
-  instance_type     = "PRIMARY"
-  availability_type = "ZONAL"
-
-  machine_config {
-    cpu_count = %{instance_cpu_count}
-  }
+  provider      = google-beta
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
 }
 
 data "google_alloydb_cluster" "default" {
@@ -156,7 +140,7 @@ func testAccAlloydbCluster_expressConfigOmitted(context map[string]interface{}) 
 resource "google_alloydb_cluster" "default" {
   provider         = google-beta
   cluster_id       = "tf-test-alloydb-cluster%{random_suffix}"
-  location         = "asia-east1"
+  location         = "europe-west2"
   database_version = "POSTGRES_18"
 
   labels = {
@@ -175,15 +159,10 @@ resource "google_alloydb_cluster" "default" {
 }
 
 resource "google_alloydb_instance" "default" {
-  provider          = google-beta
-  cluster           = google_alloydb_cluster.default.name
-  instance_id       = "tf-test-alloydb-instance%{random_suffix}"
-  instance_type     = "PRIMARY"
-  availability_type = "ZONAL"
-
-  machine_config {
-    cpu_count = %{instance_cpu_count}
-  }
+  provider      = google-beta
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
 }
 
 data "google_alloydb_cluster" "default" {
