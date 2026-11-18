@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
-	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -15,22 +14,10 @@ func TestAccProviderFunction_location_from_id(t *testing.T) {
 	t.Parallel()
 
 	resource.UnitTest(t, resource.TestCase{
-		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version1_8_0),
-		},
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: `
-# terraform block required for provider function to be found
-terraform {
-  required_providers {
-    google = {
-      source = "hashicorp/google"
-    }
-  }
-}
-
 output "from_project_location_id" {
   value = provider::google::location_from_id("projects/my-project/locations/us-central1/services/my-service")
 }
@@ -56,14 +43,6 @@ output "from_op_resource_name" {
 			},
 			{
 				Config: `
-terraform {
-  required_providers {
-    google = {
-      source = "hashicorp/google"
-    }
-  }
-}
-
 output "invalid" {
   value = provider::google::location_from_id("projects/my-project/zones/us-central1-a/instances/my-instance")
 }
