@@ -54,8 +54,6 @@ include_in_tgc_next: true
 tgc_tests:
   - name: TestAccAlloydbInstance_connectionPoolConfig
     skip: fix it after the next release, as connection_pool_config will be in the next release
-  - name: TestAccAlloydbInstance_expressPublicDnsAndUpgrade
-    skip: beta-only test; express_config and public_dns_enabled are not in the GA provider
 custom_code:
   constants: templates/terraform/constants/alloydb_instance.go.tmpl
   decoder: templates/terraform/decoders/alloydb_instance.go.tmpl
@@ -467,26 +465,12 @@ properties:
     properties:
       - name: authorizedExternalNetworks
         type: Array
-        exact_version: ga
         description: |
           A list of external networks authorized to access this instance. This
           field is only allowed to be set when `enable_public_ip` is set to
           true.
         required_with:
           - networkConfig.0.enablePublicIp
-        item_type:
-          type: NestedObject
-          properties:
-            - name: cidrRange
-              type: String
-              description: CIDR range for one authorized network of the instance.
-      - name: authorizedExternalNetworks
-        type: Array
-        exact_version: beta
-        description: |
-          A list of external networks authorized to access this instance. This
-          field is only allowed to be set when `enable_public_ip` is set to
-          true (or when `public_dns_enabled` is set to true in `google-beta`).
         item_type:
           type: NestedObject
           properties:
@@ -503,15 +487,6 @@ properties:
         type: Boolean
         description: |
           Enabling outbound public ip for the instance.
-      - name: publicDnsEnabled
-        type: Boolean
-        min_version: beta
-        description: |
-          Whether Public DNS is enabled for the instance. Public DNS can only be
-          enabled on AlloyDB Express instances. When it's enabled, the instance's
-          DNS name is exported as `network_info.public_dns_name`. Turning Public
-          DNS on or off can't be combined with changes that restart the instance
-          in the same apply.
       - name: allocatedIpRangeOverride
         type: String
         immutable: true
@@ -563,16 +538,3 @@ properties:
           in Terraform, please remove the "connection-pooling-" prefix and use
           underscores instead of dashes in the name. For example,
           "connection-pooling-pool-mode" would be "pool_mode".
-  - name: networkInfo
-    type: NestedObject
-    min_version: beta
-    output: true
-    description: |
-      Public network metadata for the instance, such as its Public DNS domain name.
-    properties:
-      - name: publicDnsName
-        type: String
-        output: true
-        description: |
-          The Public DNS domain name (FQDN) of the instance, populated when
-          `network_config.public_dns_enabled` is `true`.
