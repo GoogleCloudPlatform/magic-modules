@@ -112,6 +112,7 @@ func TestReadSerialResourceTestFile(t *testing.T) {
 					},
 				},
 			},
+			PlanChecks: []StepPlanChecks{{}},
 		},
 		{
 			Name: "testAccSerialResource2",
@@ -126,6 +127,7 @@ func TestReadSerialResourceTestFile(t *testing.T) {
 					},
 				},
 			},
+			PlanChecks: []StepPlanChecks{{}},
 		},
 	}; !reflect.DeepEqual(tests, expectedTests) {
 		t.Errorf("found unexpected serialized tests: %v, expected %v", tests, expectedTests)
@@ -163,6 +165,7 @@ func TestReadCrossFileTests(t *testing.T) {
 					},
 				},
 			},
+			PlanChecks: []StepPlanChecks{{}},
 		},
 		{
 			Name: "testAccCrossFile2",
@@ -177,6 +180,7 @@ func TestReadCrossFileTests(t *testing.T) {
 					},
 				},
 			},
+			PlanChecks: []StepPlanChecks{{}},
 		},
 	}
 
@@ -216,6 +220,7 @@ func TestReadHelperFunctionCall(t *testing.T) {
 				},
 			},
 		},
+		PlanChecks: []StepPlanChecks{{}},
 	}
 	if !reflect.DeepEqual(tests[0], expectedTest) {
 		t.Errorf("found unexpected tests using helper function: %v, expected %v", tests[0], expectedTest)
@@ -771,5 +776,99 @@ resource "my_resource" "primary" {
 	}
 	if got := tests[0].Steps[0][ResourceBlock]["my_resource"]["primary"]; !reflect.DeepEqual(got, expected) {
 		t.Errorf("got %#v, expected %#v", got, expected)
+	}
+}
+
+func TestReadConfigPlanChecks(t *testing.T) {
+	testFile := filepath.Join(t.TempDir(), "plan_checks_test.go")
+	src := `package service_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+)
+
+const pkgResourceAddr = "my_resource.pkg"
+
+func TestAccConfigPlanChecks(t *testing.T) {
+	localAddr := "my_resource.primary"
+	expectUpdate := resource.ConfigPlanChecks{
+		PreApply: []plancheck.PlanCheck{
+			plancheck.ExpectResourceAction(localAddr, plancheck.ResourceActionUpdate),
+		},
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		Steps: []resource.TestStep{
+			{
+				Config: ` + "`" + `resource "my_resource" "primary" { field_one = "v1" }` + "`" + `,
+			},
+			{
+				ResourceName: localAddr,
+				ImportState:  true,
+			},
+			{
+				Config: ` + "`" + `resource "my_resource" "primary" { field_one = "v2" }` + "`" + `,
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("my_resource.primary", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction(pkgResourceAddr, plancheck.ResourceActionNoop),
+					},
+				},
+			},
+			{
+				ConfigPlanChecks: expectUpdate,
+				Config:           ` + "`" + `resource "my_resource" "primary" { field_one = "v3" }` + "`" + `,
+			},
+			{
+				Config: ` + "`" + `resource "my_resource" "primary" { field_one = "v4" }` + "`" + `,
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(localAddr, plancheck.ResourceActionReplace),
+						acctest.ExpectNoDelete(),
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
+			},
+		},
+	})
+}
+`
+	if err := os.WriteFile(testFile, []byte(src), 0o600); err != nil {
+		t.Fatalf("error writing temp test file: %v", err)
+	}
+	tests, errs := ReadTestFiles([]string{testFile})
+	if len(errs) > 0 {
+		t.Fatalf("unexpected errors: %v", errs)
+	}
+	if len(tests) != 1 || len(tests[0].Steps) != 4 {
+		t.Fatalf("expected 1 test with 4 apply steps, got %#v", tests)
+	}
+	wantPlanChecks := []StepPlanChecks{
+		{},
+		{
+			ResourceActions: map[string]string{
+				"my_resource.primary": "ResourceActionUpdate",
+				"my_resource.pkg":     "ResourceActionNoop",
+			},
+		},
+		{
+			ResourceActions: map[string]string{
+				"my_resource.primary": "ResourceActionUpdate",
+			},
+		},
+		{
+			ResourceActions: map[string]string{
+				"my_resource.primary": "ResourceActionReplace",
+			},
+			ExpectNoDelete:  true,
+			ExpectEmptyPlan: true,
+		},
+	}
+	if !reflect.DeepEqual(tests[0].PlanChecks, wantPlanChecks) {
+		t.Errorf("PlanChecks = %#v, want %#v", tests[0].PlanChecks, wantPlanChecks)
 	}
 }

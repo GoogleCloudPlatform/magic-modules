@@ -1,6 +1,8 @@
 package detector
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -389,6 +391,205 @@ func TestDetectExhaustiveMissingTests_CoreForceNewOmissionUnset(t *testing.T) {
 	}
 	if len(gotComplete) != 0 {
 		t.Errorf("expected 0 incomplete fields once in-place labels UNSET + ForceNew omission step are present, got:\n%s", FormatExhaustiveMarkdown(gotComplete))
+	}
+}
+
+func TestDetectExhaustiveMissingTests_PlanCheckRequiredForInPlaceUpdates(t *testing.T) {
+	schemaDiff := diff.SchemaDiff{
+		"google_my_widget": {
+			Fields: map[string]diff.FieldDiff{
+				"name": {
+					New: &schema.Schema{Type: schema.TypeString, Required: true, ForceNew: true},
+				},
+				"description": {
+					New: &schema.Schema{Type: schema.TypeString, Optional: true},
+				},
+				"labels": {
+					New: &schema.Schema{Type: schema.TypeMap, Optional: true, Elem: &schema.Schema{Type: schema.TypeString}},
+				},
+				"immutable_tag": {
+					New: &schema.Schema{Type: schema.TypeString, Optional: true, ForceNew: true},
+				},
+			},
+		},
+	}
+
+	testFile := filepath.Join(t.TempDir(), "resource_my_widget_test.go")
+	src := `package service_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+)
+
+func TestAccMyWidget_unverifiedAndReplace(t *testing.T) {
+	acctest.VcrTest(t, resource.TestCase{
+		Steps: []resource.TestStep{
+			{
+				Config: ` + "`" + `
+resource "google_my_widget" "primary" {
+  name        = "w1"
+  description = "desc-1"
+  labels = {
+    env = "dev"
+  }
+}
+` + "`" + `,
+			},
+			{
+				// Missing ConfigPlanChecks: cannot verify this was an in-place update.
+				Config: ` + "`" + `
+resource "google_my_widget" "primary" {
+  name        = "w1"
+  description = "desc-2"
+}
+` + "`" + `,
+			},
+			{
+				// Explicit ResourceActionReplace: proves recreation rather than update,
+				// though ForceNew immutable_tag SET is still valid on this apply step.
+				Config: ` + "`" + `
+resource "google_my_widget" "primary" {
+  name          = "w2"
+  description   = "desc-3"
+  immutable_tag = "tag-1"
+}
+` + "`" + `,
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_my_widget.primary", plancheck.ResourceActionReplace),
+					},
+				},
+			},
+		},
+	})
+}
+`
+	if err := os.WriteFile(testFile, []byte(src), 0o600); err != nil {
+		t.Fatalf("error writing temp test file: %v", err)
+	}
+	parsedTests, errs := reader.ReadTestFiles([]string{testFile})
+	if len(errs) > 0 {
+		t.Fatalf("unexpected ReadTestFiles errors: %v", errs)
+	}
+
+	gotMissing, err := DetectExhaustiveMissingTests(schemaDiff, nil, parsedTests, false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	info := gotMissing["google_my_widget"]
+	if info == nil {
+		t.Fatalf("expected google_my_widget to have incomplete MODIFY and UNSET without ResourceActionUpdate plancheck")
+	}
+	if diffStr := cmp.Diff([]string{"description", "labels"}, info.IncompleteFields); diffStr != "" {
+		t.Errorf("IncompleteFields mismatch (-want +got):\n%s", diffStr)
+	}
+	if info.Fields["immutable_tag"].Set.Status != StatusCovered || info.Fields["immutable_tag"].Unset.Status != StatusCovered {
+		t.Errorf("expected ForceNew immutable_tag SET and omission UNSET to be covered even on unverified/replace steps, got %+v", info.Fields["immutable_tag"])
+	}
+	wantSkipped := []string{
+		"TestAccMyWidget_unverifiedAndReplace (step 1 -> 2: missing plancheck.ResourceActionUpdate on google_my_widget.primary)",
+		"TestAccMyWidget_unverifiedAndReplace (step 2 -> 3: plancheck expects ResourceActionReplace on google_my_widget.primary)",
+	}
+	if diffStr := cmp.Diff(wantSkipped, info.SkippedUpdateSteps); diffStr != "" {
+		t.Errorf("SkippedUpdateSteps mismatch (-want +got):\n%s", diffStr)
+	}
+	md := FormatExhaustiveMarkdown(gotMissing)
+	if !strings.Contains(md, "plancheck.ResourceActionUpdate") || !strings.Contains(md, wantSkipped[0]) {
+		t.Errorf("expected markdown to surface skipped update steps note, got:\n%s", md)
+	}
+
+	// Step 1 -> 2 has ExpectEmptyPlan (rejected for labels MODIFY), while Step 2 -> 3
+	// has ResourceActionUpdate (covers description MODIFY + labels UNSET) and Step 3 -> 4
+	// has ExpectNoDelete (covers description UNSET).
+	emptyPlanTest := &reader.Test{
+		Name: "TestAccMyWidget_verifiedUpdate",
+		Steps: []reader.Step{
+			{
+				reader.ResourceBlock: {
+					"google_my_widget": {
+						"primary": {
+							"name":        "\"w1\"",
+							"description": "\"d1\"",
+							"labels.env":  "\"dev\"",
+						},
+					},
+				},
+			},
+			{
+				reader.ResourceBlock: {
+					"google_my_widget": {
+						"primary": {
+							"name":        "\"w1\"",
+							"description": "\"d2\"",
+							"labels.env":  "\"prod\"",
+						},
+					},
+				},
+			},
+			{
+				reader.ResourceBlock: {
+					"google_my_widget": {
+						"primary": {
+							"name":        "\"w1\"",
+							"description": "\"d3\"",
+						},
+					},
+				},
+			},
+			{
+				reader.ResourceBlock: {
+					"google_my_widget": {
+						"primary": {
+							"name": "\"w1\"",
+						},
+					},
+				},
+			},
+		},
+		PlanChecks: []reader.StepPlanChecks{
+			{},
+			{ExpectEmptyPlan: true},
+			{ResourceActions: map[string]string{"google_my_widget.primary": "ResourceActionUpdate"}},
+			{ExpectNoDelete: true},
+		},
+	}
+
+	gotEmptyPlan, err := DetectExhaustiveMissingTests(schemaDiff, nil, append(append([]*reader.Test{}, parsedTests...), emptyPlanTest), false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	infoEmptyPlan := gotEmptyPlan["google_my_widget"]
+	if infoEmptyPlan == nil {
+		t.Fatalf("expected labels MODIFY to remain incomplete when step 1 -> 2 has ExpectEmptyPlan")
+	}
+	if diffStr := cmp.Diff([]string{"labels"}, infoEmptyPlan.IncompleteFields); diffStr != "" {
+		t.Errorf("IncompleteFields mismatch (-want +got):\n%s", diffStr)
+	}
+	wantEmptyPlanSkipped := []string{
+		"TestAccMyWidget_verifiedUpdate (step 1 -> 2: plancheck expects empty plan)",
+	}
+	if diffStr := cmp.Diff(wantEmptyPlanSkipped, infoEmptyPlan.SkippedUpdateSteps); diffStr != "" {
+		t.Errorf("SkippedUpdateSteps mismatch (-want +got):\n%s", diffStr)
+	}
+
+	// Replacing ExpectEmptyPlan with ResourceActionUpdate on Step 2 covers labels MODIFY too.
+	verifiedTest := *emptyPlanTest
+	verifiedTest.PlanChecks = []reader.StepPlanChecks{
+		{},
+		{ResourceActions: map[string]string{"google_my_widget.primary": "ResourceActionUpdate"}},
+		{ResourceActions: map[string]string{"google_my_widget.primary": "ResourceActionUpdate"}},
+		{ExpectNoDelete: true},
+	}
+	gotCovered, err := DetectExhaustiveMissingTests(schemaDiff, nil, append(append([]*reader.Test{}, parsedTests...), &verifiedTest), false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(gotCovered) != 0 {
+		t.Errorf("expected all fields covered once verified ResourceActionUpdate / ExpectNoDelete steps exist, got:\n%s", FormatExhaustiveMarkdown(gotCovered))
 	}
 }
 

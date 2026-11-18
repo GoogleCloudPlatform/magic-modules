@@ -49,9 +49,10 @@ type ExhaustiveFieldStatus struct {
 }
 
 type ExhaustiveMissingTestInfo struct {
-	Fields            map[string]*ExhaustiveFieldStatus `json:"fields"`
-	IncompleteFields  []string                          `json:"incompleteFields"`
-	SuggestedTestNote string                            `json:"suggestedTestNote,omitempty"`
+	Fields             map[string]*ExhaustiveFieldStatus `json:"fields"`
+	IncompleteFields   []string                          `json:"incompleteFields"`
+	SkippedUpdateSteps []string                          `json:"skippedUpdateSteps,omitempty"`
+	SuggestedTestNote  string                            `json:"suggestedTestNote,omitempty"`
 }
 
 // DetectExhaustiveMissingTests checks whether newly added fields (and optionally
@@ -75,7 +76,7 @@ func DetectExhaustiveMissingTests(schemaDiff diff.SchemaDiff, resourceMap map[st
 			continue
 		}
 
-		evaluateResourceTests(resourceName, updatable, fullSchema, targetFields, allTests)
+		skippedUpdateSteps := evaluateResourceTests(resourceName, updatable, fullSchema, targetFields, allTests)
 
 		var incompleteFields []string
 		for _, fieldPath := range sortedFieldPaths(targetFields) {
@@ -87,9 +88,10 @@ func DetectExhaustiveMissingTests(schemaDiff diff.SchemaDiff, resourceMap map[st
 
 		if len(incompleteFields) > 0 {
 			result[resourceName] = &ExhaustiveMissingTestInfo{
-				Fields:            targetFields,
-				IncompleteFields:  incompleteFields,
-				SuggestedTestNote: buildSuggestedTestNote(resourceName, targetFields, incompleteFields),
+				Fields:             targetFields,
+				IncompleteFields:   incompleteFields,
+				SkippedUpdateSteps: skippedUpdateSteps,
+				SuggestedTestNote:  buildSuggestedTestNote(resourceName, targetFields, incompleteFields, skippedUpdateSteps),
 			}
 		}
 	}
@@ -183,9 +185,16 @@ func getExhaustiveTargetFields(
 }
 
 type stepBlockRecord struct {
-	testName  string
-	stepIndex int // 1-based step number
-	block     reader.Block
+	testName   string
+	stepIndex  int // 1-based step number
+	block      reader.Block
+	planChecks *reader.StepPlanChecks
+}
+
+type skippedUpdateTransition struct {
+	note             string
+	skippedModifyFor []string
+	skippedUnsetFor  []string
 }
 
 func evaluateResourceTests(
@@ -194,7 +203,8 @@ func evaluateResourceTests(
 	fullSchema map[string]*schema.Schema,
 	targetFields map[string]*ExhaustiveFieldStatus,
 	allTests []*reader.Test,
-) {
+) []string {
+	var skippedUpdates []skippedUpdateTransition
 	sortedTargets := sortedFieldPaths(targetFields)
 
 	omissionUnset := make(map[string]bool, len(sortedTargets))
@@ -223,9 +233,10 @@ func evaluateResourceTests(
 			for _, label := range labels {
 				block := resourceBlocks[label]
 				rec := stepBlockRecord{
-					testName:  test.Name,
-					stepIndex: stepIdx + 1,
-					block:     block,
+					testName:   test.Name,
+					stepIndex:  stepIdx + 1,
+					block:      block,
+					planChecks: stepPlanChecksAt(test.PlanChecks, stepIdx),
 				}
 				if _, seen := instanceSteps[label]; !seen {
 					instanceOrder = append(instanceOrder, label)
@@ -258,6 +269,29 @@ func evaluateResourceTests(
 			for i := 1; i < len(recs); i++ {
 				prev := recs[i-1]
 				curr := recs[i]
+
+				if ok, skipReason := verifyInPlaceUpdateTransition(resourceName, label, prev, curr); !ok {
+					var skippedModify, skippedUnset []string
+					for _, fieldPath := range sortedTargets {
+						st := targetFields[fieldPath]
+						prevPresent := isFieldPresent(prev.block, fieldPath)
+						currPresent := isFieldPresent(curr.block, fieldPath)
+						if st.Modify.Status != StatusExempt && prevPresent && currPresent && isFieldModified(prev.block, curr.block, fieldPath) {
+							skippedModify = append(skippedModify, fieldPath)
+						}
+						if st.Unset.Status != StatusExempt && !omissionUnset[fieldPath] && prevPresent && !currPresent && isParentPresent(curr.block, fieldPath) {
+							skippedUnset = append(skippedUnset, fieldPath)
+						}
+					}
+					if len(skippedModify) > 0 || len(skippedUnset) > 0 {
+						skippedUpdates = append(skippedUpdates, skippedUpdateTransition{
+							note:             fmt.Sprintf("%s (step %d -> %d: %s)", test.Name, prev.stepIndex, curr.stepIndex, skipReason),
+							skippedModifyFor: skippedModify,
+							skippedUnsetFor:  skippedUnset,
+						})
+					}
+					continue
+				}
 
 				transitionLabel := fmt.Sprintf("%s (step %d -> %d)", test.Name, prev.stepIndex, curr.stepIndex)
 
@@ -312,6 +346,72 @@ func evaluateResourceTests(
 			}
 		}
 	}
+
+	var relevantSkipped []string
+	seenSkipped := make(map[string]bool)
+	for _, su := range skippedUpdates {
+		if seenSkipped[su.note] {
+			continue
+		}
+		stillMissing := false
+		for _, fp := range su.skippedModifyFor {
+			if targetFields[fp].Modify.Status == StatusMissing {
+				stillMissing = true
+				break
+			}
+		}
+		if !stillMissing {
+			for _, fp := range su.skippedUnsetFor {
+				if targetFields[fp].Unset.Status == StatusMissing {
+					stillMissing = true
+					break
+				}
+			}
+		}
+		if stillMissing {
+			seenSkipped[su.note] = true
+			relevantSkipped = append(relevantSkipped, su.note)
+		}
+	}
+	return relevantSkipped
+}
+
+func stepPlanChecksAt(planChecks []reader.StepPlanChecks, stepIdx int) *reader.StepPlanChecks {
+	if stepIdx >= 0 && stepIdx < len(planChecks) {
+		return &planChecks[stepIdx]
+	}
+	return nil
+}
+
+// verifyInPlaceUpdateTransition reports whether the transition from prev to
+// curr is backed by a PreApply plan check proving the resource was updated in
+// place rather than destroyed and recreated.
+//
+// ReadTestFiles populates Test.PlanChecks 1:1 with Test.Steps, so
+// curr.planChecks is non-nil for every test parsed from Go source and nil only
+// for synthetic unit-test fixtures that omit Test.PlanChecks.
+func verifyInPlaceUpdateTransition(resourceName, label string, prev, curr stepBlockRecord) (bool, string) {
+	addr := resourceName + "." + label
+	if curr.stepIndex != prev.stepIndex+1 {
+		return false, fmt.Sprintf("%s was absent in an intervening step", addr)
+	}
+	pc := curr.planChecks
+	if pc == nil {
+		return true, ""
+	}
+	if pc.ExpectEmptyPlan {
+		return false, "plancheck expects empty plan"
+	}
+	if action, ok := pc.ResourceActions[addr]; ok {
+		if action == "ResourceActionUpdate" {
+			return true, ""
+		}
+		return false, fmt.Sprintf("plancheck expects %s on %s", action, addr)
+	}
+	if pc.ExpectNoDelete {
+		return true, ""
+	}
+	return false, fmt.Sprintf("missing plancheck.ResourceActionUpdate on %s", addr)
 }
 
 // isFieldPresent reports whether fieldPath is configured with a non-null value
