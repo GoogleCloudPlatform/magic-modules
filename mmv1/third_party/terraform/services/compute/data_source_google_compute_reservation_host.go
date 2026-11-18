@@ -208,9 +208,6 @@ func dataSourceGoogleComputeReservationHostRead(d *schema.ResourceData, meta int
 	canonicalName := hostName
 	if v, ok := res["name"].(string); ok && v != "" {
 		canonicalName = v
-		if err := d.Set("name", v); err != nil {
-			return fmt.Errorf("Error setting name: %w", err)
-		}
 	}
 
 	if err := d.Set("project", project); err != nil {

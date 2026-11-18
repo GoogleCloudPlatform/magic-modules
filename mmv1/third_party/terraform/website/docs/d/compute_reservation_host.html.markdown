@@ -35,7 +35,7 @@ output "host_status" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name, resource ID, or self-link of the host. When looked up by numeric resource ID or self-link, `name` is updated in state to the canonical RFC1035 host name returned by the API.
+* `name` - (Required) The name, resource ID, or self-link of the host.
 
 - - -
 

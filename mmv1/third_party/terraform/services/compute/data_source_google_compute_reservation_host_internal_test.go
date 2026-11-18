@@ -196,8 +196,9 @@ func TestDataSourceGoogleComputeReservationHostRead(t *testing.T) {
 	ds := DataSourceGoogleComputeReservationHost()
 
 	// 1. Top-level host via self-link name (extracting project & zone when omitted on d) and full attribute verification.
+	topSelfLink := "https://www.googleapis.com/compute/v1/projects/link-project/zones/us-west1-a/hosts/host-top"
 	dTop := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
-		"name": "https://www.googleapis.com/compute/v1/projects/link-project/zones/us-west1-a/hosts/host-top",
+		"name": topSelfLink,
 	})
 	if err := ds.Read(dTop, cfg); err != nil {
 		t.Fatalf("Read (top-level) failed: %v", err)
@@ -205,7 +206,7 @@ func TestDataSourceGoogleComputeReservationHostRead(t *testing.T) {
 	if dTop.Id() != "projects/link-project/zones/us-west1-a/hosts/host-top" {
 		t.Errorf("unexpected ID: %q", dTop.Id())
 	}
-	if dTop.Get("name") != "host-top" ||
+	if dTop.Get("name") != topSelfLink ||
 		dTop.Get("project") != "link-project" ||
 		dTop.Get("zone") != "us-west1-a" ||
 		dTop.Get("description") != "top-level ExR host" ||
@@ -241,7 +242,7 @@ func TestDataSourceGoogleComputeReservationHostRead(t *testing.T) {
 		t.Errorf("unexpected physical_topology: %#v", pt0)
 	}
 
-	// 2. Hierarchical %2F-escaped URL with reservation self-link extracting project & zone, and canonical name write-back from numeric ID.
+	// 2. Hierarchical %2F-escaped URL with reservation self-link extracting project & zone, preserving user-configured name while using canonical name in ID.
 	dScoped := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
 		"name":                  "99999",
 		"reservation":           "projects/res-project/zones/us-west1-b/reservations/res-1",
@@ -255,8 +256,8 @@ func TestDataSourceGoogleComputeReservationHostRead(t *testing.T) {
 	if dScoped.Id() != wantScopedID {
 		t.Errorf("got hierarchical ID %q, want %q", dScoped.Id(), wantScopedID)
 	}
-	if dScoped.Get("name") != "host-sub-1" {
-		t.Errorf("got canonical name %q, want %q", dScoped.Get("name"), "host-sub-1")
+	if dScoped.Get("name") != "99999" {
+		t.Errorf("got name %q, want %q", dScoped.Get("name"), "99999")
 	}
 	if dScoped.Get("project") != "res-project" || dScoped.Get("zone") != "us-west1-b" {
 		t.Errorf("got project=%v zone=%v, want res-project / us-west1-b", dScoped.Get("project"), dScoped.Get("zone"))
