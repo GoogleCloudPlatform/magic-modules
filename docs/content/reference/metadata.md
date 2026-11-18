@@ -35,6 +35,12 @@ The version of the API used for this resource. For example, "v2".
 
 The API "resource type kind" used for this resource. For example, "Function".
 
+### `supports_update`
+
+Whether the Terraform resource can update the API resource in place. This is `false` if every API field requires recreating the resource when changed, even if the resource can update provider-only fields such as `deletion_policy` without recreation. For example, `true`.
+
+For MMv1 resources this is generated automatically. In handwritten meta.yaml files, set it to `true` if the resource's Update function sends a request to the API, and to `false` if the resource has no Update function, or one that only reads the resource back.
+
 ## Optional
 
 ### `cai_asset_name_formats`

@@ -3,6 +3,7 @@ generation_type: 'handwritten'
 api_service_name: 'logging.googleapis.com'
 api_version: 'v2'
 api_resource_type_kind: 'LogBucket'
+supports_update: true
 api_variant_patterns:
   - 'folders/{folder}/locations/{location}/buckets/{bucket}'
 fields:

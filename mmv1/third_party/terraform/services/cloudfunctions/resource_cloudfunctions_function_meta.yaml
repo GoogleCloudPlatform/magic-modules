@@ -3,6 +3,7 @@ generation_type: 'handwritten'
 api_service_name: 'cloudfunctions.googleapis.com'
 api_version: 'v1'
 api_resource_type_kind: 'CloudFunction'
+supports_update: true
 fields:
   - api_field: 'availableMemoryMb'
   - api_field: 'buildEnvironmentVariables'

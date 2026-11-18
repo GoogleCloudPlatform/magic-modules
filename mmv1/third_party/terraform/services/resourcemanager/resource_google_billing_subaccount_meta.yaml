@@ -3,6 +3,7 @@ generation_type: 'handwritten'
 api_service_name: 'cloudbilling.googleapis.com'
 api_version: 'v1'
 api_resource_type_kind: 'BillingAccount'
+supports_update: true
 fields:
   - field: 'billing_account_id'
   - field: 'deletion_policy'

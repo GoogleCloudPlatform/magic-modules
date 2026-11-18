@@ -30,6 +30,7 @@ func TestFromResource(t *testing.T) {
 				GenerationType: "mmv1",
 				ApiServiceName: "compute.googleapis.com",
 				ApiVersion:     "beta",
+				SupportsUpdate: true,
 			},
 		},
 		{
@@ -52,6 +53,7 @@ func TestFromResource(t *testing.T) {
 				ApiServiceName:      "compute.googleapis.com",
 				ApiVersion:          "beta",
 				ApiResourceTypeKind: "Test",
+				SupportsUpdate:      true,
 				AutogenStatus:       true,
 				AutogenVersion:      1,
 				Fields: []Field{
@@ -85,6 +87,7 @@ func TestFromResource(t *testing.T) {
 				ApiServiceName:      "compute.googleapis.com",
 				ApiVersion:          "beta",
 				ApiResourceTypeKind: "Test",
+				SupportsUpdate:      true,
 				AutogenStatus:       true,
 				AutogenVersion:      2,
 				Fields: []Field{
@@ -119,6 +122,7 @@ func TestFromResource(t *testing.T) {
 				ApiServiceName:      "compute.googleapis.com",
 				ApiVersion:          "beta",
 				ApiResourceTypeKind: "Test",
+				SupportsUpdate:      true,
 				AutogenStatus:       true,
 				AutogenVersion:      1,
 				Fields: []Field{
@@ -131,6 +135,61 @@ func TestFromResource(t *testing.T) {
 					{
 						Field:        "deletion_policy",
 						ProviderOnly: true,
+					},
+				},
+			},
+		},
+		{
+			name: "immutable",
+			resource: api.Resource{
+				Name:                  "Test",
+				Immutable:             true,
+				DeletionPolicyExclude: true,
+				Properties: []*api.Type{
+					{
+						Name:    "field",
+						ApiName: "field",
+					},
+				},
+			},
+			wantMetadata: Metadata{
+				Resource:            "google_product_test",
+				GenerationType:      "mmv1",
+				ApiServiceName:      "compute.googleapis.com",
+				ApiVersion:          "beta",
+				ApiResourceTypeKind: "Test",
+				SupportsUpdate:      false,
+				Fields: []Field{
+					{
+						ApiField: "field",
+					},
+				},
+			},
+		},
+		{
+			name: "immutable with update_url field",
+			resource: api.Resource{
+				Name:                  "Test",
+				Immutable:             true,
+				DeletionPolicyExclude: true,
+				Properties: []*api.Type{
+					{
+						Name:      "field",
+						ApiName:   "field",
+						UpdateUrl: "projects/{{project}}/tests/{{name}}:setField",
+					},
+				},
+			},
+			wantMetadata: Metadata{
+				Resource:            "google_product_test",
+				GenerationType:      "mmv1",
+				ApiServiceName:      "compute.googleapis.com",
+				ApiVersion:          "beta",
+				ApiResourceTypeKind: "Test",
+				SupportsUpdate:      true,
+				Fields: []Field{
+					{
+						ApiField: "field",
 					},
 				},
 			},

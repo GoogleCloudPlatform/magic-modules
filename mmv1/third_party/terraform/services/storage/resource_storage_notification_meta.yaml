@@ -3,6 +3,7 @@ generation_type: 'handwritten'
 api_service_name: 'storage.googleapis.com'
 api_version: 'v1'
 api_resource_type_kind: 'NotificationConfig'
+supports_update: false
 fields:
   - field: 'bucket'
   - api_field: 'customAttributes'

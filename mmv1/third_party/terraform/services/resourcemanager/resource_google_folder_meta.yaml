@@ -3,6 +3,7 @@ generation_type: 'handwritten'
 api_service_name: 'cloudresourcemanager.googleapis.com'
 api_version: 'v3'
 api_resource_type_kind: 'Folder'
+supports_update: true
 fields:
   - api_field: 'configuredCapabilities'
   - api_field: 'createTime'

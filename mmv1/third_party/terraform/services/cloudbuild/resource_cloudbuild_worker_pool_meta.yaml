@@ -3,6 +3,7 @@ generation_type: 'handwritten'
 api_service_name: 'cloudbuild.googleapis.com'
 api_version: 'v1'
 api_resource_type_kind: 'WorkerPool'
+supports_update: true
 fields:
   - api_field: 'annotations'
   - api_field: 'createTime'

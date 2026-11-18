@@ -3,6 +3,7 @@ generation_type: 'handwritten'
 api_service_name: 'sqladmin.googleapis.com'
 api_version: 'v1beta4'
 api_resource_type_kind: 'User'
+supports_update: true
 fields:
   - field: 'deletion_policy'
     provider_only: true

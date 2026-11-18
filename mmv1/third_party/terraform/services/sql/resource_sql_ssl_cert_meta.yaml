@@ -3,6 +3,7 @@ generation_type: 'handwritten'
 api_service_name: 'sqladmin.googleapis.com'
 api_version: 'v1beta4'
 api_resource_type_kind: 'SslCert'
+supports_update: false
 fields:
   - api_field: 'cert'
   - api_field: 'certSerialNumber'

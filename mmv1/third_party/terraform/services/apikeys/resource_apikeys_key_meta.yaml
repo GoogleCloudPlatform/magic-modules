@@ -3,6 +3,7 @@ generation_type: 'handwritten'
 api_service_name: 'apikeys.googleapis.com'
 api_version: 'v2'
 api_resource_type_kind: 'Key'
+supports_update: true
 fields:
   - api_field: 'displayName'
   - api_field: 'keyString'

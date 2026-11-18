@@ -7,6 +7,7 @@ api_version: 'beta'
 api_version: 'v1'
 {{- end }}
 api_resource_type_kind: 'SecurityPolicy'
+supports_update: true
 fields:
 {{- if ne $.TargetVersionName "ga" }}
   - api_field: 'adaptiveProtectionConfig.autoDeployConfig.confidenceThreshold'

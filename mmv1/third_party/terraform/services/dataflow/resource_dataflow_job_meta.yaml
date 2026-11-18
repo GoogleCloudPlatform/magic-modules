@@ -3,6 +3,7 @@ generation_type: 'handwritten'
 api_service_name: 'dataflow.googleapis.com'
 api_version: 'v1beta3'
 api_resource_type_kind: 'Job'
+supports_update: true
 fields:
   - field: 'additional_experiments'
   - field: 'effective_labels'

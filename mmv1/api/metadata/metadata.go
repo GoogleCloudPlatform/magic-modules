@@ -14,6 +14,7 @@ func FromResource(r api.Resource) Metadata {
 		ApiServiceName:      r.ProductMetadata.ServiceName(),
 		ApiVersion:          r.ProductMetadata.ServiceVersion(),
 		ApiResourceTypeKind: r.ApiResourceTypeKind,
+		SupportsUpdate:      r.Updatable(),
 		ApiVariantPatterns:  r.ApiVariantPatterns,
 		AutogenStatus:       r.AutogenStatus != "",
 		AutogenVersion:      r.AutogenVersion(),
@@ -64,6 +65,11 @@ type Metadata struct {
 
 	// The API "resource type kind" used for this resource. For example, "Function".
 	ApiResourceTypeKind string `yaml:"api_resource_type_kind"`
+
+	// Whether the Terraform resource can update the API resource in place. This is false if the
+	// provider can only change client-side fields (such as deletion_policy) without recreating the
+	// resource.
+	SupportsUpdate bool `yaml:"supports_update"`
 
 	// The custom CAI asset name formats for this resource is typically specified (for example, //cloudsql.googleapis.com/projects/{{project}}/instances/{{name}}).
 	// This will only have values if they are different than the Terraform resource ID format.

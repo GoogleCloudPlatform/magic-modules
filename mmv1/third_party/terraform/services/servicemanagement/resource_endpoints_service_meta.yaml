@@ -3,6 +3,7 @@ generation_type: 'handwritten'
 api_service_name: 'servicemanagement.googleapis.com'
 api_version: 'v1'
 api_resource_type_kind: 'ManagedService'
+supports_update: true
 fields:
   - field: 'apis.methods.name'
   - field: 'apis.methods.request_type'

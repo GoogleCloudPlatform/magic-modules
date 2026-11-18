@@ -24,6 +24,8 @@ import (
 type ProviderResource struct {
 	Name   string
 	Fields map[string]bool
+	// HasUpdate is true if the provider resource implements an update operation.
+	HasUpdate bool
 }
 
 func buildProviderResources(pluginSdk map[string]*schema.Resource, pluginFramework []func() resource.Resource) map[string]ProviderResource {
@@ -36,8 +38,9 @@ func buildProviderResources(pluginSdk map[string]*schema.Resource, pluginFramewo
 			continue
 		}
 		r := ProviderResource{
-			Name:   resourceName,
-			Fields: map[string]bool{},
+			Name:      resourceName,
+			Fields:    map[string]bool{},
+			HasUpdate: resource.Update != nil || resource.UpdateContext != nil || resource.UpdateWithoutTimeout != nil,
 		}
 		flattened := flattenSchema("", resource.Schema)
 		for f := range flattened {
@@ -56,6 +59,8 @@ func buildProviderResources(pluginSdk map[string]*schema.Resource, pluginFramewo
 		r := ProviderResource{
 			Name:   resourceName,
 			Fields: map[string]bool{},
+			// Plugin-framework resources always implement Update.
+			HasUpdate: true,
 		}
 
 		schemaReq := resource.SchemaRequest{}
@@ -205,6 +210,11 @@ func TestValidateResourceMetadata(t *testing.T) {
 		// Resources with missing meta.yaml have already been flagged.
 		if !ok {
 			continue
+		}
+		if m.SupportsUpdate == nil {
+			t.Errorf("%s: `supports_update` is required and not set", m.FileName)
+		} else if *m.SupportsUpdate && !r.HasUpdate {
+			t.Errorf("%s: `supports_update` is true but provider resource %s has no Update function", m.FileName, r.Name)
 		}
 		mFields := map[string]bool{}
 		for _, f := range m.Fields {

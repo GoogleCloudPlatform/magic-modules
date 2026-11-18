@@ -27,6 +27,7 @@ type Metadata struct {
 	ApiServiceName      string          `yaml:"api_service_name"`
 	ApiVersion          string          `yaml:"api_version"`
 	ApiResourceTypeKind string          `yaml:"api_resource_type_kind"`
+	SupportsUpdate      *bool           `yaml:"supports_update"`
 	CaiAssetNameFormats []string        `yaml:"cai_asset_name_formats"`
 	ApiVariantPatterns  []string        `yaml:"api_variant_patterns"`
 	AutogenStatus       bool            `yaml:"autogen_status,omitempty"`
@@ -136,6 +137,9 @@ func (mc *MetadataCache) Populate() error {
 			primary, secondary := existing, metadata
 			if isPrimaryMetadataFile(metadata) {
 				primary, secondary = metadata, existing
+			}
+			if primary.SupportsUpdate != nil && secondary.SupportsUpdate != nil && *primary.SupportsUpdate != *secondary.SupportsUpdate {
+				return fmt.Errorf("inconsistent supports_update for %s in %s and %s", metadata.Resource, primary.Path, secondary.Path)
 			}
 			primary.Fields = append(primary.Fields, secondary.Fields...)
 			mc.cache[metadata.Resource] = primary
