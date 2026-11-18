@@ -1031,3 +1031,56 @@ func TestDetectExhaustiveMissingTests_NullLifecycleUnsetSetChangedUnset(t *testi
 		t.Errorf("null_then_set_only.Modify = %+v, want MISSING (null -> set is not modify)", info.Fields["null_then_set_only"].Modify)
 	}
 }
+
+func TestDetectExhaustiveMissingTests_SingleValueEnum(t *testing.T) {
+	schemaDiff := diff.SchemaDiff{
+		"google_example_resource": {
+			Fields: map[string]diff.FieldDiff{
+				"single_enum": {
+					New: &schema.Schema{
+						Type:        schema.TypeString,
+						Optional:    true,
+						Description: `Mode of the resource. Possible values: ["ONLY_MODE"]`,
+					},
+				},
+				"multi_enum": {
+					New: &schema.Schema{
+						Type:        schema.TypeString,
+						Optional:    true,
+						Description: `Mode of the resource. Possible values: ["MODE_A", "MODE_B"]`,
+					},
+				},
+				"forcenew_single_enum": {
+					New: &schema.Schema{
+						Type:        schema.TypeString,
+						Optional:    true,
+						ForceNew:    true,
+						Description: `Immutable mode. Possible values: ["ONLY_MODE"]`,
+					},
+				},
+			},
+		},
+	}
+
+	got, err := DetectExhaustiveMissingTests(schemaDiff, nil, nil, false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	info := got["google_example_resource"]
+	if info == nil {
+		t.Fatalf("expected google_example_resource in results")
+	}
+
+	if gotMod := info.Fields["single_enum"].Modify; gotMod.Status != StatusExempt || gotMod.ExemptCode != "single_value_enum" {
+		t.Errorf("single_enum.Modify = %+v, want EXEMPT (single_value_enum)", gotMod)
+	}
+	if gotUnset := info.Fields["single_enum"].Unset; gotUnset.Status != StatusMissing {
+		t.Errorf("single_enum.Unset = %+v, want MISSING", gotUnset)
+	}
+	if gotMulti := info.Fields["multi_enum"].Modify; gotMulti.Status != StatusMissing {
+		t.Errorf("multi_enum.Modify = %+v, want MISSING", gotMulti)
+	}
+	if gotFN := info.Fields["forcenew_single_enum"].Modify; gotFN.Status != StatusExempt || gotFN.ExemptCode != "force_new" {
+		t.Errorf("forcenew_single_enum.Modify = %+v, want EXEMPT (force_new)", gotFN)
+	}
+}

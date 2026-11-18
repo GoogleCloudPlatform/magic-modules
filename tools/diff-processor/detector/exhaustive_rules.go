@@ -1,10 +1,13 @@
 package detector
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+var possibleValuesPattern = regexp.MustCompile(`Possible values:\s*\[([^\]]*)\]`)
 
 func initialModifyStatus(field *schema.Schema, hasUpdate bool) TransitionResult {
 	if !hasUpdate {
@@ -12,6 +15,9 @@ func initialModifyStatus(field *schema.Schema, hasUpdate bool) TransitionResult 
 	}
 	if field.ForceNew {
 		return TransitionResult{Status: StatusExempt, ExemptCode: "force_new"}
+	}
+	if isSingleValueEnum(field) {
+		return TransitionResult{Status: StatusExempt, ExemptCode: "single_value_enum"}
 	}
 	return TransitionResult{Status: StatusMissing}
 }
@@ -95,4 +101,25 @@ func hasForceNewAncestor(fieldPath string, fullSchema map[string]*schema.Schema)
 		}
 	}
 	return false
+}
+
+func isSingleValueEnum(field *schema.Schema) bool {
+	if field == nil || field.Description == "" {
+		return false
+	}
+	matches := possibleValuesPattern.FindStringSubmatch(field.Description)
+	if len(matches) < 2 {
+		return false
+	}
+	inner := strings.TrimSpace(matches[1])
+	if inner == "" {
+		return false
+	}
+	nonEmpty := 0
+	for _, p := range strings.Split(inner, ",") {
+		if strings.TrimSpace(p) != "" {
+			nonEmpty++
+		}
+	}
+	return nonEmpty == 1
 }
