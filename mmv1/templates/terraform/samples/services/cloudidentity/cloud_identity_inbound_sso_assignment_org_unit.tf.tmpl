@@ -1,0 +1,5 @@
+resource "google_cloud_identity_inbound_sso_assignment" "{{$.PrimaryResourceId}}" {
+  customer        = "customers/{{index $.TestEnvVars "cust_id"}}"
+  target_org_unit = "orgUnits/{{index $.TestEnvVars "org_unit_id"}}"
+  sso_mode        = "{{index $.Vars "sso_mode"}}"
+}
