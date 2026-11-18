@@ -21,12 +21,18 @@ update_mask: true
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/collections/{{collection_id}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 90
+sweeper:
+  query_string: "?force=true"
 async:
   operation:
     timeouts:
       insert_minutes: 20
       update_minutes: 20
-      delete_minutes: 20
+      delete_minutes: 90
     base_url: '{{op_id}}'
   actions:
     - create
@@ -36,6 +42,8 @@ async:
     resource_inside_response: true
 autogen_status: Q29sbGVjdGlvbg==
 autogen_async: true
+custom_code:
+  pre_delete: templates/terraform/pre_delete/force_delete.go.tmpl
 samples:
   - name: vectorsearch_collection_basic
     primary_resource_id: example-collection
@@ -49,6 +57,11 @@ samples:
       - name: vectorsearch_collection_cmek
         resource_id_vars:
           collection_id: example-cmek-collection
+virtual_fields:
+  - name: force_destroy
+    description: If set to true, will allow deletion of the Collection even if it contains Indexes or DataObjects. These Indexes and DataObjects will also be deleted.
+    type: Boolean
+    default_value: false
 parameters:
   - name: location
     type: String
