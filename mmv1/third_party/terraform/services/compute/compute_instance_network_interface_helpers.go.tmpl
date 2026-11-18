@@ -2,6 +2,7 @@ package compute
 
 import (
 	"fmt"
+	"maps"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -170,38 +171,28 @@ func computeInstanceCreateUpdateWhileStoppedCall(d *schema.ResourceData, config 
 	}
 }
 
-func resolveDynamicNicParentName(instNics []interface{}, targetIndex int) (string, error) {
-	startIdx := targetIndex - 1
-	if startIdx >= len(instNics) {
-		startIdx = len(instNics) - 1
-	}
-	for j := startIdx; j >= 0; j-- {
-		nic, ok := instNics[j].(map[string]interface{})
-		if !ok {
-			continue
+func resolveDynamicNicParentName(instNics []interface{}) (string, error) {
+	for i := len(instNics) - 1; i >= 0; i-- {
+		nic, _ := instNics[i].(map[string]interface{})
+		if parentName, _ := nic["parentNicName"].(string); parentName != "" {
+			return parentName, nil
 		}
 		if flattenNetworkInterfaceInt64(nic["vlan"]) == 0 {
 			if name, _ := nic["name"].(string); name != "" {
 				return name, nil
 			}
 		}
-		if parentName, _ := nic["parentNicName"].(string); parentName != "" {
-			return parentName, nil
-		}
 	}
-	return "", fmt.Errorf("cannot determine parent_nic_name for dynamic network_interface at index %d", targetIndex)
+	return "", fmt.Errorf("cannot determine parent_nic_name for dynamic network_interface")
 }
 
 func computeInstanceAddNetworkInterface(d *schema.ResourceData, config *transport_tpg.Config, networkInterface map[string]interface{}, parentNicName, project, userAgent string) error {
-	body := make(map[string]interface{}, len(networkInterface)+1)
-	for k, v := range networkInterface {
-		body[k] = v
-	}
+	body := maps.Clone(networkInterface)
 	body["parentNicName"] = parentNicName
 
 	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/addNetworkInterface")
 	if err != nil {
-		return fmt.Errorf("error replacing vars for AddNetworkInterface URL: %w", err)
+		return err
 	}
 
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -213,29 +204,20 @@ func computeInstanceAddNetworkInterface(d *schema.ResourceData, config *transpor
 		Body:      body,
 	})
 	if err != nil {
-		return fmt.Errorf("error adding dynamic network_interface (parent %q, vlan %v): %w", parentNicName, body["vlan"], err)
+		return fmt.Errorf("error adding dynamic network_interface: %w", err)
 	}
 
-	err = ComputeOperationWaitTime(config, res, project, "dynamic network_interface to add", userAgent, d.Timeout(schema.TimeoutUpdate))
-	if err != nil {
-		return fmt.Errorf("error waiting for dynamic network_interface (parent %q, vlan %v) addition: %w", parentNicName, body["vlan"], err)
-	}
-
-	return nil
+	return ComputeOperationWaitTime(config, res, project, "dynamic network_interface to add", userAgent, d.Timeout(schema.TimeoutUpdate))
 }
 
 func computeInstanceDeleteNetworkInterface(d *schema.ResourceData, config *transport_tpg.Config, nicName, project, userAgent string) error {
 	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/deleteNetworkInterface")
 	if err != nil {
-		return fmt.Errorf("error replacing vars for DeleteNetworkInterface URL: %w", err)
+		return err
 	}
-
-	params := map[string]string{
-		"networkInterfaceName": nicName,
-	}
-	url, err = transport_tpg.AddQueryParams(url, params)
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"networkInterfaceName": nicName})
 	if err != nil {
-		return fmt.Errorf("error adding query params for DeleteNetworkInterface: %w", err)
+		return err
 	}
 
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -249,12 +231,7 @@ func computeInstanceDeleteNetworkInterface(d *schema.ResourceData, config *trans
 		return fmt.Errorf("error deleting dynamic network_interface %q: %w", nicName, err)
 	}
 
-	err = ComputeOperationWaitTime(config, res, project, "dynamic network_interface to delete", userAgent, d.Timeout(schema.TimeoutUpdate))
-	if err != nil {
-		return fmt.Errorf("error waiting for dynamic network_interface %q deletion: %w", nicName, err)
-	}
-
-	return nil
+	return ComputeOperationWaitTime(config, res, project, "dynamic network_interface to delete", userAgent, d.Timeout(schema.TimeoutUpdate))
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
@@ -296,27 +273,17 @@ func computeInstanceAddSecurityPolicy(d *schema.ResourceData, config *transport_
 func computeInstanceMapSecurityPoliciesCreate(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string][]string, error) {
 	securityPolicies := make(map[string][]string)
 	configs := d.Get("network_interface").([]interface{})
-	vnicId := -1
 	for i, raw := range configs {
 		data := raw.(map[string]interface{})
-		vlan, _ := data["vlan"].(int)
-		var nicName string
-		if vlan == 0 {
-			vnicId++
-			nicName = fmt.Sprintf("nic%d", vnicId)
-		} else {
-			if vnicId < 0 {
-				return nil, fmt.Errorf("dynamic network_interface at index %d (vlan %d) must follow a non-dynamic parent network_interface", i, vlan)
-			}
-			nicName = fmt.Sprintf("nic%d.%d", vnicId, vlan)
-		}
-		secPolicy, _ := data["security_policy"].(string)
+		secPolicy := data["security_policy"].(string)
 		err := validateSecurityPolicy(data)
 		if err != nil {
 			return securityPolicies, err
 		}
 
 		if secPolicy != "" {
+			// Network interfaces use the nicN naming format and is only know after the instance is created.
+			nicName := fmt.Sprintf("nic%d", i)
 			securityPolicies[secPolicy] = append(securityPolicies[secPolicy], nicName)
 		}
 	}
@@ -327,50 +294,16 @@ func computeInstanceMapSecurityPoliciesCreate(d tpgresource.TerraformResourceDat
 func computeInstanceMapSecurityPoliciesUpdate(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string][]string, error) {
 	securityPolicies := make(map[string][]string)
 	configs := d.Get("network_interface").([]interface{})
-	vnicId := -1
-	lastParentNic := ""
 	for i, raw := range configs {
 		data := raw.(map[string]interface{})
-		vlan, _ := data["vlan"].(int)
-		stateName, _ := data["name"].(string)
-		parentNicName, _ := data["parent_nic_name"].(string)
-		var nicName string
-		if vlan == 0 {
-			vnicId++
-			if stateName != "" {
-				nicName = stateName
-			} else {
-				nicName = fmt.Sprintf("nic%d", vnicId)
-			}
-			lastParentNic = nicName
-		} else {
-			if parentNicName != "" {
-				lastParentNic = parentNicName
-			} else {
-				for idx := 0; idx < len(stateName); idx++ {
-					if stateName[idx] == '.' {
-						if idx > 0 {
-							lastParentNic = stateName[:idx]
-						}
-						break
-					}
-				}
-			}
-			if stateName != "" {
-				nicName = stateName
-			} else {
-				if lastParentNic == "" {
-					return nil, fmt.Errorf("cannot determine parent_nic_name for dynamic network_interface at index %d (vlan %d)", i, vlan)
-				}
-				nicName = fmt.Sprintf("%s.%d", lastParentNic, vlan)
-			}
-		}
-		secPolicy, _ := data["security_policy"].(string)
+		secPolicy := data["security_policy"].(string)
 		err := validateSecurityPolicy(data)
 		if err != nil {
 			return securityPolicies, err
 		}
 
+		// Network interfaces use the nicN naming format and is only know after the instance is created.
+		nicName := fmt.Sprintf("nic%d", i)
 		// To cleanup the security policy from the interface we should send something like this on the api: {"":[nic0, nic1]}
 		securityPolicies[secPolicy] = append(securityPolicies[secPolicy], nicName)
 	}
@@ -379,11 +312,9 @@ func computeInstanceMapSecurityPoliciesUpdate(d tpgresource.TerraformResourceDat
 }
 
 func validateSecurityPolicy(rawNetworkInterface map[string]interface{}) error {
-	accessRaw, _ := rawNetworkInterface["access_config"].([]interface{})
-	ipv6AccessRaw, _ := rawNetworkInterface["ipv6_access_config"].([]interface{})
-	acessConfigs := expandAccessConfigs(accessRaw)
-	ipv6AccessConfigs := expandIpv6AccessConfigs(ipv6AccessRaw)
-	secPolicy, _ := rawNetworkInterface["security_policy"].(string)
+	acessConfigs := expandAccessConfigs(rawNetworkInterface["access_config"].([]interface{}))
+	ipv6AccessConfigs := expandIpv6AccessConfigs(rawNetworkInterface["ipv6_access_config"].([]interface{}))
+	secPolicy := rawNetworkInterface["security_policy"].(string)
 
 	if secPolicy != "" && len(acessConfigs) == 0 && len(ipv6AccessConfigs) == 0 {
 		return fmt.Errorf("Error setting security policy to the instance since at least one access config must exist")
