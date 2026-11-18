@@ -55,6 +55,17 @@ samples:
       - name: memorystore_auth_token_basic
         resource_id_vars:
           instance_name: token-basic-instance
+  - name: memorystore_auth_token_rotation
+    primary_resource_id: token-2
+    steps:
+      - name: memorystore_auth_token_rotation
+        resource_id_vars:
+          instance_name: token-rotation-instance
+      - name: memorystore_auth_token_rotation_update
+        resource_id_vars:
+          instance_name: token-rotation-instance
+        ignore_read_extra:
+          - deletion_policy
 parameters:
   - name: location
     type: String
