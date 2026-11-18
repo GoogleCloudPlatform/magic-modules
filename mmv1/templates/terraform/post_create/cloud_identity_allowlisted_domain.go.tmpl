@@ -1,0 +1,44 @@
+// Clear the partial ID set before post_create so any error return leaves the
+// resource untainted/uncreated in Terraform state.
+d.SetId("")
+
+// Create returns a google.longrunning.Operation without an operation name that
+// can be polled directly. When done is true, extract the created resource name
+// from response; when done is false, poll allowlistedDomains.list by domain.
+if opErr, ok := res["error"]; ok && opErr != nil {
+	return fmt.Errorf("Error creating AllowlistedDomain: %v", opErr)
+}
+
+var name string
+if done, _ := res["done"].(bool); done {
+	if respBody, ok := res["response"].(map[string]interface{}); ok {
+		name, _ = respBody["name"].(string)
+	}
+	if name == "" {
+		return fmt.Errorf("Error creating AllowlistedDomain: completed operation response did not contain resource name")
+	}
+} else {
+	domain, _ := d.Get("domain").(string)
+	err = transport_tpg.PollingWaitTime(
+		cloudIdentityAllowlistedDomainListPollRead(d, config, billingProject, userAgent, domain),
+		cloudIdentityAllowlistedDomainPollCheckExistence(domain, &name),
+		"Creating AllowlistedDomain",
+		d.Timeout(schema.TimeoutCreate),
+		1,
+	)
+	if err != nil {
+		return fmt.Errorf("Error waiting to create AllowlistedDomain %q: %w", domain, err)
+	}
+}
+
+if err = d.Set("name", name); err != nil {
+	return fmt.Errorf("Error setting name: %w", err)
+}
+if err = d.Set("allowlisted_domain_id", tpgresource.GetResourceNameFromSelfLink(name)); err != nil {
+	return fmt.Errorf("Error setting allowlisted_domain_id: %w", err)
+}
+id, err = tpgresource.ReplaceVars(d, config, "{{$.IdFormat}}")
+if err != nil {
+	return fmt.Errorf("Error constructing id: %w", err)
+}
+d.SetId(id)

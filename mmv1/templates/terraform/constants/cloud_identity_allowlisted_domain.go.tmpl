@@ -1,0 +1,66 @@
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
+func cloudIdentityAllowlistedDomainListPollRead(d *schema.ResourceData, config *transport_tpg.Config, billingProject, userAgent, domain string) transport_tpg.PollReadFunc {
+	return func() (map[string]interface{}, error) {
+		listURL, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"allowlistedDomains")
+		if err != nil {
+			return nil, err
+		}
+		listURL, err = transport_tpg.AddQueryParams(listURL, map[string]string{
+			"filter": fmt.Sprintf("domain = '%s'", strings.ToLower(domain)),
+		})
+		if err != nil {
+			return nil, err
+		}
+		return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    listURL,
+			UserAgent: userAgent,
+		})
+	}
+}
+
+func findCloudIdentityAllowlistedDomain(resp map[string]interface{}, domain string) (string, bool) {
+	items, ok := resp["allowlistedDomains"].([]interface{})
+	if !ok {
+		return "", false
+	}
+	for _, item := range items {
+		m, ok := item.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if d, ok := m["domain"].(string); ok && strings.EqualFold(d, domain) {
+			name, _ := m["name"].(string)
+			return name, true
+		}
+	}
+	return "", false
+}
+
+func cloudIdentityAllowlistedDomainPollCheckExistence(domain string, outName *string) transport_tpg.PollCheckResponseFunc {
+	return func(resp map[string]interface{}, respErr error) transport_tpg.PollResult {
+		if respErr != nil {
+			return transport_tpg.ErrorPollResult(respErr)
+		}
+		if name, found := findCloudIdentityAllowlistedDomain(resp, domain); found && name != "" {
+			*outName = name
+			return transport_tpg.SuccessPollResult()
+		}
+		return transport_tpg.PendingStatusPollResult("not found")
+	}
+}
+
+func cloudIdentityAllowlistedDomainPollCheckAbsence(domain string) transport_tpg.PollCheckResponseFunc {
+	return func(resp map[string]interface{}, respErr error) transport_tpg.PollResult {
+		if respErr != nil {
+			return transport_tpg.ErrorPollResult(respErr)
+		}
+		if _, found := findCloudIdentityAllowlistedDomain(resp, domain); found {
+			return transport_tpg.PendingStatusPollResult("found")
+		}
+		return transport_tpg.SuccessPollResult()
+	}
+}
+{{- end }}

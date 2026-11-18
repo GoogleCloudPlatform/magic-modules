@@ -44,14 +44,12 @@ import_format:
 # The whole allowlist of a customer is rewritten on every create/delete, and the
 # API rejects a mutation while another one is still pending.
 mutex: 'cloudidentity/allowlistedDomains'
-async:
-  operation:
-    base_url: '{{op_id}}'
-  actions: [create, delete]
-  result:
-    resource_inside_response: true
 # This resource has unusual authentication requirements that mean we can't currently test it or sweep it in CI
 exclude_sweeper: true
+custom_code:
+  constants: templates/terraform/constants/cloud_identity_allowlisted_domain.go.tmpl
+  post_create: templates/terraform/post_create/cloud_identity_allowlisted_domain.go.tmpl
+  post_delete: templates/terraform/post_delete/cloud_identity_allowlisted_domain.go.tmpl
 samples:
   - name: cloud_identity_allowlisted_domain_basic
     primary_resource_id: allowlisted_domain
