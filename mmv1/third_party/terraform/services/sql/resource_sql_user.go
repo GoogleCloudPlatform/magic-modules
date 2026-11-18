@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -54,18 +53,6 @@ func handleUserNotFoundError(err error, d *schema.ResourceData, resource string)
 	}
 
 	return fmt.Errorf("Error when reading or editing %s: %w", resource, err)
-}
-
-func getSqlUserPassword(d *schema.ResourceData) string {
-	if pw, ok := d.GetOk("password"); ok {
-		return pw.(string)
-	}
-	pwWo, diags := d.GetRawConfigAt(cty.GetAttrPath("password_wo"))
-	if !diags.HasError() && pwWo.Type().Equals(cty.String) && !pwWo.IsNull() && pwWo.IsKnown() {
-		pwWo, _ = pwWo.Unmark()
-		return pwWo.AsString()
-	}
-	return ""
 }
 
 func ResourceSqlUser() *schema.Resource {
@@ -320,7 +307,12 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	instance := d.Get("instance").(string)
 	host := d.Get("host").(string)
 	typ := d.Get("type").(string)
-	password := getSqlUserPassword(d)
+	var password string
+	if pw, ok := d.GetOk("password"); ok {
+		password = pw.(string)
+	} else {
+		password = tpgresource.GetRawConfigAttributeAsString(d, "password_wo")
+	}
 	var databaseRoles []string
 	if roles, ok := d.GetOk("database_roles"); ok {
 		for _, r := range roles.([]interface{}) {
@@ -609,7 +601,12 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 				name = iamEmail
 			}
 		}
-		password := getSqlUserPassword(d)
+		var password string
+		if pw, ok := d.GetOk("password"); ok {
+			password = pw.(string)
+		} else {
+			password = tpgresource.GetRawConfigAttributeAsString(d, "password_wo")
+		}
 		var databaseRoles []string
 		if roles, ok := d.GetOk("database_roles"); ok {
 			for _, r := range roles.([]interface{}) {

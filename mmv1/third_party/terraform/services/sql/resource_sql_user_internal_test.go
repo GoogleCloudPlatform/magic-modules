@@ -343,34 +343,3 @@ func TestSqlUser_entraidUserLifecycle(t *testing.T) {
 		})
 	}
 }
-
-func TestGetSqlUserPassword(t *testing.T) {
-	t.Parallel()
-	res := ResourceSqlUser()
-	cases := []struct {
-		name     string
-		password string
-		rawCfg   cty.Value
-		want     string
-	}{
-		{"password set", "plain-pw", cty.NilVal, "plain-pw"},
-		{"password_wo set", "", cty.ObjectVal(map[string]cty.Value{"password_wo": cty.StringVal("wo-pw")}), "wo-pw"},
-		{"password_wo marked", "", cty.ObjectVal(map[string]cty.Value{"password_wo": cty.StringVal("marked-pw").Mark("s")}), "marked-pw"},
-		{"nil RawConfig", "", cty.NilVal, ""},
-		{"missing password_wo", "", cty.EmptyObjectVal, ""},
-		{"null password_wo", "", cty.ObjectVal(map[string]cty.Value{"password_wo": cty.NullVal(cty.String)}), ""},
-		{"unknown password_wo", "", cty.ObjectVal(map[string]cty.Value{"password_wo": cty.UnknownVal(cty.String)}), ""},
-	}
-	for _, tc := range cases {
-		d, err := schema.InternalMap(res.Schema).Data(&terraform.InstanceState{}, &terraform.InstanceDiff{
-			Attributes: map[string]*terraform.ResourceAttrDiff{"password": {New: tc.password}},
-			RawConfig:  tc.rawCfg,
-		})
-		if err != nil {
-			t.Fatalf("%s: Data init failed: %v", tc.name, err)
-		}
-		if got := getSqlUserPassword(d); got != tc.want {
-			t.Errorf("%s: getSqlUserPassword() = %q, want %q", tc.name, got, tc.want)
-		}
-	}
-}
