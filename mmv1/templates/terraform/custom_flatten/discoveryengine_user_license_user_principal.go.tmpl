@@ -1,0 +1,12 @@
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if d != nil {
+		if vStr, ok := v.(string); ok {
+			if cur, ok := d.Get("user_principal").(string); ok && cur != "" {
+				if cur == vStr || (strings.Contains(cur, "@") && !strings.Contains(cur, "/") && strings.Contains(vStr, "@") && !strings.Contains(vStr, "/") && strings.EqualFold(cur, vStr)) {
+					return cur
+				}
+			}
+		}
+	}
+	return v
+}

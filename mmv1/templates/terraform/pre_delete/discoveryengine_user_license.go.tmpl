@@ -1,0 +1,17 @@
+	userPrincipal, _ := d.Get("user_principal").(string)
+	deleteUnassigned := true
+	if v, ok := d.Get("delete_unassigned_user_licenses").(bool); ok {
+		deleteUnassigned = v
+	}
+
+	obj = map[string]interface{}{
+		"inlineSource": map[string]interface{}{
+			"userLicenses": []interface{}{
+				map[string]interface{}{
+					"userPrincipal": userPrincipal,
+				},
+			},
+			"updateMask": "licenseConfig",
+		},
+		"deleteUnassignedUserLicenses": deleteUnassigned,
+	}
