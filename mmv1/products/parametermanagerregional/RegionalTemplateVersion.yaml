@@ -35,7 +35,6 @@ sweeper:
     parent_field_extract_name: true
     child_field: template
 custom_code:
-  encoder: templates/terraform/encoders/parameter_manager_regional_template_version.go.tmpl
   post_create: templates/terraform/post_create/parameter_manager_template_version.go.tmpl
 samples:
   - name: regional_template_version_basic
@@ -94,8 +93,6 @@ samples:
         resource_id_vars:
           template_id: regional-template
           template_version_id: regional-template-version
-        test_env_vars:
-          project: PROJECT_NAME
         vars:
           disabled: true
         ignore_read_extra:
@@ -105,31 +102,23 @@ samples:
         resource_id_vars:
           template_id: regional-template
           template_version_id: regional-template-version
-        test_env_vars:
-          project: PROJECT_NAME
         vars:
           disabled: false
 parameters:
   - name: location
     type: String
     description: |
-      Location of the Parameter Manager Regional Template resource. It must be provided when the
-      `template` field consists of only the name of the Regional Template.
-    url_param_only: true
-    immutable: true
-    default_from_api: true
-  - name: template
-    type: String
-    description: |
-      The Regional Template resource to attach the Regional Template Version to. This can be
-      either the `template_id` or the full resource name in the format
-      `projects/{{project}}/locations/{{location}}/templates/{{template_id}}`.
+      The location of the regional template, e.g. `us-central1`.
     url_param_only: true
     required: true
     immutable: true
-    diff_suppress_func: tpgresource.CompareResourceNames
-    validation:
-      regex: ^(projects/[^/\s]+/locations/[^/\s]+/templates/[^/\s]+|[^/\s]+)$
+  - name: template
+    type: String
+    description: |
+      ID of the Parameter Manager Regional Template resource.
+    url_param_only: true
+    required: true
+    immutable: true
   - name: templateVersionId
     type: String
     description: |

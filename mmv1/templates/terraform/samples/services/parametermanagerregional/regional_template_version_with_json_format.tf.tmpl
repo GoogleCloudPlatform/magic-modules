@@ -7,7 +7,8 @@ resource "google_parameter_manager_regional_template" "regional-template-basic" 
 
 resource "google_parameter_manager_regional_template_version" "{{$.PrimaryResourceId}}" {
   provider            = google-beta
-  template            = google_parameter_manager_regional_template.regional-template-basic.id
+  location            = "us-central1"
+  template            = google_parameter_manager_regional_template.regional-template-basic.template_id
   template_version_id = "{{index $.ResourceIdVars "template_version_id"}}"
   template_data = jsonencode({
     app = "my-app"
