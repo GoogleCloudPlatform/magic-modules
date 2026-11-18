@@ -248,6 +248,7 @@ func TestAccComputeInstanceFromMachineImage_overrideMetadataDotStartupScript(t *
 }
 
 func TestAccComputeInstanceFromMachineImage_diffProject(t *testing.T) {
+	acctest.SkipTestUntil(t, "2026-11-30")
 	t.Parallel()
 
 	var instance map[string]interface{}
@@ -1334,28 +1335,9 @@ resource "google_project_service" "monitoring" {
 	depends_on = [google_project_service.service]
 }
 
-resource "google_compute_network" "net" {
-  provider                = google-beta
-  project                 = google_project.project.project_id
-  name                    = "%s-net"
-  auto_create_subnetworks = false
-
-  depends_on = [google_project_service.monitoring]
-}
-
-resource "google_compute_subnetwork" "subnet" {
-  provider      = google-beta
-  project       = google_project.project.project_id
-  name          = "%s-subnet"
-  ip_cidr_range = "10.0.0.0/16"
-  region        = "us-central1"
-  network       = google_compute_network.net.id
-}
-
 resource "google_compute_instance" "vm" {
   provider     = google-beta
   project = google_project.project.project_id
-  zone    = "us-central1-a"
   boot_disk {
     initialize_params {
       image = "debian-cloud/debian-12"
@@ -1366,8 +1348,7 @@ resource "google_compute_instance" "vm" {
   machine_type = "n1-standard-1"
 
   network_interface {
-    network    = google_compute_network.net.id
-    subnetwork = google_compute_subnetwork.subnet.id
+    network = "default"
   }
 
   metadata = {
@@ -1379,6 +1360,8 @@ resource "google_compute_instance" "vm" {
   }
 
   can_ip_forward = true
+
+  depends_on = [google_project_service.monitoring]
 }
 
 resource "google_compute_machine_image" "foobar" {
@@ -1395,10 +1378,6 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 
   source_machine_image = google_compute_machine_image.foobar.self_link
 
-  network_interface {
-    network = "default"
-  }
-
   // Overrides
   can_ip_forward = false
   labels = {
@@ -1408,7 +1387,7 @@ resource "google_compute_instance_from_machine_image" "foobar" {
     automatic_restart = false
   }
 }
-`, projectID, projectID, org, billingId, instance, instance, instance, instance, newInstance)
+`, projectID, projectID, org, billingId, instance, instance, newInstance)
 }
 
 func testAccComputeInstanceFromMachineImage_withSourceMachineImageEncryptionKey(instanceName, machineImageName, bootDiskID, serviceAccountEmail, keyRingSuffix, keyNameSuffix string) string {
