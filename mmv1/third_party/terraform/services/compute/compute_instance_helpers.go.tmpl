@@ -1739,8 +1739,7 @@ func isWorkloadIdentityCertConfigured(d tpgresource.TerraformResourceData) bool 
 			return false
 		}
 	}
-	_, ok := d.GetOkExists("workload_identity_config.0.identity_certificate_enabled")
-	return ok
+	return false
 }
 
 func expandWorkloadIdentityConfig(d tpgresource.TerraformResourceData) map[string]interface{} {
