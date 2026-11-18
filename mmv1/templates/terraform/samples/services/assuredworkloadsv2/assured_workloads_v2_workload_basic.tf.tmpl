@@ -1,0 +1,55 @@
+# Applies the US Data Boundary framework to an existing project in monitor mode.
+# Monitor mode deploys every cloud control of the framework revision that
+# supports DETECTIVE mode in DETECTIVE mode; list each of them in
+# cloud_control_configs with the revision used by the framework.
+resource "google_assured_workloads_v2_workload" "{{$.PrimaryResourceId}}" {
+  organization = "{{index $.TestEnvVars "org_id"}}"
+  location     = "us-central1"
+  workload_id  = "{{index $.ResourceIdVars "workload_id"}}"
+  description  = "US Data Boundary workload"
+
+  resource_config {
+    existing_project = "projects/{{index $.TestEnvVars "project_id"}}"
+  }
+
+  framework {
+    framework         = "organizations/{{index $.TestEnvVars "org_id"}}/locations/us-central1/frameworks/builtin-us-data-boundary"
+    major_revision_id = 62
+  }
+
+  cloud_control_configs {
+    cloud_control          = "organizations/{{index $.TestEnvVars "org_id"}}/locations/us-central1/cloudControls/builtin-restrict-tls-versions"
+    cloud_control_revision = 2
+    enforcement_mode       = "DETECTIVE"
+    parameters {
+      name = "deniedTlsVersions"
+      parameter_value {
+        string_list_value {
+          values = ["TLS_VERSION_1", "TLS_VERSION_1_1"]
+        }
+      }
+    }
+  }
+
+  cloud_control_configs {
+    cloud_control          = "organizations/{{index $.TestEnvVars "org_id"}}/locations/us-central1/cloudControls/builtin-restrict-resource-locations"
+    cloud_control_revision = 9
+    enforcement_mode       = "DETECTIVE"
+    parameters {
+      name = "locations"
+      parameter_value {
+        oneof_value {
+          name = "allowedLocations"
+          parameter_value {
+            string_list_value {
+              values = ["us-locations"]
+            }
+          }
+        }
+      }
+    }
+  }
+
+  # ... one cloud_control_configs block for each remaining cloud control of the
+  # framework revision that supports DETECTIVE mode.
+}

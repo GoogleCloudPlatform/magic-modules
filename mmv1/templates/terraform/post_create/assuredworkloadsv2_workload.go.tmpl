@@ -1,0 +1,7 @@
+if d.Get("workload_id").(string) == "" {
+	if workloadID := assuredWorkloadsV2WorkloadIdFromName(d.Get("name").(string)); workloadID != "" {
+		if err := d.Set("workload_id", workloadID); err != nil {
+			return fmt.Errorf("Error setting workload_id: %s", err)
+		}
+	}
+}

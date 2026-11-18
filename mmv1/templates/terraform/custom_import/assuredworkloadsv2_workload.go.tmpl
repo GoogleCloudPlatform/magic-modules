@@ -1,0 +1,22 @@
+config := meta.(*transport_tpg.Config)
+
+// Supported formats:
+// * organizations/{organization}/locations/{location}/workloads/{workload_id}
+// * {organization}/{location}/{workload_id}
+if err := tpgresource.ParseImportId([]string{
+	"^organizations/(?P<organization>[^/]+)/locations/(?P<location>[^/]+)/workloads/(?P<workload_id>[^/]+)$",
+	"^(?P<organization>[^/]+)/(?P<location>[^/]+)/(?P<workload_id>[^/]+)$",
+}, d, config); err != nil {
+	return nil, err
+}
+
+name := fmt.Sprintf("organizations/%s/locations/%s/workloads/%s",
+	d.Get("organization").(string),
+	d.Get("location").(string),
+	d.Get("workload_id").(string))
+if err := d.Set("name", name); err != nil {
+	return nil, fmt.Errorf("Error setting name: %s", err)
+}
+d.SetId(name)
+
+return []*schema.ResourceData{d}, nil
