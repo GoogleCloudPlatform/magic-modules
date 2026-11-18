@@ -221,6 +221,18 @@ func TestDetectExhaustiveMissingTests_SingleOptionalChildParentUnset(t *testing.
 				"encryption_config.state": {
 					New: &schema.Schema{Type: schema.TypeString, Computed: true},
 				},
+				"oc_parent": {
+					New: &schema.Schema{
+						Type:     schema.TypeList,
+						Optional: true,
+						Computed: true,
+						MaxItems: 1,
+						Elem:     &schema.Resource{},
+					},
+				},
+				"oc_parent.opt_child": {
+					New: &schema.Schema{Type: schema.TypeString, Optional: true},
+				},
 				"timeouts_config": {
 					New: &schema.Schema{
 						Type:     schema.TypeList,
@@ -251,11 +263,12 @@ func TestDetectExhaustiveMissingTests_SingleOptionalChildParentUnset(t *testing.
 		},
 	}
 
-	// Case 1: encryption_config has a single configurable child (kms_key), so removing
-	// encryption_config in Step 4 covers kms_key UNSET. By contrast, timeouts_config has
-	// two optional children (connect_timeout and read_timeout), so narrowing to
-	// connect_timeout in Step 3 and removing timeouts_config in Step 4 still leaves
-	// connect_timeout UNSET as MISSING until a step swaps to read_timeout.
+	// Case 1: encryption_config is purely Optional with a single configurable child (kms_key),
+	// so removing encryption_config in Step 4 covers kms_key UNSET. By contrast:
+	// - oc_parent is Optional+Computed, so omitting oc_parent retains prior state in SDKv2
+	//   rather than unsetting oc_parent.opt_child (which requires `oc_parent {}`);
+	// - timeouts_config has two optional children (connect_timeout and read_timeout), so
+	//   removing timeouts_config without swapping to read_timeout leaves connect_timeout UNSET MISSING.
 	baseSteps := []reader.Step{
 		{
 			reader.ResourceBlock: {
@@ -263,6 +276,7 @@ func TestDetectExhaustiveMissingTests_SingleOptionalChildParentUnset(t *testing.
 					"primary": {
 						"name":                            "\"test-name\"",
 						"encryption_config.kms_key":       "\"k1\"",
+						"oc_parent.opt_child":             "\"oc1\"",
 						"timeouts_config.connect_timeout": "\"10s\"",
 						"timeouts_config.read_timeout":    "\"30s\"",
 						"fn_parent.fn_sole_child":         "\"fn-1\"",
@@ -276,6 +290,7 @@ func TestDetectExhaustiveMissingTests_SingleOptionalChildParentUnset(t *testing.
 					"primary": {
 						"name":                            "\"test-name\"",
 						"encryption_config.kms_key":       "\"k2\"",
+						"oc_parent.opt_child":             "\"oc2\"",
 						"timeouts_config.connect_timeout": "\"20s\"",
 						"timeouts_config.read_timeout":    "\"60s\"",
 						"fn_parent.fn_sole_child":         "\"fn-1\"",
@@ -331,16 +346,32 @@ func TestDetectExhaustiveMissingTests_SingleOptionalChildParentUnset(t *testing.
 	}
 	info := gotWithoutSwap["google_example_resource"]
 	if info == nil {
-		t.Fatalf("expected timeouts_config.connect_timeout UNSET to remain MISSING without sibling swap")
+		t.Fatalf("expected oc_parent.opt_child and timeouts_config.connect_timeout UNSET to remain MISSING")
 	}
-	if diffStr := cmp.Diff([]string{"timeouts_config.connect_timeout"}, info.IncompleteFields); diffStr != "" {
-		t.Errorf("expected ONLY timeouts_config.connect_timeout to be incomplete (-want +got):\n%s", diffStr)
+	if diffStr := cmp.Diff([]string{"oc_parent.opt_child", "timeouts_config.connect_timeout"}, info.IncompleteFields); diffStr != "" {
+		t.Errorf("expected oc_parent.opt_child and timeouts_config.connect_timeout to be incomplete (-want +got):\n%s", diffStr)
 	}
 
-	// Case 2: Swapping timeouts_config to { read_timeout = "60s" } before removing
-	// timeouts_config covers connect_timeout UNSET while timeouts_config stays present.
-	stepsWithSwap := append(append([]reader.Step{}, baseSteps[:3]...),
-		reader.Step{
+	// Case 2: Transitioning from `oc_parent { opt_child = "oc2" }` (Step 2) to
+	// `oc_parent {}` (Step 3) and swapping timeouts_config to `{ read_timeout = "60s" }`
+	// before removing timeouts_config covers both.
+	stepsWithSwap := []reader.Step{
+		baseSteps[0],
+		baseSteps[1],
+		{
+			reader.ResourceBlock: {
+				"google_example_resource": {
+					"primary": {
+						"name":                            "\"test-name\"",
+						"encryption_config.kms_key":       "\"k2\"",
+						"oc_parent":                       "{}",
+						"timeouts_config.connect_timeout": "\"20s\"",
+						"fn_parent.fn_sole_child":         "\"fn-1\"",
+					},
+				},
+			},
+		},
+		{
 			reader.ResourceBlock: {
 				"google_example_resource": {
 					"primary": {
@@ -352,7 +383,7 @@ func TestDetectExhaustiveMissingTests_SingleOptionalChildParentUnset(t *testing.
 			},
 		},
 		baseSteps[3],
-	)
+	}
 
 	gotCovered, err := DetectExhaustiveMissingTests(schemaDiff, nil, []*reader.Test{
 		{Name: "TestAccExample_soleChild", Steps: stepsWithSwap},

@@ -553,17 +553,27 @@ func isFieldModified(prevBlock, currBlock reader.Block, fieldPath string) bool {
 }
 
 // isParentOrSoleChildAncestorPresent reports whether fieldPath's immediate
-// parent is present in block, or an optional ancestor whose only configurable
-// schema subtree is fieldPath was omitted while that ancestor's parent remained
-// present (avoiding an invalid empty ancestor {} block when unsetting its sole
-// optional child).
+// parent is present in block, or a purely Optional (non-Computed) ancestor
+// whose only configurable schema subtree is fieldPath was omitted while that
+// ancestor's parent remained present (avoiding an invalid empty ancestor {}
+// block when unsetting its sole optional child).
+//
+// Optional+Computed (Computed: true) ancestors are excluded: in SDKv2, omitting
+// a Computed block retains its prior state without diffing or clearing child
+// attributes, whereas writing `ancestor {}` clears the child.
 func isParentOrSoleChildAncestorPresent(block reader.Block, fieldPath string, fullSchema map[string]*schema.Schema) bool {
 	if isParentPresent(block, fieldPath) {
 		return true
 	}
 	for anc := parentPath(fieldPath); anc != ""; anc = parentPath(anc) {
-		if ancSchema := fullSchema[anc]; ancSchema != nil && ancSchema.Required {
-			continue
+		ancSchema := fullSchema[anc]
+		if ancSchema != nil {
+			if ancSchema.Computed {
+				return false
+			}
+			if ancSchema.Required {
+				continue
+			}
 		}
 		if !isFieldPresent(block, anc) && isParentPresent(block, anc) &&
 			isOnlyConfigurableChildInSchema(anc, fieldPath, fullSchema) {
