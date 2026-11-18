@@ -268,7 +268,7 @@ func evaluateResourceTests(
 
 					// Check MODIFY.
 					if st.Modify.Status == StatusMissing && prevPresent && currPresent {
-						if isFieldModified(prev.block, curr.block, fieldPath) {
+						if isFieldModified(prev.block, curr.block, fieldPath) || isSyntheticMapKeyModified(prev.block, curr.block, fieldPath, fullSchema) {
 							st.Modify = TransitionResult{
 								Status:    StatusCovered,
 								CoveredBy: transitionLabel,
@@ -420,6 +420,23 @@ func getFieldTreeValue(block reader.Block, fieldPath string) string {
 
 func isFieldModified(prevBlock, currBlock reader.Block, fieldPath string) bool {
 	return getFieldTreeValue(prevBlock, fieldPath) != getFieldTreeValue(currBlock, fieldPath)
+}
+
+// isSyntheticMapKeyModified reports whether fieldPath is a Required key field
+// inside a TypeSet nested block (MMv1's synthetic map representation, e.g.
+// `extra_headers { key = "...", value = "..." }`) whose enclosing block changed
+// in-place while keeping the same key.
+func isSyntheticMapKeyModified(prevBlock, currBlock reader.Block, fieldPath string, fullSchema map[string]*schema.Schema) bool {
+	field := fullSchema[fieldPath]
+	parent := parentPath(fieldPath)
+	if field == nil || !field.Required || parent == "" {
+		return false
+	}
+	parentSchema := fullSchema[parent]
+	if parentSchema == nil || parentSchema.Type != schema.TypeSet {
+		return false
+	}
+	return getFieldTreeValue(prevBlock, parent) != getFieldTreeValue(currBlock, parent)
 }
 
 func sortedFieldPaths(fields map[string]*ExhaustiveFieldStatus) []string {

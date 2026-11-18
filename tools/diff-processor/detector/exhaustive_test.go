@@ -687,3 +687,68 @@ func TestDetectExhaustiveMissingTests_NullLifecycleUnsetSetChangedUnset(t *testi
 		t.Errorf("null_then_set_only.Modify = %+v, want MISSING (null -> set is not modify)", info.Fields["null_then_set_only"].Modify)
 	}
 }
+
+func TestDetectExhaustiveMissingTests_SyntheticTypeSetMapKeyModify(t *testing.T) {
+	schemaDiff := diff.SchemaDiff{
+		"google_example_resource": {
+			Fields: map[string]diff.FieldDiff{
+				"extra_headers": {
+					New: &schema.Schema{
+						Type:     schema.TypeSet,
+						Optional: true,
+						Elem:     &schema.Resource{},
+					},
+				},
+				"extra_headers.key": {
+					New: &schema.Schema{Type: schema.TypeString, Required: true},
+				},
+				"extra_headers.value": {
+					New: &schema.Schema{Type: schema.TypeString, Required: true},
+				},
+			},
+		},
+	}
+
+	tests := []*reader.Test{
+		{
+			Name: "TestAccExample_syntheticMap",
+			Steps: []reader.Step{
+				{
+					reader.ResourceBlock: {
+						"google_example_resource": {
+							"primary": {
+								"extra_headers.key":   "\"X-Header\"",
+								"extra_headers.value": "\"v1\"",
+							},
+						},
+					},
+				},
+				{
+					reader.ResourceBlock: {
+						"google_example_resource": {
+							"primary": {
+								"extra_headers.key":   "\"X-Header\"",
+								"extra_headers.value": "\"v2\"",
+							},
+						},
+					},
+				},
+				{
+					reader.ResourceBlock: {
+						"google_example_resource": {
+							"primary": {},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	got, err := DetectExhaustiveMissingTests(schemaDiff, nil, tests, false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(got) != 0 {
+		t.Errorf("expected synthetic TypeSet map key MODIFY to be covered when value changes, got:\n%s", FormatExhaustiveMarkdown(got))
+	}
+}
