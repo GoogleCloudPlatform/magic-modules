@@ -214,7 +214,7 @@ func evaluateResourceTests(
 
 	var allResourceSteps []stepBlockRecord
 
-	for _, test := range allTests {
+	for _, test := range orderOwnResourceTestsFirst(resourceName, allTests) {
 		// Group steps by resource instance label so multi-step transitions follow the same instance.
 		instanceSteps := make(map[string][]stepBlockRecord)
 		var instanceOrder []string
@@ -486,6 +486,35 @@ func parentPath(fieldPath string) string {
 		return ""
 	}
 	return fieldPath[:idx]
+}
+
+// orderOwnResourceTestsFirst returns a deterministically ordered copy of
+// allTests with the resource's own TestAcc<Resource>_* tests placed ahead of
+// other tests, ordered within each group by shorter test name first and then
+// alphabetically so concise tests (such as _basic or _full) are preferred and
+// CoveredBy is stable regardless of map iteration order in test-reader.
+func orderOwnResourceTestsFirst(resourceName string, allTests []*reader.Test) []*reader.Test {
+	ordered := make([]*reader.Test, len(allTests))
+	copy(ordered, allTests)
+	sort.SliceStable(ordered, func(i, j int) bool {
+		iOwn := isOwnResourceTest(ordered[i].Name, resourceName)
+		jOwn := isOwnResourceTest(ordered[j].Name, resourceName)
+		if iOwn != jOwn {
+			return iOwn
+		}
+		if len(ordered[i].Name) != len(ordered[j].Name) {
+			return len(ordered[i].Name) < len(ordered[j].Name)
+		}
+		return ordered[i].Name < ordered[j].Name
+	})
+	return ordered
+}
+
+func isOwnResourceTest(testName, resourceName string) bool {
+	trimmed := strings.TrimPrefix(resourceName, "google_")
+	prefix := "testacc" + strings.ReplaceAll(trimmed, "_", "")
+	lower := strings.ToLower(testName)
+	return lower == prefix || strings.HasPrefix(lower, prefix+"_")
 }
 
 // getFieldTreeValue returns a deterministic snapshot of all non-null values at
