@@ -126,12 +126,14 @@ func (c *Converter) AddResourceChanges(changes []*tfjson.ResourceChange) error {
 			continue
 		}
 
-		if tfplan.IsCreate(rc) || tfplan.IsUpdate(rc) || tfplan.IsDeleteCreate(rc) || (c.convertUnchanged && tfplan.IsNoOp(rc)) {
+		if tfplan.IsCreate(rc) || tfplan.IsUpdate(rc) || tfplan.IsReplace(rc) || (c.convertUnchanged && tfplan.IsNoOp(rc)) {
 			createOrUpdateOrNoops = append(createOrUpdateOrNoops, rc)
 		} else if tfplan.IsDelete(rc) {
 			if err := c.addDelete(rc); err != nil {
 				return fmt.Errorf("%s: converting deleted TF resource to CAI: %w", rc.Address, err)
 			}
+		} else if !tfplan.IsNoOp(rc) && !rc.Change.Actions.Read() && !rc.Change.Actions.Forget() {
+			c.errorLogger.Warn(fmt.Sprintf("%s: unhandled plan actions %v", rc.Address, rc.Change.Actions))
 		}
 	}
 
