@@ -17,11 +17,10 @@ description: |
   An AutoProtectionPolicyBinding applies an AutoProtectionPolicy to a scope, such as a
   project. Once bound, the policy automatically protects the eligible resources in that
   scope that match its criteria.
-min_version: beta
 references:
   guides:
     Official Documentation: https://cloud.google.com/backup-disaster-recovery/docs
-  api: https://cloud.google.com/backup-disaster-recovery/docs/reference/rest/v1beta/projects.locations.autoProtectionPolicies.bindings
+  api: https://cloud.google.com/backup-disaster-recovery/docs/reference/rest/v1/projects.locations.autoProtectionPolicies.bindings
 docs:
   note: |
     Deleting a binding is asynchronous: `:initiateDelete` transitions the binding to the
@@ -54,7 +53,6 @@ custom_code:
 samples:
   - name: backup_dr_auto_protection_policy_binding_basic
     primary_resource_id: my-binding
-    min_version: beta
     steps:
       - name: backup_dr_auto_protection_policy_binding_basic
         resource_id_vars:

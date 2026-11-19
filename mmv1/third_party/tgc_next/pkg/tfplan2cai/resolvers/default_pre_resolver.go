@@ -58,7 +58,7 @@ func (r *DefaultPreResolver) AddResourceChanges(changes []*tfjson.ResourceChange
 
 		var resourceData *models.FakeResourceDataWithMeta
 		resource := r.schema.ResourcesMap[rc.Type]
-		if tfplan.IsCreate(rc) || tfplan.IsUpdate(rc) || tfplan.IsDeleteCreate(rc) {
+		if tfplan.IsCreate(rc) || tfplan.IsUpdate(rc) || tfplan.IsReplace(rc) {
 			resourceData = models.NewFakeResourceDataWithMeta(
 				rc.Type,
 				resource.Schema,

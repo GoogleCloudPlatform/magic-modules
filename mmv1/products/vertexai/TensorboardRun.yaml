@@ -41,7 +41,6 @@ samples:
         resource_id_vars:
           tensorboardRunId: run
           tensorboardExperimentId: experiment
-          tensorboard: tensorboard
         vars:
           display_name: "sample run"
           description: null
@@ -50,7 +49,6 @@ samples:
         resource_id_vars:
           tensorboardRunId: run
           tensorboardExperimentId: experiment
-          tensorboard: tensorboard
         vars:
           display_name: "sample run updated"
           description: "updated description"

@@ -72,16 +72,11 @@ properties:
     output: true
     custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
   - name: config
-    type: String
+    type: JsonValue
     description: |
       Config for the module. For the resident module, its config value is defined at this level.
       For the inherited module, its config value is inherited from the ancestor module.
     required: false
-    state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-    custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-    validation:
-      function: validation.StringIsJSON
   - name: enablementState
     type: Enum
     description: |

@@ -96,9 +96,11 @@ properties:
     description: |
       The memory configuration for the cluster.
     output: true
+    deprecation_message: '`memory_config` is deprecated and will be removed in a future major release. `storage_size_gib` is being removed from the Bigtable API and `memory_config` contains no other fields.'
     properties:
       - name: 'storageSizeGib'
         type: Integer
         description: |
           Reporting the current size of the memory layer in GiB.
         output: true
+        deprecation_message: '`storage_size_gib` is deprecated and will be removed in a future major release. This field is no longer populated from the API.'

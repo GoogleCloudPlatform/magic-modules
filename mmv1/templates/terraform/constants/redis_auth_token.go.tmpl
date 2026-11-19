@@ -1,0 +1,38 @@
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
+// LatestRedisClusterAuthToken selects the AuthToken entry with the highest sequential
+// "version-N" ID from a ListAuthTokens response slice, because :addAuthToken returns
+// the parent TokenAuthUser rather than the newly created token.
+func LatestRedisClusterAuthToken(rawTokens interface{}) (map[string]interface{}, error) {
+	tokens, ok := rawTokens.([]interface{})
+	if !ok || len(tokens) == 0 {
+		return nil, fmt.Errorf("no authTokens returned")
+	}
+
+	var latestToken map[string]interface{}
+	maxVersion := -1
+	for _, t := range tokens {
+		tm, ok := t.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		name, ok := tm["name"].(string)
+		if !ok || name == "" {
+			continue
+		}
+		tokenId := tpgresource.GetResourceNameFromSelfLink(name)
+		var vNum int
+		if n, err := fmt.Sscanf(tokenId, "version-%d", &vNum); err == nil && n == 1 && tokenId == fmt.Sprintf("version-%d", vNum) {
+			if vNum > maxVersion {
+				maxVersion = vNum
+				latestToken = tm
+			}
+		} else if latestToken == nil {
+			latestToken = tm
+		}
+	}
+	if latestToken == nil {
+		return nil, fmt.Errorf("AuthToken response missing name attribute")
+	}
+	return latestToken, nil
+}
+{{- end }}

@@ -54,10 +54,6 @@ samples:
           deletion_protection: "true"
           network_name: default
           subnetwork_name: default
-        test_env_vars:
-          project: PROJECT_NAME
-          location: REGION
-          membership_id: fmt.Sprintf("tf-test-membership%s", context["random_suffix"])
         test_vars_overrides:
           deletion_protection: "false"
           network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")

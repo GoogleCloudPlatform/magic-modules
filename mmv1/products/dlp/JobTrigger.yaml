@@ -42,33 +42,18 @@ samples:
     primary_resource_id: basic
     steps:
       - name: dlp_job_trigger_basic
-        resource_id_vars:
-          trigger: trigger
-        test_vars_overrides:
-          # for backward compatible
-          trigger: '"trigger" + randomSuffix'
         test_env_vars:
           project: PROJECT_NAME
   - name: dlp_job_trigger_bigquery_row_limit
     primary_resource_id: bigquery_row_limit
     steps:
       - name: dlp_job_trigger_bigquery_row_limit
-        resource_id_vars:
-          trigger: trigger
-        test_vars_overrides:
-          # for backward compatible
-          trigger: '"trigger" + randomSuffix'
         test_env_vars:
           project: PROJECT_NAME
   - name: dlp_job_trigger_bigquery_row_limit_percentage
     primary_resource_id: bigquery_row_limit_percentage
     steps:
       - name: dlp_job_trigger_bigquery_row_limit_percentage
-        resource_id_vars:
-          trigger: trigger
-        test_vars_overrides:
-          # for backward compatible
-          trigger: '"trigger" + randomSuffix'
         test_env_vars:
           project: PROJECT_NAME
   - name: dlp_job_trigger_publish_to_dataplex_catalog
@@ -76,11 +61,6 @@ samples:
     exclude_basic_doc: true
     steps:
       - name: dlp_job_trigger_publish_to_dataplex_catalog
-        resource_id_vars:
-          trigger: trigger
-        test_vars_overrides:
-          # for backward compatible
-          trigger: '"trigger" + randomSuffix'
         test_env_vars:
           project: PROJECT_NAME
   - name: dlp_job_trigger_scc_output
@@ -88,11 +68,6 @@ samples:
     exclude_basic_doc: true
     steps:
       - name: dlp_job_trigger_scc_output
-        resource_id_vars:
-          trigger: trigger
-        test_vars_overrides:
-          # for backward compatible
-          trigger: '"trigger" + randomSuffix'
         test_env_vars:
           project: PROJECT_NAME
   - name: dlp_job_trigger_job_notification_emails
@@ -121,11 +96,6 @@ samples:
     primary_resource_id: inspect
     steps:
       - name: dlp_job_trigger_inspect
-        resource_id_vars:
-          trigger: trigger
-        test_vars_overrides:
-          # for backward compatible
-          trigger: '"trigger" + randomSuffix'
         test_env_vars:
           project: PROJECT_NAME
   - name: dlp_job_trigger_publish_to_stackdriver
@@ -146,33 +116,18 @@ samples:
     primary_resource_id: basic
     steps:
       - name: dlp_job_trigger_multiple_actions
-        resource_id_vars:
-          trigger: trigger
-        test_vars_overrides:
-          # for backward compatible
-          trigger: '"trigger" + randomSuffix'
         test_env_vars:
           project: PROJECT_NAME
   - name: dlp_job_trigger_cloud_storage_optional_timespan_autopopulation
     primary_resource_id: basic
     steps:
       - name: dlp_job_trigger_cloud_storage_optional_timespan_autopopulation
-        resource_id_vars:
-          trigger: trigger
-        test_vars_overrides:
-          # for backward compatible
-          trigger: '"trigger" + randomSuffix'
         test_env_vars:
           project: PROJECT_NAME
   - name: dlp_job_trigger_timespan_config_big_query
     primary_resource_id: timespan_config_big_query
     steps:
       - name: dlp_job_trigger_timespan_config_big_query
-        resource_id_vars:
-          trigger: trigger
-        test_vars_overrides:
-          # for backward compatible
-          trigger: '"trigger" + randomSuffix'
         test_env_vars:
           project: PROJECT_NAME
 parameters:

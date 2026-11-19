@@ -35,8 +35,6 @@ samples:
         resource_id_vars:
           saas_name: example-saas
           tenant_name: example-tenant
-        test_env_vars:
-          project: PROJECT_NAME
 parameters:
   - name: location
     type: String

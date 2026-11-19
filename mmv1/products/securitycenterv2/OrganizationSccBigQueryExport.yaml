@@ -55,7 +55,6 @@ samples:
           name: my-export
         test_env_vars:
           org_id: ORG_ID
-          project: PROJECT_NAME
 parameters:
   - name: organization
     type: String

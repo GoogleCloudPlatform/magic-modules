@@ -1,0 +1,98 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: AutonomousDatabaseWallet
+api_resource_type_kind: AutonomousDatabase
+description: |
+  Generates a client credentials wallet for an Autonomous Database and provides
+  access to its contents.
+references:
+  guides:
+    Create Autonomous databases: https://cloud.google.com/oracle/database/docs/create-databases
+  api: https://cloud.google.com/oracle/database/docs/reference/rest/v1/projects.locations.autonomousDatabases/generateWallet
+docs:
+  warning: |
+    The generated wallet is stored in plain text in the Terraform state. Destroying this
+    resource only removes it from the Terraform state; it doesn't revoke the wallet. This
+    API has no method to revoke or rotate wallets; rotating the wallet in Oracle Cloud
+    Infrastructure invalidates it. Per Oracle, generating a wallet doesn't invalidate
+    wallets generated earlier. To get a new wallet (for example, before the wallet's
+    certificates expire), replace this resource.
+# generateWallet is a one-shot action on the parent Autonomous Database, and the API
+# has no method to read a wallet back, so the resource is never read.
+base_url: '{{autonomous_database}}'
+create_url: '{{autonomous_database}}:generateWallet'
+id_format: '{{autonomous_database}}/wallet'
+immutable: true
+exclude_import: true
+exclude_read: true
+# The resource can't be imported, so a resource identity has no use.
+exclude_identity_generation: true
+exclude_tgc: true
+custom_code:
+  post_create: templates/terraform/post_create/oracledatabase_autonomous_database_wallet.go.tmpl
+  # There is no API to delete a wallet, so destroy only removes it from state. Using a
+  # custom delete (rather than exclude_delete) keeps `deletion_policy`, so PREVENT can
+  # block an accidental destroy.
+  custom_delete: templates/terraform/custom_delete/only_remove_from_state.go.tmpl
+  # Destroy makes no API call, so there's nothing to check afterwards.
+  test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl
+samples:
+  - name: oracledatabase_autonomous_database_wallet_basic
+    primary_resource_id: myWallet
+    steps:
+      - name: oracledatabase_autonomous_database_wallet_basic
+        resource_id_vars:
+          project: my-project
+          autonomous_database_id: my-instance
+          database_name: mydatabase
+          deletion_protection: "true"
+        test_vars_overrides:
+          deletion_protection: "false"
+          project: '"oasis-terraform-testing-prod"'
+          database_name: fmt.Sprintf("tftestdatabase%s", randomSuffix)
+        # The wallet can't be imported because the API has no method to read it back.
+        exclude_import_test: true
+parameters:
+  - name: autonomousDatabase
+    type: String
+    required: true
+    description: |
+      The name of the Autonomous Database to generate the wallet for, in the format
+      `projects/{project}/locations/{location}/autonomousDatabases/{autonomous_database}`.
+    url_param_only: true
+properties:
+  - name: type
+    type: Enum
+    description: |
+      The type of wallet to generate. `SINGLE` generates an instance wallet for this
+      database only.
+    enum_values:
+      - SINGLE
+    default_value: SINGLE
+  - name: password
+    type: String
+    required: true
+    description: |
+      The password used to encrypt the keys inside the wallet. It must be at least
+      8 characters long. It protects only the password-protected wallet files (such as
+      `ewallet.p12`); the auto-login `cwallet.sso` file in the wallet doesn't need it.
+    sensitive: true
+    write_only: true
+  - name: archiveContent
+    type: String
+    description: |
+      The base64-encoded contents of the wallet ZIP archive.
+    output: true
+    sensitive: true

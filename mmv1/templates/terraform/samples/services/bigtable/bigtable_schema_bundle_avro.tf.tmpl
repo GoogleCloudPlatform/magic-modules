@@ -1,0 +1,41 @@
+resource "google_bigtable_instance" "instance" {
+  name = "{{index $.ResourceIdVars "instance_name"}}"
+  cluster {
+    cluster_id   = "cluster-1"
+    zone         = "us-east1-b"
+    num_nodes    = 1
+    storage_type = "HDD"
+  }
+
+  deletion_protection  = false
+}
+
+resource "google_bigtable_table" "table" {
+  name          = "{{index $.ResourceIdVars "table_name"}}"
+  instance_name = google_bigtable_instance.instance.name
+
+  column_family {
+    family = "CF"
+  }
+}
+
+resource "google_bigtable_schema_bundle" "{{$.PrimaryResourceId}}" {
+  schema_bundle_id = "{{index $.ResourceIdVars "schema_bundle_name"}}"
+  instance         = google_bigtable_instance.instance.name
+  table            = google_bigtable_table.table.name
+
+  avro_schema {
+    json_schemas = [
+      jsonencode({
+        type = "record"
+        name = "TestRecord"
+        fields = [
+          {
+            name = "id"
+            type = "string"
+          }
+        ]
+      })
+    ]
+  }
+}

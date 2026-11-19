@@ -55,13 +55,7 @@ samples:
       - name: vertex_ai_featurestore
         resource_id_vars:
           name: terraform_featurestore
-          project: appeng-flex
           kms_key_name: kms-name
-        vars:
-          region: 'us-central1'
-        test_env_vars:
-          org_id: ORG_ID
-          billing_account: BILLING_ACCT
         test_vars_overrides:
           kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
         ignore_read_extra:
@@ -74,11 +68,7 @@ samples:
         min_version: beta
         resource_id_vars:
           name: terraform_featurestore_2
-          project: appeng-flex
           kms_key_name: kms-name
-        test_env_vars:
-          org_id: ORG_ID
-          billing_account: BILLING_ACCT
         test_vars_overrides:
           kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
         ignore_read_extra:
@@ -89,11 +79,7 @@ samples:
       - name: vertex_ai_featurestore_scaling
         resource_id_vars:
           name: terraform_featurestore_3
-          project: appeng-flex
           kms_key_name: kms-name
-        test_env_vars:
-          org_id: ORG_ID
-          billing_account: BILLING_ACCT
         test_vars_overrides:
           kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
         ignore_read_extra:

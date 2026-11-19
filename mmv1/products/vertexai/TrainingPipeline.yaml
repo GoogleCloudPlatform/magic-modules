@@ -234,15 +234,10 @@ properties:
       A Google Cloud Storage path to the YAML file that defines the training task which is responsible for producing the model artifact, and may also include additional auxiliary work. The definition files that can be used here are found in gs://google-cloud-aiplatform/schema/trainingjob/definition/.
     required: true
   - name: trainingTaskInputs
-    type: String
+    type: JsonValue
     description: |
       The training task's parameter(s), as specified in the training_task_definition's inputs. This field uses JSON data as a string.
     required: true
-    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-    custom_expand: templates/terraform/custom_expand/json_value.tmpl
-    validation:
-      function: validation.StringIsJSON
   - name: inputDataConfig
     type: NestedObject
     description: |
@@ -520,23 +515,13 @@ properties:
         ignore_read: true
         properties:
           - name: parameters
-            type: String
+            type: JsonValue
             description: |
               Parameters that configure explaining of the Model's predictions. This field uses JSON data as a string.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-            custom_expand: templates/terraform/custom_expand/json_value.tmpl
-            validation:
-              function: validation.StringIsJSON
           - name: metadata
-            type: String
+            type: JsonValue
             description: |
               Metadata describing the Model's input and output for explanation. This field uses JSON data as a string.
-            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-            custom_expand: templates/terraform/custom_expand/json_value.tmpl
-            validation:
-              function: validation.StringIsJSON
   - name: parentModel
     type: String
     description: |
@@ -595,8 +580,7 @@ properties:
       Time when the TrainingPipeline was most recently updated.
     output: true
   - name: trainingTaskMetadata
-    type: String
+    type: JsonValue
     description: |
       The metadata information as specified in the training_task_definition's metadata.
     output: true
-    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl

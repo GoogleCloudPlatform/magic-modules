@@ -129,7 +129,6 @@ samples:
         resource_id_vars:
           alloydb_cluster_name: alloydb-cluster
           alloydb_instance_name: alloydb-instance
-          network_name: alloydb-network
         ignore_read_extra:
           - reconciling
           - update_time

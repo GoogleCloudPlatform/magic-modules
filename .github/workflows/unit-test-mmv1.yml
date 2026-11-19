@@ -13,9 +13,12 @@ on:
     types: [checks_requested]
   pull_request:
 
+# Pushes share one group per branch and are never cancelled mid-run: when several
+# merges land at once, the running build finishes and only the newest pending
+# push run is kept. Every commit on main was already tested by its merge_group run.
 concurrency:
-  group: ${{ github.event_name == 'merge_group' && format('mmv1-merge-group-{0}', github.event.merge_group.head_sha) || github.event_name == 'pull_request' && format('mmv1-pr-{0}', github.event.pull_request.number) || format('mmv1-commit-{0}', github.sha) }}
-  cancel-in-progress: true
+  group: ${{ github.event_name == 'merge_group' && format('mmv1-merge-group-{0}', github.event.merge_group.head_sha) || github.event_name == 'pull_request' && format('mmv1-pr-{0}', github.event.pull_request.number) || format('mmv1-push-{0}', github.ref) }}
+  cancel-in-progress: ${{ github.event_name != 'push' }}
 
 jobs:
   version-guard-check:

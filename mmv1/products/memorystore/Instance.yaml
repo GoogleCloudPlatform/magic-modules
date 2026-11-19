@@ -147,6 +147,24 @@ samples:
           deletion_protection_enabled: "false"
         oics_vars_overrides:
           deletion_protection_enabled: "false"
+  - name: memorystore_instance_auto_created_endpoints_ipv6
+    primary_resource_id: instance-ipv6
+    min_version: beta
+    steps:
+      - name: memorystore_instance_auto_created_endpoints_ipv6
+        min_version: beta
+        resource_id_vars:
+          instance_name: ipv6-instance
+          policy_name: my-policy
+          subnet_name: my-subnet
+          network_name: my-network
+          prevent_destroy: "true"
+        test_vars_overrides:
+          prevent_destroy: "false"
+        oics_vars_overrides:
+          prevent_destroy: "false"
+        ignore_read_extra:
+          - update_time
 virtual_fields:
   - name: desired_psc_auto_connections
     description: '`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead `terraform import` will only work with desired_auto_created_endpoints`.'
@@ -180,6 +198,17 @@ virtual_fields:
           name: network
           description: "Required. The consumer network where the IP address resides, in the form of\nprojects/{project_id}/global/networks/{network_id}. "
           required: true
+        - type: Enum
+          name: ip_version
+          description: |
+            Immutable. The IP version that the consumer endpoint will use.
+            Default value is `IPV4`.
+          min_version: beta
+          immutable: true
+          default_from_api: true
+          enum_values:
+            - IPV4
+            - IPV6
 parameters:
   - name: location
     type: String
@@ -639,6 +668,11 @@ properties:
                     type: Integer
                     description: Output only. Ports of the exposed endpoint.
                     output: true
+                  - name: ipVersion
+                    type: String
+                    description: The IP version of the PSC connection. Possible values are `IPV4` and `IPV6`.
+                    min_version: beta
+                    output: true
   - name: crossInstanceReplicationConfig
     type: NestedObject
     update_id: crossInstanceReplicationConfig
@@ -801,6 +835,11 @@ properties:
         - name: port
           type: Integer
           description: Output only. Ports of the exposed endpoint.
+          output: true
+        - name: ipVersion
+          type: String
+          description: The IP version of the PSC connection. Possible values are `IPV4` and `IPV6`.
+          min_version: beta
           output: true
   - name: gcsSource
     type: NestedObject

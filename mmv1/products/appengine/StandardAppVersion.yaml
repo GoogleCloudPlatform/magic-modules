@@ -66,12 +66,9 @@ samples:
     steps:
       - name: app_engine_standard_app_version
         resource_id_vars:
-          project_id: ae-project
           bucket_name: appengine-static-content
           service_name: ae-service
           account_id: my-account
-        test_env_vars:
-          org_id: ORG_ID
         ignore_read_extra:
           - delete_service_on_destroy
   - name: app_engine_standard_app_version_bundled_services
@@ -79,7 +76,6 @@ samples:
     steps:
       - name: app_engine_standard_app_version_bundled_services
         resource_id_vars:
-          project_id: tf-test-project
           service_id: bundled-service
           bucket_name: gae-bkt-bundled
           sa_email: gae-sa

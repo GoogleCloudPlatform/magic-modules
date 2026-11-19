@@ -48,7 +48,6 @@ samples:
           display_name: findings_refinement_display_name
         vars:
           query: "network.dns.response = true"
-          outcome_variable: "risk_score"
           outcome_filter_operator: "EQUAL"
           outcome_value: "value1"
       - name: 'chronicle_findings_refinement_full'
@@ -58,7 +57,6 @@ samples:
           display_name: findings_refinement_display_name
         vars:
           query: "network.dns.response = true"
-          outcome_variable: "risk_score"
           outcome_filter_operator: "CONTAINS"
           outcome_value: "value2"
 parameters:

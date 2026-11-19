@@ -78,7 +78,12 @@ properties:
       - authProviderTypeParams.apiKey
       - authProviderTypeParams.connectorReferenceAuthProvider.authorizationDetails
       - authProviderTypeParams.connectorReferenceAuthProvider.connector
-      - authProviderTypeParams.threeLeggedOauth
+      - authProviderTypeParams.threeLeggedOauth.authorizationUrl
+      - authProviderTypeParams.threeLeggedOauth.clientId
+      - authProviderTypeParams.threeLeggedOauth.clientSecret
+      - authProviderTypeParams.threeLeggedOauth.defaultContinueUri
+      - authProviderTypeParams.threeLeggedOauth.enablePkce
+      - authProviderTypeParams.threeLeggedOauth.tokenUrl
       - authProviderTypeParams.twoLeggedOauth
       - authProviderTypeParams.xaaAuthProvider
     properties:
@@ -109,15 +114,10 @@ properties:
           - auth_provider_type_params.0.xaa_auth_provider
         properties:
           - name: authorizationDetails
-            type: String
+            type: JsonValue
             description: |-
               Optional. Rich Authorization Requests (RFC 9396) detailing targeted OAuth
               resources/scopes, formatted as a JSON array of JSON objects.
-            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-            custom_expand: templates/terraform/custom_expand/json_value.tmpl
-            validation:
-              function: validation.StringIsJSON
           - name: connector
             type: String
             required: true
@@ -140,7 +140,6 @@ properties:
       - name: threeLeggedOauth
         type: NestedObject
         description: Message describing ThreeLeggedOAuth object.
-        ignore_read: true
         exactly_one_of:
           - auth_provider_type_params.0.api_key
           - auth_provider_type_params.0.connector_reference_auth_provider
@@ -160,6 +159,8 @@ properties:
           - name: clientSecret
             type: String
             description: Input only. The client secret of the OAuth client.
+            # client_secret is input-only in the API and not returned on read.
+            ignore_read: true
             write_only: true
           - name: defaultContinueUri
             type: String
@@ -185,7 +186,6 @@ properties:
       - name: twoLeggedOauth
         type: NestedObject
         description: Message describing TwoLeggedOAuth object.
-        ignore_read: true
         exactly_one_of:
           - auth_provider_type_params.0.api_key
           - auth_provider_type_params.0.connector_reference_auth_provider
@@ -199,6 +199,8 @@ properties:
           - name: clientSecret
             type: String
             description: Input only. The client secret of the OAuth client.
+            # client_secret is input-only in the API and not returned on read.
+            ignore_read: true
             write_only: true
           - name: tokenUrl
             type: String
@@ -259,14 +261,9 @@ properties:
             description: Configuration for when the input is an ID token.
             properties:
               - name: idJagAdditionalClaims
-                type: String
+                type: JsonValue
                 description: |-
                   Optional additional claims to include when fetching an ID-JAG, represented as a JSON-encoded string.
-                state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                custom_expand: templates/terraform/custom_expand/json_value.tmpl
-                validation:
-                  function: validation.StringIsJSON
               - name: idJagAuthProvider
                 type: String
                 description: |-

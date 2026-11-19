@@ -54,7 +54,6 @@ samples:
           # using a hyphen "-"" because underscore is not a valid instance ID
           instance-id: storage-resize-images
           bucket_id: bucket-id
-          service-account-id: s-a
           location: us-central1
         test_env_vars:
           project_id: PROJECT_NAME

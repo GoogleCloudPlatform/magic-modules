@@ -132,6 +132,19 @@ samples:
           persona_id: mcp-headers
         test_env_vars:
           project_number: PROJECT_NUMBER
+  - name: analyst_agent_persona_experimental_features
+    primary_resource_id: example
+    steps:
+      - name: analyst_agent_persona_experimental_features
+        resource_id_vars:
+          persona_id: exp-features
+        test_env_vars:
+          project_number: PROJECT_NUMBER
+      - name: analyst_agent_persona_experimental_features_update
+        resource_id_vars:
+          persona_id: exp-features
+        test_env_vars:
+          project_number: PROJECT_NUMBER
 
 parameters:
   - name: location
@@ -712,6 +725,11 @@ properties:
     type: String
     required: true
     description: The display name of the persona, shown to users.
+  - name: experimentalFeaturesEnabled
+    type: Boolean
+    description: |-
+      Whether the persona gets experimental features before they are
+      on by default.
   - name: externalDataSources
     type: Array
     description: The external data source selections to be used by the agent.

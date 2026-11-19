@@ -76,12 +76,8 @@ samples:
           proxy_name: 'test-proxy'
           url_map_name: 'url-map'
           backend_service_name: 'backend-service'
-          dns_zone_name: 'dnszone'
           forwarding_rule_name: 'forwarding-rule'
           http_health_check_name: 'http-health-check'
-        test_vars_overrides:
-          # for backward compatible
-          dns_zone_name: '"dnszone" + randomSuffix'
   - name: 'managed_ssl_certificate_recreation'
     primary_resource_id: 'cert'
     external_providers: ["random", "time"]

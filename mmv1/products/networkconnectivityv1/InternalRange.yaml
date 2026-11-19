@@ -97,6 +97,13 @@ samples:
         resource_id_vars:
           internal_range_name: allocation-algorithms-random-first-n
           network_name: internal-ranges
+  - name: network_connectivity_internal_ranges_internal_address
+    primary_resource_id: default
+    steps:
+      - name: network_connectivity_internal_ranges_internal_address
+        resource_id_vars:
+          internal_range_name: internal-address
+          network_name: internal-ranges
 parameters:
 properties:
   - name: name
@@ -238,3 +245,14 @@ properties:
     description: |
       Immutable ranges cannot have their fields modified, except for labels and description.
     immutable: true
+  - name: purpose
+    type: Enum
+    description: |
+      The purpose of this internal range. Defines the intended use of the range
+      and any restrictions associated with it. If not specified, it defaults to
+      VPC_SUBNET.
+    immutable: true
+    default_from_api: true
+    enum_values:
+      - VPC_SUBNET
+      - INTERNAL_ADDRESS

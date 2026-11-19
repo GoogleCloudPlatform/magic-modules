@@ -62,7 +62,6 @@ samples:
       - name: 'region_network_endpoint_group_functions'
         resource_id_vars:
           neg_name: 'function-neg'
-          function_name: 'function-neg'
           bucket_name: 'cloudfunctions-function-example-bucket'
           zip_path: 'path/to/index.zip'
         test_vars_overrides:

@@ -176,7 +176,6 @@ samples:
           datascan_name: datadocumentation
         test_env_vars:
           project_name: PROJECT_NAME
-          location: REGION
         vars:
           sql_dialect: GOOGLE_SQL
           catalog_publishing_enabled: "true"
@@ -185,7 +184,6 @@ samples:
           datascan_name: datadocumentation
         test_env_vars:
           project_name: PROJECT_NAME
-          location: REGION
         vars:
           # SPARK_SQL is only accepted by the API for BLMS IRC table resources,
           # so the update step mutates catalog_publishing_enabled instead.
@@ -199,7 +197,6 @@ samples:
           datascan_name: datadocumentation-onetime
         test_env_vars:
           project_name: PROJECT_NAME
-          location: REGION
         ignore_read_extra:
           - execution_status.0.latest_job_end_time
   - name: dataplex_datascan_execution_identity_user_credential
@@ -210,7 +207,6 @@ samples:
           datascan_name: dataplex-id-user-cred
         test_env_vars:
           project_name: PROJECT_NAME
-          location: REGION
         ignore_read_extra:
           - execution_status.0.latest_job_end_time
   - name: dataplex_datascan_execution_identity_service_account
@@ -222,7 +218,6 @@ samples:
           datascan_name: dataplex-id-sa
         test_env_vars:
           project_name: PROJECT_NAME
-          location: REGION
   - name: dataplex_datascan_quality_reusable_rules_catalog_based
     primary_resource_id: reusable_rules_catalog_based
     external_providers: [time]

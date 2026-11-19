@@ -1364,9 +1364,9 @@ func (r Resource) NotInVersion(version *product.Version) bool {
 	return version.CompareTo(r.MinVersionObj()) < 0
 }
 
-// Recurses through all nested properties and parameters and changes their
-// 'exclude' instance variable if the property is at a version below the
-// one that is passed in.
+// Recurses through all nested properties, parameters, and virtual fields and
+// changes their 'exclude' instance variable if the property is at a version
+// below the one that is passed in.
 func (r *Resource) ExcludeIfNotInVersion(version *product.Version) {
 	r.populateMaxVersionSchema() // set before filtering exclusions out of schema
 
@@ -1385,9 +1385,18 @@ func (r *Resource) ExcludeIfNotInVersion(version *product.Version) {
 			p.ExcludeIfNotInVersion(version)
 		}
 	}
+
+	if r.VirtualFields != nil {
+		for _, p := range r.VirtualFields {
+			p.ExcludeIfNotInVersion(version)
+		}
+	}
 }
 
 func (r *Resource) populateMaxVersionSchema() {
+	if r.maxVersionSchema != nil {
+		return
+	}
 	maxSchemaResource := &Resource{
 		Name:            r.Name,
 		MinVersion:      r.MinVersion,
@@ -2319,6 +2328,14 @@ func (r Resource) TestSamples() []*resource.Sample {
 }
 
 func (r Resource) TestSampleSetUp(sysfs fs.FS) {
+	var firstStep *resource.Step
+	var iamSampleBody string
+	if r.IamPolicy != nil && !r.IamPolicy.Exclude && r.IamPolicy.SampleConfigBody != "" {
+		if b, err := fs.ReadFile(sysfs, r.IamPolicy.SampleConfigBody); err == nil {
+			firstStep = r.FirstTestConfig().Step
+			iamSampleBody = string(b)
+		}
+	}
 	res := make(map[string]string)
 	for _, sample := range r.Samples {
 		sample.TargetVersionName = r.TargetVersionName
@@ -2335,6 +2352,9 @@ func (r Resource) TestSampleSetUp(sysfs fs.FS) {
 				step.ConfigPath = fmt.Sprintf("templates/terraform/samples/services/%s/%s.tf.tmpl", packageName, step.Name)
 			}
 			step.SetHCLText(sysfs)
+			if step == firstStep {
+				step.IamHCLText = iamSampleBody
+			}
 			configName := step.Name
 			if _, ok := res[step.Name]; !ok {
 				res[configName] = sample.Name

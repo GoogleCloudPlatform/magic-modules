@@ -1,0 +1,26 @@
+	endpointLocation := tpgresource.LocationFromId(d.Id())
+	if opName, ok := res["name"].(string); ok && opName != "" {
+		w, waitErr := createDiscoveryEngineWaiter(config, res, project, endpointLocation, "Creating UserLicense", userAgent)
+		if waitErr != nil {
+			d.SetId("")
+			return fmt.Errorf("Error waiting to create UserLicense: %s", waitErr)
+		}
+		if waitErr = tpgresource.OperationWait(w, "Creating UserLicense", d.Timeout(schema.TimeoutCreate), config.PollInterval); waitErr != nil {
+			d.SetId("")
+			return fmt.Errorf("Error waiting to create UserLicense: %s", waitErr)
+		}
+		if len(w.CommonOperationWaiter.Op.Response) > 0 {
+			var opRes map[string]interface{}
+			if unmarshalErr := json.Unmarshal([]byte(w.CommonOperationWaiter.Op.Response), &opRes); unmarshalErr != nil {
+				d.SetId("")
+				return fmt.Errorf("Error decoding UserLicense operation response: %s", unmarshalErr)
+			}
+			if batchErr := checkDiscoveryEngineUserLicenseBatchErrors(opRes); batchErr != nil {
+				d.SetId("")
+				return fmt.Errorf("Error creating UserLicense: %s", batchErr)
+			}
+		}
+	} else if batchErr := checkDiscoveryEngineUserLicenseBatchErrors(res); batchErr != nil {
+		d.SetId("")
+		return fmt.Errorf("Error creating UserLicense: %s", batchErr)
+	}

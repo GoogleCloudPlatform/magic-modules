@@ -7,6 +7,23 @@ if err != nil {
 obj = make(map[string]interface{})
 obj["instances"] = []string{instanceName}
 
+{{- if ne $.TargetVersionName "ga" }}
+if allowedActions, ok := d.GetOk("allowed_actions"); ok && allowedActions.(*schema.Set).Len() > 0 {
+	obj["allowedActions"] = allowedActions.(*schema.Set).List()
+} else {
+	minAction := d.Get("minimal_action")
+	if minAction == "" {
+		minAction = "NONE"
+	}
+	obj["minimalAction"] = minAction
+
+	mostDisruptiveAction := d.Get("most_disruptive_allowed_action")
+	if tpgresource.IsEmptyValue(reflect.ValueOf(mostDisruptiveAction)) {
+		mostDisruptiveAction = "REPLACE"
+	}
+	obj["mostDisruptiveAllowedAction"] = mostDisruptiveAction
+}
+{{- else }}
 minAction := d.Get("minimal_action")
 if minAction == "" {
 	minAction = "NONE"
@@ -18,6 +35,7 @@ if tpgresource.IsEmptyValue(reflect.ValueOf(mostDisruptiveAction)) {
 	mostDisruptiveAction = "REPLACE"
 }
 obj["mostDisruptiveAllowedAction"] = mostDisruptiveAction
+{{- end }}
 
 url, err = tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/instanceGroupManagers/{{"{{"}}region_instance_group_manager{{"}}"}}/applyUpdatesToInstances")
 if err != nil {

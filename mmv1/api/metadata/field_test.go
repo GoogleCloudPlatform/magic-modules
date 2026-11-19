@@ -21,8 +21,8 @@ func TestFromProperties(t *testing.T) {
 			name: "json field",
 			properties: []*api.Type{
 				{
-					Name:          "fieldName",
-					CustomFlatten: "templates/terraform/custom_flatten/json_schema.tmpl",
+					Name: "fieldName",
+					Type: "JsonValue",
 				},
 			},
 			wantFields: []Field{

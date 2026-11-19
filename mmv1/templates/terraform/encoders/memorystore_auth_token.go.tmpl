@@ -1,0 +1,24 @@
+// If the user passed a full instance resource ID (projects/{p}/locations/{l}/instances/{i})
+// instead of a short instance ID, extract project and the short instance ID
+// before mutex and URL templates are evaluated.
+instance := d.Get("instance").(string)
+if parts := regexp.MustCompile("projects/([^/]+)/locations/([^/]+)/instances/([^/]+)").FindStringSubmatch(instance); parts != nil {
+	rawCfg := d.GetRawConfig()
+	useDefaults := rawCfg.IsNull() || !rawCfg.Type().IsObjectType()
+	if (useDefaults && d.Get("project") == "") || (!useDefaults && rawCfg.Type().HasAttribute("project") && rawCfg.GetAttr("project").IsNull()) {
+		if err := d.Set("project", parts[1]); err != nil {
+			return nil, fmt.Errorf("Error setting project: %s", err)
+		}
+	}
+	if err := d.Set("instance", parts[3]); err != nil {
+		return nil, fmt.Errorf("Error setting instance: %s", err)
+	}
+}
+if userId := d.Get("user_id").(string); userId != "" {
+	if err := d.Set("user_id", tpgresource.GetResourceNameFromSelfLink(userId)); err != nil {
+		return nil, fmt.Errorf("Error setting user_id: %s", err)
+	}
+}
+
+// API request body expects an empty object for custom action :addAuthToken
+return map[string]interface{}{}, nil

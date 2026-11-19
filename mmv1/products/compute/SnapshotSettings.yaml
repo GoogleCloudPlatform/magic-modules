@@ -52,8 +52,6 @@ samples:
     primary_resource_id: 'tf-test-snapshot-settings'
     steps:
       - name: 'snapshot_settings_specific_locations'
-        resource_id_vars:
-          policy: 'SPECIFIC_LOCATIONS'
 parameters:
 properties:
   - name: 'storageLocation'

@@ -131,6 +131,26 @@ resource "google_container_cluster" "primary" {
 
 ~> **Note:** If you omit the `control_plane_soak_duration` field completely, GKE bypasses the two-step feature and performs a standard one-step upgrade. You must specify a duration between 6 hours and 7 days.
 
+## Example Usage - GKE Cluster with KCP_HPA Logging
+
+```hcl
+resource "google_container_cluster" "primary" {
+  name               = "gke-logging-cluster"
+  location           = "us-central1-a"
+  initial_node_count = 1
+
+  # Enable KCP_HPA logging along with system components
+  logging_config {
+    enable_components = ["SYSTEM_COMPONENTS", "KCP_HPA"]
+  }
+
+  # To disable KCP_HPA logging, remove it from the enable_components list:
+  # logging_config {
+  #   enable_components = ["SYSTEM_COMPONENTS"]
+  # }
+}
+```
+
 ## Argument Reference
 
 * `name` - (Required) The name of the cluster, unique within the project and
@@ -217,11 +237,13 @@ for more information.
 * `enable_k8s_beta_apis` - (Optional) Configuration for Kubernetes Beta APIs.
     Structure is [documented below](#nested_enable_k8s_beta_apis).
 
-* `enable_tpu` - (Optional) Whether to enable Cloud TPU resources in this cluster.
+* `enable_tpu` - (Optional, Deprecated) Whether to enable Cloud TPU resources in this cluster.
     See the [official documentation](https://cloud.google.com/tpu/docs/kubernetes-engine-setup).
+    `enable_tpu` is deprecated and will be removed in a future major release. Configure TPUs using `google_container_node_pool` instead. See https://docs.cloud.google.com/kubernetes-engine/docs/how-to/tpus#terraform
 
-* `tpu_config` - (Optional, [Beta](../guides/provider_versions.html.markdown)) Configuration for Cloud TPU in this cluster.
+* `tpu_config` - (Optional, [Beta](../guides/provider_versions.html.markdown), Deprecated) Configuration for Cloud TPU in this cluster.
     Structure is [documented below](#nested_tpu_config).
+    `tpu_config` is deprecated and will be removed in a future major release. Configure TPUs using `google_container_node_pool` instead. See https://docs.cloud.google.com/kubernetes-engine/docs/how-to/tpus#terraform
 
 * `enable_legacy_abac` - (Optional) Whether the ABAC authorizer is enabled for this cluster.
     When enabled, identities in the system, including service accounts, nodes, and controllers,
@@ -337,8 +359,10 @@ region are guaranteed to support the same version.
 * `skip_node_pool_refresh` - (Optional) Whether to skip refreshing the GKE cluster's inline node pool list during read operations. Setting this to `true` prevents the provider from querying GKE API for node pools, resolving long plan times on clusters with a large number of node pools. **Warning:** When enabled, the cluster's `node_pool` attribute in the Terraform state will remain empty (`[]`), even if node pools exist externally. This flag cannot be set to `true` if you define inline `node_pool` blocks in your configuration; doing so will result in a validation error during plan.
 
 * `node_pool_auto_config` - (Optional) Node pool configs that apply to auto-provisioned node pools in
-    [autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#comparison) clusters and
-    [node auto-provisioning](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning)-enabled clusters. Structure is [documented below](#nested_node_pool_auto_config).
+    [autopilot](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview#comparison) clusters,
+    [node auto-provisioning](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning)-enabled clusters, and
+    node pools auto-created by [ComputeClasses](https://cloud.google.com/kubernetes-engine/docs/concepts/node-auto-provisioning#workload-level-enablement)
+    in Standard clusters. Structure is [documented below](#nested_node_pool_auto_config).
 
 * `node_pool_defaults` - (Optional) Default NodePool settings for the entire cluster. These settings are overridden if specified on the specific NodePool object. Structure is [documented below](#nested_node_pool_defaults).
 
@@ -810,8 +834,7 @@ This block also contains several computed attributes, documented below.
 
 <a name="nested_logging_config"></a>The `logging_config` block supports:
 
-*  `enable_components` - (Required) The GKE components exposing logs. Supported values include:
-`SYSTEM_COMPONENTS`, `KCP_VPA`, `APISERVER`, `CONTROLLER_MANAGER`, `SCHEDULER`, and `WORKLOADS`.
+*  `enable_components` - (Required) The GKE components exposing logs. Supported values include: `SYSTEM_COMPONENTS`, `APISERVER`, `CONTROLLER_MANAGER`, `SCHEDULER`, `WORKLOADS`, `KCP_VPA`, `KCP_CONNECTION`, `KCP_SSHD`, and `KCP_HPA`.
 
 <a name="nested_monitoring_config"></a>The `monitoring_config` block supports:
 
@@ -1139,6 +1162,8 @@ The `master_authorized_networks_config.cidr_blocks` block supports:
 
 * `confidential_nodes` - (Optional) Configuration for Confidential Nodes feature. Structure is [documented below](#nested_confidential_nodes).
 
+* `consolidation_delay` - (Optional) Duration after which the Cluster Autoscaler can scale down underutilized nodes in the node pool. Requires autoscaling to be enabled on the node pool. The default node pool created from the top-level `node_config` of `google_container_cluster` doesn't have autoscaling, so set this field in `node_pool` blocks or in `google_container_node_pool` instead. If not set, nodes are scaled down according to the cluster's autoscaling profile (see [`cluster_autoscaling.autoscaling_profile`](#nested_cluster_autoscaling)). The GKE API doesn't support unsetting this field, so removing it from the configuration leaves the current value unchanged. A duration in seconds with up to nine fractional digits, ending with 's'. Example: `"600s"`. See [`--consolidation-delay`](https://cloud.google.com/sdk/gcloud/reference/container/node-pools/update#--consolidation-delay) for the supported GKE versions.
+
 * `disk_size_gb` - (Optional) Size of the disk attached to each node, specified
     in GB. The smallest allowed disk size is 10GB. Defaults to 100GB. This is being migrated to `boot_disk.size_gb`, and must match if specified in both places.
     Prefer configuring `boot_disk`.
@@ -1391,6 +1416,8 @@ sole_tenant_config {
 * `local_ssd_count` (Required) - Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD is 375 GB in size. If zero, it means to disable using local SSDs as ephemeral storage.
 
 * `data_cache_count` (Optional) - Number of raw-block local NVMe SSD disks to be attached to the node utilized for GKE Data Cache. If zero, then GKE Data Cache will not be enabled in the nodes.
+
+* `ephemeral_capacity_gb` - (Optional) Number of gigabytes of local SSD capacity to use for ephemeral storage in mixed local SSD mode. The remaining capacity is available for raw block storage.
 
 <a name="nested_fast_socket"></a>The `fast_socket` block supports:
 

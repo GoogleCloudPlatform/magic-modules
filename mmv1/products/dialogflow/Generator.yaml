@@ -38,8 +38,6 @@ samples:
     primary_resource_id: summarization_basic_generator
     steps:
       - name: dialogflow_generator_basic
-        resource_id_vars:
-          profile_name: dialogflow-profile
   - name: dialogflow_generator_agent_coaching
     primary_resource_id: agent_coaching_generator
     steps:

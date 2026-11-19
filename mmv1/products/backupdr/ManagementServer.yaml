@@ -46,8 +46,6 @@ samples:
         resource_id_vars:
           network_name: vpc-network
           managementserver_name: ms-console
-        test_env_vars:
-          project: PROJECT_NAME
 parameters:
   - name: location
     type: String

@@ -44,9 +44,6 @@ samples:
     primary_resource_id: primary
     steps:
       - name: network_connectivity_transport_basic
-        resource_id_vars:
-          transport_name: basic-transport
-          network_name: my-vpc-network
 parameters:
   - name: region
     type: String

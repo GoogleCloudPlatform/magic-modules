@@ -43,8 +43,6 @@ samples:
         resource_id_vars:
           ca_pool_id: my-pool
           certificate_name: my-certificate
-        test_env_vars:
-          project: PROJECT_NAME
   - name: privateca_certificate_generated_key
     primary_resource_id: default
     exclude_test: true
@@ -58,8 +56,6 @@ samples:
           ca_pool_id: my-pool
           certificate_name: my-certificate
           certificate_template_name: my-certificate-template
-        test_env_vars:
-          project: PROJECT_NAME
   - name: privateca_certificate_csr
     primary_resource_id: default
     steps:
@@ -67,8 +63,6 @@ samples:
         resource_id_vars:
           certificate_name: my-certificate
           ca_pool_id: my-pool
-        test_env_vars:
-          project: PROJECT_NAME
   - name: privateca_certificate_no_authority
     primary_resource_id: default
     steps:
@@ -76,8 +70,6 @@ samples:
         resource_id_vars:
           certificate_name: my-certificate
           ca_pool_id: my-pool
-        test_env_vars:
-          project: PROJECT_NAME
   - name: privateca_certificate_custom_ski
     primary_resource_id: default
     steps:
@@ -85,8 +77,6 @@ samples:
         resource_id_vars:
           certificate_name: my-certificate
           ca_pool_id: my-pool
-        test_env_vars:
-          project: PROJECT_NAME
   - name: privateca_certificate_subject_config_org_optional
     primary_resource_id: default
     steps:
@@ -94,8 +84,6 @@ samples:
         resource_id_vars:
           certificate_name: my-certificate
           ca_pool_id: my-pool
-        test_env_vars:
-          project: PROJECT_NAME
   - name: privateca_certificate_with_requested_not_before_time
     primary_resource_id: default
     steps:
@@ -103,8 +91,6 @@ samples:
         resource_id_vars:
           ca_pool_id: my-pool
           certificate_name: my-certificate
-        test_env_vars:
-          project: PROJECT_NAME
 parameters:
   - name: location
     type: String

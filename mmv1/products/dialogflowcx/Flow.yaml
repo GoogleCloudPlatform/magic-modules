@@ -177,14 +177,9 @@ properties:
                         output: true
                   # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                   - name: payload
-                    type: String
+                    type: JsonValue
                     description: |
                       A custom, platform-specific payload.
-                    state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                    custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-                    validation:
-                      function: validation.StringIsJSON
                   - name: conversationSuccess
                     type: NestedObject
                     description: |
@@ -196,14 +191,9 @@ properties:
                     properties:
                       # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                       - name: metadata
-                        type: String
+                        type: JsonValue
                         description: |
                           Custom metadata. Dialogflow doesn't impose any structure on this.
-                        state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                        custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-                        validation:
-                          function: validation.StringIsJSON
                   - name: outputAudioText
                     type: NestedObject
                     description: |
@@ -233,14 +223,9 @@ properties:
                     properties:
                       # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                       - name: metadata
-                        type: String
+                        type: JsonValue
                         description: |
                           Custom metadata. Dialogflow doesn't impose any structure on this.
-                        state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                        custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-                        validation:
-                          function: validation.StringIsJSON
                   - name: playAudio
                     type: NestedObject
                     description: |
@@ -290,14 +275,9 @@ properties:
                     description: |
                       Display name of the parameter.
                   - name: value
-                    type: String
+                    type: JsonValue
                     description: |
                       The new JSON-encoded value of the parameter. A null value clears the parameter.
-                    state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                    custom_expand: templates/terraform/custom_expand/json_value.tmpl
-                    validation:
-                      function: validation.StringIsJSON
             - name: conditionalCases
               type: Array
               description: |
@@ -307,15 +287,10 @@ properties:
                 properties:
                   # This object has a recursive schema so we use a string instead of a NestedObject
                   - name: cases
-                    type: String
+                    type: JsonValue
                     description: |
                       A JSON encoded list of cascading if-else conditions. Cases are mutually exclusive. The first one with a matching condition is selected, all the rest ignored.
                       See [Case](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/Fulfillment#case) for the schema.
-                    state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                    custom_expand: templates/terraform/custom_expand/json_value.tmpl
-                    validation:
-                      function: validation.StringIsJSON
         - name: targetPage
           type: String
           description: |
@@ -379,14 +354,9 @@ properties:
                           Whether the playback of this message can be interrupted by the end user's speech and the client can then starts the next Dialogflow request.
                         output: true
                   - name: payload
-                    type: String
+                    type: JsonValue
                     description: |
                       A custom, platform-specific payload.
-                    state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                    custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-                    validation:
-                      function: validation.StringIsJSON
                   - name: conversationSuccess
                     type: NestedObject
                     description: |
@@ -397,14 +367,9 @@ properties:
                       * In a webhook response when you determine that you handled the customer issue.
                     properties:
                       - name: metadata
-                        type: String
+                        type: JsonValue
                         description: |
                           Custom metadata. Dialogflow doesn't impose any structure on this.
-                        state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                        custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-                        validation:
-                          function: validation.StringIsJSON
                   - name: outputAudioText
                     type: NestedObject
                     description: |
@@ -433,14 +398,9 @@ properties:
                       * In a webhook response when you determine that the customer issue can only be handled by a human.
                     properties:
                       - name: metadata
-                        type: String
+                        type: JsonValue
                         description: |
                           Custom metadata. Dialogflow doesn't impose any structure on this.
-                        state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                        custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-                        validation:
-                          function: validation.StringIsJSON
                   - name: playAudio
                     type: NestedObject
                     description: |
@@ -490,14 +450,9 @@ properties:
                     description: |
                       Display name of the parameter.
                   - name: value
-                    type: String
+                    type: JsonValue
                     description: |
                       The new JSON-encoded value of the parameter. A null value clears the parameter.
-                    state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                    custom_expand: templates/terraform/custom_expand/json_value.tmpl
-                    validation:
-                      function: validation.StringIsJSON
             - name: conditionalCases
               type: Array
               description: |
@@ -506,15 +461,10 @@ properties:
                 type: NestedObject
                 properties:
                   - name: cases
-                    type: String
+                    type: JsonValue
                     description: |
                       A JSON encoded list of cascading if-else conditions. Cases are mutually exclusive. The first one with a matching condition is selected, all the rest ignored.
                       See [Case](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/Fulfillment#case) for the schema.
-                    state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                    custom_expand: templates/terraform/custom_expand/json_value.tmpl
-                    validation:
-                      function: validation.StringIsJSON
             - name: enableGenerativeFallback
               type: Boolean
               description: |
@@ -701,15 +651,10 @@ properties:
                       output: true
                 # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                 - name: payload
-                  type: String
+                  type: JsonValue
                   description: |
                     Returns a response containing a custom, platform-specific payload.
                     This field is part of a union field `message`: Only one of `text`, `payload`, `conversationSuccess`, `outputAudioText`, `liveAgentHandoff`, `endInteraction`, `playAudio`, `mixedAudio`, `telephonyTransferCall`, or `knowledgeInfoCard` may be set.
-                  state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                  custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                  custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-                  validation:
-                    function: validation.StringIsJSON
                 - name: conversationSuccess
                   type: NestedObject
                   description: |
@@ -722,14 +667,9 @@ properties:
                   properties:
                     # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                     - name: metadata
-                      type: String
+                      type: JsonValue
                       description: |
                         Custom metadata. Dialogflow doesn't impose any structure on this.
-                      state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                      custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                      custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-                      validation:
-                        function: validation.StringIsJSON
                 - name: outputAudioText
                   type: NestedObject
                   description: |
@@ -763,14 +703,9 @@ properties:
                   properties:
                     # This can be an arbitrary json blob, so we use a string instead of a NestedObject.
                     - name: metadata
-                      type: String
+                      type: JsonValue
                       description: |
                         Custom metadata. Dialogflow doesn't impose any structure on this.
-                      state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                      custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                      custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-                      validation:
-                        function: validation.StringIsJSON
                 - name: endInteraction
                   type: NestedObject
                   description: |
@@ -873,14 +808,9 @@ properties:
                   description: |
                     Display name of the parameter.
                 - name: value
-                  type: String
+                  type: JsonValue
                   description: |
                     The new JSON-encoded value of the parameter. A null value clears the parameter.
-                  state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                  custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                  custom_expand: templates/terraform/custom_expand/json_value.tmpl
-                  validation:
-                    function: validation.StringIsJSON
           - name: conditionalCases
             type: Array
             description: |
@@ -889,15 +819,10 @@ properties:
               type: NestedObject
               properties:
                 - name: cases
-                  type: String
+                  type: JsonValue
                   description: |
                     A JSON encoded list of cascading if-else conditions. Cases are mutually exclusive. The first one with a matching condition is selected, all the rest ignored.
                     See [Case](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/Fulfillment#case) for the schema.
-                  state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                  custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                  custom_expand: templates/terraform/custom_expand/json_value.tmpl
-                  validation:
-                    function: validation.StringIsJSON
           - name: advancedSettings
             type: NestedObject
             description: |

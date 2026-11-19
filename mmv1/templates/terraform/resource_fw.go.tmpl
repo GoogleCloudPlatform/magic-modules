@@ -155,7 +155,9 @@ func (d *{{$.ResourceName}}FWResource) Schema(ctx context.Context, _ resource.Sc
     {{template "SchemaFieldsFW" $prop -}}
 {{- end }}
 {{- range $prop := $.VirtualFields }}
+{{- if not $prop.Exclude }}
     {{template "SchemaFieldsFW" $prop -}}
+{{- end }}
 {{- end }}
 {{- if $.CustomCode.ExtraSchemaEntry }} 
     {{ customTemplate $ $.CustomCode.ExtraSchemaEntry false -}}

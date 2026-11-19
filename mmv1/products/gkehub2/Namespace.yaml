@@ -49,8 +49,6 @@ samples:
     primary_resource_id: namespace
     steps:
       - name: gkehub_namespace_basic
-        test_env_vars:
-          project: PROJECT_NAME
         ignore_read_extra:
           - scope
 parameters:
