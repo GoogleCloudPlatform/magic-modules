@@ -218,14 +218,18 @@ samples:
           backend_service_name: 'backend-service'
   - name: 'backend_service_dynamic_forwarding_forward_proxy_cloud_run'
     primary_resource_id: 'default'
+    min_version: 'beta'
     steps:
       - name: 'backend_service_dynamic_forwarding_forward_proxy_cloud_run'
+        min_version: 'beta'
         resource_id_vars:
           backend_service_name: 'backend-service'
   - name: 'backend_service_dynamic_forwarding_forward_proxy_direct_forwarding'
     primary_resource_id: 'default'
+    min_version: 'beta'
     steps:
       - name: 'backend_service_dynamic_forwarding_forward_proxy_direct_forwarding'
+        min_version: 'beta'
         resource_id_vars:
           backend_service_name: 'backend-service'
           authentication_name: 'authentication'
@@ -1836,16 +1840,19 @@ properties:
         type: NestedObject
         description: |
           Dynamic Forwarding Proxy configuration.
+        min_version: beta
         immutable: true
         properties:
           - name: 'enabled'
             type: Boolean
+            min_version: beta
             description: |
               A boolean flag enabling dynamic forwarding proxy.
             immutable: true
             required: true
           - name: 'proxyMode'
             type: Enum
+            min_version: beta
             description: |
               Determines the dynamic forwarding proxy mode
             enum_values:
