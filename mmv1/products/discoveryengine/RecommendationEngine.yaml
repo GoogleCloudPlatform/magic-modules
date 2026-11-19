@@ -121,6 +121,7 @@ properties:
     description: |
       Configurations for a Media Recommendation Engine. Only applicable on the data stores
       with SOLUTION_TYPE_RECOMMENDATION solution type and MEDIA industry vertical.
+    immutable: true
     properties:
       - name: type
         type: String
@@ -130,6 +131,7 @@ properties:
           engine metadata to use to control engine training and serving.
           Currently supported values: `recommended-for-you`, `others-you-may-like`,
           `more-like-this`, `most-popular-items`.
+        immutable: true
       - name: optimizationObjective
         type: String
         description: |
@@ -140,6 +142,7 @@ properties:
           If not specified, we choose default based on engine type. Default depends on type of recommendation:
           `recommended-for-you` => `ctr`
           `others-you-may-like` => `ctr`
+        immutable: true
       - name: optimizationObjectiveConfig
         type: NestedObject
         description: |
@@ -149,15 +152,18 @@ properties:
           (excludes 0, includes 86400) (e.g., 90).
           For target_field `watch-percentage`, the target_field_value must be a
           valid float value between (0, 1.0] (excludes 0, includes 1.0) (e.g., 0.5).
+        immutable: true
         properties:
           - name: targetField
             type: String
             description: |
               The name of the field to target. Currently supported values: `watch-percentage`, `watch-time`.
+            immutable: true
           - name: targetFieldValueFloat
             type: Double
             description: |
               The threshold to be applied to the target (e.g., 0.5).
+            immutable: true
       - name: trainingState
         type: Enum
         description: |
@@ -167,6 +173,7 @@ properties:
           engine in order to control cost. If not specified: the default value for
           `CreateEngine` method is `TRAINING`. The default value for
           `UpdateEngine` method is to keep the state the same as before.
+        immutable: true
         enum_values:
           - PAUSED
           - TRAINING
@@ -174,11 +181,13 @@ properties:
         type: NestedObject
         description: |
           More feature configs of the selected engine type.
+        immutable: true
         properties:
           - name: recommendedForYouConfig
             type: NestedObject
             description: |
               Additional feature configurations for creating a `recommended-for-you` engine.
+            immutable: true
             properties:
               - name: contextEventType
                 type: String
@@ -190,10 +199,12 @@ properties:
                   `context-events` in addition to `view-item`, `media-play`, and
                   `media-complete`. Currently supported for the `recommended-for-you`
                   engine. Currently supported values: `view-home-page`, `generic`.
+                immutable: true
           - name: mostPopularConfig
             type: NestedObject
             description: |
               Feature configurations that are required for creating a Most Popular engine.
+            immutable: true
             properties:
               - name: timeWindowDays
                 type: Integer
@@ -202,6 +213,7 @@ properties:
                   prediction time. Positive integers only. The value translates to the
                   last X days of events. Currently required for the `most-popular-items`
                   engine.
+                immutable: true
   - name: commonConfig
     type: NestedObject
     description: |
