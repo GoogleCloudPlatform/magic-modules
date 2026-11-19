@@ -2010,7 +2010,7 @@ func (r Resource) FirstTestConfig() TestConfig {
 			continue
 		}
 		for _, step := range sample.Steps {
-			if r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
+			if r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(step.MinVersion)) >= 0 {
 				return TestConfig{
 					Sample: sample,
 					Step:   step,
@@ -2029,7 +2029,7 @@ func (r Resource) FirstRunnableTestConfig() TestConfig {
 			continue
 		}
 		for _, step := range sample.Steps {
-			if r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
+			if r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(step.MinVersion)) >= 0 {
 				return TestConfig{
 					Sample: sample,
 					Step:   step,
@@ -2320,11 +2320,37 @@ func (r Resource) IsExcluded() bool {
 }
 
 func (r Resource) TestSamples() []*resource.Sample {
-	return google.Reject(google.Reject(r.Samples, func(s *resource.Sample) bool {
-		return s.ExcludeTest
-	}), func(s *resource.Sample) bool {
-		return s.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, s.MinVersion)
+	return google.Reject(r.Samples, func(s *resource.Sample) bool {
+		if s.ExcludeTest {
+			return true
+		}
+		if s.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, s.MinVersion) {
+			return true
+		}
+		return len(s.TestSteps()) == 0
 	})
+}
+
+func disambiguateStepSlug(sampleName, stepName string, activeIdx int, seenCamel map[string]string) string {
+	if activeIdx == 0 && sampleName != "" {
+		if _, taken := seenCamel[google.Camelize(sampleName, "lower")]; !taken {
+			return sampleName
+		}
+	}
+	base := stepName
+	if sampleName != "" && sampleName != stepName {
+		base = sampleName
+	}
+	candidate := fmt.Sprintf("%s_step%d", base, activeIdx+1)
+	if _, taken := seenCamel[google.Camelize(candidate, "lower")]; !taken {
+		return candidate
+	}
+	for n := 2; ; n++ {
+		c := fmt.Sprintf("%s_%d", candidate, n)
+		if _, taken := seenCamel[google.Camelize(c, "lower")]; !taken {
+			return c
+		}
+	}
 }
 
 func (r Resource) TestSampleSetUp(sysfs fs.FS) {
@@ -2336,18 +2362,21 @@ func (r Resource) TestSampleSetUp(sysfs fs.FS) {
 			iamSampleBody = string(b)
 		}
 	}
-	res := make(map[string]string)
+	seenHCLByCamelSlug := make(map[string]string)
+	slugByBaseAndHCL := make(map[string]string)
+	packageName := filepath.Base(filepath.Dir(r.SourceYamlFile))
 	for _, sample := range r.Samples {
 		sample.TargetVersionName = r.TargetVersionName
+		sample.NewConfigFuncs = nil
 		if sample.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, sample.MinVersion) {
 			continue
 		}
+		activeIdx := 0
 		for _, step := range sample.Steps {
 			if step.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, step.MinVersion) {
 				continue
 			}
 			step.PrimaryResourceId = sample.PrimaryResourceId
-			packageName := filepath.Base(filepath.Dir(r.SourceYamlFile))
 			if step.ConfigPath == "" {
 				step.ConfigPath = fmt.Sprintf("templates/terraform/samples/services/%s/%s.tf.tmpl", packageName, step.Name)
 			}
@@ -2355,10 +2384,22 @@ func (r Resource) TestSampleSetUp(sysfs fs.FS) {
 			if step == firstStep {
 				step.IamHCLText = iamSampleBody
 			}
-			configName := step.Name
-			if _, ok := res[step.Name]; !ok {
-				res[configName] = sample.Name
-				sample.NewConfigFuncs = append(sample.NewConfigFuncs, step)
+			if !sample.ExcludeTest {
+				camelBase := google.Camelize(step.Name, "lower")
+				dedupKey := camelBase + "\x00" + step.TestHCLText
+				if existingSlug, ok := slugByBaseAndHCL[dedupKey]; ok {
+					step.StepSlug = existingSlug
+				} else {
+					slug := step.Name
+					if _, taken := seenHCLByCamelSlug[google.Camelize(slug, "lower")]; taken {
+						slug = disambiguateStepSlug(sample.Name, step.Name, activeIdx, seenHCLByCamelSlug)
+					}
+					step.StepSlug = slug
+					seenHCLByCamelSlug[google.Camelize(slug, "lower")] = step.TestHCLText
+					slugByBaseAndHCL[dedupKey] = slug
+					sample.NewConfigFuncs = append(sample.NewConfigFuncs, step)
+				}
+				activeIdx++
 			}
 		}
 	}

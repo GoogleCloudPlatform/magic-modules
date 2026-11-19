@@ -50,6 +50,7 @@ samples:
       - name: config_deployment_basic
         resource_id_vars:
           deployment_name: my-deployment
+          project: my-project
           service_account_email: my-service-account@my-project.iam.gserviceaccount.com
 virtual_fields:
   - name: force_destroy
