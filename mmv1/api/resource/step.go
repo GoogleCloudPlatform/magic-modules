@@ -21,6 +21,7 @@ import (
 	"maps"
 	"net/url"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"slices"
 	"strconv"
@@ -48,13 +49,10 @@ var hclResourceRegexp = regexp.MustCompile(`(?:resource|data|list|ephemeral) "(?
 // Regular expressions used when rendering sample/step HCL. Compiled once at
 // init as they are applied to every step of every sample, several times each.
 var (
-	trailingBlankLineRegexp  = regexp.MustCompile(`\n\n$`)
-	regionTagLineRegexp      = regexp.MustCompile(`# \[[a-zA-Z_ ]+\]\n`)
-	regionTagTrailingRegexp  = regexp.MustCompile(`\n# \[[a-zA-Z_ ]+\]`)
-	testEnvVarUsageRegexp    = regexp.MustCompile(`{{index \$\.TestEnvVars "([a-zA-Z_]*)"}}`)
-	varUsageRegexp           = regexp.MustCompile(`{{index \$\.Vars "([a-zA-Z_]*)"}}`)
-	resourceIdVarUsageRegexp = regexp.MustCompile(`{{index \$\.ResourceIdVars "([a-zA-Z_]*)"}}`)
-	testPlaceholderRegexp    = regexp.MustCompile(`%\{([^{}]+)\}`)
+	trailingBlankLineRegexp = regexp.MustCompile(`\n\n$`)
+	regionTagLineRegexp     = regexp.MustCompile(`# \[[a-zA-Z_ ]+\]\n`)
+	regionTagTrailingRegexp = regexp.MustCompile(`\n# \[[a-zA-Z_ ]+\]`)
+	testPlaceholderRegexp   = regexp.MustCompile(`%\{([^{}]+)\}`)
 )
 
 type Step struct {
@@ -148,6 +146,8 @@ type Step struct {
 	OicsHCLText          string            `yaml:"-"`
 	PrimaryResourceId    string            `yaml:"-"`
 	TestContextVars      map[string]string `yaml:"-"`
+	StepSlug             string            `yaml:"-"`
+	templateErrs         []error           `yaml:"-"`
 	hclLoaded            bool
 }
 
@@ -178,8 +178,11 @@ func (v *StepVars) UnmarshalYAML(value *yaml.Node) error {
 }
 
 func (s *Step) TestStepSlug(productName, resourceName string) string {
-	ret := fmt.Sprintf("%s%s_%sExample", productName, resourceName, google.Camelize(s.Name, "lower"))
-	return ret
+	slug := s.StepSlug
+	if slug == "" {
+		slug = s.Name
+	}
+	return fmt.Sprintf("%s%s_%sExample", productName, resourceName, google.Camelize(slug, "lower"))
 }
 
 // TestDependencies returns a map of service names to import aliases that are required
@@ -249,6 +252,7 @@ func (s *Step) Validate(rName, sName string) (es []error) {
 	if s.Name == "" {
 		es = append(es, fmt.Errorf("missing `name` for one step in test sample %s in resource %s", sName, rName))
 	}
+	es = append(es, s.templateErrs...)
 
 	for _, k := range slices.Sorted(maps.Keys(s.OicsVarsOverrides)) {
 		_, inVars := s.Vars[k]
@@ -294,22 +298,6 @@ func (s *Step) Validate(rName, sName string) (es []error) {
 	return es
 }
 
-func validateRegexForContents(r *regexp.Regexp, contents string, configPath string, objName string, vars map[string]string) {
-	matches := r.FindAllStringSubmatch(contents, -1)
-	for _, v := range matches {
-		found := false
-		for k, _ := range vars {
-			if k == v[1] {
-				found = true
-				break
-			}
-		}
-		if !found {
-			log.Fatalf("Failed to find %s environment variable defined in YAML file when validating the file %s. Please define this in %s", v[1], configPath, objName)
-		}
-	}
-}
-
 // Executes step configuration templates for documentation and tests
 func (s *Step) SetHCLText(sysfs fs.FS) {
 	originalResourceIdVars := s.ResourceIdVars
@@ -349,8 +337,15 @@ func (s *Step) SetHCLText(sysfs fs.FS) {
 	}
 	s.Vars = docVars
 	s.TestEnvVars = docTestEnvVars
-	s.DocumentationHCLText = s.ExecuteTemplate(sysfs)
-	s.DocumentationHCLText = replaceNullVarSentinels(s.DocumentationHCLText)
+	docHCL, err := s.ExecuteTemplate(sysfs)
+	if err != nil {
+		s.templateErrs = append(s.templateErrs, err)
+		s.ResourceIdVars = originalResourceIdVars
+		s.Vars = originalVars
+		s.TestEnvVars = originalTestEnvVars
+		return
+	}
+	s.DocumentationHCLText = replaceNullVarSentinels(docHCL)
 	s.DocumentationHCLText = trailingBlankLineRegexp.ReplaceAllString(s.DocumentationHCLText, "\n")
 
 	// Remove region tags
@@ -407,8 +402,15 @@ func (s *Step) SetHCLText(sysfs fs.FS) {
 	s.TestEnvVars = testTestEnvVars
 	s.Vars = testVars
 	s.TestContextVars = testContextVars
-	s.TestHCLText = s.ExecuteTemplate(sysfs)
-	s.TestHCLText = trailingBlankLineRegexp.ReplaceAllString(s.TestHCLText, "\n")
+	testHCL, err := s.ExecuteTemplate(sysfs)
+	if err != nil {
+		s.templateErrs = append(s.templateErrs, err)
+		s.ResourceIdVars = originalResourceIdVars
+		s.Vars = originalVars
+		s.TestEnvVars = originalTestEnvVars
+		return
+	}
+	s.TestHCLText = trailingBlankLineRegexp.ReplaceAllString(testHCL, "\n")
 	// Remove region tags
 	s.TestHCLText = re1.ReplaceAllString(s.TestHCLText, "")
 	s.TestHCLText = re2.ReplaceAllString(s.TestHCLText, "")
@@ -421,32 +423,92 @@ func (s *Step) SetHCLText(sysfs fs.FS) {
 	s.TestEnvVars = originalTestEnvVars
 }
 
-func (s *Step) ExecuteTemplate(sysfs fs.FS) string {
+func indirectInterface(v reflect.Value) reflect.Value {
+	if v.Kind() == reflect.Interface {
+		return v.Elem()
+	}
+	return v
+}
+
+// strictIndex mirrors text/template's built-in index function, except that
+// indexing a missing key on a map returns an explicit error instead of a zero
+// value (which text/template's built-in index returns even with missingkey=error).
+func strictIndex(item reflect.Value, indexes ...reflect.Value) (reflect.Value, error) {
+	item = indirectInterface(item)
+	if !item.IsValid() {
+		return reflect.Value{}, fmt.Errorf("index of untyped nil")
+	}
+	for _, idx := range indexes {
+		item = indirectInterface(item)
+		for item.Kind() == reflect.Pointer {
+			if item.IsNil() {
+				return reflect.Value{}, fmt.Errorf("index of nil pointer")
+			}
+			item = item.Elem()
+		}
+		switch item.Kind() {
+		case reflect.Array, reflect.Slice, reflect.String:
+			idx = indirectInterface(idx)
+			var x int
+			switch idx.Kind() {
+			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+				x = int(idx.Int())
+			case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
+				x = int(idx.Uint())
+			default:
+				return reflect.Value{}, fmt.Errorf("cannot index slice/array with type %s", idx.Type())
+			}
+			if x < 0 || x >= item.Len() {
+				return reflect.Value{}, fmt.Errorf("index out of range: %d", x)
+			}
+			item = item.Index(x)
+		case reflect.Map:
+			idx = indirectInterface(idx)
+			var key reflect.Value
+			if !idx.IsValid() {
+				key = reflect.Zero(item.Type().Key())
+			} else if idx.Type().AssignableTo(item.Type().Key()) {
+				key = idx
+			} else if idx.Type().ConvertibleTo(item.Type().Key()) {
+				key = idx.Convert(item.Type().Key())
+			} else {
+				return reflect.Value{}, fmt.Errorf("value of type %s is not assignable to type %s", idx.Type(), item.Type().Key())
+			}
+			if item.IsNil() {
+				return reflect.Value{}, fmt.Errorf("map has no entry for key %q", fmt.Sprint(key.Interface()))
+			}
+			elem := item.MapIndex(key)
+			if !elem.IsValid() {
+				return reflect.Value{}, fmt.Errorf("map has no entry for key %q", fmt.Sprint(key.Interface()))
+			}
+			item = elem
+		default:
+			return reflect.Value{}, fmt.Errorf("can't index item of type %s", item.Type())
+		}
+	}
+	return item, nil
+}
+
+func (s *Step) ExecuteTemplate(sysfs fs.FS) (string, error) {
 	templateContent, err := fs.ReadFile(sysfs, s.ConfigPath)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	fileContentString := string(templateContent)
-
-	// Check that any variables in ResourceIdVars, Vars or TestEnvVars used in the step are defined via YAML
-	envVarRegex := testEnvVarUsageRegexp
-	validateRegexForContents(envVarRegex, fileContentString, s.ConfigPath, "test_env_vars", s.TestEnvVars)
-	varRegex := varUsageRegexp
-	validateRegexForContents(varRegex, fileContentString, s.ConfigPath, "vars", s.Vars)
-	prefixedVarRegex := resourceIdVarUsageRegexp
-	validateRegexForContents(prefixedVarRegex, fileContentString, s.ConfigPath, "resource_id_vars", s.ResourceIdVars)
-
 	templateFileName := filepath.Base(s.ConfigPath)
 
-	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions(sysfs)).Parse(fileContentString)
+	funcs := google.TemplateFunctions(sysfs)
+	funcs["index"] = strictIndex
+
+	tmpl, err := template.New(templateFileName).Option("missingkey=error").Funcs(funcs).Parse(fileContentString)
 	if err != nil {
-		log.Fatal(err)
+		return "", fmt.Errorf("parsing sample template %s: %w", s.ConfigPath, err)
 	}
 
 	contents := bytes.Buffer{}
 	if err = tmpl.ExecuteTemplate(&contents, templateFileName, s); err != nil {
-		log.Fatal(err)
+		return "", fmt.Errorf("executing sample template %s: %w", s.ConfigPath, err)
 	}
 
 	rs := contents.String()
@@ -455,7 +517,7 @@ func (s *Step) ExecuteTemplate(sysfs fs.FS) string {
 		rs = fmt.Sprintf("%s\n", rs)
 	}
 
-	return rs
+	return rs, nil
 }
 
 func (s *Step) OiCSLink() string {
@@ -528,8 +590,11 @@ func (s *Step) SetOiCSHCLText(sysfs fs.FS) {
 
 	s.ResourceIdVars = testResourceIdVars
 	s.Vars = testVars
-	s.OicsHCLText = s.ExecuteTemplate(sysfs)
-	s.OicsHCLText = replaceNullVarSentinels(s.OicsHCLText)
+	oicsHCL, err := s.ExecuteTemplate(sysfs)
+	if err != nil {
+		log.Fatal(err)
+	}
+	s.OicsHCLText = replaceNullVarSentinels(oicsHCL)
 	s.OicsHCLText = trailingBlankLineRegexp.ReplaceAllString(s.OicsHCLText, "\n")
 
 	// Remove region tags

@@ -1,6 +1,7 @@
 package resource_test
 
 import (
+	"strings"
 	"testing"
 	"testing/fstest"
 
@@ -421,6 +422,74 @@ func TestStep_Validate_UnusedVars(t *testing.T) {
 		}
 		if errs := st.Validate("Topic", "pubsub_topic_beta"); len(errs) != 0 {
 			t.Errorf("Validate() on unloaded step returned unexpected errors: %v", errs)
+		}
+	})
+}
+
+func TestStep_TestStepSlug(t *testing.T) {
+	t.Parallel()
+
+	st := &resource.Step{Name: "pubsub_topic_basic"}
+	if got, want := st.TestStepSlug("Pubsub", "Topic"), "PubsubTopic_pubsubTopicBasicExample"; got != want {
+		t.Errorf("TestStepSlug() = %q, want %q", got, want)
+	}
+
+	st.StepSlug = "pubsub_topic_exhaustive_step2"
+	if got, want := st.TestStepSlug("Pubsub", "Topic"), "PubsubTopic_pubsubTopicExhaustiveStep2Example"; got != want {
+		t.Errorf("TestStepSlug() with StepSlug = %q, want %q", got, want)
+	}
+}
+
+func TestStep_ExecuteTemplate_StrictIndexAndMissingKey(t *testing.T) {
+	t.Parallel()
+
+	sysfs := fstest.MapFS{
+		"templates/missing_var.tf.tmpl": &fstest.MapFile{
+			Data: []byte(`name = "{{printf "%s" (index $.Vars "missing_key")}}"`),
+		},
+		"templates/missing_dot_key.tf.tmpl": &fstest.MapFile{
+			Data: []byte(`name = "{{$.Vars.missing_key}}"`),
+		},
+		"templates/nil_map.tf.tmpl": &fstest.MapFile{
+			Data: []byte(`name = "{{index $.ResourceIdVars "id"}}"`),
+		},
+	}
+
+	t.Run("nested index on missing Vars key returns error", func(t *testing.T) {
+		t.Parallel()
+		st := &resource.Step{
+			Name:       "s",
+			ConfigPath: "templates/missing_var.tf.tmpl",
+			Vars:       resource.StepVars{"present": "ok"},
+		}
+		_, err := st.ExecuteTemplate(sysfs)
+		if err == nil || !strings.Contains(err.Error(), `map has no entry for key "missing_key"`) {
+			t.Errorf("ExecuteTemplate() err = %v, want missing_key error", err)
+		}
+	})
+
+	t.Run("dot lookup on missing map key returns error via missingkey=error", func(t *testing.T) {
+		t.Parallel()
+		st := &resource.Step{
+			Name:       "s",
+			ConfigPath: "templates/missing_dot_key.tf.tmpl",
+			Vars:       resource.StepVars{"present": "ok"},
+		}
+		_, err := st.ExecuteTemplate(sysfs)
+		if err == nil || !strings.Contains(err.Error(), `map has no entry for key "missing_key"`) {
+			t.Errorf("ExecuteTemplate() err = %v, want missing_key error", err)
+		}
+	})
+
+	t.Run("index on nil map returns error", func(t *testing.T) {
+		t.Parallel()
+		st := &resource.Step{
+			Name:       "s",
+			ConfigPath: "templates/nil_map.tf.tmpl",
+		}
+		_, err := st.ExecuteTemplate(sysfs)
+		if err == nil || !strings.Contains(err.Error(), `map has no entry for key "id"`) {
+			t.Errorf("ExecuteTemplate() err = %v, want missing id error", err)
 		}
 	})
 }
