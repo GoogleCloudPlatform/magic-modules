@@ -108,13 +108,7 @@ properties:
           immutable: true
         - name: columnType
           type: Enum
-          description: |-
-            Column type can be STRING, CIDR (Ex- 10.1.1.0/24), REGEX
-            Possible values:
-            STRING
-            REGEX
-            CIDR
-            NUMBER
+          description: Column type can be STRING, CIDR (Ex- 10.1.1.0/24), REGEX
           enum_values:
             - STRING
             - REGEX

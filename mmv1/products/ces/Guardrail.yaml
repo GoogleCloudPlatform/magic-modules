@@ -371,10 +371,6 @@ properties:
           `POLICY_SCOPE_UNSPECIFIED`, the policy will be applied to the user input.
           When applying the policy to the agent response, additional latency will
           be introduced before the agent can respond.
-          Possible values:
-          USER_QUERY
-          AGENT_RESPONSE
-          USER_QUERY_AND_AGENT_RESPONSE
         enum_values:
           - USER_QUERY
           - AGENT_RESPONSE
@@ -497,13 +493,7 @@ properties:
             - name: category
               type: Enum
               required: true
-              description: |-
-                The harm category.
-                Possible values:
-                HARM_CATEGORY_HATE_SPEECH
-                HARM_CATEGORY_DANGEROUS_CONTENT
-                HARM_CATEGORY_HARASSMENT
-                HARM_CATEGORY_SEXUALLY_EXPLICIT
+              description: The harm category.
               enum_values:
                 - HARM_CATEGORY_HATE_SPEECH
                 - HARM_CATEGORY_DANGEROUS_CONTENT
@@ -512,14 +502,7 @@ properties:
             - name: threshold
               type: Enum
               required: true
-              description: |-
-                The harm block threshold.
-                Possible values:
-                BLOCK_LOW_AND_ABOVE
-                BLOCK_MEDIUM_AND_ABOVE
-                BLOCK_ONLY_HIGH
-                BLOCK_NONE
-                OFF
+              description: The harm block threshold.
               enum_values:
                 - BLOCK_LOW_AND_ABOVE
                 - BLOCK_MEDIUM_AND_ABOVE
