@@ -37,14 +37,17 @@ id_format: '{{autonomous_database}}/wallet'
 immutable: true
 exclude_import: true
 exclude_read: true
-exclude_delete: true
-# There is no delete API, so `deletion_policy` would have no effect.
-deletion_policy_exclude: true
 # The resource can't be imported, so a resource identity has no use.
 exclude_identity_generation: true
 exclude_tgc: true
 custom_code:
   post_create: templates/terraform/post_create/oracledatabase_autonomous_database_wallet.go.tmpl
+  # There is no API to delete a wallet, so destroy only removes it from state. Using a
+  # custom delete (rather than exclude_delete) keeps `deletion_policy`, so PREVENT can
+  # block an accidental destroy.
+  custom_delete: templates/terraform/custom_delete/only_remove_from_state.go.tmpl
+  # Destroy makes no API call, so there's nothing to check afterwards.
+  test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl
 samples:
   - name: oracledatabase_autonomous_database_wallet_basic
     primary_resource_id: myWallet
