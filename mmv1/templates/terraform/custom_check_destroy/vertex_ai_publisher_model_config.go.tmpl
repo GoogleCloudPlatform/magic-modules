@@ -19,9 +19,10 @@ if err != nil {
 if strings.Contains(url, "{{"{{"}}region{{"}}"}}") {
 	return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
 }
-// The "global" location is only served by the non-regional endpoint; see
+// The "global" location is only served by the non-regional endpoint across
+// default, mTLS, and custom universe_domain hosts; see
 // vertexAIPublisherModelConfigGlobalURL in the resource.
-url = strings.Replace(url, "://global-aiplatform.googleapis.com/", "://aiplatform.googleapis.com/", 1)
+url = strings.Replace(url, "://global-aiplatform.", "://aiplatform.", 1)
 
 var billingProject string
 if config.BillingProject != "" {

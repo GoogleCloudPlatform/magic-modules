@@ -27,10 +27,10 @@ func (w *VertexAIOperationWaiter) QueryOp() (interface{}, error) {
 	region := tpgresource.GetRegionFromRegionalSelfLink(w.CommonOperationWaiter.Op.Name)
 	baseUrl := strings.ReplaceAll(transport_tpg.BaseUrl(Product, w.Config), "{{region}}", region)
 	// Operations in the "global" location are only served by the non-regional
-	// endpoint; there is no global-aiplatform.googleapis.com host. Custom
-	// endpoints are left unchanged.
+	// aiplatform.<domain> endpoint across default, mTLS (mtls.googleapis.com),
+	// and custom universe_domain hosts. Custom endpoints are left unchanged.
 	if region == "global" {
-		baseUrl = strings.Replace(baseUrl, "://global-aiplatform.googleapis.com/", "://aiplatform.googleapis.com/", 1)
+		baseUrl = strings.Replace(baseUrl, "://global-aiplatform.", "://aiplatform.", 1)
 	}
 	url := fmt.Sprintf("%s%s", baseUrl, w.CommonOperationWaiter.Op.Name)
 

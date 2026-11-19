@@ -14,12 +14,12 @@
 import "errors"
 
 // vertexAIPublisherModelConfigGlobalURL rewrites a URL built from the Vertex AI
-// regional endpoint template (https://{{"{{"}}region{{"}}"}}-aiplatform.googleapis.com/)
-// so that requests for the "global" location go to the non-regional endpoint.
-// There is no global-aiplatform.googleapis.com host. URLs for regional
+// regional endpoint template so that requests for the "global" location go to
+// the non-regional aiplatform.<domain> endpoint across default, mTLS
+// (mtls.googleapis.com), and custom universe_domain hosts. URLs for regional
 // locations (e.g. us-central1), and custom endpoints, are returned unchanged.
 func vertexAIPublisherModelConfigGlobalURL(url string) string {
-	return strings.Replace(url, "://global-aiplatform.googleapis.com/", "://aiplatform.googleapis.com/", 1)
+	return strings.Replace(url, "://global-aiplatform.", "://aiplatform.", 1)
 }
 
 // isVertexAIPublisherModelConfigAlreadyExistsError reports whether err is a

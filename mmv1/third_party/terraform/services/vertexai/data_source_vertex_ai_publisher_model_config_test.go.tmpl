@@ -43,7 +43,10 @@ func TestAccDataSourceVertexAIPublisherModelConfig_basic(t *testing.T) {
 func TestAccDataSourceVertexAIPublisherModelConfig_global(t *testing.T) {
 	t.Parallel()
 
-	context := map[string]interface{}{}
+	context := map[string]interface{}{
+		// Initializes vcrSource for VCR .seed / cassette discovery even though random_suffix is unused in HCL.
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
