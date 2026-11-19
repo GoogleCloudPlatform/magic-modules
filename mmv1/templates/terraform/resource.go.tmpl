@@ -329,10 +329,12 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- if $.NestedQuery -}}
 {{- if $.NestedQuery.ModifyByPatch }}
 {{/*# Keep this after mutex - patch request data relies on current resource state */}}
+{{- if not $.NestedQuery.UseEtag }}
     obj, err = resource{{ $.ResourceName -}}PatchCreateEncoder(d, meta, obj)
     if err != nil {
         return err
     }
+{{- end }}
 {{- if $.UpdateMask }}
     url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": "{{ join $.NestedQuery.Keys "." -}}"})
     if err != nil {
@@ -376,6 +378,9 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
         RetryFunc: func() error {
             var err error
 {{- end}}
+{{- if and $.NestedQuery $.NestedQuery.UseEtag }}
+    res, err {{if $.ErrorRetryOnAsync}}={{else}}:={{end}} resource{{ $.ResourceName -}}PatchWithRetry(d, meta, obj, userAgent, billingProject, url, "{{ upper $.CreateVerb }}", headers, d.Timeout(schema.TimeoutCreate), resource{{ $.ResourceName -}}PatchCreateEncoder)
+{{- else }}
 {{- if $.RPCCreateMethod }}
     res, err {{if $.ErrorRetryOnAsync}}={{else}}:={{end}} transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
         Config: config,
@@ -386,7 +391,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     res, err {{if $.ErrorRetryOnAsync}}={{else}}:={{end}} transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "{{ upper $.CreateVerb -}}",
-{{- end}}
+{{- end }}
         Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
@@ -403,6 +408,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
         ApiVersion: "{{ $.ApiVersion }}",
 {{- end}}
     })
+{{- end }}
     if err != nil {
 {{- if and ($.CustomCode.PostCreateFailure) (not $.GetAsync) -}}
         err = resource{{ $.ResourceName -}}PostCreateFailure(d, meta, err)
@@ -1419,7 +1425,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
 {{- end }}
     {{/*If the deletion of the object requires sending a request body, the custom code will set 'obj' */}}
     var obj map[string]interface{}
-    {{- if and $.NestedQuery $.NestedQuery.ModifyByPatch }}
+    {{- if and $.NestedQuery $.NestedQuery.ModifyByPatch (not $.NestedQuery.UseEtag) }}
         {{/*Keep this after mutex - patch request data relies on current resource state*/}}
     obj, err = resource{{ $.ResourceName }}PatchDeleteEncoder(d, meta, obj)
     if err != nil {
@@ -1450,6 +1456,9 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     {{- end }}
 
     log.Printf("[DEBUG] Deleting {{ $.Name }} %q", d.Id())
+{{- if and $.NestedQuery $.NestedQuery.UseEtag }}
+    res, err := resource{{ $.ResourceName -}}PatchWithRetry(d, meta, obj, userAgent, billingProject, url, "{{ camelize $.DeleteVerb "upper" }}", headers, d.Timeout(schema.TimeoutDelete), resource{{ $.ResourceName -}}PatchDeleteEncoder)
+{{- else }}
 {{- if $.RPCDeleteMethod }}
     res, err := transport_tpg.SendRequestRPC(transport_tpg.SendRequestOptions{
         Config: config,
@@ -1460,7 +1469,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
         Config: config,
         Method: "{{ camelize $.DeleteVerb "upper" -}}",
-{{- end}}
+{{- end }}
         Project: billingProject,
         RawURL: url,
         UserAgent: userAgent,
@@ -1473,10 +1482,11 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
         {{- if $.ErrorAbortPredicates }}
         ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{- join $.ErrorAbortPredicates "," -}}{{"}"}},
         {{- end }}
-        {{- if $.ApiVersion }}
+{{- if $.ApiVersion }}
         ApiVersion: "{{ $.ApiVersion }}",
-        {{- end}}
+{{- end}}
     })
+{{- end }}
     if err != nil {
 {{- if and ($.CustomCode.PostDeleteFailure) (not $.GetAsync) -}}
         err = resource{{ $.ResourceName -}}PostDeleteFailure(d, meta, err)

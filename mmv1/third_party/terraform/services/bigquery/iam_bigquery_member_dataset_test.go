@@ -13,7 +13,7 @@ func TestAccessToPolicyForIamMemberRejectsConditionWithoutExpression(t *testing.
 		},
 	}
 
-	_, err := accessToPolicyForIamMember(access)
+	_, err := accessToPolicyForIamMember(access, "")
 	if err == nil {
 		t.Fatal("accessToPolicyForIamMember returned nil error for a condition without expression")
 	}
@@ -59,7 +59,7 @@ func TestAccessToPolicyForIamMemberRejectsInvalidConditionExpressions(t *testing
 				},
 			}
 
-			_, err := accessToPolicyForIamMember(access)
+			_, err := accessToPolicyForIamMember(access, "")
 			if err == nil {
 				t.Fatal("accessToPolicyForIamMember returned nil error for an invalid condition")
 			}
@@ -83,7 +83,7 @@ func TestAccessToPolicyForIamMemberPreservesValidCondition(t *testing.T) {
 		},
 	}
 
-	policy, err := accessToPolicyForIamMember(access)
+	policy, err := accessToPolicyForIamMember(access, "")
 	if err != nil {
 		t.Fatalf("accessToPolicyForIamMember returned unexpected error: %v", err)
 	}

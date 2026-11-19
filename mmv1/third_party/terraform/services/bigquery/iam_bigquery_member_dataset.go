@@ -7,6 +7,7 @@ package bigquery
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/list"
@@ -45,6 +46,12 @@ type BigqueryDatasetIamMemberUpdater struct {
 	datasetId string
 	d         tpgresource.TerraformResourceData
 	Config    *transport_tpg.Config
+}
+
+func setBigQueryDatasetEtagHeader(headers http.Header, etag string) {
+	if etag != "" {
+		headers.Set("If-Match", etag)
+	}
 }
 
 func NewBigqueryDatasetIamMemberUpdater(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (tpgiamresource.ResourceIamUpdater, error) {
@@ -88,7 +95,8 @@ func (u *BigqueryDatasetIamMemberUpdater) GetResourceIamPolicy() (*cloudresource
 		return nil, fmt.Errorf("Error retrieving IAM policy for %s: %w", u.DescribeResource(), err)
 	}
 
-	policy, err := accessToPolicyForIamMember(res["access"])
+	etag, _ := res["etag"].(string)
+	policy, err := accessToPolicyForIamMember(res["access"], etag)
 	if err != nil {
 		return nil, err
 	}
@@ -168,6 +176,8 @@ func (u *BigqueryDatasetIamMemberUpdater) SetResourceIamPolicy(policy *cloudreso
 		return err
 	}
 
+	headers := make(http.Header)
+	setBigQueryDatasetEtagHeader(headers, policy.Etag)
 	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    u.Config,
 		Method:    "PATCH",
@@ -175,6 +185,7 @@ func (u *BigqueryDatasetIamMemberUpdater) SetResourceIamPolicy(policy *cloudreso
 		RawURL:    url,
 		UserAgent: userAgent,
 		Body:      obj,
+		Headers:   headers,
 	})
 	if err != nil {
 		return fmt.Errorf("Error creating DatasetAccess: %s", err)
@@ -183,9 +194,10 @@ func (u *BigqueryDatasetIamMemberUpdater) SetResourceIamPolicy(policy *cloudreso
 	return nil
 }
 
-func accessToPolicyForIamMember(access interface{}) (*cloudresourcemanager.Policy, error) {
+func accessToPolicyForIamMember(access interface{}, etag string) (*cloudresourcemanager.Policy, error) {
+	policy := &cloudresourcemanager.Policy{Etag: etag}
 	if access == nil {
-		return nil, nil
+		return policy, nil
 	}
 	roleToBinding := make(map[iamBindingKey]*cloudresourcemanager.Binding)
 
@@ -247,7 +259,8 @@ func accessToPolicyForIamMember(access interface{}) (*cloudresourcemanager.Polic
 		bindings = append(bindings, v)
 	}
 
-	return &cloudresourcemanager.Policy{Bindings: bindings}, nil
+	policy.Bindings = bindings
+	return policy, nil
 }
 
 func policyToAccessForIamMember(policy *cloudresourcemanager.Policy) ([]map[string]interface{}, error) {
