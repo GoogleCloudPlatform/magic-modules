@@ -193,6 +193,7 @@ properties:
     properties:
       - type: String
         name: kmsKeyName
+        required: true
         description: |
           Resource name of the Cloud KMS key used to protect the Model. The key must be in the
           same region as the Model, in the format
