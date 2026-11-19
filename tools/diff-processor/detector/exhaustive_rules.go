@@ -29,15 +29,49 @@ func initialUnsetStatus(fieldPath string, field *schema.Schema) TransitionResult
 	return TransitionResult{Status: StatusMissing}
 }
 
+func initialFieldModifyStatus(
+	fieldPath string,
+	field *schema.Schema,
+	hasUpdate bool,
+	fullSchema map[string]*schema.Schema,
+) TransitionResult {
+	if !hasUpdate {
+		return TransitionResult{Status: StatusExempt, ExemptCode: "resource_not_updatable"}
+	}
+	if field.ForceNew {
+		return TransitionResult{Status: StatusExempt, ExemptCode: "force_new"}
+	}
+	if hasForceNewAncestor(fieldPath, fullSchema) {
+		return TransitionResult{Status: StatusExempt, ExemptCode: "ancestor_force_new"}
+	}
+	if _, isContainer := field.Elem.(*schema.Resource); isContainer && allConfigurableDescendantsForceNew(fieldPath, fullSchema) {
+		return TransitionResult{Status: StatusExempt, ExemptCode: "descendant_force_new"}
+	}
+	return initialModifyStatus(field, hasUpdate)
+}
+
 // usesOmissionUnset returns true when a field or block cannot be unset via an in-place
-// update step (e.g. non-updatable resource or ForceNew field) and therefore satisfies
-// UNSET by being omitted in at least one valid apply step where its parent is present.
-func usesOmissionUnset(field *schema.Schema, hasUpdate bool) bool {
+// update step (e.g. non-updatable resource or ForceNew field/ancestor/descendant) and
+// therefore satisfies UNSET by being omitted in at least one valid apply step.
+func usesOmissionUnset(
+	fieldPath string,
+	field *schema.Schema,
+	hasUpdate bool,
+	fullSchema map[string]*schema.Schema,
+) bool {
 	if !hasUpdate {
 		return true
 	}
 	if field != nil && field.ForceNew {
 		return true
+	}
+	if hasForceNewAncestor(fieldPath, fullSchema) {
+		return true
+	}
+	if field != nil {
+		if _, isContainer := field.Elem.(*schema.Resource); isContainer && hasForceNewDescendant(fieldPath, fullSchema) {
+			return true
+		}
 	}
 	return false
 }
@@ -84,6 +118,37 @@ func hasMutableConfigurableField(fullSchema map[string]*schema.Schema) bool {
 		}
 	}
 	return !hasAnyConfigurable
+}
+
+func hasForceNewDescendant(fieldPath string, fullSchema map[string]*schema.Schema) bool {
+	prefix := fieldPath + "."
+	for k, sch := range fullSchema {
+		if strings.HasPrefix(k, prefix) && sch != nil && sch.ForceNew {
+			return true
+		}
+	}
+	return false
+}
+
+func allConfigurableDescendantsForceNew(fieldPath string, fullSchema map[string]*schema.Schema) bool {
+	prefix := fieldPath + "."
+	configurableCount := 0
+	for k, sch := range fullSchema {
+		if !strings.HasPrefix(k, prefix) || sch == nil {
+			continue
+		}
+		if res, isRes := sch.Elem.(*schema.Resource); isRes && res != nil && len(res.Schema) > 0 {
+			continue
+		}
+		if !sch.Optional && !sch.Required {
+			continue
+		}
+		configurableCount++
+		if !sch.ForceNew && !hasForceNewAncestor(k, fullSchema) {
+			return false
+		}
+	}
+	return configurableCount > 0
 }
 
 func hasForceNewAncestor(fieldPath string, fullSchema map[string]*schema.Schema) bool {
