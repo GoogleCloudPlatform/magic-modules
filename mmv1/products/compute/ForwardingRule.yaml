@@ -122,8 +122,8 @@ samples:
         resource_id_vars:
           forwarding_rule_name: 'byoipv6-forwarding-rule'
           backend_name: 'website-backend'
-          ip_address: '"2600:1901:4457:1::/96"'
-          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp"'
+          ip_address: '2600:1901:4457:1::/96'
+          ip_collection_url: 'projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp'
         test_vars_overrides:
           ip_address: 'fmt.Sprintf("2600:1901:4457:1:%d:%d::/96", acctest.RandIntRange(t, 0, 9999), acctest.RandIntRange(t, 0, 9999))'
           ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp"'

@@ -72,7 +72,7 @@ samples:
         test_vars_overrides:
           deletion_policy: '"DELETE"'
         oics_vars_overrides:
-          deletion_policy: '"DELETE"'
+          deletion_policy: DELETE
         ignore_read_extra:
           - update_time
           - deletion_policy
@@ -88,7 +88,7 @@ samples:
           deletion_policy: '"DELETE"'
           kms_key_name: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-secure-source-manager-key1").CryptoKey.Name
         oics_vars_overrides:
-          deletion_policy: '"DELETE"'
+          deletion_policy: DELETE
         ignore_read_extra:
           - update_time
           - deletion_policy
@@ -108,7 +108,7 @@ samples:
         test_vars_overrides:
           deletion_policy: '"DELETE"'
         oics_vars_overrides:
-          deletion_policy: '"DELETE"'
+          deletion_policy: DELETE
         ignore_read_extra:
           - update_time
           - deletion_policy
@@ -134,7 +134,7 @@ samples:
         test_vars_overrides:
           deletion_policy: '"DELETE"'
         oics_vars_overrides:
-          deletion_policy: '"DELETE"'
+          deletion_policy: DELETE
         ignore_read_extra:
           - update_time
           - deletion_policy
@@ -157,7 +157,7 @@ samples:
         test_vars_overrides:
           deletion_policy: '"DELETE"'
         oics_vars_overrides:
-          deletion_policy: '"DELETE"'
+          deletion_policy: DELETE
         ignore_read_extra:
           - update_time
           - deletion_policy

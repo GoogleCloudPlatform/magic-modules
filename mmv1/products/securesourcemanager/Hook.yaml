@@ -54,7 +54,7 @@ samples:
         test_vars_overrides:
           deletion_policy: '"DELETE"'
         oics_vars_overrides:
-          deletion_policy: '"DELETE"'
+          deletion_policy: DELETE
         ignore_read_extra:
           - deletion_policy
       - name: secure_source_manager_hook_with_fields
@@ -74,7 +74,7 @@ samples:
         test_vars_overrides:
           deletion_policy: '"DELETE"'
         oics_vars_overrides:
-          deletion_policy: '"DELETE"'
+          deletion_policy: DELETE
         ignore_read_extra:
           - deletion_policy
       - name: secure_source_manager_hook_with_fields
@@ -93,7 +93,7 @@ samples:
         test_vars_overrides:
           deletion_policy: '"DELETE"'
         oics_vars_overrides:
-          deletion_policy: '"DELETE"'
+          deletion_policy: DELETE
         ignore_read_extra:
           - deletion_policy
 parameters:

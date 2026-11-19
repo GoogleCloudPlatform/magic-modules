@@ -189,7 +189,7 @@ samples:
     steps:
       - name: subnetwork_with_subnet_mode_pdp
         resource_id_vars:
-          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
+          ip_collection_url: projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp
           network_name: network-byoipv6-external
           subnetwork_name: subnet-mode-pdp-subnet
         vars:
