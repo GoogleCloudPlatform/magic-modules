@@ -45,7 +45,6 @@ samples:
           space: BootstrapDesignCenterSpace(t)
   - name: designcenter_application_template_standard
     primary_resource_id: example
-    exclude_basic_doc: true
     steps:
       - name: designcenter_application_template_standard
         resource_id_vars:
@@ -67,7 +66,6 @@ samples:
           space: BootstrapDesignCenterSpace(t)
   - name: designcenter_application_template_full
     primary_resource_id: example
-    exclude_basic_doc: true
     steps:
       - name: designcenter_application_template_full
         resource_id_vars:
@@ -93,6 +91,42 @@ samples:
         vars:
           project: my-project-name
           space: example-space
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+  - name: designcenter_application_template_root_variables
+    primary_resource_id: example
+    # Excluded from docs because components must already exist before an update can set root variables.
+    exclude_basic_doc: true
+    steps:
+      - name: designcenter_application_template_root_variables_basic
+        resource_id_vars:
+          application_template_id: example-root-vars-template
+        vars:
+          project: my-project-name
+          space: example-space
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+      - name: designcenter_application_template_root_variables
+        resource_id_vars:
+          application_template_id: example-root-vars-template
+        vars:
+          project: my-project-name
+          space: example-space
+          input_variable: service_name
+          output_variable: service_uri
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+      - name: designcenter_application_template_root_variables
+        resource_id_vars:
+          application_template_id: example-root-vars-template
+        vars:
+          project: my-project-name
+          space: example-space
+          input_variable: location
+          output_variable: apphub_service_uri
         test_vars_overrides:
           project: BootstrapDesignCenterProject(t)
           space: BootstrapDesignCenterSpace(t)
