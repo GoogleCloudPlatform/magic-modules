@@ -1,0 +1,25 @@
+data "google_project" "project" {
+  project_id = "{{index $.Vars "project"}}"
+}
+
+resource "google_design_center_policy" "example" {
+  project              = "{{index $.Vars "project"}}"
+  location             = "us-central1"
+  space                = "{{index $.Vars "space"}}"
+  application_template = "{{index $.Vars "application_template"}}"
+  policy_id            = "{{index $.ResourceIdVars "policy_id"}}"
+  display_name         = "Example Policy"
+  description          = "Managed by Terraform"
+  policy_type          = "COMPLIANCE_FRAMEWORK"
+  policy_uri           = "projects/${data.google_project.project.number}/locations/global/frameworks/builtin-us-data-boundary"
+
+  apply_conditions {
+    condition_key   = "environment"
+    condition_value = "PRODUCTION"
+  }
+
+  apply_conditions {
+    condition_key   = "criticality"
+    condition_value = "HIGH"
+  }
+}
