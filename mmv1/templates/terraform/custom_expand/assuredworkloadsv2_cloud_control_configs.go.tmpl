@@ -96,8 +96,12 @@ func assuredWorkloadsV2ExpandParameter(raw map[string]interface{}, path string, 
 	if name != "" {
 		transformed["name"] = name
 	}
-	if pv, ok := raw["parameter_value"].([]interface{}); ok && len(pv) > 0 && pv[0] != nil {
-		value, err := assuredWorkloadsV2ExpandParamValue(pv[0].(map[string]interface{}), path+".parameter_value.0", configured, allowOneof)
+	if pv, ok := raw["parameter_value"].([]interface{}); ok && len(pv) > 0 {
+		var rawPV map[string]interface{}
+		if pv[0] != nil {
+			rawPV, _ = pv[0].(map[string]interface{})
+		}
+		value, err := assuredWorkloadsV2ExpandParamValue(rawPV, path+".parameter_value.0", configured, allowOneof)
 		if err != nil {
 			return nil, fmt.Errorf("parameter %q: %w", name, err)
 		}
@@ -107,21 +111,28 @@ func assuredWorkloadsV2ExpandParameter(raw map[string]interface{}, path string, 
 }
 
 // assuredWorkloadsV2ExpandParamValue expands a parameter_value block at path. A
-// string list or oneof value is sent when it is non-empty; a string, boolean,
-// or number value is sent when it is non-zero or explicitly configured.
+// string list or oneof value is sent when its block is present; a string,
+// boolean, or number value is sent when it is non-zero or explicitly
+// configured.
 func assuredWorkloadsV2ExpandParamValue(raw map[string]interface{}, path string, configured func(string) bool, allowOneof bool) (map[string]interface{}, error) {
 	transformed := make(map[string]interface{})
-	if val, ok := raw["string_value"].(string); ok && (val != "" || configured(path+".string_value")) {
+	if val, _ := raw["string_value"].(string); val != "" || configured(path+".string_value") {
 		transformed["stringValue"] = val
 	}
-	if list, ok := raw["string_list_value"].([]interface{}); ok && len(list) > 0 && list[0] != nil {
-		values, _ := list[0].(map[string]interface{})["values"].([]interface{})
+	if list, ok := raw["string_list_value"].([]interface{}); ok && len(list) > 0 {
+		var values []interface{}
+		if list[0] != nil {
+			values, _ = list[0].(map[string]interface{})["values"].([]interface{})
+		}
+		if values == nil {
+			values = []interface{}{}
+		}
 		transformed["stringListValue"] = map[string]interface{}{"values": values}
 	}
-	if val, ok := raw["bool_value"].(bool); ok && (val || configured(path+".bool_value")) {
+	if val, _ := raw["bool_value"].(bool); val || configured(path+".bool_value") {
 		transformed["boolValue"] = val
 	}
-	if val, ok := raw["number_value"].(float64); ok && (val != 0 || configured(path+".number_value")) {
+	if val, _ := raw["number_value"].(float64); val != 0 || configured(path+".number_value") {
 		transformed["numberValue"] = val
 	}
 	if allowOneof {

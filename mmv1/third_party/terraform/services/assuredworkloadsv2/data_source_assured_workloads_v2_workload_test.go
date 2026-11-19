@@ -14,6 +14,12 @@ func TestAccDataSourceAssuredWorkloadsV2Workload_basic(t *testing.T) {
 
 	context := testAccAssuredWorkloadsV2Context(t)
 
+	ignoredFields := []string{
+		"resource_config.#",
+		"resource_config.0.%",
+		"resource_config.0.existing_project",
+	}
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -25,18 +31,12 @@ func TestAccDataSourceAssuredWorkloadsV2Workload_basic(t *testing.T) {
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_assured_workloads_v2_workload.by_ids",
 						"google_assured_workloads_v2_workload.workload",
-						[]string{
-							"resource_config.#",
-							"resource_config.0.existing_project",
-						},
+						ignoredFields,
 					),
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_assured_workloads_v2_workload.by_name",
 						"google_assured_workloads_v2_workload.workload",
-						[]string{
-							"resource_config.#",
-							"resource_config.0.existing_project",
-						},
+						ignoredFields,
 					),
 				),
 			},

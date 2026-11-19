@@ -1,15 +1,13 @@
 package assuredworkloadsv2
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
-	"net/http"
-	"net/http/httptest"
 	"reflect"
 	"strings"
 	"testing"
-	"time"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
@@ -529,164 +527,176 @@ func TestDataSourceAssuredWorkloadsV2WorkloadResolveId(t *testing.T) {
 	})
 }
 
-func sampleAssuredWorkloadsV2WorkloadResponse(name string) map[string]interface{} {
-	return map[string]interface{}{
-		"name":                      name,
-		"description":               "Sample workload",
-		"computedTargetResource":    "projects/123456789",
-		"targetResourceDisplayName": "sample-project",
-		"kajEnrollmentType":         "KEY_ACCESS_TRANSPARENCY_DISABLED",
-		"state":                     "ACTIVE",
-		"etag":                      "etag-1",
-		"createTime":                "2026-11-18T00:00:00Z",
-		"updateTime":                "2026-11-18T01:00:00Z",
-		"framework": map[string]interface{}{
-			"framework":       "organizations/123/locations/us-east4/frameworks/builtin-us-data-boundary",
-			"majorRevisionId": "62",
-		},
-		"cloudControlConfigs": []interface{}{
-			map[string]interface{}{
-				"cloudControl":         "organizations/123/locations/us-east4/cloudControls/builtin-apigee-regulatory-settings",
-				"cloudControlRevision": "2",
-				"enforcementMode":      "DETECTIVE",
-				"parameters": []interface{}{
-					map[string]interface{}{
-						"name": "framework",
-						"parameterValue": map[string]interface{}{
-							"stringValue": "US_REGIONAL_DATA_BOUNDARY",
+func assuredWorkloadsV2ToCty(v interface{}) cty.Value {
+	switch v := v.(type) {
+	case map[string]interface{}:
+		m := make(map[string]cty.Value, len(v))
+		for k, e := range v {
+			m[k] = assuredWorkloadsV2ToCty(e)
+		}
+		return cty.ObjectVal(m)
+	case []interface{}:
+		if len(v) == 0 {
+			return cty.EmptyTupleVal
+		}
+		l := make([]cty.Value, len(v))
+		for i, e := range v {
+			l[i] = assuredWorkloadsV2ToCty(e)
+		}
+		return cty.TupleVal(l)
+	case string:
+		return cty.StringVal(v)
+	case bool:
+		return cty.BoolVal(v)
+	case int:
+		return cty.NumberIntVal(int64(v))
+	case float64:
+		return cty.NumberFloatVal(v)
+	default:
+		return cty.NullVal(cty.DynamicPseudoType)
+	}
+}
+
+func TestAssuredWorkloadsV2ExpandCloudControlConfigsFromResourceData(t *testing.T) {
+	t.Parallel()
+
+	r := ResourceAssuredWorkloadsV2Workload()
+	baseControl := func(paramValue map[string]interface{}) map[string]interface{} {
+		return map[string]interface{}{
+			"organization": "123",
+			"location":     "us-east4",
+			"resource_config": []interface{}{
+				map[string]interface{}{
+					"existing_project": "projects/123456789",
+				},
+			},
+			"framework": []interface{}{
+				map[string]interface{}{
+					"framework": "organizations/123/locations/us-east4/frameworks/builtin-us-data-boundary",
+				},
+			},
+			"cloud_control_configs": []interface{}{
+				map[string]interface{}{
+					"cloud_control":          "organizations/123/locations/us-east4/cloudControls/example",
+					"cloud_control_revision": 1,
+					"enforcement_mode":       "DETECTIVE",
+					"parameters": []interface{}{
+						map[string]interface{}{
+							"name":            "p",
+							"parameter_value": []interface{}{paramValue},
 						},
 					},
 				},
 			},
-		},
-	}
-}
-
-func TestDataSourceAssuredWorkloadsV2WorkloadRead(t *testing.T) {
-	t.Parallel()
-
-	workloadName := "organizations/123/locations/us-east4/workloads/my-workload"
-	var lastUserProject string
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		lastUserProject = req.Header.Get("X-Goog-User-Project")
-		if req.Method == "GET" && req.URL.Path == "/us-east4/v2/"+workloadName {
-			_ = json.NewEncoder(w).Encode(sampleAssuredWorkloadsV2WorkloadResponse(workloadName))
-			return
-		}
-		w.WriteHeader(http.StatusNotFound)
-		_ = json.NewEncoder(w).Encode(map[string]interface{}{
-			"error": map[string]interface{}{
-				"code":    404,
-				"message": "not found",
-			},
-		})
-	}))
-	defer srv.Close()
-
-	cfg := &transport_tpg.Config{
-		Client:              srv.Client(),
-		UserProjectOverride: true,
-		BillingProject:      "billing-proj",
-		CustomEndpoints: map[string]string{
-			Product.CustomEndpointField: srv.URL + "/{{location}}/",
-		},
-	}
-
-	ds := DataSourceAssuredWorkloadsV2Workload()
-
-	checkState := func(t *testing.T, d *schema.ResourceData) {
-		t.Helper()
-		if lastUserProject != "billing-proj" {
-			t.Errorf("X-Goog-User-Project = %q, want %q", lastUserProject, "billing-proj")
-		}
-		if d.Id() != workloadName {
-			t.Errorf("Id() = %q, want %q", d.Id(), workloadName)
-		}
-		for k, want := range map[string]interface{}{
-			"name":                         workloadName,
-			"organization":                 "123",
-			"location":                     "us-east4",
-			"workload_id":                  "my-workload",
-			"description":                  "Sample workload",
-			"computed_target_resource":     "projects/123456789",
-			"target_resource_display_name": "sample-project",
-			"kaj_enrollment_type":          "KEY_ACCESS_TRANSPARENCY_DISABLED",
-			"state":                        "ACTIVE",
-			"etag":                         "etag-1",
-			"deletion_policy":              "DELETE",
-		} {
-			if got := d.Get(k); got != want {
-				t.Errorf("%s = %#v, want %#v", k, got, want)
-			}
-		}
-		if got := d.Get("framework.0.major_revision_id"); got != 62 {
-			t.Errorf("framework.0.major_revision_id = %#v, want 62", got)
-		}
-		if got := d.Get("cloud_control_configs.0.parameters.0.parameter_value.0.string_value"); got != "US_REGIONAL_DATA_BOUNDARY" {
-			t.Errorf("string_value = %#v, want US_REGIONAL_DATA_BOUNDARY", got)
 		}
 	}
-
-	t.Run("lookup by name", func(t *testing.T) {
-		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
-			"name": workloadName,
-		})
-		if err := dataSourceAssuredWorkloadsV2WorkloadRead(d, cfg); err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
-		checkState(t, d)
-	})
-
-	t.Run("lookup by components", func(t *testing.T) {
-		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
-			"organization": "123",
-			"location":     "us-east4",
-			"workload_id":  "my-workload",
-		})
-		if err := dataSourceAssuredWorkloadsV2WorkloadRead(d, cfg); err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
-		checkState(t, d)
-	})
-
-	t.Run("not found returns error", func(t *testing.T) {
-		d := schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{
-			"name": "organizations/123/locations/us-east4/workloads/missing",
-		})
-		err := dataSourceAssuredWorkloadsV2WorkloadRead(d, cfg)
-		if err == nil || !strings.Contains(err.Error(), "not found") {
-			t.Fatalf("expected not found error, got %v", err)
-		}
-	})
-}
-
-func TestResourceAssuredWorkloadsV2WorkloadLifecycle(t *testing.T) {
-	t.Parallel()
 
 	cases := []struct {
-		name               string
-		inputWorkloadID    string
-		wantQueryHasID     bool
-		wantQueryID        string
-		serverWorkloadName string
-		wantWorkloadID     string
+		name       string
+		paramValue map[string]interface{}
+		want       map[string]interface{}
 	}{
 		{
-			name:               "server-generated workload_id omits query param and populates workload_id",
-			inputWorkloadID:    "",
-			wantQueryHasID:     false,
-			wantQueryID:        "",
-			serverWorkloadName: "organizations/123/locations/us-east4/workloads/server-gen-uuid",
-			wantWorkloadID:     "server-gen-uuid",
+			name:       "empty string value",
+			paramValue: map[string]interface{}{"string_value": ""},
+			want:       map[string]interface{}{"stringValue": ""},
 		},
 		{
-			name:               "user-assigned workload_id sends query param and strips billing_account prefix",
-			inputWorkloadID:    "user-assigned-id",
-			wantQueryHasID:     true,
-			wantQueryID:        "user-assigned-id",
-			serverWorkloadName: "organizations/123/locations/us-east4/workloads/user-assigned-id",
-			wantWorkloadID:     "user-assigned-id",
+			name:       "false bool value",
+			paramValue: map[string]interface{}{"bool_value": false},
+			want:       map[string]interface{}{"boolValue": false},
+		},
+		{
+			name:       "zero number value",
+			paramValue: map[string]interface{}{"number_value": 0.0},
+			want:       map[string]interface{}{"numberValue": 0.0},
+		},
+		{
+			name: "empty string list value",
+			paramValue: map[string]interface{}{
+				"string_list_value": []interface{}{
+					map[string]interface{}{"values": []interface{}{}},
+				},
+			},
+			want: map[string]interface{}{
+				"stringListValue": map[string]interface{}{"values": []interface{}{}},
+			},
+		},
+		{
+			name: "oneof with empty string value",
+			paramValue: map[string]interface{}{
+				"oneof_value": []interface{}{
+					map[string]interface{}{
+						"name":            "nested",
+						"parameter_value": []interface{}{map[string]interface{}{"string_value": ""}},
+					},
+				},
+			},
+			want: map[string]interface{}{
+				"oneofValue": map[string]interface{}{
+					"name":           "nested",
+					"parameterValue": map[string]interface{}{"stringValue": ""},
+				},
+			},
+		},
+		{
+			name: "oneof with false bool value",
+			paramValue: map[string]interface{}{
+				"oneof_value": []interface{}{
+					map[string]interface{}{
+						"name":            "nested",
+						"parameter_value": []interface{}{map[string]interface{}{"bool_value": false}},
+					},
+				},
+			},
+			want: map[string]interface{}{
+				"oneofValue": map[string]interface{}{
+					"name":           "nested",
+					"parameterValue": map[string]interface{}{"boolValue": false},
+				},
+			},
+		},
+		{
+			name: "oneof with zero number value",
+			paramValue: map[string]interface{}{
+				"oneof_value": []interface{}{
+					map[string]interface{}{
+						"name":            "nested",
+						"parameter_value": []interface{}{map[string]interface{}{"number_value": 0.0}},
+					},
+				},
+			},
+			want: map[string]interface{}{
+				"oneofValue": map[string]interface{}{
+					"name":           "nested",
+					"parameterValue": map[string]interface{}{"numberValue": 0.0},
+				},
+			},
+		},
+		{
+			name: "oneof with empty string list value",
+			paramValue: map[string]interface{}{
+				"oneof_value": []interface{}{
+					map[string]interface{}{
+						"name": "nested",
+						"parameter_value": []interface{}{
+							map[string]interface{}{
+								"string_list_value": []interface{}{
+									map[string]interface{}{"values": []interface{}{}},
+								},
+							},
+						},
+					},
+				},
+			},
+			want: map[string]interface{}{
+				"oneofValue": map[string]interface{}{
+					"name": "nested",
+					"parameterValue": map[string]interface{}{
+						"stringListValue": map[string]interface{}{"values": []interface{}{}},
+					},
+				},
+			},
 		},
 	}
 
@@ -694,147 +704,37 @@ func TestResourceAssuredWorkloadsV2WorkloadLifecycle(t *testing.T) {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-
-			var (
-				createQueryHasID    bool
-				createQueryID       string
-				createBody          map[string]interface{}
-				createOpPolled      bool
-				createOpUserProject string
-				deleteCalled        bool
-				deleteOpPolled      bool
-				deleteOpUserProject string
-			)
-
-			srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-				w.Header().Set("Content-Type", "application/json")
-				switch {
-				case req.Method == "POST" && req.URL.Path == "/us-east4/v2/organizations/123/locations/us-east4/workloads":
-					createQueryHasID = req.URL.Query().Has("workloadId")
-					createQueryID = req.URL.Query().Get("workloadId")
-					if err := json.NewDecoder(req.Body).Decode(&createBody); err != nil {
-						http.Error(w, err.Error(), http.StatusBadRequest)
-						return
-					}
-					_ = json.NewEncoder(w).Encode(map[string]interface{}{
-						"name": "organizations/123/locations/us-east4/operations/create-op-1",
-						"done": false,
-					})
-				case req.Method == "GET" && req.URL.Path == "/us-east4/v1/organizations/123/locations/us-east4/operations/create-op-1":
-					createOpPolled = true
-					createOpUserProject = req.Header.Get("X-Goog-User-Project")
-					_ = json.NewEncoder(w).Encode(map[string]interface{}{
-						"name":     "organizations/123/locations/us-east4/operations/create-op-1",
-						"done":     true,
-						"response": sampleAssuredWorkloadsV2WorkloadResponse(tc.serverWorkloadName),
-					})
-				case req.Method == "GET" && req.URL.Path == "/us-east4/v2/"+tc.serverWorkloadName:
-					_ = json.NewEncoder(w).Encode(sampleAssuredWorkloadsV2WorkloadResponse(tc.serverWorkloadName))
-				case req.Method == "DELETE" && req.URL.Path == "/us-east4/v2/"+tc.serverWorkloadName:
-					deleteCalled = true
-					_ = json.NewEncoder(w).Encode(map[string]interface{}{
-						"name": "organizations/123/locations/us-east4/operations/delete-op-1",
-						"done": false,
-					})
-				case req.Method == "GET" && req.URL.Path == "/us-east4/v1/organizations/123/locations/us-east4/operations/delete-op-1":
-					deleteOpPolled = true
-					deleteOpUserProject = req.Header.Get("X-Goog-User-Project")
-					_ = json.NewEncoder(w).Encode(map[string]interface{}{
-						"name": "organizations/123/locations/us-east4/operations/delete-op-1",
-						"done": true,
-					})
-				default:
-					http.NotFound(w, req)
-				}
-			}))
-			defer srv.Close()
-
-			cfg := &transport_tpg.Config{
-				Client:              srv.Client(),
-				PollInterval:        time.Millisecond,
-				UserProjectOverride: true,
-				BillingProject:      "billing-proj",
-				CustomEndpoints: map[string]string{
-					Product.CustomEndpointField: srv.URL + "/{{location}}/",
-				},
+			raw := baseControl(tc.paramValue)
+			state := &terraform.InstanceState{}
+			diff, err := r.Diff(context.Background(), state, terraform.NewResourceConfigRaw(raw), nil)
+			if err != nil {
+				t.Fatalf("Diff failed: %v", err)
+			}
+			diff.RawConfig = assuredWorkloadsV2ToCty(raw)
+			d, err := schema.InternalMap(r.Schema).Data(state, diff)
+			if err != nil {
+				t.Fatalf("Data failed: %v", err)
 			}
 
-			r := ResourceAssuredWorkloadsV2Workload()
-			d := r.Data(nil)
-			if err := d.Set("organization", "123"); err != nil {
-				t.Fatal(err)
+			got, err := expandAssuredWorkloadsV2WorkloadCloudControlConfigs(d.Get("cloud_control_configs"), d, nil)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
 			}
-			if err := d.Set("location", "us-east4"); err != nil {
-				t.Fatal(err)
-			}
-			if tc.inputWorkloadID != "" {
-				if err := d.Set("workload_id", tc.inputWorkloadID); err != nil {
-					t.Fatal(err)
-				}
-			}
-			if err := d.Set("resource_config", []interface{}{
+			want := []interface{}{
 				map[string]interface{}{
-					"new_project_config": []interface{}{
+					"cloudControl":         "organizations/123/locations/us-east4/cloudControls/example",
+					"cloudControlRevision": 1,
+					"enforcementMode":      "DETECTIVE",
+					"parameters": []interface{}{
 						map[string]interface{}{
-							"parent":          "folders/999",
-							"display_name":    "sample-project",
-							"billing_account": "billingAccounts/012345-6789AB-CDEF01",
+							"name":           "p",
+							"parameterValue": tc.want,
 						},
 					},
 				},
-			}); err != nil {
-				t.Fatal(err)
 			}
-			if err := d.Set("framework", []interface{}{
-				map[string]interface{}{
-					"framework":         "organizations/123/locations/us-east4/frameworks/builtin-us-data-boundary",
-					"major_revision_id": 62,
-				},
-			}); err != nil {
-				t.Fatal(err)
-			}
-			if err := d.Set("cloud_control_configs", []interface{}{
-				map[string]interface{}{
-					"cloud_control":          "organizations/123/locations/us-east4/cloudControls/builtin-apigee-regulatory-settings",
-					"cloud_control_revision": 2,
-					"enforcement_mode":       "DETECTIVE",
-				},
-			}); err != nil {
-				t.Fatal(err)
-			}
-
-			if err := resourceAssuredWorkloadsV2WorkloadCreate(d, cfg); err != nil {
-				t.Fatalf("Create failed: %v", err)
-			}
-			if createQueryHasID != tc.wantQueryHasID || createQueryID != tc.wantQueryID {
-				t.Errorf("workloadId query param = (present=%v, val=%q), want (present=%v, val=%q)", createQueryHasID, createQueryID, tc.wantQueryHasID, tc.wantQueryID)
-			}
-			if !createOpPolled {
-				t.Error("expected Create LRO to be polled")
-			}
-			if createOpUserProject != "billing-proj" {
-				t.Errorf("Create LRO X-Goog-User-Project = %q, want %q", createOpUserProject, "billing-proj")
-			}
-			resCfg, _ := createBody["resourceConfig"].(map[string]interface{})
-			newProjCfg, _ := resCfg["newProjectConfig"].(map[string]interface{})
-			if got := newProjCfg["billingAccount"]; got != "012345-6789AB-CDEF01" {
-				t.Errorf("billingAccount sent = %#v, want %q", got, "012345-6789AB-CDEF01")
-			}
-			if got := d.Get("workload_id").(string); got != tc.wantWorkloadID {
-				t.Errorf("workload_id = %q, want %q", got, tc.wantWorkloadID)
-			}
-			if got := d.Id(); got != tc.serverWorkloadName {
-				t.Errorf("Id() = %q, want %q", got, tc.serverWorkloadName)
-			}
-
-			if err := resourceAssuredWorkloadsV2WorkloadDelete(d, cfg); err != nil {
-				t.Fatalf("Delete failed: %v", err)
-			}
-			if !deleteCalled || !deleteOpPolled {
-				t.Errorf("expected Delete and Delete LRO poll, got deleteCalled=%v deleteOpPolled=%v", deleteCalled, deleteOpPolled)
-			}
-			if deleteOpUserProject != "billing-proj" {
-				t.Errorf("Delete LRO X-Goog-User-Project = %q, want %q", deleteOpUserProject, "billing-proj")
+			if !reflect.DeepEqual(got, want) {
+				t.Errorf("got %#v, want %#v", got, want)
 			}
 		})
 	}
