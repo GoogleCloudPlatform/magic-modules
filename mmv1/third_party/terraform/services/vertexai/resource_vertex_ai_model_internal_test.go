@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -103,6 +104,32 @@ func TestVertexAIModelFlattenVersionAliasesRefresh(t *testing.T) {
 				}
 			}
 			d := ResourceVertexAIModel().Data(&terraform.InstanceState{ID: "test-model", Attributes: attributes})
+			got := flattenVertexAIModelVersionAliases(aliases, d, nil)
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Errorf("aliases = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestVertexAIModelFlattenVersionAliasesConfig(t *testing.T) {
+	t.Parallel()
+	aliases := []interface{}{"default", "alias"}
+	for _, tc := range []struct {
+		name       string
+		configured cty.Value
+		want       []interface{}
+	}{
+		{"omitted", cty.NullVal(cty.Set(cty.String)), []interface{}{"alias"}},
+		{"empty", cty.SetValEmpty(cty.String), []interface{}{"alias"}},
+		{"explicit default", cty.SetVal([]cty.Value{cty.StringVal("default")}), aliases},
+		{"unknown", cty.UnknownVal(cty.Set(cty.String)), aliases},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			d := ResourceVertexAIModel().Data(&terraform.InstanceState{
+				ID:        "test-model",
+				RawConfig: cty.ObjectVal(map[string]cty.Value{"version_aliases": tc.configured}),
+			})
 			got := flattenVertexAIModelVersionAliases(aliases, d, nil)
 			if !reflect.DeepEqual(got, tc.want) {
 				t.Errorf("aliases = %v, want %v", got, tc.want)
