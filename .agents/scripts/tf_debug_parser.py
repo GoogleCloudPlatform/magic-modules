@@ -9,6 +9,46 @@ import urllib.parse
 from typing import Any, Dict, List, Optional
 
 NOISE_QUERY_PARAMS = frozenset({"alt", "prettyPrint"})
+API_VERSION_RE = re.compile(
+    r"^(?:v\d+(?:(?:alpha|beta|b)\d*|p\d+(?:alpha|beta)\d*)?|alpha|beta)$"
+)
+
+
+def extract_endpoint_key(host: Optional[str], url_target: str) -> str:
+    """Builds a deterministic '<host>/<api_version>' key from host and request URL."""
+    split = urllib.parse.urlsplit(url_target.strip())
+    effective_host = (host or split.netloc or "unknown").strip().lower()
+    segments = [seg for seg in split.path.split("/") if seg]
+
+    api_version = ""
+    if segments:
+        if API_VERSION_RE.match(segments[0]):
+            api_version = segments[0]
+        elif len(segments) >= 2 and API_VERSION_RE.match(segments[1]):
+            api_version = f"{segments[0]}/{segments[1]}"
+        elif (
+            len(segments) >= 3
+            and segments[0] == "upload"
+            and API_VERSION_RE.match(segments[2])
+        ):
+            api_version = f"{segments[0]}/{segments[1]}/{segments[2]}"
+        else:
+            api_version = segments[0]
+
+    return f"{effective_host}/{api_version}" if api_version else effective_host
+
+
+def extract_error_message(body: Any) -> Optional[str]:
+    """Extracts a concise API error message from a parsed response body, if present."""
+    if isinstance(body, list) and body:
+        body = body[0]
+    if isinstance(body, dict):
+        err = body.get("error")
+        if isinstance(err, dict) and isinstance(err.get("message"), str):
+            return err["message"]
+        if isinstance(err, str):
+            return err
+    return None
 
 
 def parse_request_target(raw_target: str) -> Dict[str, Any]:
@@ -83,6 +123,8 @@ class TFDebugParser:
         self.filepath = filepath
         self.events: List[Dict[str, Any]] = []
         self.failures: List[Dict[str, Any]] = []
+        self.test_results: List[Dict[str, Any]] = []
+        self.destroy_errors: List[Dict[str, Any]] = []
         self.diffs: List[str] = []
         self.steps: List[Dict[str, Any]] = []
         self.outline: List[str] = []
@@ -118,7 +160,7 @@ class TFDebugParser:
             re.compile(r'\[DEBUG\] Finished deleting '),
             re.compile(r'\[DEBUG\]test_step_number=\d+ TGC Terraform metadata:'),
             re.compile(r'\[ERROR\]'),
-            re.compile(r'^--- (FAIL|PASS)'),
+            re.compile(r'^--- (FAIL|PASS|SKIP)'),
         ]
         self.identity_re = re.compile(r'\[INFO\] Terraform is using this identity:')
         self.last_was_identity = False
@@ -148,6 +190,7 @@ class TFDebugParser:
         current_step: Optional[int] = None
         current_phase = "setup"
         destroy_banner_emitted = False
+        last_destroy_request: Optional[Dict[str, Any]] = None
 
         diff_state = False
         diff_buffer: List[str] = []
@@ -163,9 +206,12 @@ class TFDebugParser:
         res_start_re = re.compile(r'---\[ RESPONSE \]---')
         end_re = re.compile(r'-----------------------------------------------------')
 
-        method_url_re = re.compile(r'^(GET|POST|PUT|DELETE|PATCH) (.*) HTTP/\d\.\d')
-        status_re = re.compile(r'^HTTP/\d\.\d (\d{3} .*)')
+        method_url_re = re.compile(r'^(GET|POST|PUT|DELETE|PATCH) (.*) HTTP/\d+(?:\.\d+)?')
+        host_header_re = re.compile(r'^Host:\s*(\S+)', re.IGNORECASE)
+        status_re = re.compile(r'^HTTP/\d+(?:\.\d+)? ((\d{3})(?: .*)?)')
         fail_re = re.compile(r'(FAIL:|Error:|Step \d+/\d+ error:)')
+        run_re = re.compile(r'^=== RUN\s+(\S+)')
+        test_result_re = re.compile(r'^---\s+(PASS|FAIL|SKIP):\s+(\S+)(?:\s+\(([^)]+)\))?')
         diff_start_re = re.compile(
             r'Terraform used the selected providers to generate the following execution|'
             r'Terraform will perform the following actions|'
@@ -194,39 +240,56 @@ class TFDebugParser:
         for i, line in enumerate(lines):
             clean_line = line.strip()
 
-            # 0. Check for Test Name Execution and TestStep / Destroy Phase Transitions
-            if "=== RUN   TestAcc" in clean_line:
-                self.test_name = clean_line.split()[-1]
+            # 0. Check for Test Name Execution, Test Results, and TestStep / Destroy Phase Transitions
+            if not diff_state and current_state is None:
+                unprefixed_line = timestamp_re.sub('', clean_line).lstrip()
+                if run_re.match(unprefixed_line):
+                    current_step = None
+                    current_phase = "setup"
+                    destroy_banner_emitted = False
+                    last_destroy_request = None
+                if "=== RUN   TestAcc" in clean_line:
+                    self.test_name = clean_line.split()[-1]
 
-            step_match = step_start_re.search(clean_line)
-            if step_match:
-                current_step = int(step_match.group(1))
-                current_phase = f"step_{current_step}"
-                destroy_banner_emitted = False
-                self.steps.append({"step_number": current_step, "line": i + 1})
-            elif current_step is None and current_phase == "setup":
-                fallback_match = step_fallback_re.search(clean_line)
-                if fallback_match:
-                    current_step = int(fallback_match.group(1))
+                result_match = test_result_re.match(unprefixed_line)
+                if result_match:
+                    self.test_results.append({
+                        "name": result_match.group(2),
+                        "status": result_match.group(1),
+                        "duration": result_match.group(3) or "",
+                        "line": i + 1,
+                    })
+
+                step_match = step_start_re.search(clean_line)
+                if step_match:
+                    current_step = int(step_match.group(1))
                     current_phase = f"step_{current_step}"
+                    destroy_banner_emitted = False
+                    last_destroy_request = None
                     self.steps.append({"step_number": current_step, "line": i + 1})
+                elif current_step is None and current_phase == "setup":
+                    fallback_match = step_fallback_re.search(clean_line)
+                    if fallback_match:
+                        current_step = int(fallback_match.group(1))
+                        current_phase = f"step_{current_step}"
+                        self.steps.append({"step_number": current_step, "line": i + 1})
 
-            if step_finish_re.search(clean_line) or destroy_marker_re.search(clean_line):
-                current_step = None
-                current_phase = "destroy"
+                if step_finish_re.search(clean_line) or destroy_marker_re.search(clean_line):
+                    current_step = None
+                    current_phase = "destroy"
 
-            # 1. Check for Failures/Errors
-            if fail_re.search(clean_line) and not diff_state and current_state is None:
-                self.failures.append({
-                    "line": i + 1,
-                    "message": clean_line,
-                    "test_step": current_step,
-                    "phase": current_phase,
-                })
+                # 1. Check for Failures/Errors
+                if fail_re.search(clean_line):
+                    self.failures.append({
+                        "line": i + 1,
+                        "message": clean_line,
+                        "test_step": current_step,
+                        "phase": current_phase,
+                    })
 
-            if step_abort_re.search(clean_line):
-                current_step = None
-                current_phase = "destroy"
+                if step_abort_re.search(clean_line):
+                    current_step = None
+                    current_phase = "destroy"
 
             # 2. Check for Diff Block
             if diff_start_re.search(clean_line) and not diff_state:
@@ -298,17 +361,33 @@ class TFDebugParser:
             if end_re.search(clean_line) and current_state is not None:
                 # Process the buffer we just collected
                 if current_state == "REQUEST":
+                    found_request_line = False
                     for bline in current_buffer:
-                        m = method_url_re.search(bline)
-                        if m:
-                            current_event["method"] = m.group(1)
-                            current_event.update(parse_request_target(m.group(2)))
+                        if not found_request_line:
+                            m = method_url_re.search(bline)
+                            if m:
+                                current_event["method"] = m.group(1)
+                                current_event.update(parse_request_target(m.group(2)))
+                                found_request_line = True
+                            continue
+                        if not bline or bline.startswith('{') or bline.startswith('['):
                             break
+                        host_match = host_header_re.match(bline)
+                        if host_match:
+                            current_event["host"] = host_match.group(1).lower()
+                            break
+                    if "host" not in current_event and current_event.get("url_full"):
+                        parsed_netloc = urllib.parse.urlsplit(
+                            current_event["url_full"]
+                        ).netloc.lower()
+                        if parsed_netloc:
+                            current_event["host"] = parsed_netloc
                 elif current_state == "RESPONSE":
                     for bline in current_buffer:
                         m = status_re.search(bline)
                         if m:
-                            current_event["status"] = m.group(1)
+                            current_event["status"] = m.group(1).strip()
+                            current_event["status_code"] = int(m.group(2))
                             break
 
                 # Try to extract JSON body if it exists
@@ -332,6 +411,32 @@ class TFDebugParser:
                     destroy_banner_emitted = True
 
                 self.events.append(current_event)
+
+                if current_event["type"] == "request":
+                    if current_event.get("phase") == "destroy":
+                        last_destroy_request = current_event
+                elif current_event.get("phase") == "destroy":
+                    paired_req = last_destroy_request
+                    last_destroy_request = None
+                    status_code = current_event.get("status_code")
+                    if status_code is not None and status_code >= 400 and status_code != 404:
+                        destroy_err: Dict[str, Any] = {
+                            "line": current_event["line"],
+                            "status": current_event.get("status", str(status_code)),
+                            "status_code": status_code,
+                            "phase": current_event["phase"],
+                        }
+                        if paired_req is not None:
+                            if "method" in paired_req:
+                                destroy_err["method"] = paired_req["method"]
+                            if "host" in paired_req:
+                                destroy_err["host"] = paired_req["host"]
+                            if paired_req.get("url_path") or paired_req.get("url_full"):
+                                destroy_err["url"] = format_concise_url(paired_req)
+                        err_msg = extract_error_message(current_event.get("body"))
+                        if err_msg:
+                            destroy_err["error_message"] = err_msg
+                        self.destroy_errors.append(destroy_err)
 
                 # Add marker to outline
                 event_index = len(self.events)
@@ -417,10 +522,36 @@ class TFDebugParser:
                     self.outline.append(f"{formatted_line}\n")
                     self.last_was_identity = is_identity
 
+    def endpoint_summary(self) -> Dict[str, int]:
+        counts: Dict[str, int] = {}
+        for ev in self.events:
+            if ev.get("type") != "request":
+                continue
+            url_target = ev.get("url_path") or ev.get("url_full") or ""
+            if not url_target and not ev.get("host"):
+                continue
+            key = extract_endpoint_key(ev.get("host"), url_target)
+            counts[key] = counts.get(key, 0) + 1
+        return dict(sorted(counts.items()))
+
+    def test_results_summary(self) -> Dict[str, Any]:
+        counts = {"pass": 0, "fail": 0, "skip": 0}
+        for entry in self.test_results:
+            key = entry["status"].lower()
+            if key in counts:
+                counts[key] += 1
+        return {
+            "counts": counts,
+            "tests": self.test_results,
+        }
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "test_name": self.test_name,
             "steps": self.steps,
+            "endpoint_summary": self.endpoint_summary(),
+            "test_results": self.test_results_summary(),
+            "destroy_errors": self.destroy_errors,
             "timeline": self.events,
             "failures": self.failures,
             "diffs": self.diffs,
@@ -444,6 +575,47 @@ class TFDebugParser:
                 if "body" in ev and isinstance(ev["body"], dict):
                     body_keys = f"Keys: {', '.join(ev['body'].keys())}"
                 print(f"[{i+1}] {phase_prefix}RES: Status {status} | {body_keys}")
+
+        print("\n====== ENDPOINT SUMMARY ======")
+        endpoints = self.endpoint_summary()
+        if endpoints:
+            for endpoint, count in endpoints.items():
+                print(f"{endpoint}: {count}")
+        else:
+            print("No API requests found.")
+
+        print("\n====== TEST RESULTS ======")
+        results = self.test_results_summary()
+        if results["tests"]:
+            counts = results["counts"]
+            print(
+                f"Summary: {counts['pass']} passed, {counts['fail']} failed, {counts['skip']} skipped"
+            )
+            for item in results["tests"]:
+                duration = f" ({item['duration']})" if item["duration"] else ""
+                print(f"[{item['status']}] {item['name']}{duration} (line {item['line']})")
+        else:
+            print("No test result lines found.")
+
+        print("\n====== DESTROY ERRORS ======")
+        if self.destroy_errors:
+            for err in self.destroy_errors:
+                req_target = err.get("url", "")
+                host = err.get("host", "")
+                if host and req_target and not req_target.startswith(("http://", "https://")):
+                    target_display = (
+                        f"{host}{req_target}"
+                        if req_target.startswith("/")
+                        else f"{host}/{req_target}"
+                    )
+                else:
+                    target_display = req_target or host
+                req_info = " ".join(p for p in (err.get("method", ""), target_display) if p)
+                req_suffix = f" ({req_info})" if req_info else ""
+                msg_suffix = f" - {err['error_message']}" if err.get("error_message") else ""
+                print(f"Line {err['line']}: [Destroy] {err['status']}{req_suffix}{msg_suffix}")
+        else:
+            print("No non-404 destroy errors found.")
 
         print("\n====== FAILURES ======")
         for f in self.failures:
