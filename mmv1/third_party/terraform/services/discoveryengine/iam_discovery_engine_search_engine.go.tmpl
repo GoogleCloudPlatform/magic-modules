@@ -28,7 +28,7 @@ func init() {
 		Name:        "google_discovery_engine_search_engine_iam_binding",
 		ProductName: "DiscoveryEngine",
 		Type:        registry.SchemaTypeIAMResource,
-		Schema:      tpgiamresource.ResourceIamBinding(DiscoveryEngineSearchEngineIamSchema, DiscoveryEngineSearchEngineIamUpdaterProducer, DiscoveryEngineSearchEngineIdParseFunc),
+		Schema:      tpgiamresource.ResourceIamBinding(DiscoveryEngineSearchEngineIamSchema, DiscoveryEngineSearchEngineIamUpdaterProducer, DiscoveryEngineSearchEngineIdParseFunc, tpgiamresource.IamWithParentResourceIdentity(DiscoveryEngineSearchEngineIamParentParentResourceIdentityParser)),
 	}.Register()
 	registry.Schema{
 		Name:        "google_discovery_engine_search_engine_iam_member",
