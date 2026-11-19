@@ -216,7 +216,7 @@ properties:
             For GKE, this is the cluster name.
             For Cloud Run, this is the service name.
           immutable: true
-          required: true
+          output: true
         - name: state
           type: String
           description: |-
@@ -237,7 +237,7 @@ properties:
                 Format:
                 `projects/{project}/locations/{location}/clusters/{cluster}`.
               immutable: true
-              required: true
+              output: true
             - name: deployment
               type: String
               description: |-

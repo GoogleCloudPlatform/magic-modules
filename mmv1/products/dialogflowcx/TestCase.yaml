@@ -283,7 +283,7 @@ properties:
                           type: String
                           description: |
                             The natural language text to be processed. Text length must not exceed 256 characters.
-                          required: true
+                          output: true
                           validation:
                             function: validation.StringLenBetween(0, 256)
                     - name: event
@@ -295,7 +295,7 @@ properties:
                           type: String
                           description: |
                             Name of the event.
-                          required: true
+                          output: true
                     - name: dtmf
                       type: NestedObject
                       description: |
