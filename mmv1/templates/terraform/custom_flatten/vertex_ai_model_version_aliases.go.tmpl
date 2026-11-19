@@ -6,10 +6,9 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 	if rawConfig := d.GetRawConfig(); rawConfig.IsNull() || !rawConfig.IsKnown() {
 		// Refresh has no raw configuration; retain the previous state's default-alias policy.
 		previous, exists := d.GetOkExists("version_aliases")
-		if !exists {
-			return v
+		if exists {
+			keepDefault = previous.(*schema.Set).Contains("default")
 		}
-		keepDefault = previous.(*schema.Set).Contains("default")
 	} else {
 		configured := rawConfig.GetAttr("version_aliases")
 		if !configured.IsWhollyKnown() {

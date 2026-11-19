@@ -89,7 +89,7 @@ func TestVertexAIModelFlattenVersionAliasesRefresh(t *testing.T) {
 		state []interface{}
 		want  []interface{}
 	}{
-		{"import", nil, aliases},
+		{"import", nil, []interface{}{"alias", "drifted"}},
 		{"API default", []interface{}{"default"}, aliases},
 		{"implicit default", []interface{}{"alias"}, []interface{}{"alias", "drifted"}},
 		{"empty", []interface{}{}, []interface{}{"alias", "drifted"}},

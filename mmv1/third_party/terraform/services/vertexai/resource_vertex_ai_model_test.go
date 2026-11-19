@@ -15,8 +15,8 @@ import (
 
 // The API returns the project number, source_model and custom_service_account are
 // write-only inputs used only when copying a model, labels cannot be reconstructed
-// as user-configured labels on import, and version_aliases includes the API-managed
-// default alias when imported without configuration.
+// as user-configured labels on import, and import cannot determine whether the
+// API-managed default alias was explicitly configured in version_aliases.
 var vertexAIModelImportStateVerifyIgnore = []string{"project", "source_model", "custom_service_account", "labels", "version_aliases"}
 
 func TestAccVertexAIModel_postCreationUpdates(t *testing.T) {
