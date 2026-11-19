@@ -553,6 +553,16 @@ func (t *Type) Validate(rName string) (es []error) {
 		es = append(es, fmt.Errorf("property %s cannot be write_only and sensitive at the same time in resource %s", fullFieldPath, rName))
 	}
 
+	for _, f := range []struct{ name, val string }{
+		{"description", t.Description},
+		{"deprecation_message", t.DeprecationMessage},
+		{"removed_message", t.RemovedMessage},
+	} {
+		if err := ValidateNoInternalRefs(f.val, "property %s `%s` in resource %s", fullFieldPath, f.name, rName); err != nil {
+			es = append(es, err)
+		}
+	}
+
 	t.validateLabelsField()
 
 	switch {

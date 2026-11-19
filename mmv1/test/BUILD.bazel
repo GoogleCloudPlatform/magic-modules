@@ -3,5 +3,8 @@ load("@rules_go//go:def.bzl", "go_test")
 go_test(
     name = "test_test",
     srcs = ["validate_third_party_test.go"],
-    deps = ["@in_gopkg_yaml_v3//:yaml_v3"],
+    deps = [
+        "//mmv1/api",
+        "@in_gopkg_yaml_v3//:yaml_v3",
+    ],
 )

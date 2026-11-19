@@ -1,6 +1,7 @@
 package test
 
 import (
+	"bufio"
 	"bytes"
 	"os"
 	"path/filepath"
@@ -9,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"gopkg.in/yaml.v3"
 )
 
@@ -153,6 +155,53 @@ func TestWebsiteDocsFrontmatter(t *testing.T) {
 			}
 		}
 
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("Error walking website docs directory: %v", err)
+	}
+}
+
+func TestWebsiteDocsNoInternalRefs(t *testing.T) {
+	_, testFilePath, _, ok := runtime.Caller(0)
+	if !ok {
+		t.Fatal("Failed to get current test file path")
+	}
+	docsDir := filepath.Join(filepath.Dir(filepath.Dir(testFilePath)), "third_party", "terraform", "website", "docs")
+
+	err := filepath.Walk(docsDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			if os.IsNotExist(err) && path == docsDir {
+				t.Logf("Warning: third_party/terraform/website/docs directory not found at %s", docsDir)
+				return nil
+			}
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		if !strings.HasSuffix(path, ".markdown") && !strings.HasSuffix(path, ".markdown.tmpl") {
+			return nil
+		}
+
+		relPath, _ := filepath.Rel(docsDir, path)
+		f, err := os.Open(path)
+		if err != nil {
+			t.Errorf("%s: failed to open file: %v", relPath, err)
+			return nil
+		}
+		defer f.Close()
+
+		scanner := bufio.NewScanner(f)
+		scanner.Buffer(make([]byte, 64*1024), 1024*1024)
+		for lineNum := 1; scanner.Scan(); lineNum++ {
+			if err := api.ValidateNoInternalRefs(scanner.Text(), "%s:%d", relPath, lineNum); err != nil {
+				t.Error(err)
+			}
+		}
+		if err := scanner.Err(); err != nil {
+			t.Errorf("%s: failed to scan file: %v", relPath, err)
+		}
 		return nil
 	})
 	if err != nil {
