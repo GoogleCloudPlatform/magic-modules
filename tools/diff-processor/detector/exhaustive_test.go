@@ -10,6 +10,7 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/tools/test-reader/reader"
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func TestDetectExhaustiveMissingTests_CoreRecursiveLifecycle(t *testing.T) {
@@ -1248,5 +1249,168 @@ func TestDetectExhaustiveMissingTests_NullLifecycleUnsetSetChangedUnset(t *testi
 	}
 	if info.Fields["null_then_set_only"].Modify.Status != StatusMissing {
 		t.Errorf("null_then_set_only.Modify = %+v, want MISSING (null -> set is not modify)", info.Fields["null_then_set_only"].Modify)
+	}
+}
+
+func TestDetectExhaustiveMissingTests_SingleValueEnum(t *testing.T) {
+	schemaDiff := diff.SchemaDiff{
+		"google_example_resource": {
+			Fields: map[string]diff.FieldDiff{
+				"required_single_enum": {
+					New: &schema.Schema{
+						Type:         schema.TypeString,
+						Required:     true,
+						ValidateFunc: validation.StringInSlice([]string{"ONLY_MODE"}, false),
+					},
+				},
+				"default_single_enum": {
+					New: &schema.Schema{
+						Type:         schema.TypeString,
+						Optional:     true,
+						Default:      "ONLY_MODE",
+						ValidateFunc: validation.StringInSlice([]string{"ONLY_MODE", ""}, false),
+					},
+				},
+				"optional_single_enum": {
+					New: &schema.Schema{
+						Type:         schema.TypeString,
+						Optional:     true,
+						ValidateFunc: validation.StringInSlice([]string{"ONLY_MODE", ""}, false),
+					},
+				},
+				"optional_computed_single_enum": {
+					New: &schema.Schema{
+						Type:         schema.TypeString,
+						Optional:     true,
+						Computed:     true,
+						ValidateFunc: validation.StringInSlice([]string{"ONLY_MODE", ""}, false),
+					},
+				},
+				"multi_enum": {
+					New: &schema.Schema{
+						Type:         schema.TypeString,
+						Optional:     true,
+						ValidateFunc: validation.StringInSlice([]string{"MODE_A", "MODE_B", ""}, false),
+					},
+				},
+				"list_of_single_enum": {
+					New: &schema.Schema{
+						Type:        schema.TypeList,
+						Optional:    true,
+						Description: `Modes. Possible values: ["ONLY_MODE"]`,
+						Elem: &schema.Schema{
+							Type:         schema.TypeString,
+							ValidateFunc: validation.StringInSlice([]string{"ONLY_MODE"}, false),
+						},
+					},
+				},
+				"forcenew_single_enum": {
+					New: &schema.Schema{
+						Type:         schema.TypeString,
+						Optional:     true,
+						ForceNew:     true,
+						ValidateFunc: validation.StringInSlice([]string{"ONLY_MODE", ""}, false),
+					},
+				},
+			},
+		},
+	}
+
+	got, err := DetectExhaustiveMissingTests(schemaDiff, nil, nil, false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	info := got["google_example_resource"]
+	if info == nil {
+		t.Fatalf("expected google_example_resource in results")
+	}
+
+	if gotMod := info.Fields["required_single_enum"].Modify; gotMod.Status != StatusExempt || gotMod.ExemptCode != "single_value_enum" {
+		t.Errorf("required_single_enum.Modify = %+v, want EXEMPT (single_value_enum)", gotMod)
+	}
+	if gotMod := info.Fields["default_single_enum"].Modify; gotMod.Status != StatusExempt || gotMod.ExemptCode != "single_value_enum" {
+		t.Errorf("default_single_enum.Modify = %+v, want EXEMPT (single_value_enum)", gotMod)
+	}
+	if gotUnset := info.Fields["default_single_enum"].Unset; gotUnset.Status != StatusMissing {
+		t.Errorf("default_single_enum.Unset = %+v, want MISSING", gotUnset)
+	}
+	if gotMod := info.Fields["optional_single_enum"].Modify; gotMod.Status != StatusMissing {
+		t.Errorf("optional_single_enum.Modify = %+v, want MISSING (unset vs ONLY_MODE are distinct)", gotMod)
+	}
+	if gotMod := info.Fields["optional_computed_single_enum"].Modify; gotMod.Status != StatusMissing {
+		t.Errorf("optional_computed_single_enum.Modify = %+v, want MISSING", gotMod)
+	}
+	if gotMulti := info.Fields["multi_enum"].Modify; gotMulti.Status != StatusMissing {
+		t.Errorf("multi_enum.Modify = %+v, want MISSING", gotMulti)
+	}
+	if gotList := info.Fields["list_of_single_enum"].Modify; gotList.Status != StatusMissing {
+		t.Errorf("list_of_single_enum.Modify = %+v, want MISSING", gotList)
+	}
+	if gotFN := info.Fields["forcenew_single_enum"].Modify; gotFN.Status != StatusExempt || gotFN.ExemptCode != "force_new" {
+		t.Errorf("forcenew_single_enum.Modify = %+v, want EXEMPT (force_new)", gotFN)
+	}
+
+	// Verify that an in-place unset -> ONLY_MODE transition satisfies MODIFY on
+	// optional 1-value enums (both plain Optional and Optional+Computed), while
+	// NOT satisfying MODIFY on multi-value enums.
+	tests := []*reader.Test{
+		{
+			Name: "TestAccExample_singleValueEnumLifecycle",
+			Steps: []reader.Step{
+				{
+					reader.ResourceBlock: {
+						"google_example_resource": {
+							"primary": {
+								"required_single_enum": "\"ONLY_MODE\"",
+								"default_single_enum":  "\"ONLY_MODE\"",
+								"forcenew_single_enum": "\"ONLY_MODE\"",
+							},
+						},
+					},
+				},
+				{
+					reader.ResourceBlock: {
+						"google_example_resource": {
+							"primary": {
+								"required_single_enum":          "\"ONLY_MODE\"",
+								"optional_single_enum":          "\"ONLY_MODE\"",
+								"optional_computed_single_enum": "\"ONLY_MODE\"",
+								"multi_enum":                    "\"MODE_A\"",
+								"list_of_single_enum":           "[\"ONLY_MODE\"]",
+							},
+						},
+					},
+				},
+				{
+					reader.ResourceBlock: {
+						"google_example_resource": {
+							"primary": {
+								"required_single_enum":          "\"ONLY_MODE\"",
+								"optional_computed_single_enum": "\"ONLY_MODE\"",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	gotAfter, err := DetectExhaustiveMissingTests(schemaDiff, nil, tests, false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	afterInfo := gotAfter["google_example_resource"]
+	if afterInfo == nil {
+		t.Fatalf("expected multi_enum and list_of_single_enum MODIFY to remain MISSING")
+	}
+	wantIncomplete := []string{"list_of_single_enum", "multi_enum"}
+	if diffStr := cmp.Diff(wantIncomplete, afterInfo.IncompleteFields); diffStr != "" {
+		t.Errorf("IncompleteFields mismatch (-want +got):\n%s", diffStr)
+	}
+	if gotMod := afterInfo.Fields["optional_single_enum"].Modify; gotMod.Status != StatusCovered || gotMod.CoveredBy != "TestAccExample_singleValueEnumLifecycle (step 1 -> 2)" {
+		t.Errorf("optional_single_enum.Modify = %+v, want COVERED (step 1 -> 2)", gotMod)
+	}
+	if gotMod := afterInfo.Fields["optional_computed_single_enum"].Modify; gotMod.Status != StatusCovered || gotMod.CoveredBy != "TestAccExample_singleValueEnumLifecycle (step 1 -> 2)" {
+		t.Errorf("optional_computed_single_enum.Modify = %+v, want COVERED (step 1 -> 2)", gotMod)
 	}
 }
