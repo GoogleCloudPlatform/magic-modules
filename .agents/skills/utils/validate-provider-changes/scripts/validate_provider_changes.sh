@@ -4,12 +4,13 @@
 #
 # Automates local provider change validation checks for Magic Modules by
 # comparing the current working tree against a base branch (e.g., main),
-# matching the diff-processor checks run in CI (.ci/magician/cmd/generate_comment.go):
+# running all 5 diff-processor checks from CI (.ci/magician/cmd/generate_comment.go)
+# on both GA and Beta (also catching GA-only gaps such as Beta -> GA promotions):
 #   - breaking-changes        (GA and Beta)
-#   - detect-missing-tests    (Beta only; supports --exhaustive)
-#   - detect-unreadable-tests (Beta only)
-#   - detect-missing-docs     (Beta only)
-#   - detect-missing-identity (Beta only)
+#   - detect-missing-tests    (GA and Beta; supports --exhaustive)
+#   - detect-unreadable-tests (GA and Beta)
+#   - detect-missing-docs     (GA and Beta)
+#   - detect-missing-identity (GA and Beta)
 #
 # Usage:
 #   ./.agents/skills/utils/validate-provider-changes/scripts/validate_provider_changes.sh [--exhaustive] [base_ref]
@@ -28,13 +29,14 @@ usage() {
   cat <<'EOF'
 Usage: validate_provider_changes.sh [--exhaustive] [base_ref]
 
-Validate generated provider changes against a base branch or commit, matching
-the diff-processor checks run by CI (.ci/magician/cmd/generate_comment.go):
+Validate generated provider changes against a base branch or commit, running
+all 5 diff-processor checks from CI (.ci/magician/cmd/generate_comment.go)
+on both GA and Beta (also catching GA-only gaps such as Beta -> GA promotions):
   - breaking-changes        (GA and Beta)
-  - detect-missing-tests    (Beta only)
-  - detect-unreadable-tests (Beta only)
-  - detect-missing-docs     (Beta only)
-  - detect-missing-identity (Beta only)
+  - detect-missing-tests    (GA and Beta)
+  - detect-unreadable-tests (GA and Beta)
+  - detect-missing-docs     (GA and Beta)
+  - detect-missing-identity (GA and Beta)
 
 Options:
   --exhaustive    Pass --exhaustive to detect-missing-tests to verify SET,
@@ -289,26 +291,24 @@ run_version_checks() {
   wait $OLD_GEN_PID
   wait $NEW_GEN_PID
 
-  # Compute changed beta services before package substitution rewrites imports.
-  # Mirrors changedServices() in .ci/magician/cmd/generate_comment.go.
+  # Compute changed services before package substitution rewrites imports.
+  # Mirrors changedServices() in .ci/magician/cmd/generate_comment.go (run for both GA and Beta).
   local CHANGED_SERVICES=()
-  if [ "$VERSION" = "beta" ]; then
-    local OLD_SERVICES_DIR="$TARGET_DIFF_PROC/old/$REAL_FOLDER_NAME/services"
-    local NEW_SERVICES_DIR="$TARGET_DIFF_PROC/new/$REAL_FOLDER_NAME/services"
-    local svc
-    while IFS= read -r svc; do
-      [ -z "$svc" ] && continue
-      if [ ! -d "$OLD_SERVICES_DIR/$svc" ] || [ ! -d "$NEW_SERVICES_DIR/$svc" ] || ! diff -rq "$OLD_SERVICES_DIR/$svc" "$NEW_SERVICES_DIR/$svc" >/dev/null 2>&1; then
-        CHANGED_SERVICES+=("$svc")
-      fi
-    done < <(
-      for d in "$OLD_SERVICES_DIR"/*/ "$NEW_SERVICES_DIR"/*/; do
-        [ -d "$d" ] || continue
-        d="${d%/}"
-        printf '%s\n' "${d##*/}"
-      done | LC_ALL=C sort -u
-    )
-  fi
+  local OLD_SERVICES_DIR="$TARGET_DIFF_PROC/old/$REAL_FOLDER_NAME/services"
+  local NEW_SERVICES_DIR="$TARGET_DIFF_PROC/new/$REAL_FOLDER_NAME/services"
+  local svc
+  while IFS= read -r svc; do
+    [ -z "$svc" ] && continue
+    if [ ! -d "$OLD_SERVICES_DIR/$svc" ] || [ ! -d "$NEW_SERVICES_DIR/$svc" ] || ! diff -rq "$OLD_SERVICES_DIR/$svc" "$NEW_SERVICES_DIR/$svc" >/dev/null 2>&1; then
+      CHANGED_SERVICES+=("$svc")
+    fi
+  done < <(
+    for d in "$OLD_SERVICES_DIR"/*/ "$NEW_SERVICES_DIR"/*/; do
+      [ -d "$d" ] || continue
+      d="${d%/}"
+      printf '%s\n' "${d##*/}"
+    done | LC_ALL=C sort -u
+  )
 
   # Perform package substitutions for side-by-side compilation
   echo -e "${BLUE}[${VERSION_UPPER}] Preparing provider code for compilation...${NC}"
@@ -364,7 +364,7 @@ run_version_checks() {
   local HAS_ERR=0
   local STDERR_FILE="$TARGET_DIFF_PROC/stderr.log"
 
-  # 1. Run breaking changes check (GA and Beta, matching CI)
+  # 1. Run breaking changes check
   echo -e "\n${BLUE}=== Running Breaking Changes Check (${VERSION_UPPER}) ===${NC}"
   set +e
   local BREAKING_OUTPUT
@@ -385,104 +385,101 @@ run_version_checks() {
     echo -e "${GREEN}[${VERSION_UPPER}] No breaking changes detected!${NC}"
   fi
 
-  # The remaining checks run on Beta only, matching .ci/magician/cmd/generate_comment.go
-  if [ "$VERSION" = "beta" ]; then
-    # 2. Run missing tests check
-    local TEST_ARGS=(detect-missing-tests)
-    local TESTS_LABEL="Missing Tests Check (${VERSION_UPPER})"
-    if [ "$EXHAUSTIVE" = true ]; then
-      TEST_ARGS+=(--exhaustive)
-      TESTS_LABEL="Missing Tests Check (${VERSION_UPPER}, --exhaustive)"
-    fi
-    TEST_ARGS+=("$TARGET_DIFF_PROC/new/google/services")
+  # 2. Run missing tests check
+  local TEST_ARGS=(detect-missing-tests)
+  local TESTS_LABEL="Missing Tests Check (${VERSION_UPPER})"
+  if [ "$EXHAUSTIVE" = true ]; then
+    TEST_ARGS+=(--exhaustive)
+    TESTS_LABEL="Missing Tests Check (${VERSION_UPPER}, --exhaustive)"
+  fi
+  TEST_ARGS+=("$TARGET_DIFF_PROC/new/google/services")
 
-    echo -e "\n${BLUE}=== Running ${TESTS_LABEL} ===${NC}"
-    set +e
-    local TESTS_OUTPUT
-    TESTS_OUTPUT=$("$TARGET_DIFF_PROC/bin/diff-processor" "${TEST_ARGS[@]}" 2>"$STDERR_FILE")
-    local TESTS_EXIT_CODE=$?
-    set -e
+  echo -e "\n${BLUE}=== Running ${TESTS_LABEL} ===${NC}"
+  set +e
+  local TESTS_OUTPUT
+  TESTS_OUTPUT=$("$TARGET_DIFF_PROC/bin/diff-processor" "${TEST_ARGS[@]}" 2>"$STDERR_FILE")
+  local TESTS_EXIT_CODE=$?
+  set -e
 
-    if [ $TESTS_EXIT_CODE -ne 0 ]; then
-      echo -e "${RED}[${VERSION_UPPER}] Error: diff-processor detect-missing-tests failed:${NC}"
-      [ -n "$TESTS_OUTPUT" ] && echo "$TESTS_OUTPUT"
-      [ -s "$STDERR_FILE" ] && cat "$STDERR_FILE"
-      HAS_ERR=1
-    elif [ -n "$TESTS_OUTPUT" ] && [ "$TESTS_OUTPUT" != "{}" ] && [ "$TESTS_OUTPUT" != "null" ]; then
-      echo -e "${YELLOW}[${VERSION_UPPER}] Missing tests detected!${NC}"
-      pretty_print_json "$TESTS_OUTPUT"
-      HAS_ERR=1
-    else
-      echo -e "${GREEN}[${VERSION_UPPER}] No missing tests detected!${NC}"
-    fi
+  if [ $TESTS_EXIT_CODE -ne 0 ]; then
+    echo -e "${RED}[${VERSION_UPPER}] Error: diff-processor detect-missing-tests failed:${NC}"
+    [ -n "$TESTS_OUTPUT" ] && echo "$TESTS_OUTPUT"
+    [ -s "$STDERR_FILE" ] && cat "$STDERR_FILE"
+    HAS_ERR=1
+  elif [ -n "$TESTS_OUTPUT" ] && [ "$TESTS_OUTPUT" != "{}" ] && [ "$TESTS_OUTPUT" != "null" ]; then
+    echo -e "${YELLOW}[${VERSION_UPPER}] Missing tests detected!${NC}"
+    pretty_print_json "$TESTS_OUTPUT"
+    HAS_ERR=1
+  else
+    echo -e "${GREEN}[${VERSION_UPPER}] No missing tests detected!${NC}"
+  fi
 
-    # 3. Run unreadable tests check
-    echo -e "\n${BLUE}=== Running Unreadable Tests Check (${VERSION_UPPER}) ===${NC}"
-    if [ ${#CHANGED_SERVICES[@]} -gt 0 ]; then
-      echo -e "${BLUE}[${VERSION_UPPER}] Checking changed services: ${YELLOW}${CHANGED_SERVICES[*]}${NC}"
-    else
-      echo -e "${BLUE}[${VERSION_UPPER}] No changed beta services detected.${NC}"
-    fi
-    set +e
-    local UNREADABLE_OUTPUT
-    UNREADABLE_OUTPUT=$("$TARGET_DIFF_PROC/bin/diff-processor" detect-unreadable-tests "$TARGET_DIFF_PROC/new/google/services" ${CHANGED_SERVICES[@]+"${CHANGED_SERVICES[@]}"} 2>"$STDERR_FILE")
-    local UNREADABLE_EXIT_CODE=$?
-    set -e
+  # 3. Run unreadable tests check
+  echo -e "\n${BLUE}=== Running Unreadable Tests Check (${VERSION_UPPER}) ===${NC}"
+  if [ ${#CHANGED_SERVICES[@]} -gt 0 ]; then
+    echo -e "${BLUE}[${VERSION_UPPER}] Checking changed services: ${YELLOW}${CHANGED_SERVICES[*]}${NC}"
+  else
+    echo -e "${BLUE}[${VERSION_UPPER}] No changed services detected.${NC}"
+  fi
+  set +e
+  local UNREADABLE_OUTPUT
+  UNREADABLE_OUTPUT=$("$TARGET_DIFF_PROC/bin/diff-processor" detect-unreadable-tests "$TARGET_DIFF_PROC/new/google/services" ${CHANGED_SERVICES[@]+"${CHANGED_SERVICES[@]}"} 2>"$STDERR_FILE")
+  local UNREADABLE_EXIT_CODE=$?
+  set -e
 
-    if [ $UNREADABLE_EXIT_CODE -ne 0 ]; then
-      echo -e "${RED}[${VERSION_UPPER}] Error: diff-processor detect-unreadable-tests failed:${NC}"
-      [ -n "$UNREADABLE_OUTPUT" ] && echo "$UNREADABLE_OUTPUT"
-      [ -s "$STDERR_FILE" ] && cat "$STDERR_FILE"
-      HAS_ERR=1
-    elif has_unreadable_tests "$UNREADABLE_OUTPUT"; then
-      echo -e "${YELLOW}[${VERSION_UPPER}] Unreadable or stale unreadable tests detected!${NC}"
-      pretty_print_json "$UNREADABLE_OUTPUT"
-      HAS_ERR=1
-    else
-      echo -e "${GREEN}[${VERSION_UPPER}] No unreadable tests detected!${NC}"
-    fi
+  if [ $UNREADABLE_EXIT_CODE -ne 0 ]; then
+    echo -e "${RED}[${VERSION_UPPER}] Error: diff-processor detect-unreadable-tests failed:${NC}"
+    [ -n "$UNREADABLE_OUTPUT" ] && echo "$UNREADABLE_OUTPUT"
+    [ -s "$STDERR_FILE" ] && cat "$STDERR_FILE"
+    HAS_ERR=1
+  elif has_unreadable_tests "$UNREADABLE_OUTPUT"; then
+    echo -e "${YELLOW}[${VERSION_UPPER}] Unreadable or stale unreadable tests detected!${NC}"
+    pretty_print_json "$UNREADABLE_OUTPUT"
+    HAS_ERR=1
+  else
+    echo -e "${GREEN}[${VERSION_UPPER}] No unreadable tests detected!${NC}"
+  fi
 
-    # 4. Run missing documentation check
-    echo -e "\n${BLUE}=== Running Missing Documentation Check (${VERSION_UPPER}) ===${NC}"
-    set +e
-    local DOCS_OUTPUT
-    DOCS_OUTPUT=$("$TARGET_DIFF_PROC/bin/diff-processor" detect-missing-docs "$TARGET_DIFF_PROC/new" 2>"$STDERR_FILE")
-    local DOCS_EXIT_CODE=$?
-    set -e
+  # 4. Run missing documentation check
+  echo -e "\n${BLUE}=== Running Missing Documentation Check (${VERSION_UPPER}) ===${NC}"
+  set +e
+  local DOCS_OUTPUT
+  DOCS_OUTPUT=$("$TARGET_DIFF_PROC/bin/diff-processor" detect-missing-docs "$TARGET_DIFF_PROC/new" 2>"$STDERR_FILE")
+  local DOCS_EXIT_CODE=$?
+  set -e
 
-    if [ $DOCS_EXIT_CODE -ne 0 ]; then
-      echo -e "${RED}[${VERSION_UPPER}] Error: diff-processor detect-missing-docs failed:${NC}"
-      [ -n "$DOCS_OUTPUT" ] && echo "$DOCS_OUTPUT"
-      [ -s "$STDERR_FILE" ] && cat "$STDERR_FILE"
-      HAS_ERR=1
-    elif has_missing_docs "$DOCS_OUTPUT"; then
-      echo -e "${YELLOW}[${VERSION_UPPER}] Missing documentation detected!${NC}"
-      pretty_print_json "$DOCS_OUTPUT"
-      HAS_ERR=1
-    else
-      echo -e "${GREEN}[${VERSION_UPPER}] No missing documentation detected!${NC}"
-    fi
+  if [ $DOCS_EXIT_CODE -ne 0 ]; then
+    echo -e "${RED}[${VERSION_UPPER}] Error: diff-processor detect-missing-docs failed:${NC}"
+    [ -n "$DOCS_OUTPUT" ] && echo "$DOCS_OUTPUT"
+    [ -s "$STDERR_FILE" ] && cat "$STDERR_FILE"
+    HAS_ERR=1
+  elif has_missing_docs "$DOCS_OUTPUT"; then
+    echo -e "${YELLOW}[${VERSION_UPPER}] Missing documentation detected!${NC}"
+    pretty_print_json "$DOCS_OUTPUT"
+    HAS_ERR=1
+  else
+    echo -e "${GREEN}[${VERSION_UPPER}] No missing documentation detected!${NC}"
+  fi
 
-    # 5. Run missing ResourceIdentity coverage check
-    echo -e "\n${BLUE}=== Running Missing Identity Check (${VERSION_UPPER}) ===${NC}"
-    set +e
-    local IDENTITY_OUTPUT
-    IDENTITY_OUTPUT=$("$TARGET_DIFF_PROC/bin/diff-processor" detect-missing-identity "$TARGET_DIFF_PROC/new/google/services" 2>"$STDERR_FILE")
-    local IDENTITY_EXIT_CODE=$?
-    set -e
+  # 5. Run missing ResourceIdentity coverage check
+  echo -e "\n${BLUE}=== Running Missing Identity Check (${VERSION_UPPER}) ===${NC}"
+  set +e
+  local IDENTITY_OUTPUT
+  IDENTITY_OUTPUT=$("$TARGET_DIFF_PROC/bin/diff-processor" detect-missing-identity "$TARGET_DIFF_PROC/new/google/services" 2>"$STDERR_FILE")
+  local IDENTITY_EXIT_CODE=$?
+  set -e
 
-    if [ $IDENTITY_EXIT_CODE -ne 0 ]; then
-      echo -e "${RED}[${VERSION_UPPER}] Error: diff-processor detect-missing-identity failed:${NC}"
-      [ -n "$IDENTITY_OUTPUT" ] && echo "$IDENTITY_OUTPUT"
-      [ -s "$STDERR_FILE" ] && cat "$STDERR_FILE"
-      HAS_ERR=1
-    elif [ -n "$IDENTITY_OUTPUT" ] && [ "$IDENTITY_OUTPUT" != "{}" ] && [ "$IDENTITY_OUTPUT" != "null" ]; then
-      echo -e "${YELLOW}[${VERSION_UPPER}] Missing ResourceIdentity coverage detected!${NC}"
-      pretty_print_json "$IDENTITY_OUTPUT"
-      HAS_ERR=1
-    else
-      echo -e "${GREEN}[${VERSION_UPPER}] No missing ResourceIdentity coverage detected!${NC}"
-    fi
+  if [ $IDENTITY_EXIT_CODE -ne 0 ]; then
+    echo -e "${RED}[${VERSION_UPPER}] Error: diff-processor detect-missing-identity failed:${NC}"
+    [ -n "$IDENTITY_OUTPUT" ] && echo "$IDENTITY_OUTPUT"
+    [ -s "$STDERR_FILE" ] && cat "$STDERR_FILE"
+    HAS_ERR=1
+  elif [ -n "$IDENTITY_OUTPUT" ] && [ "$IDENTITY_OUTPUT" != "{}" ] && [ "$IDENTITY_OUTPUT" != "null" ]; then
+    echo -e "${YELLOW}[${VERSION_UPPER}] Missing ResourceIdentity coverage detected!${NC}"
+    pretty_print_json "$IDENTITY_OUTPUT"
+    HAS_ERR=1
+  else
+    echo -e "${GREEN}[${VERSION_UPPER}] No missing ResourceIdentity coverage detected!${NC}"
   fi
 
   return $HAS_ERR

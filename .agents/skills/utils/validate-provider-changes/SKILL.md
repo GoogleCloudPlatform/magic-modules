@@ -6,7 +6,7 @@ description: "Validate that changes to the generated providers don't introduce b
 # `validate-provider-changes`
 
 > **Note to AI Agents:** You MUST read the YAML frontmatter above first. Only read the rest of this file if the `description` matches your required task.
-> This skill runs all 5 `diff-processor` validation checks from CI (`.ci/magician/cmd/generate_comment.go`) locally against generated GA and Beta provider changes.
+> This skill runs all 5 `diff-processor` validation checks from CI (`.ci/magician/cmd/generate_comment.go`) locally across both GA and Beta provider changes.
 
 ## Prerequisites
 
@@ -45,13 +45,13 @@ Pass `--help` (or `-h`) to display usage and options.
 
 ### 2. Analyze the Output
 
-The tool mirrors the exact `diff-processor` checks and provider scope executed by CI in `.ci/magician/cmd/generate_comment.go`:
+The tool runs all 5 `diff-processor` checks from CI (`.ci/magician/cmd/generate_comment.go`) across **both GA (`terraform-provider-google`) and Beta (`terraform-provider-google-beta`)**. While CI runs checks 2–5 on Beta only, running all 5 on both GA and Beta locally also catches GA-only coverage gaps (e.g., Beta → GA promotions):
 
 - **Breaking Changes (`breaking-changes`) — GA & Beta:** Detects backwards-incompatible schema changes across both `terraform-provider-google` (GA) and `terraform-provider-google-beta` (Beta).
-- **Missing Tests (`detect-missing-tests`) — Beta only:** Identifies new or changed fields in `google-beta/services` that are not covered by acceptance tests. When `--exhaustive` is passed, additionally checks that newly added fields have `SET`, `MODIFY`, and `UNSET` test coverage at every nesting level.
-- **Unreadable Tests (`detect-unreadable-tests`) — Beta only:** Checks changed beta service directories for acceptance tests that the test reader cannot parse (and that are not listed in `KnownUnreadableTests`), as well as stale entries in `KnownUnreadableTests` that can now be read.
-- **Missing Documentation (`detect-missing-docs`) — Beta only:** Identifies new resource or data source fields that are not documented in `website/docs` markdown files.
-- **Missing ResourceIdentity Coverage (`detect-missing-identity`) — Beta only:** Checks changed resources declaring `ResourceIdentity` for missing `SetResourceIdentityAttributes` calls in CRUD functions or missing `ImportBlockWithResourceIdentity` import tests.
+- **Missing Tests (`detect-missing-tests`) — GA & Beta:** Identifies new or changed fields in `google/services` (GA) and `google-beta/services` (Beta) that are not covered by acceptance tests. When `--exhaustive` is passed, additionally checks that newly added fields have `SET`, `MODIFY`, and `UNSET` test coverage at every nesting level.
+- **Unreadable Tests (`detect-unreadable-tests`) — GA & Beta:** Checks changed service directories across both GA and Beta for acceptance tests that the test reader cannot parse (and that are not listed in `KnownUnreadableTests`), as well as stale entries in `KnownUnreadableTests` that can now be read.
+- **Missing Documentation (`detect-missing-docs`) — GA & Beta:** Identifies new resource or data source fields that are not documented in `website/docs` markdown files across both GA and Beta.
+- **Missing ResourceIdentity Coverage (`detect-missing-identity`) — GA & Beta:** Checks changed resources declaring `ResourceIdentity` across both GA and Beta for missing `SetResourceIdentityAttributes` calls in CRUD functions or missing `ImportBlockWithResourceIdentity` import tests.
 
 ### 3. Verification & Handoff
 
