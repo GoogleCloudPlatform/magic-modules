@@ -1,0 +1,23 @@
+resource "google_vertex_ai_publisher_model_config" "{{$.PrimaryResourceId}}" {
+  provider  = google-beta
+  region    = "us-central1"
+  publisher = "google"
+  model     = "gemini-2.0-flash-001"
+
+  inference_event_logging_config {
+    state = "{{index $.Vars "state"}}"
+  }
+}
+
+resource "google_vertex_ai_publisher_model_config" "tf_test_second" {
+  provider  = google-beta
+  region    = "us-central1"
+  publisher = "google"
+  model     = "gemini-2.0-flash-001"
+
+  inference_event_logging_config {
+    state = "{{index $.Vars "state"}}"
+  }
+
+  depends_on = [google_vertex_ai_publisher_model_config.{{$.PrimaryResourceId}}]
+}

@@ -1,0 +1,104 @@
+{{- if ne $.TargetVersionName "ga" -}}
+package vertexai_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+)
+
+func TestAccDataSourceVertexAIPublisherModelConfig_basic(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckVertexAIPublisherModelConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSourceVertexAIPublisherModelConfig_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
+						"data.google_vertex_ai_publisher_model_config.tf_test_config",
+						"google_vertex_ai_publisher_model_config.tf_test_config",
+						[]string{},
+					),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataSourceVertexAIPublisherModelConfig_global(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckVertexAIPublisherModelConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSourceVertexAIPublisherModelConfig_global(context),
+				Check: resource.ComposeTestCheckFunc(
+					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
+						"data.google_vertex_ai_publisher_model_config.tf_test_config",
+						"google_vertex_ai_publisher_model_config.tf_test_config",
+						[]string{},
+					),
+				),
+			},
+		},
+	})
+}
+
+func testAccDataSourceVertexAIPublisherModelConfig_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_publisher_model_config" "tf_test_config" {
+  provider  = google-beta
+  region    = "us-central1"
+  publisher = "google"
+  model     = "gemini-2.5-pro"
+
+  inference_event_logging_config {
+    state = "ENABLED"
+  }
+}
+
+data "google_vertex_ai_publisher_model_config" "tf_test_config" {
+  provider  = google-beta
+  project   = google_vertex_ai_publisher_model_config.tf_test_config.project
+  region    = google_vertex_ai_publisher_model_config.tf_test_config.region
+  publisher = google_vertex_ai_publisher_model_config.tf_test_config.publisher
+  model     = google_vertex_ai_publisher_model_config.tf_test_config.model
+}
+`, context)
+}
+
+func testAccDataSourceVertexAIPublisherModelConfig_global(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_publisher_model_config" "tf_test_config" {
+  provider  = google-beta
+  region    = "global"
+  publisher = "google"
+  model     = "gemini-2.5-pro"
+
+  inference_event_logging_config {
+    state = "ENABLED"
+  }
+}
+
+data "google_vertex_ai_publisher_model_config" "tf_test_config" {
+  provider  = google-beta
+  project   = google_vertex_ai_publisher_model_config.tf_test_config.project
+  region    = google_vertex_ai_publisher_model_config.tf_test_config.region
+  publisher = google_vertex_ai_publisher_model_config.tf_test_config.publisher
+  model     = google_vertex_ai_publisher_model_config.tf_test_config.model
+}
+`, context)
+}
+{{- end }}

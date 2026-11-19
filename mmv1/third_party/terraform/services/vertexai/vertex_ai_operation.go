@@ -26,6 +26,12 @@ func (w *VertexAIOperationWaiter) QueryOp() (interface{}, error) {
 	// ReplaceVars can't be used because we don't have all of the necessary inputs.
 	region := tpgresource.GetRegionFromRegionalSelfLink(w.CommonOperationWaiter.Op.Name)
 	baseUrl := strings.ReplaceAll(transport_tpg.BaseUrl(Product, w.Config), "{{region}}", region)
+	// Operations in the "global" location are only served by the non-regional
+	// endpoint; there is no global-aiplatform.googleapis.com host. Custom
+	// endpoints are left unchanged.
+	if region == "global" {
+		baseUrl = strings.Replace(baseUrl, "://global-aiplatform.googleapis.com/", "://aiplatform.googleapis.com/", 1)
+	}
 	url := fmt.Sprintf("%s%s", baseUrl, w.CommonOperationWaiter.Op.Name)
 
 	return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
