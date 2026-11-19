@@ -139,7 +139,8 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 		CheckDestroy: testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t),
 	{{- end }}
 		Steps: []resource.TestStep{
-		{{- range $i, $st := $s.TestSteps }}
+		{{- $activeSteps := $s.TestSteps }}
+		{{- range $i, $st := $activeSteps }}
 			{
 			{{- if eq $i 0 }}
 				Config: testAcc{{ $st.TestStepSlug $.Res.ProductMetadata.Name $.Res.Name }}(context),
@@ -152,7 +153,7 @@ func TestAcc{{ $s.TestSampleSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *tes
 				},
 			{{- end }}
 			},
-			{{- if not $st.ExcludeImportTest }}
+			{{- if $s.ShouldRunImportStep $i (len $activeSteps) $st }}
 			{
 				ResourceName:      "{{ $s.ResourceType $.Res.TerraformName }}.{{ $s.PrimaryResourceId }}",
 				ImportState:       true,

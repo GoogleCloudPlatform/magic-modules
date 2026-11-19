@@ -60,6 +60,7 @@ custom_code:
 samples:
   - name: workstation_config_basic
     primary_resource_id: default
+    import_all_steps: true
     steps:
       - name: workstation_config_basic
         resource_id_vars:
@@ -130,6 +131,7 @@ samples:
           org_id: envvar.GetTestOrgFromEnv(t)
   - name: workstation_config_boost
     primary_resource_id: default
+    import_all_steps: true
     steps:
       - name: workstation_config_boost
         resource_id_vars:

@@ -1,6 +1,7 @@
 package resource_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -121,5 +122,53 @@ func TestSample_TestDependencies(t *testing.T) {
 				t.Errorf("TestDependencies() mismatch (-want +got:\n%s", diff)
 			}
 		})
+	}
+}
+
+func TestSample_ShouldRunImportStep(t *testing.T) {
+	t.Parallel()
+
+	collect := func(s *resource.Sample, total int, steps []*resource.Step) []bool {
+		got := make([]bool, total)
+		for i := 0; i < total; i++ {
+			st := &resource.Step{}
+			if i < len(steps) && steps[i] != nil {
+				st = steps[i]
+			}
+			got[i] = s.ShouldRunImportStep(i, total, st)
+		}
+		return got
+	}
+
+	if diff := cmp.Diff([]bool{true, true, true}, collect(&resource.Sample{}, 3, nil)); diff != "" {
+		t.Errorf("3-step default mismatch (-want +got):\n%s", diff)
+	}
+	if diff := cmp.Diff([]bool{true, true, false, false, true}, collect(&resource.Sample{}, 5, nil)); diff != "" {
+		t.Errorf("5-step default mismatch (-want +got):\n%s", diff)
+	}
+	if diff := cmp.Diff(
+		[]bool{false, true, true, false, true},
+		collect(&resource.Sample{}, 5, []*resource.Step{
+			{ExcludeImportTest: true},
+			nil,
+			{IncludeImportTest: true},
+			nil,
+			nil,
+		}),
+	); diff != "" {
+		t.Errorf("5-step overrides mismatch (-want +got):\n%s", diff)
+	}
+	if diff := cmp.Diff(
+		[]bool{true, true, true, false, true},
+		collect(&resource.Sample{ImportAllSteps: true}, 5, []*resource.Step{
+			nil, nil, nil, {ExcludeImportTest: true}, nil,
+		}),
+	); diff != "" {
+		t.Errorf("ImportAllSteps mismatch (-want +got):\n%s", diff)
+	}
+
+	badStep := &resource.Step{Name: "s", ExcludeImportTest: true, IncludeImportTest: true}
+	if errs := badStep.Validate("Topic", "samp"); len(errs) != 1 || !strings.Contains(errs[0].Error(), "cannot set both") {
+		t.Errorf("Validate() mutual exclusion = %v, want cannot set both error", errs)
 	}
 }

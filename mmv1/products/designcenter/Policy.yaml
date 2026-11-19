@@ -33,6 +33,7 @@ async:
 samples:
   - name: designcenter_policy_basic
     primary_resource_id: example
+    import_all_steps: true
     steps:
       - name: designcenter_policy_basic
         resource_id_vars:

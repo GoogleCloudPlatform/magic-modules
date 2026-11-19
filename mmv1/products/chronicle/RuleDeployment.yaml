@@ -55,6 +55,7 @@ samples:
   - name: 'chronicle_ruledeployment_schedule_customizations'
     primary_resource_id: 'example'
     exclude_basic_doc: true
+    import_all_steps: true
     steps:
       - name: 'chronicle_ruledeployment_schedule_customizations'
         test_env_vars:

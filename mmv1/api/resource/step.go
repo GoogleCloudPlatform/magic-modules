@@ -137,6 +137,9 @@ type Step struct {
 	// Whether to skip import tests for this test step
 	ExcludeImportTest bool `yaml:"exclude_import_test,omitempty"`
 
+	// Whether to force import tests on intermediate steps (>1 and <last)
+	IncludeImportTest bool `yaml:"include_import_test,omitempty"`
+
 	// Whether to generate docs for this test step (override sample's exclude_basic_doc)
 	IncludeStepDoc bool `yaml:"include_step_doc,omitempty"`
 
@@ -251,6 +254,9 @@ func (s *Step) Validate(rName, sName string) (es []error) {
 	}
 	if s.Name == "" {
 		es = append(es, fmt.Errorf("missing `name` for one step in test sample %s in resource %s", sName, rName))
+	}
+	if s.ExcludeImportTest && s.IncludeImportTest {
+		es = append(es, fmt.Errorf("step %q in sample %q of resource %q cannot set both 'exclude_import_test' and 'include_import_test'", s.Name, sName, rName))
 	}
 	es = append(es, s.templateErrs...)
 

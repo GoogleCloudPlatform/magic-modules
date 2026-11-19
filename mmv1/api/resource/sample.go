@@ -77,6 +77,10 @@ type Sample struct {
 	// object parent
 	PrimaryResourceType string `yaml:"primary_resource_type,omitempty"`
 
+	// Forces ImportStateVerify + Identity import after every active step
+	// instead of only key active steps (0, 1, len(activeSteps)-1).
+	ImportAllSteps bool `yaml:"import_all_steps,omitempty"`
+
 	// Steps
 	Steps []*Step
 
@@ -97,6 +101,16 @@ type Sample struct {
 	// The reason to skip a test. For example, a link to a ticket explaining the issue that needs to be resolved before
 	// unskipping the test. If this is not empty, the test will be skipped.
 	TGCSkipTest string `yaml:"tgc_skip_test,omitempty"`
+}
+
+func (s *Sample) ShouldRunImportStep(activeIdx, activeTotal int, st *Step) bool {
+	if st.ExcludeImportTest {
+		return false
+	}
+	if st.IncludeImportTest || s.ImportAllSteps {
+		return true
+	}
+	return activeIdx == 0 || activeIdx == 1 || activeIdx == activeTotal-1
 }
 
 func (s *Sample) TestSampleSlug(productName, resourceName string) string {

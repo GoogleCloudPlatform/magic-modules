@@ -83,6 +83,7 @@ samples:
           - delete_service_on_destroy
   - name: app_engine_standard_app_version_vpc_access
     primary_resource_id: gae-std-app-ver-vpc-access
+    import_all_steps: true
     steps:
       - name: app_engine_standard_app_version_vpc_access
         vars:

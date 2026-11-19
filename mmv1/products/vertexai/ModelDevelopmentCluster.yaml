@@ -61,6 +61,7 @@ samples:
   - name: vertex_ai_model_development_cluster_basic
     primary_resource_id: default
     min_version: beta
+    import_all_steps: true
     steps:
       - name: vertex_ai_model_development_cluster_basic
         min_version: beta
