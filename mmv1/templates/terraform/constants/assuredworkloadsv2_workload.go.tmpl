@@ -1,16 +1,6 @@
-var assuredWorkloadsV2WorkloadNameRegexp = regexp.MustCompile("^organizations/([^/]+)/locations/([^/]+)/workloads/([^/]+)$")
-
 func assuredWorkloadsV2BillingAccountDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	if old == "" || new == "" {
 		return old == new
 	}
 	return strings.TrimPrefix(old, "billingAccounts/") == strings.TrimPrefix(new, "billingAccounts/")
-}
-
-func assuredWorkloadsV2WorkloadIdFromName(name string) string {
-	parts := assuredWorkloadsV2WorkloadNameRegexp.FindStringSubmatch(name)
-	if len(parts) != 4 {
-		return ""
-	}
-	return parts[3]
 }

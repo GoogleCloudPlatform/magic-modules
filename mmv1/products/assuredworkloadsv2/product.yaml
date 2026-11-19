@@ -19,8 +19,6 @@ scopes:
 versions:
   - name: ga
     # Assured Workloads only serves workloads from the regional endpoint that
-    # matches the workload location; the global endpoint rejects them. The API
-    # version is part of each resource URL (instead of this base URL) because
-    # long-running operations are served from the v1 path.
-    base_url: https://{{location}}-assuredworkloads.googleapis.com/
+    # matches the workload location; the global endpoint rejects them.
+    base_url: https://{{location}}-assuredworkloads.googleapis.com/v2/
     cai_base_url: https://assuredworkloads.googleapis.com/v2/

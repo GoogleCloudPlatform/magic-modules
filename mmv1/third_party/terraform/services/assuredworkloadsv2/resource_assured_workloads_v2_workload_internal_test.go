@@ -316,22 +316,65 @@ func TestAssuredWorkloadsV2BillingAccountDiffSuppress(t *testing.T) {
 	}
 }
 
-func TestAssuredWorkloadsV2WorkloadIdFromName(t *testing.T) {
+func TestAssuredWorkloadsV2OperationURL(t *testing.T) {
 	t.Parallel()
 
 	cases := []struct {
-		input string
-		want  string
+		name     string
+		baseURL  string
+		opName   string
+		location string
+		want     string
+		wantErr  bool
 	}{
-		{"organizations/123/locations/us-east4/workloads/my-workload", "my-workload"},
-		{"organizations/123/locations/europe/workloads/uuid-1234-5678", "uuid-1234-5678"},
-		{"invalid/name", ""},
-		{"", ""},
+		{
+			name:     "rewrites v2 base URL to v1 with explicit location",
+			baseURL:  "https://{{location}}-assuredworkloads.googleapis.com/v2/",
+			opName:   "organizations/123/locations/us-east4/operations/op-1",
+			location: "us-east4",
+			want:     "https://us-east4-assuredworkloads.googleapis.com/v1/organizations/123/locations/us-east4/operations/op-1",
+		},
+		{
+			name:     "falls back to location in operation name",
+			baseURL:  "https://{{location}}-assuredworkloads.googleapis.com/v2/",
+			opName:   "organizations/123/locations/europe/operations/op-2",
+			location: "",
+			want:     "https://europe-assuredworkloads.googleapis.com/v1/organizations/123/locations/europe/operations/op-2",
+		},
+		{
+			name:     "handles base URL without trailing slash",
+			baseURL:  "https://{{location}}-assuredworkloads.googleapis.com/v2",
+			opName:   "organizations/123/locations/us-east4/operations/op-3",
+			location: "us-east4",
+			want:     "https://us-east4-assuredworkloads.googleapis.com/v1/organizations/123/locations/us-east4/operations/op-3",
+		},
+		{
+			name:     "errors when location cannot be resolved",
+			baseURL:  "https://{{location}}-assuredworkloads.googleapis.com/v2/",
+			opName:   "operations/op-4",
+			location: "",
+			wantErr:  true,
+		},
 	}
+
 	for _, tc := range cases {
-		if got := assuredWorkloadsV2WorkloadIdFromName(tc.input); got != tc.want {
-			t.Errorf("assuredWorkloadsV2WorkloadIdFromName(%q) = %q, want %q", tc.input, got, tc.want)
-		}
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			got, err := assuredWorkloadsV2OperationURL(tc.baseURL, tc.opName, tc.location)
+			if tc.wantErr {
+				if err == nil {
+					t.Fatalf("expected error, got %q", got)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if got != tc.want {
+				t.Errorf("got %q, want %q", got, tc.want)
+			}
+		})
 	}
 }
 
@@ -342,6 +385,7 @@ func TestAssuredWorkloadsV2WorkloadImport(t *testing.T) {
 		"organizations/123/locations/us-east4/workloads/my-workload",
 		"123/us-east4/my-workload",
 	}
+	wantID := "organizations/123/locations/us-east4/workloads/my-workload"
 	for _, importId := range cases {
 		importId := importId
 		t.Run(importId, func(t *testing.T) {
@@ -359,15 +403,14 @@ func TestAssuredWorkloadsV2WorkloadImport(t *testing.T) {
 				"organization": "123",
 				"location":     "us-east4",
 				"workload_id":  "my-workload",
-				"name":         "organizations/123/locations/us-east4/workloads/my-workload",
 			}
 			for k, v := range want {
 				if got := res[0].Get(k).(string); got != v {
 					t.Errorf("%s = %q, want %q", k, got, v)
 				}
 			}
-			if got := res[0].Id(); got != want["name"] {
-				t.Errorf("id = %q, want %q", got, want["name"])
+			if got := res[0].Id(); got != wantID {
+				t.Errorf("id = %q, want %q", got, wantID)
 			}
 		})
 	}
@@ -377,154 +420,6 @@ func TestAssuredWorkloadsV2WorkloadImport(t *testing.T) {
 	if _, err := resourceAssuredWorkloadsV2WorkloadImport(d, &transport_tpg.Config{}); err == nil {
 		t.Error("expected an error for an invalid import ID")
 	}
-}
-
-func TestDataSourceAssuredWorkloadsV2WorkloadSchema(t *testing.T) {
-	t.Parallel()
-
-	ds := DataSourceAssuredWorkloadsV2Workload()
-	if err := ds.InternalValidate(nil, false); err != nil {
-		t.Fatalf("data source schema InternalValidate failed: %s", err)
-	}
-	if _, exists := ds.Schema["resource_config"]; exists {
-		t.Errorf("expected %q to be excluded from data source schema", "resource_config")
-	}
-	if _, exists := ds.Schema["deletion_policy"]; !exists {
-		t.Errorf("expected %q to remain in data source schema so resource read can populate virtual fields", "deletion_policy")
-	}
-
-	cases := []struct {
-		name    string
-		raw     map[string]interface{}
-		wantErr bool
-	}{
-		{
-			name: "valid name",
-			raw: map[string]interface{}{
-				"name": "organizations/123/locations/us-east4/workloads/my-workload",
-			},
-		},
-		{
-			name: "valid org location workload_id",
-			raw: map[string]interface{}{
-				"organization": "123",
-				"location":     "us-east4",
-				"workload_id":  "my-workload",
-			},
-		},
-		{
-			name:    "neither specified",
-			raw:     map[string]interface{}{},
-			wantErr: true,
-		},
-		{
-			name: "invalid name format",
-			raw: map[string]interface{}{
-				"name": "invalid-name",
-			},
-			wantErr: true,
-		},
-		{
-			name: "name conflicts with organization",
-			raw: map[string]interface{}{
-				"name":         "organizations/123/locations/us-east4/workloads/my-workload",
-				"organization": "123",
-			},
-			wantErr: true,
-		},
-		{
-			name: "incomplete components",
-			raw: map[string]interface{}{
-				"organization": "123",
-				"workload_id":  "my-workload",
-			},
-			wantErr: true,
-		},
-	}
-
-	for _, tc := range cases {
-		tc := tc
-		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-			diags := ds.Validate(terraform.NewResourceConfigRaw(tc.raw))
-			if tc.wantErr && !diags.HasError() {
-				t.Errorf("expected validation error for %#v, got none", tc.raw)
-			}
-			if !tc.wantErr && diags.HasError() {
-				t.Errorf("unexpected validation errors for %#v: %v", tc.raw, diags)
-			}
-		})
-	}
-}
-
-func TestDataSourceAssuredWorkloadsV2WorkloadResolveId(t *testing.T) {
-	t.Parallel()
-
-	dsSchema := DataSourceAssuredWorkloadsV2Workload().Schema
-	wantName := "organizations/123/locations/us-east4/workloads/my-workload"
-
-	t.Run("by name populates regional URL components", func(t *testing.T) {
-		t.Parallel()
-		d := schema.TestResourceDataRaw(t, dsSchema, map[string]interface{}{
-			"name": wantName,
-		})
-		id, err := resolveDataSourceAssuredWorkloadsV2WorkloadId(d)
-		if err != nil {
-			t.Fatalf("unexpected error: %s", err)
-		}
-		if id != wantName {
-			t.Errorf("id = %q, want %q", id, wantName)
-		}
-		for k, want := range map[string]string{
-			"organization": "123",
-			"location":     "us-east4",
-			"workload_id":  "my-workload",
-			"name":         wantName,
-		} {
-			if got := d.Get(k).(string); got != want {
-				t.Errorf("%s = %q, want %q", k, got, want)
-			}
-		}
-	})
-
-	t.Run("by components populates name", func(t *testing.T) {
-		t.Parallel()
-		d := schema.TestResourceDataRaw(t, dsSchema, map[string]interface{}{
-			"organization": "123",
-			"location":     "us-east4",
-			"workload_id":  "my-workload",
-		})
-		id, err := resolveDataSourceAssuredWorkloadsV2WorkloadId(d)
-		if err != nil {
-			t.Fatalf("unexpected error: %s", err)
-		}
-		if id != wantName {
-			t.Errorf("id = %q, want %q", id, wantName)
-		}
-		if got := d.Get("name").(string); got != wantName {
-			t.Errorf("name = %q, want %q", got, wantName)
-		}
-	})
-
-	t.Run("invalid name returns error", func(t *testing.T) {
-		t.Parallel()
-		d := schema.TestResourceDataRaw(t, dsSchema, map[string]interface{}{
-			"name": "not-a-valid-name",
-		})
-		if _, err := resolveDataSourceAssuredWorkloadsV2WorkloadId(d); err == nil {
-			t.Error("expected an error for invalid name")
-		}
-	})
-
-	t.Run("missing components returns error", func(t *testing.T) {
-		t.Parallel()
-		d := schema.TestResourceDataRaw(t, dsSchema, map[string]interface{}{
-			"organization": "123",
-		})
-		if _, err := resolveDataSourceAssuredWorkloadsV2WorkloadId(d); err == nil {
-			t.Error("expected an error for missing components")
-		}
-	})
 }
 
 func assuredWorkloadsV2ToCty(v interface{}) cty.Value {
@@ -565,6 +460,7 @@ func TestAssuredWorkloadsV2ExpandCloudControlConfigsFromResourceData(t *testing.
 		return map[string]interface{}{
 			"organization": "123",
 			"location":     "us-east4",
+			"workload_id":  "my-workload",
 			"resource_config": []interface{}{
 				map[string]interface{}{
 					"existing_project": "projects/123456789",

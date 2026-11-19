@@ -21,14 +21,12 @@ references:
   guides:
     Assured Workloads Overview: https://cloud.google.com/assured-workloads/docs/overview
   api: https://cloud.google.com/assured-workloads/docs/reference/rest/v2/organizations.locations.workloads
-base_url: v2/organizations/{{organization}}/locations/{{location}}/workloads
-self_link: v2/{{name}}
-create_url: v2/organizations/{{organization}}/locations/{{location}}/workloads
-update_url: v2/{{name}}
+base_url: organizations/{{organization}}/locations/{{location}}/workloads
+self_link: organizations/{{organization}}/locations/{{location}}/workloads/{{workload_id}}
+create_url: organizations/{{organization}}/locations/{{location}}/workloads?workloadId={{workload_id}}
 update_verb: PATCH
 update_mask: true
-delete_url: v2/{{name}}
-id_format: '{{name}}'
+id_format: organizations/{{organization}}/locations/{{location}}/workloads/{{workload_id}}
 import_format:
   - organizations/{{organization}}/locations/{{location}}/workloads/{{workload_id}}
   - '{{organization}}/{{location}}/{{workload_id}}'
@@ -37,29 +35,15 @@ timeouts:
   insert_minutes: 30
   update_minutes: 30
   delete_minutes: 30
-autogen_async: true
+autogen_async: false
 async:
   type: OpAsync
-  operation:
-    # Assured Workloads serves long-running operations from the v1 path only.
-    base_url: v1/{{op_id}}
   actions:
     - create
     - update
     - delete
-  result:
-    resource_inside_response: true
-  # The operation waiter sends the billing project in X-Goog-User-Project; see
-  # the pre_create, pre_update and pre_delete templates.
-  include_project: true
 custom_code:
   constants: templates/terraform/constants/assuredworkloadsv2_workload.go.tmpl
-  pre_create: templates/terraform/pre_create/assuredworkloadsv2_workload.go.tmpl
-  post_create: templates/terraform/post_create/assuredworkloadsv2_workload.go.tmpl
-  post_read: templates/terraform/post_read/assuredworkloadsv2_workload.go.tmpl
-  pre_update: templates/terraform/pre_create/assuredworkloadsv2_workload_operation_project.go.tmpl
-  pre_delete: templates/terraform/pre_create/assuredworkloadsv2_workload_operation_project.go.tmpl
-  custom_import: templates/terraform/custom_import/assuredworkloadsv2_workload.go.tmpl
 docs:
   note: |
     Workloads have no project, so Assured Workloads attributes API quota and
@@ -104,10 +88,10 @@ parameters:
     description: |
       The user-assigned identifier for the workload, which must be unique within
       the parent organization and location. It can contain only letters,
-      numbers, hyphens and underscores. If omitted, the server generates an ID.
+      numbers, hyphens and underscores.
     immutable: true
     url_param_only: true
-    default_from_api: true
+    required: true
 properties:
   - name: name
     type: String

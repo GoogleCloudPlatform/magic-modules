@@ -1,6 +1,0 @@
-// Assured Workloads long-running operations are polled with the billing
-// project in X-Goog-User-Project (when user_project_override is enabled); the
-// workload has no project of its own.
-if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
-	project = bp
-}
