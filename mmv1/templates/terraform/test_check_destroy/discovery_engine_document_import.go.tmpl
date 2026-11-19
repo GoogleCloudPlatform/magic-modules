@@ -1,4 +1,4 @@
-if rs.Primary.Attributes["deletion_policy"] != "FORCE" {
+if rs.Primary == nil || rs.Primary.Attributes["deletion_policy"] != "FORCE" {
 	continue
 }
 
