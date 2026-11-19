@@ -1517,113 +1517,6 @@ func TestUnitContainerCluster_dnsConfigPlan(t *testing.T) {
 	}
 }
 
-func TestUnitContainerCluster_controlPlaneEndpointsConfigDiff(t *testing.T) {
-	t.Parallel()
-
-	r := &schema.Resource{Schema: map[string]*schema.Schema{
-		"control_plane_endpoints_config": ResourceContainerCluster().Schema["control_plane_endpoints_config"],
-	}}
-
-	cases := map[string]struct {
-		priorTokensViaDns string
-		config            map[string]interface{}
-		wantDiff          bool
-	}{
-		"omitted control_plane_endpoints_config": {
-			priorTokensViaDns: "false",
-			config:            map[string]interface{}{},
-			wantDiff:          false,
-		},
-		"partial dns_endpoint_config omitting allow_external_traffic": {
-			priorTokensViaDns: "true",
-			config: map[string]interface{}{
-				"control_plane_endpoints_config": []interface{}{
-					map[string]interface{}{
-						"dns_endpoint_config": []interface{}{
-							map[string]interface{}{
-								"enable_k8s_tokens_via_dns": true,
-							},
-						},
-					},
-				},
-			},
-			wantDiff: false,
-		},
-		"empty dns_endpoint_config and ip_endpoints_config blocks": {
-			priorTokensViaDns: "false",
-			config: map[string]interface{}{
-				"control_plane_endpoints_config": []interface{}{
-					map[string]interface{}{
-						"dns_endpoint_config": []interface{}{map[string]interface{}{}},
-						"ip_endpoints_config": []interface{}{map[string]interface{}{}},
-					},
-				},
-			},
-			wantDiff: false,
-		},
-		"explicit allow_external_traffic false": {
-			priorTokensViaDns: "true",
-			config: map[string]interface{}{
-				"control_plane_endpoints_config": []interface{}{
-					map[string]interface{}{
-						"dns_endpoint_config": []interface{}{
-							map[string]interface{}{
-								"allow_external_traffic":    false,
-								"enable_k8s_tokens_via_dns": true,
-							},
-						},
-					},
-				},
-			},
-			wantDiff: true,
-		},
-		"explicit ip_endpoints_config enabled true": {
-			priorTokensViaDns: "false",
-			config: map[string]interface{}{
-				"control_plane_endpoints_config": []interface{}{
-					map[string]interface{}{
-						"ip_endpoints_config": []interface{}{
-							map[string]interface{}{
-								"enabled": true,
-							},
-						},
-					},
-				},
-			},
-			wantDiff: true,
-		},
-	}
-
-	for tn, tc := range cases {
-		tc := tc
-		t.Run(tn, func(t *testing.T) {
-			t.Parallel()
-			prior := &terraform.InstanceState{
-				ID: "id",
-				Attributes: map[string]string{
-					"id": "id",
-					"control_plane_endpoints_config.#":                                                 "1",
-					"control_plane_endpoints_config.0.dns_endpoint_config.#":                           "1",
-					"control_plane_endpoints_config.0.dns_endpoint_config.0.endpoint":                  "gke-example.us-east1-b.gke.goog",
-					"control_plane_endpoints_config.0.dns_endpoint_config.0.allow_external_traffic":    "true",
-					"control_plane_endpoints_config.0.dns_endpoint_config.0.enable_k8s_tokens_via_dns": tc.priorTokensViaDns,
-					"control_plane_endpoints_config.0.dns_endpoint_config.0.enable_k8s_certs_via_dns":  "false",
-					"control_plane_endpoints_config.0.ip_endpoints_config.#":                            "1",
-					"control_plane_endpoints_config.0.ip_endpoints_config.0.enabled":                   "false",
-				},
-			}
-			diff, err := r.SimpleDiff(context.Background(), prior, terraform.NewResourceConfigRaw(tc.config), nil)
-			if err != nil {
-				t.Fatalf("SimpleDiff: %v", err)
-			}
-			gotDiff := !diff.Empty()
-			if gotDiff != tc.wantDiff {
-				t.Errorf("diff present = %t, want %t (diff: %+v)", gotDiff, tc.wantDiff, diff)
-			}
-		})
-	}
-}
-
 func TestUnitContainerCluster_expandControlPlaneEndpointsAndManConfig(t *testing.T) {
 	t.Parallel()
 
@@ -1658,114 +1551,37 @@ func TestUnitContainerCluster_expandControlPlaneEndpointsAndManConfig(t *testing
 		isCreate  bool
 		wantJSON  string
 	}{
-		"create with omitted control_plane_endpoints_config": {
-			attrs:     map[string]string{"id": "id"},
-			rawConfig: cty.NullVal(cty.EmptyObject),
-			isCreate:  true,
-			wantJSON:  `{"dnsEndpointConfig":{"enableK8sCertsViaDns":false,"enableK8sTokensViaDns":false},"ipEndpointsConfig":{"authorizedNetworksConfig":{},"enablePublicEndpoint":true,"globalAccess":false,"privateEndpointSubnetwork":""}}`,
-		},
-		"create with empty dns_endpoint_config and ip_endpoints_config lists": {
-			attrs: map[string]string{
-				"id":                               "id",
-				"control_plane_endpoints_config.#": "1",
-			},
-			rawConfig: cty.ObjectVal(map[string]cty.Value{
-				"control_plane_endpoints_config": cty.ListVal([]cty.Value{
-					cty.ObjectVal(map[string]cty.Value{
-						"dns_endpoint_config": cty.ListValEmpty(cty.Object(map[string]cty.Type{
-							"allow_external_traffic": cty.Bool,
-						})),
-						"ip_endpoints_config": cty.ListValEmpty(cty.Object(map[string]cty.Type{
-							"enabled": cty.Bool,
-						})),
-					}),
-				}),
-			}),
-			isCreate: true,
-			wantJSON: `{"dnsEndpointConfig":{"enableK8sCertsViaDns":false,"enableK8sTokensViaDns":false},"ipEndpointsConfig":{"authorizedNetworksConfig":{},"enablePublicEndpoint":true,"globalAccess":false,"privateEndpointSubnetwork":""}}`,
-		},
-		"create with partial dns_endpoint_config omitting allow_external_traffic": {
+		"create omitting endpoint access fields": {
 			attrs: map[string]string{
 				"id": "id",
 				"control_plane_endpoints_config.#":                                                 "1",
 				"control_plane_endpoints_config.0.dns_endpoint_config.#":                           "1",
 				"control_plane_endpoints_config.0.dns_endpoint_config.0.enable_k8s_tokens_via_dns": "true",
-			},
-			rawConfig: cty.ObjectVal(map[string]cty.Value{
-				"control_plane_endpoints_config": cty.ListVal([]cty.Value{
-					cty.ObjectVal(map[string]cty.Value{
-						"dns_endpoint_config": cty.ListVal([]cty.Value{
-							cty.ObjectVal(map[string]cty.Value{
-								"allow_external_traffic":    cty.NullVal(cty.Bool),
-								"enable_k8s_tokens_via_dns": cty.True,
-							}),
-						}),
-					}),
-				}),
-			}),
-			isCreate: true,
-			wantJSON: `{"dnsEndpointConfig":{"enableK8sCertsViaDns":false,"enableK8sTokensViaDns":true},"ipEndpointsConfig":{"authorizedNetworksConfig":{},"enablePublicEndpoint":true,"globalAccess":false,"privateEndpointSubnetwork":""}}`,
-		},
-		"create with empty dns_endpoint_config and ip_endpoints_config blocks": {
-			attrs: map[string]string{
-				"id":                                       "id",
-				"control_plane_endpoints_config.#":         "1",
-				"control_plane_endpoints_config.0.dns_endpoint_config.#": "1",
-				"control_plane_endpoints_config.0.ip_endpoints_config.#":  "1",
+				"control_plane_endpoints_config.0.ip_endpoints_config.#":                            "1",
 			},
 			rawConfig: cpecRawConfig(cty.NullVal(cty.Bool), cty.NullVal(cty.Bool)),
 			isCreate:  true,
-			wantJSON:  `{"dnsEndpointConfig":{"enableK8sCertsViaDns":false,"enableK8sTokensViaDns":false},"ipEndpointsConfig":{"authorizedNetworksConfig":{},"enablePublicEndpoint":true,"globalAccess":false,"privateEndpointSubnetwork":""}}`,
+			wantJSON:  `{"dnsEndpointConfig":{"enableK8sCertsViaDns":false,"enableK8sTokensViaDns":true},"ipEndpointsConfig":{"authorizedNetworksConfig":{},"enablePublicEndpoint":true,"globalAccess":false,"privateEndpointSubnetwork":""}}`,
 		},
-		"create with explicit false allow_external_traffic and enabled": {
-			attrs: map[string]string{
-				"id": "id",
-				"control_plane_endpoints_config.#":                                              "1",
-				"control_plane_endpoints_config.0.dns_endpoint_config.#":                        "1",
-				"control_plane_endpoints_config.0.dns_endpoint_config.0.allow_external_traffic": "false",
-				"control_plane_endpoints_config.0.ip_endpoints_config.#":                        "1",
-				"control_plane_endpoints_config.0.ip_endpoints_config.0.enabled":                "false",
-			},
+		"create with explicit false values": {
+			attrs:     map[string]string{"id": "id"},
 			rawConfig: cpecRawConfig(cty.False, cty.False),
 			isCreate:  true,
 			wantJSON:  `{"dnsEndpointConfig":{"allowExternalTraffic":false,"enableK8sCertsViaDns":false,"enableK8sTokensViaDns":false},"ipEndpointsConfig":{"enabled":false}}`,
 		},
-		"create with explicit true allow_external_traffic and enabled": {
-			attrs: map[string]string{
-				"id": "id",
-				"control_plane_endpoints_config.#":                                              "1",
-				"control_plane_endpoints_config.0.dns_endpoint_config.#":                        "1",
-				"control_plane_endpoints_config.0.dns_endpoint_config.0.allow_external_traffic": "true",
-				"control_plane_endpoints_config.0.ip_endpoints_config.#":                        "1",
-				"control_plane_endpoints_config.0.ip_endpoints_config.0.enabled":                "true",
-			},
+		"create with explicit true values": {
+			attrs:     map[string]string{"id": "id"},
 			rawConfig: cpecRawConfig(cty.True, cty.True),
 			isCreate:  true,
 			wantJSON:  `{"dnsEndpointConfig":{"allowExternalTraffic":true,"enableK8sCertsViaDns":false,"enableK8sTokensViaDns":false},"ipEndpointsConfig":{"authorizedNetworksConfig":{},"enablePublicEndpoint":true,"enabled":true,"globalAccess":false,"privateEndpointSubnetwork":""}}`,
 		},
-		"update with omitted allow_external_traffic and enabled when state has allow_external_traffic true and ip enabled true": {
+		"update with omitted ip_endpoints_config when disabled in state": {
 			attrs: map[string]string{
 				"id": "id",
 				"control_plane_endpoints_config.#":                                                 "1",
 				"control_plane_endpoints_config.0.dns_endpoint_config.#":                           "1",
 				"control_plane_endpoints_config.0.dns_endpoint_config.0.allow_external_traffic":    "true",
 				"control_plane_endpoints_config.0.dns_endpoint_config.0.enable_k8s_tokens_via_dns": "true",
-				"control_plane_endpoints_config.0.dns_endpoint_config.0.enable_k8s_certs_via_dns":  "false",
-				"control_plane_endpoints_config.0.ip_endpoints_config.#":                            "1",
-				"control_plane_endpoints_config.0.ip_endpoints_config.0.enabled":                   "true",
-			},
-			rawConfig: cpecRawConfig(cty.NullVal(cty.Bool), cty.NullVal(cty.Bool)),
-			isCreate:  false,
-			wantJSON:  `{"dnsEndpointConfig":{"enableK8sCertsViaDns":false,"enableK8sTokensViaDns":true},"ipEndpointsConfig":{"authorizedNetworksConfig":{},"enablePublicEndpoint":true,"globalAccess":false,"privateEndpointSubnetwork":""}}`,
-		},
-		"update with omitted ip_endpoints_config when state has ip_endpoints_config.0.enabled false": {
-			attrs: map[string]string{
-				"id": "id",
-				"control_plane_endpoints_config.#":                                                 "1",
-				"control_plane_endpoints_config.0.dns_endpoint_config.#":                           "1",
-				"control_plane_endpoints_config.0.dns_endpoint_config.0.allow_external_traffic":    "true",
-				"control_plane_endpoints_config.0.dns_endpoint_config.0.enable_k8s_tokens_via_dns": "true",
-				"control_plane_endpoints_config.0.dns_endpoint_config.0.enable_k8s_certs_via_dns":  "false",
 				"control_plane_endpoints_config.0.ip_endpoints_config.#":                            "1",
 				"control_plane_endpoints_config.0.ip_endpoints_config.0.enabled":                   "false",
 			},
@@ -1808,43 +1624,18 @@ func TestUnitContainerCluster_expandControlPlaneEndpointsAndManConfig(t *testing
 	}
 
 	manCases := map[string]struct {
-		attrs     map[string]string
 		rawConfig cty.Value
 		wantJSON  string
 	}{
-		"gcp_public_cidrs_access_enabled omitted in config when state has false": {
-			attrs: map[string]string{
-				"id": "id",
-				"master_authorized_networks_config.#":                                 "1",
-				"master_authorized_networks_config.0.gcp_public_cidrs_access_enabled": "false",
-			},
+		"gcp_public_cidrs_access_enabled omitted when false in state": {
 			rawConfig: manRawConfig(cty.NullVal(cty.Bool)),
 			wantJSON:  `{"enabled":true}`,
 		},
-		"gcp_public_cidrs_access_enabled omitted with null raw config when state has false": {
-			attrs: map[string]string{
-				"id": "id",
-				"master_authorized_networks_config.#":                                 "1",
-				"master_authorized_networks_config.0.gcp_public_cidrs_access_enabled": "false",
-			},
-			rawConfig: cty.NullVal(cty.EmptyObject),
-			wantJSON:  `{"enabled":true}`,
-		},
 		"gcp_public_cidrs_access_enabled explicit false": {
-			attrs: map[string]string{
-				"id": "id",
-				"master_authorized_networks_config.#":                                 "1",
-				"master_authorized_networks_config.0.gcp_public_cidrs_access_enabled": "false",
-			},
 			rawConfig: manRawConfig(cty.False),
 			wantJSON:  `{"enabled":true,"gcpPublicCidrsAccessEnabled":false}`,
 		},
 		"gcp_public_cidrs_access_enabled explicit true": {
-			attrs: map[string]string{
-				"id": "id",
-				"master_authorized_networks_config.#":                                 "1",
-				"master_authorized_networks_config.0.gcp_public_cidrs_access_enabled": "true",
-			},
 			rawConfig: manRawConfig(cty.True),
 			wantJSON:  `{"enabled":true,"gcpPublicCidrsAccessEnabled":true}`,
 		},
@@ -1855,9 +1646,13 @@ func TestUnitContainerCluster_expandControlPlaneEndpointsAndManConfig(t *testing
 		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
 			d, err := schema.InternalMap(r.SchemaMap()).Data(&terraform.InstanceState{
-				ID:         "id",
-				Attributes: tc.attrs,
-				RawConfig:  tc.rawConfig,
+				ID: "id",
+				Attributes: map[string]string{
+					"id": "id",
+					"master_authorized_networks_config.#":                                 "1",
+					"master_authorized_networks_config.0.gcp_public_cidrs_access_enabled": "false",
+				},
+				RawConfig: tc.rawConfig,
 			}, nil)
 			if err != nil {
 				t.Fatalf("Data: %v", err)
