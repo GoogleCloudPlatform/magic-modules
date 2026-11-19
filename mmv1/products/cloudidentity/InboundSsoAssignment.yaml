@@ -28,7 +28,7 @@ description: |
   `billing_project` you defined.
 references:
   guides:
-    Assign SSO profiles: https://cloud.google.com/identity/docs/how-to/assign-sso-profiles
+    Assign SSO profiles: https://support.google.com/a/answer/12032922#assign_profile
   api: https://cloud.google.com/identity/docs/reference/rest/v1/inboundSsoAssignments
 base_url: inboundSsoAssignments
 self_link: 'inboundSsoAssignments/{{inbound_sso_assignment_id}}'
@@ -139,7 +139,10 @@ properties:
     description: |
       Must be zero (which is the default value so it can be omitted) for assignments with
       `target_org_unit` set and must be greater-than-or-equal-to one for assignments with
-      `target_group` set.
+      `target_group` set (where `1` is the highest priority). Setting or updating `rank`
+      on a group-targeted assignment can automatically shift the ranks of other
+      group-targeted assignments in the customer, which may cause unexpected diffs on
+      other assignments, so it should be used with caution.
     default_from_api: true
   - name: ssoMode
     type: Enum
