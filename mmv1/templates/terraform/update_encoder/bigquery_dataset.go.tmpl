@@ -1,4 +1,24 @@
 if !d.HasChange("access") {
 	delete(obj, "access")
 }
+replicasChanged := hasBigQueryDatasetReplicasChange(d)
+if replicasChanged {
+	if payload := buildBigQueryDatasetReplicasAPIPayload(d); len(payload) > 0 {
+		obj["replicas"] = payload
+	}
+} else {
+	delete(obj, "replicas")
+}
+if d.HasChange("failover_reservation_id") {
+	newFailover, _ := d.Get("failover_reservation_id").(string)
+	if replicasChanged {
+		// Handled in pre_update (when disassociating prior failover reservation before dropping replicas)
+		// and post_update (when associating new failover reservation after replica backfill completes).
+		delete(obj, "failoverReservationId")
+	} else {
+		obj["failoverReservationId"] = newFailover
+	}
+} else {
+	delete(obj, "failoverReservationId")
+}
 return obj, nil
