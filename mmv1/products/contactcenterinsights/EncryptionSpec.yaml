@@ -32,6 +32,7 @@ async:
 exclude_delete: true
 custom_code:
   pre_create: templates/terraform/pre_create/contactcenterinsights_encryption_spec_pre_create.go.tmpl
+  post_create: templates/terraform/post_create/sleep_2_min.go.tmpl
   pre_read: templates/terraform/pre_create/contactcenterinsights_set_endpoint.go.tmpl
 samples:
   - name: contact_center_insights_encryption_spec_basic
