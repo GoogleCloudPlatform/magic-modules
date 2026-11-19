@@ -457,6 +457,90 @@ properties:
               description: |
                 The status of the service connection policy.
               output: true
+            - name: serviceConnectionPolicy
+              type: String
+              description: |
+                The PSC service connection policy name. The format is
+                `projects/<PROJECT_ID>/regions/<REGION_ID>/serviceConnectionPolicies/<alloydb-$NETWORK-$RANDOM-scp>`.
+              output: true
+            - name: serviceConnectionPolicyCreationState
+              type: String
+              description: |
+                The creation state or result of the connection policy.
+                Possible values include:
+                - `ACTIVE`: The policy was created successfully.
+                - `PERMISSION_DENIED`: Sufficient permissions were not provided.
+                Note that this field is an unstructured output and customers should not
+                rely on the specific string value or error message directly.
+              output: true
+            - name: dnsAutomationInfos
+              type: Array
+              description: |
+                List of DNS automation info for the PSC auto connection.
+              output: true
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: state
+                    type: String
+                    description: |
+                      The state of the DNS automation.
+                      Possible values are: `STATE_UNSPECIFIED`, `PENDING_CREATE`, `ACTIVE`, `PENDING_DELETE`, `CREATE_FAILED`, `DELETE_FAILED`.
+                    output: true
+                  - name: fullyQualifiedDomainName
+                    type: String
+                    description: |
+                      The fully qualified domain name of the instance for DNS automation.
+                      Example: `<uid>.<uid>.<region>.alloydb.goog.`.
+                    output: true
+      - name: pscAutoDnsState
+        type: Enum
+        description: |
+          Configuration for setting up PSC auto DNS for the instance.
+          If unspecified, PSC auto DNS is disabled for older instances and enabled by default for new instances.
+          Use `psc_instance_info.effective_psc_auto_dns_enabled` to check the effective state of PSC auto DNS.
+        enum_values:
+          - PSC_AUTO_DNS_STATE_ENABLED
+          - PSC_AUTO_DNS_STATE_DISABLED
+      - name: pscAutoConnectionPolicyState
+        type: Enum
+        description: |
+          Configuration for setting up PSC auto connection policy for the instance.
+          If unspecified, PSC auto connection policy is disabled for older instances and enabled by default for new instances.
+          Use `psc_instance_info.effective_psc_auto_connection_policy` to check the effective state of PSC auto connection policy.
+        enum_values:
+          - ENABLED
+          - DISABLED
+  - name: pscInstanceInfo
+    type: NestedObject
+    description: |
+      Information about the Private Service Connect (PSC) for the instance.
+    output: true
+    properties:
+      - name: effectivePscAutoDnsEnabled
+        type: Boolean
+        description: |
+          The effective state of the PSC auto DNS for the instance.
+        output: true
+      - name: pscAutoDnsNames
+        type: Array
+        description: |
+          Specifies the auto DNS names for the instance.
+        output: true
+        item_type:
+          type: String
+      - name: effectivePscAutoConnectionPolicy
+        type: Boolean
+        description: |
+          Indicates if the PSC auto connection policy is enabled for the instance.
+          For older instances, this will be off by default, but for newer instances, this will be auto-enabled.
+        output: true
+      - name: serviceConnectionPolicy
+        type: String
+        description: |
+          The PSC service connection policy name. The format is
+          `projects/<PROJECT_ID>/regions/<REGION_ID>/serviceConnectionPolicies/<alloydb-$NETWORK-$RANDOM-scp>`.
+        output: true
   - name: networkConfig
     type: NestedObject
     default_from_api: true
