@@ -9,6 +9,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+func TestBootstrapVertexAIModelReplay(t *testing.T) {
+	t.Setenv("VCR_PATH", t.TempDir())
+	t.Setenv("VCR_MODE", "REPLAYING")
+	t.Setenv("GOOGLE_PROJECT", "test-project")
+	t.Setenv("TF_ACC", "1")
+	t.Setenv("GOOGLE_CREDENTIALS", "invalid credentials")
+
+	got := BootstrapVertexAIModel(t, "us-central1")
+	want := "projects/test-project/locations/us-central1/models/tf-bootstrap-vertex-ai-model"
+	if got != want {
+		t.Errorf("model name = %q, want %q", got, want)
+	}
+}
+
 func TestVertexAIModelFlattenSupportedExportFormats(t *testing.T) {
 	t.Parallel()
 	apiFormats := []interface{}{

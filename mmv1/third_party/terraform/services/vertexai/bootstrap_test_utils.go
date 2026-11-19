@@ -2,6 +2,7 @@ package vertexai
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -15,15 +16,19 @@ const sharedVertexAIModelID = "tf-bootstrap-vertex-ai-model"
 // BootstrapVertexAIModel returns a shared Model in the test project, uploading
 // it if it does not exist. Tests use it as a copy source, so it must not be deleted.
 func BootstrapVertexAIModel(t *testing.T, region string) string {
+	project := envvar.GetTestProjectFromEnv()
+	parent := fmt.Sprintf("projects/%s/locations/%s", project, region)
+	modelName := fmt.Sprintf("%s/models/%s", parent, sharedVertexAIModelID)
+	if os.Getenv("VCR_PATH") != "" && os.Getenv("VCR_MODE") == "REPLAYING" {
+		return modelName
+	}
+
 	config := transport_tpg.BootstrapConfig(t)
 	if config == nil {
 		return ""
 	}
 
-	project := envvar.GetTestProjectFromEnv()
-	parent := fmt.Sprintf("projects/%s/locations/%s", project, region)
 	apiURL := strings.ReplaceAll(transport_tpg.BaseUrl(Product, config), "{{region}}", region)
-	modelName := fmt.Sprintf("%s/models/%s", parent, sharedVertexAIModelID)
 
 	exists, err := vertexAIModelExists(config, project, apiURL, modelName)
 	if err != nil {
