@@ -14,6 +14,7 @@ type SchemaDiff map[string]ResourceDiff
 type ResourceDiffInterface interface {
 	IsNewResource() bool
 	IsFieldInNewNestedStructure(fieldPath string) bool
+	HasOldComputedOnlyAncestor(fieldPath string) bool
 }
 
 type ResourceDiff struct {
@@ -353,4 +354,19 @@ func (rd ResourceDiff) IsFieldInNewNestedStructure(fieldPath string) bool {
 	_, parentExistsInNew := rd.FlattenedSchema.New[parentPath]
 
 	return !parentExistsInOld && parentExistsInNew
+}
+
+// HasOldComputedOnlyAncestor reports whether any ancestor of fieldPath in the
+// old schema was Computed-only (Computed && !Optional && !Required).
+func (rd ResourceDiff) HasOldComputedOnlyAncestor(fieldPath string) bool {
+	for path := fieldPath; ; {
+		lastDot := strings.LastIndex(path, ".")
+		if lastDot == -1 {
+			return false
+		}
+		path = path[:lastDot]
+		if parent, ok := rd.FlattenedSchema.Old[path]; ok && parent != nil && parent.Computed && !parent.Optional && !parent.Required {
+			return true
+		}
+	}
 }

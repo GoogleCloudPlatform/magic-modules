@@ -1906,3 +1906,132 @@ func TestIsFieldInNewNestedStructure(t *testing.T) {
 		})
 	}
 }
+
+func TestHasOldComputedOnlyAncestor(t *testing.T) {
+	cases := map[string]struct {
+		oldSchema map[string]*schema.Schema
+		fieldPath string
+		expected  bool
+	}{
+		"top-level field has no ancestor": {
+			oldSchema: map[string]*schema.Schema{
+				"top": {Type: schema.TypeString, Computed: true},
+			},
+			fieldPath: "top",
+			expected:  false,
+		},
+		"direct child of computed-only parent": {
+			oldSchema: map[string]*schema.Schema{
+				"parent": {
+					Type:     schema.TypeList,
+					Computed: true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"child": {Type: schema.TypeString, Required: true},
+						},
+					},
+				},
+			},
+			fieldPath: "parent.child",
+			expected:  true,
+		},
+		"deeply nested descendant of computed-only ancestor": {
+			oldSchema: map[string]*schema.Schema{
+				"a": {
+					Type:     schema.TypeList,
+					Computed: true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"b": {
+								Type:     schema.TypeList,
+								Optional: true,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"c": {
+											Type:     schema.TypeList,
+											Optional: true,
+											Computed: true,
+											Elem: &schema.Resource{
+												Schema: map[string]*schema.Schema{
+													"d": {Type: schema.TypeString, Required: true},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			fieldPath: "a.b.c.d",
+			expected:  true,
+		},
+		"child of optional+computed parent is not under computed-only ancestor": {
+			oldSchema: map[string]*schema.Schema{
+				"parent": {
+					Type:     schema.TypeList,
+					Optional: true,
+					Computed: true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"child": {Type: schema.TypeString, Optional: true},
+						},
+					},
+				},
+			},
+			fieldPath: "parent.child",
+			expected:  false,
+		},
+		"child of optional parent": {
+			oldSchema: map[string]*schema.Schema{
+				"parent": {
+					Type:     schema.TypeList,
+					Optional: true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"child": {Type: schema.TypeString, Required: true},
+						},
+					},
+				},
+			},
+			fieldPath: "parent.child",
+			expected:  false,
+		},
+		"child of required parent": {
+			oldSchema: map[string]*schema.Schema{
+				"parent": {
+					Type:     schema.TypeList,
+					Required: true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"child": {Type: schema.TypeString, Required: true},
+						},
+					},
+				},
+			},
+			fieldPath: "parent.child",
+			expected:  false,
+		},
+		"nil old schema returns false": {
+			oldSchema: nil,
+			fieldPath: "parent.child",
+			expected:  false,
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			var flattenedOld map[string]*schema.Schema
+			if tc.oldSchema != nil {
+				flattenedOld = flattenSchema("", tc.oldSchema)
+			}
+			rd := ResourceDiff{
+				FlattenedSchema: FlattenedSchemaRaw{Old: flattenedOld},
+			}
+			if got := rd.HasOldComputedOnlyAncestor(tc.fieldPath); got != tc.expected {
+				t.Errorf("HasOldComputedOnlyAncestor(%q) = %v, want %v", tc.fieldPath, got, tc.expected)
+			}
+		})
+	}
+}

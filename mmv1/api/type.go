@@ -525,6 +525,10 @@ func (t *Type) Validate(rName string) (es []error) {
 		es = append(es, fmt.Errorf("property %s cannot be output and required at the same time in resource %s.", fullFieldPath, rName))
 	}
 
+	if t.Required && t.hasOutputAncestor() {
+		es = append(es, fmt.Errorf("property %s cannot be required because it has an output ancestor in resource %s", fullFieldPath, rName))
+	}
+
 	if t.Output && (t.IsA("Enum") || (t.IsA("Array") && t.ItemType != nil && t.ItemType.IsA("Enum"))) {
 		es = append(es, fmt.Errorf("property %s cannot be an output-only Enum in resource %s; use String instead", fullFieldPath, rName))
 	}
@@ -635,6 +639,21 @@ func (t *Type) isExcluded() bool {
 	}
 	if t.ResourceMetadata != nil {
 		return t.ResourceMetadata.IsExcluded()
+	}
+	return false
+}
+
+// hasOutputAncestor reports whether any ancestor of t has Output set to true.
+func (t *Type) hasOutputAncestor() bool {
+	if t == nil {
+		return false
+	}
+	seen := map[*Type]bool{t: true}
+	for p := t.ParentMetadata; p != nil && !seen[p]; p = p.ParentMetadata {
+		seen[p] = true
+		if p.Output {
+			return true
+		}
 	}
 	return false
 }

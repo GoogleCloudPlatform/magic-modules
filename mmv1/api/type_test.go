@@ -1424,3 +1424,143 @@ func TestTypeJsonValue(t *testing.T) {
 		})
 	}
 }
+
+func TestTypeValidateRequiredUnderOutput(t *testing.T) {
+	t.Parallel()
+
+	p := &Product{
+		Name: "TestProduct",
+		Versions: []*product.Version{
+			{Name: "ga", BaseUrl: "ga_url"},
+		},
+	}
+
+	cases := []struct {
+		description string
+		prop        *Type
+		wantError   string
+	}{
+		{
+			description: "direct required child under output NestedObject returns error",
+			prop: &Type{
+				Name:   "status",
+				Type:   "NestedObject",
+				Output: true,
+				Properties: []*Type{
+					{Name: "code", Type: "String", Required: true},
+				},
+			},
+			wantError: "property status.code cannot be required because it has an output ancestor in resource TestResource",
+		},
+		{
+			description: "multi-level nested required descendant under output Array returns error",
+			prop: &Type{
+				Name:   "runtimeConfigs",
+				Type:   "Array",
+				Output: true,
+				ItemType: &Type{
+					Type: "NestedObject",
+					Properties: []*Type{
+						{
+							Name: "gkeWorkload",
+							Type: "NestedObject",
+							Properties: []*Type{
+								{Name: "cluster", Type: "String", Required: true},
+							},
+						},
+					},
+				},
+			},
+			wantError: "property runtime_configs.gke_workload.cluster cannot be required because it has an output ancestor in resource TestResource",
+		},
+		{
+			description: "required descendant under output Map ValueType returns error",
+			prop: &Type{
+				Name:    "entries",
+				Type:    "Map",
+				KeyName: "key",
+				Output:  true,
+				ValueType: &Type{
+					Type: "NestedObject",
+					Properties: []*Type{
+						{Name: "value", Type: "String", Required: true},
+					},
+				},
+			},
+			wantError: "property entries.value cannot be required because it has an output ancestor in resource TestResource",
+		},
+		{
+			description: "output descendant under output parent succeeds",
+			prop: &Type{
+				Name:   "status",
+				Type:   "NestedObject",
+				Output: true,
+				Properties: []*Type{
+					{Name: "code", Type: "String", Output: true},
+				},
+			},
+		},
+		{
+			description: "required child with no output ancestor succeeds",
+			prop: &Type{
+				Name: "config",
+				Type: "NestedObject",
+				Properties: []*Type{
+					{Name: "name", Type: "String", Required: true},
+				},
+			},
+		},
+		{
+			description: "non-required non-output descendant under output parent succeeds",
+			prop: &Type{
+				Name:   "status",
+				Type:   "NestedObject",
+				Output: true,
+				Properties: []*Type{
+					{Name: "message", Type: "String"},
+				},
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			res := &Resource{
+				Name:       "TestResource",
+				Properties: []*Type{tc.prop},
+			}
+			res.SetDefault(p)
+
+			errs := tc.prop.Validate(res.Name)
+			if tc.wantError == "" {
+				if len(errs) > 0 {
+					t.Fatalf("expected no errors, got: %v", errs)
+				}
+				return
+			}
+			if len(errs) != 1 || errs[0].Error() != tc.wantError {
+				t.Fatalf("expected error %q, got: %v", tc.wantError, errs)
+			}
+		})
+	}
+
+	t.Run("hasOutputAncestor is nil-safe and cycle-safe", func(t *testing.T) {
+		t.Parallel()
+		var nilType *Type
+		if nilType.hasOutputAncestor() {
+			t.Errorf("expected nil Type to return false")
+		}
+		a := &Type{Name: "a", Type: "NestedObject"}
+		b := &Type{Name: "b", Type: "NestedObject", ParentMetadata: a}
+		a.ParentMetadata = b
+		if a.hasOutputAncestor() {
+			t.Errorf("expected cycle without output ancestor to return false")
+		}
+		b.Output = true
+		if !a.hasOutputAncestor() {
+			t.Errorf("expected cycle with output ancestor to return true")
+		}
+	})
+}

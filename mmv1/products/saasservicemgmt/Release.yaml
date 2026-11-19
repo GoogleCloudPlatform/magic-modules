@@ -185,7 +185,7 @@ properties:
           type: String
           description: Name of the variable from actuation configs.
           immutable: true
-          required: true
+          output: true
   - name: labels
     type: KeyValueLabels
     description: |-
@@ -224,7 +224,7 @@ properties:
           type: String
           description: Name of the variable from actuation configs.
           immutable: true
-          required: true
+          output: true
   - name: releaseRequirements
     type: NestedObject
     description: Set of requirements to be fulfilled on the Unit when using this Release.
