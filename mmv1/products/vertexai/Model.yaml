@@ -207,8 +207,7 @@ properties:
     name: sourceModel
     immutable: true
     ignore_read: true
-    at_least_one_of:
-      - sourceModel
+    required: true
     description: Resource name of the Model to copy.
   - type: String
     name: modelId
