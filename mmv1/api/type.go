@@ -584,6 +584,10 @@ func (t *Type) Validate(rName string) (es []error) {
 		}
 	}
 
+	es = append(es, t.validateDefaultValue(fullFieldPath, rName)...)
+	es = append(es, t.validateEnumValues(fullFieldPath, rName)...)
+	es = append(es, t.validateRequiredConstraints(fullFieldPath, rName)...)
+
 	t.validateLabelsField()
 
 	switch {
@@ -708,7 +712,6 @@ func (t *Type) hasOutputAncestor() bool {
 // TODO rewrite: add validations
 // check :description, required: true
 // check :update_verb, allowed: %i[POST PUT PATCH NONE],
-// check_default_value_property
 // check the allowed fields for each type, for example, KeyName is only allowed for Map
 
 // Returns a slice of Terraform field names representing where the field is nested within the parent resource.
@@ -829,30 +832,91 @@ func (t Type) FWResourceType() string {
 	return path[len(path)-1]
 }
 
-// TODO rewrite: validation
-// func (t *Type) check_default_value_property() {
-// return if @default_value.nil?
+func (t *Type) validateDefaultValue(fullFieldPath, rName string) (es []error) {
+	if t.DefaultValue == nil {
+		return nil
+	}
 
-// case self
-// when Api::Type::String
-//   clazz = ::String
-// when Api::Type::Integer
-//   clazz = ::Integer
-// when Api::Type::Double
-//   clazz = ::Float
-// when Api::Type::Enum
-//   clazz = ::Symbol
-// when Api::Type::Boolean
-//   clazz = :boolean
-// when Api::Type::ResourceRef
-//   clazz = [::String, ::Hash]
-// else
-//   raise "Update 'check_default_value_property' method to support " \
-//         "default value for type //{self.class}"
-// end
+	if t.Required {
+		es = append(es, fmt.Errorf("property %s cannot set both default_value and required in resource %s", fullFieldPath, rName))
+	}
 
-// check :default_value, type: clazz
-// }
+	if t.Output {
+		es = append(es, fmt.Errorf("property %s cannot set both default_value and output in resource %s", fullFieldPath, rName))
+	}
+
+	switch {
+	case t.IsA("Boolean"):
+		if _, ok := t.DefaultValue.(bool); !ok {
+			es = append(es, fmt.Errorf("property %s has default_value %v of type %T, expected bool for Boolean in resource %s", fullFieldPath, t.DefaultValue, t.DefaultValue, rName))
+		}
+	case t.IsA("Integer"):
+		switch t.DefaultValue.(type) {
+		case int, int64:
+		default:
+			es = append(es, fmt.Errorf("property %s has default_value %v of type %T, expected int or int64 for Integer in resource %s", fullFieldPath, t.DefaultValue, t.DefaultValue, rName))
+		}
+	case t.IsA("Double"):
+		switch t.DefaultValue.(type) {
+		case float64, int, int64:
+		default:
+			es = append(es, fmt.Errorf("property %s has default_value %v of type %T, expected float64, int, or int64 for Double in resource %s", fullFieldPath, t.DefaultValue, t.DefaultValue, rName))
+		}
+	case t.IsA("String"), t.IsA("Enum"), t.IsA("ResourceRef"):
+		val, ok := t.DefaultValue.(string)
+		if !ok {
+			es = append(es, fmt.Errorf("property %s has default_value %v of type %T, expected string for %s in resource %s", fullFieldPath, t.DefaultValue, t.DefaultValue, t.Type, rName))
+		} else if t.IsA("Enum") && len(t.EnumValues) > 0 && !slices.Contains(t.EnumValues, val) {
+			es = append(es, fmt.Errorf("property %s has default_value %q which is not in enum_values %v in resource %s", fullFieldPath, val, t.EnumValues, rName))
+		}
+	default:
+		es = append(es, fmt.Errorf("property %s cannot set default_value for type %s in resource %s", fullFieldPath, t.Type, rName))
+	}
+
+	return es
+}
+
+func (t *Type) validateEnumValues(fullFieldPath, rName string) (es []error) {
+	if !t.IsA("Enum") || len(t.EnumValues) == 0 {
+		return nil
+	}
+
+	seen := make(map[string]struct{}, len(t.EnumValues))
+	reported := make(map[string]struct{})
+	for _, v := range t.EnumValues {
+		if _, dup := seen[v]; dup {
+			if _, already := reported[v]; !already {
+				es = append(es, fmt.Errorf("property %s has duplicate enum_values entry %q in resource %s", fullFieldPath, v, rName))
+				reported[v] = struct{}{}
+			}
+		}
+		seen[v] = struct{}{}
+	}
+
+	return es
+}
+
+func (t *Type) validateRequiredConstraints(fullFieldPath, rName string) (es []error) {
+	if !t.Required {
+		return nil
+	}
+
+	hasConstraint := func(raw []string, group *[]string) bool {
+		return len(raw) > 0 || (group != nil && len(*group) > 0)
+	}
+
+	if hasConstraint(t.Conflicts, t.ConflictsGroup) {
+		es = append(es, fmt.Errorf("property %s cannot set both required and conflicts in resource %s", fullFieldPath, rName))
+	}
+	if hasConstraint(t.ExactlyOneOf, t.ExactlyOneOfGroup) {
+		es = append(es, fmt.Errorf("property %s cannot set both required and exactly_one_of in resource %s", fullFieldPath, rName))
+	}
+	if hasConstraint(t.AtLeastOneOf, t.AtLeastOneOfGroup) {
+		es = append(es, fmt.Errorf("property %s cannot set both required and at_least_one_of in resource %s", fullFieldPath, rName))
+	}
+
+	return es
+}
 
 // Returns list of properties that are in conflict with this property.
 func (t Type) Conflicting() []string {
