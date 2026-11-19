@@ -1,0 +1,8 @@
+if d.Get("deletion_policy").(string) != "FORCE" {
+	log.Printf("[DEBUG] deletion_policy is %q (not \"FORCE\"); removing DocumentImport %q from Terraform state without purging branch documents", d.Get("deletion_policy").(string), d.Id())
+	return nil
+}
+obj = map[string]interface{}{
+	"filter": "*",
+	"force":  true,
+}
