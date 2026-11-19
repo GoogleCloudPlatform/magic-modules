@@ -28,6 +28,12 @@ type iamBindingKey struct {
 	Condition conditionKey
 }
 
+func setBigQueryDatasetEtagHeader(headers http.Header, etag string) {
+	if etag != "" {
+		headers.Set("If-Match", etag)
+	}
+}
+
 func conditionKeyFromCondition(condition *cloudresourcemanager.Expr) conditionKey {
 	if condition == nil {
 		return conditionKey{}

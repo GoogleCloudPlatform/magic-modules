@@ -48,12 +48,6 @@ type BigqueryDatasetIamMemberUpdater struct {
 	Config    *transport_tpg.Config
 }
 
-func setBigQueryDatasetEtagHeader(headers http.Header, etag string) {
-	if etag != "" {
-		headers.Set("If-Match", etag)
-	}
-}
-
 func NewBigqueryDatasetIamMemberUpdater(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (tpgiamresource.ResourceIamUpdater, error) {
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
