@@ -12,10 +12,12 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 		keepDefault = previous.(*schema.Set).Contains("default")
 	} else {
 		configured := rawConfig.GetAttr("version_aliases")
-		if configured.IsNull() || !configured.IsWhollyKnown() {
+		if !configured.IsWhollyKnown() {
 			return v
 		}
-		keepDefault = configured.HasElement(cty.StringVal("default")).True()
+		if !configured.IsNull() {
+			keepDefault = configured.HasElement(cty.StringVal("default")).True()
+		}
 	}
 	return vertexAiModelFilterVersionAliases(v.([]interface{}), keepDefault)
 }

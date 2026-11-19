@@ -181,7 +181,6 @@ properties:
       User-provided version aliases, managed after the Model is copied and on updates.
       Aliases are unordered. The API-managed `default` alias is omitted from state unless
       explicitly configured.
-    default_from_api: true
     is_set: true
     custom_flatten: templates/terraform/custom_flatten/vertex_ai_model_version_aliases.go.tmpl
     item_type:

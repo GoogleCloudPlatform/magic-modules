@@ -156,6 +156,21 @@ func TestAccVertexAIModel_copyWithOptionalFields(t *testing.T) {
 				ImportStateVerifyIgnore: vertexAIModelImportStateVerifyIgnore,
 			},
 			{
+				Config: testAccVertexAIModel_copyWithOptionalFieldsOmitAliases(context),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "version_aliases.#", "0"),
+					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "description", "updated-without-aliases"),
+				),
+			},
+			{
+				Config: testAccVertexAIModel_copyWithOptionalFieldsUpdate(context),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "version_aliases.#", "2"),
+					resource.TestCheckTypeSetElemAttr("google_vertex_ai_model.model", "version_aliases.*", context["version_alias"].(string)),
+					resource.TestCheckTypeSetElemAttr("google_vertex_ai_model.model", "version_aliases.*", context["updated_version_alias"].(string)),
+				),
+			},
+			{
 				Config: testAccVertexAIModel_copyWithOptionalFields(context),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_vertex_ai_model.model", "version_aliases.#", "1"),
@@ -265,6 +280,28 @@ resource "google_vertex_ai_model" "model" {
   region = "us-central1"
   custom_service_account = "%{service_account}"
   version_aliases = []
+  encryption_spec {
+    kms_key_name = "%{kms_key_name}"
+  }
+}
+`, context)
+}
+
+func testAccVertexAIModel_copyWithOptionalFieldsOmitAliases(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_model" "model" {
+  model_id = "%{model_id}"
+  project = "%{project_name}"
+  source_model = "%{source_model}"
+
+  region = "us-central1"
+  custom_service_account = "%{service_account}"
+  display_name = "updated"
+  description = "updated-without-aliases"
+  labels = {
+    label-one = "value-one"
+    label-two = "value-two"
+  }
   encryption_spec {
     kms_key_name = "%{kms_key_name}"
   }
