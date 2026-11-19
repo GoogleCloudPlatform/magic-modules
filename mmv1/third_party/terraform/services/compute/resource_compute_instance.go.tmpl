@@ -2636,7 +2636,11 @@ func populateComputeInstanceResourceData(d *schema.ResourceData, instance map[st
 		return fmt.Errorf("Error setting instance_encryption_key: %s", err)
 	}
 	if wicMap, ok := instance["workloadIdentityConfig"].(map[string]interface{}); ok && len(wicMap) > 0 {
-		if err := d.Set("workload_identity_config", flattenWorkloadIdentityConfig(wicMap)); err != nil {
+		flattenedWic := flattenInstanceWorkloadIdentityConfig(wicMap)
+		if d.Get("source_instance_template") != nil || d.Get("source_machine_image") != nil {
+			flattenedWic = flattenWorkloadIdentityConfig(wicMap)
+		}
+		if err := d.Set("workload_identity_config", flattenedWic); err != nil {
 			return fmt.Errorf("Error setting workload_identity_config: %s", err)
 		}
 	} else {

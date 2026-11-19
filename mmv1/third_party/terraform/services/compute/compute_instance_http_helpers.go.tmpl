@@ -296,7 +296,7 @@ func FlattenWorkloadIdentityConfigHTTP(v interface{}) []map[string]interface{} {
 	if !ok {
 		return nil
 	}
-	return flattenWorkloadIdentityConfig(config)
+	return flattenInstanceWorkloadIdentityConfig(config)
 }
 
 type diskCharacteristics struct {
