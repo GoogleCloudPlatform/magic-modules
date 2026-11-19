@@ -715,7 +715,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `local_ssd_recovery_timeout` -  (Optional) (../guides/provider_versions.html.markdown) Specifies the maximum amount of time a Local Ssd Vm should wait while recovery of the Local Ssd state is attempted. Its value should be in between 0 and 168 hours with hour granularity and the default value being 1 hour. Structure is [documented below](#nested_local_ssd_recovery_timeout).
 
-* `graceful_shutdown` -  (Optional) [Beta](../guides/provider_versions.html.markdown) Settings for the instance to perform a graceful shutdown. Structure is [documented below](#nested_graceful_shutdown).
+* `graceful_shutdown` - (Optional) Settings for the instance to perform a graceful shutdown. Structure is [documented below](#nested_graceful_shutdown).
 
 * `skip_guest_os_shutdown` - (Optional) [Beta](../guides/provider_versions.html.markdown) Boolean parameter. Default is false and there will be 120 seconds between GCE ACPI G2 Soft Off and ACPI G3 Mechanical Off for Standard VMs and 30 seconds for Spot VMs.
 
@@ -725,7 +725,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `enabled` - (Required) Opts-in for graceful shutdown.
 
-* `max_duration` (Optional) The time allotted for the instance to gracefully shut down.
+* `max_duration` - (Optional) The time allotted for the instance to gracefully shut down.
     If the graceful shutdown isn't complete after this time, then the instance
     transitions to the STOPPING state. Structure is [documented below](#nested_max_duration).
 
@@ -734,10 +734,11 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 * `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
     resolution. Durations less than one second are represented with a 0
     `seconds` field and a positive `nanos` field. Must be from 0 to
-    999,999,999 inclusive.
+    999,999,999 inclusive. Note: the Compute Engine API does not persist
+    `nanos` on read, so importing an existing resource will not populate `nanos`.
 
 * `seconds` - (Required) Span of time at a resolution of a second.
-    The value must be between 1 and 3600, which is 3,600 seconds (one hour).
+    The value must be between 1 and 21600, which is 21,600 seconds (six hours).
 
 <a name="nested_preemption_notice_duration"></a>The `preemption_notice_duration` block supports:
 

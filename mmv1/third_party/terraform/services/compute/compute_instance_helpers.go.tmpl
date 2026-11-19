@@ -228,12 +228,6 @@ func expandScheduling(v interface{}) (map[string]interface{}, error) {
 			result["hostErrorTimeoutSeconds"] = int64(v.(int))
 		}
 	}
-{{- if ne $.TargetVersionName "ga" }}
-
-	if v, ok := original["maintenance_interval"]; ok && v.(string) != "" {
-		result["maintenanceInterval"] = v.(string)
-	}
-
 	if v, ok := original["graceful_shutdown"]; ok {
 		transformedGracefulShutdown, err := expandGracefulShutdown(v)
 		if err != nil {
@@ -242,6 +236,11 @@ func expandScheduling(v interface{}) (map[string]interface{}, error) {
 		if transformedGracefulShutdown != nil || !omitDurations {
 			result["gracefulShutdown"] = transformedGracefulShutdown
 		}
+	}
+{{- if ne $.TargetVersionName "ga" }}
+
+	if v, ok := original["maintenance_interval"]; ok && v.(string) != "" {
+		result["maintenanceInterval"] = v.(string)
 	}
 
 	if v, ok := original["skip_guest_os_shutdown"]; ok {
@@ -355,7 +354,6 @@ func expandComputeLocalSsdRecoveryTimeoutSeconds(v interface{}) (interface{}, er
 	return v, nil
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func expandGracefulShutdown(v interface{}) (map[string]interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -375,6 +373,8 @@ func expandGracefulShutdown(v interface{}) (map[string]interface{}, error) {
 	}
 	if maxDuration != nil {
 		result["maxDuration"] = maxDuration
+	} else {
+		result["maxDuration"] = nil
 	}
 
 	return result, nil
@@ -397,7 +397,6 @@ func expandGracefulShutdownMaxDuration(v interface{}) (map[string]interface{}, e
 
 	return result, nil
 }
-{{ end }}
 
 func flattenScheduling(resp map[string]interface{}) []map[string]interface{} {
 	schedulingMap := map[string]interface{}{
@@ -426,15 +425,15 @@ func flattenScheduling(resp map[string]interface{}) []map[string]interface{} {
 		schedulingMap["host_error_timeout_seconds"] = h
 	}
 
+	if gs, ok := resp["gracefulShutdown"].(map[string]interface{}); ok {
+		schedulingMap["graceful_shutdown"] = flattenGracefulShutdown(gs)
+	}
+
 {{ if ne $.TargetVersionName `ga` -}}
 	schedulingMap["skip_guest_os_shutdown"] = resp["skipGuestOsShutdown"]
 
 	if mi, ok := resp["maintenanceInterval"].(string); ok && mi != "" {
 		schedulingMap["maintenance_interval"] = mi
-	}
-
-	if gs, ok := resp["gracefulShutdown"].(map[string]interface{}); ok {
-		schedulingMap["graceful_shutdown"] = flattenGracefulShutdown(gs)
 	}
 {{- end }}
 
@@ -501,7 +500,6 @@ func flattenComputeLocalSsdRecoveryTimeout(v map[string]interface{}) []interface
 	return []interface{}{transformed}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func flattenGracefulShutdown(v map[string]interface{}) []interface{} {
 	if v == nil {
 		return nil
@@ -523,7 +521,6 @@ func flattenGracefulShutdownMaxDuration(v map[string]interface{}) []interface{} 
 	transformed["seconds"] = getInt(v["seconds"])
 	return []interface{}{transformed}
 }
-{{- end }}
 
 func expandComputePreemptionNoticeDuration(v interface{}) (map[string]interface{}, error) {
 	l := v.([]interface{})
@@ -1322,16 +1319,9 @@ func schedulingHasChangeRequiringReboot(d *schema.ResourceData) bool {
 	oScheduling := o.([]interface{})[0].(map[string]interface{})
 	newScheduling := n.([]interface{})[0].(map[string]interface{})
 
-{{ if ne $.TargetVersionName `ga` -}}
 	return hasNodeAffinitiesChanged(oScheduling, newScheduling) ||
 		hasMaxRunDurationChanged(oScheduling, newScheduling) ||
-		hasGracefulShutdownChangedWithReboot(d, oScheduling, newScheduling) ||
 		hasTerminationTimeChanged(oScheduling, newScheduling)
-{{- else }}
-	return (hasNodeAffinitiesChanged(oScheduling, newScheduling) ||
-		hasMaxRunDurationChanged(oScheduling, newScheduling) ||
-		hasTerminationTimeChanged(oScheduling, newScheduling))
-{{- end }}
 }
 
 // Terraform doesn't correctly calculate changes on schema.Set, so we do it manually
@@ -1375,13 +1365,12 @@ func schedulingHasChangeWithoutReboot(d *schema.ResourceData) bool {
 	if oScheduling["host_error_timeout_seconds"] != newScheduling["host_error_timeout_seconds"] {
 		return true
 	}
+	if hasGracefulShutdownChanged(oScheduling, newScheduling) {
+		return true
+	}
 {{- if ne $.TargetVersionName "ga" }}
 
 	if oScheduling["skip_guest_os_shutdown"] != newScheduling["skip_guest_os_shutdown"] {
-		return true
-	}
-
-	if hasGracefulShutdownChanged(oScheduling, newScheduling) {
 		return true
 	}
 {{- end }}
@@ -1405,15 +1394,6 @@ func hasTerminationTimeChanged(oScheduling, nScheduling map[string]interface{}) 
 	}
 
 	return false
-}
-
-{{ if ne $.TargetVersionName `ga` -}}
-func hasGracefulShutdownChangedWithReboot(d *schema.ResourceData, oScheduling, nScheduling map[string]interface{}) bool {
-	allow_stopping_for_update := d.Get("allow_stopping_for_update").(bool)
-	if !allow_stopping_for_update {
-		return false
-	}
-	return hasGracefulShutdownChanged(oScheduling, nScheduling)
 }
 
 func hasGracefulShutdownChanged(oScheduling, nScheduling map[string]interface{}) bool {
@@ -1458,7 +1438,6 @@ func hasGracefulShutdownChanged(oScheduling, nScheduling map[string]interface{})
 
 	return false
 }
-{{- end }}
 
 func hasMaxRunDurationChanged(oScheduling, nScheduling map[string]interface{}) bool {
 	oMrd := oScheduling["max_run_duration"].([]interface{})
