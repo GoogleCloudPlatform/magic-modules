@@ -9,6 +9,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
+func TestVertexAIModelFlattenSupportedExportFormats(t *testing.T) {
+	t.Parallel()
+	apiFormats := []interface{}{
+		map[string]interface{}{
+			"id":                 "custom-trained",
+			"exportableContents": []interface{}{"ARTIFACT", "IMAGE"},
+		},
+	}
+	d := ResourceVertexAIModel().Data(nil)
+	formats := flattenVertexAIModelSupportedExportFormats(apiFormats, d, nil)
+	if err := d.Set("supported_export_formats", formats); err != nil {
+		t.Fatal(err)
+	}
+	got := d.Get("supported_export_formats").([]interface{})[0].(map[string]interface{})["exportable_contents"]
+	want := []interface{}{"ARTIFACT", "IMAGE"}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("exportable contents = %v, want %v", got, want)
+	}
+}
+
 func TestVertexAIModelVersionAliasChanges(t *testing.T) {
 	t.Parallel()
 	for _, tc := range []struct {

@@ -136,7 +136,7 @@ properties:
           description: The ID of the export format, such as `tflite`, `tf-saved-model`, or `custom-trained`.
           output: true
         - type: Array
-          name: exportableContent
+          name: exportableContents
           description: |
             The content of this Model that may be exported. Possible values are `ARTIFACT` and `IMAGE`.
             See https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.models#Model.ExportFormat
