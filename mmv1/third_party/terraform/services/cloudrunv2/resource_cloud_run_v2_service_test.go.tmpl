@@ -1309,7 +1309,7 @@ resource "time_sleep" "wait_for_mesh" {
     google_project_service.trafficdirector,
   ]
 
-  create_duration = "1m"
+  create_duration = "10m"
 }
 
 resource "google_network_services_mesh" "mesh" {
@@ -1384,7 +1384,7 @@ resource "time_sleep" "wait_for_mesh" {
     google_project_service.trafficdirector,
   ]
 
-  create_duration = "1m"
+  create_duration = "10m"
 }
 
 resource "google_network_services_mesh" "mesh" {
