@@ -631,10 +631,10 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 <a name="nested_max_duration"></a>The `max_duration` block supports:
 
 * `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
-    resolution. Durations less than one second are represented with a 0
-    `seconds` field and a positive `nanos` field. Must be from 0 to
-    999,999,999 inclusive. Note: the Compute Engine API does not persist
-    `nanos` on read, so importing an existing resource will not populate `nanos`.
+    resolution. Must be from 0 to 999,999,999 inclusive. Note: the Compute
+    Engine API truncates `max_duration` to whole `seconds` (`1` to `21600`) and
+    does not persist `nanos` on read, so importing an existing resource will not
+    populate `nanos`.
 
 * `seconds` - (Required) Span of time at a resolution of a second.
     The value must be between 1 and 21600, which is 21,600 seconds (six hours).

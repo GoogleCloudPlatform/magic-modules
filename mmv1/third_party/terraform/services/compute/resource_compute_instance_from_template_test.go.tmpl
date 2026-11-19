@@ -527,6 +527,11 @@ func TestAccComputeInstanceFromTemplate_schedulingGracefulShutdown(t *testing.T)
 			},
 			{
 				Config: testAccComputeInstanceFromTemplate_schedulingGracefulShutdownOverride(templateName, instanceName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionUpdate),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, resourceName, &instance),
 					resource.TestCheckResourceAttr(resourceName, "scheduling.0.graceful_shutdown.0.enabled", "false"),
@@ -536,15 +541,39 @@ func TestAccComputeInstanceFromTemplate_schedulingGracefulShutdown(t *testing.T)
 			},
 			{
 				Config: testAccComputeInstanceFromTemplate_schedulingGracefulShutdownDropNanos(templateName, instanceName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionUpdate),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, resourceName, &instance),
 					resource.TestCheckResourceAttr(resourceName, "scheduling.0.graceful_shutdown.0.enabled", "false"),
-					resource.TestCheckResourceAttr(resourceName, "scheduling.0.graceful_shutdown.0.max_duration.0.seconds", "90"),
+					resource.TestCheckResourceAttr(resourceName, "scheduling.0.graceful_shutdown.0.max_duration.0.seconds", "120"),
 					resource.TestCheckResourceAttr(resourceName, "scheduling.0.graceful_shutdown.0.max_duration.0.nanos", "0"),
 				),
 			},
 			{
+				Config: testAccComputeInstanceFromTemplate_schedulingGracefulShutdownCreateOverride(templateName, instanceName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, resourceName, &instance),
+					resource.TestCheckResourceAttr(resourceName, "scheduling.0.graceful_shutdown.0.enabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "scheduling.0.graceful_shutdown.0.max_duration.#", "0"),
+				),
+			},
+			{
+				// Replace via a new instance name to verify create-time override of source_instance_template's max_duration.
 				Config: testAccComputeInstanceFromTemplate_schedulingGracefulShutdownCreateOverride(templateName, instanceNameCleared),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionReplace),
+					},
+				},
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, resourceName, &instance),
 					resource.TestCheckResourceAttr(resourceName, "scheduling.0.graceful_shutdown.0.enabled", "false"),
@@ -2161,7 +2190,7 @@ resource "google_compute_instance_from_template" "foobar" {
     graceful_shutdown {
       enabled = false
       max_duration {
-        seconds = 90
+        seconds = 120
       }
     }
   }
