@@ -1,13 +1,18 @@
 package detector
 
 import (
-	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-var possibleValuesPattern = regexp.MustCompile(`Possible values:\s*\[([^\]]*)\]`)
+const (
+	enumProbeKey = "__diff_processor_enum_probe__"
+	enumProbeVal = "\x00__diff_processor_enum_probe__\x00"
+	enumErrStart = "expected " + enumProbeKey + " to be one of ["
+	enumErrEnd   = "], got " + enumProbeVal
+)
 
 func initialModifyStatus(field *schema.Schema, hasUpdate bool) TransitionResult {
 	if !hasUpdate {
@@ -16,7 +21,12 @@ func initialModifyStatus(field *schema.Schema, hasUpdate bool) TransitionResult 
 	if field.ForceNew {
 		return TransitionResult{Status: StatusExempt, ExemptCode: "force_new"}
 	}
-	if isSingleValueEnum(field) {
+	// Exempt 1-value enums only when Required or backed by a non-empty schema
+	// Default/DefaultFunc (only one value is reachable). Optional 1-value enums
+	// without a schema default have two distinct states—unset and the enum
+	// value—so MODIFY remains required and can be satisfied by an in-place
+	// unset -> value transition.
+	if isSingleValueEnum(field) && (field.Required || hasSchemaDefault(field)) {
 		return TransitionResult{Status: StatusExempt, ExemptCode: "single_value_enum"}
 	}
 	return TransitionResult{Status: StatusMissing}
@@ -103,23 +113,55 @@ func hasForceNewAncestor(fieldPath string, fullSchema map[string]*schema.Schema)
 	return false
 }
 
-func isSingleValueEnum(field *schema.Schema) bool {
-	if field == nil || field.Description == "" {
+func hasSchemaDefault(field *schema.Schema) bool {
+	if field == nil {
 		return false
 	}
-	matches := possibleValuesPattern.FindStringSubmatch(field.Description)
-	if len(matches) < 2 {
+	if field.DefaultFunc != nil {
+		return true
+	}
+	return field.Default != nil && field.Default != ""
+}
+
+// isSingleValueEnum probes field.ValidateFunc to determine whether a TypeString
+// attribute uses validation.StringInSlice (including MMv1's verify.ValidateEnum
+// and verify.OrEmpty) with exactly one non-empty allowed value.
+func isSingleValueEnum(field *schema.Schema) (ok bool) {
+	if field == nil || field.Type != schema.TypeString || field.ValidateFunc == nil {
 		return false
 	}
-	inner := strings.TrimSpace(matches[1])
-	if inner == "" {
+	defer func() {
+		if recover() != nil {
+			ok = false
+		}
+	}()
+	_, errs := field.ValidateFunc(enumProbeVal, enumProbeKey)
+	if len(errs) != 1 || errs[0] == nil {
+		return false
+	}
+	inner, hasPrefix := strings.CutPrefix(errs[0].Error(), enumErrStart)
+	if !hasPrefix {
+		return false
+	}
+	inner, hasSuffix := strings.CutSuffix(inner, enumErrEnd)
+	if !hasSuffix {
 		return false
 	}
 	nonEmpty := 0
-	for _, p := range strings.Split(inner, ",") {
-		if strings.TrimSpace(p) != "" {
+	rest := strings.TrimSpace(inner)
+	for rest != "" {
+		quoted, err := strconv.QuotedPrefix(rest)
+		if err != nil {
+			return false
+		}
+		val, err := strconv.Unquote(quoted)
+		if err != nil {
+			return false
+		}
+		if val != "" {
 			nonEmpty++
 		}
+		rest = strings.TrimSpace(rest[len(quoted):])
 	}
 	return nonEmpty == 1
 }

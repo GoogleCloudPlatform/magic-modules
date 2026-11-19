@@ -276,7 +276,7 @@ func evaluateResourceTests(
 						st := targetFields[fieldPath]
 						prevPresent := isFieldPresent(prev.block, fieldPath)
 						currPresent := isFieldPresent(curr.block, fieldPath)
-						if st.Modify.Status != StatusExempt && prevPresent && currPresent && isFieldModified(prev.block, curr.block, fieldPath) {
+						if st.Modify.Status != StatusExempt && isModifiedInUpdateStep(prev.block, curr.block, prevPresent, currPresent, fieldPath, fullSchema) {
 							skippedModify = append(skippedModify, fieldPath)
 						}
 						if st.Unset.Status != StatusExempt && !omissionUnset[fieldPath] && prevPresent && !currPresent && isParentOrSoleChildAncestorPresent(curr.block, fieldPath, fullSchema) {
@@ -301,12 +301,10 @@ func evaluateResourceTests(
 					currPresent := isFieldPresent(curr.block, fieldPath)
 
 					// Check MODIFY.
-					if st.Modify.Status == StatusMissing && prevPresent && currPresent {
-						if isFieldModified(prev.block, curr.block, fieldPath) {
-							st.Modify = TransitionResult{
-								Status:    StatusCovered,
-								CoveredBy: transitionLabel,
-							}
+					if st.Modify.Status == StatusMissing && isModifiedInUpdateStep(prev.block, curr.block, prevPresent, currPresent, fieldPath, fullSchema) {
+						st.Modify = TransitionResult{
+							Status:    StatusCovered,
+							CoveredBy: transitionLabel,
 						}
 					}
 
@@ -550,6 +548,26 @@ func getFieldTreeValue(block reader.Block, fieldPath string) string {
 
 func isFieldModified(prevBlock, currBlock reader.Block, fieldPath string) bool {
 	return getFieldTreeValue(prevBlock, fieldPath) != getFieldTreeValue(currBlock, fieldPath)
+}
+
+// isModifiedInUpdateStep reports whether an in-place update step modifies
+// fieldPath. Multi-value fields require two distinct non-null values
+// (prevPresent && currPresent), whereas optional single-value enums have only
+// two distinct states (unset and their sole value) and therefore satisfy MODIFY
+// via an in-place unset -> value transition.
+func isModifiedInUpdateStep(
+	prevBlock, currBlock reader.Block,
+	prevPresent, currPresent bool,
+	fieldPath string,
+	fullSchema map[string]*schema.Schema,
+) bool {
+	if prevPresent && currPresent {
+		return isFieldModified(prevBlock, currBlock, fieldPath)
+	}
+	if !prevPresent && currPresent && isSingleValueEnum(fullSchema[fieldPath]) {
+		return isParentOrSoleChildAncestorPresent(prevBlock, fieldPath, fullSchema)
+	}
+	return false
 }
 
 // isParentOrSoleChildAncestorPresent reports whether fieldPath's immediate
