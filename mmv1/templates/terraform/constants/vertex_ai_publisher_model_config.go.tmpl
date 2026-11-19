@@ -22,20 +22,6 @@ func vertexAIPublisherModelConfigGlobalURL(url string) string {
 	return strings.Replace(url, "://global-aiplatform.googleapis.com/", "://aiplatform.googleapis.com/", 1)
 }
 
-// vertexAIPublisherModelConfigRequestBody wraps a PublisherModelConfig payload
-// in a SetPublisherModelConfig request scoped to inferenceEventLoggingConfig so
-// sibling PublisherModelConfig settings are preserved on create, update, and
-// delete.
-func vertexAIPublisherModelConfigRequestBody(cfg map[string]interface{}) map[string]interface{} {
-	if cfg == nil {
-		cfg = map[string]interface{}{}
-	}
-	return map[string]interface{}{
-		"publisherModelConfig": cfg,
-		"updateMask":           "inferenceEventLoggingConfig",
-	}
-}
-
 // isVertexAIPublisherModelConfigAlreadyExistsError reports whether err is a
 // Google API 409 ALREADY_EXISTS error returned by SetPublisherModelConfig when
 // the target PublisherModelConfig already matches the stored configuration (on

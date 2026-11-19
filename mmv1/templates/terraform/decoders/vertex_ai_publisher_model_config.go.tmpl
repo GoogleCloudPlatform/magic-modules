@@ -18,4 +18,15 @@ if cfg, ok := res["inferenceEventLoggingConfig"].(map[string]interface{}); ok {
 		delete(res, "inferenceEventLoggingConfig")
 	}
 }
+if cfg, ok := res["loggingConfig"].(map[string]interface{}); ok && len(cfg) == 0 {
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
+	if count, ok := d.Get("logging_config.#").(int); ok && count > 0 {
+		cfg["enabled"] = false
+	} else {
+		delete(res, "loggingConfig")
+	}
+{{- else }}
+	delete(res, "loggingConfig")
+{{- end }}
+}
 return res, nil

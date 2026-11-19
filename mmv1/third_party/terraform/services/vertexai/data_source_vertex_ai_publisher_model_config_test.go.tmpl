@@ -6,12 +6,15 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/bigquery"
 )
 
 func TestAccDataSourceVertexAIPublisherModelConfig_basic(t *testing.T) {
 	t.Parallel()
 
-	context := map[string]interface{}{}
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -27,6 +30,11 @@ func TestAccDataSourceVertexAIPublisherModelConfig_basic(t *testing.T) {
 						[]string{},
 					),
 				),
+			},
+			{
+				ResourceName:      "google_vertex_ai_publisher_model_config.tf_test_config",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -52,12 +60,24 @@ func TestAccDataSourceVertexAIPublisherModelConfig_global(t *testing.T) {
 					),
 				),
 			},
+			{
+				ResourceName:      "google_vertex_ai_publisher_model_config.tf_test_config",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
 
 func testAccDataSourceVertexAIPublisherModelConfig_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_bigquery_dataset" "tf_test_logs" {
+  provider                   = google-beta
+  dataset_id                 = "tf_test_pmc_ds_%{random_suffix}"
+  location                   = "US"
+  delete_contents_on_destroy = true
+}
+
 resource "google_vertex_ai_publisher_model_config" "tf_test_config" {
   provider  = google-beta
   region    = "us-central1"
@@ -66,6 +86,17 @@ resource "google_vertex_ai_publisher_model_config" "tf_test_config" {
 
   inference_event_logging_config {
     state = "ENABLED"
+  }
+
+  logging_config {
+    enabled             = true
+    sampling_rate       = 0.5
+    error_sampling_rate = 0.25
+    enable_otel_logging = true
+
+    bigquery_destination {
+      output_uri = "bq://${google_bigquery_dataset.tf_test_logs.project}.${google_bigquery_dataset.tf_test_logs.dataset_id}.request_response_logs"
+    }
   }
 }
 
@@ -84,11 +115,15 @@ func testAccDataSourceVertexAIPublisherModelConfig_global(context map[string]int
 resource "google_vertex_ai_publisher_model_config" "tf_test_config" {
   provider  = google-beta
   region    = "global"
-  publisher = "google"
-  model     = "gemini-2.5-pro"
+  publisher = "anthropic"
+  model     = "claude-3-5-haiku"
 
   inference_event_logging_config {
     state = "ENABLED"
+  }
+
+  claude_feature_config {
+    advanced_ai_enabled = false
   }
 }
 

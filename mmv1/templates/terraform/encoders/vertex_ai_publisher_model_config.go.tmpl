@@ -11,7 +11,25 @@
 	limitations under the License.
 */ -}}
 {{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
-return vertexAIPublisherModelConfigRequestBody(obj), nil
+if count, ok := d.Get("logging_config.#").(int); ok && count > 0 {
+	cfg, _ := obj["loggingConfig"].(map[string]interface{})
+	if cfg == nil {
+		cfg = make(map[string]interface{})
+	}
+	cfg["enabled"] = d.Get("logging_config.0.enabled")
+	obj["loggingConfig"] = cfg
+}
+if count, ok := d.Get("claude_feature_config.#").(int); ok && count > 0 {
+	cfg, _ := obj["claudeFeatureConfig"].(map[string]interface{})
+	if cfg == nil {
+		cfg = make(map[string]interface{})
+	}
+	cfg["advancedAiEnabled"] = d.Get("claude_feature_config.0.advanced_ai_enabled")
+	obj["claudeFeatureConfig"] = cfg
+}
+return map[string]interface{}{
+	"publisherModelConfig": obj,
+}, nil
 {{- else }}
 return obj, nil
 {{- end }}

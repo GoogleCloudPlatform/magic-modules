@@ -54,3 +54,12 @@ if rawCfg, exists := res["inferenceEventLoggingConfig"]; exists && rawCfg != nil
 		}
 	}
 }
+if rawCfg, exists := res["loggingConfig"]; exists && rawCfg != nil {
+	cfg, ok := rawCfg.(map[string]interface{})
+	if !ok || len(cfg) > 0 {
+		return fmt.Errorf("VertexAIPublisherModelConfig loggingConfig still exists (%#v) at %s", rawCfg, url)
+	}
+}
+if rawCfg, exists := res["claudeFeatureConfig"]; exists && rawCfg != nil {
+	return fmt.Errorf("VertexAIPublisherModelConfig claudeFeatureConfig still exists (%#v) at %s", rawCfg, url)
+}
