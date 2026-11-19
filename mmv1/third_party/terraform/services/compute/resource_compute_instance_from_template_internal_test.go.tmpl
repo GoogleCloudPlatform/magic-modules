@@ -1,0 +1,154 @@
+package compute
+
+{{ if ne $.TargetVersionName `ga` -}}
+
+import (
+	"reflect"
+	"testing"
+)
+
+func TestAdjustInstanceFromTemplateWorkloadIdentityConfig(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		instance          map[string]interface{}
+		it                map[string]interface{}
+		hasServiceAccount bool
+		wantInstance      map[string]interface{}
+	}{
+		"inherit_when_override_omitted": {
+			instance: map[string]interface{}{"name": "vm"},
+			it: map[string]interface{}{
+				"properties": map[string]interface{}{
+					"workloadIdentityConfig": map[string]interface{}{
+						"identityType":               "AGENT_IDENTITY",
+						"identityCertificateEnabled": true,
+					},
+				},
+			},
+			wantInstance: map[string]interface{}{"name": "vm"},
+		},
+		"same_mode_cert_disabled_on_agent_identity_template": {
+			instance: map[string]interface{}{
+				"workloadIdentityConfig": map[string]interface{}{
+					"identityCertificateEnabled": false,
+				},
+			},
+			it: map[string]interface{}{
+				"properties": map[string]interface{}{
+					"workloadIdentityConfig": map[string]interface{}{
+						"identityType":               "AGENT_IDENTITY",
+						"identityCertificateEnabled": true,
+					},
+				},
+			},
+			wantInstance: map[string]interface{}{
+				"workloadIdentityConfig": map[string]interface{}{
+					"identityCertificateEnabled": false,
+				},
+			},
+		},
+		"same_mode_cert_disabled_on_mwlid_template_preserves_identity": {
+			instance: map[string]interface{}{
+				"workloadIdentityConfig": map[string]interface{}{
+					"identityCertificateEnabled": false,
+				},
+			},
+			it: map[string]interface{}{
+				"properties": map[string]interface{}{
+					"workloadIdentityConfig": map[string]interface{}{
+						"identity":                   "ns/p/sa/id",
+						"identityCertificateEnabled": true,
+					},
+				},
+			},
+			wantInstance: map[string]interface{}{
+				"workloadIdentityConfig": map[string]interface{}{
+					"identityCertificateEnabled": false,
+				},
+			},
+		},
+		"cross_mode_mwlid_template_to_agent_identity_clears_identity_and_service_accounts": {
+			instance: map[string]interface{}{
+				"workloadIdentityConfig": map[string]interface{}{
+					"identityType": "AGENT_IDENTITY",
+				},
+			},
+			it: map[string]interface{}{
+				"properties": map[string]interface{}{
+					"serviceAccounts": []interface{}{
+						map[string]interface{}{"email": "default"},
+					},
+					"workloadIdentityConfig": map[string]interface{}{
+						"identity":                   "ns/p/sa/id",
+						"identityCertificateEnabled": false,
+					},
+				},
+			},
+			wantInstance: map[string]interface{}{
+				"serviceAccounts": []interface{}{},
+				"workloadIdentityConfig": map[string]interface{}{
+					"identity":                   "",
+					"identityType":               "AGENT_IDENTITY",
+					"identityCertificateEnabled": true,
+				},
+			},
+		},
+		"cross_mode_agent_identity_template_to_service_account_resets_cert": {
+			instance: map[string]interface{}{
+				"workloadIdentityConfig": map[string]interface{}{
+					"identityType": "SERVICE_ACCOUNT",
+				},
+			},
+			it: map[string]interface{}{
+				"properties": map[string]interface{}{
+					"workloadIdentityConfig": map[string]interface{}{
+						"identityType":               "AGENT_IDENTITY",
+						"identityCertificateEnabled": true,
+					},
+				},
+			},
+			wantInstance: map[string]interface{}{
+				"workloadIdentityConfig": map[string]interface{}{
+					"identityType":               "SERVICE_ACCOUNT",
+					"identityCertificateEnabled": false,
+				},
+			},
+		},
+		"cross_mode_agent_identity_template_to_mwlid_resets_identity_type": {
+			instance: map[string]interface{}{
+				"workloadIdentityConfig": map[string]interface{}{
+					"identity":                   "ns/p/sa/id",
+					"identityCertificateEnabled": true,
+				},
+			},
+			it: map[string]interface{}{
+				"properties": map[string]interface{}{
+					"workloadIdentityConfig": map[string]interface{}{
+						"identityType":               "AGENT_IDENTITY",
+						"identityCertificateEnabled": true,
+					},
+				},
+			},
+			wantInstance: map[string]interface{}{
+				"workloadIdentityConfig": map[string]interface{}{
+					"identity":                   "ns/p/sa/id",
+					"identityCertificateEnabled": true,
+					"identityType":               "IDENTITY_TYPE_UNSPECIFIED",
+				},
+			},
+		},
+	}
+
+	for name, tc := range cases {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			adjustInstanceFromTemplateWorkloadIdentityConfig(tc.instance, tc.it, tc.hasServiceAccount)
+			if !reflect.DeepEqual(tc.instance, tc.wantInstance) {
+				t.Fatalf("adjustInstanceFromTemplateWorkloadIdentityConfig() =\n%#v\nwant:\n%#v", tc.instance, tc.wantInstance)
+			}
+		})
+	}
+}
+{{- end }}

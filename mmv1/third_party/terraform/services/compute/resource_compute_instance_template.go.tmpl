@@ -1793,6 +1793,8 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
 	}
 	if wic := expandWorkloadIdentityConfig(d); wic != nil {
+		// Unpacking into typed compute.WorkloadIdentityConfig drops explicit false via omitempty
+		// unless ForceSendFields is set (unlike region_instance_template, which sends the raw map).
 		wicTyped := &compute.WorkloadIdentityConfig{}
 		if v, ok := wic["identity"].(string); ok {
 			wicTyped.Identity = v
@@ -2296,7 +2298,7 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 		if convErr != nil {
 			return fmt.Errorf("Error converting workload_identity_config: %s", convErr)
 		}
-		if err = d.Set("workload_identity_config", flattenWorkloadIdentityConfig(wicMap)); err != nil {
+		if err = d.Set("workload_identity_config", flattenInstanceWorkloadIdentityConfig(wicMap)); err != nil {
 			return fmt.Errorf("Error setting workload_identity_config: %s", err)
 		}
 	} else {
