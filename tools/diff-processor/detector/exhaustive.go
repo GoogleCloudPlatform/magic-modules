@@ -279,7 +279,7 @@ func evaluateResourceTests(
 						if st.Modify.Status != StatusExempt && prevPresent && currPresent && isFieldModified(prev.block, curr.block, fieldPath) {
 							skippedModify = append(skippedModify, fieldPath)
 						}
-						if st.Unset.Status != StatusExempt && !omissionUnset[fieldPath] && prevPresent && !currPresent && isParentPresent(curr.block, fieldPath) {
+						if st.Unset.Status != StatusExempt && !omissionUnset[fieldPath] && prevPresent && !currPresent && isParentOrSoleChildAncestorPresent(curr.block, fieldPath, fullSchema) {
 							skippedUnset = append(skippedUnset, fieldPath)
 						}
 					}
@@ -311,10 +311,11 @@ func evaluateResourceTests(
 					}
 
 					// Check in-place UNSET for mutable fields/blocks. For nested fields like
-					// `foo.bar.baz`, `foo.bar` must remain present so removing `foo` altogether
-					// does not count as unsetting `baz`.
+					// `foo.bar.baz`, `foo.bar` must remain present (unless `baz` is the sole
+					// configurable child in `foo.bar`'s schema) so removing `foo` altogether
+					// does not skip unsetting `baz` on multi-child blocks.
 					if st.Unset.Status == StatusMissing && !omissionUnset[fieldPath] &&
-						prevPresent && !currPresent && isParentPresent(curr.block, fieldPath) {
+						prevPresent && !currPresent && isParentOrSoleChildAncestorPresent(curr.block, fieldPath, fullSchema) {
 						st.Unset = TransitionResult{
 							Status:    StatusCovered,
 							CoveredBy: transitionLabel,
@@ -337,7 +338,7 @@ func evaluateResourceTests(
 			if isFieldPresent(rec.block, fieldPath) {
 				continue
 			}
-			if isParentPresent(rec.block, fieldPath) {
+			if isParentOrSoleChildAncestorPresent(rec.block, fieldPath, fullSchema) {
 				st.Unset = TransitionResult{
 					Status:    StatusCovered,
 					CoveredBy: stepLabel,
@@ -549,6 +550,69 @@ func getFieldTreeValue(block reader.Block, fieldPath string) string {
 
 func isFieldModified(prevBlock, currBlock reader.Block, fieldPath string) bool {
 	return getFieldTreeValue(prevBlock, fieldPath) != getFieldTreeValue(currBlock, fieldPath)
+}
+
+// isParentOrSoleChildAncestorPresent reports whether fieldPath's immediate
+// parent is present in block, or a purely Optional (non-Computed) ancestor
+// whose only configurable schema subtree is a defaultless fieldPath was omitted
+// while that ancestor's parent remained present (avoiding an invalid empty
+// ancestor {} block when unsetting its sole optional child).
+//
+// Two cases are excluded because `ancestor {}` is distinct from omitting
+// `ancestor`:
+//   - Optional+Computed (Computed: true) ancestors: omitting `ancestor` retains
+//     prior state in SDKv2 without clearing child attributes, whereas writing
+//     `ancestor {}` clears the child.
+//   - Children with a schema Default/DefaultFunc: writing `ancestor {}`
+//     populates the child's default value (making `ancestor {}` non-empty in
+//     SDKv2), whereas omitting `ancestor` removes the block without testing the
+//     default.
+func isParentOrSoleChildAncestorPresent(block reader.Block, fieldPath string, fullSchema map[string]*schema.Schema) bool {
+	if isParentPresent(block, fieldPath) {
+		return true
+	}
+	if fieldSchema := fullSchema[fieldPath]; fieldSchema != nil && (fieldSchema.Default != nil || fieldSchema.DefaultFunc != nil) {
+		return false
+	}
+	for anc := parentPath(fieldPath); anc != ""; anc = parentPath(anc) {
+		ancSchema := fullSchema[anc]
+		if ancSchema != nil {
+			if ancSchema.Computed {
+				return false
+			}
+			if ancSchema.Required {
+				continue
+			}
+		}
+		if !isFieldPresent(block, anc) && isParentPresent(block, anc) &&
+			isOnlyConfigurableChildInSchema(anc, fieldPath, fullSchema) {
+			return true
+		}
+	}
+	return false
+}
+
+// isOnlyConfigurableChildInSchema reports whether ancestorPath has no Required
+// or Optional schema fields outside targetPath's lineage, meaning ancestorPath
+// cannot remain non-empty in HCL once targetPath is omitted.
+func isOnlyConfigurableChildInSchema(ancestorPath, targetPath string, fullSchema map[string]*schema.Schema) bool {
+	ancPrefix := ancestorPath + "."
+	targetPrefix := targetPath + "."
+	for k, sch := range fullSchema {
+		if !strings.HasPrefix(k, ancPrefix) {
+			continue
+		}
+		if k == targetPath || strings.HasPrefix(k, targetPrefix) {
+			continue
+		}
+		if strings.HasPrefix(targetPath, k+".") {
+			continue
+		}
+		if sch != nil && (sch.Optional || sch.Required) {
+			return false
+		}
+	}
+	return true
 }
 
 func sortedFieldPaths(fields map[string]*ExhaustiveFieldStatus) []string {
