@@ -227,9 +227,9 @@ func TestCheckForCommonAliasIp(t *testing.T) {
 			expected: []interface{}{},
 		},
 		{
-			old:      []interface{}{testApiAliasRange("240.14.16.0/32", "range-a"), testApiAliasRange("240.20.16.0/32", "range-b")},
+			old:      []interface{}{testApiAliasRange("172.16.0.5/32", "range-a"), testApiAliasRange("172.16.2.5/32", "range-b")},
 			new:      []interface{}{testApiAliasRange("/32", "range-b"), testApiAliasRange("/32", "range-c")},
-			expected: []interface{}{testApiAliasRange("240.20.16.0/32", "range-b")},
+			expected: []interface{}{testApiAliasRange("172.16.2.5/32", "range-b")},
 		},
 	}
 
@@ -268,8 +268,9 @@ func TestResolveAliasIpRanges(t *testing.T) {
 		oldRanges, newRanges             []interface{}
 		expectedResolved, expectedCommon []interface{}
 	}{
-		{"shift surviving range to index 0 and add new range", []interface{}{testApiAliasRange("240.14.16.0/32", "range-a"), testApiAliasRange("240.20.16.0/32", "range-b")}, []interface{}{testApiAliasRange("/32", "range-b"), testApiAliasRange("/32", "range-c")}, []interface{}{testApiAliasRange("240.20.16.0/32", "range-b"), testApiAliasRange("/32", "range-c")}, []interface{}{testApiAliasRange("240.20.16.0/32", "range-b")}},
-		{"multiple /32 in same range consume distinct old entries", []interface{}{testApiAliasRange("240.14.16.0/32", "range-a"), testApiAliasRange("240.20.16.0/32", "range-b"), testApiAliasRange("240.20.16.1/32", "range-b")}, []interface{}{testApiAliasRange("/32", "range-b"), testApiAliasRange("/32", "range-b"), testApiAliasRange("/32", "range-b")}, []interface{}{testApiAliasRange("240.20.16.0/32", "range-b"), testApiAliasRange("240.20.16.1/32", "range-b"), testApiAliasRange("/32", "range-b")}, []interface{}{testApiAliasRange("240.20.16.0/32", "range-b"), testApiAliasRange("240.20.16.1/32", "range-b")}},
+		{"shift surviving range to index 0 and add new range", []interface{}{testApiAliasRange("172.16.0.5/32", "range-a"), testApiAliasRange("172.16.2.5/32", "range-b")}, []interface{}{testApiAliasRange("/32", "range-b"), testApiAliasRange("/32", "range-c")}, []interface{}{testApiAliasRange("172.16.2.5/32", "range-b"), testApiAliasRange("/32", "range-c")}, []interface{}{testApiAliasRange("172.16.2.5/32", "range-b")}},
+		{"pure reorder retains all ranges", []interface{}{testApiAliasRange("172.16.0.5/32", "range-a"), testApiAliasRange("172.16.2.5/32", "range-b")}, []interface{}{testApiAliasRange("/32", "range-b"), testApiAliasRange("/32", "range-a")}, []interface{}{testApiAliasRange("172.16.2.5/32", "range-b"), testApiAliasRange("172.16.0.5/32", "range-a")}, []interface{}{testApiAliasRange("172.16.2.5/32", "range-b"), testApiAliasRange("172.16.0.5/32", "range-a")}},
+		{"multiple /32 in same range consume distinct old entries", []interface{}{testApiAliasRange("172.16.0.5/32", "range-a"), testApiAliasRange("172.16.2.5/32", "range-b"), testApiAliasRange("172.16.2.6/32", "range-b")}, []interface{}{testApiAliasRange("/32", "range-b"), testApiAliasRange("/32", "range-b"), testApiAliasRange("/32", "range-b")}, []interface{}{testApiAliasRange("172.16.2.5/32", "range-b"), testApiAliasRange("172.16.2.6/32", "range-b"), testApiAliasRange("/32", "range-b")}, []interface{}{testApiAliasRange("172.16.2.5/32", "range-b"), testApiAliasRange("172.16.2.6/32", "range-b")}},
 		{"mixed /32 before explicit CIDR matches explicit first", []interface{}{testApiAliasRange("10.10.10.2/32", ""), testApiAliasRange("10.10.10.5/32", "")}, []interface{}{testApiAliasRange("/32", ""), testApiAliasRange("10.10.10.2/32", ""), testApiAliasRange("/32", "")}, []interface{}{testApiAliasRange("10.10.10.5/32", ""), testApiAliasRange("10.10.10.2/32", ""), testApiAliasRange("/32", "")}, []interface{}{testApiAliasRange("10.10.10.5/32", ""), testApiAliasRange("10.10.10.2/32", "")}},
 		{"same CIDR in different range name is not common", []interface{}{testApiAliasRange("172.16.0.1/32", "range-a")}, []interface{}{testApiAliasRange("172.16.0.1/32", "range-b")}, []interface{}{testApiAliasRange("172.16.0.1/32", "range-b")}, []interface{}{}},
 		{"empty ipCidrRange or nil entries do not panic or match", []interface{}{testApiAliasRange("", "r1"), nil}, []interface{}{testApiAliasRange("", "r1")}, []interface{}{testApiAliasRange("", "r1")}, []interface{}{}},
@@ -312,14 +313,13 @@ func TestIpCidrRangeDiffSuppress(t *testing.T) {
 		expectDiffEmpty    bool
 	}{
 		{"create does not suppress /32", nil, []interface{}{testTfAliasRange("/32", "range-a")}, true, false},
-		{"unchanged secondary range suppresses /32", []map[string]interface{}{testTfAliasRange("240.20.16.0/32", "range-a")}, []interface{}{testTfAliasRange("/32", "range-a")}, false, true},
+		{"unchanged secondary range suppresses /32", []map[string]interface{}{testTfAliasRange("172.16.2.5/32", "range-a")}, []interface{}{testTfAliasRange("/32", "range-a")}, false, true},
 		{"unchanged primary range suppresses /32", []map[string]interface{}{testTfAliasRange("10.0.1.5/32")}, []interface{}{testTfAliasRange("/32")}, false, true},
 		{"steady-state mixed /32 and explicit CIDR", []map[string]interface{}{testTfAliasRange("10.10.10.5/32"), testTfAliasRange("10.10.10.2/32")}, []interface{}{testTfAliasRange("/32"), testTfAliasRange("10.10.10.2/32")}, false, true},
-		{"appending second /32 suppresses index 0", []map[string]interface{}{testTfAliasRange("240.20.16.0/32", "range-a")}, []interface{}{testTfAliasRange("/32", "range-a"), testTfAliasRange("/32", "range-b")}, false, false},
-		{"secondary range-a to range-b does not suppress", []map[string]interface{}{testTfAliasRange("240.14.16.0/32", "range-a"), testTfAliasRange("240.20.16.0/32", "range-b")}, []interface{}{testTfAliasRange("/32", "range-b")}, true, false},
-		{"secondary range-a to omitted primary does not suppress", []map[string]interface{}{testTfAliasRange("240.14.16.0/32", "range-a")}, []interface{}{testTfAliasRange("/32")}, true, false},
-		{"inserting /32 before explicit CIDR (#12180)", []map[string]interface{}{testTfAliasRange("10.10.10.2/32")}, []interface{}{testTfAliasRange("/32"), testTfAliasRange("10.10.10.2/32")}, true, false},
-		{"instance template duplicate netmasks suppress", []map[string]interface{}{testTfAliasRange("/24", "range-a"), testTfAliasRange("/24", "range-a")}, []interface{}{testTfAliasRange("/24", "range-a"), testTfAliasRange("/24", "range-a")}, false, true},
+		{"appending second /32 suppresses index 0", []map[string]interface{}{testTfAliasRange("172.16.2.5/32", "range-a")}, []interface{}{testTfAliasRange("/32", "range-a"), testTfAliasRange("/32", "range-b")}, false, false},
+		{"secondary range-a to range-b does not suppress", []map[string]interface{}{testTfAliasRange("172.16.0.5/32", "range-a"), testTfAliasRange("172.16.2.5/32", "range-b")}, []interface{}{testTfAliasRange("/32", "range-b")}, true, false},
+		{"secondary range-a to omitted primary does not suppress", []map[string]interface{}{testTfAliasRange("172.16.0.5/32", "range-a")}, []interface{}{testTfAliasRange("/32")}, true, false},
+		{"inserting /32 before explicit CIDR does not suppress", []map[string]interface{}{testTfAliasRange("10.10.10.2/32")}, []interface{}{testTfAliasRange("/32"), testTfAliasRange("10.10.10.2/32")}, true, false},
 	}
 
 	for _, tc := range cases {
@@ -370,11 +370,13 @@ func TestFlattenAliasIpRangeHTTP(t *testing.T) {
 		apiRanges    []interface{}
 		expectedFlat []map[string]interface{}
 	}{
-		{name: "multi /32 across secondary ranges preserves config order", stateRanges: []interface{}{testTfAliasRange("/32", "range-b-1"), testTfAliasRange("/32", "range-b-2"), testTfAliasRange("/32", "range-c-1")}, apiRanges: []interface{}{testApiAliasRange("240.30.16.0/32", "range-c-1"), testApiAliasRange("240.20.16.1/32", "range-b-2"), testApiAliasRange("240.20.16.0/32", "range-b-1")}, expectedFlat: []map[string]interface{}{testTfAliasRange("240.20.16.0/32", "range-b-1"), testTfAliasRange("240.20.16.1/32", "range-b-2"), testTfAliasRange("240.30.16.0/32", "range-c-1")}},
+		{name: "multi /32 across secondary ranges preserves config order", stateRanges: []interface{}{testTfAliasRange("/32", "range-b-1"), testTfAliasRange("/32", "range-b-2"), testTfAliasRange("/32", "range-c-1")}, apiRanges: []interface{}{testApiAliasRange("172.16.4.5/32", "range-c-1"), testApiAliasRange("172.16.2.6/32", "range-b-2"), testApiAliasRange("172.16.2.5/32", "range-b-1")}, expectedFlat: []map[string]interface{}{testTfAliasRange("172.16.2.5/32", "range-b-1"), testTfAliasRange("172.16.2.6/32", "range-b-2"), testTfAliasRange("172.16.4.5/32", "range-c-1")}},
 		{name: "mixed /32 before explicit CIDR in primary range (#19765)", stateRanges: []interface{}{testTfAliasRange("/32", ""), testTfAliasRange("10.10.10.2/32", "")}, apiRanges: []interface{}{testApiAliasRange("10.10.10.2/32", ""), testApiAliasRange("10.10.10.5/32", "")}, expectedFlat: []map[string]interface{}{testTfAliasRange("10.10.10.5/32", ""), testTfAliasRange("10.10.10.2/32", "")}},
-		{name: "secondary NIC reads matching network_interface slot", nicIndex: 1, stateRanges: []interface{}{testTfAliasRange("/32", ""), testTfAliasRange("/32", "")}, apiRanges: []interface{}{testApiAliasRange("10.0.1.2/32", ""), testApiAliasRange("10.0.1.3/32", "")}, expectedFlat: []map[string]interface{}{testTfAliasRange("10.0.1.2/32", ""), testTfAliasRange("10.0.1.3/32", "")}},
+		{name: "secondary NIC reads matching network_interface slot", nicIndex: 1, stateRanges: []interface{}{testTfAliasRange("/32", "range-b"), testTfAliasRange("/32", "range-a")}, apiRanges: []interface{}{testApiAliasRange("172.16.0.5/32", "range-a"), testApiAliasRange("172.16.2.5/32", "range-b")}, expectedFlat: []map[string]interface{}{testTfAliasRange("172.16.2.5/32", "range-b"), testTfAliasRange("172.16.0.5/32", "range-a")}},
 		{name: "instance template netmasks match config order", stateRanges: []interface{}{testTfAliasRange("/24", "range-b"), testTfAliasRange("/24", "range-a")}, apiRanges: []interface{}{testApiAliasRange("/24", "range-a"), testApiAliasRange("/24", "range-b")}, expectedFlat: []map[string]interface{}{testTfAliasRange("/24", "range-b"), testTfAliasRange("/24", "range-a")}},
-		{name: "empty config preserves API order on import and data sources", apiRanges: []interface{}{testApiAliasRange("/24", "range-b"), testApiAliasRange("/24", "range-a")}, expectedFlat: []map[string]interface{}{testTfAliasRange("/24", "range-b"), testTfAliasRange("/24", "range-a")}},
+		{name: "netmasks of different sizes in one range match by size", stateRanges: []interface{}{testTfAliasRange("/32", "range-a"), testTfAliasRange("/24", "range-a")}, apiRanges: []interface{}{testApiAliasRange("172.16.1.0/24", "range-a"), testApiAliasRange("172.16.0.5/32", "range-a")}, expectedFlat: []map[string]interface{}{testTfAliasRange("172.16.0.5/32", "range-a"), testTfAliasRange("172.16.1.0/24", "range-a")}},
+		{name: "empty config sorts by CIDR string on import and data sources", apiRanges: []interface{}{testApiAliasRange("10.0.0.9/32", ""), testApiAliasRange("10.0.0.10/32", "")}, expectedFlat: []map[string]interface{}{testTfAliasRange("10.0.0.10/32", ""), testTfAliasRange("10.0.0.9/32", "")}},
+		{name: "empty config keeps API order when netmasks repeat (instance templates)", apiRanges: []interface{}{testApiAliasRange("/24", "range-b"), testApiAliasRange("/24", "range-a")}, expectedFlat: []map[string]interface{}{testTfAliasRange("/24", "range-b"), testTfAliasRange("/24", "range-a")}},
 		{name: "out-of-band deletion compacts matched slots and appends extra entries", stateRanges: []interface{}{testTfAliasRange("10.0.1.1/32", "r1"), testTfAliasRange("10.0.1.2/32", "r2")}, apiRanges: []interface{}{testApiAliasRange("10.0.1.2/32", "r2"), testApiAliasRange("10.0.1.9/32", "r3")}, expectedFlat: []map[string]interface{}{testTfAliasRange("10.0.1.2/32", "r2"), testTfAliasRange("10.0.1.9/32", "r3")}},
 	}
 
@@ -3150,7 +3152,7 @@ func TestAccComputeInstance_aliasIpRangeNetmaskShift(t *testing.T) {
 	t.Parallel()
 
 	var instance map[string]interface{}
-	var rangeBIp0, rangeBIp1, primaryMaskIp string
+	var rangeBIp0, rangeBIp1, primaryMaskIp, keptIp string
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	networkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	subnetName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
@@ -3161,8 +3163,8 @@ func TestAccComputeInstance_aliasIpRangeNetmaskShift(t *testing.T) {
 		},
 	}
 
-	// ImportState has no config to reorder against, so FlattenAliasIpRangeHTTP keeps GCE's API
-	// order on import while network_interface.0.alias_ip_range.# is still verified.
+	// Import has no config to match ranges to, so they come back sorted by CIDR string, which need
+	// not be config order. Per-index values are ignored; the count is still verified.
 	aliasOrderImportIgnore := []string{
 		"network_interface.0.alias_ip_range.0",
 		"network_interface.0.alias_ip_range.1",
@@ -3233,6 +3235,38 @@ func TestAccComputeInstance_aliasIpRangeNetmaskShift(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "network_interface.0.alias_ip_range.#", "0"),
+				),
+			},
+			computeInstanceImportStep("us-east1-d", instanceName, []string{}),
+			// A "/32" block must keep its address when the block ahead of it is removed. The explicit
+			// /30 holds the lowest addresses of range-b until that update, so a "/32" that had been
+			// released and requested again would come back inside it.
+			{
+				Config:           testAccComputeInstance_aliasIpRangeNetmaskShift_step4(networkName, subnetName, instanceName),
+				ConfigPlanChecks: inPlaceUpdate,
+			},
+			computeInstanceImportStep("us-east1-d", instanceName, []string{}),
+			{
+				Config:           testAccComputeInstance_aliasIpRangeNetmaskShift_step5(networkName, subnetName, instanceName),
+				ConfigPlanChecks: inPlaceUpdate,
+				Check: func(s *terraform.State) error {
+					keptIp = s.RootModule().Resources["google_compute_instance.foobar"].Primary.Attributes["network_interface.0.alias_ip_range.1.ip_cidr_range"]
+					if !strings.HasSuffix(keptIp, "/32") || regexp.MustCompile("^172\\.16\\.2\\.[0-3]/").MatchString(keptIp) {
+						return fmt.Errorf("expected a /32 outside 172.16.2.0/30 at index 1, got %q", keptIp)
+					}
+					return nil
+				},
+			},
+			computeInstanceImportStep("us-east1-d", instanceName, []string{}),
+			{
+				Config:           testAccComputeInstance_aliasIpRangeNetmaskShift_step6(networkName, subnetName, instanceName),
+				ConfigPlanChecks: inPlaceUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttrPtr("google_compute_instance.foobar", "network_interface.0.alias_ip_range.0.ip_cidr_range", &keptIp),
+					func(s *terraform.State) error {
+						return testAccCheckComputeInstanceHasAliasIpRange(&instance, "range-b", keptIp)(s)
+					},
 				),
 			},
 			computeInstanceImportStep("us-east1-d", instanceName, []string{}),
@@ -11049,6 +11083,80 @@ resource "google_compute_instance" "foobar" {
   }
   network_interface {
     subnetwork = google_compute_subnetwork.inst-test-subnetwork.self_link
+  }
+}
+`, instance)
+}
+
+func testAccComputeInstance_aliasIpRangeNetmaskShift_step4(network, subnet, instance string) string {
+	return testAccComputeInstance_aliasIpRangeNetmaskBase(network, subnet) + fmt.Sprintf(`
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-east1-d"
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-13"
+    }
+  }
+  network_interface {
+    subnetwork = google_compute_subnetwork.inst-test-subnetwork.self_link
+    alias_ip_range {
+      subnetwork_range_name = "range-b"
+      ip_cidr_range         = "172.16.2.0/30"
+    }
+  }
+}
+`, instance)
+}
+
+func testAccComputeInstance_aliasIpRangeNetmaskShift_step5(network, subnet, instance string) string {
+	return testAccComputeInstance_aliasIpRangeNetmaskBase(network, subnet) + fmt.Sprintf(`
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-east1-d"
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-13"
+    }
+  }
+  network_interface {
+    subnetwork = google_compute_subnetwork.inst-test-subnetwork.self_link
+    alias_ip_range {
+      subnetwork_range_name = "range-b"
+      ip_cidr_range         = "172.16.2.0/30"
+    }
+    alias_ip_range {
+      subnetwork_range_name = "range-b"
+      ip_cidr_range         = "/32"
+    }
+  }
+}
+`, instance)
+}
+
+func testAccComputeInstance_aliasIpRangeNetmaskShift_step6(network, subnet, instance string) string {
+	return testAccComputeInstance_aliasIpRangeNetmaskBase(network, subnet) + fmt.Sprintf(`
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-east1-d"
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-13"
+    }
+  }
+  network_interface {
+    subnetwork = google_compute_subnetwork.inst-test-subnetwork.self_link
+    alias_ip_range {
+      subnetwork_range_name = "range-b"
+      ip_cidr_range         = "/32"
+    }
+    alias_ip_range {
+      subnetwork_range_name = "range-c"
+      ip_cidr_range         = "/28"
+    }
   }
 }
 `, instance)

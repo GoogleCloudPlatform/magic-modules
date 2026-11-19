@@ -65,8 +65,11 @@ func matchAliasIpRanges(desired, actual []aliasIpRange) (matched []int, used []b
 	return matched, used
 }
 
-// FlattenAliasIpRangeHTTP reorders API aliasIpRanges to match configured list order,
-// appending any unmatched API entries (such as during import) in API order.
+// FlattenAliasIpRangeHTTP returns the API's aliasIpRanges in the order of the blocks already in d:
+// the plan after an apply, prior state on refresh. The API lists ranges in the order they were
+// attached, which stops matching config once an update adds a range ahead of another. Ranges with
+// no block in d (import, data sources, ranges added outside Terraform) follow sorted by CIDR
+// string, or in API order if two of them share one, as bare netmasks on instance templates do.
 func FlattenAliasIpRangeHTTP(d *schema.ResourceData, ranges []interface{}, i int) []map[string]interface{} {
 	configRaw, _ := d.Get(fmt.Sprintf("network_interface.%d.alias_ip_range", i)).([]interface{})
 	desired := make([]aliasIpRange, 0, len(configRaw))
@@ -101,12 +104,16 @@ func FlattenAliasIpRangeHTTP(d *schema.ResourceData, ranges []interface{}, i int
 			result = append(result, apiData[apiIdx])
 		}
 	}
+	unmatched := make([]map[string]interface{}, 0, len(apiData))
 	for apiIdx, api := range apiData {
 		if !used[apiIdx] {
-			result = append(result, api)
+			unmatched = append(unmatched, api)
 		}
 	}
-	return result
+	if sorted, err := tpgresource.SortMapsByConfigOrder(nil, unmatched, "ip_cidr_range"); err == nil {
+		unmatched = sorted
+	}
+	return append(result, unmatched...)
 }
 
 func FlattenDisksHTTP(disks []interface{}, d *schema.ResourceData, defaultProject string) ([]map[string]interface{}, error) {
