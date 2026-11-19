@@ -33,13 +33,17 @@ func TestAccAlloydbCluster_expressUpgrade(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		CheckDestroy: resource.ComposeTestCheckFunc(
 			testAccCheckAlloydbInstanceDestroyProducer(t),
 			testAccCheckAlloydbClusterDestroyProducer(t),
 		),
 		Steps: []resource.TestStep{
 			{
-				// Create an AlloyDB Express cluster and primary instance.
+				// Create an AlloyDB Express cluster and primary instance, then wait 10 minutes
+				// for AlloyDB Express background instance setup to complete before Day-2 updates.
 				Config: testAccAlloydbCluster_expressConfig(expressContext),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "express_config.0.enabled", "true"),
@@ -126,11 +130,17 @@ resource "google_alloydb_instance" "default" {
   instance_type = "PRIMARY"
 }
 
+resource "time_sleep" "wait_10_mins" {
+  depends_on = [google_alloydb_instance.default]
+
+  create_duration = "600s"
+}
+
 data "google_alloydb_cluster" "default" {
   provider   = google-beta
   cluster_id = google_alloydb_cluster.default.cluster_id
   location   = google_alloydb_cluster.default.location
-  depends_on = [google_alloydb_instance.default]
+  depends_on = [time_sleep.wait_10_mins]
 }
 `, context)
 }
@@ -165,11 +175,17 @@ resource "google_alloydb_instance" "default" {
   instance_type = "PRIMARY"
 }
 
+resource "time_sleep" "wait_10_mins" {
+  depends_on = [google_alloydb_instance.default]
+
+  create_duration = "600s"
+}
+
 data "google_alloydb_cluster" "default" {
   provider   = google-beta
   cluster_id = google_alloydb_cluster.default.cluster_id
   location   = google_alloydb_cluster.default.location
-  depends_on = [google_alloydb_instance.default]
+  depends_on = [time_sleep.wait_10_mins]
 }
 `, context)
 }
