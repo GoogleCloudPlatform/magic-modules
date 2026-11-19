@@ -470,4 +470,121 @@ func TestUnitComputeDhcpOptionsConfig_sweeper(t *testing.T) {
 		}
 	}
 }
+
+func TestUnitComputeDhcpOptionsConfig_dataSourceAndDefaultRegion(t *testing.T) {
+	t.Parallel()
+
+	const (
+		project = "test-project"
+		region  = "us-central1"
+		name    = "test-dhcp"
+		resPath = "/projects/test-project/regions/us-central1/dhcpOptionsConfigs/test-dhcp"
+	)
+
+	var calls []string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls = append(calls, r.Method+" "+r.URL.Path)
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method == http.MethodGet && r.URL.Path == resPath {
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"id":                "123456789",
+				"name":              name,
+				"description":       "unit test config",
+				"region":            "https://www.googleapis.com/compute/beta/projects/" + project + "/regions/" + region,
+				"selfLink":          "https://www.googleapis.com/compute/beta" + resPath,
+				"leaseTimeSec":      float64(3600),
+				"domainName":        "corp.example.com",
+				"creationTimestamp": "2026-11-12T00:00:00.000-08:00",
+				"associations": map[string]interface{}{
+					"assoc-1": map[string]interface{}{
+						"network":   "https://www.googleapis.com/compute/beta/projects/" + project + "/global/networks/net-1",
+						"networkId": "111",
+						"state":     "ACTIVE",
+					},
+				},
+			})
+			return
+		}
+		t.Errorf("unexpected request: %s %s", r.Method, r.URL.Path)
+		http.NotFound(w, r)
+	}))
+	defer server.Close()
+
+	cfg := &transport_tpg.Config{
+		Context:      context.Background(),
+		Client:       server.Client(),
+		Project:      project,
+		Region:       region,
+		PollInterval: time.Millisecond,
+		CustomEndpoints: map[string]string{
+			"compute_custom_endpoint": server.URL + "/",
+		},
+	}
+
+	ds := DataSourceComputeDhcpOptionsConfig()
+	if !ds.Schema["name"].Required {
+		t.Errorf("datasource name schema Required = false, want true")
+	}
+	if !ds.Schema["region"].Optional || ds.Schema["region"].Required {
+		t.Errorf("datasource region schema = {Optional:%v Required:%v}, want {Optional:true Required:false}", ds.Schema["region"].Optional, ds.Schema["region"].Required)
+	}
+	if !ds.Schema["project"].Optional || ds.Schema["project"].Required {
+		t.Errorf("datasource project schema = {Optional:%v Required:%v}, want {Optional:true Required:false}", ds.Schema["project"].Optional, ds.Schema["project"].Required)
+	}
+
+	for _, tc := range []struct {
+		name string
+		raw  map[string]interface{}
+	}{
+		{
+			name: "default region and project from provider config",
+			raw: map[string]interface{}{
+				"name": name,
+			},
+		},
+		{
+			name: "explicit region and project",
+			raw: map[string]interface{}{
+				"name":    name,
+				"region":  region,
+				"project": project,
+			},
+		},
+	} {
+		d := schema.TestResourceDataRaw(t, ds.Schema, tc.raw)
+		if err := ds.Read(d, cfg); err != nil {
+			t.Fatalf("datasource Read(%s) unexpected error: %v", tc.name, err)
+		}
+		if got := d.Id(); got != "projects/"+project+"/regions/"+region+"/dhcpOptionsConfigs/"+name {
+			t.Errorf("datasource Id() = %q, want %q", got, "projects/"+project+"/regions/"+region+"/dhcpOptionsConfigs/"+name)
+		}
+		if got := d.Get("region").(string); got != region {
+			t.Errorf("datasource region = %q, want %q", got, region)
+		}
+		if got := d.Get("project").(string); got != project {
+			t.Errorf("datasource project = %q, want %q", got, project)
+		}
+		if got := d.Get("name").(string); got != name {
+			t.Errorf("datasource name = %q, want %q", got, name)
+		}
+		if got := d.Get("lease_time_sec").(int); got != 3600 {
+			t.Errorf("datasource lease_time_sec = %d, want 3600", got)
+		}
+	}
+
+	res := ResourceComputeDhcpOptionsConfig()
+	rd := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+		"name": name,
+	})
+	rd.SetId("projects/" + project + "/regions/" + region + "/dhcpOptionsConfigs/" + name)
+	if err := res.Read(rd, cfg); err != nil {
+		t.Fatalf("resource Read() unexpected error: %v", err)
+	}
+	if got := rd.Get("region").(string); got != region {
+		t.Errorf("resource region after Read = %q, want %q", got, region)
+	}
+	if len(calls) != 3 {
+		t.Errorf("GET call count = %d, want 3", len(calls))
+	}
+}
 {{- end }}

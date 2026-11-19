@@ -32,6 +32,11 @@ has_self_link: true
 update_mask: true
 update_verb: PATCH
 kind: compute#dhcpOptionsConfig
+datasource_experimental:
+  generate: true
+  # The generated data source test omits `provider = google-beta` on the data block
+  # (which beta-only resources require) and uses the basic sample with a hardcoded region.
+  exclude_test: true
 # Uses handwritten sweeper in resource_compute_dhcp_options_config_sweeper.go.tmpl to clear associations before deletion.
 exclude_sweeper: true
 async:
@@ -112,10 +117,10 @@ parameters:
       The region where the DHCP options config resides.
       If it is not provided, the provider region is used.
     immutable: true
+    ignore_read: true
     url_param_only: true
     default_from_api: true
     diff_suppress_func: tpgresource.CompareResourceNames
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
     resource: Region
     imports: name
 properties:

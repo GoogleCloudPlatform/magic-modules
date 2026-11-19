@@ -33,7 +33,7 @@ func TestAccDataSourceGoogleComputeDhcpOptionsConfig_basic(t *testing.T) {
 				Config: testAccDataSourceGoogleComputeDhcpOptionsConfig_basic(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_compute_dhcp_options_config.explicit", "region", context["region"].(string)),
-					// deletion_policy is a client-side lifecycle field on the resource and cleared on the data source.
+					// deletion_policy is a client-side lifecycle field on the resource and not applicable to data sources.
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 						"data.google_compute_dhcp_options_config.explicit",
 						"google_compute_dhcp_options_config.default",
