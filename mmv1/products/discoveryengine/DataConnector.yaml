@@ -369,6 +369,7 @@ properties:
       BAP (Business Application Platform) configuration for the data
       connector. Controls which actions are enabled for connectors
       using the ACTIONS connector mode.
+    default_from_api: true
     properties:
       - name: 'enabledActions'
         type: Array
