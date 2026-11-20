@@ -58,13 +58,15 @@ samples:
           application_template: my-application-template
           component: my-source-component
           destination_component_uri: projects/my-project-name/locations/us-central1/spaces/my-space/applicationTemplates/my-application-template/components/my-dest-component
+          source_roles: '["roles/cloudsql.client"]'
+          iam_user_id: example-sa
         test_vars_overrides:
           project: BootstrapDesignCenterProject(t)
           space: BootstrapDesignCenterSpace(t)
           application_template: BootstrapDesignCenterApplicationTemplate(t)
           component: BootstrapDesignCenterComponent(t)
           destination_component_uri: BootstrapDesignCenterDestinationComponentURI(t)
-      - name: designcenter_connection_update2
+      - name: designcenter_connection_update
         resource_id_vars:
           connection_id: example-connection
         vars:
@@ -73,6 +75,8 @@ samples:
           application_template: my-application-template
           component: my-source-component
           destination_component_uri: projects/my-project-name/locations/us-central1/spaces/my-space/applicationTemplates/my-application-template/components/my-dest-component
+          source_roles: '["roles/cloudsql.client", "roles/cloudsql.instanceUser"]'
+          iam_user_id: updated-sa
         test_vars_overrides:
           project: BootstrapDesignCenterProject(t)
           space: BootstrapDesignCenterSpace(t)

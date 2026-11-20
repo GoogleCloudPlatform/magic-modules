@@ -9,15 +9,15 @@ resource "google_design_center_connection" "example" {
 
   source_component_parameters {
     key   = "service_account_project_roles"
-    value = jsonencode(["roles/cloudsql.client"])
+    value = jsonencode({{index $.Vars "source_roles"}})
   }
 
   destination_component_parameters {
     key = "iam_users"
     value = jsonencode([
       {
-        id    = "example-sa"
-        email = "example-sa@{{index $.Vars "project"}}.iam.gserviceaccount.com"
+        id    = "{{index $.Vars "iam_user_id"}}"
+        email = "{{index $.Vars "iam_user_id"}}@{{index $.Vars "project"}}.iam.gserviceaccount.com"
         type  = "CLOUD_IAM_SERVICE_ACCOUNT"
       },
     ])
