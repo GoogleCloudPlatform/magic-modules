@@ -19,7 +19,6 @@ description: |
 references:
   guides:
     Parameter templates overview: https://cloud.google.com/secret-manager/parameter-manager/docs/parameter-templates-overview
-  api: https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.templates
 base_url: projects/{{project}}/locations/{{location}}/templates
 min_version: beta
 self_link: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
@@ -113,9 +112,11 @@ properties:
 
       No more than 64 labels can be assigned to a given resource.
   - name: format
-    type: String
+    type: Enum
     description: |
-      The format type of the regional template resource. For possible values, see the
-      [API documentation](https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.templates#TemplateFormat).
+      The format type of the regional template resource.
     default_value: TEMPLATE_FORMAT_YAML
     immutable: true
+    enum_values:
+      - TEMPLATE_FORMAT_YAML
+      - TEMPLATE_FORMAT_JSON
