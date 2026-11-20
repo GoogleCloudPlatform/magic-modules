@@ -1392,3 +1392,174 @@ resource "google_compute_region_security_policy" "policy" {
 `, context)
 }
 
+func TestAccComputeRegionSecurityPolicy_withExprOptionsUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionSecurityPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionSecurityPolicy_withoutExprOptions(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSecurityPolicy_withExprOptions(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSecurityPolicy_modifyExprOptions(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSecurityPolicy_withoutExprOptions(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeRegionSecurityPolicy_withoutExprOptions(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_region_security_policy" "policy" {
+  name   = "tf-test%{random_suffix}"
+  region = "us-central1"
+  type   = "CLOUD_ARMOR"
+
+  rules {
+    action      = "allow"
+    priority    = "2147483647"
+    description = "default rule"
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["*"]
+      }
+    }
+  }
+
+  rules {
+    action      = "deny(403)"
+    priority    = "2000"
+    description = "reCAPTCHA rule"
+    match {
+      expr {
+        expression = "request.path.endsWith('RegisterWithEmail') && token.recaptcha_action.score >= 0.8 && (token.recaptcha_action.valid)"
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccComputeRegionSecurityPolicy_withExprOptions(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_region_security_policy" "policy" {
+  name   = "tf-test%{random_suffix}"
+  region = "us-central1"
+  type   = "CLOUD_ARMOR"
+
+  rules {
+    action      = "allow"
+    priority    = "2147483647"
+    description = "default rule"
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["*"]
+      }
+    }
+  }
+
+  rules {
+    action      = "deny(403)"
+    priority    = "2000"
+    description = "reCAPTCHA rule"
+    match {
+      expr {
+        expression = "request.path.endsWith('RegisterWithEmail') && token.recaptcha_action.score >= 0.8 && (token.recaptcha_action.valid)"
+      }
+      expr_options {
+        recaptcha_options {
+          action_token_site_keys = [
+            "placeholder-recaptcha-action-site-key-01",
+            "placeholder-recaptcha-action-site-key-02",
+          ]
+          session_token_site_keys = [
+            "placeholder-recaptcha-session-site-key-1",
+            "placeholder-recaptcha-session-site-key-2",
+          ]
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccComputeRegionSecurityPolicy_modifyExprOptions(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_region_security_policy" "policy" {
+  name   = "tf-test%{random_suffix}"
+  region = "us-central1"
+  type   = "CLOUD_ARMOR"
+
+  rules {
+    action      = "allow"
+    priority    = "2147483647"
+    description = "default rule"
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["*"]
+      }
+    }
+  }
+
+  rules {
+    action      = "deny(403)"
+    priority    = "2000"
+    description = "reCAPTCHA rule"
+    match {
+      expr {
+        expression = "request.path.endsWith('RegisterWithEmail') && token.recaptcha_action.score >= 0.8 && (token.recaptcha_action.valid)"
+      }
+      expr_options {
+        recaptcha_options {
+          action_token_site_keys = [
+            "placeholder-recaptcha-action-site-key-09",
+            "placeholder-recaptcha-action-site-key-08",
+            "placeholder-recaptcha-action-site-key-07",
+          ]
+          session_token_site_keys = [
+            "placeholder-recaptcha-session-site-key-1",
+          ]
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
