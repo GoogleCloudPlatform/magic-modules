@@ -34,7 +34,6 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-supports_indirect_user_project_override: true
 include_in_tgc_next: true
 cai_asset_name_format: projects/{{project}}/feeds/{{feed_id}}
 custom_code:
