@@ -79,7 +79,7 @@ func TestAccVertexAIModel_generatedModelIdUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckVertexAIModelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccVertexAIModel_generatedModelId(context, ""),
+				Config: testAccVertexAIModel_generatedModelId_create(context),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttrWith("google_vertex_ai_model.model", "model_id", func(value string) error {
 						if value == "" {
@@ -91,7 +91,7 @@ func TestAccVertexAIModel_generatedModelIdUpdate(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccVertexAIModel_generatedModelId(context, "updated"),
+				Config: testAccVertexAIModel_generatedModelId_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_vertex_ai_model.model", plancheck.ResourceActionUpdate),
@@ -111,18 +111,25 @@ func TestAccVertexAIModel_generatedModelIdUpdate(t *testing.T) {
 	})
 }
 
-func testAccVertexAIModel_generatedModelId(context map[string]interface{}, description string) string {
-	descriptionLine := ""
-	if description != "" {
-		descriptionLine = fmt.Sprintf("description = %q", description)
-	}
+func testAccVertexAIModel_generatedModelId_create(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vertex_ai_model" "model" {
   project = "%{project_name}"
   source_model = "%{source_model}"
 
   region = "us-central1"
-  `+descriptionLine+`
+}
+`, context)
+}
+
+func testAccVertexAIModel_generatedModelId_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_model" "model" {
+  project = "%{project_name}"
+  source_model = "%{source_model}"
+
+  region = "us-central1"
+  description = "updated"
 }
 `, context)
 }
