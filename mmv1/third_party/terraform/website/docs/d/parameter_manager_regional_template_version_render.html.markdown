@@ -6,7 +6,7 @@ description: |-
 
 # google_parameter_manager_regional_template_version_render
 
-Renders a Parameter Manager Regional Template Version against a specified Parameter Version. For more information see the [official documentation](https://cloud.google.com/secret-manager/parameter-manager/docs/parameter-templates-overview) and [API](https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.templates.versions/render).
+Renders a Parameter Manager Regional Template Version against a specified Parameter Version. For more information see the [official documentation](https://cloud.google.com/secret-manager/parameter-manager/docs/parameter-templates-overview) and [rendering guide](https://cloud.google.com/secret-manager/parameter-manager/docs/render-parameter-template-version).
 
 ~> **Warning:** This datasource is in beta, and should be used with the terraform-provider-google-beta provider.
 See [Provider Versions](../guides/provider_versions.html.markdown) for more details on beta resources.
