@@ -333,7 +333,8 @@ properties:
                         description: 'Specifies the reservation affinity type. Possible values: NO_RESERVATION ANY_RESERVATION SPECIFIC_RESERVATION SPECIFIC_THEN_ANY_RESERVATION SPECIFIC_THEN_NO_RESERVATION'
                       - name: 'useReservationPool'
                         type: Boolean
-                        description: When set to true, resources will be drawn from go/cloud-ai-gcp-pool.
+                        # Internal reference: go/cloud-ai-gcp-pool
+                        description: When set to true, resources will be drawn from the reservation pool.
                       - name: 'values'
                         type: Array
                         description: Corresponds to the label values of a reservation resource. This must be the full resource name of the reservation or reservation block.

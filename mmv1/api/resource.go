@@ -45,6 +45,18 @@ var (
 	looseFieldMarkerRegexp = regexp.MustCompile(`{{\s*([^}]+)\s*}}`)
 	// "key": entries in an extra_schema_entry file.
 	schemaEntryKeyRegexp = regexp.MustCompile(`"([^"]+)"\s*:`)
+	// Internal-only Google URLs, shortlinks, and source paths disallowed in public docs.
+	internalRefPatterns = []struct {
+		label string
+		re    *regexp.Regexp
+	}{
+		{"corp.google.com", regexp.MustCompile(`(?i)(?:^|[^a-z0-9-])corp\.google\.com\b`)},
+		{"goto.google.com", regexp.MustCompile(`(?i)(?:^|[^a-z0-9-])goto\.google\.com\b`)},
+		{"go/", regexp.MustCompile(`(?i)(?:https?://go/|(?:^|[^a-z0-9_./:-])go/[a-z0-9][a-z0-9._-]*)`)},
+		{"b/", regexp.MustCompile(`(?i)(?:https?://b/[0-9]+|(?:^|[^a-z0-9_./:-])b/[0-9]{5,}\b)`)},
+		{"//depot/", regexp.MustCompile(`(?i)//depot/`)},
+		{"google3/", regexp.MustCompile(`(?i)\bgoogle3/`)},
+	}
 )
 
 type Resource struct {
@@ -603,6 +615,29 @@ func (r *Resource) Validate() (es []error) {
 		es = append(es, fmt.Errorf("missing `description` for resource %s", r.Name))
 	}
 
+	for _, f := range []struct{ name, val string }{
+		{"description", r.Description},
+		{"deprecation_message", r.DeprecationMessage},
+		{"references.api", r.References.Api},
+		{"docs.warning", r.Docs.Warning},
+		{"docs.note", r.Docs.Note},
+		{"docs.required_properties", r.Docs.RequiredProperties},
+		{"docs.optional_properties", r.Docs.OptionalProperties},
+		{"docs.write_only_properties", r.Docs.WriteOnlyProperties},
+		{"docs.attributes", r.Docs.Attributes},
+	} {
+		if err := ValidateNoInternalRefs(f.val, "resource %s `%s`", r.Name, f.name); err != nil {
+			es = append(es, err)
+		}
+	}
+	for _, k := range slices.Sorted(maps.Keys(r.References.Guides)) {
+		if err := ValidateNoInternalRefs(k, "resource %s `references.guides[%q]`", r.Name, k); err != nil {
+			es = append(es, err)
+		} else if err := ValidateNoInternalRefs(r.References.Guides[k], "resource %s `references.guides[%q]`", r.Name, k); err != nil {
+			es = append(es, err)
+		}
+	}
+
 	if !r.Exclude {
 		// Ensures we have all properties defined
 		for _, i := range r.Identity {
@@ -666,6 +701,19 @@ func (r *Resource) Validate() (es []error) {
 	}
 
 	return es
+}
+
+// ValidateNoInternalRefs rejects internal-only Google URLs, shortlinks, and source paths in public documentation text.
+func ValidateNoInternalRefs(text, contextFormat string, args ...any) error {
+	if text == "" {
+		return nil
+	}
+	for _, p := range internalRefPatterns {
+		if p.re.MatchString(text) {
+			return fmt.Errorf("%s must not contain internal Google reference %q; replace with a public link or move to a comment", fmt.Sprintf(contextFormat, args...), p.label)
+		}
+	}
+	return nil
 }
 
 // ====================

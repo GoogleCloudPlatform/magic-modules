@@ -1679,3 +1679,105 @@ func TestResource_FirstTestConfig_StepMinVersion(t *testing.T) {
 		t.Errorf("TestSamples() = %v, want 2 samples starting with mixed_steps", testSamples)
 	}
 }
+
+func TestResourceValidateInternalRefs(t *testing.T) {
+	t.Parallel()
+
+	baseResource := func() api.Resource {
+		return api.Resource{
+			Name:        "TestResource",
+			Description: "A public resource description. See https://cloud.google.com/docs.",
+			Exclude:     true,
+			CreateVerb:  "POST",
+			ReadVerb:    "GET",
+			DeleteVerb:  "DELETE",
+			UpdateVerb:  "PUT",
+			References: resource.ReferenceLinks{
+				Api:    "https://cloud.google.com/service/docs/reference/rest",
+				Guides: map[string]string{"Official Documentation": "https://cloud.google.com/service/docs"},
+			},
+			Docs: resource.Docs{
+				Note: "Public note referencing https://go.dev/doc and https://beyondcorp.googleapis.com/v1/.",
+			},
+		}
+	}
+
+	cases := []struct {
+		name      string
+		mutate    func(*api.Resource)
+		wantError string
+	}{
+		{
+			name:   "valid public resource passes",
+			mutate: func(*api.Resource) {},
+		},
+		{
+			name:      "corp.google.com in description",
+			mutate:    func(r *api.Resource) { r.Description = "See https://corp.google.com/internal." },
+			wantError: `resource TestResource ` + "`description`" + ` must not contain internal Google reference "corp.google.com"`,
+		},
+		{
+			name:      "goto.google.com in references.api",
+			mutate:    func(r *api.Resource) { r.References.Api = "https://goto.google.com/api-ref" },
+			wantError: `resource TestResource ` + "`references.api`" + ` must not contain internal Google reference "goto.google.com"`,
+		},
+		{
+			name:      "corp.google.com in references.guides value",
+			mutate:    func(r *api.Resource) { r.References.Guides["Internal Guide"] = "https://g3doc.corp.google.com/guide" },
+			wantError: `resource TestResource ` + "`references.guides[\"Internal Guide\"]`" + ` must not contain internal Google reference "corp.google.com"`,
+		},
+		{
+			name:      "https://go/ in references.guides key",
+			mutate:    func(r *api.Resource) { r.References.Guides["See https://go/guide"] = "https://cloud.google.com/docs" },
+			wantError: `resource TestResource ` + "`references.guides[\"See https://go/guide\"]`" + ` must not contain internal Google reference "go/"`,
+		},
+		{
+			name:      "bare go/ link in description",
+			mutate:    func(r *api.Resource) { r.Description = "See go/cloud-ai-gcp-pool for details." },
+			wantError: `resource TestResource ` + "`description`" + ` must not contain internal Google reference "go/"`,
+		},
+		{
+			name:      "b/ bug link in docs.note",
+			mutate:    func(r *api.Resource) { r.Docs.Note = "Tracked in b/360405077." },
+			wantError: `resource TestResource ` + "`docs.note`" + ` must not contain internal Google reference "b/"`,
+		},
+		{
+			name:      "google3/ in docs.note",
+			mutate:    func(r *api.Resource) { r.Docs.Note = "See google3/cloud/foo/README.md" },
+			wantError: `resource TestResource ` + "`docs.note`" + ` must not contain internal Google reference "google3/"`,
+		},
+		{
+			name:      "//depot/ in docs.warning",
+			mutate:    func(r *api.Resource) { r.Docs.Warning = "See //depot/google3/cloud/foo.proto" },
+			wantError: `resource TestResource ` + "`docs.warning`" + ` must not contain internal Google reference "//depot/"`,
+		},
+		{
+			name:      "case-insensitive GOTO.GOOGLE.COM in deprecation_message",
+			mutate:    func(r *api.Resource) { r.DeprecationMessage = "See HTTPS://GOTO.GOOGLE.COM/sunset." },
+			wantError: `resource TestResource ` + "`deprecation_message`" + ` must not contain internal Google reference "goto.google.com"`,
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			r := baseResource()
+			tc.mutate(&r)
+
+			errs := r.Validate()
+			if tc.wantError == "" {
+				if len(errs) != 0 {
+					t.Fatalf("expected no errors, got: %v", errs)
+				}
+				return
+			}
+			for _, err := range errs {
+				if strings.Contains(err.Error(), tc.wantError) {
+					return
+				}
+			}
+			t.Fatalf("expected error containing %q, got: %v", tc.wantError, errs)
+		})
+	}
+}

@@ -1564,3 +1564,148 @@ func TestTypeValidateRequiredUnderOutput(t *testing.T) {
 		}
 	})
 }
+
+func TestTypeValidateInternalRefs(t *testing.T) {
+	t.Parallel()
+
+	p := &Product{
+		Name:     "TestProduct",
+		Versions: []*product.Version{{Name: "ga", BaseUrl: "ga_url"}},
+	}
+
+	cases := []struct {
+		name      string
+		prop      *Type
+		wantError string
+	}{
+		{
+			name:      "corp.google.com subdomain in description",
+			prop:      &Type{Name: "field", Type: "String", Description: "See https://clouddocs.devsite.corp.google.com/docs."},
+			wantError: `property field ` + "`description`" + ` in resource TestResource must not contain internal Google reference "corp.google.com"`,
+		},
+		{
+			name:      "goto.google.com in description",
+			prop:      &Type{Name: "field", Type: "String", Description: "See https://goto.google.com/my-doc."},
+			wantError: `internal Google reference "goto.google.com"`,
+		},
+		{
+			name:      "http://go/ in description",
+			prop:      &Type{Name: "field", Type: "String", Description: "See http://go/internal-doc."},
+			wantError: `internal Google reference "go/"`,
+		},
+		{
+			name:      "https://go/ in description",
+			prop:      &Type{Name: "field", Type: "String", Description: "See https://go/internal-doc."},
+			wantError: `internal Google reference "go/"`,
+		},
+		{
+			name:      "bare go/ in description",
+			prop:      &Type{Name: "field", Type: "String", Description: "Drawn from go/cloud-ai-gcp-pool."},
+			wantError: `internal Google reference "go/"`,
+		},
+		{
+			name:      "bare b/ bug ID in description",
+			prop:      &Type{Name: "field", Type: "String", Description: "See b/360405077#comment8."},
+			wantError: `internal Google reference "b/"`,
+		},
+		{
+			name:      "https://b/ bug URL in description",
+			prop:      &Type{Name: "field", Type: "String", Description: "See https://b/123456."},
+			wantError: `internal Google reference "b/"`,
+		},
+		{
+			name:      "//depot/ in description",
+			prop:      &Type{Name: "field", Type: "String", Description: "Defined at //depot/foo/bar.proto."},
+			wantError: `internal Google reference "//depot/"`,
+		},
+		{
+			name:      "google3/ in description",
+			prop:      &Type{Name: "field", Type: "String", Description: "Defined at google3/cloud/foo/bar.proto."},
+			wantError: `internal Google reference "google3/"`,
+		},
+		{
+			name:      "case-insensitive corp.google.com",
+			prop:      &Type{Name: "field", Type: "String", Description: "See HTTPS://B.CORP.GOOGLE.COM/issues/123."},
+			wantError: `internal Google reference "corp.google.com"`,
+		},
+		{
+			name:      "case-insensitive HTTPS://GO/",
+			prop:      &Type{Name: "field", Type: "String", Description: "See HTTPS://GO/my-link."},
+			wantError: `internal Google reference "go/"`,
+		},
+		{
+			name:      "case-insensitive GOOGLE3/",
+			prop:      &Type{Name: "field", Type: "String", Description: "Path GOOGLE3/cloud/api.proto."},
+			wantError: `internal Google reference "google3/"`,
+		},
+		{
+			name:      "deprecation_message with internal URL",
+			prop:      &Type{Name: "field", Type: "String", DeprecationMessage: "See https://goto.google.com/deprecation."},
+			wantError: `property field ` + "`deprecation_message`" + ` in resource TestResource must not contain internal Google reference "goto.google.com"`,
+		},
+		{
+			name:      "removed_message with internal path",
+			prop:      &Type{Name: "field", Type: "String", RemovedMessage: "Removed per google3/cloud/removed.proto."},
+			wantError: `property field ` + "`removed_message`" + ` in resource TestResource must not contain internal Google reference "google3/"`,
+		},
+		{
+			name: "nested object child description",
+			prop: &Type{
+				Name: "parent",
+				Type: "NestedObject",
+				Properties: []*Type{
+					{Name: "childField", Type: "String", Description: "See https://g3doc.corp.google.com/foo."},
+				},
+			},
+			wantError: `property parent.child_field ` + "`description`" + ` in resource TestResource must not contain internal Google reference "corp.google.com"`,
+		},
+		{
+			name: "array item_type nested description",
+			prop: &Type{
+				Name: "items",
+				Type: "Array",
+				ItemType: &Type{
+					Type: "NestedObject",
+					Properties: []*Type{
+						{Name: "entry", Type: "String", Description: "See //depot/foo/bar.proto."},
+					},
+				},
+			},
+			wantError: `property items.entry ` + "`description`" + ` in resource TestResource must not contain internal Google reference "//depot/"`,
+		},
+		{
+			name: "valid public URLs and prose pass",
+			prop: &Type{
+				Name: "field",
+				Type: "String",
+				Description: "See https://cloud.google.com/go/docs, https://go.dev/doc, " +
+					"https://beyondcorp.googleapis.com/v1/, beyondcorp.google.com, " +
+					"https://example.com/depot/foo, https://example.com/b/123456, " +
+					"django/app, mygoogle3/path, and 100 b/s.",
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			res := &Resource{Name: "TestResource", Properties: []*Type{tc.prop}}
+			res.SetDefault(p)
+
+			errs := tc.prop.Validate(res.Name)
+			if tc.wantError == "" {
+				if len(errs) != 0 {
+					t.Fatalf("expected no errors, got: %v", errs)
+				}
+				return
+			}
+			for _, err := range errs {
+				if strings.Contains(err.Error(), tc.wantError) {
+					return
+				}
+			}
+			t.Fatalf("expected error containing %q, got: %v", tc.wantError, errs)
+		})
+	}
+}
