@@ -1,0 +1,25 @@
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+// This method returns a full self link from whatever the input is.
+  if v == nil || v.(string) == "" {
+    return "", nil
+  } else if strings.HasPrefix(v.(string), "https://") {
+    return v, nil
+  } else if strings.HasPrefix(v.(string), "projects/") {
+    url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}" + v.(string))
+    if err != nil {
+      return "", err
+    }
+    return url, nil
+    } else if strings.HasPrefix(v.(string), "regions/") {
+    url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/")
+    if err != nil {
+      return nil, err
+    }
+    return url + v.(string), nil
+  }
+  f, err := tpgresource.ParseRegionalFieldValue("backendServices", v.(string), "project", "region", "zone", d, config, true)
+  if err != nil {
+    return "", err
+}
+return f.RelativeLink(), nil
+}
