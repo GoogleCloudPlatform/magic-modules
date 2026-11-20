@@ -235,17 +235,12 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		}
 	}
 
-	if wicMap := expandWorkloadIdentityConfig(d); len(wicMap) > 0 {
-		wic := &compute.WorkloadIdentityConfig{}
-		if v, ok := wicMap["identity"].(string); ok {
-			wic.Identity = v
-			wic.ForceSendFields = append(wic.ForceSendFields, "Identity")
+	if wicMap := expandWorkloadIdentityConfig(d); wicMap != nil {
+		instance.WorkloadIdentityConfig = &compute.WorkloadIdentityConfig{
+			Identity:                   wicMap["identity"].(string),
+			IdentityCertificateEnabled: wicMap["identityCertificateEnabled"].(bool),
+			ForceSendFields:            []string{"Identity", "IdentityCertificateEnabled"},
 		}
-		if v, ok := wicMap["identityCertificateEnabled"].(bool); ok {
-			wic.IdentityCertificateEnabled = v
-			wic.ForceSendFields = append(wic.ForceSendFields, "IdentityCertificateEnabled")
-		}
-		instance.WorkloadIdentityConfig = wic
 	}
 	return instance, nil
 }
