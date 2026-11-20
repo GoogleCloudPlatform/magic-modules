@@ -740,6 +740,44 @@ func TestAccDataflowFlexTemplateJob_workerPoolsFallback(t *testing.T) {
 	})
 }
 
+// Beam Python pipelines record the worker machine type in sdkPipelineOptions as
+// machine_type rather than workerMachineType. Before the fix, every read with a
+// machine type already in state set machine_type to "", so the plan right after
+// apply was not empty.
+func TestAccDataflowFlexTemplateJob_pythonMachineType(t *testing.T) {
+	// Dataflow responses include serialized pipeline options and commands
+	// This makes body comparison infeasible
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_id":    acctest.RandString(t, 10),
+		"machine_type": "n2-standard-2",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataflowFlexTemplateJob_pythonMachineType(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccDataflowFlexJobExists(t, "google_dataflow_flex_template_job.flex_job", false),
+					// The job takes the Python code path: the option is stored as machine_type.
+					testAccDataflowFlexJobHasOption(t, "google_dataflow_flex_template_job.flex_job", "machine_type", "n2-standard-2", false),
+					resource.TestCheckResourceAttr("google_dataflow_flex_template_job.flex_job", "machine_type", "n2-standard-2"),
+				),
+			},
+			{
+				// Refresh again and expect no diff.
+				Config:   testAccDataflowFlexTemplateJob_pythonMachineType(context),
+				PlanOnly: true,
+			},
+		},
+	})
+}
+
 func testAccDataflowFlexTemplateJobHasNetwork(t *testing.T, res, expected string, wait bool) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		instanceTmpl, err := testAccDataflowFlexTemplateGetGeneratedInstanceTemplate(t, s, res)
@@ -2235,6 +2273,50 @@ resource "google_dataflow_flex_template_job" "flex_job" {
   machine_type = %{machine_type}
   network = google_compute_network.test-network.name
   subnetwork = google_compute_subnetwork.test-subnetwork.self_link
+}
+`, context)
+}
+
+// Google's Yaml_Template runs on the Beam Python SDK. The pipeline reads from
+// Pub/Sub so the job keeps running and stays in state.
+func testAccDataflowFlexTemplateJob_pythonMachineType(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_pubsub_topic" "example" {
+  name = "tf-test-topic-%{random_id}"
+}
+
+data "google_storage_bucket_object" "flex_template" {
+  name   = "latest/flex/Yaml_Template"
+  bucket = "dataflow-templates"
+}
+
+resource "google_dataflow_flex_template_job" "flex_job" {
+  name                    = "tf-test-flex-job-%{random_id}"
+  container_spec_gcs_path = "gs://${data.google_storage_bucket_object.flex_template.bucket}/${data.google_storage_bucket_object.flex_template.name}"
+  on_delete               = "cancel"
+  machine_type            = "%{machine_type}"
+  parameters = {
+    yaml_pipeline = yamlencode({
+      pipeline = {
+        type = "chain"
+        transforms = [
+          {
+            type   = "ReadFromPubSub"
+            config = {
+              topic  = google_pubsub_topic.example.id
+              format = "RAW"
+            }
+          },
+          {
+            type = "LogForTesting"
+          },
+        ]
+      }
+      options = {
+        streaming = true
+      }
+    })
+  }
 }
 `, context)
 }
