@@ -89,6 +89,11 @@ samples:
       - name: vertex_ai_publisher_model_config_full_clear_logging
         resource_id_vars:
           dataset_id: publisher_model_logs
+  - name: vertex_ai_publisher_model_config_data_sharing
+    primary_resource_id: config
+    steps:
+      - name: vertex_ai_publisher_model_config_data_sharing
+      - name: vertex_ai_publisher_model_config_data_sharing_update
   - name: vertex_ai_publisher_model_config_singleton_lifecycle
     primary_resource_id: tf_test_first
     exclude_basic_doc: true
@@ -142,6 +147,7 @@ properties:
       - inference_event_logging_config
       - logging_config
       - claude_feature_config
+      - data_sharing_enabled_provider
     properties:
       - name: state
         type: Enum
@@ -161,6 +167,7 @@ properties:
       - inference_event_logging_config
       - logging_config
       - claude_feature_config
+      - data_sharing_enabled_provider
     properties:
       - name: enabled
         type: Boolean
@@ -209,6 +216,7 @@ properties:
       - inference_event_logging_config
       - logging_config
       - claude_feature_config
+      - data_sharing_enabled_provider
     properties:
       - name: advancedAiEnabled
         type: Boolean
@@ -216,3 +224,17 @@ properties:
           Indicates whether advanced AI features (data retention opt-in) are
           enabled for this publisher model.
         send_empty_value: true
+  - name: dataSharingEnabledProvider
+    type: Enum
+    description: |-
+      The model provider (publisher) for which the customer has enabled data
+      sharing. For publisher models that are configured to require data
+      sharing, a prediction request is only allowed when the model's publisher
+      matches this provider; otherwise, the request is rejected.
+    at_least_one_of:
+      - inference_event_logging_config
+      - logging_config
+      - claude_feature_config
+      - data_sharing_enabled_provider
+    enum_values:
+      - ANTHROPIC

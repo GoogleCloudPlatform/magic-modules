@@ -29,4 +29,7 @@ if cfg, ok := res["loggingConfig"].(map[string]interface{}); ok && len(cfg) == 0
 	delete(res, "loggingConfig")
 {{- end }}
 }
+if provider, _ := res["dataSharingEnabledProvider"].(string); provider == "" || provider == "MODEL_PROVIDER_UNSPECIFIED" {
+	delete(res, "dataSharingEnabledProvider")
+}
 return res, nil

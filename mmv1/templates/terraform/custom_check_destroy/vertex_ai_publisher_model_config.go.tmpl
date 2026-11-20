@@ -64,3 +64,9 @@ if rawCfg, exists := res["loggingConfig"]; exists && rawCfg != nil {
 if rawCfg, exists := res["claudeFeatureConfig"]; exists && rawCfg != nil {
 	return fmt.Errorf("VertexAIPublisherModelConfig claudeFeatureConfig still exists (%#v) at %s", rawCfg, url)
 }
+if rawProvider, exists := res["dataSharingEnabledProvider"]; exists && rawProvider != nil {
+	provider, ok := rawProvider.(string)
+	if !ok || (provider != "" && provider != "MODEL_PROVIDER_UNSPECIFIED") {
+		return fmt.Errorf("VertexAIPublisherModelConfig dataSharingEnabledProvider still exists (%#v) at %s", rawProvider, url)
+	}
+}
