@@ -42,6 +42,13 @@ samples:
     primary_resource_id: agent_coaching_generator
     steps:
       - name: dialogflow_generator_agent_coaching
+        vars:
+          enable_deduping: 'true'
+          similarity_threshold: '0.75'
+      - name: dialogflow_generator_agent_coaching
+        vars:
+          enable_deduping: 'false'
+          similarity_threshold: '0.5'
   - name: dialogflow_generator_with_tools
     primary_resource_id: generator_with_tools
     steps:
@@ -380,3 +387,17 @@ properties:
       Optional. Resource names of the tools that the generator can choose from. Format: `projects/<Project ID>/locations/<Location ID>/tools/<tool ID>`.
     item_type:
       type: String
+  - name: suggestionDedupingConfig
+    type: NestedObject
+    description: |
+      Optional. Configuration for suggestion deduping. This is only applicable to AI Coach feature.
+    properties:
+      - name: enableDeduping
+        type: Boolean
+        send_empty_value: true
+        description: |
+          Optional. Whether to enable suggestion deduping.
+      - name: similarityThreshold
+        type: Double
+        description: |
+          Optional. The threshold for similarity between two suggestions. Acceptable value is [0.0, 1.0], default to 0.8.
