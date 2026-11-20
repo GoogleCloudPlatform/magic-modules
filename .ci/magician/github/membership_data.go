@@ -89,7 +89,7 @@ var (
 			vacations: []Vacation{
 				{
 					startDate: newDate(2026, 11, 19),
-					endDate:   newDate(2026, 11, 30),
+					endDate:   newDate(2026, 11, 29),
 				},
 			},
 		},
@@ -118,6 +118,10 @@ var (
 				{
 					startDate: newDate(2026, 06, 29),
 					endDate:   newDate(2026, 07, 06),
+				},
+				{
+					startDate: newDate(2026, 11, 21),
+					endDate:   newDate(2026, 11, 29),
 				},
 			},
 		},
@@ -157,7 +161,7 @@ var (
 			vacations: []Vacation{
 				{
 					startDate: newDate(2026, 11, 21),
-					endDate:   newDate(2026, 11, 30),
+					endDate:   newDate(2026, 11, 29),
 				},
 			},
 		},
