@@ -45,6 +45,17 @@ samples:
           app_version_display_name: my-app-version
           app_version_id: app-version-id
           deployment_display_name: my-deployment
+        vars:
+          noise_suppression_level: low
+      - name: ces_deployment_full
+        resource_id_vars:
+          app_display_name: my-app
+          app_id: app-id
+          app_version_display_name: my-app-version
+          app_version_id: app-version-id
+          deployment_display_name: my-deployment
+        vars:
+          noise_suppression_level: high
   - name: ces_deployment_whatsapp
     primary_resource_id: my-deployment
     steps:
@@ -109,6 +120,11 @@ properties:
       - name: disableDtmf
         type: Boolean
         description: Whether to disable DTMF (dual-tone multi-frequency).
+      - name: noiseSuppressionLevel
+        type: String
+        description: |-
+          The noise suppression level of the channel profile.
+          Available values are "low", "moderate", "high", "very_high".
       - name: personaProperty
         type: NestedObject
         description: Represents the persona property of a channel.

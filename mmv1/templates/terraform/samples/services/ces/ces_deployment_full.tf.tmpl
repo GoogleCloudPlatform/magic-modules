@@ -22,6 +22,7 @@ resource "google_ces_deployment" "{{$.PrimaryResourceId}}" {
         channel_type = "API"
         disable_barge_in_control = true
         disable_dtmf = true
+        noise_suppression_level = "{{index $.Vars "noise_suppression_level"}}"
         persona_property {
             persona = "CHATTY"
         }
