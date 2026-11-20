@@ -20,6 +20,7 @@ references:
   api: https://cloud.google.com/transcoder/docs/reference/rest/v1/projects.locations.jobs
 base_url: projects/{{project}}/locations/{{location}}/jobs
 immutable: true
+generate_list_resource: true
 self_link: '{{name}}'
 create_url: projects/{{project}}/locations/{{location}}/jobs
 import_format:
