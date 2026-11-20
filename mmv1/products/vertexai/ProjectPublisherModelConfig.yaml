@@ -1,0 +1,136 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: ProjectPublisherModelConfig
+api_resource_type_kind: PublisherModelConfig
+description: |-
+  Manages the project-wide default configuration for Vertex AI Model Garden
+  publisher models in a Google Cloud project.
+
+  Each project has a single project-wide publisher model configuration;
+  creating or updating this resource authoritatively replaces that
+  configuration, and destroying this resource clears all project-wide publisher
+  model configuration settings on the project.
+references:
+  guides:
+    Inference metadata logging: https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/capabilities/inference-metadata-logging
+    Use models in Model Garden: https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/use-models
+  api: https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/rest/v1beta1/projects/setPublisherModelConfig
+base_url: projects/{{project}}
+min_version: beta
+self_link: projects/{{project}}:fetchPublisherModelConfig
+create_url: projects/{{project}}:setPublisherModelConfig
+delete_url: projects/{{project}}:setPublisherModelConfig
+update_url: projects/{{project}}:setPublisherModelConfig
+update_verb: POST
+delete_verb: POST
+id_format: projects/{{project}}
+import_format:
+  - projects/{{project}}
+mutex: projects/{{project}}
+async:
+  operation:
+    base_url: '{{op_id}}'
+custom_code:
+  encoder: templates/terraform/encoders/vertex_ai_project_publisher_model_config.go.tmpl
+  decoder: templates/terraform/decoders/vertex_ai_project_publisher_model_config.go.tmpl
+  constants: templates/terraform/constants/vertex_ai_project_publisher_model_config.go.tmpl
+  pre_create: templates/terraform/pre_create/vertex_ai_project_publisher_model_config.go.tmpl
+  pre_read: templates/terraform/pre_read/vertex_ai_project_publisher_model_config.go.tmpl
+  pre_update: templates/terraform/pre_update/vertex_ai_project_publisher_model_config.go.tmpl
+  pre_delete: templates/terraform/pre_delete/vertex_ai_project_publisher_model_config.go.tmpl
+  test_check_destroy: templates/terraform/custom_check_destroy/vertex_ai_project_publisher_model_config.go.tmpl
+samples:
+  - name: vertex_ai_project_publisher_model_config_basic
+    primary_resource_id: config
+    # Exercised by vertex_ai_project_publisher_model_config_full; excluded from
+    # parallel generated test execution because ProjectPublisherModelConfig is a
+    # singleton per project.
+    exclude_test: true
+    steps:
+      - name: vertex_ai_project_publisher_model_config_basic
+  - name: vertex_ai_project_publisher_model_config_full
+    primary_resource_id: config
+    # Also verifies the companion data source in its update steps so only one
+    # TestAcc function mutates the per-project singleton during parallel VCR
+    # recording.
+    steps:
+      - name: vertex_ai_project_publisher_model_config_full
+        resource_id_vars:
+          dataset_id: project_publisher_model_logs
+      - name: vertex_ai_project_publisher_model_config_full_update
+        resource_id_vars:
+          dataset_id: project_publisher_model_logs
+      - name: vertex_ai_project_publisher_model_config_full_unset_logging_subfields
+        resource_id_vars:
+          dataset_id: project_publisher_model_logs
+      - name: vertex_ai_project_publisher_model_config_full_clear_inference
+        resource_id_vars:
+          dataset_id: project_publisher_model_logs
+      - name: vertex_ai_project_publisher_model_config_full_clear_logging
+        resource_id_vars:
+          dataset_id: project_publisher_model_logs
+properties:
+  - name: inferenceEventLoggingConfig
+    type: NestedObject
+    description: |-
+      Configures project-wide default emission of the per-request
+      `aiplatform.googleapis.com/inference_request` Cloud Logging log, which
+      records structured per-request metadata (such as principal, traffic type,
+      and token usage) for publisher-model traffic in the project. This is
+      distinct from `logging_config`, which logs raw request and response
+      payloads to a BigQuery table.
+    at_least_one_of:
+      - inference_event_logging_config
+      - logging_config
+    properties:
+      - name: state
+        type: Enum
+        description: |-
+          Whether emission of the `aiplatform.googleapis.com/inference_request`
+          log is enabled across publisher models in the project.
+        required: true
+        enum_values:
+          - ENABLED
+          - DISABLED
+  - name: loggingConfig
+    type: NestedObject
+    description: |-
+      Project-wide default configuration for logging prediction requests and
+      responses to a BigQuery table.
+    at_least_one_of:
+      - inference_event_logging_config
+      - logging_config
+    properties:
+      - name: enabled
+        type: Boolean
+        description: Whether project-wide default request-response logging is enabled.
+        send_empty_value: true
+      - name: samplingRate
+        type: Double
+        description: |-
+          Percentage of requests to be logged, expressed as a fraction in the
+          range `(0, 1]`.
+      - name: bigqueryDestination
+        type: NestedObject
+        description: BigQuery destination for request-response logging.
+        properties:
+          - name: outputUri
+            type: String
+            description: |-
+              BigQuery URI to a project, dataset, or table, up to 2000
+              characters long, in the form `bq://projectId`,
+              `bq://projectId.bqDatasetId`, or
+              `bq://projectId.bqDatasetId.bqTableId`.
+            required: true
