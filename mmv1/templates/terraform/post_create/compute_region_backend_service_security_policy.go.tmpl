@@ -24,6 +24,9 @@ if v, ok := d.GetOkExists("security_policy"); !tpgresource.IsEmptyValue(reflect.
     RawURL:    url,
     UserAgent: userAgent,
     Body:      obj,
+    {{- if $.ApiVersion }}
+    ApiVersion: "{{ $.ApiVersion }}",
+    {{- end }}
   })
 
   if err != nil {

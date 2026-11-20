@@ -212,10 +212,8 @@ samples:
           url_map_name: 'url_map'
   - name: 'backend_service_dynamic_forwarding'
     primary_resource_id: 'default'
-    min_version: 'beta'
     steps:
       - name: 'backend_service_dynamic_forwarding'
-        min_version: 'beta'
         resource_id_vars:
           backend_service_name: 'backend-service'
   - name: 'backend_service_dynamic_forwarding_forward_proxy_cloud_run'
@@ -1826,18 +1824,15 @@ properties:
     description: |
       Dynamic forwarding configuration. This field is used to configure the backend service with dynamic forwarding
       feature which together with Service Extension allows customized and complex routing logic.
-    min_version: beta
     is_missing_in_cai: true
     properties:
       - name: 'ipPortSelection'
         type: NestedObject
         description: |
           IP:PORT based dynamic forwarding configuration.
-        min_version: beta
         properties:
           - name: 'enabled'
             type: Boolean
-            min_version: beta
             description: |
               A boolean flag enabling IP:PORT based dynamic forwarding.
             immutable: true

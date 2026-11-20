@@ -47,6 +47,8 @@ iam_policy:
   iam_conditions_request_type: 'QUERY_PARAM'
   min_version: 'beta'
 include_in_tgc_next: true
+api_version:
+  ga: '2026-11-01'
 custom_code:
   constants: 'templates/terraform/constants/region_backend_service.go.tmpl'
   encoder: 'templates/terraform/encoders/region_backend_service.go.tmpl'
@@ -178,26 +180,20 @@ samples:
           network_name: 'network'
   - name: 'region_backend_service_dynamic_forwarding'
     primary_resource_id: 'default'
-    min_version: 'beta'
     steps:
       - name: 'region_backend_service_dynamic_forwarding'
-        min_version: 'beta'
         resource_id_vars:
           region_backend_service_name: 'region-service'
   - name: 'region_backend_service_dynamic_forwarding_forward_proxy_cloud_run'
     primary_resource_id: 'default'
-    min_version: 'beta'
     steps:
       - name: 'region_backend_service_dynamic_forwarding_forward_proxy_cloud_run'
-        min_version: 'beta'
         resource_id_vars:
           region_backend_service_name: 'region-service'
   - name: 'region_backend_service_dynamic_forwarding_forward_proxy_direct_forwarding'
     primary_resource_id: 'default'
-    min_version: 'beta'
     steps:
       - name: 'region_backend_service_dynamic_forwarding_forward_proxy_direct_forwarding'
-        min_version: 'beta'
         resource_id_vars:
           region_backend_service_name: 'region-service'
   - name: 'region_backend_service_ha_policy'
@@ -1656,17 +1652,14 @@ properties:
     description: |
       Dynamic forwarding configuration. This field is used to configure the backend service with dynamic forwarding
       feature which together with Service Extension allows customized and complex routing logic.
-    min_version: beta
     properties:
       - name: 'ipPortSelection'
         type: NestedObject
         description: |
           IP:PORT based dynamic forwarding configuration.
-        min_version: beta
         properties:
           - name: 'enabled'
             type: Boolean
-            min_version: beta
             description: |
               A boolean flag enabling IP:PORT based dynamic forwarding.
             immutable: true
@@ -1674,18 +1667,15 @@ properties:
         type: NestedObject
         description: |
           Dynamic Forwarding Proxy configuration.
-        min_version: beta
         properties:
           - name: 'enabled'
             type: Boolean
-            min_version: beta
             description: |
               A boolean flag enabling dynamic forwarding proxy.
             immutable: true
             required: true
           - name: 'proxyMode'
             type: Enum
-            min_version: beta
             description: |
               Determines the dynamic forwarding proxy mode
             enum_values:
