@@ -406,8 +406,12 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     if err != nil {
 {{- if and ($.CustomCode.PostCreateFailure) (not $.GetAsync) -}}
         err = resource{{ $.ResourceName -}}PostCreateFailure(d, meta, err)
-{{- end}}
+        if err != nil {
+            return fmt.Errorf("Error creating {{ $.Name -}}: %s", err)
+        }
+{{- else }}
         return fmt.Errorf("Error creating {{ $.Name -}}: %s", err)
+{{- end}}
     }
 {{- /* Set computed resource properties required for building the ID from create API response (as long as Create doesn't use an async operation) */}}
 {{- /* This is necessary so that the ID is set correctly (and so that the following Read can succeed.) */}}
@@ -1085,8 +1089,12 @@ if len(updateMask) > 0 {
     if err != nil {
 {{- if and ($.CustomCode.PostUpdateFailure) (not $.GetAsync) -}}
         err = resource{{ $.ResourceName -}}PostUpdateFailure(d, meta, err)
-{{- end}}
+        if err != nil {
+            return fmt.Errorf("Error updating {{ $.Name }} %q: %s", d.Id(), err)
+        }
+{{- else }}
         return fmt.Errorf("Error updating {{ $.Name }} %q: %s", d.Id(), err)
+{{- end}}
     } else {
         log.Printf("[DEBUG] Finished updating {{ $.Name }} %q: %#v", d.Id(), res)
     }
@@ -1303,8 +1311,12 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         if err != nil {
 {{- if and ($.CustomCode.PostUpdateFailure) (not $.GetAsync) -}}
             err = resource{{ $.ResourceName -}}PostUpdateFailure(d, meta, err)
-{{- end}}
+            if err != nil {
+                return fmt.Errorf("Error updating {{ $.Name }} %q: %s", d.Id(), err)
+            }
+{{- else }}
             return fmt.Errorf("Error updating {{ $.Name }} %q: %s", d.Id(), err)
+{{- end}}
         } else {
         log.Printf("[DEBUG] Finished updating {{ $.Name }} %q: %#v", d.Id(), res)
     }
@@ -1480,8 +1492,12 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     if err != nil {
 {{- if and ($.CustomCode.PostDeleteFailure) (not $.GetAsync) -}}
         err = resource{{ $.ResourceName -}}PostDeleteFailure(d, meta, err)
-{{- end}}
+        if err != nil {
+            return transport_tpg.HandleNotFoundError(err, d, "{{ $.Name }}")
+        }
+{{- else }}
         return transport_tpg.HandleNotFoundError(err, d, "{{ $.Name }}")
+{{- end}}
     }
     {{ if and $.GetAsync ($.GetAsync.Allow "Delete") -}}
         {{ if $.GetAsync.IsA "PollAsync" }}

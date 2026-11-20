@@ -218,7 +218,7 @@ The parameters the functions receive are:
 
 - `d`: Terraform resource data. Use `d.Get("field_name")` to get a field's current value.
 - `meta`: Can be cast to a Config object (which can make API calls) using `meta.(*transport_tpg.Config)`
-- `err`: The error returned by the API call or operation. The hook should return an error (either `err` or a modified error).
+- `err`: The error returned by the API call or operation. The hook should return an error (either `err` or a modified error), or `nil` to ignore a synchronous API request error.
 
 ### Custom retry handling
 
