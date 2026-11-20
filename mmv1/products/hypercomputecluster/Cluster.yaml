@@ -752,9 +752,6 @@ properties:
                   description: |-
                     Access protocol to use for all file shares in the instance. Defaults to NFS
                     V3 if not set.
-                    Possible values:
-                    NFSV3
-                    NFSV41
                   enum_values:
                     - PROTOCOL_UNSPECIFIED
                     - NFSV3
@@ -762,11 +759,7 @@ properties:
                 - name: tier
                   type: Enum
                   required: true
-                  description: |-
-                    Service tier to use for the instance.
-                    Possible values:
-                    ZONAL
-                    REGIONAL
+                  description: Service tier to use for the instance.
                   enum_values:
                     - TIER_UNSPECIFIED
                     - ZONAL

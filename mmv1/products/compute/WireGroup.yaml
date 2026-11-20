@@ -52,8 +52,6 @@ samples:
         test_vars_overrides:
           # for backward compatible
           description: '"Example Wire Group" + randomSuffix'
-        test_env_vars:
-          project: 'PROJECT_NAME'
   - name: 'compute_wire_group_basic_beta'
     primary_resource_id: 'example-test-wire-group-beta'
     min_version: 'beta'
@@ -66,8 +64,6 @@ samples:
         test_vars_overrides:
           # for backward compatible
           description: '"Example Wire Group Beta" + randomSuffix'
-        test_env_vars:
-          project: 'PROJECT_NAME'
         min_version: 'beta'
 parameters:
   - name: 'crossSiteNetwork'

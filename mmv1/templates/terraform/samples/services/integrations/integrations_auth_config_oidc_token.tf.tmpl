@@ -4,7 +4,7 @@ resource "google_service_account" "service_account" {
 }
 
 resource "google_integrations_auth_config" "{{$.PrimaryResourceId}}" {
-    location = "us-east4"
+    location = "{{index $.Vars "location"}}"
     display_name = "{{index $.ResourceIdVars "auth_config_name"}}"
     description = "Test auth config created via terraform"
     decrypted_credential {

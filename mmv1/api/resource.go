@@ -1364,9 +1364,9 @@ func (r Resource) NotInVersion(version *product.Version) bool {
 	return version.CompareTo(r.MinVersionObj()) < 0
 }
 
-// Recurses through all nested properties and parameters and changes their
-// 'exclude' instance variable if the property is at a version below the
-// one that is passed in.
+// Recurses through all nested properties, parameters, and virtual fields and
+// changes their 'exclude' instance variable if the property is at a version
+// below the one that is passed in.
 func (r *Resource) ExcludeIfNotInVersion(version *product.Version) {
 	r.populateMaxVersionSchema() // set before filtering exclusions out of schema
 
@@ -1385,9 +1385,18 @@ func (r *Resource) ExcludeIfNotInVersion(version *product.Version) {
 			p.ExcludeIfNotInVersion(version)
 		}
 	}
+
+	if r.VirtualFields != nil {
+		for _, p := range r.VirtualFields {
+			p.ExcludeIfNotInVersion(version)
+		}
+	}
 }
 
 func (r *Resource) populateMaxVersionSchema() {
+	if r.maxVersionSchema != nil {
+		return
+	}
 	maxSchemaResource := &Resource{
 		Name:            r.Name,
 		MinVersion:      r.MinVersion,
@@ -2001,7 +2010,7 @@ func (r Resource) FirstTestConfig() TestConfig {
 			continue
 		}
 		for _, step := range sample.Steps {
-			if r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
+			if r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(step.MinVersion)) >= 0 {
 				return TestConfig{
 					Sample: sample,
 					Step:   step,
@@ -2020,7 +2029,7 @@ func (r Resource) FirstRunnableTestConfig() TestConfig {
 			continue
 		}
 		for _, step := range sample.Steps {
-			if r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(sample.MinVersion)) >= 0 {
+			if r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(step.MinVersion)) >= 0 {
 				return TestConfig{
 					Sample: sample,
 					Step:   step,
@@ -2311,34 +2320,86 @@ func (r Resource) IsExcluded() bool {
 }
 
 func (r Resource) TestSamples() []*resource.Sample {
-	return google.Reject(google.Reject(r.Samples, func(s *resource.Sample) bool {
-		return s.ExcludeTest
-	}), func(s *resource.Sample) bool {
-		return s.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, s.MinVersion)
+	return google.Reject(r.Samples, func(s *resource.Sample) bool {
+		if s.ExcludeTest {
+			return true
+		}
+		if s.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, s.MinVersion) {
+			return true
+		}
+		return len(s.TestSteps()) == 0
 	})
 }
 
+func disambiguateStepSlug(sampleName, stepName string, activeIdx int, seenCamel map[string]string) string {
+	if activeIdx == 0 && sampleName != "" {
+		if _, taken := seenCamel[google.Camelize(sampleName, "lower")]; !taken {
+			return sampleName
+		}
+	}
+	base := stepName
+	if sampleName != "" && sampleName != stepName {
+		base = sampleName
+	}
+	candidate := fmt.Sprintf("%s_step%d", base, activeIdx+1)
+	if _, taken := seenCamel[google.Camelize(candidate, "lower")]; !taken {
+		return candidate
+	}
+	for n := 2; ; n++ {
+		c := fmt.Sprintf("%s_%d", candidate, n)
+		if _, taken := seenCamel[google.Camelize(c, "lower")]; !taken {
+			return c
+		}
+	}
+}
+
 func (r Resource) TestSampleSetUp(sysfs fs.FS) {
-	res := make(map[string]string)
+	var firstStep *resource.Step
+	var iamSampleBody string
+	if r.IamPolicy != nil && !r.IamPolicy.Exclude && r.IamPolicy.SampleConfigBody != "" {
+		if b, err := fs.ReadFile(sysfs, r.IamPolicy.SampleConfigBody); err == nil {
+			firstStep = r.FirstTestConfig().Step
+			iamSampleBody = string(b)
+		}
+	}
+	seenHCLByCamelSlug := make(map[string]string)
+	slugByBaseAndHCL := make(map[string]string)
+	packageName := filepath.Base(filepath.Dir(r.SourceYamlFile))
 	for _, sample := range r.Samples {
 		sample.TargetVersionName = r.TargetVersionName
+		sample.NewConfigFuncs = nil
 		if sample.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, sample.MinVersion) {
 			continue
 		}
+		activeIdx := 0
 		for _, step := range sample.Steps {
 			if step.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, step.MinVersion) {
 				continue
 			}
 			step.PrimaryResourceId = sample.PrimaryResourceId
-			packageName := filepath.Base(filepath.Dir(r.SourceYamlFile))
 			if step.ConfigPath == "" {
 				step.ConfigPath = fmt.Sprintf("templates/terraform/samples/services/%s/%s.tf.tmpl", packageName, step.Name)
 			}
 			step.SetHCLText(sysfs)
-			configName := step.Name
-			if _, ok := res[step.Name]; !ok {
-				res[configName] = sample.Name
-				sample.NewConfigFuncs = append(sample.NewConfigFuncs, step)
+			if step == firstStep {
+				step.IamHCLText = iamSampleBody
+			}
+			if !sample.ExcludeTest {
+				camelBase := google.Camelize(step.Name, "lower")
+				dedupKey := camelBase + "\x00" + step.TestHCLText
+				if existingSlug, ok := slugByBaseAndHCL[dedupKey]; ok {
+					step.StepSlug = existingSlug
+				} else {
+					slug := step.Name
+					if _, taken := seenHCLByCamelSlug[google.Camelize(slug, "lower")]; taken {
+						slug = disambiguateStepSlug(sample.Name, step.Name, activeIdx, seenHCLByCamelSlug)
+					}
+					step.StepSlug = slug
+					seenHCLByCamelSlug[google.Camelize(slug, "lower")] = step.TestHCLText
+					slugByBaseAndHCL[dedupKey] = slug
+					sample.NewConfigFuncs = append(sample.NewConfigFuncs, step)
+				}
+				activeIdx++
 			}
 		}
 	}

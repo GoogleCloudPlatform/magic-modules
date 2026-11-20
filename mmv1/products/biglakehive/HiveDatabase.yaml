@@ -53,18 +53,12 @@ samples:
                 key2 = "value2"
             }
           description: "hive database description"
-        test_env_vars:
-          GOOGLE_BILLING_PROJECT: 'PROJECT'
-          USER_PROJECT_OVERRIDE: 'true'
       - name: 'biglake_hive_database'
         resource_id_vars:
           bucket_name: example-bucket
         vars:
           parameters: '{key2 = "value2"}'
           description: "updated hive database description"
-        test_env_vars:
-          GOOGLE_BILLING_PROJECT: 'PROJECT'
-          USER_PROJECT_OVERRIDE: 'true'
 parameters:
   - name: 'catalog'
     type: String

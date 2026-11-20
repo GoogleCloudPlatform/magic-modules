@@ -110,16 +110,11 @@ properties:
     description: '[Output only] Update time stamp'
     output: true
   - name: data
-    type: String
+    type: JsonValue
     description: |-
       The JSON data of the DataObject. Must be a JSON object whose field
       names match the fields defined in the parent Collection's
       `data_schema`.
-    state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-    custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-    validation:
-      function: validation.StringIsJSON
   - name: vectors
     type: Map
     key_name: field_name

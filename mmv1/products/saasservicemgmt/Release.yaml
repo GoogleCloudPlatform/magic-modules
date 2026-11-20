@@ -46,8 +46,6 @@ samples:
           unitkind_name: example-unitkind
           release_name: example-release
           previous_release_name: previous-release
-        test_env_vars:
-          project: PROJECT_NAME
 parameters:
   - name: location
     type: String
@@ -187,7 +185,7 @@ properties:
           type: String
           description: Name of the variable from actuation configs.
           immutable: true
-          required: true
+          output: true
   - name: labels
     type: KeyValueLabels
     description: |-
@@ -226,7 +224,7 @@ properties:
           type: String
           description: Name of the variable from actuation configs.
           immutable: true
-          required: true
+          output: true
   - name: releaseRequirements
     type: NestedObject
     description: Set of requirements to be fulfilled on the Unit when using this Release.

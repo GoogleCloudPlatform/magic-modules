@@ -144,7 +144,10 @@ func getMissingTestsForChanges(changedFields map[string]ResourceChanges, allTest
 }
 
 func markCoverage(fieldCoverage ResourceChanges, config reader.Block) error {
-	for fieldName := range config {
+	for fieldName, val := range config {
+		if reader.IsNullValue(val) {
+			continue
+		}
 		if field, ok := fieldCoverage[fieldName]; ok {
 			field.Tested = true
 		}

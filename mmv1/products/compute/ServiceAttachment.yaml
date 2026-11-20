@@ -114,8 +114,6 @@ samples:
           producer_health_check_name: 'producer-service-health-check'
           producer_service_name: 'producer-service'
           producer_forwarding_rule_name: 'producer-forwarding-rule'
-          consumer_address_name: 'psc-ilb-consumer-address'
-          consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
   - name: 'service_attachment_tunneling_config'
     primary_resource_id: 'psc_ilb_service_attachment'
     min_version: beta

@@ -1,16 +1,13 @@
 data "google_project" "project" {
-  provider = google-beta
 }
 
 resource "google_backup_dr_backup_vault" "my_backup_vault" {
-  provider                                   = google-beta
   location                                   = "us-central1"
   backup_vault_id                            = "{{index $.ResourceIdVars "backup_vault_id"}}"
   backup_minimum_enforced_retention_duration = "100000s"
 }
 
 resource "google_backup_dr_backup_plan" "my_backup_plan" {
-  provider       = google-beta
   location       = "us-central1"
   backup_plan_id = "{{index $.ResourceIdVars "backup_plan_id"}}"
   resource_type  = "compute.googleapis.com/Instance"
@@ -34,7 +31,6 @@ resource "google_backup_dr_backup_plan" "my_backup_plan" {
 }
 
 resource "google_backup_dr_auto_protection_policy" "my_policy" {
-  provider                  = google-beta
   location                  = "us-central1"
   auto_protection_policy_id = "{{index $.ResourceIdVars "auto_protection_policy_id"}}"
 
@@ -54,7 +50,6 @@ resource "google_backup_dr_auto_protection_policy" "my_policy" {
 }
 
 resource "google_backup_dr_auto_protection_policy_binding" "{{$.PrimaryResourceId}}" {
-  provider                          = google-beta
   location                          = "us-central1"
   auto_protection_policy_id         = google_backup_dr_auto_protection_policy.my_policy.auto_protection_policy_id
   auto_protection_policy_binding_id = "{{index $.ResourceIdVars "auto_protection_policy_binding_id"}}"

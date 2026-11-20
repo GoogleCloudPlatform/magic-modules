@@ -71,8 +71,6 @@ samples:
           folder: 'folder'
           fw_policy: 'fw-policy'
           network: 'network'
-          tag_key: 'tag-key'
-          tag_value: 'tag-value'
         test_vars_overrides:
           # for backward compatible
           folder: '"folder" + randomSuffix'
@@ -86,9 +84,6 @@ samples:
         resource_id_vars:
           folder: 'folder'
           fw_policy: 'fw-policy'
-          network: 'network'
-          tag_key: 'tag-key'
-          tag_value: 'tag-value'
         test_vars_overrides:
           # for backward compatible
           folder: '"folder" + randomSuffix'

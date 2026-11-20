@@ -31,7 +31,6 @@ samples:
     steps:
       - name: "cloud_support_event_subscription_basic"
         resource_id_vars:
-          subscription_id: "my-subscription"
           topic_name: "test-topic"
         test_env_vars:
           org_id: "ORG_ID"
@@ -41,7 +40,6 @@ samples:
     steps:
       - name: "cloud_support_event_subscription_update"
         resource_id_vars:
-          subscription_id: "my-subscription"
           topic_name: "test-topic-2"
         test_env_vars:
           org_id: "ORG_ID"

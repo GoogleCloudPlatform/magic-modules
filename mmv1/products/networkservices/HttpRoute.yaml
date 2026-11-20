@@ -68,7 +68,6 @@ samples:
     steps:
       - name: network_services_http_route_mesh_basic
         resource_id_vars:
-          mesh_name: my-mesh
           resource_name: my-http-route
 parameters:
   - name: name

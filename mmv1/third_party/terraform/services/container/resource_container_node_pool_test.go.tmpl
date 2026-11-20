@@ -1189,7 +1189,7 @@ func TestAccContainerNodePool_withLinuxNodeConfig(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccContainerNodePool_withLinuxNodeConfig(cluster, np, "1000 20000 100000", networkName, subnetworkName),
+				Config: testAccContainerNodePool_withLinuxNodeConfig(cluster, np, "4096 20000 100000", networkName, subnetworkName),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_container_node_pool.with_linux_node_config", plancheck.ResourceActionUpdate),
@@ -1203,7 +1203,7 @@ func TestAccContainerNodePool_withLinuxNodeConfig(t *testing.T) {
 			},
 			// Perform an update.
 			{
-				Config: testAccContainerNodePool_withLinuxNodeConfig(cluster, np, "1000 20000 200000", networkName, subnetworkName),
+				Config: testAccContainerNodePool_withLinuxNodeConfig(cluster, np, "4096 20000 200000", networkName, subnetworkName),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_container_node_pool.with_linux_node_config", plancheck.ResourceActionUpdate),
@@ -2961,6 +2961,73 @@ resource "google_container_node_pool" "np" {
     ephemeral_storage_local_ssd_config {
 	  local_ssd_count = 0
       data_cache_count = 1
+    }
+  }
+}
+`, cluster, networkName, subnetworkName, np)
+}
+
+func TestAccContainerNodePool_ephemeralStorageLocalSsdConfigWithEphemeralCapacityGb(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_ephemeralStorageLocalSsdConfigWithEphemeralCapacityGb(cluster, np, networkName, subnetworkName),
+			},
+			{
+				ResourceName:      "google_container_node_pool.np",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccContainerNodePool_ephemeralStorageLocalSsdConfigWithEphemeralCapacityGb(cluster, np, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+	location       = "us-central1-a"
+	version_prefix = "1.37"
+}
+
+resource "google_container_cluster" "cluster" {
+  name               = "%s"
+  location           = "us-central1-a"
+  min_master_version = data.google_container_engine_versions.central1a.latest_master_version
+  initial_node_count = 1
+  deletion_protection = false
+  network            = "%s"
+  subnetwork         = "%s"
+
+  node_config {
+    machine_type = "n2-standard-4"
+    ephemeral_storage_local_ssd_config {
+      local_ssd_count       = 1
+      ephemeral_capacity_gb = 100
+    }
+  }
+}
+
+resource "google_container_node_pool" "np" {
+  name               = "%s"
+  location           = "us-central1-a"
+  cluster            = google_container_cluster.cluster.name
+  initial_node_count = 1
+
+  node_config {
+    machine_type = "n2-standard-4"
+    ephemeral_storage_local_ssd_config {
+      local_ssd_count       = 1
+      ephemeral_capacity_gb = 200
     }
   }
 }
@@ -5842,7 +5909,7 @@ resource "google_container_node_pool" "np" {
   node_config {
     guest_accelerator {
       count = 0
-      type  = "nvidia-tesla-p100"
+      type  = "nvidia-tesla-t4"
     }
     machine_type = "n1-highmem-4"
   }
@@ -5870,12 +5937,12 @@ resource "google_container_node_pool" "np" {
   node_config {
     guest_accelerator {
       count = 0
-      type  = "nvidia-tesla-p100"
+      type  = "nvidia-tesla-t4"
     }
 
     guest_accelerator {
       count = %d
-      type  = "nvidia-tesla-p100"
+      type  = "nvidia-tesla-t4"
     }
     machine_type = "n1-highmem-4"
   }
@@ -5903,12 +5970,12 @@ resource "google_container_node_pool" "np" {
   node_config {
     guest_accelerator {
       count = 0
-      type  = "nvidia-tesla-p100"
+      type  = "nvidia-tesla-t4"
     }
 
     guest_accelerator {
       count = 1
-      type  = "nvidia-tesla-p100"
+      type  = "nvidia-tesla-t4"
     }
 
     guest_accelerator {
@@ -6372,7 +6439,7 @@ resource "google_container_node_pool" "np" {
 `, clusterName, networkName, subnetworkName, np)
 }
 
-func TestAccContainerNodePool_withFlexStart(t *testing.T) {
+func TestAccContainerNodePool_withFlexStartAndConsolidationDelay(t *testing.T) {
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
@@ -6386,12 +6453,30 @@ func TestAccContainerNodePool_withFlexStart(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerNodePool_withFlexStart(clusterName, np, networkName, subnetworkName),
+				Config: testAccContainerNodePool_withFlexStartAndConsolidationDelay(clusterName, np, networkName, subnetworkName, "600s"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.machine_type", "n4-standard-2"),
 					resource.TestCheckResourceAttr("google_container_node_pool.np",
 						"node_config.0.reservation_affinity.0.consume_reservation_type", "NO_RESERVATION"),
 					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.flex_start", "true"),
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.consolidation_delay", "600s"),
+				),
+			},
+			{
+				ResourceName:            "google_container_node_pool.np",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"node_config.0.taint"},
+			},
+			{
+				Config: testAccContainerNodePool_withFlexStartAndConsolidationDelay(clusterName, np, networkName, subnetworkName, "1200s"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_node_pool.np", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_node_pool.np", "node_config.0.consolidation_delay", "1200s"),
 				),
 			},
 			{
@@ -6404,7 +6489,7 @@ func TestAccContainerNodePool_withFlexStart(t *testing.T) {
 	})
 }
 
-func testAccContainerNodePool_withFlexStart(clusterName, np, networkName, subnetworkName string) string {
+func testAccContainerNodePool_withFlexStartAndConsolidationDelay(clusterName, np, networkName, subnetworkName, consolidationDelay string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
   location = "us-east1-b"
@@ -6442,6 +6527,7 @@ resource "google_container_node_pool" "np" {
    	machine_type = "n4-standard-2"
 	flex_start = true
 	max_run_duration = "604800s"
+	consolidation_delay = "%s"
 
 	reservation_affinity {
       consume_reservation_type = "NO_RESERVATION"
@@ -6454,7 +6540,7 @@ resource "google_container_node_pool" "np" {
 	}
   }
 }
-`, clusterName, networkName, subnetworkName, np)
+`, clusterName, networkName, subnetworkName, np, consolidationDelay)
 }
 
 func TestAccContainerNodePool_tpuTopology(t *testing.T) {

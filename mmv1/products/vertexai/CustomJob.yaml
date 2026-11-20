@@ -49,6 +49,28 @@ samples:
         resource_id_vars:
           display_name: example-custom-job
           bucket_name: example-custom-job-bucket
+          persistent_resource_id: example-persistent-resource
+          experiment: example-experiment
+          experiment_run: example-experiment-run
+        test_vars_overrides:
+          persistent_resource_id: 'bootstrapTestPersistentResourceId(t, "us-central1")'
+          experiment: 'bootstrapTestExperiment(t, "us-central1")'
+          experiment_run: 'bootstrapTestExperimentRun(t, "us-central1")'
+  - name: vertex_ai_custom_job_models
+    primary_resource_id: custom_job
+    steps:
+      - name: vertex_ai_custom_job_models
+        ignore_read_extra:
+          - state
+          - update_time
+          - start_time
+          - end_time
+          - error
+        resource_id_vars:
+          display_name: example-custom-job-models
+          model: example-model
+        test_vars_overrides:
+          model: 'bootstrapTestParentModel(t, "us-central1")'
   - name: vertex_ai_custom_job_python_package
     primary_resource_id: custom_job
     bootstrap_iam:
@@ -70,8 +92,10 @@ samples:
           service_account_id: job-sa
           tensorboard_name: example-tensorboard
           kms_key_name: example-key
+          experiment: example-experiment
         test_vars_overrides:
           kms_key_name: 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name'
+          experiment: 'bootstrapTestExperiment(t, "us-central1")'
   - name: vertex_ai_custom_job_tpu_network
     primary_resource_id: custom_job
     steps:
@@ -187,6 +211,7 @@ properties:
                 - name: env
                   type: Array
                   description: Environment variables to be passed to the container. Maximum limit is 100.
+                  custom_flatten: templates/terraform/custom_flatten/vertex_ai_custom_job_env.go.tmpl
                   item_type:
                     type: NestedObject
                     properties:
@@ -225,6 +250,7 @@ properties:
                 - name: env
                   type: Array
                   description: Environment variables to be passed to the python module. Maximum limit is 100.
+                  custom_flatten: templates/terraform/custom_flatten/vertex_ai_custom_job_env.go.tmpl
                   item_type:
                     type: NestedObject
                     properties:
@@ -349,6 +375,37 @@ properties:
       - name: enableDashboardAccess
         type: Boolean
         description: Whether you want Vertex AI to enable access to the customized dashboard in training chief container.
+      - name: experiment
+        type: String
+        description: |-
+          The Experiment associated with this job.
+          Format: `projects/{project}/locations/{location}/metadataStores/{metadataStores}/contexts/{experiment-name}`
+      - name: experimentRun
+        type: String
+        default_from_api: true
+        description: |-
+          The Experiment Run associated with this job.
+          Format: `projects/{project}/locations/{location}/metadataStores/{metadataStores}/contexts/{experiment-name}-{experiment-run-name}`
+      - name: models
+        type: Array
+        description: |-
+          The name of the Model resources for which to generate a mapping to artifact URIs. Applicable only to some of the Google-provided custom jobs.
+          Format: `projects/{project}/locations/{location}/models/{model}`
+          In order to retrieve a specific version of the model, also provide the version ID or version alias.
+          Example: `projects/{project}/locations/{location}/models/{model}@2` or `projects/{project}/locations/{location}/models/{model}@golden`
+          If no version ID or alias is specified, the "default" version will be returned.
+        item_type:
+          type: String
+      - name: persistentResourceId
+        type: String
+        description: |-
+          The ID of the PersistentResource in the same Project and Location which to run.
+          If this is specified, the job will be run on existing machines held by the PersistentResource instead of on-demand short-live machines.
+          The network and CMEK configs on the job should be consistent with those on the PersistentResource, otherwise, the job will be rejected.
+      - name: protectedArtifactLocationId
+        type: String
+        description: |-
+          The ID of the location to store protected artifacts. e.g. us-central1. Populate only when the location is different than CustomJob location.
   - name: labels
     type: KeyValueLabels
     description: |-

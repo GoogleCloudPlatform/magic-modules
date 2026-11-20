@@ -107,7 +107,7 @@ var FieldBecomingComputedOnly = FieldDiffRule{
 	Messages:   FieldBecomingComputedOnlyMessages,
 }
 
-func FieldBecomingComputedOnlyMessages(resource, field string, fieldDiff diff.FieldDiff, _ diff.ResourceDiffInterface) []string {
+func FieldBecomingComputedOnlyMessages(resource, field string, fieldDiff diff.FieldDiff, resourceDiff diff.ResourceDiffInterface) []string {
 	// ignore for added / removed fields
 	if fieldDiff.Old == nil || fieldDiff.New == nil {
 		return nil
@@ -115,6 +115,11 @@ func FieldBecomingComputedOnlyMessages(resource, field string, fieldDiff diff.Fi
 	// if the field is computed only already
 	// this rule doesn't apply
 	if fieldDiff.Old.Computed && !fieldDiff.Old.Optional {
+		return nil
+	}
+	// if an ancestor was already computed-only in the old schema, users could never
+	// configure this field, so marking it computed-only is not a breaking change
+	if resourceDiff != nil && resourceDiff.HasOldComputedOnlyAncestor(field) {
 		return nil
 	}
 

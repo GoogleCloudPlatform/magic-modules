@@ -1,0 +1,540 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Application'
+base_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applications'
+self_link: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applications/{{application_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applications?applicationId={{application_id}}'
+update_verb: 'PATCH'
+update_mask: true
+description: |
+  Application Design Center Application.
+autogen_async: true
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - 'delete'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/spaces/{{space}}/applications/{{application_id}}'
+samples:
+  - name: 'designcenter_application_basic'
+    primary_resource_id: 'example'
+    steps:
+      - name: 'designcenter_application_basic'
+        resource_id_vars:
+          application_id: 'example-application'
+        vars:
+          project: 'my-project-name'
+          space: 'example-space'
+          application_template_revision_uri: 'projects/my-project-name/locations/us-central1/spaces/example-space/applicationTemplates/example-template/revisions/r-1'
+        test_vars_overrides:
+          project: 'BootstrapDesignCenterProject(t)'
+          space: 'BootstrapDesignCenterSpace(t)'
+          application_template_revision_uri: 'BootstrapDesignCenterApplicationTemplateRevisionURI(t)'
+  - name: 'designcenter_application_full'
+    primary_resource_id: 'example'
+    exclude_basic_doc: true
+    steps:
+      - name: 'designcenter_application_full'
+        resource_id_vars:
+          application_id: 'example-full-application'
+        vars:
+          project: 'my-project-name'
+          space: 'example-space'
+          application_template_revision_uri: 'projects/my-project-name/locations/us-central1/spaces/example-space/applicationTemplates/example-template/revisions/r-1'
+          service_account: 'projects/my-project-name/serviceAccounts/deployer@my-project-name.iam.gserviceaccount.com'
+        test_vars_overrides:
+          project: 'BootstrapDesignCenterProject(t)'
+          space: 'BootstrapDesignCenterSpace(t)'
+          application_template_revision_uri: 'BootstrapDesignCenterConnectedApplicationTemplateRevisionURI(t)'
+          service_account: 'BootstrapDesignCenterApplicationServiceAccount(t)'
+      - name: 'designcenter_application_update'
+        resource_id_vars:
+          application_id: 'example-full-application'
+        vars:
+          project: 'my-project-name'
+          space: 'example-space'
+          application_template_revision_uri: 'projects/my-project-name/locations/us-central1/spaces/example-space/applicationTemplates/example-template/revisions/r-1'
+          service_account: 'projects/my-project-name/serviceAccounts/deployer@my-project-name.iam.gserviceaccount.com'
+          source_component: 'projects/my-project-name/locations/us-central1/spaces/example-space/applicationTemplates/example-template/components/source-component'
+          destination_component: 'projects/my-project-name/locations/us-central1/spaces/example-space/applicationTemplates/example-template/components/destination-component'
+          connection: 'projects/my-project-name/locations/us-central1/spaces/example-space/applicationTemplates/example-template/components/source-component/connections/example-connection'
+        test_vars_overrides:
+          project: 'BootstrapDesignCenterProject(t)'
+          space: 'BootstrapDesignCenterSpace(t)'
+          application_template_revision_uri: 'BootstrapDesignCenterConnectedApplicationTemplateRevisionURI(t)'
+          service_account: 'BootstrapDesignCenterApplicationServiceAccount(t)'
+          source_component: 'BootstrapDesignCenterConnectedSourceComponentURI(t)'
+          destination_component: 'BootstrapDesignCenterConnectedDestinationComponentURI(t)'
+          connection: 'BootstrapDesignCenterConnectedConnectionURI(t)'
+
+parameters:
+  - name: 'location'
+    type: String
+    required: true
+    url_param_only: true
+    description: |
+      The location of the space.
+  - name: 'space'
+    type: String
+    required: true
+    url_param_only: true
+    description: |
+      The space for the application.
+  - name: 'application_id'
+    type: String
+    required: true
+    url_param_only: true
+    description: |
+      The ID of the application.
+properties:
+  - name: 'source'
+    type: NestedObject
+    required: true
+    description: |
+      DeploymentSource for the application.
+    properties:
+      - name: 'applicationTemplateRevision'
+        type: String
+        description: |
+          Application template revision URI.
+  - name: 'scope'
+    type: NestedObject
+    required: true
+    immutable: true
+    description: |
+      AppHub Scope for the application.
+    properties:
+      - name: 'type'
+        type: String
+        immutable: true
+        description: |
+          Scope type.
+  - name: 'displayName'
+    type: String
+    description: |
+      Display name.
+  - name: 'description'
+    type: String
+    description: |
+      Description of the application.
+  - name: 'appParameters'
+    type: Array
+    default_from_api: true
+    description: |
+      A list of parameters to attach to the deployment source object, which is
+      a catalog entry or an application template snapshot. When unset, the API
+      fills these in from the application template.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'key'
+          type: String
+          required: true
+          description: |
+            The key of the parameter.
+        - name: 'value'
+          type: JsonValue
+          description: |
+            The value of the parameter, as a JSON-encoded string. Use
+            `jsonencode()` to set it.
+          send_empty_value: true
+  - name: 'componentParameters'
+    type: Array
+    default_from_api: true
+    description: |
+      A list of component parameters to associate with the application. When
+      unset, the API fills these in from the application template.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'component'
+          type: String
+          required: true
+          description: |
+            The URI of the component that the parameters belong to.
+        - name: 'parameters'
+          type: Array
+          description: |
+            A list of parameters associated with the component.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'key'
+                type: String
+                required: true
+                description: |
+                  The key of the parameter.
+              - name: 'value'
+                type: JsonValue
+                description: |
+                  The value of the parameter, as a JSON-encoded string. Use
+                  `jsonencode()` to set it.
+                send_empty_value: true
+        - name: 'state'
+          type: String
+          output: true
+          description: |
+            The deployment state of the component.
+  - name: 'serviceAccount'
+    type: String
+    description: |
+      Service account for deployment.
+  - name: 'attributes'
+    type: NestedObject
+    description: |
+      Attributes of the App Hub application.
+    properties:
+      - name: 'criticality'
+        type: NestedObject
+        description: |
+          Criticality of the application.
+        properties:
+          - name: 'type'
+            type: String
+            required: true
+            description: |
+              Criticality type. Possible values are `MISSION_CRITICAL`, `HIGH`,
+              `MEDIUM` and `LOW`.
+      - name: 'environment'
+        type: NestedObject
+        description: |
+          Environment of the application.
+        properties:
+          - name: 'type'
+            type: String
+            required: true
+            description: |
+              Environment type. Possible values are `PRODUCTION`, `STAGING`,
+              `TEST` and `DEVELOPMENT`.
+      - name: 'developerOwners'
+        type: Array
+        description: |
+          Developer team that owns development and coding.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'displayName'
+              type: String
+              description: |
+                Contact's name.
+            - name: 'email'
+              type: String
+              required: true
+              description: |
+                Email address of the contact.
+      - name: 'operatorOwners'
+        type: Array
+        description: |
+          Operator team that ensures runtime and operations.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'displayName'
+              type: String
+              description: |
+                Contact's name.
+            - name: 'email'
+              type: String
+              required: true
+              description: |
+                Email address of the contact.
+      - name: 'businessOwners'
+        type: Array
+        description: |
+          Business team that ensures user needs are met and value is delivered.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'displayName'
+              type: String
+              description: |
+                Contact's name.
+            - name: 'email'
+              type: String
+              required: true
+              description: |
+                Email address of the contact.
+  - name: 'deploymentRegion'
+    type: String
+    immutable: true
+    description: |
+      Deployment region.
+  - name: 'deploymentProject'
+    type: String
+    immutable: true
+    description: |
+      Deployment project.
+  - name: 'connectionConfigs'
+    type: Array
+    default_from_api: true
+    description: |
+      Connection configurations for the application. When the application is
+      created or its source changes, the API sets these from the connections
+      in the application template.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'connectionUri'
+          type: String
+          required: true
+          description: |
+            The URI of the connection.
+        - name: 'sourceComponentParameters'
+          type: Array
+          description: |
+            The parameters of the connection associated with the source
+            component.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'key'
+                type: String
+                required: true
+                description: |
+                  The key of the parameter.
+              - name: 'value'
+                type: JsonValue
+                description: |
+                  The value of the parameter, as a JSON-encoded string. Use
+                  `jsonencode()` to set it.
+                send_empty_value: true
+        - name: 'destinationComponentParameters'
+          type: Array
+          description: |
+            The parameters of the connection associated with the destination
+            component.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'key'
+                type: String
+                required: true
+                description: |
+                  The key of the parameter.
+              - name: 'value'
+                type: JsonValue
+                description: |
+                  The value of the parameter, as a JSON-encoded string. Use
+                  `jsonencode()` to set it.
+                send_empty_value: true
+  - name: 'deploymentTarget'
+    type: NestedObject
+    description: |
+      The deployment target of the application.
+    properties:
+      - name: 'gkeDeploymentTarget'
+        type: NestedObject
+        description: |
+          The GKE deployment target.
+        properties:
+          - name: 'clusterSelfLink'
+            type: String
+            required: true
+            description: |
+              The self link of the cluster where the GKE based application is
+              deployed.
+          - name: 'namespace'
+            type: String
+            required: true
+            description: |
+              The namespace where the application is deployed.
+          - name: 'kubernetesServiceAccount'
+            type: String
+            required: true
+            description: |
+              The Kubernetes service account in the namespace, such as
+              `default`.
+          - name: 'kubernetesServiceAccountCreation'
+            type: Boolean
+            description: |
+              Whether to create the Kubernetes service account. If `true`, the
+              service account is created in the namespace. If `false`, the
+              service account must already exist in the namespace.
+  - name: 'compositeApplicationParameters'
+    type: NestedObject
+    default_from_api: true
+    description: |
+      Parameters that are required for composite applications.
+    properties:
+      - name: 'serviceAccountMap'
+        type: KeyValuePairs
+        description: |
+          A map from a component URI to the service account that deploys the
+          component. Keys use the format
+          `projects/{project}/locations/{location}/spaces/{space}/applicationTemplates/{application_template}/components/{component}`
+          and values use the format
+          `projects/{project}/serviceAccounts/{email_address}`.
+  - name: 'rolesApisConfig'
+    type: Array
+    default_from_api: true
+    description: |
+      Project-specific configurations required to deploy the application,
+      including IAM roles and APIs. When unset, the API fills in the roles and
+      APIs that the deployment needs.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'projectId'
+          type: String
+          required: true
+          description: |
+            The project ID to which these configurations apply.
+        - name: 'roles'
+          type: Array
+          description: |
+            IAM roles that the deployment service account needs to deploy the
+            application within this project.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'role'
+                type: String
+                required: true
+                description: |
+                  IAM role name, such as `roles/editor`.
+              - name: 'systemProvided'
+                type: Boolean
+                output: true
+                description: |
+                  Whether Application Design Center added the role.
+        - name: 'apis'
+          type: Array
+          description: |
+            APIs that must be enabled in this project before the application is
+            deployed, in the form of `*.googleapis.com`.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'api'
+                type: String
+                required: true
+                description: |
+                  API name, such as `compute.googleapis.com`.
+              - name: 'systemProvided'
+                type: Boolean
+                output: true
+                description: |
+                  Whether Application Design Center added the API.
+  - name: 'name'
+    type: String
+    output: true
+    description: |
+      Name of the application.
+  - name: 'state'
+    type: String
+    output: true
+    description: |
+      State of the application.
+  - name: 'deploymentMetadata'
+    type: NestedObject
+    output: true
+    description: |
+      Deployment metadata of the application.
+    properties:
+      - name: 'revision'
+        type: String
+        output: true
+        description: |
+          The revision of the deployment associated with the application.
+      - name: 'componentOutputParameters'
+        type: Array
+        output: true
+        description: |
+          The component output parameters of the deployment.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'component'
+              type: String
+              output: true
+              description: |
+                The name of the component that the output parameters belong to.
+            - name: 'parameters'
+              type: Array
+              output: true
+              description: |
+                The output parameters of the component.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'key'
+                    type: String
+                    output: true
+                    description: |
+                      The key of the parameter.
+                  - name: 'value'
+                    type: JsonValue
+                    output: true
+                    description: |
+                      The value of the parameter, as a JSON-encoded string.
+      - name: 'error'
+        type: NestedObject
+        output: true
+        description: |
+          The error associated with the deployment.
+        properties:
+          - name: 'type'
+            type: String
+            output: true
+            description: |
+              The error type based on the deployment error code.
+          - name: 'code'
+            type: String
+            output: true
+            description: |
+              The deployment error code, based on the Infrastructure Manager
+              error codes.
+          - name: 'detail'
+            type: String
+            output: true
+            description: |
+              A human-readable summary of the deployment error.
+          - name: 'errorMessage'
+            type: String
+            output: true
+            description: |
+              The errors generated by Infrastructure Manager, and any
+              non-internal errors that occurred before the deployment started.
+      - name: 'build'
+        type: String
+        output: true
+        description: |
+          The Cloud Build instance UUID associated with the deployment.
+      - name: 'workerPool'
+        type: String
+        output: true
+        description: |
+          The Cloud Build worker pool used to deploy the application.
+      - name: 'retryAttempts'
+        type: Integer
+        output: true
+        description: |
+          The number of deployment retries attempted.
+  - name: 'apphubApplication'
+    type: String
+    output: true
+    description: |
+      AppHub application URI.
+  - name: 'createTime'
+    type: Time
+    output: true
+    description: |
+      Create time.
+  - name: 'updateTime'
+    type: Time
+    output: true
+    description: |
+      Update time.

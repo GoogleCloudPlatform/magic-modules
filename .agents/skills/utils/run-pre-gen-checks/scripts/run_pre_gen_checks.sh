@@ -6,10 +6,10 @@
 # Checks:
 # 1. Submodule check (disallows git submodules)
 # 2. gofmt formatting check
-# 3. tools/template-check (version-guard and unused-tmpl on modified .tmpl files)
+# 3. tools/template-check (version-guard, unused-tmpl, and disallow-legacy-apiary)
 # 4. YAML linting check on changed product YAML files (if yamllint is installed)
 # 5. mmv1 unit tests
-# 6. internal tools & magician unit tests (scoped to touched tools/ or .ci/ files, or all with --all)
+# 6. internal tools, magician & agent script unit tests (scoped to touched tools/, .ci/, or .agents/scripts/ files, or all with --all)
 #
 
 set -e
@@ -43,18 +43,26 @@ fi
 
 cd "$REPO_ROOT"
 
-# Determine base ref for diff checks
-BASE_REF="origin/main"
-if ! git rev-parse --verify "$BASE_REF" >/dev/null 2>&1; then
-  if git rev-parse --verify "upstream/main" >/dev/null 2>&1; then
-    BASE_REF="upstream/main"
-  else
-    BASE_REF="HEAD"
+# Determine base ref for diff checks (prefer upstream/main for fork workflows, then origin/main, main, HEAD)
+BASE_REF=""
+for candidate in upstream/main origin/main main; do
+  if git rev-parse --verify "$candidate" >/dev/null 2>&1; then
+    BASE_REF="$candidate"
+    break
   fi
+done
+if [ -z "$BASE_REF" ]; then
+  BASE_REF="HEAD"
 fi
+DIFF_BASE="$(git merge-base HEAD "$BASE_REF" 2>/dev/null || echo "$BASE_REF")"
 
-# Detect all modified files (staged, unstaged, or committed relative to base ref)
-CHANGED_FILES="$(git diff --name-only "$BASE_REF" 2>/dev/null || git diff --name-only HEAD 2>/dev/null || true)"
+# Detect all changed files (committed relative to DIFF_BASE, staged, unstaged, or untracked)
+CHANGED_FILES="$(
+  {
+    git diff --name-only "$DIFF_BASE" 2>/dev/null || git diff --name-only HEAD 2>/dev/null || true
+    git ls-files --others --exclude-standard 2>/dev/null || true
+  } | sort -u
+)"
 
 SCRATCH_DIR="${REPO_ROOT}/scratch/pre-gen-checks"
 LOGS_DIR="${SCRATCH_DIR}/logs"
@@ -77,7 +85,18 @@ SUBMODULE_PID=$!
 
 # Check 2: Go Formatting Check (gofmt)
 (
-  GOFMT_OUTPUT="$(gofmt -l $(git ls-files '*.go'))"
+  GOFMT_OUTPUT=""
+  if git ls-files --cached --others --exclude-standard -- '*.go' | grep -q .; then
+    GOFMT_OUTPUT="$(
+      git ls-files -z --cached --others --exclude-standard -- '*.go' \
+        | while IFS= read -r -d '' f; do
+            if [ -f "$f" ]; then
+              printf '%s\0' "$f"
+            fi
+          done \
+        | xargs -0 gofmt -l
+    )"
+  fi
   if [ -n "$GOFMT_OUTPUT" ]; then
     echo "The following files are not formatted properly:" >&2
     echo "$GOFMT_OUTPUT" >&2
@@ -89,15 +108,91 @@ GOFMT_PID=$!
 
 # Check 3: Template Validation Checks (tools/template-check)
 (
-  cd tools/template-check
-  tmpls=$(git diff --name-only --diff-filter=d "$BASE_REF" ../../*.tmpl 2>/dev/null | sed 's=^=../../=g' || true)
-  if [ -n "$tmpls" ]; then
-    go run main.go version-guard --file-list "${tmpls//$'\n'/,}"
+  template_failed=0
+
+  # 3a. version-guard on modified/added (committed, staged, unstaged, untracked) non-deleted .tmpl files
+  tmpls_csv=""
+  while IFS= read -r f; do
+    if [ -n "$f" ] && [ -f "$REPO_ROOT/$f" ]; then
+      tmpls_csv="${tmpls_csv:+${tmpls_csv},}../../${f}"
+    fi
+  done < <(
+    {
+      git -C "$REPO_ROOT" diff --name-only --diff-filter=d "$DIFF_BASE" -- '*.tmpl' 2>/dev/null || true
+      git -C "$REPO_ROOT" ls-files --others --exclude-standard -- '*.tmpl' 2>/dev/null || true
+    } | sort -u
+  )
+
+  cd "$REPO_ROOT/tools/template-check"
+
+  if [ -n "$tmpls_csv" ]; then
+    echo "--- version-guard ---"
+    if ! go run main.go version-guard --file-list "$tmpls_csv"; then
+      template_failed=1
+    fi
+  else
+    echo "No modified .tmpl files to check; skipping version-guard."
   fi
 
-  newtmplfiles=$(git diff --name-only --diff-filter=A "$BASE_REF" HEAD -- ../../mmv1 2>/dev/null | grep '\.tmpl$' | sed 's=^=../../=g' || true)
-  if [ -n "$newtmplfiles" ]; then
-    go run main.go unused-tmpl --file-list "${newtmplfiles//$'\n'/,}"
+  # 3b. unused-tmpl on newly added (committed, staged, or untracked) .tmpl files under mmv1/
+  newtmplfiles_csv=""
+  while IFS= read -r f; do
+    if [ -n "$f" ] && [ -f "$REPO_ROOT/$f" ]; then
+      newtmplfiles_csv="${newtmplfiles_csv:+${newtmplfiles_csv},}../../${f}"
+    fi
+  done < <(
+    {
+      git -C "$REPO_ROOT" diff --name-only --diff-filter=A "$DIFF_BASE" -- 'mmv1/*.tmpl' 2>/dev/null || true
+      git -C "$REPO_ROOT" ls-files --others --exclude-standard -- 'mmv1/*.tmpl' 2>/dev/null || true
+    } | sort -u
+  )
+
+  if [ -n "$newtmplfiles_csv" ]; then
+    echo "--- unused-tmpl ---"
+    if ! go run main.go unused-tmpl --file-list "$newtmplfiles_csv"; then
+      template_failed=1
+    fi
+  else
+    echo "No newly added mmv1 .tmpl files to check; skipping unused-tmpl."
+  fi
+
+  # 3c. disallow-legacy-apiary on tracked diffs (mirroring CI) + untracked files in checked pathspecs
+  echo "--- disallow-legacy-apiary ---"
+  if git -C "$REPO_ROOT" rev-parse --verify "$DIFF_BASE" >/dev/null 2>&1; then
+    if ! go run main.go disallow-legacy-apiary --base-ref "$DIFF_BASE"; then
+      template_failed=1
+    fi
+  else
+    echo "Base ref '${DIFF_BASE}' could not be verified; skipping tracked disallow-legacy-apiary diff check."
+  fi
+
+  untracked_apiary_files=()
+  while IFS= read -r f; do
+    if [ -n "$f" ] && [ -f "$REPO_ROOT/$f" ]; then
+      untracked_apiary_files+=("$f")
+    fi
+  done < <(
+    git -C "$REPO_ROOT" ls-files --others --exclude-standard -- \
+      'mmv1/templates/terraform/**.tmpl' \
+      'mmv1/third_party/terraform/**.go' \
+      'mmv1/third_party/terraform/**.go.tmpl' \
+      'mmv1/third_party/cai2hcl/**.go' \
+      'mmv1/third_party/tgc*/**.go' \
+      'mmv1/third_party/tgc*/**.go.tmpl' 2>/dev/null || true
+  )
+
+  if [ "${#untracked_apiary_files[@]}" -gt 0 ]; then
+    if ! (
+      for f in "${untracked_apiary_files[@]}"; do
+        git -C "$REPO_ROOT" diff --no-index -U0 -- /dev/null "$f" 2>/dev/null || true
+      done
+    ) | go run main.go disallow-legacy-apiary --diff-file -; then
+      template_failed=1
+    fi
+  fi
+
+  if [ "$template_failed" -ne 0 ]; then
+    exit 1
   fi
   echo "Template validation checks passed."
 ) > "${LOGS_DIR}/template.log" 2>&1 &
@@ -106,9 +201,19 @@ TEMPLATE_PID=$!
 # Check 4: YAML Linting Check (yamllint)
 (
   if command -v yamllint >/dev/null 2>&1; then
-    yamlfiles=$(echo "$CHANGED_FILES" | grep '^mmv1/products/' || true)
-    if [ -n "$yamlfiles" ]; then
-      yamllint -c .yamllint $yamlfiles
+    yamlfiles=()
+    while IFS= read -r f; do
+      if [ -n "$f" ] && [ -f "$f" ]; then
+        yamlfiles+=("$f")
+      fi
+    done < <(
+      {
+        git diff --name-only --diff-filter=d "$DIFF_BASE" -- 'mmv1/products/*.yaml' 'mmv1/products/*.yml' 2>/dev/null || true
+        git ls-files --others --exclude-standard -- 'mmv1/products/*.yaml' 'mmv1/products/*.yml' 2>/dev/null || true
+      } | sort -u
+    )
+    if [ "${#yamlfiles[@]}" -gt 0 ]; then
+      yamllint -c .yamllint "${yamlfiles[@]}"
       echo "YAML lint check passed for modified product YAML files."
     else
       echo "No modified product YAML files to lint. YAML lint check passed."
@@ -189,7 +294,7 @@ if [ $SUBMODULE_STATUS -eq 0 ] && [ $GOFMT_STATUS -eq 0 ] && [ $TEMPLATE_STATUS 
   echo -e "\n${GREEN}=== All pre-generation & static checks passed successfully! ===${NC}"
   echo "  ✓ Submodule check passed"
   echo "  ✓ Go formatting check passed (gofmt)"
-  echo "  ✓ Template validation checks passed"
+  echo "  ✓ Template validation checks passed (version-guard, unused-tmpl, disallow-legacy-apiary)"
   echo "  ✓ YAML lint check passed"
   echo "  ✓ MMv1 core unit tests passed"
   echo "  ✓ Tool & CI unit tests passed"

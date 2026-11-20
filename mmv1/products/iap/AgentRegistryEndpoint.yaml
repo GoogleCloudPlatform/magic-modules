@@ -42,8 +42,6 @@ samples:
     external_providers: [time]
     steps:
       - name: agent_registry_endpoint_basic
-        resource_id_vars:
-          endpoint_id: endpoint-id
         test_env_vars:
           org_id: ORG_ID
 parameters:

@@ -73,7 +73,37 @@ samples:
           # still exists, rather than during CheckDestroy (when read returns
           # nothing because the parent resource has then also been destroyed)
 virtual_fields:
+  - name: 'allowed_actions'
+    description: |
+      [Beta](../guides/provider_versions.html.markdown) The list of allowed actions to perform on the instance during an update.
+      `allowed_actions` is the only way to request `RESTART_IN_PLACE`.
+      Conflicts with `minimal_action` and `most_disruptive_allowed_action`.
+      Possible values are:
+      * REPLACE
+      * RESTART
+      * RESTART_IN_PLACE
+      * REFRESH
+      * NONE
+    type: 'Array'
+    is_set: true
+    min_size: 1
+    item_type:
+      type: 'Enum'
+      description: 'The allowed action to perform on the instance during an update.'
+      enum_values:
+        - 'REPLACE'
+        - 'RESTART'
+        - 'RESTART_IN_PLACE'
+        - 'REFRESH'
+        - 'NONE'
+      exclude_docs_values: true
+    min_version: 'beta'
+    conflicts:
+      - minimal_action
+      - most_disruptive_allowed_action
   - name: 'minimal_action'
+    conflicts:
+      - allowed_actions
     description: |
       The minimal action to perform on the instance during an update.
       Default is `NONE`. Possible values are:
@@ -84,6 +114,8 @@ virtual_fields:
     type: String
     default_value: "NONE"
   - name: 'most_disruptive_allowed_action'
+    conflicts:
+      - allowed_actions
     description: |
       The most disruptive action to perform on the instance during an update.
       Default is `REPLACE`. Possible values are:

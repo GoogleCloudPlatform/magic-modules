@@ -54,8 +54,6 @@ samples:
         resource_id_vars:
           evaluator_name: online-evaluator
           engine_name: reasoning-engine
-        test_env_vars:
-          project: PROJECT_NAME
   - name: vertex_ai_online_evaluator_full
     primary_resource_id: evaluator
     steps:
@@ -64,8 +62,6 @@ samples:
           evaluator_name: online-evaluator
           engine_name: reasoning-engine
           metric_name: eval-metric
-        test_env_vars:
-          project: PROJECT_NAME
 parameters:
   - name: region
     type: String
@@ -210,6 +206,24 @@ properties:
                       required: true
                       immutable: true
                       description: The value to compare against.
+                - name: serviceVersion
+                  type: NestedObject
+                  immutable: true
+                  description: |
+                    Filter on the version that served a trace (`service.version`
+                    OTel resource attribute). At most one is allowed. On Vertex AI
+                    Agent Engine, this is the runtime revision id, currently set only
+                    for agents created via v1beta1.
+                  properties:
+                    - name: values
+                      type: Array
+                      required: true
+                      immutable: true
+                      description: |
+                        The values to match exactly (case-sensitive). Requires 1 to 20
+                        values, each at most 128 characters long.
+                      item_type:
+                        type: String
       - name: sessionScope
         type: NestedObject
         immutable: true
@@ -369,6 +383,24 @@ properties:
                       required: true
                       immutable: true
                       description: The value to compare against.
+                - name: serviceVersion
+                  type: NestedObject
+                  immutable: true
+                  description: |
+                    Filter on the versions that served a session (`service.version`
+                    OTel resource attribute); matches if any of them is listed. At most
+                    one is allowed. On Vertex AI Agent Engine, this is the runtime
+                    revision id, currently set only for agents created via v1beta1.
+                  properties:
+                    - name: values
+                      type: Array
+                      required: true
+                      immutable: true
+                      description: |
+                        The values to match exactly (case-sensitive). Requires 1 to 20
+                        values, each at most 128 characters long.
+                      item_type:
+                        type: String
   - name: metricSources
     type: Array
     required: true
@@ -385,7 +417,7 @@ properties:
       type: NestedObject
       properties:
         - name: metric
-          type: String
+          type: JsonValue
           immutable: true
           description: |
             Inline metric config, provided as a JSON-formatted string using
@@ -399,11 +431,6 @@ properties:
               - `session_scope` (multi-turn session):
                 `multi_turn_task_success_v1`, `multi_turn_tool_use_quality_v1`,
                 `multi_turn_trajectory_quality_v1`.
-          state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-          custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-          custom_expand: templates/terraform/custom_expand/json_schema.tmpl
-          validation:
-            function: validation.StringIsJSON
         - name: metricResourceName
           type: String
           immutable: true

@@ -1,0 +1,22 @@
+resource "google_agent_identity_auth_provider" "{{$.PrimaryResourceId}}" {
+  location         = "us-central1"
+  auth_provider_id = "{{index $.ResourceIdVars "auth_provider_id"}}"
+  description      = "Cross-App Access with Client Assertion JWT"
+
+  auth_provider_type_params {
+    xaa_auth_provider {
+      client_assertion_jwt_auth {
+        client_id = "test-jwt-client-id"
+      }
+      custom_issuer {
+        token_url = "https://auth.example.com/token"
+      }
+      id_token_input {
+        id_jag_auth_provider = "projects/{{index $.TestEnvVars "project"}}/locations/us-central1/authProviders/idp-provider"
+        id_jag_additional_claims = jsonencode({
+          env = "test"
+        })
+      }
+    }
+  }
+}

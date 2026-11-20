@@ -60,6 +60,7 @@ Replace `String` in the field type with one of the following options:
 - `Integer`
 - `Boolean`
 - `Double`
+- `JsonValue` (arbitrary JSON value represented as a JSON-encoded string in Terraform)
 - `KeyValuePairs` (string -> string map)
 - `KeyValueLabels` (for standard resource 'labels' field)
 - `KeyValueAnnotations` (for standard resource 'annotations' field)

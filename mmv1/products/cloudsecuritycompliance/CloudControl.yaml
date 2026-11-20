@@ -196,13 +196,8 @@ properties:
                               type: Double
                               description: Represents a double value.
                             - name: oneofValue
-                              type: String
+                              type: JsonValue
                               description: Sub-parameter values, in JSON format.
-                              state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                              custom_expand: templates/terraform/custom_expand/json_value.tmpl
-                              validation:
-                                function: validation.StringIsJSON
                             - name: stringListValue
                               type: NestedObject
                               description: A list of strings.
@@ -329,13 +324,8 @@ properties:
                                     type: Double
                                     description: Represents a double value.
                                   - name: oneofValue
-                                    type: String
+                                    type: JsonValue
                                     description: Sub-parameter values, in JSON format.
-                                    state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                                    custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                                    custom_expand: templates/terraform/custom_expand/json_value.tmpl
-                                    validation:
-                                      function: validation.StringIsJSON
                                   - name: stringListValue
                                     type: NestedObject
                                     description: A list of strings.
@@ -467,13 +457,8 @@ properties:
                                               type: Double
                                               description: Represents a double value.
                                             - name: oneofValue
-                                              type: String
+                                              type: JsonValue
                                               description: Sub-parameter values, in JSON format.
-                                              state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                                              custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                                              custom_expand: templates/terraform/custom_expand/json_value.tmpl
-                                              validation:
-                                                function: validation.StringIsJSON
                                             - name: stringListValue
                                               type: NestedObject
                                               description: A list of strings.
@@ -567,13 +552,8 @@ properties:
                                   type: Double
                                   description: Represents a double value.
                                 - name: oneofValue
-                                  type: String
+                                  type: JsonValue
                                   description: Sub-parameter values, in JSON format.
-                                  state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                                  custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                                  custom_expand: templates/terraform/custom_expand/json_value.tmpl
-                                  validation:
-                                    function: validation.StringIsJSON
                                 - name: stringListValue
                                   type: NestedObject
                                   description: A list of strings.
@@ -637,13 +617,8 @@ properties:
                                 type: String
                                 description: Fully qualified proto attribute path (e.g., dot notation)
                     - name: subParameters
-                      type: String
+                      type: JsonValue
                       description: The parameter spec of the cloud control, in JSON format.
-                      state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                      custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                      custom_expand: templates/terraform/custom_expand/json_value.tmpl
-                      validation:
-                        function: validation.StringIsJSON
                     - name: validation
                       type: NestedObject
                       description: Validation of the parameter.
@@ -683,13 +658,8 @@ properties:
                                             type: Double
                                             description: Represents a double value.
                                           - name: oneofValue
-                                            type: String
+                                            type: JsonValue
                                             description: Sub-parameter values, in JSON format.
-                                            state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                                            custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                                            custom_expand: templates/terraform/custom_expand/json_value.tmpl
-                                            validation:
-                                              function: validation.StringIsJSON
                                           - name: stringListValue
                                             type: NestedObject
                                             description: A list of strings.
@@ -814,13 +784,8 @@ properties:
                                         type: Double
                                         description: Represents a double value.
                                       - name: oneofValue
-                                        type: String
+                                        type: JsonValue
                                         description: Sub-parameter values, in JSON format.
-                                        state_func: func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }
-                                        custom_flatten: templates/terraform/custom_flatten/json_schema.tmpl
-                                        custom_expand: templates/terraform/custom_expand/json_value.tmpl
-                                        validation:
-                                          function: validation.StringIsJSON
                                       - name: stringListValue
                                         type: NestedObject
                                         description: A list of strings.

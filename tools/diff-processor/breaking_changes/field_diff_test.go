@@ -613,6 +613,39 @@ var FieldBecomingComputedOnlyTestCases = []fieldTestCase{
 		newField:          nil,
 		expectedViolation: false,
 	},
+	{
+		name: "transition required -> computed under old computed-only ancestor",
+		oldField: &schema.Schema{
+			Required: true,
+		},
+		newField: &schema.Schema{
+			Computed: true,
+		},
+		resourceDiff:      fieldUnderOldComputedOnlyAncestorSchemaDiff,
+		expectedViolation: false,
+	},
+	{
+		name: "transition optional -> computed under old computed-only ancestor",
+		oldField: &schema.Schema{
+			Optional: true,
+		},
+		newField: &schema.Schema{
+			Computed: true,
+		},
+		resourceDiff:      fieldUnderOldComputedOnlyAncestorSchemaDiff,
+		expectedViolation: false,
+	},
+	{
+		name: "transition required -> computed without old computed-only ancestor",
+		oldField: &schema.Schema{
+			Required: true,
+		},
+		newField: &schema.Schema{
+			Computed: true,
+		},
+		resourceDiff:      existingResourceSchemaDiff,
+		expectedViolation: true,
+	},
 }
 
 func TestFieldOptionalComputedToOptional(t *testing.T) {

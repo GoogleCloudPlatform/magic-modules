@@ -103,7 +103,6 @@ samples:
       - name: 'workbench_instance_labels_stopped'
         resource_id_vars:
           instance_name: 'workbench-instance'
-          network_name: 'wbi-test-default'
         test_env_vars:
           service_account: 'SERVICE_ACCT'
         ignore_read_extra:

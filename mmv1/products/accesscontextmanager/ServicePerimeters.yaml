@@ -58,7 +58,8 @@ samples:
       - name: access_context_manager_service_perimeters_basic
         resource_id_vars:
           access_level_name: chromeos_no_lock
-          service_perimeter_name: restrict_storage
+          service_perimeter_name1: restrict_storage
+          service_perimeter_name2: restrict_bigtable
 parameters:
   # Parent is a path parameter that _cannot_ be read or sent in the request at all.
   # This must be done at the provider level.

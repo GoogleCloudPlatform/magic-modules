@@ -85,6 +85,8 @@ samples:
       - name: access_context_manager_service_perimeter_secure_data_exchange
         resource_id_vars:
           access_level_name: secure_data_exchange
+          service_perimeter_name1: restrict_storage
+          service_perimeter_name2: restrict_bigtable
   - name: access_context_manager_service_perimeter_dry-run
     primary_resource_id: service-perimeter
     exclude_test: true
@@ -97,8 +99,6 @@ samples:
     exclude_test: true
     steps:
       - name: access_context_manager_service_perimeter_granular_controls
-        resource_id_vars:
-          service_perimeter_name: granular_controls
 parameters:
   # Parent is a path parameter that _cannot_ be read or sent in the request at all.
   # This must be done at the provider level.

@@ -55,8 +55,6 @@ samples:
           region: 'us-east1'
         resource_id_vars:
           resource_name: 'my-edge-security-service'
-        test_env_vars:
-          project_id: 'PROJECT_NAME'
 parameters:
   - name: 'region'
     type: ResourceRef

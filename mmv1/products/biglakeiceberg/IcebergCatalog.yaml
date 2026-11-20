@@ -51,45 +51,30 @@ samples:
       - name: biglake_iceberg_catalog
         resource_id_vars:
           name: my_iceberg_catalog
-        test_env_vars:
-          GOOGLE_BILLING_PROJECT: PROJECT
-          USER_PROJECT_OVERRIDE: "true"
   - name: biglake_iceberg_catalog_primary_location
     primary_resource_id: my_iceberg_catalog
     steps:
       - name: biglake_iceberg_catalog_primary_location
         resource_id_vars:
           name: my_iceberg_catalog
-        test_env_vars:
-          GOOGLE_BILLING_PROJECT: PROJECT
-          USER_PROJECT_OVERRIDE: "true"
   - name: biglake_iceberg_catalog_biglake
     primary_resource_id: my_iceberg_catalog
     steps:
       - name: biglake_iceberg_catalog_biglake
         resource_id_vars:
           name: my_iceberg_catalog
-        test_env_vars:
-          GOOGLE_BILLING_PROJECT: PROJECT
-          USER_PROJECT_OVERRIDE: "true"
   - name: biglake_iceberg_catalog_federated_unity
     primary_resource_id: my_iceberg_catalog
     steps:
       - name: biglake_iceberg_catalog_federated_unity
         resource_id_vars:
           name: my_iceberg_catalog
-        test_env_vars:
-          GOOGLE_BILLING_PROJECT: PROJECT
-          USER_PROJECT_OVERRIDE: "true"
   - name: biglake_iceberg_catalog_federated_glue
     primary_resource_id: my_iceberg_catalog
     steps:
       - name: biglake_iceberg_catalog_federated_glue
         resource_id_vars:
           name: my_iceberg_catalog
-        test_env_vars:
-          GOOGLE_BILLING_PROJECT: PROJECT
-          USER_PROJECT_OVERRIDE: "true"
 parameters:
   - name: name
     type: String

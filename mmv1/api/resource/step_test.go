@@ -1,6 +1,7 @@
 package resource_test
 
 import (
+	"strings"
 	"testing"
 	"testing/fstest"
 
@@ -300,4 +301,195 @@ func TestStep_SetHCLText_NullVars(t *testing.T) {
 	if diff := cmp.Diff(wantStep1OiCS, steps[1].OicsHCLText); diff != "" {
 		t.Errorf("Step 1 OicsHCLText mismatch (-want +got):\n%s", diff)
 	}
+}
+
+func TestStep_Validate_UnusedVars(t *testing.T) {
+	t.Parallel()
+
+	sysfs := fstest.MapFS{
+		"templates/terraform/samples/services/pubsub/used.tf.tmpl": &fstest.MapFile{
+			Data: []byte(`resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
+  name    = "{{index $.ResourceIdVars "topic_name"}}"
+  project = "{{index $.TestEnvVars "project"}}"
+  labels = {
+    env = "{{index $.Vars "env"}}"
+  }
+  source = "path/to/index.zip"
+}
+`),
+		},
+	}
+
+	t.Run("all variables used passes validation", func(t *testing.T) {
+		t.Parallel()
+		st := &resource.Step{
+			Name:       "used",
+			ConfigPath: "templates/terraform/samples/services/pubsub/used.tf.tmpl",
+			ResourceIdVars: map[string]string{
+				"topic_name": "my-topic",
+			},
+			Vars: resource.StepVars{
+				"env": "dev",
+			},
+			TestEnvVars: map[string]string{
+				"project":          "PROJECT_NAME",
+				"consumer_project": "PROJECT_NAME",
+			},
+			TestVarsOverrides: map[string]string{
+				"topic_name": `"custom-topic"`,
+				"zip_path":   `"./test-fixtures/index.zip"`,
+			},
+			OicsVarsOverrides: map[string]string{
+				"env": "oics-dev",
+			},
+		}
+		st.PrimaryResourceId = "primary"
+		st.SetHCLText(sysfs)
+		st.IamHCLText = `consumer_project = "%{consumer_project}"`
+
+		if errs := st.Validate("Topic", "pubsub_topic_used"); len(errs) != 0 {
+			t.Errorf("Validate() returned unexpected errors: %v", errs)
+		}
+	})
+
+	t.Run("unused variables across maps fail validation", func(t *testing.T) {
+		t.Parallel()
+		st := &resource.Step{
+			Name:       "used",
+			ConfigPath: "templates/terraform/samples/services/pubsub/used.tf.tmpl",
+			ResourceIdVars: map[string]string{
+				"topic_name": "my-topic",
+				"unused_id":  "unused",
+				"paired_id":  "paired",
+			},
+			Vars: resource.StepVars{
+				"env":        "dev",
+				"unused_var": "val",
+			},
+			TestEnvVars: map[string]string{
+				"project":    "PROJECT_NAME",
+				"unused_env": "ORG_ID",
+			},
+			TestVarsOverrides: map[string]string{
+				"unused_override": `"val"`,
+				"paired_id":       `"val"`,
+			},
+			OicsVarsOverrides: map[string]string{
+				"orphan_oics": `"val"`,
+				"paired_id":   `"val"`,
+			},
+		}
+		st.PrimaryResourceId = "primary"
+		st.SetHCLText(sysfs)
+
+		errs := st.Validate("Topic", "pubsub_topic_unused")
+		got := make([]string, len(errs))
+		for i, err := range errs {
+			got[i] = err.Error()
+		}
+		want := []string{
+			`unused variable "orphan_oics" in 'oics_vars_overrides' (not defined in 'vars' or 'resource_id_vars') for step "used" in sample "pubsub_topic_unused" of resource "Topic"`,
+			`unused variable "unused_var" in 'vars' for step "used" in sample "pubsub_topic_unused" of resource "Topic"`,
+			`unused variable "paired_id" in 'resource_id_vars' for step "used" in sample "pubsub_topic_unused" of resource "Topic"`,
+			`unused variable "unused_id" in 'resource_id_vars' for step "used" in sample "pubsub_topic_unused" of resource "Topic"`,
+			`unused variable "unused_env" in 'test_env_vars' for step "used" in sample "pubsub_topic_unused" of resource "Topic"`,
+			`unused variable "paired_id" in 'test_vars_overrides' for step "used" in sample "pubsub_topic_unused" of resource "Topic"`,
+			`unused variable "unused_override" in 'test_vars_overrides' for step "used" in sample "pubsub_topic_unused" of resource "Topic"`,
+			`unused variable "paired_id" in 'oics_vars_overrides' for step "used" in sample "pubsub_topic_unused" of resource "Topic"`,
+		}
+		if diff := cmp.Diff(want, got); diff != "" {
+			t.Errorf("Validate() errors mismatch (-want +got):\n%s", diff)
+		}
+	})
+
+	t.Run("unloaded step skips template usage checks", func(t *testing.T) {
+		t.Parallel()
+		st := &resource.Step{
+			Name:       "beta_only_step",
+			MinVersion: "beta",
+			ResourceIdVars: map[string]string{
+				"topic_name": "my-topic",
+			},
+			Vars: resource.StepVars{
+				"env": "dev",
+			},
+			TestEnvVars: map[string]string{
+				"project": "PROJECT_NAME",
+			},
+			TestVarsOverrides: map[string]string{
+				"topic_name": `"custom"`,
+			},
+		}
+		if errs := st.Validate("Topic", "pubsub_topic_beta"); len(errs) != 0 {
+			t.Errorf("Validate() on unloaded step returned unexpected errors: %v", errs)
+		}
+	})
+}
+
+func TestStep_TestStepSlug(t *testing.T) {
+	t.Parallel()
+
+	st := &resource.Step{Name: "pubsub_topic_basic"}
+	if got, want := st.TestStepSlug("Pubsub", "Topic"), "PubsubTopic_pubsubTopicBasicExample"; got != want {
+		t.Errorf("TestStepSlug() = %q, want %q", got, want)
+	}
+
+	st.StepSlug = "pubsub_topic_exhaustive_step2"
+	if got, want := st.TestStepSlug("Pubsub", "Topic"), "PubsubTopic_pubsubTopicExhaustiveStep2Example"; got != want {
+		t.Errorf("TestStepSlug() with StepSlug = %q, want %q", got, want)
+	}
+}
+
+func TestStep_ExecuteTemplate_StrictIndexAndMissingKey(t *testing.T) {
+	t.Parallel()
+
+	sysfs := fstest.MapFS{
+		"templates/missing_var.tf.tmpl": &fstest.MapFile{
+			Data: []byte(`name = "{{printf "%s" (index $.Vars "missing_key")}}"`),
+		},
+		"templates/missing_dot_key.tf.tmpl": &fstest.MapFile{
+			Data: []byte(`name = "{{$.Vars.missing_key}}"`),
+		},
+		"templates/nil_map.tf.tmpl": &fstest.MapFile{
+			Data: []byte(`name = "{{index $.ResourceIdVars "id"}}"`),
+		},
+	}
+
+	t.Run("nested index on missing Vars key returns error", func(t *testing.T) {
+		t.Parallel()
+		st := &resource.Step{
+			Name:       "s",
+			ConfigPath: "templates/missing_var.tf.tmpl",
+			Vars:       resource.StepVars{"present": "ok"},
+		}
+		_, err := st.ExecuteTemplate(sysfs)
+		if err == nil || !strings.Contains(err.Error(), `map has no entry for key "missing_key"`) {
+			t.Errorf("ExecuteTemplate() err = %v, want missing_key error", err)
+		}
+	})
+
+	t.Run("dot lookup on missing map key returns error via missingkey=error", func(t *testing.T) {
+		t.Parallel()
+		st := &resource.Step{
+			Name:       "s",
+			ConfigPath: "templates/missing_dot_key.tf.tmpl",
+			Vars:       resource.StepVars{"present": "ok"},
+		}
+		_, err := st.ExecuteTemplate(sysfs)
+		if err == nil || !strings.Contains(err.Error(), `map has no entry for key "missing_key"`) {
+			t.Errorf("ExecuteTemplate() err = %v, want missing_key error", err)
+		}
+	})
+
+	t.Run("index on nil map returns error", func(t *testing.T) {
+		t.Parallel()
+		st := &resource.Step{
+			Name:       "s",
+			ConfigPath: "templates/nil_map.tf.tmpl",
+		}
+		_, err := st.ExecuteTemplate(sysfs)
+		if err == nil || !strings.Contains(err.Error(), `map has no entry for key "id"`) {
+			t.Errorf("ExecuteTemplate() err = %v, want missing id error", err)
+		}
+	})
 }

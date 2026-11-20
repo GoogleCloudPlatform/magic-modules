@@ -52,17 +52,8 @@ samples:
     steps:
       - name: app_engine_service_split_traffic
         resource_id_vars:
-          service_id: default
-          split.allocations.v1: '1'
           bucket_name: appengine-static-content
           service_name: liveapp
-        test_vars_overrides:
-          # for backward compatible
-          service_id: '"default" + randomSuffix'
-          # for backward compatible
-          split.allocations.v1: '"1" + randomSuffix'
-        test_env_vars:
-          org_id: ORG_ID
 parameters:
   - name: migrate_traffic
     type: Boolean

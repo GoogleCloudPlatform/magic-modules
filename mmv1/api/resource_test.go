@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strings"
 	"testing"
+	"testing/fstest"
 
 	"github.com/google/go-cmp/cmp"
 
@@ -1540,4 +1541,141 @@ func TestMergeApiVersions(t *testing.T) {
 			t.Errorf("Merge() ApiVersions mismatch (-want +got):\n%s", diff)
 		}
 	})
+}
+
+func TestResource_TestSampleSetUp_ContentAwareSlugDedup(t *testing.T) {
+	t.Parallel()
+
+	sysfs := fstest.MapFS{
+		"templates/terraform/samples/services/pubsub/shared.tf.tmpl": &fstest.MapFile{
+			Data: []byte(`resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "label"}}"
+}
+`),
+		},
+		"templates/terraform/samples/services/pubsub/alt.tf.tmpl": &fstest.MapFile{
+			Data: []byte(`resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
+  name   = "static"
+  labels = { mode = "alt" }
+}
+`),
+		},
+	}
+
+	p := &api.Product{
+		Name: "Pubsub",
+		Versions: []*product.Version{
+			{Name: "ga"},
+			{Name: "beta"},
+		},
+	}
+	r := api.Resource{
+		Name:              "Topic",
+		ProductMetadata:   p,
+		SourceYamlFile:    "products/pubsub/Topic.yaml",
+		TargetVersionName: "ga",
+		Samples: []*resource.Sample{
+			{
+				Name:              "topic_docs_only",
+				PrimaryResourceId: "primary",
+				ExcludeTest:       true,
+				Steps: []*resource.Step{
+					{
+						Name:       "shared",
+						ConfigPath: "templates/terraform/samples/services/pubsub/shared.tf.tmpl",
+						Vars:       resource.StepVars{"label": "docs"},
+					},
+				},
+			},
+			{
+				Name:              "topic_update",
+				PrimaryResourceId: "primary",
+				Steps: []*resource.Step{
+					{
+						Name:       "shared",
+						ConfigPath: "templates/terraform/samples/services/pubsub/shared.tf.tmpl",
+						Vars:       resource.StepVars{"label": "v1"},
+					},
+					{
+						// Identical TestHCLText ("%{label}") -> reuses single NewConfigFunc & StepSlug
+						Name:       "shared",
+						ConfigPath: "templates/terraform/samples/services/pubsub/shared.tf.tmpl",
+						Vars:       resource.StepVars{"label": "v2"},
+					},
+					{
+						// Same step.Name ("shared") but distinct TestHCLText -> disambiguated slug
+						Name:       "shared",
+						ConfigPath: "templates/terraform/samples/services/pubsub/alt.tf.tmpl",
+					},
+				},
+			},
+		},
+	}
+
+	r.TestSampleSetUp(sysfs)
+
+	if len(r.Samples[0].NewConfigFuncs) != 0 {
+		t.Fatalf("ExcludeTest sample NewConfigFuncs len = %d, want 0", len(r.Samples[0].NewConfigFuncs))
+	}
+	if len(r.Samples[1].NewConfigFuncs) != 2 {
+		t.Fatalf("topic_update NewConfigFuncs len = %d, want 2", len(r.Samples[1].NewConfigFuncs))
+	}
+	if got := r.Samples[1].Steps[0].StepSlug; got != "shared" {
+		t.Errorf("step 0 StepSlug = %q, want %q", got, "shared")
+	}
+	if got := r.Samples[1].Steps[1].StepSlug; got != "shared" {
+		t.Errorf("step 1 StepSlug = %q, want %q (reused)", got, "shared")
+	}
+	if got := r.Samples[1].Steps[2].StepSlug; got != "topic_update_step3" {
+		t.Errorf("step 2 StepSlug = %q, want %q", got, "topic_update_step3")
+	}
+}
+
+func TestResource_FirstTestConfig_StepMinVersion(t *testing.T) {
+	t.Parallel()
+
+	p := &api.Product{
+		Name: "Pubsub",
+		Versions: []*product.Version{
+			{Name: "ga"},
+			{Name: "beta"},
+		},
+	}
+	betaOnlyStep := &resource.Step{Name: "beta_step", MinVersion: "beta"}
+	gaFallbackStep := &resource.Step{Name: "ga_step"}
+	secondSampleStep := &resource.Step{Name: "second_ga_step"}
+
+	r := api.Resource{
+		Name:              "Topic",
+		ProductMetadata:   p,
+		TargetVersionName: "ga",
+		Samples: []*resource.Sample{
+			{
+				Name:              "all_beta_steps",
+				TargetVersionName: "ga",
+				Steps:             []*resource.Step{{Name: "only_beta", MinVersion: "beta"}},
+			},
+			{
+				Name:              "mixed_steps",
+				TargetVersionName: "ga",
+				Steps:             []*resource.Step{betaOnlyStep, gaFallbackStep},
+			},
+			{
+				Name:              "second_sample",
+				TargetVersionName: "ga",
+				Steps:             []*resource.Step{secondSampleStep},
+			},
+		},
+	}
+
+	if got := r.FirstTestConfig().Step; got != gaFallbackStep {
+		t.Errorf("FirstTestConfig().Step = %+v, want gaFallbackStep", got)
+	}
+	if got := r.FirstRunnableTestConfig().Step; got != gaFallbackStep {
+		t.Errorf("FirstRunnableTestConfig().Step = %+v, want gaFallbackStep", got)
+	}
+	testSamples := r.TestSamples()
+	if len(testSamples) != 2 || testSamples[0].Name != "mixed_steps" {
+		t.Errorf("TestSamples() = %v, want 2 samples starting with mixed_steps", testSamples)
+	}
 }

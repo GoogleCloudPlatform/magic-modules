@@ -48,12 +48,10 @@ samples:
         resource_id_vars:
           name: jupyter-session-template
           subnetwork_name: default
-          prevent_destroy: "true"
         test_env_vars:
           project_name: PROJECT_NAME
         test_vars_overrides:
           subnetwork_name: BootstrapSubnetWithFirewallForDataprocBatches(t, "jupyer-session-test-network", "jupyter-session-test-subnetwork")
-          prevent_destroy: "false"
         ignore_read_extra:
           - runtime_config.0.properties
   - name: dataproc_session_templates_jupyter_full
@@ -63,14 +61,12 @@ samples:
         resource_id_vars:
           name: jupyter-session-template
           subnetwork_name: default
-          prevent_destroy: "true"
           kms_key_name: example-key
           bucket_name: dataproc-bucket
         test_env_vars:
           project_name: PROJECT_NAME
         test_vars_overrides:
           subnetwork_name: BootstrapSubnetWithFirewallForDataprocBatches(t, "jupyer-session-test-network", "jupyter-session-test-subnetwork")
-          prevent_destroy: "false"
           kms_key_name: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-bootstrap-dataproc-session-template-key1").CryptoKey.Name
         ignore_read_extra:
           - runtime_config.0.properties
@@ -81,12 +77,10 @@ samples:
         resource_id_vars:
           name: sc-session-template
           subnetwork_name: default
-          prevent_destroy: "true"
         test_env_vars:
           project_name: PROJECT_NAME
         test_vars_overrides:
           subnetwork_name: BootstrapSubnetWithFirewallForDataprocBatches(t, "spark-connect-session-test-network", "spark-connect-session-test-subnetwork")
-          prevent_destroy: "false"
         ignore_read_extra:
           - runtime_config.0.properties
 parameters:

@@ -36,8 +36,6 @@ samples:
           saas_name: example-saas
           unitkind_name: example-unitkind
           unit_name: example-unit
-        test_env_vars:
-          project: PROJECT_NAME
         ignore_read_extra:
           - conditions
           - state
@@ -85,15 +83,15 @@ properties:
         - name: lastTransitionTime
           type: String
           description: Last time the condition transited from one status to another.
-          required: true
+          output: true
         - name: message
           type: String
           description: Human readable message indicating details about the last transition.
-          required: true
+          output: true
         - name: reason
           type: String
           description: Brief reason for the condition's last transition.
-          required: true
+          output: true
         - name: status
           type: String
           description: |-
@@ -102,7 +100,7 @@ properties:
             STATUS_UNKNOWN
             STATUS_TRUE
             STATUS_FALSE
-          required: true
+          output: true
         - name: type
           type: String
           description: |-
@@ -112,7 +110,7 @@ properties:
             TYPE_UPDATING
             TYPE_PROVISIONED
             TYPE_OPERATION_ERROR
-          required: true
+          output: true
   - name: createTime
     type: String
     description: The timestamp when the resource was created.
@@ -172,7 +170,7 @@ properties:
           type: String
           description: Name of the variable from actuation configs.
           immutable: true
-          required: true
+          output: true
   - name: labels
     type: KeyValueLabels
     description: |-
@@ -243,7 +241,7 @@ properties:
           type: String
           description: Name of the variable from actuation configs.
           immutable: true
-          required: true
+          output: true
   - name: pendingOperations
     type: Array
     description: List of pending (wait to be executed) UnitOperations for this unit.

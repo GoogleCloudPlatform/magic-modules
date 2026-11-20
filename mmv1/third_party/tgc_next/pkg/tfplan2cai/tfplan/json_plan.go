@@ -27,8 +27,15 @@ func IsUpdate(rc *tfjson.ResourceChange) bool {
 	return len(rc.Change.Actions) == 1 && rc.Change.Actions[0] == "update"
 }
 
+// IsReplace covers both ["delete", "create"] (default) and ["create", "delete"]
+// (lifecycle.create_before_destroy) replacement encodings.
+func IsReplace(rc *tfjson.ResourceChange) bool {
+	return rc.Change.Actions.Replace()
+}
+
+// Deprecated: Use IsReplace instead.
 func IsDeleteCreate(rc *tfjson.ResourceChange) bool {
-	return len(rc.Change.Actions) == 2 && rc.Change.Actions[0] == "delete"
+	return IsReplace(rc)
 }
 
 func IsDelete(rc *tfjson.ResourceChange) bool {

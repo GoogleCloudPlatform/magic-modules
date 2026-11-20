@@ -44,8 +44,6 @@ samples:
         min_version: beta
         resource_id_vars:
           template_id: lock-template
-        test_env_vars:
-          project_id: PROJECT_NAME
   - name: firebaseailogic_prompt_template_lock_global_only
     min_version: beta
     primary_resource_id: global_only_lock

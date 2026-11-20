@@ -41,16 +41,12 @@ samples:
       - name: agent_registry_binding_basic
         resource_id_vars:
           binding: ar-binding
-        test_env_vars:
-          project: PROJECT_NAME
   - name: agent_registry_binding_target_only
     primary_resource_id: default
     steps:
       - name: agent_registry_binding_target_only
         resource_id_vars:
           binding: ar-binding
-        test_env_vars:
-          project: PROJECT_NAME
 parameters:
   - name: location
     type: String

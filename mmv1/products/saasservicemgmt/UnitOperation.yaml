@@ -52,7 +52,6 @@ samples:
           provision_operation_name: provision-unit-operation
           release_name: example-release
           saas_name: example-saas
-          tenant_name: example-tenant
           tenant_project_name: tenant
           unit_name: example-unit
           unitkind_name: vm-unitkind

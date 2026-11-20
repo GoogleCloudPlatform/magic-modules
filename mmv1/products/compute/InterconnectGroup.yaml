@@ -44,8 +44,6 @@ samples:
       - name: 'interconnect_group_basic'
         resource_id_vars:
           interconnect_group_name: 'example-interconnect-group'
-        test_vars_overrides:
-          'deletion_protection': 'false'
 parameters:
 properties:
   - name: 'description'

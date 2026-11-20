@@ -50,6 +50,18 @@ samples:
           schema_bundle_name: bt-schema-bundle
         ignore_read_extra:
           - ignore_warnings
+  - name: bigtable_schema_bundle_avro
+    primary_resource_id: schema_bundle
+    # bigtable instance does not use the shared HTTP client, this test creates an instance
+    skip_vcr: true
+    steps:
+      - name: bigtable_schema_bundle_avro
+        resource_id_vars:
+          instance_name: bt-instance
+          table_name: bt-table
+          schema_bundle_name: bt-schema-bundle
+        ignore_read_extra:
+          - ignore_warnings
 parameters:
   - name: schemaBundleId
     type: String
@@ -94,7 +106,9 @@ properties:
       To generate, use protoc with imports and source info included. For an example test.proto file, the following command would put the value in a new file named out.pb.
 
       $ protoc --include_imports --include_source_info test.proto -o out.pb
-    required: true
+    exactly_one_of:
+      - proto_schema
+      - avro_schema
     properties:
       - name: protoDescriptors
         type: String
@@ -103,3 +117,22 @@ properties:
         required: true
         validation:
           function: verify.ValidateBase64String
+  - name: avroSchema
+    type: NestedObject
+    description: |
+      Represents a collection of Avro schemas.
+    exactly_one_of:
+      - proto_schema
+      - avro_schema
+    properties:
+      - name: jsonSchemas
+        type: Array
+        description: |
+          The Avro schemas in JSON format.
+          Each element must be the content of a valid, self-contained Avro schema
+          file (.avsc), as described in https://avro.apache.org/docs/1.8.1/spec.html.
+          Use repeated elements to include multiple Avro schema files in a single
+          bundle.
+        required: true
+        item_type:
+          type: String

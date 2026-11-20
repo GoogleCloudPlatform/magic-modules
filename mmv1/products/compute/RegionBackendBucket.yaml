@@ -72,8 +72,6 @@ samples:
     primary_resource_id: 'image_backend'
     steps:
       - name: 'region_backend_bucket_basic'
-        vars:
-          region: 'us-central1'
         resource_id_vars:
           backend_bucket_name: 'region-image-backend-bucket'
           bucket_name: 'region-image-store-bucket'
@@ -81,8 +79,6 @@ samples:
     primary_resource_id: 'internal_backend'
     steps:
       - name: 'region_backend_bucket_internal_lb'
-        vars:
-          region: 'us-central1'
         resource_id_vars:
           backend_bucket_name: 'regional-internal-backend'
           bucket_name: 'regional-internal-bucket'
@@ -90,8 +86,6 @@ samples:
     primary_resource_id: 'external_backend'
     steps:
       - name: 'region_backend_bucket_external_lb'
-        vars:
-          region: 'us-east1'
         resource_id_vars:
           backend_bucket_name: 'regional-external-backend'
           bucket_name: 'regional-external-bucket'
@@ -138,9 +132,7 @@ properties:
   - name: 'loadBalancingScheme'
     type: Enum
     description: |
-      Specifies the load balancer type this backend bucket will be used with.
-
-      Possible values:
+      Specifies the load balancer type this backend bucket will be used with:
       - 'INTERNAL_MANAGED': for regional internal Application Load Balancers
       - 'EXTERNAL_MANAGED': for regional external Application Load Balancers
 

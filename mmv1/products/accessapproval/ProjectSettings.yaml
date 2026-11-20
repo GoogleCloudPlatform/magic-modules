@@ -50,7 +50,6 @@ samples:
       - name: project_access_approval_full
         test_env_vars:
           project: PROJECT_NAME
-          org_id: ORG_ID
   - name: project_access_approval_active_key_version
     primary_resource_id: project_access_approval
     exclude_test: true
@@ -58,7 +57,6 @@ samples:
       - name: project_access_approval_active_key_version
         test_env_vars:
           project: PROJECT_NAME
-          org_id: ORG_ID
 parameters:
   - name: project_id
     type: String

@@ -335,6 +335,16 @@ func TestAddResourceChanges_createOrUpdateOrDeleteCreateOrNoopProcessed(t *testi
 			convertUnchanged: true,
 		},
 		{
+			name:             "CreateBeforeDestroy when convertUnchanged is false",
+			actions:          tfjson.Actions{"create", "delete"},
+			convertUnchanged: false,
+		},
+		{
+			name:             "CreateBeforeDestroy when convertUnchanged is true",
+			actions:          tfjson.Actions{"create", "delete"},
+			convertUnchanged: true,
+		},
+		{
 			name:             "Noop when convertUnchanged is true",
 			actions:          tfjson.Actions{"no-op"},
 			convertUnchanged: true,

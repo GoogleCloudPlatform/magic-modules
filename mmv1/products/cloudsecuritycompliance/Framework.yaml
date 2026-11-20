@@ -42,8 +42,6 @@ samples:
       - name: "cloudsecuritycompliance_framework_project_basic"
         resource_id_vars:
           framework_name: "example-framework"
-        test_env_vars:
-          project_number: "PROJECT_NUMBER"
         ignore_read_extra:
           - "cloud_control_details"
   - name: "cloudsecuritycompliance_framework_org_basic_backward"

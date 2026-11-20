@@ -63,8 +63,6 @@ samples:
       - name: datastream_stream_basic
         resource_id_vars:
           stream_id: my-stream
-          private_connection_id: my-connection
-          network_name: my-network
           source_connection_profile_id: source-profile
           database_instance_name: my-instance
           deletion_protection: "true"
@@ -83,8 +81,6 @@ samples:
       - name: datastream_stream_full
         resource_id_vars:
           stream_id: my-stream
-          private_connection_id: my-connection
-          network_name: my-network
           source_connection_profile_id: source-profile
           database_instance_name: my-instance
           deletion_protection: "true"
@@ -155,24 +151,10 @@ samples:
           database_password: '"password" + randomSuffix'
   - name: datastream_stream_mysql_gtid
     primary_resource_id: default
+    # Requires MySQL Configuration
     exclude_test: true
     steps:
       - name: datastream_stream_mysql_gtid
-        resource_id_vars:
-          database_name: db
-          database_password: password
-          database_user: user
-          deletion_protection: "true"
-          destination_connection_profile_id: destination-profile
-          source_connection_profile_id: source-profile
-          mysql_name: mysql
-          mysql_root_password: root-password
-          stream_id: stream
-        test_vars_overrides:
-          deletion_protection: "false"
-          # Requires MySQL Configuration
-          # for backward compatible
-          database_password: '"password" + randomSuffix'
   - name: datastream_stream_postgresql_bigquery_dataset_id
     primary_resource_id: default
     external_providers: [random, time]
@@ -199,8 +181,6 @@ samples:
       - name: datastream_stream_bigquery
         resource_id_vars:
           stream_id: my-stream
-          private_connection_id: my-connection
-          network_name: my-network
           source_connection_profile_id: source-profile
           database_instance_name: my-instance
           deletion_protection: "true"
@@ -220,8 +200,6 @@ samples:
       - name: datastream_stream_bigquery_cross_project_source_hierachy
         resource_id_vars:
           stream_id: my-stream
-          private_connection_id: my-connection
-          network_name: my-network
           source_connection_profile_id: source-profile
           database_instance_name: my-instance
           deletion_protection: "true"
@@ -242,8 +220,6 @@ samples:
       - name: datastream_stream_bigquery_append_only
         resource_id_vars:
           stream_id: my-stream
-          private_connection_id: my-connection
-          network_name: my-network
           source_connection_profile_id: source-profile
           database_instance_name: my-instance
           deletion_protection: "true"
@@ -282,9 +258,6 @@ samples:
           source_connection_profile_id: rules-source-profile
           destination_connection_profile_id: rules-dest-profile
           dataset_id: rules-project:rules-dataset
-          deletion_protection: "true"
-        test_vars_overrides:
-          deletion_protection: "false"
   - name: datastream_stream_salesforce
     primary_resource_id: default
     exclude_test: true

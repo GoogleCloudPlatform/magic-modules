@@ -524,6 +524,9 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
 
 * `shielded_instance_config` (Optional) Shielded Instance Config for clusters using [Compute Engine Shielded VMs](https://cloud.google.com/security/shielded-cloud/shielded-vm).
 
+* `multi_zone_config` - (Optional) Configuration for multi-zonal clusters that can create instances across multiple Zones within the Region.
+   Structure [defined below](#nested_multi_zone_config).
+
 - - -
 
 
@@ -546,6 +549,12 @@ cluster_config{
 * `enable_vtpm` - (Optional) Defines whether instances have the [vTPM](https://cloud.google.com/security/shielded-cloud/shielded-vm#vtpm) enabled.
 
 * `enable_integrity_monitoring` - (Optional) Defines whether instances have integrity monitoring enabled.
+
+- - -
+
+<a name="nested_multi_zone_config"></a>The `cluster_config.gce_cluster_config.multi_zone_config` block supports:
+
+* `target_shape` - (Required) The distribution shape of the nodes in the multi-zonal cluster. Valid values are `"ANY"`.
 
 - - -
 
@@ -922,18 +931,28 @@ cluster_config {
 }
 ```
 
+!> **Warning:** Dataproc can only change `num_instances` in place, with a
+[`clusters.patch`](https://cloud.google.com/dataproc/docs/reference/rest/v1/projects.regions.clusters/patch)
+request. The shape fields (`core_count`, `hardware_class` and `boot_disk_size_gb`) are
+[fixed at creation](https://cloud.google.com/dataproc/docs/reference/rest/v1/ClusterConfig#FlexibleInstanceGroupConfig),
+so changing them recreates the cluster **unless** `worker_flexible_config` is set and the shape
+fields in `secondary_worker_flexible_config` exactly match the equivalent fields in `worker_flexible_config`.
+
+-> **Note:** Removing the block from your configuration does not change the cluster; set `num_instances = 0`
+to remove all secondary workers.
+
 * `num_instances` - (Optional) Specifies the number of secondary worker instances to create.
    Defaults to `0`; can be scaled down to `0`; updatable in place.
 
 * `core_count` - (Required) The number of vCPUs per instance. Must be a power of 2
-   (2, 4, 8, 16, or 32). Changing this forces a new resource to be created.
+   (2, 4, 8, 16, or 32). Changing this on an existing secondary worker group forces a new resource to be created.
 
 * `hardware_class` - (Optional) Controls the hardware class for the flexible instance group.
    Allowed values are `"STANDARD"` and `"PERFORMANCE"`. Defaults to `"STANDARD"`.
-   Changing this forces a new resource to be created.
+   Changing this on an existing secondary worker group forces a new resource to be created.
 
-* `boot_disk_size_gb` - (Optional) The boot disk size in GB.
-   Changing this forces a new resource to be created.
+* `boot_disk_size_gb` - (Optional) The boot disk size in GB. Changing this on an existing
+   secondary worker group forces a new resource to be created.
 - - -
 
 <a name="nested_software_config"></a>The `cluster_config.software_config` block supports:
