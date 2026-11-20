@@ -21,22 +21,10 @@ steps:
           - --global
           - user.name
           - "Modular Magician Diff Process"
-    # Then we check out the branch provided, and merge it into
-    # the base branch provided.  This matches the behavior
-    # we're used to from Concourse.
-    - name: 'gcr.io/cloud-builders/git'
-      args:
-          - remote
-          - add
-          - head
-          - $_HEAD_REPO_URL
-
-    - name: 'gcr.io/cloud-builders/git'
-      args:
-          - fetch
-          - head
-          - $_HEAD_BRANCH
-
+    # Then we check out the base branch provided, and merge the exact
+    # commit this build was triggered for into it. Merging $COMMIT_SHA
+    # (rather than re-fetching the PR branch) ensures that commits pushed
+    # to the PR after the build was triggered are not picked up.
     - name: 'gcr.io/cloud-builders/git'
       args:
           - checkout
@@ -46,7 +34,7 @@ steps:
       args:
           - merge
           - --no-ff
-          - head/$_HEAD_BRANCH
+          - $COMMIT_SHA
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
@@ -186,7 +174,7 @@ steps:
       env:
         - BUILD_ID=$BUILD_ID
         - PROJECT_ID=$PROJECT_ID
-        - BUILD_STEP=17
+        - BUILD_STEP=15
         - COMMIT_SHA=$COMMIT_SHA
         - PR_NUMBER=$_PR_NUMBER
 
@@ -219,7 +207,7 @@ steps:
         - $COMMIT_SHA
         - $BUILD_ID
         - $PROJECT_ID
-        - "19"  # Build step
+        - "17"  # Build step
         - terraform-google-conversion
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
@@ -238,7 +226,7 @@ steps:
         - $COMMIT_SHA
         - $BUILD_ID
         - $PROJECT_ID
-        - "20"  # Build step
+        - "18"  # Build step
         - "true"
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
