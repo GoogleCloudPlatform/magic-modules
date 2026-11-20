@@ -18,7 +18,6 @@ description: |
 references:
   guides:
     Parameter templates overview: https://cloud.google.com/secret-manager/parameter-manager/docs/parameter-templates-overview
-  api: https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.templates.versions
 base_url: projects/{{project}}/locations/global/templates/{{template}}/versions
 min_version: beta
 self_link: projects/{{project}}/locations/global/templates/{{template}}/versions/{{template_version_id}}
