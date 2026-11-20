@@ -65,6 +65,45 @@ samples:
           callouts_instance_group: 'l7-ilb-callouts-ins-group'
           callouts_hc_name: 'l7-ilb-callouts-hc'
           callouts_backend_name: 'l7-ilb-callouts-backend'
+  - name: 'network_services_lb_traffic_extension_body_send_mode'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'network_services_lb_traffic_extension_body_send_mode'
+        resource_id_vars:
+          forwarding_rule_name: 'l7-ext-fr'
+          target_http_proxy_name: 'l7-ext-proxy'
+          url_map_name: 'l7-ext-urlmap'
+          backend_service_name: 'l7-ext-backend'
+          callouts_backend_name: 'l7-ext-callout'
+          lb_traffic_extension_name: 'l7-ext-traffic-ext'
+        vars:
+          supported_events: '["REQUEST_HEADERS", "REQUEST_BODY", "RESPONSE_HEADERS", "RESPONSE_BODY"]'
+          request_body_send_mode: 'BODY_SEND_MODE_STREAMED'
+          response_body_send_mode: 'BODY_SEND_MODE_STREAMED'
+      - name: 'network_services_lb_traffic_extension_body_send_mode'
+        resource_id_vars:
+          forwarding_rule_name: 'l7-ext-fr'
+          target_http_proxy_name: 'l7-ext-proxy'
+          url_map_name: 'l7-ext-urlmap'
+          backend_service_name: 'l7-ext-backend'
+          callouts_backend_name: 'l7-ext-callout'
+          lb_traffic_extension_name: 'l7-ext-traffic-ext'
+        vars:
+          supported_events: '["REQUEST_HEADERS", "REQUEST_BODY", "REQUEST_TRAILERS", "RESPONSE_HEADERS", "RESPONSE_BODY", "RESPONSE_TRAILERS"]'
+          request_body_send_mode: 'BODY_SEND_MODE_FULL_DUPLEX_STREAMED'
+          response_body_send_mode: 'BODY_SEND_MODE_FULL_DUPLEX_STREAMED'
+      - name: 'network_services_lb_traffic_extension_body_send_mode'
+        resource_id_vars:
+          forwarding_rule_name: 'l7-ext-fr'
+          target_http_proxy_name: 'l7-ext-proxy'
+          url_map_name: 'l7-ext-urlmap'
+          backend_service_name: 'l7-ext-backend'
+          callouts_backend_name: 'l7-ext-callout'
+          lb_traffic_extension_name: 'l7-ext-traffic-ext'
+        vars:
+          supported_events: '["REQUEST_HEADERS"]'
+          request_body_send_mode: null
+          response_body_send_mode: null
 parameters:
   - name: 'location'
     type: String
