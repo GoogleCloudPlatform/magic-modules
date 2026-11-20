@@ -232,6 +232,48 @@ func (s *Step) TestDependencies(resourcePrefixPkgMap map[string]string) map[stri
 	return deps
 }
 
+func mergeStringMap(sampleMap, stepMap map[string]string) map[string]string {
+	if len(sampleMap) == 0 {
+		return stepMap
+	}
+	merged := make(map[string]string, len(sampleMap)+len(stepMap))
+	maps.Copy(merged, sampleMap)
+	maps.Copy(merged, stepMap)
+	return merged
+}
+
+// InheritFromSample merges sample-level defaults into s without overwriting
+// keys explicitly specified on s.
+func (s *Step) InheritFromSample(sample *Sample) {
+	if s.ConfigPath == "" && sample.ConfigPath != "" {
+		s.ConfigPath = sample.ConfigPath
+	}
+	s.ResourceIdVars = mergeStringMap(sample.ResourceIdVars, s.ResourceIdVars)
+	if len(sample.Vars) > 0 {
+		merged := make(StepVars, len(sample.Vars)+len(s.Vars))
+		maps.Copy(merged, sample.Vars)
+		maps.Copy(merged, s.Vars)
+		s.Vars = merged
+	}
+	s.TestEnvVars = mergeStringMap(sample.TestEnvVars, s.TestEnvVars)
+	s.TestVarsOverrides = mergeStringMap(sample.TestVarsOverrides, s.TestVarsOverrides)
+	s.OicsVarsOverrides = mergeStringMap(sample.OicsVarsOverrides, s.OicsVarsOverrides)
+	if len(sample.IgnoreReadExtra) > 0 {
+		combined := make([]string, 0, len(sample.IgnoreReadExtra)+len(s.IgnoreReadExtra))
+		for _, item := range sample.IgnoreReadExtra {
+			if !slices.Contains(combined, item) {
+				combined = append(combined, item)
+			}
+		}
+		for _, item := range s.IgnoreReadExtra {
+			if !slices.Contains(combined, item) {
+				combined = append(combined, item)
+			}
+		}
+		s.IgnoreReadExtra = combined
+	}
+}
+
 func (s *Step) usedPlaceholders() map[string]bool {
 	used := make(map[string]bool)
 	for _, match := range testPlaceholderRegexp.FindAllStringSubmatch(s.TestHCLText, -1) {
@@ -249,7 +291,7 @@ func (s *Step) Validate(rName, sName string) (es []error) {
 			es = append(es, fmt.Errorf("variable key '%s' cannot exist in both 'vars' and 'resource_id_vars' for step '%s' in sample '%s' of resource '%s'", k, s.Name, sName, rName))
 		}
 	}
-	if s.Name == "" {
+	if s.Name == "" && sName == "" {
 		es = append(es, fmt.Errorf("missing `name` for one step in test sample %s in resource %s", sName, rName))
 	}
 	es = append(es, s.templateErrs...)
