@@ -26,6 +26,7 @@ func newRootCmd() (*cobra.Command, *rootOptions, error) {
 	cmd.AddCommand(newDetectUnreadableTestsCmd(o))
 	cmd.AddCommand(newSchemaDiffCmd(o))
 	cmd.AddCommand(newDetectMissingDocsCmd(o))
+	cmd.AddCommand(newFixDocsCmd(o))
 	cmd.AddCommand(newDetectMissingIdentityCmd(o))
 	return cmd, o, nil
 }
