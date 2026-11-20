@@ -135,6 +135,15 @@ properties:
     enum_values:
       - ENABLED
       - ENFORCED
+  - name: providerConfig
+    type: NestedObject
+    description: This field specifies the provider configurations.
+    properties:
+      - name: sourceType
+        type: Enum
+        description: ProviderSource specifies the source type of the provider.
+        enum_values:
+          - SERVICE_MAINTAINED
   # Output only fields
   - name: state
     type: String
