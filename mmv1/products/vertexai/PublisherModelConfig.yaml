@@ -91,6 +91,7 @@ samples:
           dataset_id: publisher_model_logs
   - name: vertex_ai_publisher_model_config_data_sharing
     primary_resource_id: config
+    skip_test: Requires an organization without third-party model provider data-sharing restrictions
     steps:
       - name: vertex_ai_publisher_model_config_data_sharing
       - name: vertex_ai_publisher_model_config_data_sharing_update
