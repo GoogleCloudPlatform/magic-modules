@@ -1,0 +1,35 @@
+resource "google_compute_region_security_policy" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.ResourceIdVars "sec_policy_name"}}"
+  region      = "us-central1"
+  description = "basic region security policy with expr_options"
+  type        = "CLOUD_ARMOR"
+
+  rules {
+    action      = "deny(403)"
+    priority    = "2000"
+    description = "reCAPTCHA rule"
+    match {
+      expr {
+        expression = "request.path.endsWith('RegisterWithEmail') && token.recaptcha_action.score >= 0.8 && (token.recaptcha_action.valid)"
+      }
+      expr_options {
+        recaptcha_options {
+          action_token_site_keys  = {{index $.Vars "action_token_site_keys"}}
+          session_token_site_keys = {{index $.Vars "session_token_site_keys"}}
+        }
+      }
+    }
+  }
+
+  rules {
+    action      = "allow"
+    priority    = "2147483647"
+    description = "default rule"
+    match {
+      versioned_expr = "SRC_IPS_V1"
+      config {
+        src_ip_ranges = ["*"]
+      }
+    }
+  }
+}
