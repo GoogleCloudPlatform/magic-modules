@@ -141,7 +141,7 @@ var (
 			vacations: []Vacation{
 				{
 					startDate: newDate(2026, 9, 14),
-					endDate:   newDate(2026, 11, 18),
+					endDate:   newDate(2026, 12, 01),
 				},
 			},
 		},
@@ -156,8 +156,8 @@ var (
 		"slevenick": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2026, 5, 7),
-					endDate:   newDate(2026, 5, 12),
+					startDate: newDate(2026, 11, 21),
+					endDate:   newDate(2026, 11, 30),
 				},
 			},
 		},
