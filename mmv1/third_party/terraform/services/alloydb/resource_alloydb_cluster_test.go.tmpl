@@ -3,8 +3,14 @@ package alloydb_test
 import (
 	"regexp"
 	"testing"
+{{- if ne $.TargetVersionName "ga" }}
+	"time"
+{{- end }}
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+{{- if ne $.TargetVersionName "ga" }}
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+{{- end }}
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/alloydb"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
@@ -2140,3 +2146,168 @@ resource "google_compute_network" "default" {
 }
 `, context)
 }
+{{- if ne $.TargetVersionName "ga" }}
+
+func TestAccAlloydbCluster_expressUpgrade(t *testing.T) {
+	t.Parallel()
+
+	suffix := acctest.RandString(t, 10)
+	expressContext := map[string]interface{}{
+		"random_suffix":   suffix,
+		"express_enabled": true,
+		"cluster_env":     "express",
+	}
+	upgradedContext := map[string]interface{}{
+		"random_suffix":   suffix,
+		"express_enabled": false,
+		"cluster_env":     "upgraded",
+	}
+	downgradeContext := map[string]interface{}{
+		"random_suffix":   suffix,
+		"express_enabled": true,
+		"cluster_env":     "upgraded",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbCluster_expressConfig(expressContext),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "express_config.0.enabled", "true"),
+				),
+			},
+			{
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location", "labels", "terraform_labels"},
+			},
+			{
+				// Omitting the express_config block must not change an Express cluster.
+				Config: testAccAlloydbCluster_expressConfigOmitted(expressContext),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "express_config.0.enabled", "true"),
+				),
+			},
+			{
+				// AlloyDB Express instant provisioning marks the primary instance READY within a few
+				// seconds while an internal post-create setup workflow continues asynchronously in
+				// the background (typically 3-4 minutes, not exposed as an LRO or status field).
+				// While that background setup runs, updates fail with HTTP 400 ("background setup in
+				// progress, retry in a few minutes"), and starting a cluster upgrade right as that
+				// precondition clears can fail the upgrade operation with internal error code 13.
+				// Per the AlloyDB team's guidance, wait 10 minutes before applying the upgrade.
+				PreConfig: func() {
+					acctest.Sleep(10 * time.Minute)
+				},
+				// Upgrade the Express cluster to a standard cluster and update labels in the same apply.
+				// express_config has to be the only field in its update request.
+				Config: testAccAlloydbCluster_expressConfig(upgradedContext),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_alloydb_cluster.default", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "express_config.0.enabled", "false"),
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "labels.env", "upgraded"),
+				),
+			},
+			{
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location", "labels", "terraform_labels"},
+			},
+			{
+				// A standard cluster can't be converted back to an Express cluster, so enabling
+				// express_config again plans a replacement.
+				Config:             testAccAlloydbCluster_expressConfig(downgradeContext),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PostApplyPreRefresh: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_alloydb_cluster.default", plancheck.ResourceActionReplace),
+					},
+				},
+			},
+		},
+	})
+}
+
+func testAccAlloydbCluster_expressConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "default" {
+  provider         = google-beta
+  cluster_id       = "tf-test-alloydb-cluster%{random_suffix}"
+  location         = "europe-west2"
+  database_version = "POSTGRES_18"
+
+  labels = {
+    env = "%{cluster_env}"
+  }
+
+  psc_config {
+    psc_enabled = true
+  }
+
+  express_config {
+    enabled = %{express_enabled}
+  }
+
+  initial_user {
+    password = "TfTest1!Alloydb%{random_suffix}"
+  }
+
+  deletion_protection = false
+}
+
+resource "google_alloydb_instance" "default" {
+  provider      = google-beta
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+}
+`, context)
+}
+
+func testAccAlloydbCluster_expressConfigOmitted(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "default" {
+  provider         = google-beta
+  cluster_id       = "tf-test-alloydb-cluster%{random_suffix}"
+  location         = "europe-west2"
+  database_version = "POSTGRES_18"
+
+  labels = {
+    env = "%{cluster_env}"
+  }
+
+  psc_config {
+    psc_enabled = true
+  }
+
+  initial_user {
+    password = "TfTest1!Alloydb%{random_suffix}"
+  }
+
+  deletion_protection = false
+}
+
+resource "google_alloydb_instance" "default" {
+  provider      = google-beta
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+}
+`, context)
+}
+{{- end }}
