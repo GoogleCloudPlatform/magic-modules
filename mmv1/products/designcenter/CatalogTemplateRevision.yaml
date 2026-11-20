@@ -1,0 +1,195 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: CatalogTemplateRevision
+description: |
+  A revision of a CatalogTemplate.
+references:
+  guides:
+    Application Design Center Overview: https://docs.cloud.google.com/application-design-center/docs/overview
+    Manage, publish, and share catalogs: https://docs.cloud.google.com/application-design-center/docs/manage-catalogs
+  api: https://docs.cloud.google.com/application-design-center/docs/reference/rest/v1/projects.locations.spaces.catalogs.templates.revisions
+base_url: projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template}}/revisions
+immutable: true
+self_link: projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template}}/revisions/{{revision_id}}
+create_url: projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template}}/revisions?catalogTemplateRevisionId={{revision_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/spaces/{{space}}/catalogs/{{catalog}}/templates/{{catalog_template}}/revisions/{{revision_id}}
+autogen_async: true
+samples:
+  - name: designcenter_catalog_template_revision_basic
+    primary_resource_id: example
+    steps:
+      - name: designcenter_catalog_template_revision_basic
+        resource_id_vars:
+          revision_id: example-revision
+        vars:
+          project: my-project-name
+          space: example-space
+          catalog: example-catalog
+          catalog_template: example-catalog-template
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          catalog: BootstrapDesignCenterCatalog(t)
+          catalog_template: BootstrapDesignCenterCatalogTemplate(t)
+  - name: designcenter_catalog_template_revision_application_template
+    primary_resource_id: example
+    steps:
+      - name: designcenter_catalog_template_revision_application_template
+        resource_id_vars:
+          revision_id: example-app-revision
+        vars:
+          project: my-project-name
+          space: example-space
+          catalog: example-catalog
+          catalog_template: example-application-catalog-template
+          application_template_revision: projects/my-project-name/locations/us-central1/spaces/example-space/applicationTemplates/example-template/revisions/r-1
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          catalog: BootstrapDesignCenterCatalog(t)
+          catalog_template: BootstrapDesignCenterApplicationCatalogTemplate(t)
+          application_template_revision: BootstrapDesignCenterApplicationTemplateRevisionURI(t)
+  - name: designcenter_catalog_template_revision_full
+    primary_resource_id: example
+    exclude_basic_doc: true
+    steps:
+      - name: designcenter_catalog_template_revision_full
+        resource_id_vars:
+          revision_id: example-full-revision
+        vars:
+          project: my-project-name
+          space: example-space
+          catalog: example-catalog
+          catalog_template: example-catalog-template
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          catalog: BootstrapDesignCenterCatalog(t)
+          catalog_template: BootstrapDesignCenterCatalogTemplate(t)
+parameters:
+  - name: location
+    type: String
+    description: |
+      The location of the resource.
+    required: true
+    url_param_only: true
+  - name: space
+    type: String
+    description: |
+      The space of the resource.
+    required: true
+    url_param_only: true
+  - name: catalog
+    type: String
+    description: |
+      The catalog of the resource.
+    required: true
+    url_param_only: true
+  - name: catalog_template
+    type: String
+    description: |
+      The catalog template of the resource.
+    required: true
+    url_param_only: true
+  - name: revision_id
+    type: String
+    description: |
+      The ID of the revision.
+    required: true
+    url_param_only: true
+properties:
+  - name: name
+    type: String
+    description: |
+      The resource name of the revision.
+      Format: `projects/{project}/locations/{location}/spaces/{space}/catalogs/{catalog}/templates/{catalog_template}/revisions/{revision_id}`
+    output: true
+  - name: description
+    type: String
+    description: |
+      The description of the revision.
+  - name: type
+    type: String
+    description: |
+      The Application Design Center template type. Possible values include
+      `SERVICE`, `WORKLOAD`, `ASSET`, `STANDARD_APPLICATION_TEMPLATE`,
+      `COMPOSITE_APPLICATION_TEMPLATE`, and `HELM_CHART`.
+    default_from_api: true
+  - name: gitSource
+    type: NestedObject
+    description: |
+      Git repository source for the template revision.
+    exactly_one_of:
+      - git_source
+      - application_template_revision_source
+    properties:
+      - name: repo
+        type: String
+        description: |
+          The GitHub repository in `<owner>/<repo>` format (for example,
+          `GoogleCloudPlatform/terraform-google-cloud-run`).
+        required: true
+      - name: dir
+        type: String
+        description: |
+          The directory path within the Git repository.
+      - name: refTag
+        type: String
+        description: |
+          The Git reference tag or branch.
+        required: true
+      - name: commitSha
+        type: String
+        description: |
+          The commit SHA resolved from the reference tag.
+        output: true
+  - name: applicationTemplateRevisionSource
+    type: String
+    description: |
+      The application template revision source URI.
+      Format: `projects/{project}/locations/{location}/spaces/{space}/applicationTemplates/{application_template}/revisions/{revision}`
+    exactly_one_of:
+      - git_source
+      - application_template_revision_source
+  - name: annotations
+    type: KeyValueAnnotations
+    description: |
+      The annotations of the revision.
+  - name: state
+    type: String
+    description: |
+      The state of the revision.
+    output: true
+  - name: uuid
+    type: String
+    description: |
+      The unique identifier of the revision.
+    output: true
+  - name: templateCategory
+    type: String
+    description: |
+      The category of the parent catalog template.
+    output: true
+  - name: createTime
+    type: Time
+    description: |
+      The creation time of the revision.
+    output: true
+  - name: updateTime
+    type: Time
+    description: |
+      The last update time of the revision.
+    output: true
