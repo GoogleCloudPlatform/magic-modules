@@ -22,6 +22,7 @@ here, upstream — never in the downstream repos.
   behavior flags (`ignore_read`, `ImportStateVerifyIgnore`) without an adjacent
   comment justifying the API behavior that requires them.
 - **Verify before opening a PR**: generate, build, and run the tests relevant to what you changed.
+- **Prepare PR links with the helper script**: follow [.agents/skills/operations/prepare-pr-link/SKILL.md](.agents/skills/operations/prepare-pr-link/SKILL.md) and always generate compare URLs via `.agents/scripts/build_pr_link.py` (enforces the 63-char hard title cap, target `<= 60`, and release-note syntax).
 - **Prefer adding commits on PR updates**: once a branch is pushed or a PR is open, push new commits for subsequent
   updates rather than amending, rebasing, or force-pushing unless instructed otherwise.
 

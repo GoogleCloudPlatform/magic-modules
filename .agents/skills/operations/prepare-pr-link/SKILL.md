@@ -1,126 +1,82 @@
 ---
 name: prepare-pr-link
-description: "Prepares a feature branch, stages and commits changes, pushes to the user's personal fork, and generates a pre-filled GitHub comparison link for the user to review and submit a Pull Request."
+description: "Prepares a feature branch, stages and commits changes, pushes to the user's personal fork, and generates a validated pre-filled GitHub comparison link for the user to review and submit a Pull Request."
 ---
 
 # `prepare-pr-link`
 
 > **Note to AI Agents:** You MUST read the YAML frontmatter above first. Only read the rest of this file if the `description` matches your current roadblock or required task.
 
-This skill provides step-by-step instructions for preparing, committing, pushing a feature branch to a personal fork, and generating a pre-filled GitHub Pull Request comparison link for the user to review and submit.
+## Pre-PR Guardrails
 
-## Prerequisites
+Run from the `magic-modules` root with `upstream` (`GoogleCloudPlatform/magic-modules`) and a personal fork remote (`origin`) configured. Verify before pushing:
 
-* You are in the `magic-modules` root directory.
-* Your git working directory is clean except for the files intended for the PR.
-* Downstream provider changes are NOT staged or committed in `magic-modules`.
-* Remote repositories are configured (e.g., `upstream` pointing to `GoogleCloudPlatform/magic-modules` and a personal fork remote such as `origin`).
-
----
-
-## Pre-PR Verification & Guardrails
-
-Before creating a branch or generating the link, verify all of the following rules:
-
-1. **Single Self-Contained Change:** Each PR must contain only **one** logical change.
-   - Adding multiple resources? Put **one resource per PR**.
-   - Fixing a bug and adding new fields? Split into **two separate PRs**.
-2. **Strict PR Title Length Limit:**
-   - PR title must be concise and strictly **under 60 characters** (hard limit 63 chars so appending ` (#12345)` on squash-merge stays within GitHub's 72-character commit subject limit).
-   - Format: `<product>: <action> <target>` (e.g. `beyondcorp: deprecate google_beyondcorp_app_*` or `compute: add foo field to google_compute_instance`).
-3. **No Downstream Artifacts in Magic Modules:**
-   - Do NOT commit generated downstream provider code into `magic-modules`.
-4. **Workspace Cleanup:** Run `git status --porcelain` and ensure no untracked temporary test files exist before pushing.
-5. **Prefer Adding Commits on Subsequent Updates:**
-   - Once a branch has been pushed, always add new commits for follow-up changes rather than amending (`git commit --amend`), rebasing, or force-pushing (`-f`, `--force`, `--force-with-lease`) unless explicitly instructed otherwise.
-
----
+1. **Single self-contained change:** One logical change per PR (one resource per PR; split bugfixes and new fields into separate PRs).
+2. **PR title & commit subject length:** Target `<= 60` chars; hard limit `63` chars (enforced by `.agents/scripts/build_pr_link.py`, keeping squash-merge ` (#12345)` under GitHub's 72-char ceiling). Keep commit subjects `<= 60` chars too. Format: `<product/area>: <imperative verb phrase>`. Drop redundant `google_<service>_` prefixes after `<service>:` and summarize the theme instead of listing every field or check:
+   - Bad (71): `compute: fix alias_ip_range netmask handling on google_compute_instance` → Good (56): `compute: fix alias_ip_range netmask handling on instance`
+   - Bad (88): `mmv1: validate default_value types, enum duplicates/membership, and required constraints` → Good (52): `mmv1: validate default_value, enum dupes, & required`
+3. **No downstream artifacts & clean workspace:** Do not commit generated downstream provider code into `magic-modules`. Run `git status --porcelain` before pushing to confirm no untracked temporary files remain.
+4. **Add commits on updates:** Once a branch is pushed, always add new commits for follow-up changes rather than amending (`git commit --amend`), rebasing, or force-pushing (`-f`, `--force`, `--force-with-lease`) unless instructed otherwise.
 
 ## Execution Steps
 
 ### 1. Sync and Create Feature Branch
 
-Ensure the branch has a clean, `<short-descriptive-branch-name>` matching the change (never push internal worktree or task branch names; rename with `git branch -m "$BRANCH"` if already committed on a worktree branch). If updating an already-pushed PR branch, check out or stay on that existing branch rather than recreating it from `$UPSTREAM_REMOTE/$BASE_BRANCH`:
+Use a clean `<short-descriptive-branch-name>` matching the change (never push internal worktree or task branch names; rename with `git branch -m "$BRANCH"` if needed). When updating an already-pushed PR branch, stay on that branch instead of recreating it:
 
 ```bash
 UPSTREAM_REMOTE=$(git remote -v | grep -i "GoogleCloudPlatform/magic-modules" | head -n 1 | awk '{print $1}')
-UPSTREAM_REMOTE="${UPSTREAM_REMOTE:-upstream}"
-
-BASE_BRANCH="main" # or target major release feature branch, e.g. FEATURE-BRANCH-major-release-8.0.0
-git fetch "$UPSTREAM_REMOTE" "$BASE_BRANCH"
+BASE_BRANCH="main" # or target major release branch, e.g. FEATURE-BRANCH-major-release-8.0.0
+git fetch "${UPSTREAM_REMOTE:-upstream}" "$BASE_BRANCH"
 
 BRANCH="<short-descriptive-branch-name>" # e.g. deprecate-beyondcorp-app
-git checkout -b "$BRANCH" "$UPSTREAM_REMOTE/$BASE_BRANCH"
+git checkout -b "$BRANCH" "${UPSTREAM_REMOTE:-upstream}/$BASE_BRANCH"
 ```
 
-### 2. Stage and Commit Changes
+### 2. Stage, Commit, and Push
 
 ```bash
 git add mmv1/products/<product>/ # or other relevant files
-git commit -m "<product>: <concise description under 60 chars>"
-```
+git commit -m "<product/area>: <concise description <= 60 chars>"
 
-### 3. Push to Personal Fork
-
-```bash
 FORK_REMOTE=$(git remote -v | grep -v -i "GoogleCloudPlatform/magic-modules" | head -n 1 | awk '{print $1}')
-FORK_REMOTE="${FORK_REMOTE:-origin}"
-
-git push -u "$FORK_REMOTE" "$BRANCH"
+git push -u "${FORK_REMOTE:-origin}" "$BRANCH"
 ```
 
----
+### 3. Write the PR Description & Release Notes
 
-### 4. Format PR Body & Release Notes
+- **Default to plain, brief prose:** Write for a human reviewer—1–2 short paragraphs (or a short flat bullet list when listing a few distinct changes) explaining the problem/why and what changed. Skip headings, tables, and boilerplate verification checklists by default.
+- **Scale up only when warranted:** For genuinely complex or multi-part changes, add short sections for non-obvious design choices, edge cases, or trade-offs. Use tables **sparingly**—only when actually comparing discrete cases (e.g., before/after behavior across multiple rules), never as a default summary of files changed.
+- **Avoid AI scaffolding:** Skip boilerplate headings (`## Summary`, `### Verification`, etc.), file-by-file diff narration, internal eval/agent jargon, and leftover PR template HTML comments (`<!-- ... -->`). Mention local testing only when it adds signal beyond CI (e.g., `TF_ACC` runs or repro steps).
+- **Links & release notes:** Put `Needs <PR URL>` at the top if blocked. Add standalone `Fixes <github_issue_url>` / `Fixes b/<bug_id>` (or `Part of ...`) right before the release-note block—when working from a `b/` bug, link any matching GitHub issue too *(exception: keep internal tracker IDs, internal links, and unannounced dates out of GA promotions)*. End with a release-note block per [docs/content/code-review/release-notes.md](../../../../docs/content/code-review/release-notes.md) (syntax validated by `build_pr_link.py`):
+  - Valid types (10): `enhancement`, `bug`, `note`, `none`, `new-resource`, `new-list-resource`, `new-datasource`, `new-action`, `deprecation`, `breaking-change`. Single line per block (`none` empty; `enhancement`/`bug` use `<product>: <past-tense description>`; `new-resource`/`new-datasource` use `` `google_<name>` ``).
 
-Every PR must contain:
-1. A concise summary of what changed and why.
-2. A standalone `Fixes <github_issue_url>` and/or `Fixes b/<bug_id>` (or `Part of ...`) line for the issue or bug the PR addresses (when working from an internal `b/` bug, also check if a corresponding GitHub issue exists and link both).
-3. A release note block. Refer to [docs/content/code-review/release-notes.md](../../../../docs/content/code-review/release-notes.md) for categories (`enhancement`, `bug`, `none`, `new-resource`, `new-datasource`, `new-list-resource`, `deprecation`, `breaking-change`).
+Sample PR body:
 
-#### Sample PR Body
-```markdown
-Summary of what changed and why in a few concise sentences.
+~~~markdown
+`RegionalEndpoint` GET responses return an empty `subnetwork` field on legacy
+endpoints, causing a perpetual diff in shared customer modules. Add a diff
+suppress function on `subnetwork` when the API returns empty.
 
 Fixes https://github.com/hashicorp/terraform-provider-google/issues/12345
-Fixes b/123456789
 
-```release-note:enhancement
-<product>: added `foo` field to `google_compute_instance`
+```release-note:bug
+compute: fixed perpetual diff on `subnetwork` in `google_compute_regional_endpoint`
 ```
-```
+~~~
 
----
+### 4. Generate Pre-Filled PR Link (Mandatory Script)
 
-### 5. Generate Pre-Filled Web URL (Always Provide as Hyperlink)
+Always run `.agents/scripts/build_pr_link.py` to validate the title, release-note block, branch, and URL length before emitting the link. Do not improvise ad-hoc `urllib.parse` one-liners.
 
-Run Python to generate the pre-filled comparison URL with title and body URL-encoded:
-
-```python
-import urllib.parse
-import subprocess
-import re
-
-base_branch = "main" # or target feature branch, e.g. "FEATURE-BRANCH-major-release-8.0.0"
-branch = "<BRANCH>"
-title = "<PR_TITLE>"
-body = """<PR_BODY>"""
-
-# Auto-detect fork remote and username
-fork_remote_cmd = "git remote -v | grep -v -i 'GoogleCloudPlatform/magic-modules' | head -n 1 | awk '{print $1}'"
-fork_remote = subprocess.check_output(fork_remote_cmd, shell=True, text=True).strip() or "origin"
-fork_url = subprocess.check_output(["git", "remote", "get-url", fork_remote], text=True).strip()
-
-# Extract username from git URL (ssh or https)
-m = re.search(r"github\.com[:/]([^/]+)/", fork_url)
-username = m.group(1) if m else "<username>"
-
-head_ref = f"{username}:{branch}"
-url = f"https://github.com/GoogleCloudPlatform/magic-modules/compare/{base_branch}...{head_ref}?expand=1&title={urllib.parse.quote(title)}&body={urllib.parse.quote(body)}"
-print(url)
+```bash
+python3 .agents/scripts/build_pr_link.py \
+  --title "<product/area>: <concise title <= 60 chars>" \
+  --markdown \
+  --body-file - <<'EOF'
+<PR_BODY>
+EOF
 ```
 
-Present the result in chat as:
-👉 **[Create Pull Request on GitHub](<URL>)**
-
-Inform the user that the branch has been pushed to their fork and they can click the link to review the diff and submit the Pull Request.
+- Pass `--base <branch>` for non-`main` targets (e.g., `FEATURE-BRANCH-major-release-8.0.0`). `--branch` and `--user` default to the current git branch and fork remote.
+- Fix any reported errors and review stderr warnings before sharing. Present the `--markdown` output directly in chat (`👉 **[Create Pull Request on GitHub](<URL>)**`) and let the user know the branch is pushed and ready to review.
