@@ -49,6 +49,10 @@ samples:
         vars:
           enable_deduping: 'false'
           similarity_threshold: '0.5'
+      - name: dialogflow_generator_agent_coaching
+        vars:
+          enable_deduping: 'false'
+          similarity_threshold: null
   - name: dialogflow_generator_with_tools
     primary_resource_id: generator_with_tools
     steps:
@@ -389,6 +393,8 @@ properties:
       type: String
   - name: suggestionDedupingConfig
     type: NestedObject
+    allow_empty_object: true
+    send_empty_value: true
     description: |
       Optional. Configuration for suggestion deduping. This is only applicable to AI Coach feature.
     properties:
