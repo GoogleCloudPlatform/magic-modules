@@ -1,0 +1,61 @@
+// Why this custom test_check_destroy exists:
+//   1. `PhoneNumbers` has no `GetPhoneNumber` endpoint; existence must be checked by calling
+//      `ListPhoneNumbers` (`GET /v2beta1/projects/{project}/locations/{location}/phoneNumbers`)
+//      on the regional Dialogflow endpoint (`https://{location}-dialogflow.googleapis.com`)
+//      and verifying that `rs.Primary.Attributes["name"]` is absent from `phoneNumbers`.
+//      When `DeletePhoneNumber` is called (`deletion_policy = "DELETE"`), the phone number
+//      transitions to `DELETE_REQUESTED` and is immediately excluded from `ListPhoneNumbers`.
+//   2. When a test sets `deletion_policy = "ABANDON"`, Terraform removes the resource from
+//      state without calling `DeletePhoneNumber`, so the phone number intentionally remains
+//      `ACTIVE` in the API and should be skipped by the standard destroy check.
+if rs.Primary.Attributes["deletion_policy"] == "ABANDON" {
+	continue
+}
+
+config := acctest.GoogleProviderConfig(t)
+url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(dialogflow.Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/phoneNumbers?pageSize=1000")
+if err != nil {
+	return err
+}
+
+billingProject := ""
+if config.BillingProject != "" {
+	billingProject = config.BillingProject
+}
+
+location := rs.Primary.Attributes["location"]
+universeDomain := config.UniverseDomain
+
+if universeDomain != "" && universeDomain != "googleapis.com" {
+	url = strings.Replace(url, "googleapis.com", universeDomain, 1)
+}
+
+if strings.HasPrefix(url, "https://dialogflow") {
+	if location != "" && location != "global" {
+		url = strings.Replace(url, "https://dialogflow", fmt.Sprintf("https://%s-dialogflow", location), 1)
+	}
+}
+
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	Project:   billingProject,
+	RawURL:    url,
+	UserAgent: config.UserAgent,
+})
+if err != nil {
+	continue
+}
+
+expectedName := rs.Primary.Attributes["name"]
+if items, ok := res["phoneNumbers"].([]interface{}); ok {
+	for _, itemRaw := range items {
+		item, ok := itemRaw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if item["name"] == expectedName {
+			return fmt.Errorf("DialogflowPhoneNumber %s still exists at %s", expectedName, url)
+		}
+	}
+}
