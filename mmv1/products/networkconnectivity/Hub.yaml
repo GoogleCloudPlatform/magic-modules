@@ -62,7 +62,6 @@ samples:
           resource_name: basic
   - name: network_connectivity_hub_with_export_psc_config
     primary_resource_id: primary
-    min_version: 'beta'
     steps:
       - name: network_connectivity_hub_with_export_psc_config
         resource_id_vars:
@@ -153,7 +152,6 @@ properties:
     default_from_api: true
   - name: exportPscConfig
     type: NestedObject
-    min_version: 'beta'
     description: |
       Config for more granular control of Private Service Connect transitivity. Only takes effect when `export_psc` is true.
       If `export_psc` is true, at least one of `published_services_and_regional_google_apis` and `global_google_apis` must be true.
