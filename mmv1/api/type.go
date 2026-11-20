@@ -62,7 +62,7 @@ type Type struct {
 	//
 	Description string `yaml:"description,omitempty"`
 
-	Exclude bool `yaml:"exclude,omitempty"`
+	Exclude *bool `yaml:"exclude,omitempty"`
 
 	// Add a deprecation message for a field that's been deprecated in the API
 	// use the YAML chomping folding indicator (>-) if this is a multiline
@@ -629,9 +629,14 @@ func (t *Type) validateSchemaPathConstraint(
 	return es
 }
 
+// Whether this field itself is excluded; nil (unset) means not excluded
+func (t Type) IsExcluded() bool {
+	return t.Exclude != nil && *t.Exclude
+}
+
 // Hierarchical exclusion check against self, parent (if nested), resource
 func (t *Type) isExcluded() bool {
-	if t.Exclude {
+	if t.IsExcluded() {
 		return true
 	}
 	if t.ParentMetadata != nil {
@@ -872,14 +877,16 @@ func (t *Type) exactVersionObj() *product.Version {
 }
 
 func (t *Type) ExcludeIfNotInVersion(version *product.Version) {
-	if !t.Exclude {
+	if !t.IsExcluded() {
+		excluded := false
 		if versionObj := t.exactVersionObj(); versionObj != nil {
-			t.Exclude = versionObj.CompareTo(version) != 0
+			excluded = versionObj.CompareTo(version) != 0
 		}
 
-		if !t.Exclude {
-			t.Exclude = version.CompareTo(t.MinVersionObj()) < 0
+		if !excluded {
+			excluded = version.CompareTo(t.MinVersionObj()) < 0
 		}
+		t.Exclude = &excluded
 	}
 
 	if t.IsA("NestedObject") {
@@ -913,14 +920,14 @@ func (t Type) NestedProperties() []*Type {
 	case t.IsA("Array"):
 		if t.ItemType.IsA("NestedObject") {
 			props = google.Reject(t.ItemType.NestedProperties(), func(p *Type) bool {
-				return t.Exclude
+				return t.IsExcluded()
 			})
 		}
 	case t.IsA("NestedObject"):
 		props = t.UserProperties()
 	case t.IsA("Map"):
 		props = google.Reject(t.ValueType.NestedProperties(), func(p *Type) bool {
-			return t.Exclude
+			return t.IsExcluded()
 		})
 	default:
 	}
@@ -935,7 +942,7 @@ func (t Type) WriteOnlyProperties() []*Type {
 	case t.IsA("Array"):
 		if t.ItemType.IsA("NestedObject") {
 			props = google.Reject(t.ItemType.WriteOnlyProperties(), func(p *Type) bool {
-				return t.Exclude
+				return t.IsExcluded()
 			})
 		}
 	case t.IsA("NestedObject"):
@@ -944,7 +951,7 @@ func (t Type) WriteOnlyProperties() []*Type {
 		})
 	case t.IsA("Map"):
 		props = google.Reject(t.ValueType.WriteOnlyProperties(), func(p *Type) bool {
-			return t.Exclude
+			return t.IsExcluded()
 		})
 	default:
 	}
@@ -1219,9 +1226,9 @@ func (t Type) UserProperties() []*Type {
 
 		return google.Reject(t.Properties, func(p *Type) bool {
 			if t.ResourceMetadata.IsTgcCompiler() {
-				return p.Exclude || p.Output
+				return p.IsExcluded() || p.Output
 			}
-			return p.Exclude
+			return p.IsExcluded()
 		})
 	}
 	return nil
