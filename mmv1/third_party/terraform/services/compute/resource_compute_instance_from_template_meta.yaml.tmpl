@@ -224,6 +224,10 @@ fields:
   - api_field: 'partnerMetadata'
 {{- end }}
   - field: 'project'
+  - field: 'retry_on_stockout'
+    provider_only: true
+  - field: 'stockout_retry_timeout_seconds'
+    provider_only: true
   - api_field: 'reservationAffinity.key'
     field: 'reservation_affinity.specific_reservation.key'
   - api_field: 'reservationAffinity.values'

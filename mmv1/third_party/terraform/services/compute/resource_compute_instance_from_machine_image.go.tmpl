@@ -262,27 +262,7 @@ func resourceComputeInstanceFromMachineImageCreate(d *schema.ResourceData, meta 
 
 	log.Printf("[INFO] Requesting instance creation")
 	insertURL := fmt.Sprintf("%sprojects/%s/zones/%s/instances", transport_tpg.BaseUrl(Product, config), project, z)
-	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "POST",
-		Project:   project,
-		RawURL:    insertURL,
-		UserAgent: userAgent,
-		Body:      instanceBody,
-	})
-	if err != nil {
-		return fmt.Errorf("Error creating instance: %s", err)
-	}
-
-	// Store the ID now
-	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, z, d.Get("name").(string)))
-
-	// Wait for the operation to complete
-	err = ComputeOperationWaitTime(config, res, project,
-		"instance to create", userAgent, d.Timeout(schema.TimeoutCreate))
-	if err != nil {
-		// The resource didn't actually create
-		d.SetId("")
+	if err := createComputeInstanceWithStockoutRetry(d, config, project, z, insertURL, userAgent, instanceBody); err != nil {
 		return err
 	}
 
