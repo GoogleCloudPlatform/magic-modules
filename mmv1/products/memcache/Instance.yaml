@@ -22,6 +22,9 @@ references:
 base_url: projects/{{project}}/locations/{{region}}/instances
 self_link: projects/{{project}}/locations/{{region}}/instances/{{name}}
 create_url: projects/{{project}}/locations/{{region}}/instances?instanceId={{name}}
+generate_list_resource: true
+# ListInstancesResponse returns the list under "resources", not "instances".
+collection_url_key: resources
 update_mask: true
 update_verb: PATCH
 async:
