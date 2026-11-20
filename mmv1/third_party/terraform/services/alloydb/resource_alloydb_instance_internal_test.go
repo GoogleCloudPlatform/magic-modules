@@ -12,8 +12,10 @@ func TestIsAlloyDbInstanceUpdatingError(t *testing.T) {
 
 	updatingMessage := `Invalid resource state for "projects/653407317329/locations/us-central1/clusters/tf-test-alloydb-clusterna2xzcniou/instances/tf-test-alloydb-instancena2xzcniou": The instance is currently undergoing another update operation. Please try again later.`
 	updatingMixedCaseMessage := `Invalid resource state: the Instance is currently undergoing another update operation`
+	backgroundSetupMessage := `Invalid resource state for "projects/794360760068/locations/asia-southeast1/clusters/tf-test-alloydb-clustersd8rrxe71e/instances/tf-test-alloydb-instancesd8rrxe71e": background setup in progress, retry in a few minutes`
 	queueMessage := "unable to queue the operation"
 	expectedUpdatingReason := "Instance is undergoing another update operation"
+	expectedBackgroundSetupReason := "Waiting for background setup to finish"
 	expectedQueueReason := "Waiting for other enqueued operations to finish"
 
 	cases := map[string]struct {
@@ -50,6 +52,28 @@ func TestIsAlloyDbInstanceUpdatingError(t *testing.T) {
 			},
 			expected:       true,
 			expectedReason: expectedUpdatingReason,
+		},
+		"googleapi 400 background setup with message and body": {
+			err: &googleapi.Error{
+				Code:    400,
+				Message: backgroundSetupMessage,
+				Body:    fmt.Sprintf(`{"error":{"code":400,"message":%q,"status":"FAILED_PRECONDITION"}}`, backgroundSetupMessage),
+			},
+			expected:       true,
+			expectedReason: expectedBackgroundSetupReason,
+		},
+		"googleapi 400 background setup with body only": {
+			err: &googleapi.Error{
+				Code: 400,
+				Body: backgroundSetupMessage,
+			},
+			expected:       true,
+			expectedReason: expectedBackgroundSetupReason,
+		},
+		"wrapped standard error 400 background setup": {
+			err:            fmt.Errorf("Error updating Cluster: googleapi: Error 400: %s", backgroundSetupMessage),
+			expected:       true,
+			expectedReason: expectedBackgroundSetupReason,
 		},
 		"googleapi 409 unable to queue with message and body": {
 			err: &googleapi.Error{
