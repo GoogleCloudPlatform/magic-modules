@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/storage"
+	"github.com/hashicorp/terraform-provider-google/google/services/storage"
 )
 
 func TestAccStorageManagedFolder_storageManagedFolderUpdate(t *testing.T) {
@@ -50,14 +50,15 @@ func TestAccStorageManagedFolder_storageManagedFolderUpdate(t *testing.T) {
 
 func TestAccStorageManagedFolder_rapidCacheConfig(t *testing.T) {
 	t.Parallel()
-	bucketName := fmt.Sprintf("tf-test-managed-folder-%s", acctest.RandString(t, 10))
+	sharedCache := storage.BootstrapSharedTestAnywhereCache(t, "managed-folder", "US-EAST1", "us-east1-b")
+	folderName := fmt.Sprintf("datasets-%s/", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageManagedFolder_rapidCacheConfig(bucketName, "enabled"),
+				Config: testAccStorageManagedFolder_rapidCacheConfig(sharedCache.Bucket, folderName, sharedCache.AnywhereCacheID, "enabled"),
 			},
 			{
 				ResourceName:            "google_storage_managed_folder.folder",
@@ -66,7 +67,7 @@ func TestAccStorageManagedFolder_rapidCacheConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"bucket", "force_destroy"},
 			},
 			{
-				Config: testAccStorageManagedFolder_rapidCacheConfig(bucketName, "unspecified"),
+				Config: testAccStorageManagedFolder_rapidCacheConfig(sharedCache.Bucket, folderName, sharedCache.AnywhereCacheID, "unspecified"),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_storage_managed_folder.folder", plancheck.ResourceActionUpdate),
@@ -80,7 +81,7 @@ func TestAccStorageManagedFolder_rapidCacheConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"bucket", "force_destroy"},
 			},
 			{
-				Config: testAccStorageManagedFolder_rapidCacheConfigCleared(bucketName),
+				Config: testAccStorageManagedFolder_rapidCacheConfigCleared(sharedCache.Bucket, folderName),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_storage_managed_folder.folder", plancheck.ResourceActionUpdate),
@@ -123,56 +124,28 @@ resource "google_storage_managed_folder" "folder" {
 `, forceDestroy)
 }
 
-func testAccStorageManagedFolder_rapidCacheConfig(bucketName, ingestOnWrite string) string {
+func testAccStorageManagedFolder_rapidCacheConfig(bucketName, folderName, rapidCacheID, ingestOnWrite string) string {
 	return fmt.Sprintf(`
-resource "google_storage_bucket" "bucket" {
-  name                        = "%s"
-  location                    = "US"
-  uniform_bucket_level_access = true
-  force_destroy               = true
-}
-
-resource "google_storage_anywhere_cache" "cache" {
-  bucket          = google_storage_bucket.bucket.name
-  zone            = "us-central1-f"
-  ttl             = "3601s"
-  ingest_on_write = false
-}
-
 resource "google_storage_managed_folder" "folder" {
-  bucket        = google_storage_bucket.bucket.name
-  name          = "datasets/"
+  bucket        = "%s"
+  name          = "%s"
   force_destroy = true
   rapid_cache_config {
     policies {
-      rapid_cache_id  = google_storage_anywhere_cache.cache.anywhere_cache_id
+      rapid_cache_id  = "%s"
       ingest_on_write = "%s"
     }
   }
 }
-`, bucketName, ingestOnWrite)
+`, bucketName, folderName, rapidCacheID, ingestOnWrite)
 }
 
-func testAccStorageManagedFolder_rapidCacheConfigCleared(bucketName string) string {
+func testAccStorageManagedFolder_rapidCacheConfigCleared(bucketName, folderName string) string {
 	return fmt.Sprintf(`
-resource "google_storage_bucket" "bucket" {
-  name                        = "%s"
-  location                    = "US"
-  uniform_bucket_level_access = true
-  force_destroy               = true
-}
-
-resource "google_storage_anywhere_cache" "cache" {
-  bucket          = google_storage_bucket.bucket.name
-  zone            = "us-central1-f"
-  ttl             = "3601s"
-  ingest_on_write = false
-}
-
 resource "google_storage_managed_folder" "folder" {
-  bucket        = google_storage_bucket.bucket.name
-  name          = "datasets/"
+  bucket        = "%s"
+  name          = "%s"
   force_destroy = true
 }
-`, bucketName)
+`, bucketName, folderName)
 }
