@@ -520,7 +520,7 @@ resource "google_dataplex_entry_link" "full_entry_link_with_aspect" {
 			userManaged = false
 		})
 		aspect_source {
-			create_time  = "2024-01-01T00:00:00Z"
+			create_time  = "2024-01-01T12:00:00Z"
 			update_time  = "2024-01-02T00:00:00Z"
 			data_version = "2.0.0"
 		}
