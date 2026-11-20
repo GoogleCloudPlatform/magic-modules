@@ -36,6 +36,7 @@ import_format:
 custom_code:
   constants: "templates/terraform/constants/discoveryengine_data_connector.go.tmpl"
   post_create: "templates/terraform/post_create/discoveryengine_data_connector.go.tmpl"
+  decoder: "templates/terraform/decoders/discoveryengine_data_connector.go.tmpl"
 state_upgraders: true
 schema_version: 1
 timeouts:
@@ -231,6 +232,7 @@ properties:
     type: Array
     description: |
       List of entities from the connected data source to ingest.
+    diff_suppress_func: 'dataConnectorEntitiesDiffSuppress'
     update_mask_fields:
       - 'entities.params'
       - 'entities.keyPropertyMappings'
