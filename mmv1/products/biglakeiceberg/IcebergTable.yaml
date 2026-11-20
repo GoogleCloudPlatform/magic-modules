@@ -114,7 +114,10 @@ properties:
     type: NestedObject
     required: true
     description: |
-      The schema of the table.
+      The schema of the table. A change is applied in place as a new current schema: columns
+      are matched by field `id`, so a new `id` adds a column and a removed one drops it, and the
+      columns take the order of the `fields` blocks. The catalog rejects changes Iceberg does not
+      allow, such as adding a required column.
     properties:
       - name: type
         type: String

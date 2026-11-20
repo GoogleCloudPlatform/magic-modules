@@ -1,5 +1,33 @@
-	// Accumulate the metadata update actions of a CommitTableRequest.
+	// Accumulate the metadata update actions of a CommitTableRequest, and the
+	// requirements the table must meet for them to be applied.
 	updateActions := []interface{}{}
+	requirements := []interface{}{}
+
+	if d.HasChange("schema") {
+		if schema, ok := obj["schema"].(map[string]interface{}); ok {
+			// The id in state is the one of the schema being replaced.
+			delete(schema, "schema-id")
+			// Add the new schema, then make it the table's current one. The
+			// server assigns the new schema id, so "-1" selects the last added.
+			updateActions = append(updateActions,
+				map[string]interface{}{
+					"action": "add-schema",
+					"schema": schema,
+				},
+				map[string]interface{}{
+					"action":    "set-current-schema",
+					"schema-id": -1,
+				},
+			)
+			// The new schema replaces the one in state: fail the commit rather
+			// than overwrite a schema another writer changed in the meantime.
+			oldSchemaId, _ := d.GetChange("schema.0.schema_id")
+			requirements = append(requirements, map[string]interface{}{
+				"type":              "assert-current-schema-id",
+				"current-schema-id": oldSchemaId,
+			})
+		}
+	}
 
 	if d.HasChange("properties") {
 		oldProp, newProp := d.GetChange("properties")
@@ -56,7 +84,7 @@
 	if len(updateActions) > 0 {
 		// Wrap in 'updates' and 'requirements' as per CommitTableRequest
 		return map[string]interface{}{
-			"requirements": []interface{}{},
+			"requirements": requirements,
 			"updates":      updateActions,
 		}, nil
 	}

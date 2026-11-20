@@ -50,6 +50,145 @@ func TestAccBiglakeIcebergIcebergTable_update(t *testing.T) {
 	})
 }
 
+// TestAccBiglakeIcebergIcebergTable_schemaUpdate verifies that a schema change
+// reaches the table: a column added in the middle of the schema, renamed,
+// renamed back (a schema the table already has) and dropped. Each step is
+// followed by an import, which reads the schema back from the API.
+func TestAccBiglakeIcebergIcebergTable_schemaUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	added := `
+    fields {
+      id       = 3
+      name     = "note"
+      type     = "string"
+      required = false
+      doc      = "Added after the table was created"
+    }`
+	renamed := `
+    fields {
+      id       = 3
+      name     = "comment"
+      type     = "string"
+      required = false
+    }`
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBiglakeIcebergIcebergTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBiglakeIcebergIcebergTable_schema(context, ""),
+			},
+			{
+				Config: testAccBiglakeIcebergIcebergTable_schema(context, added),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_biglake_iceberg_table.my_iceberg_table", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_biglake_iceberg_table.my_iceberg_table",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"catalog", "namespace"},
+			},
+			{
+				Config: testAccBiglakeIcebergIcebergTable_schema(context, renamed),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_biglake_iceberg_table.my_iceberg_table", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_biglake_iceberg_table.my_iceberg_table",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"catalog", "namespace"},
+			},
+			{
+				Config: testAccBiglakeIcebergIcebergTable_schema(context, added),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_biglake_iceberg_table.my_iceberg_table", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_biglake_iceberg_table.my_iceberg_table",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"catalog", "namespace"},
+			},
+			{
+				Config: testAccBiglakeIcebergIcebergTable_schema(context, ""),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_biglake_iceberg_table.my_iceberg_table", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_biglake_iceberg_table.my_iceberg_table",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"catalog", "namespace"},
+			},
+		},
+	})
+}
+
+// testAccBiglakeIcebergIcebergTable_schema is a two-column table with
+// extraField, if any, declared between them.
+func testAccBiglakeIcebergIcebergTable_schema(context map[string]interface{}, extraField string) string {
+	return acctest.Nprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "tf-test-my-bucket-%{random_suffix}"
+  location      = "us-central1"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_biglake_iceberg_catalog" "catalog" {
+  name = google_storage_bucket.bucket.name
+  catalog_type = "CATALOG_TYPE_GCS_BUCKET"
+}
+
+resource "google_biglake_iceberg_namespace" "namespace" {
+  catalog = google_biglake_iceberg_catalog.catalog.name
+  namespace_id = "my_namespace_%{random_suffix}"
+}
+
+resource "google_biglake_iceberg_table" "my_iceberg_table" {
+  catalog   = google_biglake_iceberg_catalog.catalog.name
+  namespace = google_biglake_iceberg_namespace.namespace.namespace_id
+  name      = "tf-test-my_table_%{random_suffix}"
+  schema {
+    type = "struct"
+    fields {
+      id       = 1
+      name     = "id"
+      type     = "long"
+      required = true
+    }`+extraField+`
+    fields {
+      id       = 2
+      name     = "data"
+      type     = "long"
+      required = true
+    }
+  }
+}
+`, context)
+}
+
 // TestAccBiglakeIcebergIcebergTable_vendedCredentials verifies that a table can
 // be created in a catalog configured with
 // credential_mode = CREDENTIAL_MODE_VENDED_CREDENTIALS. In this mode every table
