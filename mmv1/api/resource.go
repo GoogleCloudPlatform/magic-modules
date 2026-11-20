@@ -680,7 +680,7 @@ func (r Resource) AllProperties() []*Type {
 
 func (r Resource) AllPropertiesInVersion() []*Type {
 	return google.Reject(google.Concat(r.Properties, r.Parameters), func(p *Type) bool {
-		return p.Exclude
+		return p.IsExcluded()
 	})
 }
 
@@ -690,19 +690,19 @@ func (r Resource) PropertiesWithExcluded() []*Type {
 
 func (r Resource) UserProperites() []*Type {
 	return google.Reject(r.Properties, func(p *Type) bool {
-		return p.Exclude
+		return p.IsExcluded()
 	})
 }
 
 func (r Resource) UserParameters() []*Type {
 	return google.Reject(r.Parameters, func(p *Type) bool {
-		return p.Exclude
+		return p.IsExcluded()
 	})
 }
 
 func (r Resource) UserVirtualFields() []*Type {
 	return google.Reject(r.VirtualFields, func(p *Type) bool {
-		return p.Exclude
+		return p.IsExcluded()
 	})
 }
 
