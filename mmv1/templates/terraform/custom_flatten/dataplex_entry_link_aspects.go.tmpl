@@ -60,7 +60,39 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}Aspect(v interface{}, d *schem
     flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}AspectUpdateTime(original["updateTime"], d, config)
   transformed["data"] =
     flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}AspectData(original["data"], d, config)
+  transformed["aspect_source"] =
+    flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}AspectAspectSource(original["aspectSource"], d, config)
   return []interface{}{transformed}
+}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}AspectAspectSource(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+  if v == nil {
+    return nil
+  }
+  original := v.(map[string]interface{})
+  if len(original) == 0 {
+    return nil
+  }
+  transformed := make(map[string]interface{})
+  transformed["create_time"] =
+    flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}AspectAspectSourceCreateTime(original["createTime"], d, config)
+  transformed["update_time"] =
+    flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}AspectAspectSourceUpdateTime(original["updateTime"], d, config)
+  transformed["data_version"] =
+    flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}AspectAspectSourceDataVersion(original["dataVersion"], d, config)
+  return []interface{}{transformed}
+}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}AspectAspectSourceCreateTime(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+  return v
+}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}AspectAspectSourceUpdateTime(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+  return v
+}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}AspectAspectSourceDataVersion(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+  return v
 }
 
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}AspectAspectType(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
