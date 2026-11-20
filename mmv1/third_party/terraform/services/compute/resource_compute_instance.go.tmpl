@@ -127,6 +127,13 @@ var (
 		"shielded_instance_config.0.enable_vtpm",
 		"shielded_instance_config.0.enable_integrity_monitoring",
 	}
+	{{- if eq $.TargetVersionName "ga" }}
+
+	workloadIdentityConfigKeys = []string{
+		"workload_identity_config.0.identity",
+		"workload_identity_config.0.identity_certificate_enabled",
+	}
+	{{- end }}
 )
 
 // This checks if the project provided in subnetwork's self_link matches
@@ -168,11 +175,13 @@ func forceNewIfNetworkIPNotUpdatable(ctx context.Context, d *schema.ResourceDiff
 	return forceNewIfNetworkIPNotUpdatableFunc(d)
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func workloadIdentityConfigForceNewCustomDiff() schema.CustomizeDiffFunc {
 	return customdiff.ForceNewIf("workload_identity_config", func(_ context.Context, d *schema.ResourceDiff, meta interface{}) bool {
 		return d.Id() != "" && d.HasChange("workload_identity_config")
 	})
 }
+{{- end }}
 
 func forceNewIfNetworkIPNotUpdatableFunc(d tpgresource.TerraformResourceDiff) error {
 	oldCount, newCount := d.GetChange("network_interface.#")
@@ -1775,11 +1784,12 @@ be from 0 to 999,999,999 inclusive.`,
 						},
 						{{- if ne $.TargetVersionName "ga" }}
 						"identity_type": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Computed:    true,
-							ForceNew:    true,
-							Description: `The type of identity to use.`,
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							ForceNew:     true,
+							ValidateFunc: verify.ValidateEnum([]string{"IDENTITY_TYPE_UNSPECIFIED", "SERVICE_ACCOUNT", "AGENT_IDENTITY", ""}),
+							Description:  `The type of identity to use. Possible values: ["IDENTITY_TYPE_UNSPECIFIED", "SERVICE_ACCOUNT", "AGENT_IDENTITY"]`,
 						},
 						{{- end }}
 					},
@@ -1806,7 +1816,9 @@ be from 0 to 999,999,999 inclusive.`,
 			customdiff.ForceNewIf("boot_disk.0.initialize_params.0.provisioned_iops", func(_ context.Context, d *schema.ResourceDiff, meta interface{}) bool {
 				return d.HasChange("boot_disk.0.initialize_params.0.provisioned_iops") && !strings.Contains(d.Get("boot_disk.0.initialize_params.0.type").(string), "hyperdisk")
 			}),
+			{{- if ne $.TargetVersionName "ga" }}
 			workloadIdentityConfigForceNewCustomDiff(),
+			{{- end }}
 			validateSubnetworkProject,
 			forceNewIfNetworkIPNotUpdatable,
 			tpgresource.SetLabelsDiff,
@@ -2635,6 +2647,7 @@ func populateComputeInstanceResourceData(d *schema.ResourceData, instance map[st
 	if err := d.Set("instance_encryption_key", flattenComputeInstanceEncryptionKey(instanceEncryptionKeyMap)); err != nil {
 		return fmt.Errorf("Error setting instance_encryption_key: %s", err)
 	}
+	{{- if ne $.TargetVersionName `ga` }}
 	if wicMap, ok := instance["workloadIdentityConfig"].(map[string]interface{}); ok && len(wicMap) > 0 {
 		flattenedWic := flattenInstanceWorkloadIdentityConfig(wicMap)
 		if d.Get("source_instance_template") != nil || d.Get("source_machine_image") != nil {
@@ -2649,7 +2662,6 @@ func populateComputeInstanceResourceData(d *schema.ResourceData, instance map[st
 		}
 	}
 
-	{{- if ne $.TargetVersionName `ga` }}
 	if partnerMetadataMap, ok := instance["partnerMetadata"].(map[string]interface{}); ok {
 		partnerMetadata, err := flattenPartnerMetadata(convertPartnerMetadataFromCompute(partnerMetadataMap))
 		if err != nil {

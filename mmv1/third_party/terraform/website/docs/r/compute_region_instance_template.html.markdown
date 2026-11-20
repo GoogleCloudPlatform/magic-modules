@@ -805,7 +805,7 @@ The `specific_reservation` block supports:
 
 * `identity_certificate_enabled` - (Optional) Specifies whether identity certificates are enabled. Required unless `identity_type` is specified in [Beta](../guides/provider_versions.html.markdown); when omitted with `identity_type`, defaults to `true` for `AGENT_IDENTITY` and `false` for `SERVICE_ACCOUNT`.
 
-* `identity_type` - (Optional, [Beta](../guides/provider_versions.html.markdown)) The type of identity to use, such as `SERVICE_ACCOUNT` or `AGENT_IDENTITY`. Note that `service_account` cannot be configured when `identity_type` is `AGENT_IDENTITY`. See the [Compute Engine regionInstanceTemplates REST reference](https://cloud.google.com/compute/docs/reference/rest/beta/regionInstanceTemplates) for supported values.
+* `identity_type` - (Optional, [Beta](../guides/provider_versions.html.markdown)) The type of identity to use. Note that `service_account` cannot be configured when `identity_type` is `AGENT_IDENTITY`. Possible values are: `IDENTITY_TYPE_UNSPECIFIED`, `SERVICE_ACCOUNT`, `AGENT_IDENTITY`.
 
 ## Attributes Reference
 
