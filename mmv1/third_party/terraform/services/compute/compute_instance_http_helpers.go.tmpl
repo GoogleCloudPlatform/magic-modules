@@ -18,6 +18,8 @@ type aliasIpRange struct {
 	rangeName string
 }
 
+// aliasIpRangeNetmask returns the netmask of an alias IP range, with its leading slash, or "" if
+// the range has none: "10.0.0.1/32" -> "/32", "/24" -> "/24", "10.0.0.1" -> "".
 func aliasIpRangeNetmask(cidr string) string {
 	idx := strings.LastIndex(cidr, "/")
 	if idx == -1 {

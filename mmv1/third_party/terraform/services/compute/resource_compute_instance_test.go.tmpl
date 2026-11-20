@@ -298,6 +298,13 @@ func TestIpCidrRangeDiffSuppress(t *testing.T) {
 	if tpgcompute.IpCidrRangeDiffSuppress("ip_cidr_range", "10.128.1.0/24", "10.128.2.0/24", nil) {
 		t.Errorf("expected explicit CIDR mismatch not to suppress diff")
 	}
+}
+
+func TestAliasIpRangeDiffSuppress(t *testing.T) {
+	// With no block to examine, the mask-only answer stands.
+	if !tpgcompute.AliasIpRangeDiffSuppress("ip_cidr_range", "10.128.1.0/24", "/24", nil) {
+		t.Errorf("expected /24 netmask match to suppress diff when there is no block to examine")
+	}
 
 	r := &schema.Resource{
 		Schema: map[string]*schema.Schema{

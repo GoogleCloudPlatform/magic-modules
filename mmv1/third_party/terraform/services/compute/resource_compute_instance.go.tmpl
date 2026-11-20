@@ -23,62 +23,57 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 )
 
-// IpCidrRangeDiffSuppress treats a netmask in config (such as "/32") as equal to the CIDR the API
-// allocated for it. A suppressed diff keeps the state CIDR in the plan and Update sends it, so the
-// diff is suppressed only while that CIDR still belongs to this block: subnetwork_range_name at
-// this index is unchanged, and no other block in the same range sets that CIDR explicitly.
-func IpCidrRangeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	if !strings.HasPrefix(new, "/") || aliasIpRangeNetmask(old) != new {
+// IpCidrRangeDiffSuppress suppresses the diff between a CIDR in state and a netmask in config
+// with the same mask: old "10.1.2.0/24", new "/24" -> true; new "/32" or "10.1.3.0/24" -> false.
+// It compares the mask and nothing else. It serves ip_cidr_range in alias_ip_range on the
+// instance templates and in beta alias_ipv6_range; alias_ip_range on google_compute_instance
+// uses AliasIpRangeDiffSuppress.
+func IpCidrRangeDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	return strings.HasPrefix(new, "/") && aliasIpRangeNetmask(old) == new
+}
+
+// AliasIpRangeDiffSuppress is IpCidrRangeDiffSuppress for alias_ip_range on
+// google_compute_instance, with two more conditions. A suppressed diff keeps the state CIDR in
+// the plan and Update sends it, so the diff is suppressed only while that CIDR still belongs to
+// this block: subnetwork_range_name at this index is unchanged, and no other block in the same
+// range sets that CIDR explicitly.
+func AliasIpRangeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// Config must be a netmask and state a CIDR with that mask.
+	if !IpCidrRangeDiffSuppress(k, old, new, d) {
 		return false
 	}
-	if d == nil {
+
+	// Locate this block in state and in config. If there is no block to examine (a direct call
+	// with a nil d or another kind of key, or an index outside either list), the mask-only
+	// answer stands.
+	listKey, idx, ok := parseAliasIpRangeListKey(k)
+	if !ok || d == nil {
 		return true
 	}
-	// alias_ipv6_range keeps the mask-only rule above: its Update and Read do not resolve netmasks yet.
-	if strings.Contains(k, ".alias_ipv6_range.") {
+	// d.GetChange on this block's own subnetwork_range_name returns the state value when config
+	// omits it, which would hide a move to the primary range, so read the whole list.
+	oldRaw, newRaw := d.GetChange(listKey)
+	oldBlocks, _ := oldRaw.([]interface{})
+	newBlocks, _ := newRaw.([]interface{})
+	if idx >= len(oldBlocks) || idx >= len(newBlocks) {
 		return true
 	}
 
-	elemPrefix, ok := strings.CutSuffix(k, ".ip_cidr_range")
-	if !ok {
-		return true
-	}
-	dot := strings.LastIndex(elemPrefix, ".")
-	if dot == -1 {
-		return true
-	}
-	idx, err := strconv.Atoi(elemPrefix[dot+1:])
-	if err != nil {
-		return true
-	}
-
-	// Read the parent list because d.GetChange on an omitted leaf key falls back to state during Diff.
-	oldRaw, newRaw := d.GetChange(elemPrefix[:dot])
-	oldList, oldOk := oldRaw.([]interface{})
-	newList, newOk := newRaw.([]interface{})
-	if !oldOk || !newOk {
-		return false
-	}
-	if idx < 0 || idx >= len(oldList) || idx >= len(newList) {
-		return true
-	}
-
-	oldElem, _ := oldList[idx].(map[string]interface{})
-	newElem, _ := newList[idx].(map[string]interface{})
-	oldRangeName, _ := oldElem["subnetwork_range_name"].(string)
-	newRangeName, _ := newElem["subnetwork_range_name"].(string)
+	// The block must name the same range as before.
+	oldBlock, _ := oldBlocks[idx].(map[string]interface{})
+	newBlock, _ := newBlocks[idx].(map[string]interface{})
+	oldRangeName, _ := oldBlock["subnetwork_range_name"].(string)
+	newRangeName, _ := newBlock["subnetwork_range_name"].(string)
 	if oldRangeName != newRangeName {
 		return false
 	}
 
-	for j, raw := range newList {
+	// No other block may set the state CIDR explicitly in that range.
+	for j, raw := range newBlocks {
 		if j == idx {
 			continue
 		}
-		other, ok := raw.(map[string]interface{})
-		if !ok {
-			continue
-		}
+		other, _ := raw.(map[string]interface{})
 		otherCidr, _ := other["ip_cidr_range"].(string)
 		otherRangeName, _ := other["subnetwork_range_name"].(string)
 		if otherCidr == old && otherRangeName == newRangeName {
@@ -86,7 +81,26 @@ func IpCidrRangeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 		}
 	}
 
+	// Established above: config is a netmask and the state CIDR has that mask; the block at this
+	// index names the same range in state and in config; no other block sets that CIDR
+	// explicitly in the range. The state CIDR is therefore still this block's address.
 	return true
+}
+
+// parseAliasIpRangeListKey splits the key of a block's ip_cidr_range into the key of its list
+// and the block's index: "network_interface.0.alias_ip_range.1.ip_cidr_range" ->
+// "network_interface.0.alias_ip_range", 1, true. ok is false for any other form of key.
+func parseAliasIpRangeListKey(k string) (listKey string, idx int, ok bool) {
+	blockKey, found := strings.CutSuffix(k, ".ip_cidr_range")
+	dot := strings.LastIndex(blockKey, ".")
+	if !found || dot == -1 {
+		return "", 0, false
+	}
+	idx, err := strconv.Atoi(blockKey[dot+1:])
+	if err != nil || idx < 0 {
+		return "", 0, false
+	}
+	return blockKey[:dot], idx, true
 }
 
 func DisksForceAttachDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
@@ -807,7 +821,7 @@ func ResourceComputeInstance() *schema.Resource {
 									"ip_cidr_range": {
 										Type:             schema.TypeString,
 										Required:         true,
-										DiffSuppressFunc: IpCidrRangeDiffSuppress,
+										DiffSuppressFunc: AliasIpRangeDiffSuppress,
 										Description:      `The IP CIDR range represented by this alias IP range.`,
 									},
 									"subnetwork_range_name": {
