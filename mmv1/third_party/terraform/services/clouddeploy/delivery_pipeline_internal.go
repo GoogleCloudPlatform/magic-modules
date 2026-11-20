@@ -1205,6 +1205,7 @@ func canonicalizeDeliveryPipelineSerialPipelineStagesStrategyStandard(des, initi
 	}
 	cDes.Predeploy = canonicalizeDeliveryPipelineSerialPipelineStagesStrategyStandardPredeploy(des.Predeploy, initial.Predeploy, opts...)
 	cDes.Postdeploy = canonicalizeDeliveryPipelineSerialPipelineStagesStrategyStandardPostdeploy(des.Postdeploy, initial.Postdeploy, opts...)
+	cDes.Analysis = des.Analysis
 
 	return cDes
 }
@@ -2543,6 +2544,7 @@ func canonicalizeDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploym
 	}
 	cDes.Predeploy = canonicalizeDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPredeploy(des.Predeploy, initial.Predeploy, opts...)
 	cDes.Postdeploy = canonicalizeDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentPostdeploy(des.Postdeploy, initial.Postdeploy, opts...)
+	cDes.Analysis = des.Analysis
 
 	return cDes
 }
@@ -3029,6 +3031,7 @@ func canonicalizeDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryD
 	}
 	cDes.Predeploy = canonicalizeDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPredeploy(des.Predeploy, initial.Predeploy, opts...)
 	cDes.Postdeploy = canonicalizeDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPostdeploy(des.Postdeploy, initial.Postdeploy, opts...)
+	cDes.Analysis = des.Analysis
 
 	return cDes
 }
@@ -4260,6 +4263,13 @@ func compareDeliveryPipelineSerialPipelineStagesStrategyStandardNewStyle(d, a in
 		}
 		diffs = append(diffs, ds...)
 	}
+
+	if ds, err := dcl.Diff(desired.Analysis, actual.Analysis, dcl.DiffInfo{ObjectFunction: compareDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisNewStyle, EmptyObject: EmptyDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis, OperationSelector: dcl.TriggersOperation("updateDeliveryPipelineUpdateDeliveryPipelineOperation")}, fn.AddNest("Analysis")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
 	return diffs, nil
 }
 
@@ -4313,6 +4323,243 @@ func compareDeliveryPipelineSerialPipelineStagesStrategyStandardPostdeployNewSty
 	}
 
 	if ds, err := dcl.Diff(desired.Actions, actual.Actions, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateDeliveryPipelineUpdateDeliveryPipelineOperation")}, fn.AddNest("Actions")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+	return diffs, nil
+}
+
+func compareDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisNewStyle(d, a interface{}, fn dcl.FieldName) ([]*dcl.FieldDiff, error) {
+	var diffs []*dcl.FieldDiff
+
+	desired, ok := d.(*DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis)
+	if !ok {
+		desiredNotPointer, ok := d.(DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis)
+		if !ok {
+			return nil, fmt.Errorf("obj %v is not a DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis or *DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis", d)
+		}
+		desired = &desiredNotPointer
+	}
+	actual, ok := a.(*DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis)
+	if !ok {
+		actualNotPointer, ok := a.(DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis)
+		if !ok {
+			return nil, fmt.Errorf("obj %v is not a DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis", a)
+		}
+		actual = &actualNotPointer
+	}
+
+	if ds, err := dcl.Diff(desired.Duration, actual.Duration, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateDeliveryPipelineUpdateDeliveryPipelineOperation")}, fn.AddNest("Duration")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+
+	if ds, err := dcl.Diff(desired.GoogleCloud, actual.GoogleCloud, dcl.DiffInfo{ObjectFunction: compareDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisGoogleCloudNewStyle, EmptyObject: EmptyDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisGoogleCloud, OperationSelector: dcl.TriggersOperation("updateDeliveryPipelineUpdateDeliveryPipelineOperation")}, fn.AddNest("GoogleCloud")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+
+	if ds, err := dcl.Diff(desired.CustomChecks, actual.CustomChecks, dcl.DiffInfo{ObjectFunction: compareDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecksNewStyle, EmptyObject: EmptyDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks, OperationSelector: dcl.TriggersOperation("updateDeliveryPipelineUpdateDeliveryPipelineOperation")}, fn.AddNest("CustomChecks")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+	return diffs, nil
+}
+
+func compareDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisGoogleCloudNewStyle(d, a interface{}, fn dcl.FieldName) ([]*dcl.FieldDiff, error) {
+	var diffs []*dcl.FieldDiff
+
+	desired, ok := d.(*DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisGoogleCloud)
+	if !ok {
+		desiredNotPointer, ok := d.(DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisGoogleCloud)
+		if !ok {
+			return nil, fmt.Errorf("obj %v is not a DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisGoogleCloud or *DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisGoogleCloud", d)
+		}
+		desired = &desiredNotPointer
+	}
+	actual, ok := a.(*DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisGoogleCloud)
+	if !ok {
+		actualNotPointer, ok := a.(DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisGoogleCloud)
+		if !ok {
+			return nil, fmt.Errorf("obj %v is not a DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisGoogleCloud", a)
+		}
+		actual = &actualNotPointer
+	}
+
+	if ds, err := dcl.Diff(desired.AlertPolicyChecks, actual.AlertPolicyChecks, dcl.DiffInfo{ObjectFunction: compareDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheckNewStyle, EmptyObject: EmptyDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck, OperationSelector: dcl.TriggersOperation("updateDeliveryPipelineUpdateDeliveryPipelineOperation")}, fn.AddNest("AlertPolicyChecks")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+	return diffs, nil
+}
+
+func compareDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheckNewStyle(d, a interface{}, fn dcl.FieldName) ([]*dcl.FieldDiff, error) {
+	var diffs []*dcl.FieldDiff
+
+	desired, ok := d.(*DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck)
+	if !ok {
+		desiredNotPointer, ok := d.(DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck)
+		if !ok {
+			return nil, fmt.Errorf("obj %v is not a DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck or *DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck", d)
+		}
+		desired = &desiredNotPointer
+	}
+	actual, ok := a.(*DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck)
+	if !ok {
+		actualNotPointer, ok := a.(DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck)
+		if !ok {
+			return nil, fmt.Errorf("obj %v is not a DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisAlertPolicyCheck", a)
+		}
+		actual = &actualNotPointer
+	}
+
+	if ds, err := dcl.Diff(desired.Id, actual.Id, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateDeliveryPipelineUpdateDeliveryPipelineOperation")}, fn.AddNest("Id")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+
+	if ds, err := dcl.Diff(desired.AlertPolicies, actual.AlertPolicies, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateDeliveryPipelineUpdateDeliveryPipelineOperation")}, fn.AddNest("AlertPolicies")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+
+	if ds, err := dcl.Diff(desired.Labels, actual.Labels, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateDeliveryPipelineUpdateDeliveryPipelineOperation")}, fn.AddNest("Labels")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+	return diffs, nil
+}
+
+func compareDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecksNewStyle(d, a interface{}, fn dcl.FieldName) ([]*dcl.FieldDiff, error) {
+	var diffs []*dcl.FieldDiff
+
+	desired, ok := d.(*DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks)
+	if !ok {
+		desiredNotPointer, ok := d.(DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks)
+		if !ok {
+			return nil, fmt.Errorf("obj %v is not a DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks or *DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks", d)
+		}
+		desired = &desiredNotPointer
+	}
+	actual, ok := a.(*DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks)
+	if !ok {
+		actualNotPointer, ok := a.(DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks)
+		if !ok {
+			return nil, fmt.Errorf("obj %v is not a DeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisCustomChecks", a)
+		}
+		actual = &actualNotPointer
+	}
+
+	if ds, err := dcl.Diff(desired.Id, actual.Id, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateDeliveryPipelineUpdateDeliveryPipelineOperation")}, fn.AddNest("Id")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+
+	if ds, err := dcl.Diff(desired.Frequency, actual.Frequency, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateDeliveryPipelineUpdateDeliveryPipelineOperation")}, fn.AddNest("Frequency")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+
+	if ds, err := dcl.Diff(desired.Task, actual.Task, dcl.DiffInfo{ObjectFunction: compareDeliveryPipelineTaskNewStyle, EmptyObject: EmptyDeliveryPipelineTask, OperationSelector: dcl.TriggersOperation("updateDeliveryPipelineUpdateDeliveryPipelineOperation")}, fn.AddNest("Task")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+	return diffs, nil
+}
+
+func compareDeliveryPipelineTaskNewStyle(d, a interface{}, fn dcl.FieldName) ([]*dcl.FieldDiff, error) {
+	var diffs []*dcl.FieldDiff
+
+	desired, ok := d.(*DeliveryPipelineTask)
+	if !ok {
+		desiredNotPointer, ok := d.(DeliveryPipelineTask)
+		if !ok {
+			return nil, fmt.Errorf("obj %v is not a DeliveryPipelineTask or *DeliveryPipelineTask", d)
+		}
+		desired = &desiredNotPointer
+	}
+	actual, ok := a.(*DeliveryPipelineTask)
+	if !ok {
+		actualNotPointer, ok := a.(DeliveryPipelineTask)
+		if !ok {
+			return nil, fmt.Errorf("obj %v is not a DeliveryPipelineTask", a)
+		}
+		actual = &actualNotPointer
+	}
+
+	if ds, err := dcl.Diff(desired.Container, actual.Container, dcl.DiffInfo{ObjectFunction: compareDeliveryPipelineContainerNewStyle, EmptyObject: EmptyDeliveryPipelineContainer, OperationSelector: dcl.TriggersOperation("updateDeliveryPipelineUpdateDeliveryPipelineOperation")}, fn.AddNest("Container")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+	return diffs, nil
+}
+
+func compareDeliveryPipelineContainerNewStyle(d, a interface{}, fn dcl.FieldName) ([]*dcl.FieldDiff, error) {
+	var diffs []*dcl.FieldDiff
+
+	desired, ok := d.(*DeliveryPipelineContainer)
+	if !ok {
+		desiredNotPointer, ok := d.(DeliveryPipelineContainer)
+		if !ok {
+			return nil, fmt.Errorf("obj %v is not a DeliveryPipelineContainer or *DeliveryPipelineContainer", d)
+		}
+		desired = &desiredNotPointer
+	}
+	actual, ok := a.(*DeliveryPipelineContainer)
+	if !ok {
+		actualNotPointer, ok := a.(DeliveryPipelineContainer)
+		if !ok {
+			return nil, fmt.Errorf("obj %v is not a DeliveryPipelineContainer", a)
+		}
+		actual = &actualNotPointer
+	}
+
+	if ds, err := dcl.Diff(desired.Image, actual.Image, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateDeliveryPipelineUpdateDeliveryPipelineOperation")}, fn.AddNest("Image")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+
+	if ds, err := dcl.Diff(desired.Command, actual.Command, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateDeliveryPipelineUpdateDeliveryPipelineOperation")}, fn.AddNest("Command")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+
+	if ds, err := dcl.Diff(desired.Args, actual.Args, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateDeliveryPipelineUpdateDeliveryPipelineOperation")}, fn.AddNest("Args")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+
+	if ds, err := dcl.Diff(desired.Env, actual.Env, dcl.DiffInfo{OperationSelector: dcl.TriggersOperation("updateDeliveryPipelineUpdateDeliveryPipelineOperation")}, fn.AddNest("Env")); len(ds) != 0 || err != nil {
 		if err != nil {
 			return nil, err
 		}
@@ -4690,6 +4937,13 @@ func compareDeliveryPipelineSerialPipelineStagesStrategyCanaryCanaryDeploymentNe
 		}
 		diffs = append(diffs, ds...)
 	}
+
+	if ds, err := dcl.Diff(desired.Analysis, actual.Analysis, dcl.DiffInfo{ObjectFunction: compareDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisNewStyle, EmptyObject: EmptyDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis, OperationSelector: dcl.TriggersOperation("updateDeliveryPipelineUpdateDeliveryPipelineOperation")}, fn.AddNest("Analysis")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
 	return diffs, nil
 }
 
@@ -4836,6 +5090,13 @@ func compareDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploy
 	}
 
 	if ds, err := dcl.Diff(desired.Postdeploy, actual.Postdeploy, dcl.DiffInfo{ObjectFunction: compareDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPostdeployNewStyle, EmptyObject: EmptyDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPostdeploy, OperationSelector: dcl.TriggersOperation("updateDeliveryPipelineUpdateDeliveryPipelineOperation")}, fn.AddNest("Postdeploy")); len(ds) != 0 || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		diffs = append(diffs, ds...)
+	}
+
+	if ds, err := dcl.Diff(desired.Analysis, actual.Analysis, dcl.DiffInfo{ObjectFunction: compareDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysisNewStyle, EmptyObject: EmptyDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis, OperationSelector: dcl.TriggersOperation("updateDeliveryPipelineUpdateDeliveryPipelineOperation")}, fn.AddNest("Analysis")); len(ds) != 0 || err != nil {
 		if err != nil {
 			return nil, err
 		}
@@ -5698,6 +5959,11 @@ func expandDeliveryPipelineSerialPipelineStagesStrategyStandard(c *Client, f *De
 	} else if !dcl.IsEmptyValueIndirect(v) {
 		m["verifyConfig"] = v
 	}
+	if v, err := expandDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis(c, f.Analysis, res); err != nil {
+		return nil, fmt.Errorf("error expanding Analysis into analysis: %w", err)
+	} else if !dcl.IsEmptyValueIndirect(v) {
+		m["analysis"] = v
+	}
 
 	return m, nil
 }
@@ -5717,6 +5983,7 @@ func flattenDeliveryPipelineSerialPipelineStagesStrategyStandard(c *Client, i in
 	r.Predeploy = flattenDeliveryPipelineSerialPipelineStagesStrategyStandardPredeploy(c, m["predeploy"], res)
 	r.Postdeploy = flattenDeliveryPipelineSerialPipelineStagesStrategyStandardPostdeploy(c, m["postdeploy"], res)
 	r.VerifyConfig = flattenDeliveryPipelineVerifyConfig(c, m["verifyConfig"], res)
+	r.Analysis = flattenDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis(c, m["analysis"], res)
 
 	return r
 }
@@ -7737,6 +8004,11 @@ func expandDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploym
 	} else if !dcl.IsEmptyValueIndirect(v) {
 		m["verifyConfig"] = v
 	}
+	if v, err := expandDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis(c, f.Analysis, res); err != nil {
+		return nil, fmt.Errorf("error expanding Analysis into analysis: %w", err)
+	} else if !dcl.IsEmptyValueIndirect(v) {
+		m["analysis"] = v
+	}
 
 	return m, nil
 }
@@ -7759,6 +8031,7 @@ func flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploy
 	r.Predeploy = flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPredeploy(c, m["predeploy"], res)
 	r.Postdeploy = flattenDeliveryPipelineSerialPipelineStagesStrategyCanaryCustomCanaryDeploymentPhaseConfigsPostdeploy(c, m["postdeploy"], res)
 	r.VerifyConfig = flattenDeliveryPipelineVerifyConfig(c, m["verifyConfig"], res)
+	r.Analysis = flattenDeliveryPipelineSerialPipelineStagesStrategyStandardAnalysis(c, m["analysis"], res)
 
 	return r
 }
