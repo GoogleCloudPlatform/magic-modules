@@ -614,6 +614,153 @@ func TestDetectExhaustiveMissingTests_CoreForceNewOmissionUnset(t *testing.T) {
 	}
 }
 
+func TestDetectExhaustiveMissingTests_NestedForceNew(t *testing.T) {
+	schemaDiff := diff.SchemaDiff{
+		"google_updatable_with_nested_forcenew": {
+			Fields: map[string]diff.FieldDiff{
+				"name": {
+					New: &schema.Schema{Type: schema.TypeString, Required: true, ForceNew: true},
+				},
+				"labels": {
+					New: &schema.Schema{Type: schema.TypeMap, Optional: true, Elem: &schema.Schema{Type: schema.TypeString}},
+				},
+				// MMv1 sets ForceNew: true on an immutable NestedObject without setting
+				// ForceNew: true on its child schemas on updatable resources.
+				"imm_block": {
+					New: &schema.Schema{Type: schema.TypeList, Optional: true, ForceNew: true, MaxItems: 1, Elem: &schema.Resource{}},
+				},
+				"imm_block.opt_child": {
+					New: &schema.Schema{Type: schema.TypeString, Optional: true},
+				},
+				// Non-ForceNew container block whose configurable children are all ForceNew.
+				"block_all_imm": {
+					New: &schema.Schema{Type: schema.TypeList, Optional: true, MaxItems: 1, Elem: &schema.Resource{}},
+				},
+				"block_all_imm.imm_child": {
+					New: &schema.Schema{Type: schema.TypeString, Required: true, ForceNew: true},
+				},
+				// Non-ForceNew container block with both ForceNew and mutable children:
+				// MODIFY is still required (mutable child can update in place), while
+				// UNSET uses omission because removing the block when imm_child is set
+				// forces replacement.
+				"block_mixed_imm": {
+					New: &schema.Schema{Type: schema.TypeList, Optional: true, MaxItems: 1, Elem: &schema.Resource{}},
+				},
+				"block_mixed_imm.imm_child": {
+					New: &schema.Schema{Type: schema.TypeString, Optional: true, ForceNew: true},
+				},
+				"block_mixed_imm.mut_child": {
+					New: &schema.Schema{Type: schema.TypeString, Optional: true},
+				},
+			},
+		},
+	}
+
+	gotInitial, err := DetectExhaustiveMissingTests(schemaDiff, nil, nil, false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	info := gotInitial["google_updatable_with_nested_forcenew"]
+	if info == nil {
+		t.Fatalf("expected google_updatable_with_nested_forcenew in results")
+	}
+
+	if got := info.Fields["imm_block.opt_child"].Modify; got.Status != StatusExempt || got.ExemptCode != "ancestor_force_new" {
+		t.Errorf("imm_block.opt_child.Modify = %+v, want EXEMPT (ancestor_force_new)", got)
+	}
+	if got := info.Fields["block_all_imm"].Modify; got.Status != StatusExempt || got.ExemptCode != "descendant_force_new" {
+		t.Errorf("block_all_imm.Modify = %+v, want EXEMPT (descendant_force_new)", got)
+	}
+	if got := info.Fields["block_mixed_imm"].Modify; got.Status != StatusMissing {
+		t.Errorf("block_mixed_imm.Modify = %+v, want MISSING", got)
+	}
+
+	tests := []*reader.Test{
+		{
+			Name: "TestAccUpdatableWithNestedForcenew_full",
+			Steps: []reader.Step{
+				{
+					reader.ResourceBlock: {
+						"google_updatable_with_nested_forcenew": {
+							"primary": {
+								"name":                      "\"n1\"",
+								"labels.env":                "\"dev\"",
+								"imm_block.opt_child":       "\"ic1\"",
+								"block_all_imm.imm_child":   "\"ai1\"",
+								"block_mixed_imm.imm_child": "\"mi1\"",
+								"block_mixed_imm.mut_child": "\"mm1\"",
+							},
+						},
+					},
+				},
+				{
+					reader.ResourceBlock: {
+						"google_updatable_with_nested_forcenew": {
+							"primary": {
+								"name":                      "\"n1\"",
+								"labels.env":                "\"prod\"",
+								"imm_block.opt_child":       "\"ic1\"",
+								"block_all_imm.imm_child":   "\"ai1\"",
+								"block_mixed_imm.imm_child": "\"mi1\"",
+								"block_mixed_imm.mut_child": "\"mm2\"",
+							},
+						},
+					},
+				},
+				{
+					reader.ResourceBlock: {
+						"google_updatable_with_nested_forcenew": {
+							"primary": {
+								"name":                      "\"n1\"",
+								"imm_block.opt_child":       "\"ic1\"",
+								"block_all_imm.imm_child":   "\"ai1\"",
+								"block_mixed_imm.imm_child": "\"mi1\"",
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			Name: "TestAccUpdatableWithNestedForcenew_basic",
+			Steps: []reader.Step{
+				{
+					reader.ResourceBlock: {
+						"google_updatable_with_nested_forcenew": {
+							"primary": {
+								"name":                      "\"n1\"",
+								"block_mixed_imm.mut_child": "\"mm1\"",
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			Name: "TestAccUpdatableWithNestedForcenew_minimal",
+			Steps: []reader.Step{
+				{
+					reader.ResourceBlock: {
+						"google_updatable_with_nested_forcenew": {
+							"primary": {
+								"name": "\"n1\"",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	gotCovered, err := DetectExhaustiveMissingTests(schemaDiff, nil, tests, false)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(gotCovered) != 0 {
+		t.Errorf("expected all nested ForceNew fields covered, got:\n%s", FormatExhaustiveMarkdown(gotCovered))
+	}
+}
+
 func TestDetectExhaustiveMissingTests_PlanCheckRequiredForInPlaceUpdates(t *testing.T) {
 	schemaDiff := diff.SchemaDiff{
 		"google_my_widget": {
