@@ -11,7 +11,7 @@ resource "google_design_center_component" "component" {
   location                     = "us-central1"
   space                        = "{{index $.Vars "space"}}"
   application_template         = google_design_center_application_template.example.application_template_id
-  component_id                 = "example-component"
+  component_id                 = "{{index $.ResourceIdVars "component_id"}}"
   display_name                 = "Example Component"
   shared_template_revision_uri = "projects/gcpdesigncenter/locations/us-central1/spaces/googlespace/sharedTemplates/1b5e09c8-780f-484e-b8ed-c7178f4e4342/revisions/r-24"
 

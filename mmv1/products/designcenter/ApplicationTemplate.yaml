@@ -102,6 +102,7 @@ samples:
       - name: designcenter_application_template_root_variables_basic
         resource_id_vars:
           application_template_id: example-root-vars-template
+          component_id: example-component
         vars:
           project: my-project-name
           space: example-space
@@ -111,6 +112,7 @@ samples:
       - name: designcenter_application_template_root_variables
         resource_id_vars:
           application_template_id: example-root-vars-template
+          component_id: example-component
         vars:
           project: my-project-name
           space: example-space
@@ -122,6 +124,7 @@ samples:
       - name: designcenter_application_template_root_variables
         resource_id_vars:
           application_template_id: example-root-vars-template
+          component_id: example-component
         vars:
           project: my-project-name
           space: example-space
