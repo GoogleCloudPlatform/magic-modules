@@ -45,6 +45,22 @@ samples:
         # API caps display names at 20 characters, so no random suffix is added.
         test_vars_overrides:
           display_name: '"tf-test-tenant"'
+  - name: identity_platform_tenant_anonymous
+    primary_resource_id: tenant
+    exclude_basic_doc: true
+    steps:
+      - name: identity_platform_tenant_anonymous
+        vars:
+          display_name: tenant
+          enable_anonymous_user: true
+        test_vars_overrides:
+          display_name: '"tf-test-anon-tenant"'
+      - name: identity_platform_tenant_anonymous
+        vars:
+          display_name: tenant
+          enable_anonymous_user: false
+        test_vars_overrides:
+          display_name: '"tf-test-anon-tenant"'
 parameters:
 properties:
   - name: name
@@ -66,6 +82,10 @@ properties:
     type: Boolean
     description: |
       Whether to enable email link user authentication.
+  - name: enableAnonymousUser
+    type: Boolean
+    description: |
+      Whether to enable anonymous user authentication.
   - name: disableAuth
     type: Boolean
     description: |
