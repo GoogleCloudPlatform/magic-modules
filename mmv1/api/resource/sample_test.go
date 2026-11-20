@@ -200,7 +200,7 @@ func TestSample_InheritFromSample(t *testing.T) {
 		t.Errorf("step 1 IgnoreReadExtra mismatch (-want +got):\n%s", diff)
 	}
 
-	// Verify an unused sample-level variable is caught by Step.Validate.
+	// Verify an unused sample-level variable is caught by Sample.Validate.
 	sUnused := &resource.Sample{
 		Name:              "topic_unused_sample_var",
 		PrimaryResourceId: "primary",
@@ -213,6 +213,7 @@ func TestSample_InheritFromSample(t *testing.T) {
 	sUnused.Steps[0].PrimaryResourceId = "primary"
 	sUnused.Steps[0].InheritFromSample(sUnused)
 	sUnused.Steps[0].SetHCLText(sysfs)
+	sUnused.Steps[0].PruneUnusedInheritedVars()
 	errs := sUnused.Validate("Topic")
 	if len(errs) != 1 || !strings.Contains(errs[0].Error(), `unused variable "never_used_anywhere"`) {
 		t.Errorf("Validate() = %v, want unused never_used_anywhere error", errs)
@@ -234,5 +235,60 @@ func TestSample_InheritFromSample(t *testing.T) {
 	errs = sCollision.Validate("Topic")
 	if len(errs) != 1 || !strings.Contains(errs[0].Error(), "cannot exist in both 'vars' and 'resource_id_vars'") {
 		t.Errorf("Validate() = %v, want cross-level vars/resource_id_vars collision error", errs)
+	}
+}
+
+func TestSample_PruneUnusedInheritedVars(t *testing.T) {
+	t.Parallel()
+
+	sysfs := fstest.MapFS{
+		"templates/step0.tf.tmpl": &fstest.MapFile{
+			Data: []byte(`resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.ResourceIdVars "topic_id"}}"
+  env  = "{{index $.Vars "env"}}"
+  opt  = "{{index $.Vars "opt_only_step0"}}"
+}
+`),
+		},
+		"templates/step1.tf.tmpl": &fstest.MapFile{
+			Data: []byte(`resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.ResourceIdVars "topic_id"}}"
+  env  = "{{index $.Vars "env"}}"
+}
+`),
+		},
+	}
+
+	s := &resource.Sample{
+		Name:              "topic_prune",
+		PrimaryResourceId: "primary",
+		ConfigPath:        "templates/step0.tf.tmpl",
+		ResourceIdVars:    map[string]string{"topic_id": "my-topic"},
+		Vars:              resource.StepVars{"env": "v1", "opt_only_step0": "present"},
+		Steps: []*resource.Step{
+			{},
+			{
+				ConfigPath: "templates/step1.tf.tmpl",
+				Vars:       resource.StepVars{"env": "v2"},
+			},
+		},
+	}
+
+	for _, st := range s.Steps {
+		st.Name = s.Name
+		st.PrimaryResourceId = s.PrimaryResourceId
+		st.InheritFromSample(s)
+		st.SetHCLText(sysfs)
+		st.PruneUnusedInheritedVars()
+	}
+
+	if errs := s.Validate("Topic"); len(errs) != 0 {
+		t.Fatalf("Sample.Validate() unexpected errors: %v", errs)
+	}
+	if _, ok := s.Steps[0].TestContextVars["opt_only_step0"]; !ok {
+		t.Errorf("expected opt_only_step0 to remain in step 0 TestContextVars, got %v", s.Steps[0].TestContextVars)
+	}
+	if _, ok := s.Steps[1].TestContextVars["opt_only_step0"]; ok {
+		t.Errorf("expected opt_only_step0 to be pruned from step 1 TestContextVars, got %v", s.Steps[1].TestContextVars)
 	}
 }

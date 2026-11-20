@@ -160,8 +160,62 @@ func (s *Sample) Validate(rName string) (es []error) {
 	}
 	es = append(es, s.ValidateExternalProviders()...)
 
+	// TestSampleSetUp skips samples and steps above TargetVersionName (e.g.
+	// min_version: beta during GA builds), and unit tests may call Validate
+	// directly without loading templates; only check sample-level unused
+	// variables when every step's template has been loaded (hclLoaded) so
+	// variables consumed solely by skipped version-gated steps are not flagged.
+	allLoaded := len(s.Steps) > 0
+	usedOrReferenced := make(map[string]bool)
 	for _, step := range s.Steps {
 		es = append(es, step.Validate(rName, s.Name)...)
+		if !step.hclLoaded {
+			allLoaded = false
+			continue
+		}
+		for k := range step.usedPlaceholders() {
+			usedOrReferenced[k] = true
+		}
+	}
+	if allLoaded {
+		isUsed := func(k string) bool {
+			if usedOrReferenced[k] {
+				return true
+			}
+			for _, step := range s.Steps {
+				if step.templateRefsVarKey(k) {
+					return true
+				}
+			}
+			return false
+		}
+		for _, k := range slices.Sorted(maps.Keys(s.Vars)) {
+			if !isUsed(k) {
+				es = append(es, fmt.Errorf("unused variable %q in 'vars' for sample %q of resource %q", k, s.Name, rName))
+			}
+		}
+		for _, k := range slices.Sorted(maps.Keys(s.ResourceIdVars)) {
+			if !isUsed(k) {
+				es = append(es, fmt.Errorf("unused variable %q in 'resource_id_vars' for sample %q of resource %q", k, s.Name, rName))
+			}
+		}
+		for _, k := range slices.Sorted(maps.Keys(s.TestEnvVars)) {
+			if !isUsed(k) {
+				es = append(es, fmt.Errorf("unused variable %q in 'test_env_vars' for sample %q of resource %q", k, s.Name, rName))
+			}
+		}
+		for _, k := range slices.Sorted(maps.Keys(s.TestVarsOverrides)) {
+			if !isUsed(k) {
+				es = append(es, fmt.Errorf("unused variable %q in 'test_vars_overrides' for sample %q of resource %q", k, s.Name, rName))
+			}
+		}
+		for _, k := range slices.Sorted(maps.Keys(s.OicsVarsOverrides)) {
+			_, inVars := s.Vars[k]
+			_, inResourceIdVars := s.ResourceIdVars[k]
+			if (inVars || inResourceIdVars) && !isUsed(k) {
+				es = append(es, fmt.Errorf("unused variable %q in 'oics_vars_overrides' for sample %q of resource %q", k, s.Name, rName))
+			}
+		}
 	}
 
 	return es

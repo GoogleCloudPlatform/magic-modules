@@ -2395,6 +2395,7 @@ func (r Resource) TestSampleSetUp(sysfs fs.FS) {
 			if step == firstStep {
 				step.IamHCLText = iamSampleBody
 			}
+			step.PruneUnusedInheritedVars()
 			if !sample.ExcludeTest {
 				camelBase := google.Camelize(step.Name, "lower")
 				dedupKey := camelBase + "\x00" + step.TestHCLText
