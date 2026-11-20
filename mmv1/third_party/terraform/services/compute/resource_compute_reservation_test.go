@@ -228,3 +228,52 @@ resource "google_compute_reservation" "reservation" {
 }
 `, context)
 }
+
+// Compute Engine only permits in-place PATCH updates of enable_emergent_maintenance on
+// Hypercompute Cluster (Extended Reservation) allocations, which require dedicated ExR
+// capacity delivery and cannot be dynamically provisioned in standard CI projects.
+// In-place update encoding and isolated ?paths=enableEmergentMaintenance PATCH routing
+// are verified in resource_compute_reservation_internal_test.go.
+func TestAccComputeReservation_enableEmergentMaintenance(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"reservation_name": fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+		"zone":             "us-west1-a",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeReservationDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeReservation_enableEmergentMaintenance(context),
+			},
+			{
+				ResourceName:            "google_compute_reservation.reservation",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"enable_emergent_maintenance"},
+			},
+		},
+	})
+}
+
+func testAccComputeReservation_enableEmergentMaintenance(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_reservation" "reservation" {
+  name = "%{reservation_name}"
+  zone = "%{zone}"
+
+  specific_reservation {
+    count = 1
+    instance_properties {
+      machine_type = "n2-standard-2"
+    }
+  }
+
+  enable_emergent_maintenance = true
+}
+`, context)
+}
