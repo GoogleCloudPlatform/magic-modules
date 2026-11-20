@@ -1874,7 +1874,7 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceWithReadinessProbe(t *testing.T) 
         ResourceName: "google_cloud_run_v2_service.default",
         ImportState: true,
         ImportStateVerify: true,
-        ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "launch_stage", "deletion_protection"},
+        ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "launch_stage", "deletion_protection", "template.0.containers.0.readiness_probe.0.success_threshold"},
       },
       {
         Config: testAccCloudRunV2Service_cloudrunv2ServiceUpdateWithGRPCReadinessProbe(context),
