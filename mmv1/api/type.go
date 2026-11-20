@@ -16,6 +16,7 @@ package api
 import (
 	"fmt"
 	"log"
+	"path/filepath"
 	"slices"
 	"strings"
 
@@ -37,22 +38,11 @@ var defaultFromApiConflictAllowlist = []string{
 	"Rule.rule_id",
 }
 
-// Existing Enum fields with empty enum_values, grandfathered to avoid breaking existing schemas.
-// Do not add new fields to this list.
-var emptyEnumValuesAllowlist = []string{
-	"FutureReservation.status.amendment_status",
-	"FutureReservation.status.last_known_good_state.procurement_status",
-}
-
-// Existing output-only fields that also set send_empty_value, grandfathered to avoid changing existing schemas.
-// Do not add new fields to this list.
+// Existing output-only fields under a writable parent that also set send_empty_value,
+// grandfathered to avoid changing existing request-expansion behavior.
+// Keys use "<product_folder>/<Resource>.<field_path>". Do not add new fields to this list.
 var sendEmptyValueOutputAllowlist = []string{
-	"AppVersion.snapshot.tools.open_api_tool.api_authentication.service_agent_id_token_auth_config",
-	"AuthProvider.auth_provider_type_params.ge_auth_provider",
-	"NetworkFirewallPolicyWithRules.predefined_rules.enable_logging",
-	"RegionNetworkFirewallPolicyWithRules.predefined_rules.enable_logging",
-	"Tool.open_api_tool.api_authentication.service_agent_id_token_auth_config",
-	"Tool.remote_agent_tool.api_authentication.service_agent_id_token_auth_config",
+	"agentidentity/AuthProvider.auth_provider_type_params.ge_auth_provider",
 }
 
 // Represents a property type
@@ -551,8 +541,7 @@ func (t *Type) Validate(rName string) (es []error) {
 		es = append(es, fmt.Errorf("property %s cannot be an output-only Enum in resource %s; use String instead", fullFieldPath, rName))
 	}
 
-	fieldKey := fmt.Sprintf("%s.%s", rName, fullFieldPath)
-	if !t.isExcluded() && t.IsA("Enum") && len(t.EnumValues) == 0 && !slices.Contains(emptyEnumValuesAllowlist, fieldKey) {
+	if !t.isExcluded() && t.IsA("Enum") && len(t.EnumValues) == 0 {
 		es = append(es, fmt.Errorf("property %s of type Enum must specify non-empty enum_values in resource %s", fullFieldPath, rName))
 	}
 
@@ -561,7 +550,7 @@ func (t *Type) Validate(rName string) (es []error) {
 		es = append(es, fmt.Errorf("property %s cannot manually include 'Possible values:' in description in resource %s; enum_values are appended automatically", fullFieldPath, rName))
 	}
 
-	if !t.isExcluded() && t.SendEmptyValue && t.Output && !slices.Contains(sendEmptyValueOutputAllowlist, fieldKey) {
+	if !t.isExcluded() && t.SendEmptyValue && t.Output && !slices.Contains(sendEmptyValueOutputAllowlist, t.allowlistKey(rName, fullFieldPath)) {
 		es = append(es, fmt.Errorf("property %s cannot set both send_empty_value and output in resource %s", fullFieldPath, rName))
 	}
 
@@ -683,6 +672,22 @@ func (t *Type) isExcluded() bool {
 		return t.ResourceMetadata.IsExcluded()
 	}
 	return false
+}
+
+// allowlistKey returns "<product_folder>/<Resource>.<field_path>" for scoping validation allowlists.
+func (t *Type) allowlistKey(rName, fullFieldPath string) string {
+	productFolder := ""
+	if t != nil && t.ResourceMetadata != nil && t.ResourceMetadata.ProductMetadata != nil {
+		if t.ResourceMetadata.ProductMetadata.PackagePath != "" {
+			productFolder = filepath.Base(t.ResourceMetadata.ProductMetadata.PackagePath)
+		} else if t.ResourceMetadata.ProductMetadata.Name != "" {
+			productFolder = strings.ToLower(t.ResourceMetadata.ProductMetadata.Name)
+		}
+	}
+	if productFolder == "" {
+		return fmt.Sprintf("%s.%s", rName, fullFieldPath)
+	}
+	return fmt.Sprintf("%s/%s.%s", productFolder, rName, fullFieldPath)
 }
 
 // hasOutputAncestor reports whether any ancestor of t has Output set to true.

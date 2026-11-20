@@ -1812,4 +1812,46 @@ func TestTypeValidateEnumAndSendEmptyValue(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("send_empty_value allowlist is scoped to product folder", func(t *testing.T) {
+		t.Parallel()
+		makeRes := func(pkgPath, prodName string) (*Resource, *Type) {
+			prod := &Product{
+				Name:        prodName,
+				PackagePath: pkgPath,
+				Versions:    []*product.Version{{Name: "ga", BaseUrl: "ga_url"}},
+			}
+			leaf := &Type{
+				Name:             "geAuthProvider",
+				Type:             "NestedObject",
+				AllowEmptyObject: true,
+				SendEmptyValue:   true,
+				Output:           true,
+				Properties:       []*Type{},
+			}
+			parent := &Type{
+				Name:       "authProviderTypeParams",
+				Type:       "NestedObject",
+				Properties: []*Type{leaf},
+			}
+			res := &Resource{
+				Name:       "AuthProvider",
+				Properties: []*Type{parent},
+			}
+			res.SetDefault(prod)
+			return res, parent
+		}
+
+		resAllowed, parentAllowed := makeRes("products/agentidentity", "AgentIdentity")
+		if errs := parentAllowed.Validate(resAllowed.Name); len(errs) > 0 {
+			t.Fatalf("expected allowlisted agentidentity field to pass, got: %v", errs)
+		}
+
+		resOther, parentOther := makeRes("products/otherproduct", "OtherProduct")
+		errs := parentOther.Validate(resOther.Name)
+		want := "property auth_provider_type_params.ge_auth_provider cannot set both send_empty_value and output in resource AuthProvider"
+		if len(errs) != 1 || !strings.Contains(errs[0].Error(), want) {
+			t.Fatalf("expected error containing %q for non-allowlisted product, got: %v", want, errs)
+		}
+	})
 }

@@ -244,9 +244,10 @@ properties:
             description: |
               ID of the instance template used to populate the Future Reservation properties.
       - name: 'amendmentStatus'
-        type: Enum
+        type: String
         description: |
           The current status of the requested amendment.
+        output: true
       - name: 'lastKnownGoodState'
         type: NestedObject
         description: |
@@ -388,9 +389,10 @@ properties:
                           description: |
                             The project ID, should be same as the key of this project config in the parent map.
           - name: 'procurementStatus'
-            type: Enum
+            type: String
             description: |
               The status of the last known good state for the Future Reservation
+            output: true
           - name: 'namePrefix'
             type: String
             description: |
