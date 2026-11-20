@@ -69,6 +69,31 @@ samples:
         resource_id_vars:
           engine_id: example-engine-id
           data_store_id: example-datastore-id
+  - name: discoveryengine_searchengine_agent_gateway
+    primary_resource_id: agent_gateway
+    steps:
+      - name: discoveryengine_searchengine_agent_gateway
+        resource_id_vars:
+          engine_id: example-engine-id
+          data_store_id: example-datastore-id
+          agent_gateway_name: example-agent-gateway
+      - name: discoveryengine_searchengine_agent_gateway_update
+        resource_id_vars:
+          engine_id: example-engine-id
+          data_store_id: example-datastore-id
+          agent_gateway_name: example-agent-gateway
+          agent_gateway_name_updated: example-agent-gateway-2
+      - name: discoveryengine_searchengine_agent_gateway_detach
+        resource_id_vars:
+          engine_id: example-engine-id
+          data_store_id: example-datastore-id
+          agent_gateway_name: example-agent-gateway
+          agent_gateway_name_updated: example-agent-gateway-2
+      - name: discoveryengine_searchengine_agent_gateway
+        resource_id_vars:
+          engine_id: example-engine-id
+          data_store_id: example-datastore-id
+          agent_gateway_name: example-agent-gateway
 parameters:
   - name: engineId
     type: String
@@ -283,3 +308,24 @@ properties:
       chosen to enable it. Each value is one of `MODEL_STATE_UNSPECIFIED`,
       `MODEL_ENABLED`, or `MODEL_DISABLED`; see the [ModelState API reference](https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.engines#modelstate)
       for details.
+  - name: agentGatewaySetting
+    type: NestedObject
+    description: |
+      Agent Gateway setting, which may be attached to Gemini Enterprise
+      resources for egress control of Gemini Enterprise agents to agents
+      and tools outside of Gemini Enterprise.
+    properties:
+      - name: defaultEgressAgentGateway
+        type: NestedObject
+        description: |
+          The default egress agent gateway to use, when this setting is
+          applied to a Gemini Enterprise resource. The deployment mode must
+          be `GOOGLE_MANAGED`, and the governed access path must be
+          `AGENT_TO_ANYWHERE`.
+        properties:
+          - name: name
+            type: String
+            required: true
+            description: |
+              The resource name of the agent gateway. Expected format:
+              `projects/{project_number}/locations/{location}/agentGateways/{agent_gateway}`.
