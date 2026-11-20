@@ -1,0 +1,19 @@
+// isApihubAttributeCardinalityDecrease reports whether cardinality is being
+// lowered. The API only allows increasing cardinality in place, so a decrease
+// recreates the attribute.
+func isApihubAttributeCardinalityDecrease(_ context.Context, old, new, _ interface{}) bool {
+	oldCardinality, ok := old.(int)
+	if !ok {
+		return false
+	}
+	newCardinality, ok := new.(int)
+	if !ok {
+		return false
+	}
+	// 0 means the value isn't set or isn't known yet. The API only accepts
+	// values from 1 to 20.
+	if oldCardinality == 0 || newCardinality == 0 {
+		return false
+	}
+	return newCardinality < oldCardinality
+}

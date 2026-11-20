@@ -1,0 +1,28 @@
+resource "google_apihub_attribute" "{{$.PrimaryResourceId}}" {
+  project      = "{{index $.Vars "project"}}"
+  location     = "us-central1"
+  attribute_id = "{{index $.ResourceIdVars "attribute_id"}}"
+  display_name = "{{index $.Vars "display_name"}}"
+  description  = "{{index $.Vars "description"}}"
+  scope        = "VERSION"
+  data_type    = "ENUM"
+  cardinality  = {{index $.Vars "cardinality"}}
+
+  allowed_values {
+    id           = "{{index $.Vars "first_value_id"}}"
+    display_name = "{{index $.Vars "first_value_display_name"}}"
+    description  = "{{index $.Vars "first_value_description"}}"
+  }
+
+  allowed_values {
+    id           = "value-2"
+    display_name = "Value 2"
+    description  = "{{index $.Vars "second_value_description"}}"
+  }
+
+  allowed_values {
+    id           = "{{index $.Vars "third_value_id"}}"
+    display_name = "{{index $.Vars "third_value_display_name"}}"
+    description  = "{{index $.Vars "third_value_description"}}"
+  }
+}
