@@ -2,6 +2,9 @@ package sql
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"strings"
 	"testing"
@@ -524,7 +527,7 @@ func TestFlattenAndExpandSqlServerPasswordValidationPolicy(t *testing.T) {
 			"password_maximum_age":    "2592000s",
 		},
 	})
-	wantEnabled := &sqladmin.SqlServerPasswordValidationPolicy{
+	wantEnabled := &sqlServerPasswordValidationPolicy{
 		EnablePasswordPolicy:  true,
 		PasswordMinimumLength: 10,
 		PasswordHistoryLength: 5,
@@ -559,7 +562,7 @@ func TestFlattenAndExpandSqlServerPasswordValidationPolicy(t *testing.T) {
 			"password_maximum_age":    "",
 		},
 	})
-	wantDisabled := &sqladmin.SqlServerPasswordValidationPolicy{
+	wantDisabled := &sqlServerPasswordValidationPolicy{
 		EnablePasswordPolicy: false,
 		ForceSendFields:      []string{"EnablePasswordPolicy"},
 		NullFields: []string{
@@ -571,6 +574,70 @@ func TestFlattenAndExpandSqlServerPasswordValidationPolicy(t *testing.T) {
 	}
 	if !reflect.DeepEqual(expandedDisabled, wantDisabled) {
 		t.Fatalf("expand disabled got %#v, want %#v", expandedDisabled, wantDisabled)
+	}
+
+	var gotInsertPayload map[string]interface{}
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.Method {
+		case http.MethodPost:
+			_ = json.NewDecoder(r.Body).Decode(&gotInsertPayload)
+			_, _ = w.Write([]byte(`{"name":"op-1","status":"DONE"}`))
+		case http.MethodGet:
+			_, _ = w.Write([]byte(`{
+				"name": "inst-1",
+				"settings": {
+					"tier": "db-custom-1-3840",
+					"sqlServerPasswordValidationPolicy": {
+						"enablePasswordPolicy": true,
+						"passwordMinimumLength": 12,
+						"passwordHistoryLength": 8,
+						"passwordMinimumAge": "172800s",
+						"passwordMaximumAge": "5184000s"
+					}
+				}
+			}`))
+		}
+	}))
+	defer server.Close()
+
+	cfg := &transport_tpg.Config{
+		Context:         context.Background(),
+		Client:          server.Client(),
+		CustomEndpoints: map[string]string{"sql_custom_endpoint": server.URL + "/sql/v1beta4/"},
+	}
+	if _, err := newClientWithSqlServerPasswordPolicy(cfg, "test-ua", expandedDisabled, nil).Instances.Insert("p1", &sqladmin.DatabaseInstance{
+		Name:     "inst-1",
+		Settings: &sqladmin.Settings{Tier: "db-custom-1-3840"},
+	}).Do(); err != nil {
+		t.Fatalf("Insert failed: %v", err)
+	}
+	gotPVP := gotInsertPayload["settings"].(map[string]interface{})["sqlServerPasswordValidationPolicy"]
+	wantPVP := map[string]interface{}{
+		"enablePasswordPolicy":  false,
+		"passwordMinimumLength": nil,
+		"passwordHistoryLength": nil,
+		"passwordMinimumAge":    nil,
+		"passwordMaximumAge":    nil,
+	}
+	if !reflect.DeepEqual(gotPVP, wantPVP) {
+		t.Fatalf("wire sqlServerPasswordValidationPolicy = %#v, want %#v", gotPVP, wantPVP)
+	}
+
+	var captured []byte
+	if _, err := newClientWithSqlServerPasswordPolicy(cfg, "test-ua", nil, &captured).Instances.Get("p1", "inst-1").Do(); err != nil {
+		t.Fatalf("Get failed: %v", err)
+	}
+	parsed := parseSqlServerPasswordValidationPolicyFromInstanceJSON(captured)
+	wantParsed := &sqlServerPasswordValidationPolicy{
+		EnablePasswordPolicy:  true,
+		PasswordMinimumLength: 12,
+		PasswordHistoryLength: 8,
+		PasswordMinimumAge:    "172800s",
+		PasswordMaximumAge:    "5184000s",
+	}
+	if !reflect.DeepEqual(parsed, wantParsed) {
+		t.Fatalf("parsed = %#v, want %#v", parsed, wantParsed)
 	}
 }
 

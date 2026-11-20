@@ -78,7 +78,44 @@ func GetSQLDatabaseInstanceApiObject(d tpgresource.TerraformResourceData, config
 		ReplicaConfiguration: expandReplicaConfiguration(d.Get("replica_configuration").([]interface{})),
 	}
 
-	return cai.JsonMap(instance)
+	obj, err := cai.JsonMap(instance)
+	if err != nil {
+		return nil, err
+	}
+	if settingsList, ok := d.Get("settings").([]interface{}); ok && len(settingsList) > 0 && settingsList[0] != nil {
+		sMap := settingsList[0].(map[string]interface{})
+		if pvpList, ok := sMap["sql_server_password_validation_policy"].([]interface{}); ok {
+			if pvp := expandSqlServerPasswordValidationPolicy(pvpList); pvp != nil {
+				if objSettings, ok := obj["settings"].(map[string]interface{}); ok {
+					objSettings["sqlServerPasswordValidationPolicy"] = pvp
+				}
+			}
+		}
+	}
+	return obj, nil
+}
+
+func expandSqlServerPasswordValidationPolicy(configured []interface{}) map[string]interface{} {
+	if len(configured) == 0 || configured[0] == nil {
+		return nil
+	}
+	raw := configured[0].(map[string]interface{})
+	out := map[string]interface{}{
+		"enablePasswordPolicy": raw["enable_password_policy"].(bool),
+	}
+	if v, ok := raw["password_minimum_length"].(int); ok && v != 0 {
+		out["passwordMinimumLength"] = int64(v)
+	}
+	if v, ok := raw["password_history_length"].(int); ok && v != 0 {
+		out["passwordHistoryLength"] = int64(v)
+	}
+	if v, ok := raw["password_minimum_age"].(string); ok && v != "" {
+		out["passwordMinimumAge"] = v
+	}
+	if v, ok := raw["password_maximum_age"].(string); ok && v != "" {
+		out["passwordMaximumAge"] = v
+	}
+	return out
 }
 
 // Detects whether a database is 1st Generation by inspecting the tier name
