@@ -3,10 +3,11 @@
 // which block each heading documents.
 //
 // It only makes changes that don't alter wording:
-//   - add a `<a name="nested_..."></a>` anchor to an anchorless
+//   - add a `<a name="nested_...">` anchor to an anchorless
 //     "The `x` block supports:" heading, and
-//   - link the parent field's bullet to that anchor, either by turning
-//     "Structure is documented below" into a link or by appending
+//   - link the parent field's bullet to that anchor, by fixing a broken
+//     "[documented below](#...)" link, by turning "Structure is documented
+//     below" into a link, or by appending
 //     " Structure is [documented below](#nested_...)." to the bullet's first
 //     paragraph.
 //
@@ -16,7 +17,6 @@ package docfixer
 import (
 	"fmt"
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -28,24 +28,26 @@ var (
 	bulletRe       = regexp.MustCompile("^[*-][ \\t]+`([a-z0-9_./]+)`")
 	sectionRe      = regexp.MustCompile(`^##[ \t]+(.*)$`)
 	fieldSectionRe = regexp.MustCompile(`^(?:Argument|Attributes|Ephemeral Attributes) Reference\b`)
+	argSectionRe   = regexp.MustCompile(`^##[ \t]+Argument Reference\b`)
 	hrRe           = regexp.MustCompile(`^[ \t]*(?:- - -|-{3,})[ \t]*$`)
 	anchorLineRe   = regexp.MustCompile(`^<a\s+name="`)
+	anchorNameRe   = regexp.MustCompile(`<a\s+name="([^"]+)"`)
 	plainBelowRe   = regexp.MustCompile(`(?i)structure (?:is )?documented below`)
 	linkedBelowRe  = regexp.MustCompile(`documented below\]\(#([a-z0-9_-]+)\)`)
 	indentedListRe = regexp.MustCompile(`^\s+[*-]\s`)
 )
 
-// Block is a nested block in a resource schema.
-type Block struct {
-	Path     string // dotted path, e.g. "serial_pipeline.stages"
-	Name     string // last path element
-	Parent   string // dotted path of the parent block, "" for top level
-	Children map[string]bool
+// block is a nested block in a resource schema.
+type block struct {
+	path     string // dotted path, e.g. "serial_pipeline.stages"
+	name     string // last path element
+	parent   string // dotted path of the parent block, "" for top level
+	children map[string]bool
 }
 
-// Blocks returns all nested blocks in the schema, keyed by dotted path.
-func Blocks(r *schema.Resource) map[string]*Block {
-	out := make(map[string]*Block)
+// schemaBlocks returns all nested blocks in the schema, keyed by dotted path.
+func schemaBlocks(r *schema.Resource) map[string]*block {
+	out := make(map[string]*block)
 	var walk func(prefix string, s map[string]*schema.Schema)
 	walk = func(prefix string, s map[string]*schema.Schema) {
 		for name, f := range s {
@@ -57,9 +59,9 @@ func Blocks(r *schema.Resource) map[string]*Block {
 			if prefix != "" {
 				path = prefix + "." + name
 			}
-			b := &Block{Path: path, Name: name, Parent: prefix, Children: make(map[string]bool)}
+			b := &block{path: path, name: name, parent: prefix, children: make(map[string]bool)}
 			for c := range elem.Schema {
-				b.Children[c] = true
+				b.children[c] = true
 			}
 			out[path] = b
 			walk(path, elem.Schema)
@@ -69,14 +71,15 @@ func Blocks(r *schema.Resource) map[string]*Block {
 	return out
 }
 
+// heading is a "The `x` block supports:" line and the bullets under it.
 type heading struct {
 	line    int // index into lines
 	end     int // exclusive end of the heading's region
 	name    string
 	anchor  string // existing anchor, if any
 	bullets []string
-	path    string // resolved block path
-	shared  []string
+	path    string   // resolved block path
+	shared  []string // other block paths with the same shape that this heading documents
 }
 
 // Result describes what Fix did.
@@ -89,10 +92,23 @@ type Result struct {
 // Fix applies the mechanical fixes to a doc for the resource described by r.
 func Fix(doc string, r *schema.Resource) Result {
 	crlf := strings.Contains(doc, "\r\n")
-	text := strings.ReplaceAll(doc, "\r\n", "\n")
-	lines := strings.Split(text, "\n")
-	res := Result{}
-	blocks := Blocks(r)
+	lines := strings.Split(strings.ReplaceAll(doc, "\r\n", "\n"), "\n")
+	res := Result{Text: doc}
+	blocks := schemaBlocks(r)
+
+	// Docs with one Argument Reference section per variant (e.g. per
+	// environment generation) repeat the same blocks in each, so a heading
+	// can't be matched to its parent bullet by position.
+	argSections := 0
+	for _, l := range lines {
+		if argSectionRe.MatchString(l) {
+			argSections++
+		}
+	}
+	if argSections > 1 {
+		res.Notes = append(res.Notes, fmt.Sprintf("%d Argument Reference sections; doc left alone", argSections))
+		return res
+	}
 
 	// Mark which lines are in field reference sections.
 	inField := make([]bool, len(lines))
@@ -134,24 +150,25 @@ func Fix(doc string, r *schema.Resource) Result {
 		headings = append(headings, h)
 	}
 
-	// Root bullets: column-0 bullets in field sections that aren't inside any heading region.
+	// Root bullets are column-0 bullets in field sections outside any heading
+	// region. Regions started by bare anchors (not "The `x` block" headings)
+	// count as heading regions too.
 	inRegion := make([]bool, len(lines))
 	for _, h := range headings {
 		for k := h.line; k < h.end; k++ {
 			inRegion[k] = true
 		}
 	}
-	// Also treat regions started by bare anchors (not "The `x` block" headings) as non-root.
 	for i, l := range lines {
-		if inField[i] && anchorLineRe.MatchString(l) && headingRe.FindStringSubmatch(l) == nil {
+		if inField[i] && anchorLineRe.MatchString(l) && !headingRe.MatchString(l) {
 			for k := i; k < len(lines) && inField[k] && (k == i || !isBoundary(k)); k++ {
 				inRegion[k] = true
 			}
 		}
 	}
 
-	// bulletLine finds the line of the bullet for `name` among the given candidate lines.
-	findBullet := func(name string, from, to int, root bool) []int {
+	// findBullets returns the lines in [from, to) with a bullet for name.
+	findBullets := func(name string, from, to int, root bool) []int {
 		var out []int
 		for k := from; k < to; k++ {
 			if !inField[k] || (root && inRegion[k]) {
@@ -166,47 +183,50 @@ func Fix(doc string, r *schema.Resource) Result {
 
 	// Resolve each heading to a block path.
 	resolved := map[string]*heading{} // path -> heading
-	parentResolved := func(b *Block) bool { return b.Parent == "" || resolved[b.Parent] != nil }
-	parentBulletLine := func(b *Block) int {
+	parentResolved := func(b *block) bool { return b.parent == "" || resolved[b.parent] != nil }
+	// parentBulletLine returns the line of b's bullet in its parent's
+	// region, or -1 if there isn't exactly one.
+	parentBulletLine := func(b *block) int {
 		var cands []int
-		if b.Parent == "" {
-			cands = findBullet(b.Name, 0, len(lines), true)
-		} else if ph := resolved[b.Parent]; ph != nil {
-			cands = findBullet(b.Name, ph.line+1, ph.end, false)
+		if b.parent == "" {
+			cands = findBullets(b.name, 0, len(lines), true)
+		} else if ph := resolved[b.parent]; ph != nil {
+			cands = findBullets(b.name, ph.line+1, ph.end, false)
 		}
 		if len(cands) == 1 {
 			return cands[0]
 		}
 		return -1
 	}
-	matches := func(h *heading, b *Block) bool {
-		if b.Name != h.name || len(h.bullets) == 0 {
+	// matches reports whether every bullet under h is a field of b.
+	matches := func(h *heading, b *block) bool {
+		if b.name != h.name || len(h.bullets) == 0 {
 			return false
 		}
 		for _, c := range h.bullets {
-			if !b.Children[strings.SplitN(c, ".", 2)[0]] {
+			if !b.children[strings.SplitN(c, ".", 2)[0]] {
 				return false
 			}
 		}
 		return true
 	}
+	// Resolve outside in: a nested block's heading can only be resolved once
+	// its parent's heading has been.
 	for changed := true; changed; {
 		changed = false
 		for _, h := range headings {
 			if h.path != "" {
 				continue
 			}
-			var cands []*Block
+			var cands []*block
 			for _, b := range blocks {
-				if resolved[b.Path] == nil && matches(h, b) && parentResolved(b) {
+				if resolved[b.path] == nil && matches(h, b) && parentResolved(b) {
 					cands = append(cands, b)
 				}
 			}
-			if len(cands) == 0 {
-				continue
-			}
 			// Prefer the candidate whose parent bullet is the closest one before the heading.
-			best, bestLine, tie := (*Block)(nil), -1, false
+			var best *block
+			bestLine, tie := -1, false
 			for _, b := range cands {
 				pl := parentBulletLine(b)
 				if pl < 0 || pl > h.line {
@@ -224,21 +244,21 @@ func Fix(doc string, r *schema.Resource) Result {
 			if best == nil || tie {
 				continue
 			}
-			h.path = best.Path
-			resolved[best.Path] = h
+			h.path = best.path
+			resolved[best.path] = h
 			changed = true
 		}
 	}
 
-	// Blocks with the same schema shape under other parents that have no heading of their own
-	// share the heading (the doc documents the shape once).
+	// Blocks with the same schema shape under other parents that have no
+	// heading of their own share the heading (the doc documents the shape once).
 	for _, b := range blocks {
-		if resolved[b.Path] != nil || !parentResolved(b) || parentBulletLine(b) < 0 {
+		if resolved[b.path] != nil || !parentResolved(b) || parentBulletLine(b) < 0 {
 			continue
 		}
 		var share *heading
 		for _, h := range headings {
-			if h.path != "" && h.name == b.Name && matches(h, b) && sameChildren(blocks[h.path], b) {
+			if h.path != "" && matches(h, b) && sameChildren(blocks[h.path], b) {
 				if share != nil && share != h {
 					share = nil
 					break
@@ -247,148 +267,125 @@ func Fix(doc string, r *schema.Resource) Result {
 			}
 		}
 		if share != nil {
-			share.shared = append(share.shared, b.Path)
-			resolved[b.Path] = share
+			share.shared = append(share.shared, b.path)
+			resolved[b.path] = share
 		}
 	}
 
 	existingAnchors := map[string]bool{}
 	for _, l := range lines {
-		for _, m := range regexp.MustCompile(`<a\s+name="([^"]+)"`).FindAllStringSubmatch(l, -1) {
+		for _, m := range anchorNameRe.FindAllStringSubmatch(l, -1) {
 			existingAnchors[m[1]] = true
 		}
 	}
 
-	// Assign anchors and edit.
-	edits := map[int]string{} // line -> new content
+	// Add anchors and links. Edits keep each line's bullet or heading prefix,
+	// so the line classification above stays valid.
 	for _, h := range headings {
-		if h.path == "" {
+		switch {
+		case h.path == "":
 			if h.anchor == "" {
 				res.Notes = append(res.Notes, fmt.Sprintf("line %d: couldn't match `%s` heading (bullets %v) to exactly one schema block; left alone", h.line+1, h.name, h.bullets))
 			}
 			continue
-		}
-		anchor := h.anchor
-		if anchor == "" || !strings.HasPrefix(anchor, "nested_") {
+		case h.anchor != "" && !strings.HasPrefix(h.anchor, "nested_"):
+			res.Notes = append(res.Notes, fmt.Sprintf("line %d: heading has non-nested anchor %q; left alone", h.line+1, h.anchor))
+			continue
+		case h.anchor == "":
 			want := "nested_" + strings.ReplaceAll(h.path, ".", "_")
 			if existingAnchors[want] {
 				res.Notes = append(res.Notes, fmt.Sprintf("line %d: anchor %q already exists; left `%s` heading alone", h.line+1, want, h.name))
 				continue
 			}
-			if h.anchor == "" {
-				edits[h.line] = fmt.Sprintf(`<a name="%s"></a>`, want) + lines[h.line]
-				res.Changes = append(res.Changes, fmt.Sprintf("line %d: added anchor %s to `%s` heading", h.line+1, want, h.name))
-			} else {
-				// Non-nested_ anchor: rename it and its links.
-				res.Notes = append(res.Notes, fmt.Sprintf("line %d: heading has non-nested anchor %q; left alone", h.line+1, h.anchor))
-				continue
-			}
+			lines[h.line] = fmt.Sprintf(`<a name="%s"></a>`, want) + lines[h.line]
+			res.Changes = append(res.Changes, fmt.Sprintf("line %d: added anchor %s to `%s` heading", h.line+1, want, h.name))
 			existingAnchors[want] = true
-			anchor = want
+			h.anchor = want
 		}
 		for _, p := range append([]string{h.path}, h.shared...) {
 			b := blocks[p]
 			pl := parentBulletLine(b)
 			if pl < 0 {
-				res.Notes = append(res.Notes, fmt.Sprintf("`%s`: couldn't find exactly one parent bullet for `%s`; not linked", p, b.Name))
+				res.Notes = append(res.Notes, fmt.Sprintf("`%s`: couldn't find exactly one parent bullet for `%s`; not linked", p, b.name))
 				continue
 			}
-			msg, ok := linkBullet(lines, edits, pl, anchor, existingAnchors, isBoundary)
-			if ok {
-				if msg != "" {
-					res.Changes = append(res.Changes, fmt.Sprintf("line %d: %s", pl+1, msg))
-				}
-			} else {
+			msg, ok := linkBullet(lines, pl, h.anchor, existingAnchors, isBoundary)
+			switch {
+			case !ok:
 				res.Notes = append(res.Notes, fmt.Sprintf("line %d: %s", pl+1, msg))
+			case msg != "":
+				res.Changes = append(res.Changes, fmt.Sprintf("line %d: %s", pl+1, msg))
 			}
 		}
 	}
 
-	keys := make([]int, 0, len(edits))
-	for k := range edits {
-		keys = append(keys, k)
+	if len(res.Changes) > 0 {
+		res.Text = strings.Join(lines, "\n")
+		if crlf {
+			res.Text = strings.ReplaceAll(res.Text, "\n", "\r\n")
+		}
 	}
-	sort.Ints(keys)
-	for _, k := range keys {
-		lines[k] = edits[k]
-	}
-	out := strings.Join(lines, "\n")
-	if crlf {
-		out = strings.ReplaceAll(out, "\n", "\r\n")
-	}
-	res.Text = out
 	return res
 }
 
-func sameChildren(a, b *Block) bool {
-	if len(a.Children) != len(b.Children) {
+func sameChildren(a, b *block) bool {
+	if len(a.children) != len(b.children) {
 		return false
 	}
-	for c := range a.Children {
-		if !b.Children[c] {
+	for c := range a.children {
+		if !b.children[c] {
 			return false
 		}
 	}
 	return true
 }
 
-// linkBullet makes the bullet starting at line pl link to anchor.
-func linkBullet(lines []string, edits map[int]string, pl int, anchor string, anchors map[string]bool, isBoundary func(int) bool) (string, bool) {
-	get := func(k int) string {
-		if e, ok := edits[k]; ok {
-			return e
-		}
-		return lines[k]
-	}
-	// Extent of the bullet: until the next column-0 bullet or boundary.
+// linkBullet makes the bullet starting at line pl link to anchor, editing
+// lines in place. It returns a description of the change ("" if the bullet
+// was already linked) and false if it couldn't link the bullet.
+func linkBullet(lines []string, pl int, anchor string, anchors map[string]bool, isBoundary func(int) bool) (string, bool) {
+	// Extent of the bullet: until the next column-0 bullet, boundary, or code fence.
 	end := pl + 1
 	for end < len(lines) && !bulletRe.MatchString(lines[end]) && !isBoundary(end) && !strings.HasPrefix(lines[end], "```") {
 		end++
 	}
-	for k := pl; k < end; k++ {
-		// Any existing link to the anchor counts, whatever its text
-		// (for example "See [structure below](#nested_x)").
-		if strings.Contains(get(k), "(#"+anchor+")") {
-			return "", true
-		}
+	bullet := strings.Join(lines[pl:end], "\n")
+	// Any existing link to the anchor counts, whatever its text (for
+	// example "See [structure below](#nested_x)"), even across lines.
+	if strings.Contains(bullet, "(#"+anchor+")") {
+		return "", true
 	}
 	for k := pl; k < end; k++ {
-		if m := linkedBelowRe.FindStringSubmatch(get(k)); m != nil {
-			if m[1] == anchor {
-				return "", true
-			}
+		if m := linkedBelowRe.FindStringSubmatch(lines[k]); m != nil {
 			if anchors[m[1]] {
 				return fmt.Sprintf("bullet already links to a different anchor %q; not changed", m[1]), false
 			}
-			edits[k] = strings.Replace(get(k), "(#"+m[1]+")", "(#"+anchor+")", 1)
+			lines[k] = strings.Replace(lines[k], "(#"+m[1]+")", "(#"+anchor+")", 1)
 			return fmt.Sprintf("fixed broken link #%s -> #%s", m[1], anchor), true
 		}
 	}
 	for k := pl; k < end; k++ {
-		if loc := plainBelowRe.FindStringIndex(get(k)); loc != nil {
-			l := get(k)
-			phrase := l[loc[0]:loc[1]]
-			edits[k] = l[:loc[0]] + phrase[:len(phrase)-len("documented below")] + "[documented below](#" + anchor + ")" + l[loc[1]:]
-			return "linked existing \"Structure is documented below\"", true
+		if loc := plainBelowRe.FindStringIndex(lines[k]); loc != nil {
+			// Keep the matched "Structure is" wording; link "documented below".
+			l := lines[k]
+			mid := loc[1] - len("documented below")
+			lines[k] = l[:mid] + "[documented below](#" + anchor + ")" + l[loc[1]:]
+			return `linked existing "Structure is documented below"`, true
 		}
 	}
 	// Append to the end of the bullet's first paragraph.
 	last := pl
 	for k := pl + 1; k < end; k++ {
-		l := get(k)
-		if strings.TrimSpace(l) == "" || indentedListRe.MatchString(l) {
+		if strings.TrimSpace(lines[k]) == "" || indentedListRe.MatchString(lines[k]) {
 			break
 		}
 		last = k
 	}
-	l := strings.TrimRight(get(last), " \t")
-	sep := " "
-	if !strings.HasSuffix(l, ".") && !strings.HasSuffix(l, ":") && !strings.HasSuffix(l, ")") && !strings.HasSuffix(l, "-") {
-		sep = ". "
-	}
-	if strings.HasSuffix(l, "-") || strings.HasSuffix(l, ")") && strings.HasPrefix(strings.TrimSpace(l), "(") {
+	l := strings.TrimRight(lines[last], " \t")
+	sep := ". "
+	if strings.ContainsAny(l[len(l)-1:], ".:)-") {
 		sep = " "
 	}
-	edits[last] = l + sep + "Structure is [documented below](#" + anchor + ")."
+	lines[last] = l + sep + "Structure is [documented below](#" + anchor + ")."
 	return "appended link to " + anchor, true
 }
