@@ -1709,3 +1709,149 @@ func TestTypeValidateInternalRefs(t *testing.T) {
 		})
 	}
 }
+
+func TestTypeValidateEnumAndSendEmptyValue(t *testing.T) {
+	t.Parallel()
+
+	p := &Product{
+		Name: "TestProduct",
+		Versions: []*product.Version{
+			{Name: "ga", BaseUrl: "ga_url"},
+		},
+	}
+
+	cases := []struct {
+		description string
+		prop        *Type
+		resource    string
+		wantError   string
+	}{
+		{
+			description: "Enum with empty enum_values fails",
+			prop: &Type{
+				Name: "mode",
+				Type: "Enum",
+			},
+			resource:  "MyResource",
+			wantError: "property mode of type Enum must specify non-empty enum_values in resource MyResource",
+		},
+		{
+			description: "Enum with manual Possible values in description fails",
+			prop: &Type{
+				Name:        "mode",
+				Type:        "Enum",
+				Description: "Operating mode. Possible values: FAST, SLOW.",
+				EnumValues:  []string{"FAST", "SLOW"},
+			},
+			resource:  "MyResource",
+			wantError: "property mode cannot manually include 'Possible values:' in description in resource MyResource",
+		},
+		{
+			description: "Array of Enum with manual Possible values in description fails",
+			prop: &Type{
+				Name:        "modes",
+				Type:        "Array",
+				Description: "Modes. Possible values: [FAST, SLOW]",
+				ItemType: &Type{
+					Type:       "Enum",
+					EnumValues: []string{"FAST", "SLOW"},
+				},
+			},
+			resource:  "MyResource",
+			wantError: "property modes cannot manually include 'Possible values:' in description in resource MyResource",
+		},
+		{
+			description: "Valid Enum without manual Possible values succeeds",
+			prop: &Type{
+				Name:        "mode",
+				Type:        "Enum",
+				Description: "Operating mode.",
+				EnumValues:  []string{"FAST", "SLOW"},
+			},
+			resource:  "MyResource",
+			wantError: "",
+		},
+		{
+			description: "send_empty_value combined with output fails",
+			prop: &Type{
+				Name:           "state",
+				Type:           "String",
+				SendEmptyValue: true,
+				Output:         true,
+			},
+			resource:  "MyResource",
+			wantError: "property state cannot set both send_empty_value and output in resource MyResource",
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			res := &Resource{
+				Name:       tc.resource,
+				Properties: []*Type{tc.prop},
+			}
+			res.SetDefault(p)
+			errs := tc.prop.Validate(tc.resource)
+			if tc.wantError == "" {
+				if len(errs) > 0 {
+					t.Fatalf("expected no errors, got: %v", errs)
+				}
+				return
+			}
+			found := false
+			for _, err := range errs {
+				if strings.Contains(err.Error(), tc.wantError) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Fatalf("expected error containing %q, got: %v", tc.wantError, errs)
+			}
+		})
+	}
+
+	t.Run("send_empty_value allowlist is scoped to product folder", func(t *testing.T) {
+		t.Parallel()
+		makeRes := func(pkgPath, prodName string) (*Resource, *Type) {
+			prod := &Product{
+				Name:        prodName,
+				PackagePath: pkgPath,
+				Versions:    []*product.Version{{Name: "ga", BaseUrl: "ga_url"}},
+			}
+			leaf := &Type{
+				Name:             "geAuthProvider",
+				Type:             "NestedObject",
+				AllowEmptyObject: true,
+				SendEmptyValue:   true,
+				Output:           true,
+				Properties:       []*Type{},
+			}
+			parent := &Type{
+				Name:       "authProviderTypeParams",
+				Type:       "NestedObject",
+				Properties: []*Type{leaf},
+			}
+			res := &Resource{
+				Name:       "AuthProvider",
+				Properties: []*Type{parent},
+			}
+			res.SetDefault(prod)
+			return res, parent
+		}
+
+		resAllowed, parentAllowed := makeRes("products/agentidentity", "AgentIdentity")
+		if errs := parentAllowed.Validate(resAllowed.Name); len(errs) > 0 {
+			t.Fatalf("expected allowlisted agentidentity field to pass, got: %v", errs)
+		}
+
+		resOther, parentOther := makeRes("products/otherproduct", "OtherProduct")
+		errs := parentOther.Validate(resOther.Name)
+		want := "property auth_provider_type_params.ge_auth_provider cannot set both send_empty_value and output in resource AuthProvider"
+		if len(errs) != 1 || !strings.Contains(errs[0].Error(), want) {
+			t.Fatalf("expected error containing %q for non-allowlisted product, got: %v", want, errs)
+		}
+	})
+}

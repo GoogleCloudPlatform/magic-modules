@@ -566,7 +566,6 @@ properties:
             If logging is enabled, logs will be exported to the
             configured export destination in Stackdriver.
           output: true
-          send_empty_value: true
         - name: 'targetServiceAccounts'
           type: Array
           description: |

@@ -16,6 +16,7 @@ package api
 import (
 	"fmt"
 	"log"
+	"path/filepath"
 	"slices"
 	"strings"
 
@@ -35,6 +36,13 @@ var defaultFromApiConflictAllowlist = []string{
 	"EkmConnection.service_resolvers.server_certificates.subject_alternative_dns_names",
 	"LinkedDataset.bigquery_dataset",
 	"Rule.rule_id",
+}
+
+// Existing output-only fields under a writable parent that also set send_empty_value,
+// grandfathered to avoid changing existing request-expansion behavior.
+// Keys use "<product_folder>/<Resource>.<field_path>". Do not add new fields to this list.
+var sendEmptyValueOutputAllowlist = []string{
+	"agentidentity/AuthProvider.auth_provider_type_params.ge_auth_provider",
 }
 
 // Represents a property type
@@ -533,6 +541,19 @@ func (t *Type) Validate(rName string) (es []error) {
 		es = append(es, fmt.Errorf("property %s cannot be an output-only Enum in resource %s; use String instead", fullFieldPath, rName))
 	}
 
+	if !t.isExcluded() && t.IsA("Enum") && len(t.EnumValues) == 0 {
+		es = append(es, fmt.Errorf("property %s of type Enum must specify non-empty enum_values in resource %s", fullFieldPath, rName))
+	}
+
+	if !t.isExcluded() && (t.IsA("Enum") || (t.IsA("Array") && t.ItemType != nil && t.ItemType.IsA("Enum"))) &&
+		strings.Contains(strings.ToLower(t.Description), "possible values:") {
+		es = append(es, fmt.Errorf("property %s cannot manually include 'Possible values:' in description in resource %s; enum_values are appended automatically", fullFieldPath, rName))
+	}
+
+	if !t.isExcluded() && t.SendEmptyValue && t.Output && !slices.Contains(sendEmptyValueOutputAllowlist, t.allowlistKey(rName, fullFieldPath)) {
+		es = append(es, fmt.Errorf("property %s cannot set both send_empty_value and output in resource %s", fullFieldPath, rName))
+	}
+
 	if t.DefaultFromApi && t.Required {
 		es = append(es, fmt.Errorf("property %s cannot set both default_from_api and required in resource %s", fullFieldPath, rName))
 	}
@@ -651,6 +672,22 @@ func (t *Type) isExcluded() bool {
 		return t.ResourceMetadata.IsExcluded()
 	}
 	return false
+}
+
+// allowlistKey returns "<product_folder>/<Resource>.<field_path>" for scoping validation allowlists.
+func (t *Type) allowlistKey(rName, fullFieldPath string) string {
+	productFolder := ""
+	if t != nil && t.ResourceMetadata != nil && t.ResourceMetadata.ProductMetadata != nil {
+		if t.ResourceMetadata.ProductMetadata.PackagePath != "" {
+			productFolder = filepath.Base(t.ResourceMetadata.ProductMetadata.PackagePath)
+		} else if t.ResourceMetadata.ProductMetadata.Name != "" {
+			productFolder = strings.ToLower(t.ResourceMetadata.ProductMetadata.Name)
+		}
+	}
+	if productFolder == "" {
+		return fmt.Sprintf("%s.%s", rName, fullFieldPath)
+	}
+	return fmt.Sprintf("%s/%s.%s", productFolder, rName, fullFieldPath)
 }
 
 // hasOutputAncestor reports whether any ancestor of t has Output set to true.

@@ -1262,7 +1262,6 @@ properties:
               token](https://cloud.google.com/docs/authentication/token-types#id) generated
               from service agent.
             allow_empty_object: true
-            send_empty_value: true
             output: true
             properties: [] # Explicitly show no properties
       - name: description
@@ -1597,7 +1596,6 @@ properties:
               token](https://cloud.google.com/docs/authentication/token-types#id) generated
               from service agent.
             allow_empty_object: true
-            send_empty_value: true
             output: true
             properties: [] # Explicitly show no properties
       - name: inputVariableMapping
