@@ -243,6 +243,31 @@ func (s *Step) usedPlaceholders() map[string]bool {
 	return used
 }
 
+func isQuoteWrapped(value string) bool {
+	trimmed := strings.TrimSpace(value)
+	if len(trimmed) < 2 {
+		return false
+	}
+	quote := trimmed[0]
+	if (quote != '"' && quote != '\'') || trimmed[len(trimmed)-1] != quote {
+		return false
+	}
+	inner := trimmed[1 : len(trimmed)-1]
+	for i := 0; i < len(inner); i++ {
+		if inner[i] == '\\' {
+			if i+1 >= len(inner) {
+				return false
+			}
+			i++
+			continue
+		}
+		if inner[i] == quote {
+			return false
+		}
+	}
+	return true
+}
+
 func (s *Step) Validate(rName, sName string) (es []error) {
 	for _, k := range slices.Sorted(maps.Keys(s.Vars)) {
 		if _, exists := s.ResourceIdVars[k]; exists {
@@ -253,6 +278,21 @@ func (s *Step) Validate(rName, sName string) (es []error) {
 		es = append(es, fmt.Errorf("missing `name` for one step in test sample %s in resource %s", sName, rName))
 	}
 	es = append(es, s.templateErrs...)
+
+	for _, check := range []struct {
+		field string
+		vals  map[string]string
+	}{
+		{field: "vars", vals: s.Vars},
+		{field: "resource_id_vars", vals: s.ResourceIdVars},
+		{field: "oics_vars_overrides", vals: s.OicsVarsOverrides},
+	} {
+		for _, k := range slices.Sorted(maps.Keys(check.vals)) {
+			if v := check.vals[k]; isQuoteWrapped(v) {
+				es = append(es, fmt.Errorf("variable %q in '%s' has quote-wrapped value %q for step %q in sample %q of resource %q; values are substituted verbatim into HCL templates (unlike 'test_vars_overrides'), so remove the surrounding quotes", k, check.field, v, s.Name, sName, rName))
+			}
+		}
+	}
 
 	for _, k := range slices.Sorted(maps.Keys(s.OicsVarsOverrides)) {
 		_, inVars := s.Vars[k]

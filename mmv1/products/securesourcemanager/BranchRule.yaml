@@ -47,7 +47,7 @@ samples:
         test_vars_overrides:
           deletion_policy: '"DELETE"'
         oics_vars_overrides:
-          deletion_policy: '"DELETE"'
+          deletion_policy: DELETE
       - name: secure_source_manager_branch_rule_with_fields
         include_step_doc: true
         ignore_read_extra:
@@ -68,7 +68,7 @@ samples:
         test_vars_overrides:
           deletion_policy: '"DELETE"'
         oics_vars_overrides:
-          deletion_policy: '"DELETE"'
+          deletion_policy: DELETE
       - name: secure_source_manager_branch_rule_with_fields
         ignore_read_extra:
           - deletion_policy
@@ -88,7 +88,7 @@ samples:
         test_vars_overrides:
           deletion_policy: '"DELETE"'
         oics_vars_overrides:
-          deletion_policy: '"DELETE"'
+          deletion_policy: DELETE
 parameters:
   - name: branch_rule_id
     type: String

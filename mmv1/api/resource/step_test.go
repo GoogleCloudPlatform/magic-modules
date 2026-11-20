@@ -375,8 +375,8 @@ func TestStep_Validate_UnusedVars(t *testing.T) {
 				"paired_id":       `"val"`,
 			},
 			OicsVarsOverrides: map[string]string{
-				"orphan_oics": `"val"`,
-				"paired_id":   `"val"`,
+				"orphan_oics": "val",
+				"paired_id":   "val",
 			},
 		}
 		st.PrimaryResourceId = "primary"
@@ -490,6 +490,113 @@ func TestStep_ExecuteTemplate_StrictIndexAndMissingKey(t *testing.T) {
 		_, err := st.ExecuteTemplate(sysfs)
 		if err == nil || !strings.Contains(err.Error(), `map has no entry for key "id"`) {
 			t.Errorf("ExecuteTemplate() err = %v, want missing id error", err)
+		}
+	})
+}
+
+func TestStep_Validate_QuoteWrappedVars(t *testing.T) {
+	t.Parallel()
+
+	t.Run("rejects quote-wrapped values across vars, resource_id_vars, and oics_vars_overrides", func(t *testing.T) {
+		t.Parallel()
+		st := &resource.Step{
+			Name: "sample_step",
+			Vars: resource.StepVars{
+				"double_quoted":    `"DELETE"`,
+				"single_quoted":    `'DELETE'`,
+				"empty_double":     `""`,
+				"empty_single":     `''`,
+				"whitespace_pad":   " \"DELETE\"\n",
+				"escaped_inner":    `"foo\"bar"`,
+				"escaped_bslash":   `"foo\\"`,
+				"regex_like":       `"\d+"`,
+				"valid_plain":      "DELETE",
+				"valid_empty":      "",
+				"valid_null":       "null",
+				"valid_hcl_list":   `["-c", "echo hello"]`,
+				"valid_hcl_map":    `{"key" = "value"}`,
+				"valid_hcl_ref":    `data.google_container_engine_versions.versions.release_channel_latest_version["REGULAR"]`,
+				"valid_json_array": `[\"Default Environment\"]`,
+				"valid_pair":       `"a" = "b"`,
+				"valid_single_chr": `"`,
+				"valid_unclosed":   `"unterminated`,
+				"valid_esc_end":    `"foo\"`,
+			},
+			ResourceIdVars: map[string]string{
+				"quoted_id":  `"custom-nam11-config"`,
+				"single_id":  `'custom-id'`,
+				"valid_id":   "custom-nam11-config",
+				"valid_cidr": "136.124.3.120/32",
+			},
+			TestVarsOverrides: map[string]string{
+				"valid_id": `"custom-tf-test-nam11-config"`,
+			},
+			OicsVarsOverrides: map[string]string{
+				"valid_id":    `"DELETE"`,
+				"valid_plain": `'DELETE'`,
+				"valid_cidr":  "DELETE",
+			},
+		}
+
+		errs := st.Validate("InstanceConfig", "spanner_instance_config_basic")
+		got := make([]string, len(errs))
+		for i, err := range errs {
+			got[i] = err.Error()
+		}
+		want := []string{
+			`variable "double_quoted" in 'vars' has quote-wrapped value "\"DELETE\"" for step "sample_step" in sample "spanner_instance_config_basic" of resource "InstanceConfig"; values are substituted verbatim into HCL templates (unlike 'test_vars_overrides'), so remove the surrounding quotes`,
+			`variable "empty_double" in 'vars' has quote-wrapped value "\"\"" for step "sample_step" in sample "spanner_instance_config_basic" of resource "InstanceConfig"; values are substituted verbatim into HCL templates (unlike 'test_vars_overrides'), so remove the surrounding quotes`,
+			`variable "empty_single" in 'vars' has quote-wrapped value "''" for step "sample_step" in sample "spanner_instance_config_basic" of resource "InstanceConfig"; values are substituted verbatim into HCL templates (unlike 'test_vars_overrides'), so remove the surrounding quotes`,
+			`variable "escaped_bslash" in 'vars' has quote-wrapped value "\"foo\\\\\"" for step "sample_step" in sample "spanner_instance_config_basic" of resource "InstanceConfig"; values are substituted verbatim into HCL templates (unlike 'test_vars_overrides'), so remove the surrounding quotes`,
+			`variable "escaped_inner" in 'vars' has quote-wrapped value "\"foo\\\"bar\"" for step "sample_step" in sample "spanner_instance_config_basic" of resource "InstanceConfig"; values are substituted verbatim into HCL templates (unlike 'test_vars_overrides'), so remove the surrounding quotes`,
+			`variable "regex_like" in 'vars' has quote-wrapped value "\"\\d+\"" for step "sample_step" in sample "spanner_instance_config_basic" of resource "InstanceConfig"; values are substituted verbatim into HCL templates (unlike 'test_vars_overrides'), so remove the surrounding quotes`,
+			`variable "single_quoted" in 'vars' has quote-wrapped value "'DELETE'" for step "sample_step" in sample "spanner_instance_config_basic" of resource "InstanceConfig"; values are substituted verbatim into HCL templates (unlike 'test_vars_overrides'), so remove the surrounding quotes`,
+			`variable "whitespace_pad" in 'vars' has quote-wrapped value " \"DELETE\"\n" for step "sample_step" in sample "spanner_instance_config_basic" of resource "InstanceConfig"; values are substituted verbatim into HCL templates (unlike 'test_vars_overrides'), so remove the surrounding quotes`,
+			`variable "quoted_id" in 'resource_id_vars' has quote-wrapped value "\"custom-nam11-config\"" for step "sample_step" in sample "spanner_instance_config_basic" of resource "InstanceConfig"; values are substituted verbatim into HCL templates (unlike 'test_vars_overrides'), so remove the surrounding quotes`,
+			`variable "single_id" in 'resource_id_vars' has quote-wrapped value "'custom-id'" for step "sample_step" in sample "spanner_instance_config_basic" of resource "InstanceConfig"; values are substituted verbatim into HCL templates (unlike 'test_vars_overrides'), so remove the surrounding quotes`,
+			`variable "valid_id" in 'oics_vars_overrides' has quote-wrapped value "\"DELETE\"" for step "sample_step" in sample "spanner_instance_config_basic" of resource "InstanceConfig"; values are substituted verbatim into HCL templates (unlike 'test_vars_overrides'), so remove the surrounding quotes`,
+			`variable "valid_plain" in 'oics_vars_overrides' has quote-wrapped value "'DELETE'" for step "sample_step" in sample "spanner_instance_config_basic" of resource "InstanceConfig"; values are substituted verbatim into HCL templates (unlike 'test_vars_overrides'), so remove the surrounding quotes`,
+		}
+		if diff := cmp.Diff(want, got); diff != "" {
+			t.Errorf("Validate() errors mismatch (-want +got):\n%s", diff)
+		}
+	})
+
+	t.Run("yaml unmarshaling distinguishes YAML quotes from literal HCL quotes", func(t *testing.T) {
+		t.Parallel()
+		rawYAML := `
+name: sample_step
+resource_id_vars:
+  yaml_single_quoted: 'my-id'
+  yaml_double_quoted: "my-other-id"
+  unquoted_id: my-plain-id
+vars:
+  empty_str: ""
+  null_val: null
+  yaml_quoted_str: "DELETE"
+  literal_quoted_str: '"DELETE"'
+test_vars_overrides:
+  yaml_single_quoted: '"override-id"'
+oics_vars_overrides:
+  yaml_single_quoted: "DELETE"
+  yaml_double_quoted: '"DELETE"'
+`
+		var st resource.Step
+		if err := yaml.Unmarshal([]byte(rawYAML), &st); err != nil {
+			t.Fatalf("yaml.Unmarshal failed: %v", err)
+		}
+
+		errs := st.Validate("Instance", "sample_name")
+		got := make([]string, len(errs))
+		for i, err := range errs {
+			got[i] = err.Error()
+		}
+		want := []string{
+			`variable "literal_quoted_str" in 'vars' has quote-wrapped value "\"DELETE\"" for step "sample_step" in sample "sample_name" of resource "Instance"; values are substituted verbatim into HCL templates (unlike 'test_vars_overrides'), so remove the surrounding quotes`,
+			`variable "yaml_double_quoted" in 'oics_vars_overrides' has quote-wrapped value "\"DELETE\"" for step "sample_step" in sample "sample_name" of resource "Instance"; values are substituted verbatim into HCL templates (unlike 'test_vars_overrides'), so remove the surrounding quotes`,
+		}
+		if diff := cmp.Diff(want, got); diff != "" {
+			t.Errorf("Validate() errors mismatch (-want +got):\n%s", diff)
 		}
 	})
 }

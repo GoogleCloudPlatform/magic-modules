@@ -55,7 +55,7 @@ samples:
     steps:
       - name: spanner_instance_config_basic
         resource_id_vars:
-          instance_config_name: '"custom-nam11-config"'
+          instance_config_name: 'custom-nam11-config'
         test_vars_overrides:
           instance_config_name: '"custom-tf-test-nam11-config"'
 parameters:
