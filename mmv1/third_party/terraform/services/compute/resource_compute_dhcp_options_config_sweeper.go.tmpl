@@ -1,0 +1,163 @@
+package compute
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/hashicorp/terraform-provider-google/google/sweeper"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func init() {
+	sweeper.AddTestSweepers(&sweeper.Sweeper{
+		Name:           "google_compute_dhcp_options_config",
+		DeleteFunction: testSweepComputeDhcpOptionsConfig,
+		Parents:        []string{"google_compute_network"},
+	})
+}
+
+// At the time of writing, the CI only passes us-central1 as the region
+func testSweepComputeDhcpOptionsConfig(region string) error {
+	resourceName := "ComputeDhcpOptionsConfig"
+	log.Printf("[INFO][SWEEPER_LOG] Starting sweeper for %s", resourceName)
+
+	if region == "" {
+		region = "us-central1"
+	}
+
+	config, err := sweeper.SharedConfigForRegion(region)
+	if err != nil {
+		log.Printf("[INFO][SWEEPER_LOG] error getting shared config for region: %s", err)
+		return err
+	}
+
+	err = config.LoadAndValidate(context.Background())
+	if err != nil {
+		log.Printf("[INFO][SWEEPER_LOG] error loading: %s", err)
+		return err
+	}
+
+	return sweepComputeDhcpOptionsConfigsInRegion(config, region)
+}
+
+func sweepComputeDhcpOptionsConfigsInRegion(config *transport_tpg.Config, region string) error {
+	resourceName := "ComputeDhcpOptionsConfig"
+	listUrl := fmt.Sprintf("%sprojects/%s/regions/%s/dhcpOptionsConfigs", transport_tpg.BaseUrl(Product, config), config.Project, region)
+	pageUrl := listUrl
+
+	for {
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   config.Project,
+			RawURL:    pageUrl,
+			UserAgent: config.UserAgent,
+		})
+		if err != nil {
+			log.Printf("[INFO][SWEEPER_LOG] Error in response from request %s: %s", pageUrl, err)
+			return nil
+		}
+
+		itemsRaw, ok := res["items"]
+		if !ok {
+			log.Printf("[INFO][SWEEPER_LOG] Nothing found in response.")
+			return nil
+		}
+
+		items, ok := itemsRaw.([]interface{})
+		if !ok {
+			log.Printf("[INFO][SWEEPER_LOG] Unexpected items type %T in response.", itemsRaw)
+			return nil
+		}
+
+		nonPrefixCount := 0
+		for _, itemRaw := range items {
+			obj, ok := itemRaw.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			rawName, ok := obj["name"].(string)
+			if !ok || rawName == "" {
+				continue
+			}
+			name := tpgresource.GetResourceNameFromSelfLink(rawName)
+			if !sweeper.IsSweepableTestResource(name) {
+				nonPrefixCount++
+				continue
+			}
+
+			resourceUrl := fmt.Sprintf("%sprojects/%s/regions/%s/dhcpOptionsConfigs/%s", transport_tpg.BaseUrl(Product, config), config.Project, region, name)
+
+			if assocs, ok := obj["associations"].(map[string]interface{}); ok && len(assocs) > 0 {
+				clearUrl, err := transport_tpg.AddQueryParams(resourceUrl, map[string]string{"updateMask": "associations"})
+				if err != nil {
+					log.Printf("[INFO][SWEEPER_LOG] Error building clear associations URL for %s (%s): %s", resourceName, name, err)
+					continue
+				}
+
+				log.Printf("[INFO][SWEEPER_LOG] Clearing associations before deleting %s resource: %s", resourceName, name)
+				patchOp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+					Config:    config,
+					Method:    "PATCH",
+					Project:   config.Project,
+					RawURL:    clearUrl,
+					UserAgent: config.UserAgent,
+					Body:      map[string]interface{}{},
+				})
+				if err != nil {
+					log.Printf("[INFO][SWEEPER_LOG] Error clearing associations on %s resource %s: %s", resourceName, name, err)
+					continue
+				}
+
+				err = ComputeOperationWaitTime(
+					config, patchOp, config.Project, fmt.Sprintf("Clearing %s associations", resourceName), config.UserAgent,
+					time.Minute*5)
+				if err != nil {
+					log.Printf("[INFO][SWEEPER_LOG] Error waiting for clearing associations on %s resource (%s): %s", resourceName, name, err)
+					continue
+				}
+			}
+
+			op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "DELETE",
+				Project:   config.Project,
+				RawURL:    resourceUrl,
+				UserAgent: config.UserAgent,
+			})
+			if err != nil {
+				log.Printf("[INFO][SWEEPER_LOG] Error deleting %s resource %s: %s", resourceName, name, err)
+				continue
+			}
+
+			log.Printf("[INFO][SWEEPER_LOG] Sent delete request for %s resource: %s", resourceName, name)
+			err = ComputeOperationWaitTime(
+				config, op, config.Project, fmt.Sprintf("Deleting %s", resourceName), config.UserAgent,
+				time.Minute*5)
+			if err != nil {
+				log.Printf("[INFO][SWEEPER_LOG] Error waiting for deletion of %s resource (%s): %s", resourceName, name, err)
+			}
+		}
+
+		if nonPrefixCount > 0 {
+			log.Printf("[INFO][SWEEPER_LOG] %d items without tf-test prefix remain for region %s.", nonPrefixCount, region)
+		}
+
+		pageToken, ok := res["nextPageToken"].(string)
+		if !ok || pageToken == "" {
+			break
+		}
+		pageUrl, err = transport_tpg.AddQueryParams(listUrl, map[string]string{"pageToken": pageToken})
+		if err != nil {
+			log.Printf("[INFO][SWEEPER_LOG] Error preparing paginated list URL: %s", err)
+			break
+		}
+	}
+
+	return nil
+}
+{{- end }}
