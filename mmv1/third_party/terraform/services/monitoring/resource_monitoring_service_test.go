@@ -52,3 +52,53 @@ resource "google_monitoring_service" "srv" {
 }
 `, randSuffix, endpoint)
 }
+
+func TestAccMonitoringService_cloudRun(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMonitoringServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMonitoringService_cloudRun(randomSuffix, "My Cloud Run Service", "cloud-run-svc-1", "us-central1"),
+			},
+			{
+				ResourceName:      "google_monitoring_service.srv",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccMonitoringService_cloudRun(randomSuffix, "My Updated Cloud Run Service", "cloud-run-svc-1", "us-central1"),
+			},
+			{
+				ResourceName:      "google_monitoring_service.srv",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccMonitoringService_cloudRun(randomSuffix, "My Updated Cloud Run Service", "cloud-run-svc-2", "us-east1"),
+			},
+			{
+				ResourceName:      "google_monitoring_service.srv",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccMonitoringService_cloudRun(randSuffix, displayName, serviceName, location string) string {
+	return fmt.Sprintf(`
+resource "google_monitoring_service" "srv" {
+	service_id   = "tf-test-srv-%s"
+	display_name = "%s"
+	cloud_run {
+		service_name = "%s"
+		location     = "%s"
+	}
+}
+`, randSuffix, displayName, serviceName, location)
+}

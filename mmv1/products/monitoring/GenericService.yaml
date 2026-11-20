@@ -100,6 +100,9 @@ properties:
       https://cloud.google.com/stackdriver/docs/solutions/slo-monitoring/api/api-structures#basic-svc-w-basic-sli
     # BasicService info can be set on creation but is then immutable.
     immutable: true
+    default_from_api: true
+    conflicts:
+      - cloud_run
     properties:
       - name: serviceType
         type: String
@@ -111,4 +114,28 @@ properties:
         description: |
           Labels that specify the resource that emits the monitoring data
           which is used for SLO reporting of this `Service`.
+        immutable: true
+  - name: cloudRun
+    type: NestedObject
+    description: |
+      Type used for Cloud Run services.
+    immutable: true
+    conflicts:
+      - basic_service
+    properties:
+      - name: serviceName
+        type: String
+        description: |
+          The name of the Cloud Run service. Corresponds to the `service_name`
+          resource label in the [`cloud_run_revision` monitored
+          resource](https://cloud.google.com/monitoring/api/resources#tag_cloud_run_revision).
+        required: true
+        immutable: true
+      - name: location
+        type: String
+        description: |
+          The location the service is run. Corresponds to the `location`
+          resource label in the [`cloud_run_revision` monitored
+          resource](https://cloud.google.com/monitoring/api/resources#tag_cloud_run_revision).
+        required: true
         immutable: true
