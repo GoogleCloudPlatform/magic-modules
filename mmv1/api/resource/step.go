@@ -147,8 +147,15 @@ type Step struct {
 	PrimaryResourceId    string            `yaml:"-"`
 	TestContextVars      map[string]string `yaml:"-"`
 	StepSlug             string            `yaml:"-"`
-	templateErrs         []error           `yaml:"-"`
-	hclLoaded            bool
+
+	inheritedVars              map[string]bool `yaml:"-"`
+	inheritedResourceIdVars    map[string]bool `yaml:"-"`
+	inheritedTestEnvVars       map[string]bool `yaml:"-"`
+	inheritedTestVarsOverrides map[string]bool `yaml:"-"`
+	inheritedOicsVarsOverrides map[string]bool `yaml:"-"`
+	rawTemplateContent         string          `yaml:"-"`
+	templateErrs               []error         `yaml:"-"`
+	hclLoaded                  bool
 }
 
 // StepVars is a map of template variable names to string values that preserves
@@ -232,6 +239,101 @@ func (s *Step) TestDependencies(resourcePrefixPkgMap map[string]string) map[stri
 	return deps
 }
 
+func mergeStringMapWithInherited(sampleMap, stepMap map[string]string) (map[string]string, map[string]bool) {
+	if len(sampleMap) == 0 {
+		return stepMap, nil
+	}
+	merged := make(map[string]string, len(sampleMap)+len(stepMap))
+	inherited := make(map[string]bool)
+	for k, v := range sampleMap {
+		merged[k] = v
+		if _, inStep := stepMap[k]; !inStep {
+			inherited[k] = true
+		}
+	}
+	for k, v := range stepMap {
+		merged[k] = v
+	}
+	return merged, inherited
+}
+
+// InheritFromSample merges sample-level defaults into s without overwriting
+// keys explicitly specified on s.
+func (s *Step) InheritFromSample(sample *Sample) {
+	if s.ConfigPath == "" && sample.ConfigPath != "" {
+		s.ConfigPath = sample.ConfigPath
+	}
+	s.ResourceIdVars, s.inheritedResourceIdVars = mergeStringMapWithInherited(sample.ResourceIdVars, s.ResourceIdVars)
+	if len(sample.Vars) > 0 {
+		merged := make(StepVars, len(sample.Vars)+len(s.Vars))
+		inherited := make(map[string]bool)
+		for k, v := range sample.Vars {
+			merged[k] = v
+			if _, inStep := s.Vars[k]; !inStep {
+				inherited[k] = true
+			}
+		}
+		for k, v := range s.Vars {
+			merged[k] = v
+		}
+		s.Vars = merged
+		s.inheritedVars = inherited
+	}
+	s.TestEnvVars, s.inheritedTestEnvVars = mergeStringMapWithInherited(sample.TestEnvVars, s.TestEnvVars)
+	s.TestVarsOverrides, s.inheritedTestVarsOverrides = mergeStringMapWithInherited(sample.TestVarsOverrides, s.TestVarsOverrides)
+	s.OicsVarsOverrides, s.inheritedOicsVarsOverrides = mergeStringMapWithInherited(sample.OicsVarsOverrides, s.OicsVarsOverrides)
+	if len(sample.IgnoreReadExtra) > 0 {
+		combined := make([]string, 0, len(sample.IgnoreReadExtra)+len(s.IgnoreReadExtra))
+		for _, item := range sample.IgnoreReadExtra {
+			if !slices.Contains(combined, item) {
+				combined = append(combined, item)
+			}
+		}
+		for _, item := range s.IgnoreReadExtra {
+			if !slices.Contains(combined, item) {
+				combined = append(combined, item)
+			}
+		}
+		s.IgnoreReadExtra = combined
+	}
+}
+
+// PruneUnusedInheritedVars drops sample-inherited variables that did not
+// survive into s.TestHCLText or s.IamHCLText from s.TestContextVars so steps
+// with omitted branches do not emit dead context entries.
+func (s *Step) PruneUnusedInheritedVars() {
+	if !s.hclLoaded {
+		return
+	}
+	used := s.usedPlaceholders()
+	for k := range s.inheritedVars {
+		if !used[k] && !s.inheritedTestVarsOverrides[k] {
+			if _, explicitOverride := s.TestVarsOverrides[k]; !explicitOverride {
+				delete(s.TestContextVars, k)
+			}
+		}
+	}
+	for k := range s.inheritedResourceIdVars {
+		if !used[k] && !s.inheritedTestVarsOverrides[k] {
+			if _, explicitOverride := s.TestVarsOverrides[k]; !explicitOverride {
+				delete(s.TestContextVars, k)
+			}
+		}
+	}
+	for k := range s.inheritedTestVarsOverrides {
+		if !used[k] {
+			delete(s.TestContextVars, k)
+		}
+	}
+}
+
+func (s *Step) templateRefsVarKey(k string) bool {
+	if s.rawTemplateContent == "" {
+		return false
+	}
+	return strings.Contains(s.rawTemplateContent, `"`+k+`"`) || strings.Contains(s.rawTemplateContent, `.`+k)
+}
+
 func (s *Step) usedPlaceholders() map[string]bool {
 	used := make(map[string]bool)
 	for _, match := range testPlaceholderRegexp.FindAllStringSubmatch(s.TestHCLText, -1) {
@@ -249,7 +351,7 @@ func (s *Step) Validate(rName, sName string) (es []error) {
 			es = append(es, fmt.Errorf("variable key '%s' cannot exist in both 'vars' and 'resource_id_vars' for step '%s' in sample '%s' of resource '%s'", k, s.Name, sName, rName))
 		}
 	}
-	if s.Name == "" {
+	if s.Name == "" && sName == "" {
 		es = append(es, fmt.Errorf("missing `name` for one step in test sample %s in resource %s", sName, rName))
 	}
 	es = append(es, s.templateErrs...)
@@ -267,29 +369,29 @@ func (s *Step) Validate(rName, sName string) (es []error) {
 	if s.hclLoaded {
 		used := s.usedPlaceholders()
 		for _, k := range slices.Sorted(maps.Keys(s.Vars)) {
-			if !used[k] {
+			if !used[k] && !s.inheritedVars[k] {
 				es = append(es, fmt.Errorf("unused variable %q in 'vars' for step %q in sample %q of resource %q", k, s.Name, sName, rName))
 			}
 		}
 		for _, k := range slices.Sorted(maps.Keys(s.ResourceIdVars)) {
-			if !used[k] {
+			if !used[k] && !s.inheritedResourceIdVars[k] {
 				es = append(es, fmt.Errorf("unused variable %q in 'resource_id_vars' for step %q in sample %q of resource %q", k, s.Name, sName, rName))
 			}
 		}
 		for _, k := range slices.Sorted(maps.Keys(s.TestEnvVars)) {
-			if !used[k] {
+			if !used[k] && !s.inheritedTestEnvVars[k] {
 				es = append(es, fmt.Errorf("unused variable %q in 'test_env_vars' for step %q in sample %q of resource %q", k, s.Name, sName, rName))
 			}
 		}
 		for _, k := range slices.Sorted(maps.Keys(s.TestVarsOverrides)) {
-			if !used[k] {
+			if !used[k] && !s.inheritedTestVarsOverrides[k] {
 				es = append(es, fmt.Errorf("unused variable %q in 'test_vars_overrides' for step %q in sample %q of resource %q", k, s.Name, sName, rName))
 			}
 		}
 		for _, k := range slices.Sorted(maps.Keys(s.OicsVarsOverrides)) {
 			_, inVars := s.Vars[k]
 			_, inResourceIdVars := s.ResourceIdVars[k]
-			if (inVars || inResourceIdVars) && !used[k] {
+			if (inVars || inResourceIdVars) && !used[k] && !s.inheritedOicsVarsOverrides[k] {
 				es = append(es, fmt.Errorf("unused variable %q in 'oics_vars_overrides' for step %q in sample %q of resource %q", k, s.Name, sName, rName))
 			}
 		}
@@ -496,6 +598,7 @@ func (s *Step) ExecuteTemplate(sysfs fs.FS) (string, error) {
 	}
 
 	fileContentString := string(templateContent)
+	s.rawTemplateContent = fileContentString
 	templateFileName := filepath.Base(s.ConfigPath)
 
 	funcs := google.TemplateFunctions(sysfs)

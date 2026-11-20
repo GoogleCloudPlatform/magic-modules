@@ -2354,6 +2354,17 @@ func disambiguateStepSlug(sampleName, stepName string, activeIdx int, seenCamel 
 }
 
 func (r Resource) TestSampleSetUp(sysfs fs.FS) {
+	for _, sample := range r.Samples {
+		sample.TargetVersionName = r.TargetVersionName
+		if len(sample.Steps) == 0 {
+			sample.Steps = []*resource.Step{{}}
+		}
+		for _, st := range sample.Steps {
+			if st.Name == "" {
+				st.Name = sample.Name
+			}
+		}
+	}
 	var firstStep *resource.Step
 	var iamSampleBody string
 	if r.IamPolicy != nil && !r.IamPolicy.Exclude && r.IamPolicy.SampleConfigBody != "" {
@@ -2366,7 +2377,6 @@ func (r Resource) TestSampleSetUp(sysfs fs.FS) {
 	slugByBaseAndHCL := make(map[string]string)
 	packageName := filepath.Base(filepath.Dir(r.SourceYamlFile))
 	for _, sample := range r.Samples {
-		sample.TargetVersionName = r.TargetVersionName
 		sample.NewConfigFuncs = nil
 		if sample.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, sample.MinVersion) {
 			continue
@@ -2377,6 +2387,7 @@ func (r Resource) TestSampleSetUp(sysfs fs.FS) {
 				continue
 			}
 			step.PrimaryResourceId = sample.PrimaryResourceId
+			step.InheritFromSample(sample)
 			if step.ConfigPath == "" {
 				step.ConfigPath = fmt.Sprintf("templates/terraform/samples/services/%s/%s.tf.tmpl", packageName, step.Name)
 			}
@@ -2384,6 +2395,7 @@ func (r Resource) TestSampleSetUp(sysfs fs.FS) {
 			if step == firstStep {
 				step.IamHCLText = iamSampleBody
 			}
+			step.PruneUnusedInheritedVars()
 			if !sample.ExcludeTest {
 				camelBase := google.Camelize(step.Name, "lower")
 				dedupKey := camelBase + "\x00" + step.TestHCLText

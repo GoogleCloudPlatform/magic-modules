@@ -16,6 +16,7 @@ package resource
 import (
 	"fmt"
 	"log"
+	"maps"
 	"slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
@@ -76,6 +77,15 @@ type Sample struct {
 	// If set, this will override the default resource type implied from the
 	// object parent
 	PrimaryResourceType string `yaml:"primary_resource_type,omitempty"`
+
+	// Sample-level defaults inherited by steps (step entries override sample entries)
+	ConfigPath        string            `yaml:"config_path,omitempty"`
+	ResourceIdVars    map[string]string `yaml:"resource_id_vars,omitempty"`
+	Vars              StepVars          `yaml:"vars,omitempty"`
+	TestEnvVars       map[string]string `yaml:"test_env_vars,omitempty"`
+	TestVarsOverrides map[string]string `yaml:"test_vars_overrides,omitempty"`
+	OicsVarsOverrides map[string]string `yaml:"oics_vars_overrides,omitempty"`
+	IgnoreReadExtra   []string          `yaml:"ignore_read_extra,omitempty"`
 
 	// Steps
 	Steps []*Step
@@ -143,10 +153,69 @@ func (s *Sample) Validate(rName string) (es []error) {
 	if s.Name == "" {
 		es = append(es, fmt.Errorf("missing `name` for one sample in resource %s", rName))
 	}
+	for _, k := range slices.Sorted(maps.Keys(s.Vars)) {
+		if _, exists := s.ResourceIdVars[k]; exists {
+			es = append(es, fmt.Errorf("variable key '%s' cannot exist in both 'vars' and 'resource_id_vars' for sample '%s' of resource '%s'", k, s.Name, rName))
+		}
+	}
 	es = append(es, s.ValidateExternalProviders()...)
 
+	// TestSampleSetUp skips samples and steps above TargetVersionName (e.g.
+	// min_version: beta during GA builds), and unit tests may call Validate
+	// directly without loading templates; only check sample-level unused
+	// variables when every step's template has been loaded (hclLoaded) so
+	// variables consumed solely by skipped version-gated steps are not flagged.
+	allLoaded := len(s.Steps) > 0
+	usedOrReferenced := make(map[string]bool)
 	for _, step := range s.Steps {
 		es = append(es, step.Validate(rName, s.Name)...)
+		if !step.hclLoaded {
+			allLoaded = false
+			continue
+		}
+		for k := range step.usedPlaceholders() {
+			usedOrReferenced[k] = true
+		}
+	}
+	if allLoaded {
+		isUsed := func(k string) bool {
+			if usedOrReferenced[k] {
+				return true
+			}
+			for _, step := range s.Steps {
+				if step.templateRefsVarKey(k) {
+					return true
+				}
+			}
+			return false
+		}
+		for _, k := range slices.Sorted(maps.Keys(s.Vars)) {
+			if !isUsed(k) {
+				es = append(es, fmt.Errorf("unused variable %q in 'vars' for sample %q of resource %q", k, s.Name, rName))
+			}
+		}
+		for _, k := range slices.Sorted(maps.Keys(s.ResourceIdVars)) {
+			if !isUsed(k) {
+				es = append(es, fmt.Errorf("unused variable %q in 'resource_id_vars' for sample %q of resource %q", k, s.Name, rName))
+			}
+		}
+		for _, k := range slices.Sorted(maps.Keys(s.TestEnvVars)) {
+			if !isUsed(k) {
+				es = append(es, fmt.Errorf("unused variable %q in 'test_env_vars' for sample %q of resource %q", k, s.Name, rName))
+			}
+		}
+		for _, k := range slices.Sorted(maps.Keys(s.TestVarsOverrides)) {
+			if !isUsed(k) {
+				es = append(es, fmt.Errorf("unused variable %q in 'test_vars_overrides' for sample %q of resource %q", k, s.Name, rName))
+			}
+		}
+		for _, k := range slices.Sorted(maps.Keys(s.OicsVarsOverrides)) {
+			_, inVars := s.Vars[k]
+			_, inResourceIdVars := s.ResourceIdVars[k]
+			if (inVars || inResourceIdVars) && !isUsed(k) {
+				es = append(es, fmt.Errorf("unused variable %q in 'oics_vars_overrides' for sample %q of resource %q", k, s.Name, rName))
+			}
+		}
 	}
 
 	return es
