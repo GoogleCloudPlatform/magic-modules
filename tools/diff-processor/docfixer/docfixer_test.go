@@ -48,6 +48,21 @@ func TestFix(t *testing.T) {
 			want: "## Argument Reference\n\n* `top` - (Optional) Top. Structure is [documented below](#nested_top).\n\n* `other` - (Optional) Other. Structure is [documented below](#nested_other).\n\n<a name=\"nested_top\"></a>The `top` block supports:\n\n* `inner` - (Optional) Inner. Structure is [documented below](#nested_other_inner).\n\n<a name=\"nested_other\"></a>The `other` block supports:\n\n* `inner` - (Optional) Inner. Structure is [documented below](#nested_other_inner).\n\n<a name=\"nested_other_inner\"></a>The `inner` block supports:\n\n* `x` - (Optional) X.\n",
 		},
 		{
+			name: "links existing plain text without is",
+			in:   "## Argument Reference\n\n* `top` - (Optional) structure documented below\n\nThe `top` block supports:\n\n* `plain` - (Optional) Plain.\n",
+			want: "## Argument Reference\n\n* `top` - (Optional) structure [documented below](#nested_top)\n\n<a name=\"nested_top\"></a>The `top` block supports:\n\n* `plain` - (Optional) Plain.\n",
+		},
+		{
+			name: "existing link with other wording is kept",
+			in:   "## Argument Reference\n\n* `top` - (Optional) Top. See [structure below](#nested_top).\n\n<a name=\"nested_top\"></a>The `top` block supports:\n\n* `plain` - (Optional) Plain.\n",
+			want: "## Argument Reference\n\n* `top` - (Optional) Top. See [structure below](#nested_top).\n\n<a name=\"nested_top\"></a>The `top` block supports:\n\n* `plain` - (Optional) Plain.\n",
+		},
+		{
+			name: "existing link split across lines is kept",
+			in:   "## Argument Reference\n\n* `top` - (Optional) Top. Structure is [documented\nbelow](#nested_top).\n\nThe `top` block supports:\n\n* `plain` - (Optional) Plain.\n",
+			want: "## Argument Reference\n\n* `top` - (Optional) Top. Structure is [documented\nbelow](#nested_top).\n\n<a name=\"nested_top\"></a>The `top` block supports:\n\n* `plain` - (Optional) Plain.\n",
+		},
+		{
 			name: "already fixed is unchanged",
 			in:   "## Argument Reference\n\n* `top` - (Optional) Top. Structure is [documented below](#nested_top).\n\n<a name=\"nested_top\"></a>The `top` block supports:\n\n* `plain` - (Optional) Plain.\n",
 			want: "## Argument Reference\n\n* `top` - (Optional) Top. Structure is [documented below](#nested_top).\n\n<a name=\"nested_top\"></a>The `top` block supports:\n\n* `plain` - (Optional) Plain.\n",

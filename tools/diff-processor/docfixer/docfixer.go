@@ -30,7 +30,7 @@ var (
 	fieldSectionRe = regexp.MustCompile(`^(?:Argument|Attributes|Ephemeral Attributes) Reference\b`)
 	hrRe           = regexp.MustCompile(`^[ \t]*(?:- - -|-{3,})[ \t]*$`)
 	anchorLineRe   = regexp.MustCompile(`^<a\s+name="`)
-	plainBelowRe   = regexp.MustCompile(`(?i)structure is documented below`)
+	plainBelowRe   = regexp.MustCompile(`(?i)structure (?:is )?documented below`)
 	linkedBelowRe  = regexp.MustCompile(`documented below\]\(#([a-z0-9_-]+)\)`)
 	indentedListRe = regexp.MustCompile(`^\s+[*-]\s`)
 )
@@ -344,6 +344,13 @@ func linkBullet(lines []string, edits map[int]string, pl int, anchor string, anc
 	end := pl + 1
 	for end < len(lines) && !bulletRe.MatchString(lines[end]) && !isBoundary(end) && !strings.HasPrefix(lines[end], "```") {
 		end++
+	}
+	for k := pl; k < end; k++ {
+		// Any existing link to the anchor counts, whatever its text
+		// (for example "See [structure below](#nested_x)").
+		if strings.Contains(get(k), "(#"+anchor+")") {
+			return "", true
+		}
 	}
 	for k := pl; k < end; k++ {
 		if m := linkedBelowRe.FindStringSubmatch(get(k)); m != nil {
