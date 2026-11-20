@@ -12,6 +12,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
 
@@ -143,5 +144,76 @@ func TestCopyDir(t *testing.T) {
 	// Verify non-existent source returns os.ErrNotExist
 	if err := copyDir(filepath.Join(srcDir, "does-not-exist"), dstDir, nil); !errors.Is(err, os.ErrNotExist) {
 		t.Errorf("expected os.ErrNotExist for missing srcDir, got %v", err)
+	}
+}
+
+func TestTerraformOiCS_GatesOnShouldGenerateDoc(t *testing.T) {
+	fsys := os.DirFS("..")
+	stepBasic := &resource.Step{
+		Name:       "oics_basic",
+		ConfigPath: "templates/terraform/samples/static/motd.tmpl",
+	}
+	stepUpdateUndocumented := &resource.Step{
+		Name:       "oics_update_undoc",
+		ConfigPath: "templates/terraform/samples/static/motd.tmpl",
+	}
+	stepUpdateDocumented := &resource.Step{
+		Name:           "oics_update_doc",
+		ConfigPath:     "templates/terraform/samples/static/motd.tmpl",
+		IncludeStepDoc: true,
+	}
+	stepExcludedSample := &resource.Step{
+		Name:       "oics_excluded_basic_doc",
+		ConfigPath: "templates/terraform/samples/static/motd.tmpl",
+	}
+	stepBetaOnly := &resource.Step{
+		Name:           "oics_beta_step",
+		ConfigPath:     "templates/terraform/samples/static/motd.tmpl",
+		MinVersion:     "beta",
+		IncludeStepDoc: true,
+	}
+
+	res := &api.Resource{
+		Name:              "Topic",
+		TargetVersionName: "ga",
+		Samples: []*resource.Sample{
+			{
+				Name:              "sample_main",
+				PrimaryResourceId: "primary",
+				TargetVersionName: "ga",
+				Steps:             []*resource.Step{stepBasic, stepUpdateUndocumented, stepUpdateDocumented, stepBetaOnly},
+			},
+			{
+				Name:              "sample_no_doc",
+				PrimaryResourceId: "primary",
+				ExcludeBasicDoc:   true,
+				TargetVersionName: "ga",
+				Steps:             []*resource.Step{stepExcludedSample},
+			},
+		},
+	}
+	p := &api.Product{
+		Name:        "Pubsub",
+		Versions:    []*product.Version{{Name: "ga"}, {Name: "beta"}},
+		Objects:     []*api.Resource{res},
+		PackagePath: "products/pubsub",
+	}
+	p.Version = p.Versions[0]
+	res.SetDefault(p)
+	res.TestSampleSetUp(fsys)
+
+	outDir := t.TempDir()
+	toics := NewTerraformOiCS(p, "ga", time.Now(), fsys)
+	toics.Generate(outDir, "", false, true)
+
+	for _, wantPresent := range []string{"oics_basic", "oics_update_doc"} {
+		if _, err := os.Stat(filepath.Join(outDir, wantPresent, "main.tf")); err != nil {
+			t.Errorf("expected OiCS dir %q to be generated, stat err: %v", wantPresent, err)
+		}
+	}
+	for _, wantAbsent := range []string{"oics_update_undoc", "oics_excluded_basic_doc", "oics_beta_step"} {
+		if _, err := os.Stat(filepath.Join(outDir, wantAbsent)); !errors.Is(err, os.ErrNotExist) {
+			t.Errorf("expected OiCS dir %q NOT to be generated, stat err: %v", wantAbsent, err)
+		}
 	}
 }

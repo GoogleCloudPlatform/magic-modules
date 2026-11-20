@@ -21,9 +21,11 @@ import (
 	"log"
 	"os"
 	"path"
+	"slices"
 	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 )
 
@@ -84,11 +86,19 @@ func (toics TerraformOiCS) GenerateResource(object api.Resource, templateData Te
 		return
 	}
 
+	seenOiCSDir := make(map[string]bool)
 	for _, sample := range object.TestSamples() {
-		for _, step := range sample.NewConfigFuncs {
-			if len(step.TestEnvVars) > 0 {
+		for index, step := range sample.Steps {
+			if !step.ShouldGenerateDoc(index, sample) {
 				continue
 			}
+			if step.MinVersion != "" && slices.Index(product.ORDER, toics.TargetVersionName) < slices.Index(product.ORDER, step.MinVersion) {
+				continue
+			}
+			if len(step.TestEnvVars) > 0 || seenOiCSDir[step.Name] {
+				continue
+			}
+			seenOiCSDir[step.Name] = true
 
 			step.SetOiCSHCLText(toics.templateFS)
 
