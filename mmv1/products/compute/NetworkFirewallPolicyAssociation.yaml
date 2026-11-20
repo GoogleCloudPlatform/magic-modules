@@ -46,6 +46,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+read_error_transform: 'transformSecurityPolicyAssociationReadError'
 samples:
   - name: 'network_firewall_policy_association'
     primary_resource_id: 'default'
