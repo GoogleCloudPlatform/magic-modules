@@ -1,0 +1,240 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: IcebergView
+api_resource_type_kind: View
+api_variant_patterns:
+  - projects/{project}/catalogs/{catalog}/namespaces/{namespace}/views/{view}
+description: |
+  IcebergViews are view objects in an IcebergCatalog.
+base_url: iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/views
+self_link: iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/views/{{name}}
+update_url: iceberg/v1/restcatalog/v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/views/{{name}}
+update_verb: POST
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: GET
+  allowed_iam_role: roles/biglake.editor
+  parent_resource_attribute: name
+  sample_config_body: templates/terraform/iam/example_config_body/biglake_iceberg_view.tf.tmpl
+  base_url: v1/projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/views/{{name}}
+  import_format:
+    - projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/views/{{name}}
+    - '{{name}}'
+id_format: projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/views/{{name}}
+import_format:
+  - projects/{{project}}/catalogs/{{catalog}}/namespaces/{{namespace}}/views/{{name}}
+  - '{{project}}/{{catalog}}/{{namespace}}/{{name}}'
+  - '{{catalog}}/{{namespace}}/{{name}}'
+supports_indirect_user_project_override: true
+custom_code:
+  encoder: templates/terraform/encoders/biglake_iceberg_view_create.go.tmpl
+  update_encoder: templates/terraform/encoders/biglake_iceberg_view_update.go.tmpl
+  constants: templates/terraform/constants/biglake_iceberg_view.go.tmpl
+  post_read: templates/terraform/post_read/biglake_iceberg_view.go.tmpl
+samples:
+  - name: biglake_iceberg_view_basic
+    primary_resource_id: my_iceberg_view
+    steps:
+      - name: biglake_iceberg_view_basic
+        resource_id_vars:
+          bucket_name: my-bucket
+          namespace_id: my_namespace
+          view_name: my_view
+  - name: biglake_iceberg_view_update
+    primary_resource_id: my_iceberg_view
+    steps:
+      - name: biglake_iceberg_view_minimal
+        resource_id_vars:
+          bucket_name: my-bucket
+          namespace_id: my_namespace
+          view_name: my_view
+      - name: biglake_iceberg_view_update
+        include_step_doc: true
+        resource_id_vars:
+          bucket_name: my-bucket
+          namespace_id: my_namespace
+          other_namespace_id: other_namespace
+          view_name: my_view
+parameters:
+  - name: catalog
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The name of the IcebergCatalog.
+  - name: namespace
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The parent namespace of the view.
+properties:
+  - name: name
+    type: String
+    description: |
+      The name of the view.
+    required: true
+    immutable: true
+  - name: location
+    type: String
+    description: |
+      The location of the view.
+    immutable: true
+    default_from_api: true
+    diff_suppress_func: icebergViewLocationDiffSuppress
+  - name: view_uuid
+    api_name: view-uuid
+    type: String
+    output: true
+    description: |
+      The unique identifier of the view.
+  - name: schema
+    type: NestedObject
+    required: true
+    description: |
+      The schema of the view.
+    properties:
+      - name: type
+        type: String
+        description: |
+          The type of the schema.
+        default_value: struct
+      - name: schema_id
+        api_name: schema-id
+        type: Integer
+        output: true
+        description: |
+          The unique identifier of the schema.
+      - name: identifier_field_ids
+        api_name: identifier-field-ids
+        type: Array
+        item_type:
+          type: Integer
+        default_from_api: true
+        description: |
+          The field IDs that make up the identifier for the view.
+      - name: fields
+        type: Array
+        required: true
+        description: |
+          The fields of the schema.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: id
+              type: Integer
+              required: true
+              description: |
+                The unique identifier of the field.
+            - name: name
+              type: String
+              required: true
+              description: |
+                The name of the field.
+            - name: type
+              type: String
+              required: true
+              description: |
+                The type of the field. Primitive types are plain names such as `long`. List, map and
+                struct types are JSON objects as defined by the
+                [Iceberg spec](https://iceberg.apache.org/spec/#appendix-c-json-serialization),
+                typically written with `jsonencode`.
+              state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+              custom_flatten: templates/terraform/custom_flatten/biglake_iceberg_table_field_type.go.tmpl
+              custom_expand: templates/terraform/custom_expand/biglake_iceberg_table_field_type.go.tmpl
+            - name: required
+              type: Boolean
+              required: true
+              send_empty_value: true
+              description: |
+                Whether the field is required.
+            - name: doc
+              type: String
+              description: |
+                A description of the field.
+  - name: view_version
+    api_name: view-version
+    type: NestedObject
+    required: true
+    description: |
+      The current version of the view.
+    properties:
+      - name: version_id
+        api_name: version-id
+        type: Integer
+        output: true
+        description: |
+          The unique identifier of the view version.
+      - name: schema_id
+        api_name: schema-id
+        type: Integer
+        output: true
+        description: |
+          The unique identifier of the schema used by this view version.
+      - name: timestamp_ms
+        api_name: timestamp-ms
+        type: Integer
+        output: true
+        description: |
+          The timestamp in milliseconds since the Unix epoch when the view version was created.
+      - name: default_namespace
+        api_name: default-namespace
+        type: Array
+        required: true
+        item_type:
+          type: String
+        description: |
+          The default namespace to use when resolving unqualified table names in the SQL query.
+      - name: default_catalog
+        api_name: default-catalog
+        type: String
+        description: |
+          The default catalog to use when resolving table names without a catalog in the SQL query.
+      - name: summary
+        type: KeyValuePairs
+        description: |
+          Summary metadata about the view version, such as the engine that created it.
+      - name: representations
+        type: Array
+        required: true
+        description: |
+          The SQL representations of the view.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: type
+              type: String
+              default_value: sql
+              description: |
+                The type of the view representation. Defaults to `sql`.
+            - name: sql
+              type: String
+              required: true
+              description: |
+                The SQL query that defines the view.
+            - name: dialect
+              type: String
+              required: true
+              description: |
+                The SQL dialect of the query, such as `spark` or `trino`.
+  - name: properties
+    type: KeyValuePairs
+    description: |
+      User-defined properties for the view.
+    required: false
+    default_from_api: true
+    diff_suppress_func: icebergViewPropertiesDiffSuppress

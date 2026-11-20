@@ -1,0 +1,42 @@
+var icebergViewIgnoredProperties = map[string]bool{
+	"location":                         true,
+	"write.metadata.compression-codec": true,
+}
+
+func icebergViewPropertiesDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// properties.KEY
+	parts := strings.SplitN(k, ".", 2)
+	if len(parts) == 2 && icebergViewIgnoredProperties[parts[1]] && new == "" {
+		return true
+	}
+	return false
+}
+
+func icebergViewLocationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if new == "" {
+		return true
+	}
+	oldClean := strings.TrimSuffix(old, "/")
+	newClean := strings.TrimSuffix(new, "/")
+	if oldClean == newClean {
+		return true
+	}
+	return strings.HasPrefix(oldClean, newClean+"/")
+}
+
+func icebergViewJsonInt(v interface{}) (int, bool) {
+	switch n := v.(type) {
+	case json.Number:
+		id64, err := n.Int64()
+		if err != nil {
+			return 0, false
+		}
+		return int(id64), true
+	case float64:
+		return int(n), true
+	case int:
+		return n, true
+	default:
+		return 0, false
+	}
+}
