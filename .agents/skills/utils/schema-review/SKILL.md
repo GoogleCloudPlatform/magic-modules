@@ -1,24 +1,11 @@
 ---
 name: schema-review
-description: "Skill for reviewing Magic Modules schemas. Currently covers the Enum vs. String decision via the knowledge base."
+description: "Review Magic Modules field and resource schemas across Enum/String modeling and zero-value clearing."
 ---
 
 # `schema-review`
 
-> **Note to AI Agents:** You MUST read the YAML frontmatter above first. Only read the rest of this file if the `description` matches your current roadblock or required task.
+When adding or reviewing Magic Modules schema fields, open and apply the matching knowledge entries (the rules live in `.agents/knowledge/` rather than in this skill):
 
-## Prerequisites
-* You must be in the `magic-modules` root directory.
-* You must be reviewing or adding a field.
-
-## Execution Steps
-
-### 1. Enum vs. String Trade-off
-When adding a field that is defined as an Enum in the API, you must decide between `Enum` and `String` in Magic Modules. Read the knowledge entry [.agents/knowledge/field/enums-vs-strings.md](../../../knowledge/field/enums-vs-strings.md) and apply its trade-off.
-
-> [!NOTE]
-> This skill will be expanded over time with more schema review checklist items. The judgment content lives in [.agents/knowledge/](../../../knowledge/index.md) — this skill references it and does not hold its own copy.
-
-### 2. Verification & Handoff
-
-* Proceed with your field addition or PR review based on the decision.
+1. **Enum vs. String & Descriptions:** Read [`.agents/knowledge/field/enums-vs-strings.md`](../../../knowledge/field/enums-vs-strings.md) whenever an API field is an enum.
+2. **Zero-Value Clearing & Empty Blocks:** Read [`.agents/knowledge/field/zero-value-clearing.md`](../../../knowledge/field/zero-value-clearing.md) when handling `send_empty_value`, `default_from_api` with zero values, or `allow_empty_object`.

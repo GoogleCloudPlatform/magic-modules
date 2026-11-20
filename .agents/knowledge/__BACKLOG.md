@@ -5,9 +5,6 @@ Tracks known work for growing the agent knowledge base. This document is not int
 ## Not in the docs
 
 - **casing-and-pluralization** — how API names map to Terraform names; when `api_name` is required.
-- **raw-config-access** — when to use `d.GetRawConfig()` / `GetRawPlan()` / `GetRawState()` instead of
-  `Get`/`GetOk`, which conflate "unset in config" with "set to the zero value" (false/0/""); the raw cty
-  values distinguish null from zero for detecting whether a user actually set a field.
 
 ## Overlaps the docs (entry would add the judgment layer)
 
