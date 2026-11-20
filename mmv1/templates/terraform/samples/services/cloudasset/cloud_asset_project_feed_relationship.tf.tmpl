@@ -1,0 +1,24 @@
+resource "google_cloud_asset_project_feed" "{{$.PrimaryResourceId}}" {
+  project      = "{{index $.TestEnvVars "project"}}"
+  feed_id      = "{{index $.ResourceIdVars "feed_id"}}"
+  content_type = "RELATIONSHIP"
+
+  asset_types = [
+    "compute.googleapis.com/Instance",
+  ]
+
+  relationship_types = [
+    "INSTANCE_TO_INSTANCEGROUP",
+  ]
+
+  feed_output_config {
+    pubsub_destination {
+      topic = google_pubsub_topic.feed_output.id
+    }
+  }
+}
+
+resource "google_pubsub_topic" "feed_output" {
+  project = "{{index $.TestEnvVars "project"}}"
+  name    = "{{index $.ResourceIdVars "feed_id"}}"
+}
