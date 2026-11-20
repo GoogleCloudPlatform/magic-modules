@@ -1,11 +1,17 @@
 package spanner_test
 
 import (
+	"fmt"
+	"regexp"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	_ "github.com/hashicorp/terraform-provider-google/google/services/spanner"
+	"github.com/hashicorp/terraform-provider-google/google/services/spanner"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccSpannerInstancePartition_basic(t *testing.T) {
@@ -416,6 +422,219 @@ resource "google_spanner_instance_partition" "partition" {
       storage_utilization_percent           = 95
     }
   }
+}
+`, context)
+}
+
+func TestAccSpannerInstancePartition_deletionPolicyUpdate(t *testing.T) {
+	t.Parallel()
+
+	suffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerInstancePartitionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSpannerInstancePartition_deletionPolicyUpdate(suffix, "PREVENT"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_spanner_instance_partition.partition", "deletion_policy", "PREVENT"),
+				),
+			},
+			{
+				ResourceName:      "google_spanner_instance_partition.partition",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// deletion_policy is client-side only, so import resets it to its default ("DELETE").
+				ImportStateVerifyIgnore: []string{"deletion_policy"},
+			},
+			{
+				Config:      testAccSpannerInstancePartition_deletionPolicyInstanceOnly(suffix),
+				ExpectError: regexp.MustCompile("cannot destroy SpannerInstancePartition"),
+			},
+			{
+				Config: testAccSpannerInstancePartition_deletionPolicyUpdate(suffix, "FORCE"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_spanner_instance_partition.partition", "deletion_policy", "FORCE"),
+				),
+			},
+			{
+				ResourceName:      "google_spanner_instance_partition.partition",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// deletion_policy is client-side only, so import resets it to its default ("DELETE").
+				ImportStateVerifyIgnore: []string{"deletion_policy"},
+			},
+			{
+				Config: testAccSpannerInstancePartition_deletionPolicyUpdate(suffix, "DELETE"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_spanner_instance_partition.partition", "deletion_policy", "DELETE"),
+				),
+			},
+			{
+				ResourceName:      "google_spanner_instance_partition.partition",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccSpannerInstancePartition_deletionPolicyInstanceOnly(suffix string) string {
+	context := map[string]interface{}{
+		"random_suffix": suffix,
+	}
+	return acctest.Nprintf(`
+resource "google_spanner_instance" "main" {
+  name         = "tf-test-spanner-main-%{random_suffix}"
+  config       = "nam6"
+  display_name = "main-instance"
+  num_nodes    = 1
+  edition      = "ENTERPRISE_PLUS"
+
+  default_backup_schedule_type = "NONE"
+}
+`, context)
+}
+
+func testAccSpannerInstancePartition_deletionPolicyUpdate(suffix, deletionPolicy string) string {
+	context := map[string]interface{}{
+		"random_suffix":   suffix,
+		"deletion_policy": deletionPolicy,
+	}
+	return acctest.Nprintf(`
+resource "google_spanner_instance" "main" {
+  name         = "tf-test-spanner-main-%{random_suffix}"
+  config       = "nam6"
+  display_name = "main-instance"
+  num_nodes    = 1
+  edition      = "ENTERPRISE_PLUS"
+
+  default_backup_schedule_type = "NONE"
+}
+
+resource "google_spanner_instance_partition" "partition" {
+  name            = "tf-test-partition-%{random_suffix}"
+  instance        = google_spanner_instance.main.name
+  config          = "nam8"
+  display_name    = "test-spanner-partition"
+  node_count      = 1
+  deletion_policy = "%{deletion_policy}"
+}
+`, context)
+}
+
+func TestAccSpannerInstancePartition_deletionPolicyForce(t *testing.T) {
+	// Uses time.Now
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	suffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerInstancePartitionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSpannerInstancePartition_deletionPolicyForceWithDatabase(suffix, "DELETE"),
+				// Create a backup that references the instance partition.
+				Check: testAccSpannerInstancePartitionCreateBackup(t, "google_spanner_database.database"),
+			},
+			{
+				// Drop the database while keeping the backup referencing the partition.
+				Config: testAccSpannerInstancePartition_deletionPolicyUpdate(suffix, "DELETE"),
+			},
+			{
+				// With deletion_policy = "DELETE", deleting the partition fails because of the backup.
+				Config:      testAccSpannerInstancePartition_deletionPolicyInstanceOnly(suffix),
+				ExpectError: regexp.MustCompile("(?i)backup"),
+			},
+			{
+				// Switch to deletion_policy = "FORCE" in-place so teardown deletes the backup and partition.
+				Config: testAccSpannerInstancePartition_deletionPolicyUpdate(suffix, "FORCE"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_spanner_instance_partition.partition", "deletion_policy", "FORCE"),
+				),
+			},
+		},
+	})
+}
+
+// testAccSpannerInstancePartitionCreateBackup backs up the database and waits for the backup to be ready.
+// A database cannot be deleted while one of its backups is still being created.
+func testAccSpannerInstancePartitionCreateBackup(t *testing.T, databaseResource string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[databaseResource]
+		if !ok {
+			return fmt.Errorf("Not found: %s", databaseResource)
+		}
+
+		config := acctest.GoogleProviderConfig(t)
+		url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(spanner.Product, config)+"projects/{{project}}/instances/{{instance}}/backups?backupId={{name}}")
+		if err != nil {
+			return err
+		}
+		database, err := tpgresource.ReplaceVarsForTest(config, rs, "projects/{{project}}/instances/{{instance}}/databases/{{name}}")
+		if err != nil {
+			return err
+		}
+
+		project := rs.Primary.Attributes["project"]
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+			Body: map[string]interface{}{
+				"database": database,
+				// Just over the 6 hour minimum, so that a leaked backup expires soon.
+				"expireTime": time.Now().Add(7 * time.Hour).UTC().Format(time.RFC3339),
+			},
+		})
+		if err != nil {
+			return fmt.Errorf("Error creating backup of %s: %s", database, err)
+		}
+		return spanner.SpannerOperationWaitTime(config, res, project, "Creating Backup", config.UserAgent, 60*time.Minute)
+	}
+}
+
+func testAccSpannerInstancePartition_deletionPolicyForceWithDatabase(suffix, deletionPolicy string) string {
+	context := map[string]interface{}{
+		"random_suffix":   suffix,
+		"deletion_policy": deletionPolicy,
+	}
+	return acctest.Nprintf(`
+resource "google_spanner_instance" "main" {
+  name         = "tf-test-spanner-main-%{random_suffix}"
+  config       = "nam6"
+  display_name = "main-instance"
+  num_nodes    = 1
+  edition      = "ENTERPRISE_PLUS"
+
+  # A scheduled backup that is still being created would block the database delete.
+  default_backup_schedule_type = "NONE"
+}
+
+resource "google_spanner_instance_partition" "partition" {
+  name            = "tf-test-partition-%{random_suffix}"
+  instance        = google_spanner_instance.main.name
+  config          = "nam8"
+  display_name    = "test-spanner-partition"
+  node_count      = 1
+  deletion_policy = "%{deletion_policy}"
+}
+
+resource "google_spanner_database" "database" {
+  instance            = google_spanner_instance.main.name
+  name                = "tf-test-db-%{random_suffix}"
+  deletion_protection = false
+  ddl = [
+    "CREATE PLACEMENT testplacement OPTIONS (instance_partition = '${google_spanner_instance_partition.partition.name}')",
+    "CREATE TABLE Singers (SingerId INT64 NOT NULL, Location STRING(MAX) NOT NULL PLACEMENT KEY) PRIMARY KEY (SingerId)",
+  ]
 }
 `, context)
 }
