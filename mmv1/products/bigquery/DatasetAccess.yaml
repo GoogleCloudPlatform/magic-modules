@@ -62,6 +62,7 @@ nested_query:
     - access
   is_list_of_ids: false
   modify_by_patch: true
+  use_etag: true
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/bigquery_dataset_access.go.tmpl'
   constants: 'templates/terraform/constants/bigquery_dataset_access.go.tmpl'
