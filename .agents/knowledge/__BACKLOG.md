@@ -14,8 +14,6 @@ Tracks known work for growing the agent knowledge base. This document is not int
 - **permadiff-decision-path** — choosing between `output`, `default_from_api`, diff suppression, or a real
   fix; mechanics are in `docs/content/develop/diffs.md`.
 - **data-source-idioms** — pitfalls beyond the procedure in `docs/content/develop/add-handwritten-datasource.md`.
-- **test-adequacy-traps** — cases `docs/content/test/test.md` doesn't cover (identical-config update steps,
-  missing import-and-recheck).
 
 ## Mostly covered by the docs (revisit only if agents misread them)
 

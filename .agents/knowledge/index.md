@@ -71,3 +71,4 @@ Read this index at decision points; open only the source the task needs. Format 
 ### Test (`test/`)
 
 - **unit-test-scope** — When to write unit tests vs acceptance tests, and avoiding test bloat. — [test/unit-test-scope.md](test/unit-test-scope.md)
+- **test-adequacy-traps** — Avoid silent no-op update steps, ExpectError-only configs, and custom_check_destroy loop bugs in acceptance tests. — [test/test-adequacy-traps.md](test/test-adequacy-traps.md)
