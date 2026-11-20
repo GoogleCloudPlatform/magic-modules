@@ -751,3 +751,165 @@ resource "google_datastream_connection_profile" "default" {
 }
 `, context)
 }
+
+func TestAccDatastreamConnectionProfile_postgresqlSslConfig(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDatastreamConnectionProfileDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDatastreamConnectionProfile_postgresqlSslConfig(context, "", ""),
+			},
+			{
+				ResourceName:      "google_datastream_connection_profile.server_verification",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"create_without_validation",
+					"postgresql_profile.0.password",
+					"postgresql_profile.0.ssl_config.0.server_verification.0.ca_certificate",
+				},
+			},
+			{
+				ResourceName:      "google_datastream_connection_profile.server_and_client_verification",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"create_without_validation",
+					"postgresql_profile.0.password",
+					"postgresql_profile.0.ssl_config.0.server_and_client_verification.0.ca_certificate",
+					"postgresql_profile.0.ssl_config.0.server_and_client_verification.0.client_certificate",
+					"postgresql_profile.0.ssl_config.0.server_and_client_verification.0.client_key",
+				},
+			},
+			{
+				Config: testAccDatastreamConnectionProfile_postgresqlSslConfig(context, "pg-server.example.com", "pg-mutual.example.com"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_datastream_connection_profile.server_verification", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_datastream_connection_profile.server_and_client_verification", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_datastream_connection_profile.server_verification",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"create_without_validation",
+					"postgresql_profile.0.password",
+					"postgresql_profile.0.ssl_config.0.server_verification.0.ca_certificate",
+				},
+			},
+			{
+				ResourceName:      "google_datastream_connection_profile.server_and_client_verification",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"create_without_validation",
+					"postgresql_profile.0.password",
+					"postgresql_profile.0.ssl_config.0.server_and_client_verification.0.ca_certificate",
+					"postgresql_profile.0.ssl_config.0.server_and_client_verification.0.client_certificate",
+					"postgresql_profile.0.ssl_config.0.server_and_client_verification.0.client_key",
+				},
+			},
+			{
+				Config: testAccDatastreamConnectionProfile_postgresqlSslConfig(context, "pg-server-updated.example.com", "pg-mutual-updated.example.com"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_datastream_connection_profile.server_verification", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_datastream_connection_profile.server_and_client_verification", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_datastream_connection_profile.server_verification",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"create_without_validation",
+					"postgresql_profile.0.password",
+					"postgresql_profile.0.ssl_config.0.server_verification.0.ca_certificate",
+				},
+			},
+			{
+				ResourceName:      "google_datastream_connection_profile.server_and_client_verification",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"create_without_validation",
+					"postgresql_profile.0.password",
+					"postgresql_profile.0.ssl_config.0.server_and_client_verification.0.ca_certificate",
+					"postgresql_profile.0.ssl_config.0.server_and_client_verification.0.client_certificate",
+					"postgresql_profile.0.ssl_config.0.server_and_client_verification.0.client_key",
+				},
+			},
+		},
+	})
+}
+
+func testAccDatastreamConnectionProfile_postgresqlSslConfig(context map[string]interface{}, serverHostname, mutualHostname string) string {
+	serverHostnameLine := ""
+	if serverHostname != "" {
+		serverHostnameLine = fmt.Sprintf(`        server_certificate_hostname = "%s"`, serverHostname)
+	}
+	mutualHostnameLine := ""
+	if mutualHostname != "" {
+		mutualHostnameLine = fmt.Sprintf(`        server_certificate_hostname = "%s"`, mutualHostname)
+	}
+	context["server_hostname_line"] = serverHostnameLine
+	context["mutual_hostname_line"] = mutualHostnameLine
+
+	return acctest.Nprintf(`
+resource "google_datastream_connection_profile" "server_verification" {
+  display_name              = "PostgreSQL SSL server verification"
+  location                  = "us-central1"
+  connection_profile_id     = "tf-test-pg-ssl-sv-%{random_suffix}"
+  create_without_validation = true
+
+  postgresql_profile {
+    hostname = "1.1.1.1"
+    port     = 5432
+    username = "user"
+    password = "password"
+    database = "db"
+    ssl_config {
+      server_verification {
+        ca_certificate = file("text-fixtures/ca-cert.pem")
+%{server_hostname_line}
+      }
+    }
+  }
+}
+
+resource "google_datastream_connection_profile" "server_and_client_verification" {
+  display_name              = "PostgreSQL SSL server and client verification"
+  location                  = "us-central1"
+  connection_profile_id     = "tf-test-pg-ssl-sacv-%{random_suffix}"
+  create_without_validation = true
+
+  postgresql_profile {
+    hostname = "1.1.1.1"
+    port     = 5432
+    username = "user"
+    password = "password"
+    database = "db"
+    ssl_config {
+      server_and_client_verification {
+        client_certificate = file("text-fixtures/cert.pem")
+        client_key         = file("text-fixtures/private-key.pem")
+        ca_certificate     = file("text-fixtures/ca-cert.pem")
+%{mutual_hostname_line}
+      }
+    }
+  }
+}
+`, context)
+}
