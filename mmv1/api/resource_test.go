@@ -236,7 +236,7 @@ func TestProviderDefaultFieldsAreSynthesizedAndDeduplicated(t *testing.T) {
 				BaseUrl: "projects/{{project}}/zones/{{zone}}/foos",
 				Parameters: []*api.Type{
 					{Name: "project", Type: "String"},
-					{Name: "zone", Type: "String", IgnoreRead: true, Exclude: true},
+					{Name: "zone", Type: "String", IgnoreRead: true, Exclude: new(true)},
 				},
 				ProductMetadata: &api.Product{
 					Versions: []*product.Version{version},
@@ -1677,5 +1677,53 @@ func TestResource_FirstTestConfig_StepMinVersion(t *testing.T) {
 	testSamples := r.TestSamples()
 	if len(testSamples) != 2 || testSamples[0].Name != "mixed_steps" {
 		t.Errorf("TestSamples() = %v, want 2 samples starting with mixed_steps", testSamples)
+	}
+}
+
+func TestMergeExclude(t *testing.T) {
+	t.Parallel()
+
+	newBase := func(exclude *bool) *api.Resource {
+		return &api.Resource{
+			Name: "Repository",
+			VirtualFields: []*api.Type{
+				{Name: "deletion_policy", Type: "Enum", Description: "base", Exclude: exclude},
+			},
+		}
+	}
+
+	cases := []struct {
+		name         string
+		baseExclude  *bool
+		override     *api.Type
+		wantIncluded bool
+		wantDesc     string
+	}{
+		{"override exclude false wins", new(true), &api.Type{Name: "deletion_policy", Exclude: new(false)}, true, "base"},
+		{"override without exclude keeps base", new(true), &api.Type{Name: "deletion_policy", Description: "new"}, false, "new"},
+		{"override exclude true over base unset", nil, &api.Type{Name: "deletion_policy", Exclude: new(true)}, false, "base"},
+		{"override exclude true over base false", new(false), &api.Type{Name: "deletion_policy", Exclude: new(true)}, false, "base"},
+		{"override exclude false over base false", new(false), &api.Type{Name: "deletion_policy", Exclude: new(false)}, true, "base"},
+		{"override without exclude keeps base unset", nil, &api.Type{Name: "deletion_policy", Description: "new"}, true, "new"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			base := newBase(tc.baseExclude)
+			override := api.Resource{VirtualFields: []*api.Type{tc.override}}
+
+			api.Merge(reflect.ValueOf(base), reflect.ValueOf(override), "ga")
+
+			got := false
+			for _, f := range base.UserVirtualFields() {
+				got = got || f.Name == "deletion_policy"
+			}
+			if got != tc.wantIncluded {
+				t.Errorf("UserVirtualFields() includes deletion_policy = %v, want %v", got, tc.wantIncluded)
+			}
+			if d := base.VirtualFields[0].Description; d != tc.wantDesc {
+				t.Errorf("Description = %q, want %q", d, tc.wantDesc)
+			}
+		})
 	}
 }
