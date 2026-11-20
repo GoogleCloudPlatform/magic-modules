@@ -526,8 +526,6 @@ resource "google_spanner_instance_partition" "partition" {
 }
 
 func TestAccSpannerInstancePartition_deletionPolicyForce(t *testing.T) {
-	// Uses time.Now
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	suffix := acctest.RandString(t, 10)
@@ -572,6 +570,10 @@ func testAccSpannerInstancePartitionCreateBackup(t *testing.T, databaseResource 
 		}
 
 		config := acctest.GoogleProviderConfig(t)
+		dbUrl, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(spanner.Product, config)+"projects/{{project}}/instances/{{instance}}/databases/{{name}}")
+		if err != nil {
+			return err
+		}
 		url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(spanner.Product, config)+"projects/{{project}}/instances/{{instance}}/backups?backupId={{name}}")
 		if err != nil {
 			return err
@@ -582,6 +584,25 @@ func testAccSpannerInstancePartitionCreateBackup(t *testing.T, databaseResource 
 		}
 
 		project := rs.Primary.Attributes["project"]
+		dbRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    dbUrl,
+			UserAgent: config.UserAgent,
+		})
+		if err != nil {
+			return fmt.Errorf("Error reading database %s: %s", database, err)
+		}
+		createTimeRaw, ok := dbRes["createTime"].(string)
+		if !ok || createTimeRaw == "" {
+			return fmt.Errorf("Database %s response missing createTime", database)
+		}
+		createTime, err := time.Parse(time.RFC3339Nano, createTimeRaw)
+		if err != nil {
+			return fmt.Errorf("Error parsing database %s createTime %q: %s", database, createTimeRaw, err)
+		}
+
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "POST",
@@ -590,8 +611,10 @@ func testAccSpannerInstancePartitionCreateBackup(t *testing.T, databaseResource 
 			UserAgent: config.UserAgent,
 			Body: map[string]interface{}{
 				"database": database,
+				// Derive expireTime from the database's server createTime rather than time.Now()
+				// so the request body is deterministic across VCR recording and replaying.
 				// Just over the 6 hour minimum, so that a leaked backup expires soon.
-				"expireTime": time.Now().Add(7 * time.Hour).UTC().Format(time.RFC3339),
+				"expireTime": createTime.Add(7 * time.Hour).UTC().Truncate(time.Second).Format(time.RFC3339),
 			},
 		})
 		if err != nil {
