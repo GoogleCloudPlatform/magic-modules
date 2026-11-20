@@ -1,10 +1,14 @@
 package sql
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"reflect"
 	"slices"
 	"strconv"
@@ -24,6 +28,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 
 	"google.golang.org/api/googleapi"
+	"google.golang.org/api/option"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
@@ -1115,6 +1120,46 @@ API (for read pools, effective_availability_type may differ from availability_ty
 								},
 							},
 						},
+						"sql_server_password_validation_policy": {
+							Type:             schema.TypeList,
+							Optional:         true,
+							MaxItems:         1,
+							DiffSuppressFunc: sqlServerPasswordValidationPolicyDiffSuppress,
+							Description:      `Declare custom password validation policy for SQL Server instances.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enable_password_policy": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: `Whether the password policy is enabled or not.`,
+									},
+									"password_minimum_length": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										ValidateFunc: validation.IntBetween(8, 128),
+										Description:  `Minimum number of characters allowed.`,
+									},
+									"password_history_length": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										ValidateFunc: validation.IntBetween(1, 24),
+										Description:  `Number of previous passwords that cannot be reused.`,
+									},
+									"password_minimum_age": {
+										Type:             schema.TypeString,
+										Optional:         true,
+										DiffSuppressFunc: tpgresource.DurationDiffSuppress,
+										Description:      `Minimum interval after which the password can be changed, formatted as a duration in seconds with whole-day precision (for example, "86400s"). This flag is only supported for SQL Server.`,
+									},
+									"password_maximum_age": {
+										Type:             schema.TypeString,
+										Optional:         true,
+										DiffSuppressFunc: tpgresource.DurationDiffSuppress,
+										Description:      `Maximum duration a password remains valid before expiring, formatted as a duration in seconds with whole-day precision (for example, "2592000s"). This flag is only supported for SQL Server.`,
+									},
+								},
+							},
+						},
 						"connector_enforcement": {
 							Type:         schema.TypeString,
 							Optional:     true,
@@ -2018,6 +2063,8 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		instance.Settings.BackupConfiguration.BinaryLogEnabled = false
 	}
 
+	desiredSqlServerPVP := expandSqlServerPasswordValidationPolicy(d.Get("settings.0.sql_server_password_validation_policy").([]interface{}))
+
 	var op *sqladmin.Operation
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (operr error) {
@@ -2034,7 +2081,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 				parent := fmt.Sprintf("projects/%s", project)
 				op, operr = NewClient(config, userAgent).Instances.PointInTimeRestore(parent, pointInTimeRestoreContext).Do()
 			} else {
-				op, operr = NewClient(config, userAgent).Instances.Insert(project, instance).Do()
+				op, operr = newClientWithSqlServerPasswordPolicy(config, userAgent, desiredSqlServerPVP, nil).Instances.Insert(project, instance).Do()
 			}
 			return operr
 		},
@@ -2130,7 +2177,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 		var op *sqladmin.Operation
 		err = transport_tpg.Retry(transport_tpg.RetryOptions{
 			RetryFunc: func() (rerr error) {
-				op, rerr = NewClient(config, userAgent).Instances.Update(project, name, instanceUpdate).Do()
+				op, rerr = newClientWithSqlServerPasswordPolicy(config, userAgent, desiredSqlServerPVP, nil).Instances.Update(project, name, instanceUpdate).Do()
 				return rerr
 			},
 			Timeout:              d.Timeout(schema.TimeoutUpdate),
@@ -2714,9 +2761,10 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	}
 
 	var instance *sqladmin.DatabaseInstance
+	var rawInstanceBody []byte
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (rerr error) {
-			instance, rerr = NewClient(config, userAgent).Instances.Get(project, d.Get("name").(string)).Do()
+			instance, rerr = newClientWithSqlServerPasswordPolicy(config, userAgent, nil, &rawInstanceBody).Instances.Get(project, d.Get("name").(string)).Do()
 			return rerr
 		},
 		Timeout:              d.Timeout(schema.TimeoutRead),
@@ -2762,7 +2810,11 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("node_count", instance.NodeCount); err != nil {
 		return fmt.Errorf("Error setting node_count: %s", err)
 	}
-	if err := d.Set("settings", flattenSettings(instance.Settings, instance.InstanceType, d)); err != nil {
+	flattenedSettings := flattenSettings(instance.Settings, instance.InstanceType, d)
+	if sqlServerPVP := parseSqlServerPasswordValidationPolicyFromInstanceJSON(rawInstanceBody); sqlServerPVP != nil && len(flattenedSettings) > 0 {
+		flattenedSettings[0]["sql_server_password_validation_policy"] = flattenSqlServerPasswordValidationPolicy(sqlServerPVP)
+	}
+	if err := d.Set("settings", flattenedSettings); err != nil {
 		log.Printf("[WARN] Failed to set SQL Database Instance Settings")
 	}
 	if instance.DiskEncryptionConfiguration != nil {
@@ -3264,9 +3316,10 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		instance.SwitchTransactionLogsToCloudStorageEnabled = d.Get("switch_transaction_logs_to_cloud_storage_enabled").(bool)
 	}
 
+	desiredSqlServerPVP := expandSqlServerPasswordValidationPolicy(d.Get("settings.0.sql_server_password_validation_policy").([]interface{}))
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (rerr error) {
-			op, rerr = NewClient(config, userAgent).Instances.Update(project, d.Get("name").(string), instance).Do()
+			op, rerr = newClientWithSqlServerPasswordPolicy(config, userAgent, desiredSqlServerPVP, nil).Instances.Update(project, d.Get("name").(string), instance).Do()
 			return rerr
 		},
 		Timeout:              d.Timeout(schema.TimeoutUpdate),
@@ -3464,6 +3517,37 @@ func databaseCenterIntegrationDiffSuppress(_, old, new string, d *schema.Resourc
 		return true
 	}
 	return false
+}
+
+func sqlServerPasswordValidationPolicyDiffSuppress(_, _, _ string, d *schema.ResourceData) bool {
+	// SQL Server read replicas inherit sql_server_password_validation_policy from their primary instance.
+	// Suppress diffs against inherited state when the block is omitted in the replica's configuration.
+	if d == nil || sqlDatabaseIsMaster(d) {
+		return false
+	}
+	if rawConfig := d.GetRawConfig(); rawConfig.IsKnown() && !rawConfig.IsNull() && rawConfig.Type().IsObjectType() && rawConfig.Type().HasAttribute("settings") {
+		settingsVal := rawConfig.GetAttr("settings")
+		if !settingsVal.IsKnown() {
+			return false
+		}
+		if settingsVal.IsNull() || settingsVal.LengthInt() == 0 {
+			return true
+		}
+		elem := settingsVal.Index(cty.NumberIntVal(0))
+		if !elem.IsKnown() {
+			return false
+		}
+		if elem.IsNull() || !elem.Type().IsObjectType() || !elem.Type().HasAttribute("sql_server_password_validation_policy") {
+			return true
+		}
+		pvpVal := elem.GetAttr("sql_server_password_validation_policy")
+		if !pvpVal.IsKnown() {
+			return false
+		}
+		return pvpVal.IsNull() || pvpVal.LengthInt() == 0
+	}
+	pvp, ok := d.Get("settings.0.sql_server_password_validation_policy").([]interface{})
+	return !ok || len(pvp) == 0
 }
 
 func parseDenyMaintenancePeriodDate(date string) (int, int, int, bool) {
@@ -4173,6 +4257,202 @@ func flattenPasswordValidationPolicy(passwordValidationPolicy *sqladmin.Password
 		"enable_password_policy":      passwordValidationPolicy.EnablePasswordPolicy,
 	}
 	return []map[string]interface{}{data}
+}
+
+type sqlServerPasswordValidationPolicy struct {
+	EnablePasswordPolicy  bool
+	PasswordMinimumLength int64
+	PasswordHistoryLength int64
+	PasswordMinimumAge    string
+	PasswordMaximumAge    string
+	ForceSendFields       []string
+	NullFields            []string
+}
+
+func (p *sqlServerPasswordValidationPolicy) toAPIMap() map[string]interface{} {
+	if p == nil {
+		return nil
+	}
+	m := map[string]interface{}{
+		"enablePasswordPolicy": p.EnablePasswordPolicy,
+	}
+	nullSet := make(map[string]bool, len(p.NullFields))
+	for _, f := range p.NullFields {
+		nullSet[f] = true
+	}
+	if p.PasswordMinimumLength != 0 {
+		m["passwordMinimumLength"] = p.PasswordMinimumLength
+	} else if nullSet["PasswordMinimumLength"] {
+		m["passwordMinimumLength"] = nil
+	}
+	if p.PasswordHistoryLength != 0 {
+		m["passwordHistoryLength"] = p.PasswordHistoryLength
+	} else if nullSet["PasswordHistoryLength"] {
+		m["passwordHistoryLength"] = nil
+	}
+	if p.PasswordMinimumAge != "" {
+		m["passwordMinimumAge"] = p.PasswordMinimumAge
+	} else if nullSet["PasswordMinimumAge"] {
+		m["passwordMinimumAge"] = nil
+	}
+	if p.PasswordMaximumAge != "" {
+		m["passwordMaximumAge"] = p.PasswordMaximumAge
+	} else if nullSet["PasswordMaximumAge"] {
+		m["passwordMaximumAge"] = nil
+	}
+	return m
+}
+
+func parseSqlServerPasswordValidationPolicyFromInstanceJSON(body []byte) *sqlServerPasswordValidationPolicy {
+	if len(body) == 0 {
+		return nil
+	}
+	var raw struct {
+		Settings *struct {
+			SqlServerPasswordValidationPolicy *struct {
+				EnablePasswordPolicy  bool   `json:"enablePasswordPolicy"`
+				PasswordMinimumLength int64  `json:"passwordMinimumLength"`
+				PasswordHistoryLength int64  `json:"passwordHistoryLength"`
+				PasswordMinimumAge    string `json:"passwordMinimumAge"`
+				PasswordMaximumAge    string `json:"passwordMaximumAge"`
+			} `json:"sqlServerPasswordValidationPolicy"`
+		} `json:"settings"`
+	}
+	if err := json.Unmarshal(body, &raw); err != nil || raw.Settings == nil || raw.Settings.SqlServerPasswordValidationPolicy == nil {
+		return nil
+	}
+	p := raw.Settings.SqlServerPasswordValidationPolicy
+	return &sqlServerPasswordValidationPolicy{
+		EnablePasswordPolicy:  p.EnablePasswordPolicy,
+		PasswordMinimumLength: p.PasswordMinimumLength,
+		PasswordHistoryLength: p.PasswordHistoryLength,
+		PasswordMinimumAge:    p.PasswordMinimumAge,
+		PasswordMaximumAge:    p.PasswordMaximumAge,
+	}
+}
+
+type sqlServerPasswordPolicyRoundTripper struct {
+	base        http.RoundTripper
+	policy      *sqlServerPasswordValidationPolicy
+	captureBody *[]byte
+}
+
+func (rt *sqlServerPasswordPolicyRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	if rt.policy != nil && req.Body != nil && (req.Method == http.MethodPost || req.Method == http.MethodPut || req.Method == http.MethodPatch) {
+		reqBody, err := io.ReadAll(req.Body)
+		_ = req.Body.Close()
+		if err != nil {
+			return nil, err
+		}
+		var payload map[string]interface{}
+		if err := json.Unmarshal(reqBody, &payload); err == nil {
+			if settingsMap, ok := payload["settings"].(map[string]interface{}); ok {
+				settingsMap["sqlServerPasswordValidationPolicy"] = rt.policy.toAPIMap()
+				if updatedBody, mErr := json.Marshal(payload); mErr == nil {
+					reqBody = updatedBody
+				}
+			}
+		}
+		cloned := req.Clone(req.Context())
+		cloned.Body = io.NopCloser(bytes.NewReader(reqBody))
+		cloned.ContentLength = int64(len(reqBody))
+		cloned.GetBody = func() (io.ReadCloser, error) {
+			return io.NopCloser(bytes.NewReader(reqBody)), nil
+		}
+		req = cloned
+	}
+
+	resp, err := rt.base.RoundTrip(req)
+	if err == nil && resp != nil && resp.Body != nil && rt.captureBody != nil && req.Method == http.MethodGet {
+		b, rErr := io.ReadAll(resp.Body)
+		_ = resp.Body.Close()
+		if rErr != nil {
+			return nil, rErr
+		}
+		*rt.captureBody = b
+		resp.Body = io.NopCloser(bytes.NewReader(b))
+	}
+	return resp, err
+}
+
+func newClientWithSqlServerPasswordPolicy(c *transport_tpg.Config, userAgent string, policy *sqlServerPasswordValidationPolicy, captureBody *[]byte) *sqladmin.Service {
+	if policy == nil && captureBody == nil {
+		return NewClient(c, userAgent)
+	}
+	var baseClient http.Client
+	if c.Client != nil {
+		baseClient = *c.Client
+	}
+	baseTransport := baseClient.Transport
+	if baseTransport == nil {
+		baseTransport = http.DefaultTransport
+	}
+	baseClient.Transport = &sqlServerPasswordPolicyRoundTripper{
+		base:        baseTransport,
+		policy:      policy,
+		captureBody: captureBody,
+	}
+	sqlClientBasePath := transport_tpg.RemoveBasePathVersion(transport_tpg.RemoveBasePathVersion(transport_tpg.BaseUrl(Product, c)))
+	clientSqlAdmin, err := sqladmin.NewService(c.Context, option.WithHTTPClient(&baseClient))
+	if err != nil {
+		log.Printf("[WARN] Error creating client sqladmin: %s", err)
+		return nil
+	}
+	clientSqlAdmin.UserAgent = userAgent
+	clientSqlAdmin.BasePath = sqlClientBasePath
+	return clientSqlAdmin
+}
+
+func flattenSqlServerPasswordValidationPolicy(policy *sqlServerPasswordValidationPolicy) interface{} {
+	if policy == nil {
+		return nil
+	}
+	data := map[string]interface{}{
+		"enable_password_policy":  policy.EnablePasswordPolicy,
+		"password_minimum_length": policy.PasswordMinimumLength,
+		"password_history_length": policy.PasswordHistoryLength,
+		"password_minimum_age":    policy.PasswordMinimumAge,
+		"password_maximum_age":    policy.PasswordMaximumAge,
+	}
+	return []map[string]interface{}{data}
+}
+
+func expandSqlServerPasswordValidationPolicy(configured []interface{}) *sqlServerPasswordValidationPolicy {
+	if len(configured) == 0 || configured[0] == nil {
+		return nil
+	}
+
+	_policy := configured[0].(map[string]interface{})
+	policy := &sqlServerPasswordValidationPolicy{
+		EnablePasswordPolicy: _policy["enable_password_policy"].(bool),
+		ForceSendFields:      []string{"EnablePasswordPolicy"},
+	}
+
+	if v, ok := _policy["password_minimum_length"].(int); ok && v != 0 {
+		policy.PasswordMinimumLength = int64(v)
+	} else if ok && v == 0 {
+		policy.NullFields = append(policy.NullFields, "PasswordMinimumLength")
+	}
+
+	if v, ok := _policy["password_history_length"].(int); ok && v != 0 {
+		policy.PasswordHistoryLength = int64(v)
+	} else if ok && v == 0 {
+		policy.NullFields = append(policy.NullFields, "PasswordHistoryLength")
+	}
+
+	if v, ok := _policy["password_minimum_age"].(string); ok && v != "" {
+		policy.PasswordMinimumAge = v
+	} else if ok && v == "" {
+		policy.NullFields = append(policy.NullFields, "PasswordMinimumAge")
+	}
+
+	if v, ok := _policy["password_maximum_age"].(string); ok && v != "" {
+		policy.PasswordMaximumAge = v
+	} else if ok && v == "" {
+		policy.NullFields = append(policy.NullFields, "PasswordMaximumAge")
+	}
+
+	return policy
 }
 
 func flattenEdition(v interface{}) string {

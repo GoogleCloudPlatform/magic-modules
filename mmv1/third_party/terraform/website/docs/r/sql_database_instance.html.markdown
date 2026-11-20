@@ -720,6 +720,18 @@ The optional `settings.password_validation_policy` subblock for instances declar
 
 * `enable_password_policy` - Enables or disable the password validation policy.
 
+The optional `settings.sql_server_password_validation_policy` subblock for instances declares custom password validation policy for primary Cloud SQL for SQL Server instances (supported on SQL Server 2022 CU23+ and SQL Server 2025 CU3+; read replicas inherit the primary instance's policy). All subfields other than `enable_password_policy` require `enable_password_policy = true`. It contains:
+
+* `enable_password_policy` - (Required) Enables or disables the password validation policy.
+
+* `password_minimum_length` - (Optional) Specifies the minimum number of characters that the password must have. Valid values range from `8` to `128` (`8` to `14` on SQL Server 2022, `8` to `128` on SQL Server 2025). Requires `enable_password_policy = true`.
+
+* `password_history_length` - (Optional) Specifies the number of previous passwords that you can't reuse. Valid values range from `1` to `24`. Requires `enable_password_policy = true`.
+
+* `password_minimum_age` - (Optional) Specifies the minimum duration after which you can change the password, formatted in whole-day seconds (from `"86400s"` [1 day] to `"86313600s"` [999 days]; sub-day durations are not supported). Requires `enable_password_policy = true`.
+
+* `password_maximum_age` - (Optional) Specifies the maximum duration that a password remains valid before it expires, formatted in whole-day seconds (from `"86400s"` [1 day] to `"86313600s"` [999 days]; sub-day durations are not supported). Requires `enable_password_policy = true`.
+
 The optional `settings.performance_capture_config` (Beta) subblock for instances declares Performance Capture configuration. It contains:
 
 * `enabled` - (Beta) True if the Performance Capture feature is enabled.

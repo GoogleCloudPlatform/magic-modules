@@ -11859,3 +11859,161 @@ func testGoogleSqlDatabaseInstance_blueGreenDeployment_cluster_sameVersion(prima
 `, deploymentName, activeEnv, deleteOldSource)
 	return testGoogleSqlDatabaseInstance_blueGreenDeployment_cluster_base(primaryName, replicaName, primaryDbVer, replicaDbVer, bgdBlock)
 }
+
+func TestAccSqlDatabaseInstance_sqlServerPasswordValidationPolicy(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"instance_name": fmt.Sprintf("tf-test-sqlserver-pvp-%s", acctest.RandString(t, 10)),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_sqlServerPasswordValidationPolicyEnabled(context, 10, 5, "86400s", "2592000s"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.default", "settings.0.sql_server_password_validation_policy.0.enable_password_policy", "true"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.default", "settings.0.sql_server_password_validation_policy.0.password_minimum_length", "10"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.default", "settings.0.sql_server_password_validation_policy.0.password_history_length", "5"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.default", "settings.0.sql_server_password_validation_policy.0.password_minimum_age", "86400s"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.default", "settings.0.sql_server_password_validation_policy.0.password_maximum_age", "2592000s"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection"},
+			},
+			{
+				Config: testAccSqlDatabaseInstance_sqlServerPasswordValidationPolicyEnabled(context, 12, 8, "172800s", "5184000s"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_sql_database_instance.default", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.default", "settings.0.sql_server_password_validation_policy.0.enable_password_policy", "true"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.default", "settings.0.sql_server_password_validation_policy.0.password_minimum_length", "12"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.default", "settings.0.sql_server_password_validation_policy.0.password_history_length", "8"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.default", "settings.0.sql_server_password_validation_policy.0.password_minimum_age", "172800s"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.default", "settings.0.sql_server_password_validation_policy.0.password_maximum_age", "5184000s"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection"},
+			},
+			{
+				Config: testAccSqlDatabaseInstance_sqlServerPasswordValidationPolicyDisabled(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_sql_database_instance.default", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.default", "settings.0.sql_server_password_validation_policy.0.enable_password_policy", "false"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.default", "settings.0.sql_server_password_validation_policy.0.password_minimum_length", "0"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.default", "settings.0.sql_server_password_validation_policy.0.password_history_length", "0"),
+					resource.TestCheckResourceAttr("google_sql_database_instance.default", "settings.0.sql_server_password_validation_policy.0.password_minimum_age", ""),
+					resource.TestCheckResourceAttr("google_sql_database_instance.default", "settings.0.sql_server_password_validation_policy.0.password_maximum_age", ""),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection"},
+			},
+			{
+				Config: testAccSqlDatabaseInstance_sqlServerPasswordValidationPolicyRemoved(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_sql_database_instance.default", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_sql_database_instance.default", "settings.0.sql_server_password_validation_policy.#", "0"),
+				),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"root_password", "deletion_protection"},
+			},
+		},
+	})
+}
+
+func testAccSqlDatabaseInstance_sqlServerPasswordValidationPolicyEnabled(context map[string]interface{}, minLength, historyLength int, minAge, maxAge string) string {
+	cfgContext := map[string]interface{}{
+		"instance_name":  context["instance_name"],
+		"min_length":     minLength,
+		"history_length": historyLength,
+		"min_age":        minAge,
+		"max_age":        maxAge,
+	}
+	return acctest.Nprintf(`
+resource "google_sql_database_instance" "default" {
+  name                = "%{instance_name}"
+  database_version    = "SQLSERVER_2022_STANDARD"
+  region              = "us-central1"
+  root_password       = "ComplexP@ssw0rd123!"
+  deletion_protection = false
+
+  settings {
+    tier = "db-custom-1-3840"
+
+    sql_server_password_validation_policy {
+      enable_password_policy  = true
+      password_minimum_length = %{min_length}
+      password_history_length = %{history_length}
+      password_minimum_age    = "%{min_age}"
+      password_maximum_age    = "%{max_age}"
+    }
+  }
+}
+`, cfgContext)
+}
+
+func testAccSqlDatabaseInstance_sqlServerPasswordValidationPolicyDisabled(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_sql_database_instance" "default" {
+  name                = "%{instance_name}"
+  database_version    = "SQLSERVER_2022_STANDARD"
+  region              = "us-central1"
+  root_password       = "ComplexP@ssw0rd123!"
+  deletion_protection = false
+
+  settings {
+    tier = "db-custom-1-3840"
+
+    sql_server_password_validation_policy {
+      enable_password_policy = false
+    }
+  }
+}
+`, context)
+}
+
+func testAccSqlDatabaseInstance_sqlServerPasswordValidationPolicyRemoved(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_sql_database_instance" "default" {
+  name                = "%{instance_name}"
+  database_version    = "SQLSERVER_2022_STANDARD"
+  region              = "us-central1"
+  root_password       = "ComplexP@ssw0rd123!"
+  deletion_protection = false
+
+  settings {
+    tier = "db-custom-1-3840"
+  }
+}
+`, context)
+}
