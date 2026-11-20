@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -311,8 +310,8 @@ func resourceSqlUserCreate(d *schema.ResourceData, meta interface{}) error {
 	var password string
 	if pw, ok := d.GetOk("password"); ok {
 		password = pw.(string)
-	} else if pwWo, _ := d.GetRawConfigAt(cty.GetAttrPath("password_wo")); !pwWo.IsNull() {
-		password = pwWo.AsString()
+	} else {
+		password = tpgresource.GetRawConfigAttributeAsString(d, "password_wo")
 	}
 	var databaseRoles []string
 	if roles, ok := d.GetOk("database_roles"); ok {
@@ -605,8 +604,8 @@ func resourceSqlUserUpdate(d *schema.ResourceData, meta interface{}) error {
 		var password string
 		if pw, ok := d.GetOk("password"); ok {
 			password = pw.(string)
-		} else if pwWo, _ := d.GetRawConfigAt(cty.GetAttrPath("password_wo")); !pwWo.IsNull() {
-			password = pwWo.AsString()
+		} else {
+			password = tpgresource.GetRawConfigAttributeAsString(d, "password_wo")
 		}
 		var databaseRoles []string
 		if roles, ok := d.GetOk("database_roles"); ok {

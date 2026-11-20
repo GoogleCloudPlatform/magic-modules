@@ -41,9 +41,9 @@ for _, sp := range sensitiveParams {
 }
 {{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 for _, sp := range sensitiveWoParams {
-	if auth, _ := d.GetRawConfigAt(cty.GetAttrPath("sensitive_params").IndexInt(0).GetAttr(sp)); !auth.IsNull() && auth.Type().Equals(cty.String) {
+	if auth := tpgresource.GetRawConfigAttributeAsString(d, "sensitive_params.0." + sp); auth != "" {
 		sp = sp[:len(sp)-3] // _wo is convention for write-only params and are removed here
-		params[sp] = auth.AsString()
+		params[sp] = auth
 	}
 }
 {{- end }}
