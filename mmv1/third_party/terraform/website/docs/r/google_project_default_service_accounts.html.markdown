@@ -18,8 +18,9 @@ Also Google recommends using the `constraints/iam.automaticIamGrantsForDefaultSe
 to disable automatic IAM Grants to default service accounts.
 
 ~> This resource works on a best-effort basis, as no API formally describes the default service accounts
-and it is for users who are unable to use constraints. If the default service accounts change their name
-or additional service accounts are added, this resource will need to be updated.
+and it is for users who are unable to use constraints. It finds the default service accounts by their e-mail address
+(`<project_number>-compute@developer.gserviceaccount.com` and `<project_id>@appspot.gserviceaccount.com`).
+If Google changes these addresses or adds default service accounts, this resource needs an update.
 
 ## Example Usage
 

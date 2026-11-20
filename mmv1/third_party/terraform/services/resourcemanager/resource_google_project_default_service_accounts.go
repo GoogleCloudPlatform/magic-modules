@@ -1,8 +1,10 @@
 package resourcemanager
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 	"time"
 
@@ -157,9 +159,9 @@ func resourceGoogleProjectDefaultServiceAccountsCreate(d *schema.ResourceData, m
 	changedServiceAccounts := make(map[string]interface{})
 	for _, sa := range serviceAccounts {
 		// As per documentation https://cloud.google.com/iam/docs/service-accounts#default
-		// we have just two default SAs and the e-mail may change. So, it is been filtered
-		// by the Display Name
-		if isDefaultServiceAccount(sa.DisplayName) {
+		// there are just two default SAs. Their display names have changed over time,
+		// so they are matched by e-mail address.
+		if isDefaultServiceAccount(sa.Email) {
 			err := resourceGoogleProjectDefaultServiceAccountsDoAction(d, meta, action, sa.UniqueId, sa.Email, pid)
 			if err != nil {
 				return fmt.Errorf("error doing action %s on Service Account %s: %v", action, sa.Email, err)
@@ -177,11 +179,15 @@ func resourceGoogleProjectDefaultServiceAccountsCreate(d *schema.ResourceData, m
 
 func listServiceAccounts(config *transport_tpg.Config, d *schema.ResourceData, userAgent string) ([]*iam.ServiceAccount, error) {
 	pid := d.Get("project").(string)
-	response, err := iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.List(PrefixedProject(pid)).Do()
+	var accounts []*iam.ServiceAccount
+	err := iambeta.NewClient(config, userAgent).Projects.ServiceAccounts.List(PrefixedProject(pid)).Pages(context.Background(), func(resp *iam.ListServiceAccountsResponse) error {
+		accounts = append(accounts, resp.Accounts...)
+		return nil
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to list service accounts on project %q: %v", pid, err)
 	}
-	return response.Accounts, nil
+	return accounts, nil
 }
 
 func resourceGoogleProjectDefaultServiceAccountsDelete(d *schema.ResourceData, meta interface{}) error {
@@ -214,15 +220,12 @@ func resourceGoogleProjectDefaultServiceAccountsDelete(d *schema.ResourceData, m
 	return nil
 }
 
-func isDefaultServiceAccount(displayName string) bool {
-	gceDefaultSA := "compute engine default service account"
-	appEngineDefaultSA := "app engine default service account"
-	saDisplayName := strings.ToLower(displayName)
-	if saDisplayName == gceDefaultSA || saDisplayName == appEngineDefaultSA {
-		return true
-	}
+var defaultSAEmail = regexp.MustCompile(`^([0-9]+-compute@developer|[^@]+@appspot)\.gserviceaccount\.com$`)
 
-	return false
+// Default SAs are matched by e-mail: display names changed over time, and the
+// App Engine address is matched by domain because project IDs can be domain-scoped.
+func isDefaultServiceAccount(email string) bool {
+	return defaultSAEmail.MatchString(strings.ToLower(email))
 }
 
 func init() {
