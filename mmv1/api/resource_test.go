@@ -1781,3 +1781,71 @@ func TestResourceValidateInternalRefs(t *testing.T) {
 		})
 	}
 }
+
+func TestResource_TestSampleSetUp_ZeroStepShorthandAndBetaValidateUnderGA(t *testing.T) {
+	t.Parallel()
+
+	sysfs := fstest.MapFS{
+		"templates/terraform/samples/services/pubsub/topic_basic.tf.tmpl": &fstest.MapFile{
+			Data: []byte(`resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.ResourceIdVars "topic_id"}}"
+}
+`),
+		},
+		"templates/iam_body.tf.tmpl": &fstest.MapFile{
+			Data: []byte(`topic = google_pubsub_topic.primary.name`),
+		},
+	}
+
+	p := &api.Product{
+		Name:     "Pubsub",
+		Versions: []*product.Version{{Name: "ga"}, {Name: "beta"}},
+	}
+	r := api.Resource{
+		Name:              "Topic",
+		Description:       "desc",
+		Exclude:           true,
+		CreateVerb:        "POST",
+		ReadVerb:          "GET",
+		DeleteVerb:        "DELETE",
+		UpdateVerb:        "PUT",
+		ProductMetadata:   p,
+		SourceYamlFile:    "products/pubsub/Topic.yaml",
+		TargetVersionName: "ga",
+		IamPolicy: &resource.IamPolicy{
+			SampleConfigBody:   "templates/iam_body.tf.tmpl",
+			FetchIamPolicyVerb: "GET",
+			SetIamPolicyVerb:   "POST",
+		},
+		Samples: []*resource.Sample{
+			{
+				// 0-step shorthand on first sample must populate Steps[0] BEFORE FirstTestConfig()
+				Name:              "topic_basic",
+				PrimaryResourceId: "primary",
+				ResourceIdVars:    map[string]string{"topic_id": "my-topic"},
+			},
+			{
+				// Beta-only sample with unnamed step must still pass Validate() under TargetVersionName="ga"
+				Name:              "topic_beta",
+				PrimaryResourceId: "primary",
+				MinVersion:        "beta",
+				Steps:             []*resource.Step{{}},
+			},
+		},
+	}
+
+	r.TestSampleSetUp(sysfs)
+
+	if len(r.Samples[0].Steps) != 1 || r.Samples[0].Steps[0].Name != "topic_basic" {
+		t.Fatalf("0-step shorthand failed: got %+v", r.Samples[0].Steps)
+	}
+	if r.FirstTestConfig().Step != r.Samples[0].Steps[0] {
+		t.Errorf("FirstTestConfig().Step did not resolve to expanded 0-step sample")
+	}
+	if r.Samples[0].Steps[0].IamHCLText == "" {
+		t.Errorf("expected IamHCLText to be populated on expanded 0-step first sample")
+	}
+	if errs := r.Validate(); len(errs) != 0 {
+		t.Errorf("Validate() under GA returned unexpected errors: %v", errs)
+	}
+}
