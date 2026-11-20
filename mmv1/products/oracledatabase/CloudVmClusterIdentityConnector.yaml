@@ -26,8 +26,6 @@ create_url: projects/{{project}}/locations/{{location}}/cloudVmClusters/{{cloud_
 create_verb: POST
 update_url: projects/{{project}}/locations/{{location}}/cloudVmClusters/{{cloud_vm_cluster}}:enableIdentityConnector
 update_verb: POST
-exclude_delete: true
-deletion_policy_exclude: true
 exclude_tgc: true
 legacy_long_form_project: true
 id_format: projects/{{project}}/locations/{{location}}/cloudVmClusters/{{cloud_vm_cluster}}
@@ -36,7 +34,7 @@ import_format:
 timeouts:
   insert_minutes: 60
   update_minutes: 60
-  delete_minutes: 20
+  delete_minutes: 60
 autogen_async: true
 async:
   type: OpAsync
@@ -44,7 +42,7 @@ async:
     timeouts:
       insert_minutes: 60
       update_minutes: 60
-      delete_minutes: 20
+      delete_minutes: 60
     base_url: '{{op_id}}'
   actions:
     - create
@@ -56,6 +54,7 @@ custom_code:
   pre_create: templates/terraform/pre_create/oracledatabase_cloud_vm_cluster_identity_connector.go.tmpl
   pre_update: templates/terraform/pre_update/oracledatabase_cloud_vm_cluster_identity_connector.go.tmpl
   decoder: templates/terraform/decoders/oracledatabase_cloud_vm_cluster_identity_connector.go.tmpl
+  custom_delete: templates/terraform/custom_delete/only_remove_from_state.go.tmpl
 samples:
   - name: oracledatabase_cloud_vm_cluster_identity_connector_basic
     primary_resource_id: my_identity_connector
