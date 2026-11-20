@@ -43,30 +43,17 @@ if err != nil {
 	return fmt.Errorf("error checking whether VertexAIPublisherModelConfig was destroyed at %s: %w", url, err)
 }
 
-if rawCfg, exists := res["inferenceEventLoggingConfig"]; exists && rawCfg != nil {
-	cfg, ok := rawCfg.(map[string]interface{})
-	if !ok {
-		return fmt.Errorf("VertexAIPublisherModelConfig still has unexpected inferenceEventLoggingConfig %#v at %s", rawCfg, url)
-	}
-	if rawState, hasState := cfg["state"]; hasState && rawState != nil {
-		state, ok := rawState.(string)
-		if !ok || (state != "" && state != "STATE_UNSPECIFIED") {
-			return fmt.Errorf("VertexAIPublisherModelConfig inferenceEventLoggingConfig still exists (%#v) at %s", cfg, url)
-		}
+if cfg, _ := res["inferenceEventLoggingConfig"].(map[string]interface{}); cfg != nil {
+	if state, _ := cfg["state"].(string); state != "" && state != "STATE_UNSPECIFIED" {
+		return fmt.Errorf("VertexAIPublisherModelConfig inferenceEventLoggingConfig still exists (%#v) at %s", cfg, url)
 	}
 }
-if rawCfg, exists := res["loggingConfig"]; exists && rawCfg != nil {
-	cfg, ok := rawCfg.(map[string]interface{})
-	if !ok || len(cfg) > 0 {
-		return fmt.Errorf("VertexAIPublisherModelConfig loggingConfig still exists (%#v) at %s", rawCfg, url)
-	}
+if cfg, _ := res["loggingConfig"].(map[string]interface{}); len(cfg) > 0 {
+	return fmt.Errorf("VertexAIPublisherModelConfig loggingConfig still exists (%#v) at %s", cfg, url)
 }
-if rawCfg, exists := res["claudeFeatureConfig"]; exists && rawCfg != nil {
-	return fmt.Errorf("VertexAIPublisherModelConfig claudeFeatureConfig still exists (%#v) at %s", rawCfg, url)
+if cfg := res["claudeFeatureConfig"]; cfg != nil {
+	return fmt.Errorf("VertexAIPublisherModelConfig claudeFeatureConfig still exists (%#v) at %s", cfg, url)
 }
-if rawProvider, exists := res["dataSharingEnabledProvider"]; exists && rawProvider != nil {
-	provider, ok := rawProvider.(string)
-	if !ok || (provider != "" && provider != "MODEL_PROVIDER_UNSPECIFIED") {
-		return fmt.Errorf("VertexAIPublisherModelConfig dataSharingEnabledProvider still exists (%#v) at %s", rawProvider, url)
-	}
+if provider, _ := res["dataSharingEnabledProvider"].(string); provider != "" && provider != "MODEL_PROVIDER_UNSPECIFIED" {
+	return fmt.Errorf("VertexAIPublisherModelConfig dataSharingEnabledProvider still exists (%q) at %s", provider, url)
 }

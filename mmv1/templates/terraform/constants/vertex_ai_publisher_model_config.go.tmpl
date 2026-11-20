@@ -13,20 +13,14 @@
 {{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
 import "errors"
 
-// vertexAIPublisherModelConfigGlobalURL rewrites a URL built from the Vertex AI
-// regional endpoint template so that requests for the "global" location go to
-// the non-regional aiplatform.<domain> endpoint across default, mTLS
-// (mtls.googleapis.com), and custom universe_domain hosts. URLs for regional
-// locations (e.g. us-central1), and custom endpoints, are returned unchanged.
+// vertexAIPublisherModelConfigGlobalURL rewrites "global" location URLs to the
+// non-regional aiplatform.<domain> endpoint while leaving regional and custom URLs unchanged.
 func vertexAIPublisherModelConfigGlobalURL(url string) string {
 	return strings.Replace(url, "://global-aiplatform.", "://aiplatform.", 1)
 }
 
-// isVertexAIPublisherModelConfigAlreadyExistsError reports whether err is a
-// Google API 409 ALREADY_EXISTS error returned by SetPublisherModelConfig when
-// the target PublisherModelConfig already matches the stored configuration (on
-// create, update, or delete). It does not match 409 ABORTED concurrency
-// conflicts.
+// isVertexAIPublisherModelConfigAlreadyExistsError reports whether err is a 409
+// ALREADY_EXISTS response (returned when config already matches, distinct from 409 ABORTED).
 func isVertexAIPublisherModelConfigAlreadyExistsError(err error) bool {
 	var gerr *googleapi.Error
 	if !errors.As(err, &gerr) || gerr == nil || gerr.Code != http.StatusConflict {
@@ -35,10 +29,8 @@ func isVertexAIPublisherModelConfigAlreadyExistsError(err error) bool {
 	return strings.Contains(gerr.Body, "ALREADY_EXISTS") || strings.Contains(strings.ToLower(gerr.Message), "already exists")
 }
 
-// waitForVertexAIPublisherModelConfigOp waits for the SetPublisherModelConfig
-// LRO when one was returned. When SetPublisherModelConfig returned synchronous
-// 409 ALREADY_EXISTS and the failure hook ignored it, res is nil and there is
-// no operation to poll.
+// waitForVertexAIPublisherModelConfigOp polls the SetPublisherModelConfig LRO,
+// or returns nil when a synchronous 409 ALREADY_EXISTS left res nil.
 func waitForVertexAIPublisherModelConfigOp(d *schema.ResourceData, config *transport_tpg.Config, res map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
 	if res == nil {
 		return nil

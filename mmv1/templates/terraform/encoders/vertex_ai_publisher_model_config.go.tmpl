@@ -11,6 +11,8 @@
 	limitations under the License.
 */ -}}
 {{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
+// Plugin SDK v2 returns []interface{}{nil} when all subfields of a MaxItems: 1
+// TypeList block are zero-valued, causing expand* to omit false booleans.
 if count, ok := d.Get("logging_config.#").(int); ok && count > 0 {
 	cfg, _ := obj["loggingConfig"].(map[string]interface{})
 	if cfg == nil {

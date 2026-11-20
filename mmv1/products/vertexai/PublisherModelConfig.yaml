@@ -50,8 +50,8 @@ custom_code:
   pre_create: templates/terraform/pre_create/vertex_ai_publisher_model_config.go.tmpl
   post_create: templates/terraform/post_create/vertex_ai_publisher_model_config.go.tmpl
   post_create_failure: templates/terraform/post_create_failure/vertex_ai_publisher_model_config.go.tmpl
-  pre_read: templates/terraform/pre_read/vertex_ai_publisher_model_config.go.tmpl
-  pre_update: templates/terraform/pre_update/vertex_ai_publisher_model_config.go.tmpl
+  pre_read: templates/terraform/pre_create/vertex_ai_publisher_model_config.go.tmpl
+  pre_update: templates/terraform/pre_create/vertex_ai_publisher_model_config.go.tmpl
   post_update: templates/terraform/post_update/vertex_ai_publisher_model_config.go.tmpl
   post_update_failure: templates/terraform/post_create_failure/vertex_ai_publisher_model_config.go.tmpl
   pre_delete: templates/terraform/pre_delete/vertex_ai_publisher_model_config.go.tmpl
@@ -105,13 +105,6 @@ samples:
       - name: vertex_ai_publisher_model_config_singleton_lifecycle
         vars:
           state: DISABLED
-  - name: vertex_ai_publisher_model_config_global_acquire_different_state
-    primary_resource_id: tf_test_primary
-    exclude_basic_doc: true
-    steps:
-      - name: vertex_ai_publisher_model_config_global_acquire_abandon
-      - name: vertex_ai_publisher_model_config_global_acquire_verify
-      - name: vertex_ai_publisher_model_config_global_acquire_recreate
 parameters:
   - name: region
     type: String

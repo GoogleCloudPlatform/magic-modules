@@ -1492,11 +1492,12 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     if err != nil {
 {{- if and ($.CustomCode.PostDeleteFailure) (not $.GetAsync) -}}
         err = resource{{ $.ResourceName -}}PostDeleteFailure(d, meta, err)
-        if err == nil {
-            return nil
+        if err != nil {
+            return transport_tpg.HandleNotFoundError(err, d, "{{ $.Name }}")
         }
-{{- end}}
+{{- else }}
         return transport_tpg.HandleNotFoundError(err, d, "{{ $.Name }}")
+{{- end}}
     }
     {{ if and $.GetAsync ($.GetAsync.Allow "Delete") -}}
         {{ if $.GetAsync.IsA "PollAsync" }}
