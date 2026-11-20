@@ -100,6 +100,36 @@ samples:
       - name: "region_security_policy_request_body_expression"
         resource_id_vars:
           sec_policy_name: "policyruletest"
+  - name: 'region_security_policy_with_expr_options'
+    primary_resource_id: 'region-sec-policy-expr-options'
+    steps:
+      - name: 'region_security_policy_with_expr_options'
+        resource_id_vars:
+          sec_policy_name: 'my-sec-policy-expr-options'
+        vars:
+          action_token_site_keys: '["placeholder-recaptcha-action-site-key-01", "placeholder-recaptcha-action-site-key-02"]'
+          session_token_site_keys: '["placeholder-recaptcha-session-site-key-1", "placeholder-recaptcha-session-site-key-2"]'
+      - name: 'region_security_policy_with_expr_options'
+        resource_id_vars:
+          sec_policy_name: 'my-sec-policy-expr-options'
+        vars:
+          action_token_site_keys: '["placeholder-recaptcha-action-site-key-09", "placeholder-recaptcha-action-site-key-08", "placeholder-recaptcha-action-site-key-07"]'
+          session_token_site_keys: '["placeholder-recaptcha-session-site-key-1"]'
+      - name: 'region_security_policy_with_expr_options'
+        resource_id_vars:
+          sec_policy_name: 'my-sec-policy-expr-options'
+        vars:
+          action_token_site_keys: '["placeholder-recaptcha-action-site-key-09", "placeholder-recaptcha-action-site-key-08", "placeholder-recaptcha-action-site-key-07"]'
+          session_token_site_keys: null
+      - name: 'region_security_policy_with_expr_options'
+        resource_id_vars:
+          sec_policy_name: 'my-sec-policy-expr-options'
+        vars:
+          action_token_site_keys: null
+          session_token_site_keys: '["placeholder-recaptcha-session-site-key-1"]'
+      - name: 'region_security_policy_without_expr_options'
+        resource_id_vars:
+          sec_policy_name: 'my-sec-policy-expr-options'
 parameters:
   - name: 'region'
     type: ResourceRef
