@@ -38,28 +38,20 @@ autogen_async: true
 samples:
   - name: ces_app_basic
     primary_resource_id: ces_app_basic
+    resource_id_vars:
+      app_id: app-id
+      display_name: my-app
+      secret_id: fake-pk-secret-app-tf
     steps:
-      - name: ces_app_basic
-        resource_id_vars:
-          app_id: app-id
-          display_name: my-app
-          secret_id: fake-pk-secret-app-tf
-        vars:
+      - vars:
           required_recording_consent: 'true'
-      - name: ces_app_basic
-        resource_id_vars:
-          app_id: app-id
-          display_name: my-app
-          secret_id: fake-pk-secret-app-tf
-        vars:
+      - vars:
           required_recording_consent: 'false'
   - name: ces_app_ambient_sound_gcs_uri
     primary_resource_id: ces_app_ambient_sound_gcs_uri
-    steps:
-      - name: ces_app_ambient_sound_gcs_uri
-        resource_id_vars:
-          app_id: app-id
-          display_name: my-app-ambient-sound-gcs-uri
+    resource_id_vars:
+      app_id: app-id
+      display_name: my-app-ambient-sound-gcs-uri
 parameters:
   - name: location
     type: String
