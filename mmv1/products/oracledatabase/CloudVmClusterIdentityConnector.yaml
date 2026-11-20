@@ -27,7 +27,6 @@ create_verb: POST
 update_url: projects/{{project}}/locations/{{location}}/cloudVmClusters/{{cloud_vm_cluster}}:enableIdentityConnector
 update_verb: POST
 exclude_tgc: true
-legacy_long_form_project: true
 id_format: projects/{{project}}/locations/{{location}}/cloudVmClusters/{{cloud_vm_cluster}}
 import_format:
   - projects/{{project}}/locations/{{location}}/cloudVmClusters/{{cloud_vm_cluster}}
@@ -132,16 +131,11 @@ parameters:
     url_param_only: true
     description: The location of the Cloud VM Cluster.
   - name: cloudVmCluster
-    type: ResourceRef
+    type: String
     required: true
     immutable: true
     url_param_only: true
-    resource: CloudVmCluster
-    imports: name
-    description: |-
-      The ID or full resource name of the Cloud VM Cluster, in the format
-      `{cloud_vm_cluster}` or
-      `projects/{project}/locations/{location}/cloudVmClusters/{cloud_vm_cluster}`.
+    description: The ID of the Cloud VM Cluster.
 properties:
   - name: enabled
     type: Boolean
