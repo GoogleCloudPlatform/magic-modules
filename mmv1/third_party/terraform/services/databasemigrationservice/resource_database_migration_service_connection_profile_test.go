@@ -1,6 +1,7 @@
 package databasemigrationservice_test
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -38,6 +39,18 @@ func TestAccDatabaseMigrationServiceConnectionProfile_update(t *testing.T) {
 				Config: testAccDatabaseMigrationServiceConnectionProfile_update(suffix),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_database_migration_service_connection_profile.default", "role", "DESTINATION"),
+				),
+			},
+			{
+				ResourceName:            "google_database_migration_service_connection_profile.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "mysql.0.password", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccDatabaseMigrationServiceConnectionProfile_updateSslFlags(suffix),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_database_migration_service_connection_profile.default", "mysql.0.ssl.0.ssl_flags.server_certificate_hostname", "updated.example.com"),
 				),
 			},
 			{
@@ -85,6 +98,38 @@ resource "google_database_migration_service_connection_profile" "default" {
 	  port = 3306
 	  username = "tf-test-update-dbms-test-user%{random_suffix}"
 	  password = "tf-test-update-dbms-test-pass%{random_suffix}"
+	  ssl {
+	    type = "REQUIRED"
+	    ssl_flags = {
+	      server_certificate_hostname = "example.com"
+	    }
+	  }
+	}
+}
+`, context)
+}
+
+func testAccDatabaseMigrationServiceConnectionProfile_updateSslFlags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_database_migration_service_connection_profile" "default" {
+	location = "us-central1"
+	connection_profile_id = "tf-test-dbms-connection-profile%{random_suffix}"
+	display_name          = "tf-test-dbms-connection-profile-updated-display%{random_suffix}"
+	role                  = "DESTINATION"
+	labels	= {
+		bar = "foo"
+	}
+	mysql {
+	  host = "10.20.30.50"
+	  port = 3306
+	  username = "tf-test-update-dbms-test-user%{random_suffix}"
+	  password = "tf-test-update-dbms-test-pass%{random_suffix}"
+	  ssl {
+	    type = "REQUIRED"
+	    ssl_flags = {
+	      server_certificate_hostname = "updated.example.com"
+	    }
+	  }
 	}
 }
 `, context)
@@ -150,6 +195,51 @@ resource "google_database_migration_service_connection_profile" "alloydbprofile"
         labels = { 
           alloysinstfoo = "allowinstbar" 
         }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func TestAccDatabaseMigrationServiceConnectionProfile_oracleSslFlags(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDatabaseMigrationServiceConnectionProfileDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccDatabaseMigrationServiceConnectionProfile_oracleSslFlags(context, "CN=server.com,OU=RDS,O=Amazon.com,C=US"),
+				ExpectError: regexp.MustCompile("ORA-12170"),
+			},
+		},
+	})
+}
+
+func testAccDatabaseMigrationServiceConnectionProfile_oracleSslFlags(context map[string]interface{}, serverDn string) string {
+	context["server_dn"] = serverDn
+	return acctest.Nprintf(`
+resource "google_database_migration_service_connection_profile" "default" {
+  location              = "us-central1"
+  connection_profile_id = "tf-test-dbms-ora-profile%{random_suffix}"
+  display_name          = "tf-test-dbms-ora-profile-display%{random_suffix}"
+  oracle {
+    host             = "10.20.30.40"
+    port             = 1521
+    username         = "tf-test-dbms-ora-user%{random_suffix}"
+    password         = "tf-test-dbms-ora-pass%{random_suffix}"
+    database_service = "dbprovider"
+    static_service_ip_connectivity {}
+    ssl {
+      ca_certificate = "-----BEGIN CERTIFICATE-----\nMIIEWDCCA0CgAwIBAgIUPHTFNv00au9lCZnZIbpDZOVNz8swDQYJKoZIhvcNAQEL\nBQAwgaIxCzAJBgNVBAYTAkNBMRAwDgYDVQQIDAdPbnRhcmlvMRAwDgYDVQQHDAdU\nb3JvbnRvMQ8wDQYDVQQKDAZHb29nbGUxDDAKBgNVBAsMA0dDUDErMCkGA1UEAwwi\ncHJpdmF0ZS1iaXRidWNrZXQucHJvY3Rvci10ZXN0LmNvbTEjMCEGCSqGSIb3DQEJ\nARYUbW9uaWNhbGl1QGdvb2dsZS5jb20wHhcNMjUwMTEzMjIyODU5WhcNMzUwMTEx\nMjIyODU5WjCBojELMAkGA1UEBhMCQ0ExEDAOBgNVBAgMB09udGFyaW8xEDAOBgNV\nBAcMB1Rvcm9udG8xDzANBgNVBAoMBkdvb2dsZTEMMAoGA1UECwwDR0NQMSswKQYD\nVQQDDCJwcml2YXRlLWJpdGJ1Y2tldC5wcm9jdG9yLXRlc3QuY29tMSMwIQYJKoZI\nhvcNAQkBFhRtb25pY2FsaXVAZ29vZ2xlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQAD\nggEPADCCAQoCggEBAKNbLKjUD04cq5S9Z0HIdPjOSNsswegSDy4+DCN/tWYU+CiB\nKFFHVT+WUa5IGWCzUh2qXtJAls3zpsEP/EwiF2gnIR2nerLv5ppQdd5ejo57jo/u\nPqm7NVnjWEnruCt9UXyVbvCocj/FBcubBDkRzNsEx7e/aPk/deaj3YjJBbdKbNJu\nXmU5bOfnHjAqsiAsAj09W9f/ZifMZnQdGCpopbaJA+0Rr8ZcxMPsBauI5MClIy2R\n2hNWtiOLJpp4hplnIy1M2npn/sjT8FBTrClzpaDDicI4EiBVZPQTOwERd1Gdk3Us\nXBxUIi3Jje9utZeVQTEPuiUnOqIQ7GHn9ynRW3kCAwEAAaOBgzCBgDAdBgNVHQ4E\nFgQUpAZEKba/ZJUJGJ0+4q9kCCfEOv4wHwYDVR0jBBgwFoAUpAZEKba/ZJUJGJ0+\n4q9kCCfEOv4wDwYDVR0TAQH/BAUwAwEB/zAtBgNVHREEJjAkgiJwcml2YXRlLWJp\ndGJ1Y2tldC5wcm9jdG9yLXRlc3QuY29tMA0GCSqGSIb3DQEBCwUAA4IBAQA8TqtB\nQGF+ibVmcwQZeI295w8Xfy7hBiKPrl6h+ReB1zJKyspCfvSLzfFyvBWIzbVCaGIh\nRbeDPh9divTKI4w1jhNhUbL7pLVnpvX4kAvnZzbAljQwzvHfwyuMsZNtfp0c7Rc/\nbowtxNce5Mgqver477od2zwLlQjyeKWaolILKGGL0NfRIx2VeZzpXblo0pksKpLb\n3Ncw41hFYI552FTQ3eqjbCYNNWn2nzBg+FqEL8eYRHIUGCj9bcm8dvBGp1fffuNp\nlFQt8ifUATTRqUt8q3/ukN9IYCJSKc5TGrWu34/QVyReOnZ6EBL0JFSd9u+/ckXn\ntOIt3W2yI+EOFLUJ\n-----END CERTIFICATE-----\n"
+      ssl_flags = {
+        server_certificate_dn = "%{server_dn}"
       }
     }
   }
