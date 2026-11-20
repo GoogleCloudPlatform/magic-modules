@@ -60,6 +60,8 @@ deletion_policy_custom_docs: true
 deletion_policy_default: DEFAULT
 autogen_async: true
 include_in_tgc_next: true
+# tgc_next runs at GA and scans *_test.go.tmpl with a raw regex before template rendering,
+# so beta-only tests must be explicitly skipped here.
 tgc_tests:
   - name: TestAccAlloydbCluster_expressUpgrade
     skip: beta-only test; express_config is not in the GA provider

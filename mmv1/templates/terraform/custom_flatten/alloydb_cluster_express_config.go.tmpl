@@ -11,33 +11,13 @@
 	limitations under the License.
 */ -}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	if v == nil {
-		// The API omits expressConfig when the cluster is a standard cluster (enabled = false).
-		return []interface{}{
-			map[string]interface{}{
-				"enabled": false,
-			},
-		}
+	enabled := false
+	if original, ok := v.(map[string]interface{}); ok {
+		enabled, _ = original["enabled"].(bool)
 	}
-
-	original, ok := v.(map[string]interface{})
-	if !ok {
-		return []interface{}{
-			map[string]interface{}{
-				"enabled": false,
-			},
-		}
+	return []interface{}{
+		map[string]interface{}{
+			"enabled": enabled,
+		},
 	}
-
-	transformed := make(map[string]interface{})
-
-	if val, ok := original["enabled"]; ok {
-		transformed["enabled"] = val
-	} else {
-		// After upgrading an Express cluster to standard, the API returns expressConfig: {}
-		// with enabled omitted as the proto3 zero value (false).
-		transformed["enabled"] = false
-	}
-
-	return []interface{}{transformed}
 }
