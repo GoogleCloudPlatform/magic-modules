@@ -516,6 +516,7 @@ properties:
     description: |
       Information about the Private Service Connect (PSC) for the instance.
     output: true
+    allow_empty_object: true
     properties:
       - name: effectivePscAutoDnsEnabled
         type: Boolean
@@ -534,12 +535,6 @@ properties:
         description: |
           Indicates if the PSC auto connection policy is enabled for the instance.
           For older instances, this will be off by default, but for newer instances, this will be auto-enabled.
-        output: true
-      - name: serviceConnectionPolicy
-        type: String
-        description: |
-          The PSC service connection policy name. The format is
-          `projects/<PROJECT_ID>/regions/<REGION_ID>/serviceConnectionPolicies/<alloydb-$NETWORK-$RANDOM-scp>`.
         output: true
   - name: networkConfig
     type: NestedObject

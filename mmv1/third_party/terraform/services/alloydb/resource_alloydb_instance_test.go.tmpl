@@ -1147,6 +1147,13 @@ func TestAccAlloydbInstance_updatePscAutoConnections(t *testing.T) {
 						plancheck.ExpectResourceAction("google_alloydb_instance.default", plancheck.ResourceActionUpdate),
 					},
 				},
+				// Verify allow_empty_object keeps psc_instance_info[0] populated when both effective booleans are false
+				// and the API returns an empty pscInstanceInfo object ({}).
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "psc_instance_info.#", "1"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "psc_instance_info.0.effective_psc_auto_dns_enabled", "false"),
+					resource.TestCheckResourceAttr("google_alloydb_instance.default", "psc_instance_info.0.effective_psc_auto_connection_policy", "false"),
+				),
 			},
 			{
 				ResourceName:            "google_alloydb_instance.default",
