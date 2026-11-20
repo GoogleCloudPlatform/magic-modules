@@ -47,6 +47,22 @@ samples:
       - name: vertex_ai_dataset
         resource_id_vars:
           display_name: terraform
+        vars:
+          description: null
+        exclude_import_test: true
+      - name: vertex_ai_dataset_update
+        config_path: templates/terraform/samples/services/vertexai/vertex_ai_dataset.tf.tmpl
+        resource_id_vars:
+          display_name: terraform
+        vars:
+          description: "A test description"
+        exclude_import_test: true
+      - name: vertex_ai_dataset_update_again
+        config_path: templates/terraform/samples/services/vertexai/vertex_ai_dataset.tf.tmpl
+        resource_id_vars:
+          display_name: terraform
+        vars:
+          description: "An updated test description"
         exclude_import_test: true
 parameters:
   - name: region
@@ -65,6 +81,10 @@ properties:
     description: |
       The user-defined name of the Dataset. The name can be up to 128 characters long and can be consist of any UTF-8 characters.
     required: true
+  - name: description
+    type: String
+    description: |
+      The description of the Dataset.
   - name: createTime
     type: String
     description: |
