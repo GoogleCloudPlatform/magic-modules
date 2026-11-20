@@ -4773,6 +4773,7 @@ func TestAccComputeInstanceNetworkIntefaceWithSecurityPolicy(t *testing.T) {
 		})
 	}
 }
+{{- end }}
 
 func TestAccComputeInstance_GracefulShutdownWithResetUpdate(t *testing.T) {
 	t.Parallel()
@@ -4961,6 +4962,7 @@ func TestAccComputeInstance_GracefulShutdownWithoutResetUpdate(t *testing.T) {
 	})
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeInstance_schedulingSkipGuestOSShutdown(t *testing.T) {
 	t.Parallel()
 
@@ -5370,6 +5372,7 @@ func testAccComputeInstance_nic_securityPolicyCreateWithoutAccessConfig(t *testi
 		},
 	})
 }
+{{- end }}
 
 func testAccComputeInstance_GracefulShutdownUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
@@ -5407,6 +5410,7 @@ resource "google_compute_instance" "foobar" {
 `, context)
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeInstance_schedulingSkipGuestOSShutdown(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {

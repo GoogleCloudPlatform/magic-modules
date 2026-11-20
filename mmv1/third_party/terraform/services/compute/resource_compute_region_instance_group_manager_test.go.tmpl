@@ -3067,7 +3067,6 @@ resource "google_compute_instance_template" "igm-force" {
   service_account {
     scopes = ["userinfo-email", "compute-ro", "storage-ro"]
   }
-{{- if ne $.TargetVersionName "ga" }}
 
   scheduling {
     graceful_shutdown {
@@ -3077,7 +3076,6 @@ resource "google_compute_instance_template" "igm-force" {
       }
     }
   }
-{{- end }}
 }
 
 resource "google_compute_region_instance_group_manager" "igm-force" {

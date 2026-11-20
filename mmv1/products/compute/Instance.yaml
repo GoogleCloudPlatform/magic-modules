@@ -658,6 +658,19 @@ properties:
           Defines whether the instance is preemptible. This can only be set
           during instance creation, it cannot be set or changed after the
           instance has been created.
+      - name: 'gracefulShutdown'
+        type: NestedObject
+        description: Settings for the instance to perform a graceful shutdown.
+        properties:
+          - name: 'maxDuration'
+            type: NestedObject
+            description: The time allotted for the instance to gracefully shut down.
+            properties:
+              - name: 'nanos'
+                type: Integer
+                description: Span of time at nanosecond resolution.
+                # GCE does not persist gracefulShutdown.maxDuration.nanos on GET/CAI.
+                is_missing_in_cai: true
   - name: 'reservationAffinity'
     type: NestedObject
     description: |

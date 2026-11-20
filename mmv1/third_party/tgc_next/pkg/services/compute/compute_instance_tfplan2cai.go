@@ -635,6 +635,27 @@ func expandSchedulingTgc(v interface{}) (*compute.Scheduling, error) {
 		scheduling.LocalSsdRecoveryTimeout = transformedLocalSsdRecoveryTimeout
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "LocalSsdRecoveryTimeout")
 	}
+	if v, ok := original["graceful_shutdown"]; ok {
+		if l, ok := v.([]interface{}); ok && len(l) > 0 && l[0] != nil {
+			gsMap := l[0].(map[string]interface{})
+			gs := &compute.SchedulingGracefulShutdown{
+				Enabled:         gsMap["enabled"].(bool),
+				ForceSendFields: []string{"Enabled"},
+			}
+			if mdRaw, ok := gsMap["max_duration"]; ok {
+				md, err := expandComputeLocalSsdRecoveryTimeoutTgc(mdRaw)
+				if err != nil {
+					return nil, err
+				}
+				if md != nil {
+					gs.MaxDuration = md
+					gs.ForceSendFields = append(gs.ForceSendFields, "MaxDuration")
+				}
+			}
+			scheduling.GracefulShutdown = gs
+			scheduling.ForceSendFields = append(scheduling.ForceSendFields, "GracefulShutdown")
+		}
+	}
 	if v, ok := original["preemption_notice_duration"]; ok {
 		transformedPreemptionNoticeDuration, err := expandComputeLocalSsdRecoveryTimeoutTgc(v)
 		if err != nil {

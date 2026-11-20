@@ -224,7 +224,6 @@ func FlattenSchedulingHTTP(resp map[string]interface{}) []map[string]interface{}
 		}
 	}
 
-{{- if ne $.TargetVersionName "ga" }}
 	if gracefulRaw, ok := resp["gracefulShutdown"]; ok && gracefulRaw != nil {
 		graceful := gracefulRaw.(map[string]interface{})
 		graceMap := map[string]interface{}{
@@ -241,7 +240,6 @@ func FlattenSchedulingHTTP(resp map[string]interface{}) []map[string]interface{}
 		}
 		schedulingMap["graceful_shutdown"] = []map[string]interface{}{graceMap}
 	}
-{{- end }}
 
 	if pndRaw, ok := resp["preemptionNoticeDuration"]; ok && pndRaw != nil {
 		pnd := pndRaw.(map[string]interface{})
