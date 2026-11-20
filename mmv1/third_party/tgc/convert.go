@@ -15,7 +15,6 @@
 package google
 
 import (
-	errorssyslib "errors"
 	"fmt"
 	"runtime/debug"
 	"sort"
@@ -139,11 +138,7 @@ func (c *Converter) AddResourceChanges(changes []*tfjson.ResourceChange) error {
 
 	for _, rc := range createOrUpdateOrNoops {
 		if err := c.addCreateOrUpdateOrNoop(rc); err != nil {
-			if errorssyslib.Is(err, ErrDuplicateAsset) {
-				c.errorLogger.Warn(fmt.Sprintf("%s: converting TF resource to CAI: %v", rc.Address, err))
-			} else {
-				return fmt.Errorf("%s: converting TF resource to CAI: %w", rc.Address, err)
-			}
+			return fmt.Errorf("%s: converting TF resource to CAI: %w", rc.Address, err)
 		}
 	}
 
@@ -249,11 +244,21 @@ func (c *Converter) addCreateOrUpdateOrNoop(rc *tfjson.ResourceChange) error {
 
 			if existingConverterAsset != nil {
 				if converter.MergeCreateUpdate == nil {
-					// If a merge function does not exist ignore the asset and return
-					// a checkable error.
-					return fmt.Errorf("%w: type %s: name %s", ErrDuplicateAsset, converted.Type, converted.Name)
+					if existingConverterAsset.Resource == nil && converted.Resource != nil {
+						merged := *existingConverterAsset
+						merged.Resource = converted.Resource
+						converted = merged
+					} else {
+						// If a merge function does not exist ignore the asset and return
+						// a checkable error.
+						return fmt.Errorf("%w: type %s: name %s", ErrDuplicateAsset, converted.Type, converted.Name)
+					}
+				} else {
+					if existingConverterAsset.Resource != nil && converted.Resource != nil {
+						return fmt.Errorf("%w: type %s: name %s", ErrDuplicateAsset, converted.Type, converted.Name)
+					}
+					converted = converter.MergeCreateUpdate(*existingConverterAsset, converted)
 				}
-				converted = converter.MergeCreateUpdate(*existingConverterAsset, converted)
 			}
 
 			augmented, err := c.augmentAsset(rd, c.cfg, converted)
