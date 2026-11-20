@@ -44,6 +44,7 @@ async:
     - delete
 custom_code:
   constants: templates/terraform/constants/assuredworkloadsv2_workload.go.tmpl
+  test_check_destroy: templates/terraform/custom_check_destroy/assuredworkloadsv2_workload.go.tmpl
 docs:
   note: |
     Workloads have no project, so Assured Workloads attributes API quota and
@@ -55,18 +56,15 @@ docs:
 samples:
   - name: assured_workloads_v2_workload_basic
     primary_resource_id: workload
-    # The acceptance tests for this resource are handwritten in
-    # resource_assured_workloads_v2_workload_test.go because a workload
-    # must list every cloud control of its framework revision, the billing
-    # project must be set explicitly, and a test organization is required.
-    exclude_test: true
     steps:
       - name: assured_workloads_v2_workload_basic
         resource_id_vars:
           workload_id: example-workload
+          project_id: aw-target
         test_env_vars:
           org_id: ORG_ID
-          project_id: PROJECT_NAME
+          billing_account: BILLING_ACCT
+          billing_project: PROJECT_NAME
 parameters:
   - name: organization
     type: String
