@@ -4834,14 +4834,8 @@ func TestAccComputeInstance_GracefulShutdownWithResetUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.graceful_shutdown.0.max_duration.0.seconds", "1"),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
 			{
 				Config: testAccComputeInstance_GracefulShutdownUpdate(acceptableByApi_2),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_compute_instance.foobar", plancheck.ResourceActionUpdate),
-					},
-				},
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "allow_stopping_for_update", "true"),
@@ -4849,21 +4843,14 @@ func TestAccComputeInstance_GracefulShutdownWithResetUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.graceful_shutdown.0.max_duration.0.nanos", "1000"),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update", "scheduling.0.graceful_shutdown.0.max_duration.0.nanos"}),
 			{
 				Config: testAccComputeInstance_GracefulShutdownUpdate(acceptableByApi_3),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_compute_instance.foobar", plancheck.ResourceActionUpdate),
-					},
-				},
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "allow_stopping_for_update", "true"),
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.graceful_shutdown.0.max_duration.0.seconds", "100"),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
 			{
 				Config:      testAccComputeInstance_GracefulShutdownUpdate(ivalid_1),
 				ExpectError: regexp.MustCompile("must be more than 1 second in the future and less than 6 hours., invalid"),
@@ -4945,95 +4932,28 @@ func TestAccComputeInstance_GracefulShutdownWithoutResetUpdate(t *testing.T) {
 				ExpectError: regexp.MustCompile("The argument \"scheduling\\.0\\.graceful_shutdown\\.0\\.enabled\" is\\s+required, but no\\s+definition was found\\."),
 			},
 			{
-				Config: testAccComputeInstance_GracefulShutdownOmitted(instanceName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.graceful_shutdown.#", "0"),
-				),
-			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
-			{
-				Config: testAccComputeInstance_GracefulShutdownDisabledNoMaxDuration(instanceName),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_compute_instance.foobar", plancheck.ResourceActionUpdate),
-					},
-				},
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.graceful_shutdown.0.enabled", "false"),
-					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.graceful_shutdown.0.max_duration.#", "0"),
-				),
-			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
-			{
 				Config: testAccComputeInstance_GracefulShutdownUpdate(acceptableByApi_1),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_compute_instance.foobar", plancheck.ResourceActionUpdate),
-					},
-				},
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.graceful_shutdown.0.enabled", "true"),
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.graceful_shutdown.0.max_duration.0.seconds", "1"),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
-			{
-				Config: testAccComputeInstance_GracefulShutdownCleared(instanceName),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_compute_instance.foobar", plancheck.ResourceActionUpdate),
-					},
-				},
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.graceful_shutdown.#", "0"),
-				),
-			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 			{
 				Config: testAccComputeInstance_GracefulShutdownUpdate(acceptableByApi_2),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_compute_instance.foobar", plancheck.ResourceActionUpdate),
-					},
-				},
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.graceful_shutdown.0.enabled", "false"),
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.graceful_shutdown.0.max_duration.0.nanos", "1000"),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{"scheduling.0.graceful_shutdown.0.max_duration.0.nanos"}),
 			{
 				Config: testAccComputeInstance_GracefulShutdownUpdate(acceptableByApi_3),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_compute_instance.foobar", plancheck.ResourceActionUpdate),
-					},
-				},
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.graceful_shutdown.0.max_duration.0.seconds", "100"),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
-			{
-				Config: testAccComputeInstance_GracefulShutdownDisabledNoMaxDuration(instanceName),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_compute_instance.foobar", plancheck.ResourceActionUpdate),
-					},
-				},
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
-					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.graceful_shutdown.0.enabled", "false"),
-					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.graceful_shutdown.0.max_duration.#", "0"),
-				),
-			},
-			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 			{
 				Config:      testAccComputeInstance_GracefulShutdownUpdate(ivalid_3),
 				ExpectError: regexp.MustCompile("must be more than 1 second in the future and less than 6 hours., invalid"),
@@ -5456,95 +5376,7 @@ func testAccComputeInstance_nic_securityPolicyCreateWithoutAccessConfig(t *testi
 		},
 	})
 }
-{{ end }}
-
-func testAccComputeInstance_GracefulShutdownOmitted(instanceName string) string {
-	return fmt.Sprintf(`
-data "google_compute_image" "my_image" {
-  family  = "debian-13"
-  project = "debian-cloud"
-}
-
-resource "google_compute_instance" "foobar" {
-  name         = "%s"
-  machine_type = "e2-medium"
-  zone         = "us-central1-a"
-
-  boot_disk {
-    initialize_params {
-      image = data.google_compute_image.my_image.self_link
-    }
-  }
-
-  network_interface {
-    network = "default"
-    access_config {}
-  }
-}
-`, instanceName)
-}
-
-func testAccComputeInstance_GracefulShutdownDisabledNoMaxDuration(instanceName string) string {
-	return fmt.Sprintf(`
-data "google_compute_image" "my_image" {
-  family  = "debian-13"
-  project = "debian-cloud"
-}
-
-resource "google_compute_instance" "foobar" {
-  name         = "%s"
-  machine_type = "e2-medium"
-  zone         = "us-central1-a"
-
-  boot_disk {
-    initialize_params {
-      image = data.google_compute_image.my_image.self_link
-    }
-  }
-
-  network_interface {
-    network = "default"
-    access_config {}
-  }
-
-  scheduling {
-    graceful_shutdown {
-      enabled = false
-    }
-  }
-}
-`, instanceName)
-}
-
-func testAccComputeInstance_GracefulShutdownCleared(instanceName string) string {
-	return fmt.Sprintf(`
-data "google_compute_image" "my_image" {
-  family  = "debian-13"
-  project = "debian-cloud"
-}
-
-resource "google_compute_instance" "foobar" {
-  name         = "%s"
-  machine_type = "e2-medium"
-  zone         = "us-central1-a"
-
-  boot_disk {
-    initialize_params {
-      image = data.google_compute_image.my_image.self_link
-    }
-  }
-
-  network_interface {
-    network = "default"
-    access_config {}
-  }
-
-  scheduling {
-    automatic_restart = true
-  }
-}
-`, instanceName)
-}
+{{- end }}
 
 func testAccComputeInstance_GracefulShutdownUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`

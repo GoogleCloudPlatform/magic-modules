@@ -373,8 +373,6 @@ func expandGracefulShutdown(v interface{}) (map[string]interface{}, error) {
 	}
 	if maxDuration != nil {
 		result["maxDuration"] = maxDuration
-	} else {
-		result["maxDuration"] = nil
 	}
 
 	return result, nil
@@ -1321,6 +1319,7 @@ func schedulingHasChangeRequiringReboot(d *schema.ResourceData) bool {
 
 	return hasNodeAffinitiesChanged(oScheduling, newScheduling) ||
 		hasMaxRunDurationChanged(oScheduling, newScheduling) ||
+		hasGracefulShutdownChangedWithReboot(d, oScheduling, newScheduling) ||
 		hasTerminationTimeChanged(oScheduling, newScheduling)
 }
 
@@ -1394,6 +1393,14 @@ func hasTerminationTimeChanged(oScheduling, nScheduling map[string]interface{}) 
 	}
 
 	return false
+}
+
+func hasGracefulShutdownChangedWithReboot(d *schema.ResourceData, oScheduling, nScheduling map[string]interface{}) bool {
+	allow_stopping_for_update := d.Get("allow_stopping_for_update").(bool)
+	if !allow_stopping_for_update {
+		return false
+	}
+	return hasGracefulShutdownChanged(oScheduling, nScheduling)
 }
 
 func hasGracefulShutdownChanged(oScheduling, nScheduling map[string]interface{}) bool {

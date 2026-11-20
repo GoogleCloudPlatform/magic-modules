@@ -942,8 +942,8 @@ be from 0 to 999,999,999 inclusive.`,
 										Type:     schema.TypeList,
 										Optional: true,
 										Description: `The time allotted for the instance to gracefully shut down.
-If the graceful shutdown isn't complete after this time, then the instance
-transitions to the STOPPING state.`,
+										If the graceful shutdown isn't complete after this time, then the instance
+										transitions to the STOPPING state.`,
 										MaxItems: 1,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
@@ -952,14 +952,16 @@ transitions to the STOPPING state.`,
 													Required: true,
 													ForceNew: true,
 													Description: `Span of time at a resolution of a second.
-The value must be between 1 and 21600, which is 21,600 seconds (six hours).`,
+													The value must be between 1 and 3600, which is 3,600 seconds (one hour).`,
 												},
 												"nanos": {
 													Type:     schema.TypeInt,
 													Optional: true,
 													ForceNew: true,
 													Description: `Span of time that's a fraction of a second at nanosecond
-resolution. Must be from 0 to 999,999,999 inclusive.`,
+													resolution. Durations less than one second are represented
+													with a 0 seconds field and a positive nanos field. Must
+													be from 0 to 999,999,999 inclusive.`,
 												},
 											},
 										},

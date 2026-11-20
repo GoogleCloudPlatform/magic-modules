@@ -13,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -1793,7 +1792,6 @@ be from 0 to 999,999,999 inclusive.`,
 			}),
 			validateSubnetworkProject,
 			forceNewIfNetworkIPNotUpdatable,
-			clearGracefulShutdownWhenOmittedInConfig,
 			tpgresource.SetLabelsDiff,
 		),
 		UseJSONNumber: true,
@@ -2250,6 +2248,10 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
+	// Read from state before calling the helper, which will overwrite scheduling with the API
+	// response. The API doesn't persist nanos, so we restore it afterward to avoid a diff.
+	savedNanos, hadNanos := d.GetOk("scheduling.0.graceful_shutdown.0.max_duration.0.nanos")
+
 	instanceZone, _ := instance["zone"].(string)
 	zone := tpgresource.GetResourceNameFromSelfLink(instanceZone)
 
@@ -2288,6 +2290,21 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 		"host": sshIP,
 	})
 
+	// Workaround: restore nanos from state since the API doesn't persist it (see comment above).
+	if hadNanos {
+		schedulingMap, _ := instance["scheduling"].(map[string]interface{})
+		scheduling := flattenScheduling(schedulingMap)
+		graceful_shutdown := scheduling[0]["graceful_shutdown"].([]interface{})[0].(map[string]interface{})
+		max_duration := graceful_shutdown["max_duration"].([]interface{})[0].(map[string]interface{})
+		max_duration["nanos"] = int64(savedNanos.(int))
+
+		graceful_shutdown["max_duration"] = []interface{}{max_duration}
+		scheduling[0]["graceful_shutdown"] = []interface{}{graceful_shutdown}
+		if err := d.Set("scheduling", scheduling); err != nil {
+			return fmt.Errorf("Error setting scheduling: %s", err)
+		}
+	}
+
 	instanceName, _ := instance["name"].(string)
 	d.SetId(fmt.Sprintf("projects/%s/zones/%s/instances/%s", project, zone, instanceName))
 
@@ -2304,181 +2321,6 @@ func resourceComputeInstanceRead(d *schema.ResourceData, meta interface{}) error
 	}
 
 	return nil
-}
-
-func rawGracefulShutdownElem(rawCfg cty.Value) (cty.Value, bool) {
-	rawCfg, _ = rawCfg.Unmark()
-	if rawCfg.IsNull() || !rawCfg.IsKnown() {
-		return cty.NilVal, false
-	}
-
-	cur := rawCfg
-	for _, key := range []string{"scheduling", "graceful_shutdown"} {
-		if !cur.Type().IsObjectType() || !cur.Type().HasAttribute(key) {
-			return cty.NilVal, false
-		}
-		listVal := cur.GetAttr(key)
-		listVal, _ = listVal.Unmark()
-		if listVal.IsNull() || !listVal.IsKnown() || !(listVal.Type().IsListType() || listVal.Type().IsTupleType()) || listVal.LengthInt() == 0 {
-			return cty.NilVal, false
-		}
-		elem := listVal.Index(cty.NumberIntVal(0))
-		elem, _ = elem.Unmark()
-		if elem.IsNull() || !elem.IsKnown() {
-			return cty.NilVal, false
-		}
-		cur = elem
-	}
-	return cur, true
-}
-
-func rawGracefulShutdownNanosAttr(rawCfg cty.Value) (cty.Value, bool) {
-	gsElem, ok := rawGracefulShutdownElem(rawCfg)
-	if !ok || !gsElem.Type().IsObjectType() || !gsElem.Type().HasAttribute("max_duration") {
-		return cty.NilVal, false
-	}
-	listVal := gsElem.GetAttr("max_duration")
-	listVal, _ = listVal.Unmark()
-	if listVal.IsNull() || !listVal.IsKnown() || !(listVal.Type().IsListType() || listVal.Type().IsTupleType()) || listVal.LengthInt() == 0 {
-		return cty.NilVal, false
-	}
-	elem := listVal.Index(cty.NumberIntVal(0))
-	elem, _ = elem.Unmark()
-	if elem.IsNull() || !elem.IsKnown() || !elem.Type().IsObjectType() || !elem.Type().HasAttribute("nanos") {
-		return cty.NilVal, false
-	}
-	nanosVal := elem.GetAttr("nanos")
-	nanosVal, _ = nanosVal.Unmark()
-	return nanosVal, true
-}
-
-// Compute Engine discards scheduling.gracefulShutdown.maxDuration.nanos on write and read,
-// and SDKv2 leaves GetRawConfig() null during ReadResource refresh while populating it
-// during ApplyResourceChange. Fall back to prior state on refresh so configured nanos
-// survives refresh, while reading GetRawConfig() on apply so omitted nanos is cleared.
-func configuredGracefulShutdownNanos(d *schema.ResourceData) (int64, bool) {
-	rawCfg := d.GetRawConfig()
-	rawCfg, _ = rawCfg.Unmark()
-	if rawCfg.IsNull() || !rawCfg.IsKnown() {
-		if nanos, ok := d.GetOk("scheduling.0.graceful_shutdown.0.max_duration.0.nanos"); ok {
-			return int64(nanos.(int)), true
-		}
-		return 0, false
-	}
-
-	nanosVal, ok := rawGracefulShutdownNanosAttr(rawCfg)
-	if !ok || nanosVal.IsNull() || !nanosVal.IsKnown() {
-		return 0, false
-	}
-	nanosInt, _ := nanosVal.AsBigFloat().Int64()
-	if nanosInt == 0 {
-		return 0, false
-	}
-	return nanosInt, true
-}
-
-func isGracefulShutdownMaxDurationClearedInRawConfig(rawCfg cty.Value) bool {
-	gsRaw, ok := rawGracefulShutdownElem(rawCfg)
-	if !ok || !gsRaw.Type().IsObjectType() || !gsRaw.Type().HasAttribute("max_duration") {
-		return false
-	}
-	mdRawList := gsRaw.GetAttr("max_duration")
-	mdRawList, _ = mdRawList.Unmark()
-	if !mdRawList.IsKnown() {
-		return false
-	}
-	return mdRawList.IsNull() || ((mdRawList.Type().IsListType() || mdRawList.Type().IsTupleType()) && mdRawList.LengthInt() == 0)
-}
-
-// On google_compute_instance_from_template and google_compute_instance_from_machine_image,
-// SDKv2's ApplyResourceChange runs DiffFromValues with stripResourceModifiers(res), which drops
-// empty Optional+Computed TypeList diffs (diffList returns nil when n == nil && schema.Computed).
-// Detect in-place max_duration removal directly from GetRawConfig() during Update so setScheduling
-// sends maxDuration: null to Compute Engine.
-func hasClearedComputedGracefulShutdownMaxDuration(d *schema.ResourceData) bool {
-	if !isGracefulShutdownMaxDurationClearedInRawConfig(d.GetRawConfig()) {
-		return false
-	}
-	md, ok := d.GetOk("scheduling.0.graceful_shutdown.0.max_duration")
-	if !ok {
-		return false
-	}
-	mdSlice, ok := md.([]interface{})
-	return ok && len(mdSlice) > 0 && mdSlice[0] != nil
-}
-
-// On google_compute_instance_from_template and google_compute_instance_from_machine_image,
-// recurseOnSchema marks scheduling.0.graceful_shutdown.0.max_duration.0.nanos as Optional+Computed.
-// Because max_duration contains a Computed attribute, Terraform Core's ProposedNewState copies
-// prior max_duration (when max_duration is omitted inside a configured graceful_shutdown block)
-// and prior nanos (when nanos alone is omitted inside max_duration). Reconcile both against
-// GetRawConfig() in CustomizeDiff so in-place removal of max_duration or nanos plans an update.
-func clearGracefulShutdownWhenOmittedInConfig(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
-	if d.Id() == "" {
-		return nil
-	}
-	clearMaxDuration := isGracefulShutdownMaxDurationClearedInRawConfig(d.GetRawConfig())
-	clearNanos := false
-	if !clearMaxDuration {
-		nanosVal, ok := rawGracefulShutdownNanosAttr(d.GetRawConfig())
-		if !ok || !nanosVal.IsNull() {
-			return nil
-		}
-		_, newNanos := d.GetChange("scheduling.0.graceful_shutdown.0.max_duration.0.nanos")
-		if newNanos == nil || newNanos.(int) == 0 {
-			return nil
-		}
-		clearNanos = true
-	}
-
-	_, newSchedRaw := d.GetChange("scheduling")
-	schedSlice, ok := newSchedRaw.([]interface{})
-	if !ok || len(schedSlice) == 0 || schedSlice[0] == nil {
-		return nil
-	}
-	schedMap, ok := schedSlice[0].(map[string]interface{})
-	if !ok {
-		return nil
-	}
-	gsSlice, ok := schedMap["graceful_shutdown"].([]interface{})
-	if !ok || len(gsSlice) == 0 || gsSlice[0] == nil {
-		return nil
-	}
-	gsMap, ok := gsSlice[0].(map[string]interface{})
-	if !ok {
-		return nil
-	}
-	mdSlice, ok := gsMap["max_duration"].([]interface{})
-	if !ok || len(mdSlice) == 0 || mdSlice[0] == nil {
-		return nil
-	}
-
-	gsCopy := make(map[string]interface{}, len(gsMap))
-	for k, v := range gsMap {
-		gsCopy[k] = v
-	}
-	if clearMaxDuration {
-		gsCopy["max_duration"] = []interface{}{}
-	} else if clearNanos {
-		mdMap, ok := mdSlice[0].(map[string]interface{})
-		if !ok {
-			return nil
-		}
-		mdCopy := make(map[string]interface{}, len(mdMap))
-		for k, v := range mdMap {
-			mdCopy[k] = v
-		}
-		mdCopy["nanos"] = 0
-		gsCopy["max_duration"] = []interface{}{mdCopy}
-	}
-
-	schedCopy := make(map[string]interface{}, len(schedMap))
-	for k, v := range schedMap {
-		schedCopy[k] = v
-	}
-	schedCopy["graceful_shutdown"] = []interface{}{gsCopy}
-
-	return d.SetNew("scheduling", []interface{}{schedCopy})
 }
 
 func populateComputeInstanceResourceData(d *schema.ResourceData, instance map[string]interface{}, project, zone string, config *transport_tpg.Config) error {
@@ -2675,21 +2517,17 @@ func populateComputeInstanceResourceData(d *schema.ResourceData, instance map[st
 		return fmt.Errorf("Error setting scratch_disk: %s", err)
 	}
 
-	// Compute Engine does not return scheduling.gracefulShutdown.maxDuration.nanos on GET;
-	// preserve configured nanos so configured values do not drift while omitted nanos clears.
+	// Workaroud: API doesn't update the scheduling.graceful_shutdown.max_duration.nanos field.
+	// To avoid diff, we need to set the value from the state not from API response.
 	schedulingMap, _ := instance["scheduling"].(map[string]interface{})
 	scheduling := flattenScheduling(schedulingMap)
-	if nanos, ok := configuredGracefulShutdownNanos(d); ok {
-		if len(scheduling) > 0 && scheduling[0]["graceful_shutdown"] != nil {
-			if gs, ok := scheduling[0]["graceful_shutdown"].([]interface{}); ok && len(gs) > 0 && gs[0] != nil {
-				if md, ok := gs[0].(map[string]interface{})["max_duration"].([]interface{}); ok && len(md) > 0 && md[0] != nil {
-					mdMap := md[0].(map[string]interface{})
-					mdMap["nanos"] = nanos
-					gs[0].(map[string]interface{})["max_duration"] = []interface{}{mdMap}
-					scheduling[0]["graceful_shutdown"] = []interface{}{gs[0]}
-				}
-			}
-		}
+	if nanos, ok := d.GetOk("scheduling.0.graceful_shutdown.0.max_duration.0.nanos"); ok {
+		graceful_shutdown := scheduling[0]["graceful_shutdown"].([]interface{})[0].(map[string]interface{})
+		max_duration := graceful_shutdown["max_duration"].([]interface{})[0].(map[string]interface{})
+		max_duration["nanos"] = int64(nanos.(int))
+
+		graceful_shutdown["max_duration"] = []interface{}{max_duration}
+		scheduling[0]["graceful_shutdown"] = []interface{}{graceful_shutdown}
 	}
 	if err := d.Set("scheduling", scheduling); err != nil {
 		return fmt.Errorf("Error setting scheduling: %s", err)
@@ -2796,10 +2634,10 @@ func populateComputeInstanceResourceData(d *schema.ResourceData, instance map[st
 }
 
 func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
-	clearedComputedMaxDuration := hasClearedComputedGracefulShutdownMaxDuration(d)
-	if !clearedComputedMaxDuration && tpgresource.DeletionPolicyPreUpdate(d, ResourceComputeInstance) {
-		return ResourceComputeInstance().Read(d, meta)
-	}
+        
+    if tpgresource.DeletionPolicyPreUpdate(d, ResourceComputeInstance) {
+        return ResourceComputeInstance().Read(d, meta)
+    }
     
 	config := meta.(*transport_tpg.Config)
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
@@ -3137,16 +2975,11 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 	}
 
 	bootRequiredSchedulingChange := schedulingHasChangeRequiringReboot(d)
-	bootNotRequiredSchedulingChange := schedulingHasChangeWithoutReboot(d) || clearedComputedMaxDuration
+	bootNotRequiredSchedulingChange := schedulingHasChangeWithoutReboot(d)
 	if bootNotRequiredSchedulingChange {
 		schedulingBody, err := expandScheduling(d.Get("scheduling"))
 		if err != nil {
 			return fmt.Errorf("Error creating request data to update scheduling: %s", err)
-		}
-		if clearedComputedMaxDuration {
-			if gs, ok := schedulingBody["gracefulShutdown"].(map[string]interface{}); ok {
-				gs["maxDuration"] = nil
-			}
 		}
 		url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instances/{{"{{"}}name{{"}}"}}/setScheduling")
 		if err != nil {

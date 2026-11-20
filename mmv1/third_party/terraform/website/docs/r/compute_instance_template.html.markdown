@@ -725,20 +725,19 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `enabled` - (Required) Opts-in for graceful shutdown.
 
-* `max_duration` - (Optional) The time allotted for the instance to gracefully shut down.
+* `max_duration` (Optional) The time allotted for the instance to gracefully shut down.
     If the graceful shutdown isn't complete after this time, then the instance
     transitions to the STOPPING state. Structure is [documented below](#nested_max_duration).
 
 <a name="nested_max_duration"></a>The `max_duration` block supports:
 
 * `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
-    resolution. Must be from 0 to 999,999,999 inclusive. Note: the Compute
-    Engine API truncates `max_duration` to whole `seconds` (`1` to `21600`) and
-    does not persist `nanos` on read, so importing an existing resource will not
-    populate `nanos`.
+    resolution. Durations less than one second are represented with a 0
+    `seconds` field and a positive `nanos` field. Must be from 0 to
+    999,999,999 inclusive.
 
 * `seconds` - (Required) Span of time at a resolution of a second.
-    The value must be between 1 and 21600, which is 21,600 seconds (six hours).
+    The value must be between 1 and 3600, which is 3,600 seconds (one hour).
 
 <a name="nested_preemption_notice_duration"></a>The `preemption_notice_duration` block supports:
 

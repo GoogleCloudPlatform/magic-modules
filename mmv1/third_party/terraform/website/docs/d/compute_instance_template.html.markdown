@@ -301,7 +301,7 @@ The `disk_encryption_key` block supports:
 
 * `seconds` - Span of time at a resolution of a second.
 
-* `nanos` - Span of time that's a fraction of a second at nanosecond resolution. Note: the Compute Engine API does not persist `nanos` on read, so reading via a data source will not populate `nanos`.
+* `nanos` - Span of time that's a fraction of a second at nanosecond resolution.
 
 <a name="nested_guest_accelerator"></a>The `guest_accelerator` block supports:
 
