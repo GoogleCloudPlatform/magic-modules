@@ -262,7 +262,7 @@ func TestTypeExcludeIfNotInVersion(t *testing.T) {
 			description: "type has Exclude true",
 			obj: Type{
 				Name:       "test",
-				Exclude:    true,
+				Exclude:    new(true),
 				MinVersion: "",
 				ResourceMetadata: &Resource{
 					Name:            "test",
@@ -280,7 +280,7 @@ func TestTypeExcludeIfNotInVersion(t *testing.T) {
 			obj: Type{
 				Name:         "test",
 				MinVersion:   "",
-				Exclude:      false,
+				Exclude:      new(false),
 				ExactVersion: "beta",
 				ResourceMetadata: &Resource{
 					Name:            "test",
@@ -298,7 +298,7 @@ func TestTypeExcludeIfNotInVersion(t *testing.T) {
 			obj: Type{
 				Name:         "test",
 				MinVersion:   "beta",
-				Exclude:      false,
+				Exclude:      new(false),
 				ExactVersion: "",
 				ResourceMetadata: &Resource{
 					Name:            "test",
@@ -320,7 +320,7 @@ func TestTypeExcludeIfNotInVersion(t *testing.T) {
 			t.Parallel()
 
 			tc.obj.ExcludeIfNotInVersion(tc.input)
-			if got, want := tc.obj.Exclude, tc.expected; !reflect.DeepEqual(got, want) {
+			if got, want := tc.obj.IsExcluded(), tc.expected; !reflect.DeepEqual(got, want) {
 				t.Errorf("expected %v to be %v", got, want)
 			}
 		})
@@ -355,20 +355,20 @@ func TestTypeExcludeIfNotInVersion(t *testing.T) {
 
 		gaMapProp, gaNestedBetaProp := makeMapProp()
 		gaMapProp.ExcludeIfNotInVersion(&product.Version{Name: "ga"})
-		if gaMapProp.Exclude {
-			t.Errorf("expected mapProp.Exclude to be false in ga")
+		if gaMapProp.IsExcluded() {
+			t.Errorf("expected mapProp.IsExcluded() to be false in ga")
 		}
-		if !gaNestedBetaProp.Exclude {
-			t.Errorf("expected nestedBetaProp.Exclude to be true in ga")
+		if !gaNestedBetaProp.IsExcluded() {
+			t.Errorf("expected nestedBetaProp.IsExcluded() to be true in ga")
 		}
 
 		betaMapProp, betaNestedBetaProp := makeMapProp()
 		betaMapProp.ExcludeIfNotInVersion(&product.Version{Name: "beta"})
-		if betaMapProp.Exclude {
-			t.Errorf("expected mapProp.Exclude to be false in beta")
+		if betaMapProp.IsExcluded() {
+			t.Errorf("expected mapProp.IsExcluded() to be false in beta")
 		}
-		if betaNestedBetaProp.Exclude {
-			t.Errorf("expected nestedBetaProp.Exclude to be false in beta")
+		if betaNestedBetaProp.IsExcluded() {
+			t.Errorf("expected nestedBetaProp.IsExcluded() to be false in beta")
 		}
 	})
 }
@@ -879,10 +879,10 @@ func TestTypeValidateConflicts(t *testing.T) {
 		gaRes.ExcludeIfNotInVersion(&product.Version{Name: "ga"})
 		gaRes.ExcludeIfNotInVersion(&product.Version{Name: "ga"})
 
-		if !gaRes.VirtualFields[0].Exclude {
+		if !gaRes.VirtualFields[0].IsExcluded() {
 			t.Errorf("expected beta virtual field allowed_actions to have Exclude=true in GA")
 		}
-		if gaRes.VirtualFields[1].Exclude {
+		if gaRes.VirtualFields[1].IsExcluded() {
 			t.Errorf("expected GA virtual field minimal_action to have Exclude=false in GA")
 		}
 		if got := len(gaRes.UserVirtualFields()); got != 1 || gaRes.UserVirtualFields()[0].Name != "minimal_action" {
@@ -899,7 +899,7 @@ func TestTypeValidateConflicts(t *testing.T) {
 		betaRes.ExcludeIfNotInVersion(&product.Version{Name: "beta"})
 		betaRes.ExcludeIfNotInVersion(&product.Version{Name: "beta"})
 
-		if betaRes.VirtualFields[0].Exclude || betaRes.VirtualFields[1].Exclude {
+		if betaRes.VirtualFields[0].IsExcluded() || betaRes.VirtualFields[1].IsExcluded() {
 			t.Errorf("expected both virtual fields to have Exclude=false in beta")
 		}
 		if got := len(betaRes.UserVirtualFields()); got != 2 {
@@ -962,7 +962,7 @@ func TestTypeValidateConflicts(t *testing.T) {
 				{
 					Name:      "excludedField",
 					Type:      "String",
-					Exclude:   true,
+					Exclude:   new(true),
 					Conflicts: []string{"ga_field"},
 				},
 			},
@@ -1123,7 +1123,7 @@ func TestTypeValidateSiblingConstraints(t *testing.T) {
 				t.Parallel()
 
 				gaField := &Type{Name: "gaField", Type: "String"}
-				exclField := &Type{Name: "excludedField", Type: "String", Exclude: true}
+				exclField := &Type{Name: "excludedField", Type: "String", Exclude: new(true)}
 				kind.set(gaField, []string{"ga_field", "excluded_field"})
 				kind.set(exclField, []string{"ga_field", "excluded_field"})
 
