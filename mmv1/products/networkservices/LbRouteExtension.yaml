@@ -276,3 +276,12 @@ properties:
     enum_values:
       - 'INTERNAL_MANAGED'
       - 'EXTERNAL_MANAGED'
+  - name: 'metadata'
+    type: KeyValuePairs
+    description: |
+      The metadata provided here is included as part of the `metadata_context` (of type `google.protobuf.Struct`) in the `ProcessingRequest` message sent to the extension server.
+      The metadata applies to all extensions in all extensions chains in this resource.
+      The metadata is available under the key `com.google.lb_route_extension.<resource_name>`.
+      The following variables are supported in the metadata: `{forwarding_rule_id}` - substituted with the forwarding rule's fully qualified resource name.
+      This field must not be set if at least one of the extension chains contains plugin extensions. Setting it results in a validation error.
+      You can set metadata at either the resource level or the extension level. The extension level metadata is recommended because you can pass a different set of metadata through each extension to the backend.

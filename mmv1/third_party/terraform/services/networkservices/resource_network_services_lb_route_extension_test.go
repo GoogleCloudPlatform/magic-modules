@@ -1480,3 +1480,250 @@ resource "google_compute_region_backend_service" "callouts_backend" {
 }
 `, context)
 }
+
+func TestAccNetworkServicesLbRouteExtension_metadata(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetworkServicesLbRouteExtensionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkServicesLbRouteExtension_metadataOmitted(context),
+			},
+			{
+				ResourceName:            "google_network_services_lb_route_extension.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetworkServicesLbRouteExtension_metadataSet(context),
+			},
+			{
+				ResourceName:            "google_network_services_lb_route_extension.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetworkServicesLbRouteExtension_metadataUpdated(context),
+			},
+			{
+				ResourceName:            "google_network_services_lb_route_extension.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetworkServicesLbRouteExtension_metadataOmitted(context),
+			},
+			{
+				ResourceName:            "google_network_services_lb_route_extension.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccNetworkServicesLbRouteExtension_metadataBase(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_network" "ilb_network" {
+  name                    = "tf-test-l7-ilb-network%{random_suffix}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "proxy_subnet" {
+  name          = "tf-test-l7-ilb-proxy-subnet%{random_suffix}"
+  ip_cidr_range = "10.0.0.0/24"
+  region        = "us-west1"
+  purpose       = "REGIONAL_MANAGED_PROXY"
+  role          = "ACTIVE"
+  network       = google_compute_network.ilb_network.id
+}
+
+resource "google_compute_subnetwork" "ilb_subnet" {
+  name          = "tf-test-l7-ilb-subnet%{random_suffix}"
+  ip_cidr_range = "10.0.1.0/24"
+  region        = "us-west1"
+  network       = google_compute_network.ilb_network.id
+
+  depends_on = [
+    google_compute_subnetwork.proxy_subnet
+  ]
+}
+
+resource "google_compute_region_health_check" "default" {
+  name   = "tf-test-l7-ilb-hc%{random_suffix}"
+  region = "us-west1"
+
+  http_health_check {
+    port_specification = "USE_SERVING_PORT"
+  }
+}
+
+resource "google_compute_region_backend_service" "default" {
+  name                  = "tf-test-l7-ilb-backend%{random_suffix}"
+  region                = "us-west1"
+  protocol              = "HTTP"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  timeout_sec           = 10
+  health_checks         = [google_compute_region_health_check.default.id]
+}
+
+resource "google_compute_region_backend_service" "callouts_backend" {
+  name                  = "tf-test-l7-ilb-callouts-backend%{random_suffix}"
+  region                = "us-west1"
+  protocol              = "HTTP2"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  timeout_sec           = 10
+  port_name             = "grpc"
+  health_checks         = [google_compute_region_health_check.default.id]
+}
+
+resource "google_compute_region_url_map" "default" {
+  name            = "tf-test-l7-ilb-regional-url-map%{random_suffix}"
+  region          = "us-west1"
+  default_service = google_compute_region_backend_service.default.id
+
+  host_rule {
+    hosts        = ["service-extensions.com"]
+    path_matcher = "callouts"
+  }
+
+  path_matcher {
+    name            = "callouts"
+    default_service = google_compute_region_backend_service.callouts_backend.id
+  }
+}
+
+resource "google_compute_region_target_http_proxy" "default" {
+  name    = "tf-test-l7-ilb-target-http-proxy%{random_suffix}"
+  region  = "us-west1"
+  url_map = google_compute_region_url_map.default.id
+}
+
+resource "google_compute_forwarding_rule" "default" {
+  name                  = "tf-test-l7-ilb-forwarding-rule%{random_suffix}"
+  region                = "us-west1"
+  ip_protocol           = "TCP"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  port_range            = "80"
+  target                = google_compute_region_target_http_proxy.default.id
+  network               = google_compute_network.ilb_network.id
+  subnetwork            = google_compute_subnetwork.ilb_subnet.id
+  network_tier          = "PREMIUM"
+
+  depends_on = [
+    google_compute_subnetwork.proxy_subnet
+  ]
+}
+`, context)
+}
+
+func testAccNetworkServicesLbRouteExtension_metadataOmitted(context map[string]interface{}) string {
+	return testAccNetworkServicesLbRouteExtension_metadataBase(context) + acctest.Nprintf(`
+resource "google_network_services_lb_route_extension" "default" {
+  name                  = "tf-test-l7-ilb-route-ext%{random_suffix}"
+  description           = "my route extension"
+  location              = "us-west1"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  forwarding_rules      = [google_compute_forwarding_rule.default.self_link]
+
+  extension_chains {
+    name = "chain1"
+
+    match_condition {
+      cel_expression = "request.path.startsWith('/extensions')"
+    }
+
+    extensions {
+      name      = "ext11"
+      authority = "ext11.com"
+      service   = google_compute_region_backend_service.callouts_backend.self_link
+      timeout   = "0.1s"
+      fail_open = false
+
+      forward_headers = ["custom-header"]
+    }
+  }
+}
+`, context)
+}
+
+func testAccNetworkServicesLbRouteExtension_metadataSet(context map[string]interface{}) string {
+	return testAccNetworkServicesLbRouteExtension_metadataBase(context) + acctest.Nprintf(`
+resource "google_network_services_lb_route_extension" "default" {
+  name                  = "tf-test-l7-ilb-route-ext%{random_suffix}"
+  description           = "my route extension"
+  location              = "us-west1"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  forwarding_rules      = [google_compute_forwarding_rule.default.self_link]
+
+  metadata = {
+    "key1" = "value1"
+    "fr"   = "{forwarding_rule_id}"
+  }
+
+  extension_chains {
+    name = "chain1"
+
+    match_condition {
+      cel_expression = "request.path.startsWith('/extensions')"
+    }
+
+    extensions {
+      name      = "ext11"
+      authority = "ext11.com"
+      service   = google_compute_region_backend_service.callouts_backend.self_link
+      timeout   = "0.1s"
+      fail_open = false
+
+      forward_headers = ["custom-header"]
+    }
+  }
+}
+`, context)
+}
+
+func testAccNetworkServicesLbRouteExtension_metadataUpdated(context map[string]interface{}) string {
+	return testAccNetworkServicesLbRouteExtension_metadataBase(context) + acctest.Nprintf(`
+resource "google_network_services_lb_route_extension" "default" {
+  name                  = "tf-test-l7-ilb-route-ext%{random_suffix}"
+  description           = "my route extension"
+  location              = "us-west1"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  forwarding_rules      = [google_compute_forwarding_rule.default.self_link]
+
+  metadata = {
+    "key1" = "value1-updated"
+    "key2" = "value2"
+  }
+
+  extension_chains {
+    name = "chain1"
+
+    match_condition {
+      cel_expression = "request.path.startsWith('/extensions')"
+    }
+
+    extensions {
+      name      = "ext11"
+      authority = "ext11.com"
+      service   = google_compute_region_backend_service.callouts_backend.self_link
+      timeout   = "0.1s"
+      fail_open = false
+
+      forward_headers = ["custom-header"]
+    }
+  }
+}
+`, context)
+}
