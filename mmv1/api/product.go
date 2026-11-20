@@ -343,7 +343,7 @@ func Merge(self, otherObj reflect.Value, version string) {
 			}
 		} else if selfObj.Field(i).Kind() == reflect.Pointer {
 			// merge the objects that are being pointed to, if both exist (namely, ItemTypes)
-			if reflect.Indirect(selfObj.Field(i)).IsValid() && reflect.Indirect(otherObj.Field(i)).IsValid() {
+			if reflect.Indirect(selfObj.Field(i)).IsValid() && reflect.Indirect(otherObj.Field(i)).IsValid() && selfObj.Field(i).Type().Elem().Kind() == reflect.Struct {
 				Merge(selfObj.Field(i), reflect.Indirect(otherObj.Field(i)), version)
 			} else {
 				selfObj.Field(i).Set(otherObj.Field(i))
