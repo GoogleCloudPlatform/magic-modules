@@ -6,25 +6,53 @@ func TagsTagKeyPurposeDataDiffSuppress(k, old, new string, d *schema.ResourceDat
 		}
 		return strings.TrimPrefix(old, "organizations/") == strings.TrimPrefix(new, "organizations/")
 	case "purpose_data.network":
+		if old == "" || new == "" {
+			return old == new
+		}
 		if tpgresource.CompareSelfLinkOrResourceName("", old, new, d) {
 			return true
 		}
-		oldParts := strings.Split(old, "/")
-		newParts := strings.Split(new, "/")
-		if len(oldParts) >= 2 && len(newParts) >= 2 {
-			if oldParts[len(oldParts)-1] == newParts[len(newParts)-1] {
-				return true
-			}
-			for i, part := range oldParts {
-				if part == "projects" && i+1 < len(oldParts) && len(newParts) == 2 {
-					if oldParts[i+1] == newParts[0] {
-						return true
-					}
-				}
-			}
+		oldProject, oldNetwork, oldIsSelfLink := parsePurposeDataNetwork(old)
+		newProject, newNetwork, newIsSelfLink := parsePurposeDataNetwork(new)
+		if oldProject == "" || newProject == "" {
+			return false
 		}
-		return false
+		if oldIsSelfLink && newIsSelfLink {
+			if oldNetwork != newNetwork {
+				return false
+			}
+			return oldProject == newProject || isNumericString(oldProject) != isNumericString(newProject)
+		}
+		if oldIsSelfLink != newIsSelfLink {
+			return oldProject == newProject || isNumericString(oldProject) || isNumericString(newProject)
+		}
+		return oldProject == newProject && oldNetwork == newNetwork
 	default:
 		return old == new
 	}
+}
+
+func parsePurposeDataNetwork(s string) (project, network string, isSelfLink bool) {
+	parts := strings.Split(s, "/")
+	for i, part := range parts {
+		if part == "projects" && i+4 < len(parts) && parts[i+2] == "global" && parts[i+3] == "networks" && parts[i+1] != "" && parts[i+4] != "" {
+			return parts[i+1], parts[i+4], true
+		}
+	}
+	if len(parts) == 2 && parts[0] != "" && parts[1] != "" {
+		return parts[0], parts[1], false
+	}
+	return "", "", false
+}
+
+func isNumericString(s string) bool {
+	if s == "" {
+		return false
+	}
+	for _, r := range s {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
 }

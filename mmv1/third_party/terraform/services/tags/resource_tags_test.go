@@ -25,9 +25,10 @@ import (
 
 func TestAccTags(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
-		"tagKeyBasic":                              testAccTagsTagKey_tagKeyBasic,
-		"tagKeyBasicWithPurposeGceFirewall":        testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewall,
-		"tagKeyBasicWithPurposeDataGovernance":     testAccTagsTagKey_tagKeyBasicWithPurposeDataGovernance,
+		"tagKeyBasic":                                      testAccTagsTagKey_tagKeyBasic,
+		"tagKeyBasicWithPurposeGceFirewall":                testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewall,
+		"tagKeyBasicWithPurposeGceFirewallProjectNumber":   testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewallProjectNumber,
+		"tagKeyBasicWithPurposeDataGovernance":             testAccTagsTagKey_tagKeyBasicWithPurposeDataGovernance,
 		"tagKeyBasicWithAllowedValuesRegex":        testAccTagsTagKey_tagKeyBasicWithAllowedValuesRegex,
 		"tagKeyUpdate":                             testAccTagsTagKey_tagKeyUpdate,
 		"tagKeyUpdateAllowedValuesRegex":           testAccTagsTagKey_tagKeyUpdateAllowedValuesRegex,
@@ -187,6 +188,42 @@ func TestTagsTagKeyPurposeDataDiffSuppress(t *testing.T) {
 			New:                "my-project/tf-test-vpc-1",
 			ExpectDiffSuppress: true,
 		},
+		"network same vpc name in different project is not suppressed": {
+			K:                  "purpose_data.network",
+			Old:                "project-a/tf-test-vpc-1",
+			New:                "project-b/tf-test-vpc-1",
+			ExpectDiffSuppress: false,
+		},
+		"network same vpc name in different project number is not suppressed": {
+			K:                  "purpose_data.network",
+			Old:                "111111/tf-test-vpc-1",
+			New:                "222222/tf-test-vpc-1",
+			ExpectDiffSuppress: false,
+		},
+		"network selfLinkWithId suppresses project_number/vpc-name": {
+			K:                  "purpose_data.network",
+			Old:                "https://www.googleapis.com/compute/v1/projects/my-project/global/networks/6992953698831725600",
+			New:                "123456789/tf-test-vpc-12345",
+			ExpectDiffSuppress: true,
+		},
+		"network selfLinkWithId does not suppress different project/vpc-name": {
+			K:                  "purpose_data.network",
+			Old:                "https://www.googleapis.com/compute/v1/projects/project-a/global/networks/6992953698831725600",
+			New:                "project-b/tf-test-vpc-12345",
+			ExpectDiffSuppress: false,
+		},
+		"network selfLinkWithId suppresses selfLinkWithId using project number": {
+			K:                  "purpose_data.network",
+			Old:                "https://www.googleapis.com/compute/v1/projects/my-project/global/networks/6992953698831725600",
+			New:                "https://www.googleapis.com/compute/v1/projects/123456789/global/networks/6992953698831725600",
+			ExpectDiffSuppress: true,
+		},
+		"network selfLinkWithId different network id is not suppressed": {
+			K:                  "purpose_data.network",
+			Old:                "https://www.googleapis.com/compute/v1/projects/my-project/global/networks/111",
+			New:                "https://www.googleapis.com/compute/v1/projects/my-project/global/networks/222",
+			ExpectDiffSuppress: false,
+		},
 	}
 
 	for tn, tc := range cases {
@@ -236,6 +273,55 @@ resource "google_tags_tag_key" "key" {
 	  description = "For foo%{random_suffix} resources."
 	  purpose = "GCE_FIREWALL"
 	  purpose_data = {network = "${google_compute_network.tag_network_2.project}/${google_compute_network.tag_network_2.name}"}
+	}
+
+`, context)
+}
+
+func testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewallProjectNumber(t *testing.T) {
+	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckTagsTagKeyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewallProjectNumberExample(context),
+			},
+			{
+				ResourceName:            "google_tags_tag_key.key",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"purpose_data"},
+			},
+			{
+				ResourceName:    "google_tags_tag_key.key",
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithID,
+			},
+		},
+	})
+}
+
+func testAccTagsTagKey_tagKeyBasicWithPurposeGceFirewallProjectNumberExample(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+resource "google_compute_network" "tag_network" {
+	name = "tf-test-vpc-%{random_suffix}"
+	auto_create_subnetworks = false
+}
+
+resource "google_tags_tag_key" "key" {
+	  parent = "organizations/%{org_id}"
+	  short_name = "tf-test-foo%{random_suffix}"
+	  description = "For foo%{random_suffix} resources."
+	  purpose = "GCE_FIREWALL"
+	  purpose_data = {network = "${data.google_project.project.number}/${google_compute_network.tag_network.name}"}
 	}
 
 `, context)
