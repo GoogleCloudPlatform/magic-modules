@@ -50,6 +50,19 @@ samples:
         resource_id_vars:
           backup_name: fs-bkup
           instance_name: fs-inst
+  - name: filestore_backup_cmek
+    primary_resource_id: backup
+    bootstrap_iam:
+      - member: serviceAccount:service-{project_number}@cloud-filer.iam.gserviceaccount.com
+        role: roles/cloudkms.cryptoKeyEncrypterDecrypter
+    steps:
+      - name: filestore_backup_cmek
+        resource_id_vars:
+          backup_name: fs-bkup-cmek
+          instance_name: fs-inst-cmek
+          kms_key_name: projects/my-project/locations/us-central1/keyRings/my-key-ring/cryptoKeys/my-key
+        test_vars_overrides:
+          kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
 parameters:
   - name: location
     type: String
@@ -122,11 +135,29 @@ properties:
     description: |
       Amount of bytes that will be downloaded if the backup is restored.
     output: true
+  # The API field is `kmsKey` in v1 and `kmsKeyName` in v1beta1, so the field is
+  # duplicated per version to keep the same Terraform name in both providers.
   - name: kmsKeyName
     type: String
     description: |
-      KMS key name used for data encryption.
-    output: true
+      The resource name of the Cloud KMS key used to encrypt the backup, in the format
+      `projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}`.
+      The key must be in the same region as the backup. Not supported for backups of
+      `BASIC_HDD` and `BASIC_SSD` instances.
+    exact_version: ga
+    api_name: kmsKey
+    immutable: true
+    default_from_api: true
+  - name: kmsKeyName
+    type: String
+    description: |
+      The resource name of the Cloud KMS key used to encrypt the backup, in the format
+      `projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}`.
+      The key must be in the same region as the backup. Not supported for backups of
+      `BASIC_HDD` and `BASIC_SSD` instances.
+    exact_version: beta
+    immutable: true
+    default_from_api: true
   - name: tags
     type: KeyValuePairs
     description: |
