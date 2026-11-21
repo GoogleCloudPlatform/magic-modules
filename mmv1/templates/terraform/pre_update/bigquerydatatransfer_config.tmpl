@@ -46,6 +46,9 @@ if d.HasChange("disabled") {
 if d.HasChange("params") {
   updateMask = append(updateMask, "params")
 }
+if d.HasChange("param_config") {
+  updateMask = append(updateMask, "paramConfig")
+}
 
 // updateMask is a URL parameter but not present in the schema, so ReplaceVars
 // won't set it
