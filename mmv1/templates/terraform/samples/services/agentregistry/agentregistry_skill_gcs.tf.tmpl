@@ -1,0 +1,39 @@
+data "google_project" "project" {}
+
+resource "google_storage_bucket" "bucket" {
+  name                        = "{{index $.ResourceIdVars "bucket_name"}}"
+  location                    = "US"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+resource "google_storage_bucket_iam_member" "p4sa_reader" {
+  bucket = google_storage_bucket.bucket.name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-agentregistry.iam.gserviceaccount.com"
+}
+
+resource "google_storage_bucket_object" "object" {
+  name    = "skill.zip"
+  bucket  = google_storage_bucket.bucket.name
+  content = base64decode("UEsDBBQAAAAAAEEQQRBjKl0XOwAAADsAAAAIAAAAU0tJTEwubWQtLS0KbmFtZTogdGVzdC1za2lsbApkZXNjcmlwdGlvbjogVGVzdCBza2lsbAotLS0KIyBUZXN0CnYwClBLAQIUAxQAAAAAAEEQQRBjKl0XOwAAADsAAAAIAAAAAAAAAAAAAQAAAAAAAABTS0lMTC5tZFBLBQYAAAAAAQABADYAAABhAAAAAAA=")
+}
+
+resource "google_agent_registry_skill" "{{.PrimaryResourceId}}" {
+  location     = "global"
+  skill_id     = "{{index $.ResourceIdVars "skill_id"}}"
+  target_state = "TARGET_STATE_DRAFT"
+  type         = "SIMPLE"
+  description  = "A test skill from GCS"
+  display_name = "Test Skill GCS"
+  scanning_config {
+    policy = "DISABLED"
+  }
+  initial_revision {
+    gcs_source {
+      uri        = "gs://${google_storage_bucket.bucket.name}/${google_storage_bucket_object.object.name}"
+      generation = tostring(google_storage_bucket_object.object.generation)
+    }
+  }
+  depends_on = [google_storage_bucket_iam_member.p4sa_reader]
+}
