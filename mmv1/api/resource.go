@@ -2815,7 +2815,7 @@ func (r Resource) ShouldDatasourceSetAnnotations() bool {
 	return false
 }
 
-// DatasourceOptionalFields returns a list of fields from the resource's URI
+// DatasourceRequiredFields returns a list of fields from the resource's URI
 // that should be marked as "Required".
 func (r Resource) DatasourceRequiredFields() []string {
 	requiredFields := []string{}

@@ -55,7 +55,7 @@ The following arguments are supported:
 {{- range $p := $.AllUserProperties }}
   {{- range $field := $.DatasourceRequiredFields }}
     {{- if eq (underscore $p.Name) (underscore $field) }}
-      {{- trimTemplate "property_documentation.html.markdown.tmpl" $p -}}
+      {{- trimTemplate "property_documentation.html.markdown.tmpl" ($p.AsDatasourceArgument true) -}}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -63,7 +63,7 @@ The following arguments are supported:
 {{- range $p := $.AllUserProperties }}
   {{- range $field := $.DatasourceOptionalFields }}
     {{- if eq (underscore $p.Name) (underscore $field) }}
-      {{- trimTemplate "property_documentation.html.markdown.tmpl" $p -}}
+      {{- trimTemplate "property_documentation.html.markdown.tmpl" ($p.AsDatasourceArgument false) -}}
     {{- end }}
   {{- end }}
 {{- end }}
