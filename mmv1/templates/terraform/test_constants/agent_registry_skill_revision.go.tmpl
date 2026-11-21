@@ -1,0 +1,42 @@
+func bootstrapAgentRegistrySkill(t *testing.T) string {
+	const skillName = "private-tf-bootstrap-skill"
+	if acctest.IsVcrReplaying() {
+		return skillName
+	}
+	config := transport_tpg.BootstrapConfig(t)
+	if config == nil {
+		return ""
+	}
+	project := envvar.GetTestProjectFromEnv()
+	baseURL := fmt.Sprintf("https://agentregistry.googleapis.com/v1/projects/%s/locations/global/skills", project)
+	getSkill := func() (map[string]interface{}, error) {
+		return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{Config: config, Method: "GET", Project: project, RawURL: baseURL + "/" + skillName, UserAgent: config.UserAgent})
+	}
+	res, err := getSkill()
+	if err == nil && res["state"] != nil && res["state"] != "" && res["state"] != "STATE_CREATING" {
+		return skillName
+	}
+	if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config: config, Method: "POST", Project: project, RawURL: baseURL + "?skillId=tf-bootstrap-skill", UserAgent: config.UserAgent,
+			Body: map[string]interface{}{
+				"displayName":     "Bootstrap Test Skill",
+				"targetState":     "TARGET_STATE_DRAFT",
+				"type":            "SIMPLE",
+				"scanningConfig":  map[string]interface{}{"policy": "DISABLED"},
+				"initialRevision": map[string]interface{}{"name": fmt.Sprintf("projects/%s/locations/global/skills/%s/revisions/rev-1", project, skillName), "archiveUploadSource": map[string]interface{}{"archiveContent": "UEsDBBQAAAAAAEEQQRBjKl0XOwAAADsAAAAIAAAAU0tJTEwubWQtLS0KbmFtZTogdGVzdC1za2lsbApkZXNjcmlwdGlvbjogVGVzdCBza2lsbAotLS0KIyBUZXN0CnYwClBLAQIUAxQAAAAAAEEQQRBjKl0XOwAAADsAAAAIAAAAAAAAAAAAAQAAAAAAAABTS0lMTC5tZFBLBQYAAAAAAQABADYAAABhAAAAAAA="}},
+			},
+		})
+	}
+	if err != nil && !transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
+		t.Fatalf("Error bootstrapping AgentRegistry Skill: %s", err)
+	}
+	for i := 0; i < 60; i++ {
+		time.Sleep(5 * time.Second)
+		if res, err = getSkill(); err == nil && res["state"] != nil && res["state"] != "" && res["state"] != "STATE_CREATING" {
+			return skillName
+		}
+	}
+	t.Fatalf("Timed out waiting for AgentRegistry Skill %s (last err: %v)", skillName, err)
+	return skillName
+}
