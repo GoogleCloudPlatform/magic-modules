@@ -24,6 +24,7 @@ base_url: projects/{{project}}/locations/{{location}}/services
 self_link: projects/{{project}}/locations/{{location}}/services/{{service_id}}
 create_url: projects/{{project}}/locations/{{location}}/services?serviceId={{service_id}}
 update_mask: true
+generate_list_resource: true
 update_verb: PATCH
 iam_policy:
   method_name_separator: ':'
