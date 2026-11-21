@@ -50,38 +50,6 @@ func TestDatastreamStreamObjectsSetStyleDiff(t *testing.T) {
 			wantCleared: false,
 		},
 		{
-			name: "object added — show diff",
-			before: map[string]interface{}{
-				basePath + ".#": 2,
-				basePath + ".0": map[string]interface{}{"object_name": "Account"},
-				basePath + ".1": map[string]interface{}{"object_name": "Contact"},
-			},
-			after: map[string]interface{}{
-				basePath + ".#": 3,
-				basePath + ".0": map[string]interface{}{"object_name": "Account"},
-				basePath + ".1": map[string]interface{}{"object_name": "Contact"},
-				basePath + ".2": map[string]interface{}{"object_name": "Lead"},
-			},
-			keysPrefix:  []string{basePath + ".2.object_name"},
-			wantCleared: false,
-		},
-		{
-			name: "object removed — show diff",
-			before: map[string]interface{}{
-				basePath + ".#": 3,
-				basePath + ".0": map[string]interface{}{"object_name": "Account"},
-				basePath + ".1": map[string]interface{}{"object_name": "Contact"},
-				basePath + ".2": map[string]interface{}{"object_name": "Lead"},
-			},
-			after: map[string]interface{}{
-				basePath + ".#": 2,
-				basePath + ".0": map[string]interface{}{"object_name": "Account"},
-				basePath + ".1": map[string]interface{}{"object_name": "Contact"},
-			},
-			keysPrefix:  []string{basePath + ".2.object_name"},
-			wantCleared: false,
-		},
-		{
 			name: "no changes — no action",
 			before: map[string]interface{}{
 				basePath + ".#": 2,
@@ -112,6 +80,128 @@ func TestDatastreamStreamObjectsSetStyleDiff(t *testing.T) {
 			cleared := diff.Cleared != nil && diff.Cleared[basePath] != nil
 			if cleared != tc.wantCleared {
 				t.Errorf("cleared = %v, want %v", cleared, tc.wantCleared)
+			}
+		})
+	}
+}
+
+func TestDatastreamStreamObjectsSetStyleDiff_addRemove(t *testing.T) {
+	t.Parallel()
+
+	basePath := "source_config.0.salesforce_source_config.0.include_objects.0.objects"
+
+	cases := []struct {
+		name      string
+		before    map[string]interface{}
+		after     map[string]interface{}
+		wantAfter map[string]interface{}
+	}{
+		{
+			name: "mid-list insertion — reorder so new object is at end",
+			before: map[string]interface{}{
+				basePath + ".#": 3,
+				basePath + ".0": map[string]interface{}{"object_name": "ObjectA"},
+				basePath + ".1": map[string]interface{}{"object_name": "ObjectB"},
+				basePath + ".2": map[string]interface{}{"object_name": "ObjectC"},
+			},
+			after: map[string]interface{}{
+				basePath + ".#": 4,
+				basePath + ".0": map[string]interface{}{"object_name": "ObjectA"},
+				basePath + ".1": map[string]interface{}{"object_name": "ObjectX"},
+				basePath + ".2": map[string]interface{}{"object_name": "ObjectB"},
+				basePath + ".3": map[string]interface{}{"object_name": "ObjectC"},
+			},
+			wantAfter: map[string]interface{}{
+				basePath + ".0.object_name": "ObjectA",
+				basePath + ".1.object_name": "ObjectB",
+				basePath + ".2.object_name": "ObjectC",
+				basePath + ".3.object_name": "ObjectX",
+			},
+		},
+		{
+			name: "append at end — no reordering needed",
+			before: map[string]interface{}{
+				basePath + ".#": 2,
+				basePath + ".0": map[string]interface{}{"object_name": "ObjectA"},
+				basePath + ".1": map[string]interface{}{"object_name": "ObjectB"},
+			},
+			after: map[string]interface{}{
+				basePath + ".#": 3,
+				basePath + ".0": map[string]interface{}{"object_name": "ObjectA"},
+				basePath + ".1": map[string]interface{}{"object_name": "ObjectB"},
+				basePath + ".2": map[string]interface{}{"object_name": "ObjectC"},
+			},
+			wantAfter: map[string]interface{}{
+				basePath + ".0.object_name": "ObjectA",
+				basePath + ".1.object_name": "ObjectB",
+				basePath + ".2.object_name": "ObjectC",
+			},
+		},
+		{
+			name: "object removed — shared objects keep old order",
+			before: map[string]interface{}{
+				basePath + ".#": 3,
+				basePath + ".0": map[string]interface{}{"object_name": "ObjectA"},
+				basePath + ".1": map[string]interface{}{"object_name": "ObjectB"},
+				basePath + ".2": map[string]interface{}{"object_name": "ObjectC"},
+			},
+			after: map[string]interface{}{
+				basePath + ".#": 2,
+				basePath + ".0": map[string]interface{}{"object_name": "ObjectA"},
+				basePath + ".1": map[string]interface{}{"object_name": "ObjectC"},
+			},
+			wantAfter: map[string]interface{}{
+				basePath + ".0.object_name": "ObjectA",
+				basePath + ".1.object_name": "ObjectC",
+			},
+		},
+		{
+			name: "five objects with mid-list insertion — cascade prevented",
+			before: map[string]interface{}{
+				basePath + ".#": 5,
+				basePath + ".0": map[string]interface{}{"object_name": "ObjectA"},
+				basePath + ".1": map[string]interface{}{"object_name": "ObjectB"},
+				basePath + ".2": map[string]interface{}{"object_name": "ObjectC"},
+				basePath + ".3": map[string]interface{}{"object_name": "ObjectD"},
+				basePath + ".4": map[string]interface{}{"object_name": "ObjectE"},
+			},
+			after: map[string]interface{}{
+				basePath + ".#": 6,
+				basePath + ".0": map[string]interface{}{"object_name": "ObjectA"},
+				basePath + ".1": map[string]interface{}{"object_name": "ObjectB"},
+				basePath + ".2": map[string]interface{}{"object_name": "ObjectX"},
+				basePath + ".3": map[string]interface{}{"object_name": "ObjectC"},
+				basePath + ".4": map[string]interface{}{"object_name": "ObjectD"},
+				basePath + ".5": map[string]interface{}{"object_name": "ObjectE"},
+			},
+			wantAfter: map[string]interface{}{
+				basePath + ".0.object_name": "ObjectA",
+				basePath + ".1.object_name": "ObjectB",
+				basePath + ".2.object_name": "ObjectC",
+				basePath + ".3.object_name": "ObjectD",
+				basePath + ".4.object_name": "ObjectE",
+				basePath + ".5.object_name": "ObjectX",
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			keysPrefix := []string{basePath + ".0.object_name"}
+			diff := &tpgresource.ResourceDiffMock{
+				Before:     tc.before,
+				After:      tc.after,
+				KeysPrefix: keysPrefix,
+			}
+			err := resourceDatastreamStreamObjectsSetStyleDiff(diff)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			for key, wantVal := range tc.wantAfter {
+				gotVal := diff.After[key]
+				if gotVal != wantVal {
+					t.Errorf("After[%q] = %v, want %v", key, gotVal, wantVal)
+				}
 			}
 		})
 	}
