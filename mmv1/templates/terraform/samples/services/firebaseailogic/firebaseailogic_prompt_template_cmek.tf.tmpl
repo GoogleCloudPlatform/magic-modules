@@ -1,0 +1,13 @@
+resource "google_firebase_ai_logic_prompt_template" "cmek" {
+  provider = google-beta
+  location = "us-central1"
+  template_id = "{{index $.ResourceIdVars "template_id"}}"
+  regional_propagation_disabled = true
+  kms_key_name = "{{index $.ResourceIdVars "kms_key_name"}}"
+  template_string = <<EOF
+---
+model: gemini-2.5-flash
+---
+Hello world!
+EOF
+}
