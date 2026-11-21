@@ -18,7 +18,7 @@ resource "google_service_account" "test_account" {
 
 resource "google_workflows_workflow" "{{$.PrimaryResourceId}}" {
   name          = "{{index $.ResourceIdVars "name"}}"
-  region        = "us-central1"
+  region        = "{{index $.Vars "region"}}"
   description   = "Magic"
   service_account = google_service_account.test_account.id
   deletion_protection = false
