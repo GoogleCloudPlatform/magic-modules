@@ -1,0 +1,101 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: SecuritySettings
+description: |
+  Organization-level settings for Apigee Advanced API Security, managing whether the
+  organization consents to Apigee using machine learning (ML) models for abuse detection.
+references:
+  guides:
+    Opt in for machine learning models for Abuse Detection: https://cloud.google.com/apigee/docs/api-security/abuse-detection#opt-in-for-machine-learning-models-for-abuse-detection
+    Manage the Advanced API Security add-on: https://cloud.google.com/apigee/docs/api-platform/reference/manage-security-add-on
+  api: https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/SecuritySettings
+docs:
+  note: |
+    Security settings are only available for Apigee organizations with the Advanced API
+    Security add-on enabled (configured via `google_apigee_addons_config` on Subscription
+    or Evaluation organizations, or enabled on at least one environment for Pay-as-you-go
+    organizations). Creating this singleton resource acquires and updates the organization's
+    existing security settings; destroying it removes it from Terraform state without
+    modifying or deleting the underlying settings in Google Cloud.
+base_url: '{{org_id}}/securitySettings'
+self_link: '{{org_id}}/securitySettings'
+create_url: '{{org_id}}/securitySettings'
+update_mask: true
+create_verb: PATCH
+update_verb: PATCH
+import_format:
+  - '{{%org_id}}/securitySettings'
+exclude_delete: true
+deletion_policy_exclude: true
+error_retry_predicates:
+  - transport_tpg.IsApigeeRetryableError
+custom_code:
+  pre_create: templates/terraform/pre_create/apigee_security_settings.go.tmpl
+samples:
+  - name: apigee_security_settings_basic
+    exclude_test: true
+    steps:
+      - name: apigee_security_settings_basic
+  - name: apigee_security_settings_basic_test
+    primary_resource_id: security_settings
+    exclude_basic_doc: true
+    external_providers:
+      - time
+    steps:
+      - name: apigee_security_settings_basic_test
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+        vars:
+          ml_retraining_feedback_enabled: true
+      - name: apigee_security_settings_basic_test
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+        vars:
+          ml_retraining_feedback_enabled: false
+      - name: apigee_security_settings_basic_test
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+        vars:
+          ml_retraining_feedback_enabled: true
+      - name: apigee_security_settings_basic_test
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+        vars:
+          ml_retraining_feedback_enabled: null
+parameters:
+  - name: orgId
+    type: String
+    description: |
+      The Apigee Organization associated with the Apigee Security Settings,
+      in the format `organizations/{{org_name}}`.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: name
+    type: String
+    description: |
+      Name of the security settings resource,
+      in the format `organizations/{{org_name}}/securitySettings`.
+    output: true
+  - name: mlRetrainingFeedbackEnabled
+    type: Boolean
+    description: |
+      If true, the user consents to the use of ML models for Abuse detection.
+    send_empty_value: true
