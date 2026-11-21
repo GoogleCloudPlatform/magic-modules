@@ -14,7 +14,6 @@
   limitations under the License. */ -}}
 {{define "flattenTgcPropertyMethod" }}
 	{{ if $.CustomTgcFlatten }}
-{{ customTemplate $ $.CustomTgcFlatten true }}
 	{{ else if $.IsA "KeyValueLabels" }}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return tgcresource.RemoveTerraformAttributionLabel(v)
@@ -33,7 +32,6 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 	{{ else }}
     {{ if $.WriteOnly }}
     {{ else if and $.CustomFlatten (not $.ShouldIgnoreCustomFlatten) }}
-        {{- customTemplate $ $.CustomFlatten false }}
     {{ else }}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
   {{- if $.IsA "NestedObject" }}
