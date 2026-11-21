@@ -25,6 +25,7 @@ self_link: '{{parent}}/storedInfoTypes/{{name}}'
 create_url: '{{parent}}/storedInfoTypes'
 update_mask: true
 update_verb: PATCH
+generate_list_resource: true
 id_format: '{{parent}}/storedInfoTypes/{{name}}'
 timeouts:
   insert_minutes: 20

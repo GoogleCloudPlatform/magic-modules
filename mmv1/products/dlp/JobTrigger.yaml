@@ -25,6 +25,7 @@ self_link: '{{parent}}/jobTriggers/{{name}}'
 create_url: '{{parent}}/jobTriggers'
 update_mask: true
 update_verb: PATCH
+generate_list_resource: true
 id_format: '{{parent}}/jobTriggers/{{name}}'
 timeouts:
   insert_minutes: 20

@@ -25,6 +25,7 @@ self_link: '{{parent}}/deidentifyTemplates/{{name}}'
 create_url: '{{parent}}/deidentifyTemplates'
 update_mask: true
 update_verb: PATCH
+generate_list_resource: true
 id_format: '{{parent}}/deidentifyTemplates/{{name}}'
 timeouts:
   insert_minutes: 20
