@@ -24,6 +24,7 @@ create_url: projects/{{project}}/remoteConfig
 create_verb: PUT
 import_format:
   - projects/{{project}}/remoteConfig
+generate_list_resource: true
 exclude_delete: true
 autogen_status: UmVtb3RlQ29uZmln
 custom_code:
