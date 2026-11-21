@@ -1,0 +1,19 @@
+resource "google_vertex_ai_endpoint_deployed_model" "{{$.PrimaryResourceId}}" {
+  endpoint = google_vertex_ai_endpoint.endpoint.id
+  region   = "us-central1"
+  model    = "projects/vertex-ai/locations/us-central1/models/{{index $.ResourceIdVars "model_name"}}"
+
+  dedicated_resources {
+    min_replica_count = 1
+
+    machine_spec {
+      machine_type = "n1-standard-4"
+    }
+  }
+}
+
+resource "google_vertex_ai_endpoint" "endpoint" {
+  display_name = "endpoint-{{index $.ResourceIdVars "endpoint_name"}}"
+  location     = "us-central1"
+  region       = "us-central1"
+}
