@@ -2,6 +2,10 @@ package container
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"sync"
 	"testing"
 	"time"
 
@@ -254,5 +258,64 @@ func TestUnitFlattenNodePool(t *testing.T) {
 				t.Errorf("managed_instance_group_urls returned unexpected diff. +got, -want:\n%s", diff)
 			}
 		})
+	}
+}
+
+func TestUnitNodePoolCacheRefreshDropsDeletedNodePools(t *testing.T) {
+	t.Parallel()
+
+	var mu sync.Mutex
+	listed := []string{"pool-a", "pool-b"}
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		defer mu.Unlock()
+		resp := container.ListNodePoolsResponse{}
+		for _, name := range listed {
+			resp.NodePools = append(resp.NodePools, &container.NodePool{Name: name})
+		}
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			t.Errorf("encoding response: %v", err)
+		}
+	}))
+	defer srv.Close()
+
+	config := &transport_tpg.Config{
+		Client:          srv.Client(),
+		Context:         context.Background(),
+		CustomEndpoints: map[string]string{"container_custom_endpoint": srv.URL + "/v1/"},
+	}
+	info := &NodePoolInformation{project: "test-project", location: "us-central1", cluster: "cluster-1"}
+	otherCluster := &NodePoolInformation{project: "test-project", location: "us-central1", cluster: "cluster-2"}
+	cache := &nodePoolCache{
+		nodePools: map[string]*nodePoolWithUpdateTime{
+			otherCluster.fullyQualifiedName("pool-b"): {nodePool: &container.NodePool{Name: "pool-b"}, updateTime: time.Now()},
+		},
+		ttl: 0,
+	}
+	d := schema.TestResourceDataRaw(t, ResourceContainerNodePool().Schema, map[string]interface{}{})
+
+	if err := cache.refreshIfNeeded(d, config, "test", info, "pool-b"); err != nil {
+		t.Fatalf("refreshIfNeeded() error = %v", err)
+	}
+	if _, err := cache.get(info.fullyQualifiedName("pool-b")); err != nil {
+		t.Fatalf("get(pool-b) after first refresh error = %v", err)
+	}
+
+	// pool-b is deleted outside Terraform.
+	mu.Lock()
+	listed = []string{"pool-a"}
+	mu.Unlock()
+
+	if err := cache.refreshIfNeeded(d, config, "test", info, "pool-b"); err != nil {
+		t.Fatalf("refreshIfNeeded() error = %v", err)
+	}
+	if _, err := cache.get(info.fullyQualifiedName("pool-b")); err == nil {
+		t.Errorf("get(pool-b) returned a node pool that is no longer listed")
+	}
+	if _, err := cache.get(info.fullyQualifiedName("pool-a")); err != nil {
+		t.Errorf("get(pool-a) error = %v, want the listed node pool", err)
+	}
+	if _, err := cache.get(otherCluster.fullyQualifiedName("pool-b")); err != nil {
+		t.Errorf("get(pool-b) in another cluster error = %v, want it kept", err)
 	}
 }
