@@ -24,6 +24,7 @@ base_url: projects/{{project}}/locations/{{location}}/dataProducts
 self_link: projects/{{project}}/locations/{{location}}/dataProducts/{{data_product_id}}
 create_url: projects/{{project}}/locations/{{location}}/dataProducts?dataProductId={{data_product_id}}
 update_mask: true
+generate_list_resource: true
 update_verb: PATCH
 iam_policy:
   exclude_import_test: true
