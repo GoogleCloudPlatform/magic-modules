@@ -39,6 +39,7 @@ timeouts:
   delete_minutes: 20
 mutex: customMetric/{{project}}
 include_in_tgc_next: true
+generate_list_resource: true
 cai_asset_name_format: projects/{{project}}/metrics/{{%name}}
 custom_code:
   custom_import: templates/terraform/custom_import/self_link_as_name.tmpl
