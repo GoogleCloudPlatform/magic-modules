@@ -185,7 +185,7 @@ properties:
   - name: displayName
     type: String
     description: |
-      User-settable and human-readable display name for the Instance.
+      User-settable and human-readable display name for the Instance.UPDATE
     ignore_read: true
   - name: gceZone
     type: String
