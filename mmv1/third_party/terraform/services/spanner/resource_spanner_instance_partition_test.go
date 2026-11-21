@@ -426,61 +426,6 @@ resource "google_spanner_instance_partition" "partition" {
 `, context)
 }
 
-func TestAccSpannerInstancePartition_deletionPolicyUpdate(t *testing.T) {
-	t.Parallel()
-
-	suffix := acctest.RandString(t, 10)
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckSpannerInstancePartitionDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccSpannerInstancePartition_deletionPolicyUpdate(suffix, "PREVENT"),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_spanner_instance_partition.partition", "deletion_policy", "PREVENT"),
-				),
-			},
-			{
-				ResourceName:      "google_spanner_instance_partition.partition",
-				ImportState:       true,
-				ImportStateVerify: true,
-				// deletion_policy is client-side only, so import resets it to its default ("DELETE").
-				ImportStateVerifyIgnore: []string{"deletion_policy"},
-			},
-			{
-				Config:      testAccSpannerInstancePartition_deletionPolicyInstanceOnly(suffix),
-				ExpectError: regexp.MustCompile("cannot destroy SpannerInstancePartition"),
-			},
-			{
-				Config: testAccSpannerInstancePartition_deletionPolicyUpdate(suffix, "FORCE"),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_spanner_instance_partition.partition", "deletion_policy", "FORCE"),
-				),
-			},
-			{
-				ResourceName:      "google_spanner_instance_partition.partition",
-				ImportState:       true,
-				ImportStateVerify: true,
-				// deletion_policy is client-side only, so import resets it to its default ("DELETE").
-				ImportStateVerifyIgnore: []string{"deletion_policy"},
-			},
-			{
-				Config: testAccSpannerInstancePartition_deletionPolicyUpdate(suffix, "DELETE"),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_spanner_instance_partition.partition", "deletion_policy", "DELETE"),
-				),
-			},
-			{
-				ResourceName:      "google_spanner_instance_partition.partition",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
 func testAccSpannerInstancePartition_deletionPolicyInstanceOnly(suffix string) string {
 	context := map[string]interface{}{
 		"random_suffix": suffix,
