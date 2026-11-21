@@ -368,6 +368,12 @@ func ListPages(opt ListPagesOptions) error {
 		}
 
 		items, ok := res[opt.ItemName].([]interface{})
+		if !ok {
+			// Singleton list endpoints return a single object under the item key.
+			if obj, isObj := res[opt.ItemName].(map[string]interface{}); isObj {
+				items, ok = []interface{}{obj}, true
+			}
+		}
 		if !ok && opt.ItemName != "items" {
 			items, ok = res["items"].([]interface{})
 		}
