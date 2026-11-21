@@ -74,6 +74,46 @@ func TestAccMonitoringUptimeCheckConfig_update_wo(t *testing.T) {
 	})
 }
 
+func TestAccMonitoringUptimeCheckConfig_maskHeaders(t *testing.T) {
+	t.Parallel()
+	project := envvar.GetTestProjectFromEnv()
+	host := "192.168.1.1"
+	suffix := acctest.RandString(t, 4)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMonitoringUptimeCheckConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// With mask_headers = true the API returns header values as "******".
+				// The post-apply plan must be empty (no perpetual diff).
+				Config: testAccMonitoringUptimeCheckConfig_maskHeaders(suffix, "Bearer token1", project, host),
+			},
+			{
+				ResourceName:      "google_monitoring_uptime_check_config.http",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// With mask_headers = true the API returns header values as "******",
+				// so the real values cannot be recovered on import.
+				ImportStateVerifyIgnore: []string{"http_check.0.headers"},
+			},
+			{
+				// Changing a masked header value must still be detected and applied.
+				Config: testAccMonitoringUptimeCheckConfig_maskHeaders(suffix, "Bearer token2", project, host),
+			},
+			{
+				ResourceName:      "google_monitoring_uptime_check_config.http",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// With mask_headers = true the API returns header values as "******",
+				// so the real values cannot be recovered on import.
+				ImportStateVerifyIgnore: []string{"http_check.0.headers"},
+			},
+		},
+	})
+}
+
 func TestAccMonitoringUptimeCheckConfig_noProjectId(t *testing.T) {
 	t.Parallel()
 	host := "192.168.1.1"
@@ -307,5 +347,40 @@ resource "google_monitoring_uptime_check_config" "http" {
   }
 }
 `, suffix, host,
+	)
+}
+
+func testAccMonitoringUptimeCheckConfig_maskHeaders(suffix, authHeader, project, host string) string {
+	return fmt.Sprintf(`
+resource "google_monitoring_uptime_check_config" "http" {
+  display_name = "http-uptime-check-%s"
+  timeout      = "60s"
+  period       = "60s"
+
+  http_check {
+    path           = "/mypath"
+    port           = "8010"
+    request_method = "GET"
+    mask_headers   = true
+    headers = {
+      Authorization = "%s"
+      X-Custom      = "not-secret"
+    }
+  }
+
+  monitored_resource {
+    type = "uptime_url"
+    labels = {
+      project_id = "%s"
+      host       = "%s"
+    }
+  }
+
+  content_matchers {
+    content = "example"
+    matcher = "CONTAINS_STRING"
+  }
+}
+`, suffix, authHeader, project, host,
 	)
 }

@@ -244,6 +244,7 @@ properties:
           - http_check.0.use_ssl
           - http_check.0.mask_headers
         default_from_api: true
+        custom_flatten: templates/terraform/custom_flatten/uptime_check_http_headers.go.tmpl
       - name: path
         type: String
         default_value: /
