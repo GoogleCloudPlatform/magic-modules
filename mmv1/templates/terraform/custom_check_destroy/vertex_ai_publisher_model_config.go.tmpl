@@ -1,0 +1,59 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+config := acctest.GoogleProviderConfig(t)
+
+url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(vertexai.Product, config)+"{{ $.SelfLinkUri }}")
+if err != nil {
+	return err
+}
+if strings.Contains(url, "{{"{{"}}region{{"}}"}}") {
+	return fmt.Errorf("failed to qualify endpoint for a resource with a regionalized endpoint %s", url)
+}
+// The "global" location is only served by the non-regional endpoint across
+// default, mTLS, and custom universe_domain hosts; see
+// vertexAIPublisherModelConfigGlobalURL in the resource.
+url = strings.Replace(url, "://global-aiplatform.", "://aiplatform.", 1)
+
+var billingProject string
+if config.BillingProject != "" {
+	billingProject = config.BillingProject
+}
+
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	Project:   billingProject,
+	RawURL:    url,
+	UserAgent: config.UserAgent,
+})
+if err != nil {
+	if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		continue
+	}
+	return fmt.Errorf("error checking whether VertexAIPublisherModelConfig was destroyed at %s: %w", url, err)
+}
+
+if cfg, _ := res["inferenceEventLoggingConfig"].(map[string]interface{}); cfg != nil {
+	if state, _ := cfg["state"].(string); state != "" && state != "STATE_UNSPECIFIED" {
+		return fmt.Errorf("VertexAIPublisherModelConfig inferenceEventLoggingConfig still exists (%#v) at %s", cfg, url)
+	}
+}
+if cfg, _ := res["loggingConfig"].(map[string]interface{}); len(cfg) > 0 {
+	return fmt.Errorf("VertexAIPublisherModelConfig loggingConfig still exists (%#v) at %s", cfg, url)
+}
+if cfg := res["claudeFeatureConfig"]; cfg != nil {
+	return fmt.Errorf("VertexAIPublisherModelConfig claudeFeatureConfig still exists (%#v) at %s", cfg, url)
+}
+if provider, _ := res["dataSharingEnabledProvider"].(string); provider != "" && provider != "MODEL_PROVIDER_UNSPECIFIED" {
+	return fmt.Errorf("VertexAIPublisherModelConfig dataSharingEnabledProvider still exists (%q) at %s", provider, url)
+}

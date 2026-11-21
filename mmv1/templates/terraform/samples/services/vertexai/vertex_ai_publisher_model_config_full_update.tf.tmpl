@@ -1,0 +1,28 @@
+resource "google_bigquery_dataset" "logs" {
+  provider                   = google-beta
+  dataset_id                 = "{{index $.ResourceIdVars "dataset_id"}}"
+  location                   = "US"
+  delete_contents_on_destroy = true
+}
+
+resource "google_vertex_ai_publisher_model_config" "{{$.PrimaryResourceId}}" {
+  provider  = google-beta
+  region    = "us-central1"
+  publisher = "anthropic"
+  model     = "claude-3-5-haiku"
+
+  inference_event_logging_config {
+    state = "DISABLED"
+  }
+
+  logging_config {
+    enabled             = false
+    sampling_rate       = 0.25
+    error_sampling_rate = 0
+    enable_otel_logging = false
+
+    bigquery_destination {
+      output_uri = "bq://${google_bigquery_dataset.logs.project}.${google_bigquery_dataset.logs.dataset_id}.request_response_logs_v2"
+    }
+  }
+}

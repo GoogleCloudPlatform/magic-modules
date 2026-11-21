@@ -1,0 +1,8 @@
+resource "google_vertex_ai_publisher_model_config" "{{$.PrimaryResourceId}}" {
+  provider  = google-beta
+  region    = "us-central1"
+  publisher = "anthropic"
+  model     = "claude-sonnet-4-5"
+
+  data_sharing_enabled_provider = "ANTHROPIC"
+}
