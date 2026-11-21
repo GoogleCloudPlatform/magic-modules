@@ -226,6 +226,37 @@ properties:
           PARTIALLY_CONNECTED
           DISCONNECTED
           UNKNOWN
+      - name: workloadIdentityPool
+        type: String
+        output: true
+        description: |-
+          The resource name of the Workload Identity Pool configured for identity
+          federation with OCI. This exact pool name can be used to configure VPC
+          Service Controls (VPC-SC) egress rules. Format:
+          `projects/{project}/locations/global/workloadIdentityPools/{workload_identity_pool}`
+      - name: identityConnectorId
+        type: String
+        output: true
+        description: |-
+          The unique partner identifier for the Identity Connector, used to
+          establish secure cross-cloud access between Google Cloud and OCI. This
+          corresponds directly to the ID of the OracleDbGcpIdentityConnector
+          resource in Oracle Cloud Infrastructure (OCI).
+      - name: lifecycleStateDetails
+        type: String
+        output: true
+        description: Additional information about the current lifecycle state.
+  - name: identityConnectorDisabled
+    type: Boolean
+    description: |-
+      If set to true, disables the automatic provisioning of the Workload
+      Identity Connector during creation. If set to false or omitted, the
+      Workload Identity Connector will be automatically provisioned by default.
+      Note: Provisioning the Workload Identity Connector is a prerequisite for
+      enabling Google Cloud CMEK.
+    immutable: true
+    # identityConnectorDisabled is an INPUT_ONLY API field and is never returned in GET responses.
+    ignore_read: true
   - name: properties
     type: NestedObject
     description: The properties of an ExadbVmCluster.
