@@ -1,0 +1,3 @@
+identityConnector, ok := res["identityConnector"].(map[string]interface{})
+res["enabled"] = ok && len(identityConnector) > 0
+return res, nil
