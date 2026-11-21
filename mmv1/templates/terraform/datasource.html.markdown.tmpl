@@ -49,30 +49,27 @@ data "{{$.TerraformName}}" "default" {
 ## Argument Reference
 
 The following arguments are supported:
-
-{{ "" }}
-{{ "" }}
-{{- range $p := $.AllUserProperties }}
-  {{- range $field := $.DatasourceRequiredFields }}
-    {{- if eq (underscore $p.Name) (underscore $field) }}
-      {{- trimTemplate "property_documentation.html.markdown.tmpl" $p -}}
-    {{- end }}
-  {{- end }}
+{{ range $field := $.DatasourceRequiredFields }}
+{{ template "datasourceArgument" dict "Resource" $ "Field" $field "Required" true }}
+{{ end }}
+{{- if $.DatasourceOptionalFields }}
+- - -
+{{ range $field := $.DatasourceOptionalFields }}
+{{ template "datasourceArgument" dict "Resource" $ "Field" $field "Required" false }}
+{{ end }}
 {{- end }}
-{{ "" }}
-{{- range $p := $.AllUserProperties }}
-  {{- range $field := $.DatasourceOptionalFields }}
-    {{- if eq (underscore $p.Name) (underscore $field) }}
-      {{- trimTemplate "property_documentation.html.markdown.tmpl" $p -}}
-    {{- end }}
-  {{- end }}
-{{- end }}
-{{- if or (contains $.BaseUrl "{{project}}") (contains $.CreateUrl "{{project}}")}}
-* `project` - (Optional) The ID of the project in which the resource belongs.
-    If it is not provided, the provider project is used.
-{{ "" }}
-{{- end }}
-
 ## Attributes Reference
 
 See [{{$.TerraformName}}](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/{{replaceAll $.TerraformName "google_" ""}}#argument-reference) resource for details of the available attributes.
+{{- define "datasourceArgument" }}
+{{- $p := $.Resource.DatasourceArgumentProperty $.Field -}}
+* `{{ $.Field }}` - ({{ if $.Required }}Required{{ else }}Optional{{ end }})
+{{- if eq $.Field "project" }} The ID of the project in which the resource belongs.
+  If it is not provided, the provider project is used.
+{{- else if $p }}{{ $.Resource.FormatDocDescription $p.GetDescription true }}
+{{- else if eq $.Field "region" }} The region in which the resource belongs.
+  If it is not provided, the provider region is used.
+{{- else if eq $.Field "zone" }} The zone in which the resource belongs.
+  If it is not provided, the provider zone is used.
+{{- end }}
+{{- end }}

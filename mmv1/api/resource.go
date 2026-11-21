@@ -2815,7 +2815,7 @@ func (r Resource) ShouldDatasourceSetAnnotations() bool {
 	return false
 }
 
-// DatasourceOptionalFields returns a list of fields from the resource's URI
+// DatasourceRequiredFields returns a list of fields from the resource's URI
 // that should be marked as "Required".
 func (r Resource) DatasourceRequiredFields() []string {
 	requiredFields := []string{}
@@ -2839,6 +2839,17 @@ func (r Resource) DatasourceOptionalFields() []string {
 		}
 	}
 	return optionalFields
+}
+
+// DatasourceArgumentProperty returns the top-level property or parameter that
+// backs a data source argument, or nil if there isn't one (e.g. `project`).
+func (r Resource) DatasourceArgumentProperty(field string) *Type {
+	for _, p := range r.AllUserProperties() {
+		if google.Underscore(p.Name) == field {
+			return p
+		}
+	}
+	return nil
 }
 
 func (r Resource) ShouldGenerateSweepers() bool {

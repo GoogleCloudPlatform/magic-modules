@@ -37,6 +37,8 @@ iam_policy:
 id_format: projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}
+datasource_experimental:
+  generate: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
