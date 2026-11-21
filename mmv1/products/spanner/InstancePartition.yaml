@@ -41,10 +41,13 @@ async:
   actions: [create, update]
   result:
     resource_inside_response: true
+deletion_policy_custom_docs: true
 autogen_async: true
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   encoder: templates/terraform/encoders/spanner_instance_partition.go.tmpl
+  constants: templates/terraform/constants/spanner_instance_partition.go.tmpl
   pre_update: templates/terraform/pre_update/spanner_instance_partition.go.tmpl
+  pre_delete: templates/terraform/pre_delete/spanner_instance_partition.go.tmpl
 samples:
   - name: spanner_instance_partition_basic
     primary_resource_id: partition
@@ -60,6 +63,26 @@ samples:
         resource_id_vars:
           instance_name: test-instance
           partition_name: test-partition
+virtual_fields:
+  - name: deletion_policy
+    type: String
+    description: |
+      The deletion policy for the instance partition. Setting `FORCE` will delete
+      all backups that reference this instance partition, including backups created
+      by a backup schedule, before deleting the instance partition. The backups are
+      deleted permanently. Databases that use the instance partition are not deleted.
+      Defaults to `DELETE`.
+
+      When a 'terraform destroy' or 'terraform apply' would delete the resource,
+      the command will fail if this field is set to "PREVENT" in Terraform state.
+      When set to "ABANDON", the command will remove the resource from Terraform
+      management without updating or deleting the resource in the API.
+      When set to "DELETE", the resource is deleted directly and deletion fails if
+      any backups reference the instance partition.
+
+      Possible values: `DELETE`, `FORCE`, `PREVENT`, `ABANDON`.
+    # excluded from generation due to Universal Deletion Policy
+    exclude: true
 parameters:
   - name: instance
     type: ResourceRef
