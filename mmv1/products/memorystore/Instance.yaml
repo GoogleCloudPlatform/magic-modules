@@ -23,6 +23,7 @@ base_url: projects/{{project}}/locations/{{location}}/instances
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
 create_url: projects/{{project}}/locations/{{location}}/instances?instanceId={{instance_id}}
 update_mask: true
+generate_list_resource: true
 update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
 import_format:
