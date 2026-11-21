@@ -84,6 +84,7 @@ service/artifactregistry:
 service/assuredworkloads:
   resources:
   - google_assured_workloads_workload
+  - google_assured_workloads_v2_.*
 service/backupdr:
   resources:
   - google_backup_dr_.*

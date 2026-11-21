@@ -1,0 +1,29 @@
+config := acctest.GoogleProviderConfig(t)
+
+url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(assuredworkloadsv2.Product, config)+"{{$.SelfLinkUri}}")
+if err != nil {
+	return err
+}
+
+// Workloads have no project, so send the test billing project in
+// X-Goog-User-Project without mutating the shared provider config.
+checkConfig := *config
+checkConfig.UserProjectOverride = true
+billingProject := envvar.GetTestProjectFromEnv()
+if config.BillingProject != "" {
+	billingProject = config.BillingProject
+}
+
+_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    &checkConfig,
+	Method:    "GET",
+	Project:   billingProject,
+	RawURL:    url,
+	UserAgent: config.UserAgent,
+})
+if err == nil {
+	return fmt.Errorf("AssuredWorkloadsV2Workload still exists at %s", url)
+}
+if !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+	return fmt.Errorf("error checking that AssuredWorkloadsV2Workload %s is destroyed: %s", url, err)
+}
