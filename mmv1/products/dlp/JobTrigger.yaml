@@ -130,6 +130,18 @@ samples:
       - name: dlp_job_trigger_timespan_config_big_query
         test_env_vars:
           project: PROJECT_NAME
+  - name: dlp_job_trigger_min_likelihood_per_info_type
+    primary_resource_id: min_likelihood_per_info_type
+    steps:
+      - name: dlp_job_trigger_min_likelihood_per_info_type
+        test_env_vars:
+          project: PROJECT_NAME
+      - name: dlp_job_trigger_min_likelihood_per_info_type_update
+        test_env_vars:
+          project: PROJECT_NAME
+      - name: dlp_job_trigger_without_min_likelihood_per_info_type
+        test_env_vars:
+          project: PROJECT_NAME
 parameters:
   - name: parent
     type: String
