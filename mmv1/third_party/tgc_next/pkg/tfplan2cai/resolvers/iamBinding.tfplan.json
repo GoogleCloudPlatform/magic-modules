@@ -25,7 +25,7 @@
                                 "initialize_params": [
                                     {
                                         "enable_confidential_compute": null,
-                                        "image": "debian-cloud/debian-11",
+                                        "image": "debian-cloud/debian-13",
                                         "resource_manager_tags": null,
                                         "source_image_encryption_key": [],
                                         "source_snapshot_encryption_key": [],
@@ -182,7 +182,7 @@
                             "initialize_params": [
                                 {
                                     "enable_confidential_compute": null,
-                                    "image": "debian-cloud/debian-11",
+                                    "image": "debian-cloud/debian-13",
                                     "resource_manager_tags": null,
                                     "source_image_encryption_key": [],
                                     "source_snapshot_encryption_key": [],
@@ -439,7 +439,7 @@
                                 "initialize_params": [
                                     {
                                         "image": {
-                                            "constant_value": "debian-cloud/debian-11"
+                                            "constant_value": "debian-cloud/debian-13"
                                         }
                                     }
                                 ]

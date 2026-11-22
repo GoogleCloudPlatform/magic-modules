@@ -309,7 +309,7 @@ instance_flexibility_policy {
         auto_delete = true
         boot        = true
         device_name = "boot-disk"
-        source_image = "projects/debian-cloud/global/images/debian-11-bullseye-v20251111"
+        source_image = "projects/debian-cloud/global/images/debian-13-trixie-v20261116"
         architecture = "ARM64"
         disk_size_gb = 375
     }

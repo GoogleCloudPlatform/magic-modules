@@ -116,7 +116,7 @@ resource "google_compute_instance_group_manager" "igm-sr" {
 ## Example Usage with resource policies (`google` provider)
 ```hcl
 data "google_compute_image" "my_image" {
-  family  = "debian-11"
+  family  = "debian-13"
   project = "debian-cloud"
 }
 
