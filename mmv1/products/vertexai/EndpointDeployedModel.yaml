@@ -14,7 +14,24 @@
 ---
 name: EndpointDeployedModel
 api_resource_type_kind: Endpoint
-description: A model deployed to a Vertex AI Endpoint.
+description: |
+  A model deployed to a Vertex AI Endpoint.
+
+  Deploying a model with this resource does not assign prediction traffic.
+  Manage the endpoint-wide `traffic_split` with `google_vertex_ai_endpoint`
+  or another endpoint traffic controller, but not both. Because the endpoint
+  must exist before a model can be deployed, first apply the endpoint and
+  deployment without a traffic split, then configure the split and apply
+  again. Use the known `deployed_model_id` in the endpoint's split instead
+  of a reference to this resource, which would create a dependency cycle.
+
+  Before removing a model from a shared traffic split, explicitly route its
+  traffic to other models and apply the endpoint update. Deletion refuses to
+  redistribute other models' traffic. If the model is the only one receiving
+  traffic, deletion clears the split using the endpoint's etag before
+  undeploying it, stopping prediction traffic. This requires permission to
+  update the endpoint. If the endpoint remains managed, also update its
+  `traffic_split` configuration so it no longer references the deleted model.
 references:
   guides:
     Deploy a model to an endpoint: https://cloud.google.com/vertex-ai/docs/predictions/deploy-model-api

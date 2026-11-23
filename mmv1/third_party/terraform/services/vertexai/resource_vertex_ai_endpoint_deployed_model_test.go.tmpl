@@ -18,16 +18,31 @@ func TestAccVertexAIEndpointDeployedModel_mutation(t *testing.T) {
 	sourceModel := vertexai.BootstrapVertexAIModel(t, "us-central1")
 	suffix := acctest.RandString(t, 10)
 	initial := map[string]interface{}{
-		"project": project, "source_model": sourceModel, "suffix": suffix,
-		"max_replicas": 1, "target": nil, "container_logging": false,
+		"project":           project,
+		"source_model":      sourceModel,
+		"suffix":            suffix,
+		"max_replicas":      1,
+		"target":            nil,
+		"container_logging": false,
+		"traffic_split":     nil,
 	}
 	updated := map[string]interface{}{
-		"project": project, "source_model": sourceModel, "suffix": suffix,
-		"max_replicas": 2, "target": 75, "container_logging": true,
+		"project":           project,
+		"source_model":      sourceModel,
+		"suffix":            suffix,
+		"max_replicas":      2,
+		"target":            75,
+		"container_logging": true,
+		"traffic_split":     `"{\"1234567890\":100}"`,
 	}
 	reset := map[string]interface{}{
-		"project": project, "source_model": sourceModel, "suffix": suffix,
-		"max_replicas": 1, "target": 60, "container_logging": false,
+		"project":           project,
+		"source_model":      sourceModel,
+		"suffix":            suffix,
+		"max_replicas":      1,
+		"target":            60,
+		"container_logging": false,
+		"traffic_split":     `"{\"1234567890\":100}"`,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -51,6 +66,7 @@ func TestAccVertexAIEndpointDeployedModel_mutation(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_vertex_ai_endpoint_deployed_model.model", "dedicated_resources.0.max_replica_count", "2"),
 					resource.TestCheckResourceAttr("google_vertex_ai_endpoint_deployed_model.model", "dedicated_resources.0.autoscaling_metric_specs.0.target", "75"),
+					resource.TestCheckResourceAttr("google_vertex_ai_endpoint.endpoint", "traffic_split", `{"1234567890":100}`),
 					{{- if eq $.TargetVersionName "ga" }}
 					resource.TestCheckResourceAttr("google_vertex_ai_endpoint_deployed_model.model", "disable_container_logging", "true"),
 					{{- else }}
@@ -111,6 +127,7 @@ resource "google_vertex_ai_endpoint" "endpoint" {
   location     = "us-central1"
   region       = "us-central1"
   project      = "%{project}"
+  traffic_split = %{traffic_split}
 }
 
 resource "google_vertex_ai_model" "model" {

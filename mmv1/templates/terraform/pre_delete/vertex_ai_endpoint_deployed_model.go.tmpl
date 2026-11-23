@@ -1,5 +1,56 @@
 project = billingProject
 
+endpointURL, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{"{{"}}endpoint{{"}}"}}")
+if err != nil {
+	return err
+}
+endpoint, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config: config, Method: "GET", Project: billingProject, RawURL: endpointURL,
+	UserAgent: userAgent, Timeout: d.Timeout(schema.TimeoutDelete),
+})
+if err != nil {
+	return transport_tpg.HandleNotFoundError(err, d, "EndpointDeployedModel")
+}
+
+receivesTraffic, otherReceivesTraffic := false, false
+if rawSplit := endpoint["trafficSplit"]; rawSplit != nil {
+	split, ok := rawSplit.(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("Invalid traffic split on endpoint %q: expected an object, got %T", d.Get("endpoint"), rawSplit)
+	}
+	for modelID, rawPercent := range split {
+		percent, ok := rawPercent.(float64)
+		if !ok || percent < 0 || percent > 100 || float64(int(percent)) != percent {
+			return fmt.Errorf("Invalid traffic percentage for deployed model %q on endpoint %q: %v", modelID, d.Get("endpoint"), rawPercent)
+		}
+		if percent > 0 {
+			if modelID == d.Get("deployed_model_id").(string) {
+				receivesTraffic = true
+			} else {
+				otherReceivesTraffic = true
+			}
+		}
+	}
+}
+
+if receivesTraffic && otherReceivesTraffic {
+	return fmt.Errorf("Cannot undeploy model %q from endpoint %q while other models also receive traffic. Update the endpoint's traffic_split to route traffic away from this model, and apply that change before deleting it", d.Get("deployed_model_id"), d.Get("endpoint"))
+}
+if receivesTraffic {
+	etag, ok := endpoint["etag"].(string)
+	if !ok || etag == "" {
+		return fmt.Errorf("Cannot safely clear traffic on endpoint %q before undeploying model %q: endpoint response has no etag", d.Get("endpoint"), d.Get("deployed_model_id"))
+	}
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: config, Method: "PATCH", Project: billingProject, RawURL: endpointURL + "?updateMask=trafficSplit",
+		UserAgent: userAgent, Timeout: d.Timeout(schema.TimeoutDelete),
+		Body: map[string]interface{}{"trafficSplit": map[string]interface{}{}, "etag": etag},
+	})
+	if err != nil {
+		return fmt.Errorf("Error clearing endpoint traffic before undeploying model %q; verify the traffic split and retry: %w", d.Get("deployed_model_id"), err)
+	}
+}
+
 obj = map[string]interface{}{
 	"deployedModelId": d.Get("deployed_model_id"),
 }

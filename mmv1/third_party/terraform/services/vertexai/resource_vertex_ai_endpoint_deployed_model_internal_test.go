@@ -45,6 +45,14 @@ func TestVertexAIEndpointDeployedModelCreateUsesEndpointRegion(t *testing.T) {
 				body := `{}`
 				if req.Method == http.MethodGet {
 					body = `{"deployedModels":[{"id":"456","model":"projects/test-project/locations/us-central1/models/example","automaticResources":{"minReplicaCount":1}}]}`
+				} else if req.Method == http.MethodPost {
+					var request map[string]interface{}
+					if err := json.NewDecoder(req.Body).Decode(&request); err != nil {
+						t.Fatalf("decode deploy request: %v", err)
+					}
+					if _, ok := request["trafficSplit"]; ok {
+						t.Errorf("deploy request must not change endpoint traffic: %#v", request)
+					}
 				}
 				return &http.Response{
 					StatusCode: http.StatusOK,
@@ -158,15 +166,135 @@ func TestVertexAIEndpointDeployedModelQuotaProject(t *testing.T) {
 				if err != nil {
 					t.Fatalf("%s failed: %v", action, err)
 				}
-				wantRequests := 2
-				if action != "delete" {
-					wantRequests++
-				}
+				wantRequests := 3
 				if requests != wantRequests {
 					t.Errorf("got %d requests, want %d", requests, wantRequests)
 				}
 			})
 		}
+	}
+}
+
+func TestVertexAIEndpointDeployedModelDeleteTraffic(t *testing.T) {
+	tests := []struct {
+		name        string
+		endpoint    string
+		getStatus   int
+		patchStatus int
+		wantMethods []string
+		wantError   string
+		wantGone    bool
+	}{
+		{
+			name:        "no traffic",
+			endpoint:    `{"trafficSplit":{"789":100},"etag":"version-1"}`,
+			wantMethods: []string{"GET", "POST"},
+		},
+		{
+			name:        "sole recipient",
+			endpoint:    `{"trafficSplit":{"456":100,"789":0},"etag":"version-1"}`,
+			wantMethods: []string{"GET", "PATCH", "POST"},
+		},
+		{
+			name:        "shared traffic requires explicit reroute",
+			endpoint:    `{"trafficSplit":{"456":40,"789":60},"etag":"version-1"}`,
+			wantMethods: []string{"GET"},
+			wantError:   "route traffic away",
+		},
+		{
+			name:        "missing etag",
+			endpoint:    `{"trafficSplit":{"456":100}}`,
+			wantMethods: []string{"GET"},
+			wantError:   "etag",
+		},
+		{
+			name:        "concurrent traffic update",
+			endpoint:    `{"trafficSplit":{"456":100},"etag":"version-1"}`,
+			patchStatus: http.StatusPreconditionFailed,
+			wantMethods: []string{"GET", "PATCH"},
+			wantError:   "clearing",
+		},
+		{
+			name:        "invalid traffic split",
+			endpoint:    `{"trafficSplit":{"456":"100"},"etag":"version-1"}`,
+			wantMethods: []string{"GET"},
+			wantError:   "traffic",
+		},
+		{
+			name:        "endpoint already deleted",
+			endpoint:    `{"error":{"code":404,"message":"not found","status":"NOT_FOUND"}}`,
+			getStatus:   http.StatusNotFound,
+			wantMethods: []string{"GET"},
+			wantGone:    true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			d := endpointDeployedModelTestData(t)
+			if err := d.Set("region", "us-central1"); err != nil {
+				t.Fatal(err)
+			}
+			d.SetId("projects/test-project/locations/us-central1/endpoints/123/deployedModels/456")
+			var methods []string
+			client := &http.Client{Transport: endpointDeployedModelRoundTripper(func(req *http.Request) (*http.Response, error) {
+				methods = append(methods, req.Method)
+				if got := req.Header.Get("X-Goog-User-Project"); got != "billing-project" {
+					t.Errorf("%s quota project = %q, want billing-project", req.Method, got)
+				}
+				status, body := http.StatusOK, `{}`
+				switch req.Method {
+				case http.MethodGet:
+					body = tt.endpoint
+					if tt.getStatus != 0 {
+						status = tt.getStatus
+					}
+				case http.MethodPatch:
+					if !strings.HasSuffix(req.URL.Path, "/endpoints/123") {
+						t.Errorf("unexpected traffic patch URL: %s", req.URL)
+					}
+					if got := req.URL.Query().Get("updateMask"); got != "trafficSplit" {
+						t.Errorf("update mask = %q, want trafficSplit", got)
+					}
+					var got map[string]interface{}
+					if err := json.NewDecoder(req.Body).Decode(&got); err != nil {
+						t.Fatal(err)
+					}
+					want := map[string]interface{}{"trafficSplit": map[string]interface{}{}, "etag": "version-1"}
+					if !reflect.DeepEqual(got, want) {
+						t.Errorf("traffic patch = %#v, want %#v", got, want)
+					}
+					if tt.patchStatus != 0 {
+						status = tt.patchStatus
+						body = `{"error":{"code":412,"message":"etag mismatch","status":"FAILED_PRECONDITION"}}`
+					}
+				case http.MethodPost:
+					var got map[string]interface{}
+					if err := json.NewDecoder(req.Body).Decode(&got); err != nil {
+						t.Fatal(err)
+					}
+					want := map[string]interface{}{"deployedModelId": "456"}
+					if !reflect.DeepEqual(got, want) {
+						t.Errorf("undeploy body = %#v, want %#v", got, want)
+					}
+				}
+				return &http.Response{StatusCode: status, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(body)), Request: req}, nil
+			})}
+			err := resourceVertexAIEndpointDeployedModelDelete(d, &transport_tpg.Config{
+				Project: "test-project", BillingProject: "billing-project", UserProjectOverride: true, Client: client,
+			})
+			if tt.wantError == "" && err != nil {
+				t.Fatalf("delete failed: %v", err)
+			}
+			if tt.wantError != "" && (err == nil || !strings.Contains(err.Error(), tt.wantError)) {
+				t.Errorf("delete error = %v, want %q", err, tt.wantError)
+			}
+			if !reflect.DeepEqual(methods, tt.wantMethods) {
+				t.Errorf("requests = %v, want %v", methods, tt.wantMethods)
+			}
+			if tt.wantGone && d.Id() != "" {
+				t.Errorf("deleted endpoint should clear resource ID, got %q", d.Id())
+			}
+		})
 	}
 }
 
