@@ -34,8 +34,10 @@ description: |
   `traffic_split` configuration so it no longer references the deleted model.
 references:
   guides:
-    Deploy a model to an endpoint: https://cloud.google.com/vertex-ai/docs/predictions/deploy-model-api
-  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.endpoints/deployModel
+    Deploy a model to an endpoint: https://docs.cloud.google.com/gemini-enterprise-agent-platform/machine-learning/general/deployment
+    Update a deployed model: https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/rest/v1/projects.locations.endpoints/mutateDeployedModel
+    Undeploy a model: https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/rest/v1/projects.locations.endpoints/undeployModel
+  api: https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/rest/v1/projects.locations.endpoints/deployModel
 base_url: '{{endpoint}}'
 self_link: '{{endpoint}}'
 create_url: '{{endpoint}}:deployModel'
@@ -200,7 +202,9 @@ properties:
             immutable: true
           - name: acceleratorType
             type: String
-            description: The type of accelerator attached to the machine.
+            description: |
+              The type of accelerator attached to the machine. See the
+              [supported accelerator types](https://docs.cloud.google.com/gemini-enterprise-agent-platform/reference/rest/Shared.Types/AcceleratorType).
             immutable: true
           - name: acceleratorCount
             type: Integer
