@@ -25,9 +25,9 @@ description: |
   again. Use the known `deployed_model_id` in the endpoint's split instead
   of a reference to this resource, which would create a dependency cycle.
 
-  Before removing a model from a shared traffic split, explicitly route its
-  traffic to other models and apply the endpoint update. Deletion refuses to
-  redistribute other models' traffic. If the model is the only one receiving
+  When a model that shares traffic is deleted, its share is redistributed to
+  the remaining models in proportion to their current share, atomically as
+  part of the undeploy request. If the model is the only one receiving
   traffic, deletion clears the split using the endpoint's etag before
   undeploying it, stopping prediction traffic. This requires permission to
   update the endpoint. If the endpoint remains managed, also update its

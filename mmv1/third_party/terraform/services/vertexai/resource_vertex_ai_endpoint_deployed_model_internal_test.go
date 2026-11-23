@@ -182,6 +182,7 @@ func TestVertexAIEndpointDeployedModelDeleteTraffic(t *testing.T) {
 		getStatus   int
 		patchStatus int
 		wantMethods []string
+		wantSplit   map[string]interface{}
 		wantError   string
 		wantGone    bool
 	}{
@@ -196,10 +197,22 @@ func TestVertexAIEndpointDeployedModelDeleteTraffic(t *testing.T) {
 			wantMethods: []string{"GET", "PATCH", "POST"},
 		},
 		{
-			name:        "shared traffic requires explicit reroute",
-			endpoint:    `{"trafficSplit":{"456":40,"789":60},"etag":"version-1"}`,
-			wantMethods: []string{"GET"},
-			wantError:   "route traffic away",
+			name:        "shared traffic is redistributed",
+			endpoint:    `{"trafficSplit":{"456":40,"789":60,"999":0},"etag":"version-1"}`,
+			wantMethods: []string{"GET", "POST"},
+			wantSplit:   map[string]interface{}{"789": float64(100), "999": float64(0)},
+		},
+		{
+			name:        "redistribution keeps whole percentages",
+			endpoint:    `{"trafficSplit":{"456":1,"a":33,"b":33,"c":33},"etag":"version-1"}`,
+			wantMethods: []string{"GET", "POST"},
+			wantSplit:   map[string]interface{}{"a": float64(34), "b": float64(33), "c": float64(33)},
+		},
+		{
+			name:        "redistribution is proportional",
+			endpoint:    `{"trafficSplit":{"456":50,"789":30,"abc":20},"etag":"version-1"}`,
+			wantMethods: []string{"GET", "POST"},
+			wantSplit:   map[string]interface{}{"789": float64(60), "abc": float64(40)},
 		},
 		{
 			name:        "missing etag",
@@ -273,6 +286,9 @@ func TestVertexAIEndpointDeployedModelDeleteTraffic(t *testing.T) {
 						t.Fatal(err)
 					}
 					want := map[string]interface{}{"deployedModelId": "456"}
+					if tt.wantSplit != nil {
+						want["trafficSplit"] = tt.wantSplit
+					}
 					if !reflect.DeepEqual(got, want) {
 						t.Errorf("undeploy body = %#v, want %#v", got, want)
 					}
