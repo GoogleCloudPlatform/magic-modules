@@ -65,3 +65,16 @@ func TestVertexAIEndpointDeployedModelCreateUsesEndpointRegion(t *testing.T) {
 		})
 	}
 }
+
+func TestVertexAIEndpointDeployedModelCreateRejectsMissingEndpointRegion(t *testing.T) {
+	d := endpointDeployedModelTestData(t)
+	if err := d.Set("endpoint", "invalid-endpoint"); err != nil {
+		t.Fatal(err)
+	}
+	config := &transport_tpg.Config{Project: "test-project"}
+
+	err := resourceVertexAIEndpointDeployedModelCreate(d, config)
+	if err == nil || !strings.Contains(err.Error(), "Cannot determine region from endpoint") {
+		t.Fatalf("got error %v, want an endpoint region error", err)
+	}
+}
