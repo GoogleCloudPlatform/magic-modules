@@ -1,3 +1,14 @@
+if d.Get("region").(string) == "" {
+	endpoint := d.Get("endpoint").(string)
+	region := tpgresource.GetRegionFromRegionalSelfLink(endpoint)
+	if region == "" {
+		return nil, fmt.Errorf("Cannot determine region from endpoint %q", endpoint)
+	}
+	if err := d.Set("region", region); err != nil {
+		return nil, fmt.Errorf("Error setting region: %s", err)
+	}
+}
+
 deployedModel := obj
 deployedModel["id"] = d.Get("deployed_model_id")
 delete(deployedModel, "deployedModelId")
