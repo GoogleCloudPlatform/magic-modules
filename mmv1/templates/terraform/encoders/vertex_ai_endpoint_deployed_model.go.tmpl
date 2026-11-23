@@ -9,6 +9,19 @@ if d.Get("region").(string) == "" {
 	}
 }
 
+if _, ok := d.GetOk("automatic_resources"); ok {
+	if _, exists := obj["automaticResources"]; !exists {
+		obj["automaticResources"] = map[string]interface{}{}
+	}
+}
+if _, ok := d.GetOk("dedicated_resources.0.machine_spec"); ok {
+	if resources, ok := obj["dedicatedResources"].(map[string]interface{}); ok {
+		if _, exists := resources["machineSpec"]; !exists {
+			resources["machineSpec"] = map[string]interface{}{}
+		}
+	}
+}
+
 deployedModel := obj
 deployedModel["id"] = d.Get("deployed_model_id")
 delete(deployedModel, "deployedModelId")

@@ -1,13 +1,17 @@
 package vertexai
 
 import (
+	"context"
+	"encoding/json"
 	"io"
 	"net/http"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -144,5 +148,102 @@ func TestVertexAIEndpointDeployedModelQuotaProject(t *testing.T) {
 				}
 			})
 		}
+	}
+}
+
+func TestVertexAIEndpointDeployedModelEmptyResourceBlocks(t *testing.T) {
+	tests := []struct {
+		name       string
+		fields     map[string]interface{}
+		want       map[string]interface{}
+		response   string
+		stateKey   string
+		stateValue interface{}
+	}{
+		{
+			name: "empty automatic resources",
+			fields: map[string]interface{}{
+				"automatic_resources": []interface{}{map[string]interface{}{}},
+			},
+			want:       map[string]interface{}{"automaticResources": map[string]interface{}{}},
+			response:   `{"deployedModels":[{"id":"456","model":"projects/test-project/locations/us-central1/models/example","automaticResources":{}}]}`,
+			stateKey:   "automatic_resources.#",
+			stateValue: 1,
+		},
+		{
+			name: "empty machine spec",
+			fields: map[string]interface{}{
+				"dedicated_resources": []interface{}{map[string]interface{}{
+					"machine_spec":      []interface{}{map[string]interface{}{}},
+					"min_replica_count": 1,
+				}},
+			},
+			want: map[string]interface{}{"dedicatedResources": map[string]interface{}{
+				"machineSpec": map[string]interface{}{}, "minReplicaCount": float64(1),
+			}},
+			response:   `{"deployedModels":[{"id":"456","model":"projects/test-project/locations/us-central1/models/example","dedicatedResources":{"machineSpec":{"machineType":"n1-standard-2"},"minReplicaCount":1}}]}`,
+			stateKey:   "dedicated_resources.0.machine_spec.0.machine_type",
+			stateValue: "n1-standard-2",
+		},
+		{
+			name:       "shared resources",
+			fields:     map[string]interface{}{"shared_resources": "projects/test-project/locations/us-central1/deploymentResourcePools/pool"},
+			want:       map[string]interface{}{"sharedResources": "projects/test-project/locations/us-central1/deploymentResourcePools/pool"},
+			response:   `{"deployedModels":[{"id":"456","model":"projects/test-project/locations/us-central1/models/example","sharedResources":"projects/test-project/locations/us-central1/deploymentResourcePools/pool"}]}`,
+			stateKey:   "shared_resources",
+			stateValue: "projects/test-project/locations/us-central1/deploymentResourcePools/pool",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.fields["endpoint"] = "projects/test-project/locations/us-central1/endpoints/123"
+			tt.fields["deployed_model_id"] = "456"
+			tt.fields["model"] = "projects/test-project/locations/us-central1/models/example"
+			d := schema.TestResourceDataRaw(t, ResourceVertexAIEndpointDeployedModel().Schema, tt.fields)
+			var body map[string]interface{}
+			client := &http.Client{Transport: endpointDeployedModelRoundTripper(func(req *http.Request) (*http.Response, error) {
+				response := tt.response
+				if req.Method == http.MethodPost {
+					if err := json.NewDecoder(req.Body).Decode(&body); err != nil {
+						t.Fatalf("decode request: %v", err)
+					}
+					response = `{}`
+				}
+				return &http.Response{
+					StatusCode: http.StatusOK,
+					Header:     make(http.Header),
+					Body:       io.NopCloser(strings.NewReader(response)),
+					Request:    req,
+				}, nil
+			})}
+			if err := resourceVertexAIEndpointDeployedModelCreate(d, &transport_tpg.Config{Client: client}); err != nil {
+				t.Fatalf("create failed: %v", err)
+			}
+			model, ok := body["deployedModel"].(map[string]interface{})
+			if !ok {
+				t.Fatalf("missing deployedModel in request: %#v", body)
+			}
+			for _, key := range []string{"automaticResources", "dedicatedResources", "sharedResources"} {
+				got, gotOK := model[key]
+				want, wantOK := tt.want[key]
+				if gotOK != wantOK || !reflect.DeepEqual(got, want) {
+					t.Errorf("%s = %#v (present %t), want %#v (present %t)", key, got, gotOK, want, wantOK)
+				}
+			}
+			if got := d.Get(tt.stateKey); !reflect.DeepEqual(got, tt.stateValue) {
+				t.Errorf("state %s = %#v, want %#v", tt.stateKey, got, tt.stateValue)
+			}
+			if tt.name == "empty machine spec" {
+				diff, err := schema.InternalMap(ResourceVertexAIEndpointDeployedModel().Schema).Diff(
+					context.Background(), d.State(), terraform.NewResourceConfigRaw(tt.fields), nil, nil, false,
+				)
+				if err != nil {
+					t.Fatalf("plan after refresh failed: %v", err)
+				}
+				if diff != nil && diff.Attributes[tt.stateKey] != nil {
+					t.Errorf("default machine type caused a plan diff: %#v", diff.Attributes[tt.stateKey])
+				}
+			}
+		})
 	}
 }

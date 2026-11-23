@@ -116,6 +116,7 @@ properties:
   - name: automaticResources
     type: NestedObject
     description: Resources for which Vertex AI automatically manages the machine configuration.
+    allow_empty_object: true
     exactly_one_of:
       - automatic_resources
       - dedicated_resources
@@ -141,10 +142,12 @@ properties:
         type: NestedObject
         description: The specification of a single machine used by the deployment.
         required: true
+        allow_empty_object: true
         properties:
           - name: machineType
             type: String
-            description: The machine type used by each replica.
+            description: The machine type used by each replica. Defaults to `n1-standard-2`.
+            default_from_api: true
           - name: acceleratorType
             type: String
             description: The type of accelerator attached to the machine.
