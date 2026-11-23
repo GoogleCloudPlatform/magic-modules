@@ -89,6 +89,22 @@ samples:
           source_model: vertexai.BootstrapVertexAIModel(t, "us-central1")
         ignore_read_extra:
           - project
+  - name: vertex_ai_endpoint_deployed_model_spot_service_account
+    primary_resource_id: deployed_model
+    steps:
+      - name: vertex_ai_endpoint_deployed_model_spot_service_account
+        vars:
+          source_model: projects/my-project-name/locations/us-central1/models/my-source-model
+        resource_id_vars:
+          endpoint_name: endpoint-name
+          model_id: model-id
+          service_account_id: dm-sa
+        test_env_vars:
+          project_name: PROJECT_NAME
+        test_vars_overrides:
+          source_model: vertexai.BootstrapVertexAIModel(t, "us-central1")
+        ignore_read_extra:
+          - project
 parameters:
   - name: endpoint
     type: ResourceRef
