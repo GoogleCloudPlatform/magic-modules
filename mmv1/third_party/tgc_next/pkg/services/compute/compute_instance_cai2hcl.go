@@ -569,6 +569,16 @@ func flattenSchedulingTgcNext(v interface{}) []map[string]interface{} {
 		schedulingMap["local_ssd_recovery_timeout"] = flattenComputeLocalSsdRecoveryTimeoutTgcNext(lsrt)
 	}
 
+	if gs, ok := resp["gracefulShutdown"].(map[string]interface{}); ok && len(gs) > 0 {
+		gsMap := map[string]interface{}{
+			"enabled": gs["enabled"],
+		}
+		if md, ok := gs["maxDuration"].(map[string]interface{}); ok && len(md) > 0 {
+			gsMap["max_duration"] = flattenComputeLocalSsdRecoveryTimeoutTgcNext(md)
+		}
+		schedulingMap["graceful_shutdown"] = []interface{}{gsMap}
+	}
+
 	if pnd, ok := resp["preemptionNoticeDuration"].(map[string]interface{}); ok && pnd != nil {
 		schedulingMap["preemption_notice_duration"] = flattenComputeLocalSsdRecoveryTimeoutTgcNext(pnd)
 	}

@@ -40,9 +40,9 @@ var (
 		"scheduling.0.on_instance_stop_action",
 		"scheduling.0.termination_time",
 		"scheduling.0.host_error_timeout_seconds",
+		"scheduling.0.graceful_shutdown",
 {{- if ne $.TargetVersionName "ga" }}
 		"scheduling.0.maintenance_interval",
-		"scheduling.0.graceful_shutdown",
 		"scheduling.0.skip_guest_os_shutdown",
 {{- end }}
 		"scheduling.0.preemption_notice_duration",
@@ -962,7 +962,6 @@ be from 0 to 999,999,999 inclusive.`,
 								},
 							},
 						},
-{{ if ne $.TargetVersionName `ga` }}
 						"graceful_shutdown": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -1008,6 +1007,7 @@ be from 0 to 999,999,999 inclusive.`,
 								},
 							},
 						},
+{{ if ne $.TargetVersionName `ga` }}
 						"skip_guest_os_shutdown": {
 							Type:        schema.TypeBool,
 							Optional:    true,
@@ -2170,7 +2170,6 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 			return fmt.Errorf("Error converting scheduling: %s", err)
 		}
 		scheduling := flattenScheduling(schedulingMap)
-{{ if ne $.TargetVersionName `ga` }}
 		// Workaroud: API doesn't update the scheduling.graceful_shutdown.max_duration.nanos field.
 		// To avoid diff, we need to set the value from the state not from API response.
 		if nanos, ok := d.GetOk("scheduling.0.graceful_shutdown.0.max_duration.0.nanos"); ok {
@@ -2185,7 +2184,6 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 				}
 			}
 		}
-{{- end }}
 		if err = d.Set("scheduling", scheduling); err != nil {
 			return fmt.Errorf("Error setting scheduling: %s", err)
 		}

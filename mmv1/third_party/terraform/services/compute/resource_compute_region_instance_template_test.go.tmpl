@@ -1773,7 +1773,6 @@ func TestAccComputeRegionInstanceTemplate_workloadIdentity(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeRegionInstanceTemplate_gracefulShutdown(t *testing.T) {
 	t.Parallel()
 
@@ -1845,6 +1844,7 @@ func TestAccComputeRegionInstanceTemplate_gracefulShutdown(t *testing.T) {
 	})
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeRegionInstanceTemplate_schedulingSkipGuestOSShutdown(t *testing.T) {
 	t.Parallel()
 
@@ -5585,7 +5585,6 @@ resource "google_compute_region_instance_template" "foobar" {
 `, context)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeRegionInstanceTemplate_gracefulShutdown(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
@@ -5625,6 +5624,7 @@ resource "google_compute_region_instance_template" "foobar" {
 `, context)
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeRegionInstanceTemplate_schedulingSkipGuestOSShutdown(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
