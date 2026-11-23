@@ -70,8 +70,95 @@ func DataSourceGoogleComputeNetwork() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+
+			"peerings": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: `The network peerings configured on this network, including peerings not managed by Terraform.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `Name of the peering.`,
+						},
+						"network": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `The URI of the peer network.`,
+						},
+						"state": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `State for the peering, either ACTIVE or INACTIVE.`,
+						},
+						"state_details": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `Details about the current state of the peering.`,
+						},
+						"export_custom_routes": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: `Whether custom routes are exported to the peer network.`,
+						},
+						"import_custom_routes": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: `Whether custom routes are imported from the peer network.`,
+						},
+						"export_subnet_routes_with_public_ip": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: `Whether subnet routes with public IP ranges are exported to the peer network.`,
+						},
+						"import_subnet_routes_with_public_ip": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: `Whether subnet routes with public IP ranges are imported from the peer network.`,
+						},
+						"stack_type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `Which IP version(s) of traffic and routes are exchanged with the peer network, either IPV4_ONLY or IPV4_IPV6.`,
+						},
+						"update_strategy": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `The update strategy of the peering, either INDEPENDENT or CONSENSUS.`,
+						},
+					},
+				},
+			},
 		},
 	}
+}
+
+func flattenDataSourceComputeNetworkPeerings(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) []map[string]interface{} {
+	raw, ok := v.([]interface{})
+	if !ok {
+		return nil
+	}
+	peerings := make([]map[string]interface{}, 0, len(raw))
+	for _, p := range raw {
+		peering, ok := p.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		peerings = append(peerings, map[string]interface{}{
+			"name":                                peering["name"],
+			"network":                             peering["network"],
+			"state":                               peering["state"],
+			"state_details":                       peering["stateDetails"],
+			"export_custom_routes":                peering["exportCustomRoutes"],
+			"import_custom_routes":                peering["importCustomRoutes"],
+			"export_subnet_routes_with_public_ip": peering["exportSubnetRoutesWithPublicIp"],
+			"import_subnet_routes_with_public_ip": peering["importSubnetRoutesWithPublicIp"],
+			"stack_type":                          flattenNetworkPeeringStackType(peering["stackType"], d, config),
+			"update_strategy":                     flattenNetworkPeeringUpdateStrategy(peering["updateStrategy"], d, config),
+		})
+	}
+	return peerings
 }
 
 func dataSourceGoogleComputeNetworkRead(d *schema.ResourceData, meta interface{}) error {
@@ -173,6 +260,9 @@ func dataSourceGoogleComputeNetworkRead(d *schema.ResourceData, meta interface{}
 	}
 	if err := d.Set("subnetworks_self_links", network["subnetworks"]); err != nil {
 		return fmt.Errorf("Error setting subnetworks_self_links: %s", err)
+	}
+	if err := d.Set("peerings", flattenDataSourceComputeNetworkPeerings(network["peerings"], d, config)); err != nil {
+		return fmt.Errorf("Error setting peerings: %s", err)
 	}
 	d.SetId(id)
 	return nil
