@@ -1,0 +1,53 @@
+deployedModel := map[string]interface{}{"id": d.Get("deployed_model_id")}
+updateMask := []string{}
+for _, resources := range []struct {
+	terraformName string
+	apiName       string
+	fields        []struct{ terraformName, apiName string }
+}{
+	{"automatic_resources", "automaticResources", []struct{ terraformName, apiName string }{
+		{"min_replica_count", "minReplicaCount"},
+		{"max_replica_count", "maxReplicaCount"},
+	}},
+	{"dedicated_resources", "dedicatedResources", []struct{ terraformName, apiName string }{
+		{"min_replica_count", "minReplicaCount"},
+		{"max_replica_count", "maxReplicaCount"},
+		{"required_replica_count", "requiredReplicaCount"},
+	}},
+} {
+	changed := map[string]interface{}{}
+	for _, field := range resources.fields {
+		path := resources.terraformName + ".0." + field.terraformName
+		if d.HasChange(path) {
+			changed[field.apiName] = d.Get(path)
+			updateMask = append(updateMask, resources.apiName+"."+field.apiName)
+		}
+	}
+	if resources.terraformName == "dedicated_resources" && d.HasChange("dedicated_resources.0.autoscaling_metric_specs") {
+		metrics, err := expandVertexAIEndpointDeployedModelDedicatedResourcesAutoscalingMetricSpecs(
+			d.Get("dedicated_resources.0.autoscaling_metric_specs"), d, meta.(*transport_tpg.Config))
+		if err != nil {
+			return nil, err
+		}
+		changed["autoscalingMetricSpecs"] = metrics
+		updateMask = append(updateMask, "dedicatedResources.autoscalingMetricSpecs")
+	}
+	if len(changed) != 0 {
+		deployedModel[resources.apiName] = changed
+	}
+}
+{{- if eq $.TargetVersionName "ga" }}
+if d.HasChange("disable_container_logging") {
+	deployedModel["disableContainerLogging"] = d.Get("disable_container_logging")
+	updateMask = append(updateMask, "disableContainerLogging")
+}
+{{- else }}
+if d.HasChange("enable_container_logging") {
+	deployedModel["enableContainerLogging"] = d.Get("enable_container_logging")
+	updateMask = append(updateMask, "enableContainerLogging")
+}
+{{- end }}
+return map[string]interface{}{
+	"deployedModel": deployedModel,
+	"updateMask": strings.Join(updateMask, ","),
+}, nil

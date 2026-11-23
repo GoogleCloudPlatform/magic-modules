@@ -3,6 +3,7 @@ package vertexai
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"reflect"
@@ -10,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -96,7 +98,7 @@ func TestVertexAIEndpointDeployedModelQuotaProject(t *testing.T) {
 		{name: "override disabled", billingProject: "billing-project"},
 	}
 	for _, tt := range tests {
-		for _, action := range []string{"create", "delete"} {
+		for _, action := range []string{"create", "update", "delete"} {
 			t.Run(tt.name+"/"+action, func(t *testing.T) {
 				d := endpointDeployedModelTestData(t)
 				if err := d.Set("region", "us-central1"); err != nil {
@@ -129,18 +131,35 @@ func TestVertexAIEndpointDeployedModelQuotaProject(t *testing.T) {
 					Client:              client,
 					PollInterval:        time.Millisecond,
 				}
+				if action == "update" {
+					fields := func(min int) map[string]interface{} {
+						return map[string]interface{}{
+							"endpoint":          "projects/test-project/locations/us-central1/endpoints/123",
+							"region":            "us-central1",
+							"deployed_model_id": "456",
+							"model":             "projects/test-project/locations/us-central1/models/example",
+							"automatic_resources": []interface{}{map[string]interface{}{
+								"min_replica_count": min,
+							}},
+						}
+					}
+					d, _ = endpointDeployedModelUpdateData(t, fields(1), fields(2), config)
+				}
 
 				var err error
-				if action == "create" {
+				switch action {
+				case "create":
 					err = resourceVertexAIEndpointDeployedModelCreate(d, config)
-				} else {
+				case "update":
+					err = resourceVertexAIEndpointDeployedModelUpdate(d, config)
+				case "delete":
 					err = resourceVertexAIEndpointDeployedModelDelete(d, config)
 				}
 				if err != nil {
 					t.Fatalf("%s failed: %v", action, err)
 				}
 				wantRequests := 2
-				if action == "create" {
+				if action != "delete" {
 					wantRequests++
 				}
 				if requests != wantRequests {
@@ -324,6 +343,264 @@ func TestVertexAIEndpointDeployedModelAutoscalingTargetDefault(t *testing.T) {
 			}
 			if diff != nil && diff.Attributes[targetKey] != nil {
 				t.Errorf("target caused a plan diff: %#v", diff.Attributes[targetKey])
+			}
+		})
+	}
+}
+
+func endpointDeployedModelUpdateData(t *testing.T, before, after map[string]interface{}, config *transport_tpg.Config) (*schema.ResourceData, *terraform.InstanceDiff) {
+	t.Helper()
+	r := ResourceVertexAIEndpointDeployedModel()
+	state := schema.TestResourceDataRaw(t, r.Schema, before)
+	state.SetId("projects/test-project/locations/us-central1/endpoints/123/deployedModels/456")
+	instanceState := state.State()
+	instanceState.RawConfig = cty.ObjectVal(map[string]cty.Value{
+		"deletion_policy": cty.NullVal(cty.String),
+	})
+	diff, err := schema.InternalMap(r.Schema).Diff(
+		context.Background(), instanceState, terraform.NewResourceConfigRaw(after),
+		r.CustomizeDiff, config, true,
+	)
+	if err != nil {
+		t.Fatalf("plan failed: %v", err)
+	}
+	data, err := schema.InternalMap(r.Schema).Data(instanceState, diff)
+	if err != nil {
+		t.Fatalf("resource data from plan failed: %v", err)
+	}
+	return data, diff
+}
+
+func TestVertexAIEndpointDeployedModelOmittedTargetRetainsState(t *testing.T) {
+	config := func(target interface{}) map[string]interface{} {
+		metric := map[string]interface{}{"metric_name": "aiplatform.googleapis.com/prediction/online/cpu/utilization"}
+		if target != nil {
+			metric["target"] = target
+		}
+		return map[string]interface{}{
+			"endpoint":          "projects/test-project/locations/us-central1/endpoints/123",
+			"deployed_model_id": "456",
+			"model":             "projects/test-project/locations/us-central1/models/example",
+			"dedicated_resources": []interface{}{map[string]interface{}{
+				"machine_spec":             []interface{}{map[string]interface{}{"machine_type": "n1-standard-2"}},
+				"min_replica_count":        1,
+				"autoscaling_metric_specs": []interface{}{metric},
+			}},
+		}
+	}
+	d, _ := endpointDeployedModelUpdateData(t, config(75), config(nil), &transport_tpg.Config{})
+	if d.HasChange("dedicated_resources.0.autoscaling_metric_specs") {
+		t.Fatal("omitting the API-computed target should retain its existing value")
+	}
+	if got := d.Get("dedicated_resources.0.autoscaling_metric_specs.0.target"); got != 75 {
+		t.Fatalf("target after omission = %v, want 75", got)
+	}
+}
+
+func TestVertexAIEndpointDeployedModelUpdatesReplicasInPlace(t *testing.T) {
+	base := func(min, max int) map[string]interface{} {
+		return map[string]interface{}{
+			"endpoint":          "projects/test-project/locations/us-central1/endpoints/123",
+			"region":            "us-central1",
+			"deployed_model_id": "456",
+			"model":             "projects/test-project/locations/us-central1/models/example",
+			"automatic_resources": []interface{}{map[string]interface{}{
+				"min_replica_count": min, "max_replica_count": max,
+			}},
+		}
+	}
+	var body map[string]interface{}
+	var requests int
+	client := &http.Client{Transport: endpointDeployedModelRoundTripper(func(req *http.Request) (*http.Response, error) {
+		requests++
+		if got := req.Header.Get("X-Goog-User-Project"); got != "billing-project" {
+			t.Errorf("%s %s quota project = %q, want billing-project", req.Method, req.URL.Path, got)
+		}
+		response := `{"name":"projects/test-project/locations/us-central1/endpoints/123/operations/op1"}`
+		switch {
+		case req.Method == http.MethodPost:
+			if !strings.HasSuffix(req.URL.Path, "/endpoints/123:mutateDeployedModel") || req.URL.Query().Get("updateMask") != "" {
+				t.Errorf("unexpected update URL: %s", req.URL)
+			}
+			if err := json.NewDecoder(req.Body).Decode(&body); err != nil {
+				t.Fatalf("decode update request: %v", err)
+			}
+		case strings.Contains(req.URL.Path, "/operations/"):
+			response = `{"name":"projects/test-project/locations/us-central1/endpoints/123/operations/op1","done":true}`
+		default:
+			response = `{"deployedModels":[{"id":"456","model":"projects/test-project/locations/us-central1/models/example","automaticResources":{"minReplicaCount":2,"maxReplicaCount":4}}]}`
+		}
+		return &http.Response{StatusCode: http.StatusOK, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(response)), Request: req}, nil
+	})}
+	config := &transport_tpg.Config{
+		Project: "provider-project", BillingProject: "billing-project", UserProjectOverride: true,
+		Client: client, PollInterval: time.Millisecond,
+	}
+	d, diff := endpointDeployedModelUpdateData(t, base(1, 2), base(2, 4), config)
+	if diff == nil || diff.RequiresNew() {
+		t.Fatalf("replica update should be in-place, got diff %#v", diff)
+	}
+	if err := resourceVertexAIEndpointDeployedModelUpdate(d, config); err != nil {
+		t.Fatalf("update failed: %v", err)
+	}
+	want := map[string]interface{}{
+		"deployedModel": map[string]interface{}{
+			"id":                 "456",
+			"automaticResources": map[string]interface{}{"minReplicaCount": float64(2), "maxReplicaCount": float64(4)},
+		},
+		"updateMask": "automaticResources.minReplicaCount,automaticResources.maxReplicaCount",
+	}
+	if !reflect.DeepEqual(body, want) {
+		t.Errorf("update body = %#v, want %#v", body, want)
+	}
+	if requests != 3 {
+		t.Errorf("got %d requests, want update, poll, and read", requests)
+	}
+}
+
+func TestVertexAIEndpointDeployedModelMutationPayloads(t *testing.T) {
+	const metricName = "aiplatform.googleapis.com/prediction/online/cpu/utilization"
+	dedicated := func(min, max, required int, target int) map[string]interface{} {
+		fields := map[string]interface{}{
+			"machine_spec":           []interface{}{map[string]interface{}{"machine_type": "n1-standard-2"}},
+			"min_replica_count":      min,
+			"max_replica_count":      max,
+			"required_replica_count": required,
+		}
+		if target != 0 {
+			fields["autoscaling_metric_specs"] = []interface{}{map[string]interface{}{"metric_name": metricName, "target": target}}
+		}
+		return map[string]interface{}{
+			"endpoint":            "projects/test-project/locations/us-central1/endpoints/123",
+			"region":              "us-central1",
+			"deployed_model_id":   "456",
+			"model":               "projects/test-project/locations/us-central1/models/example",
+			"dedicated_resources": []interface{}{fields},
+		}
+	}
+	tests := []struct {
+		name      string
+		before    map[string]interface{}
+		after     map[string]interface{}
+		wantModel map[string]interface{}
+		wantMask  string
+	}{
+		{
+			name:   "dedicated replicas and metrics",
+			before: dedicated(1, 2, 1, 60),
+			after:  dedicated(2, 4, 2, 75),
+			wantModel: map[string]interface{}{
+				"id": "456", "dedicatedResources": map[string]interface{}{
+					"minReplicaCount": 2, "maxReplicaCount": 4, "requiredReplicaCount": 2,
+					"autoscalingMetricSpecs": []interface{}{map[string]interface{}{"metricName": metricName, "target": 75}},
+				},
+			},
+			wantMask: "dedicatedResources.minReplicaCount,dedicatedResources.maxReplicaCount,dedicatedResources.requiredReplicaCount,dedicatedResources.autoscalingMetricSpecs",
+		},
+		{
+			name:   "clear metrics",
+			before: dedicated(1, 2, 1, 60),
+			after:  dedicated(1, 2, 1, 0),
+			wantModel: map[string]interface{}{
+				"id": "456", "dedicatedResources": map[string]interface{}{"autoscalingMetricSpecs": []interface{}{}},
+			},
+			wantMask: "dedicatedResources.autoscalingMetricSpecs",
+		},
+	}
+	loggingField, loggingAPI := "disable_container_logging", "disableContainerLogging"
+	if _, beta := ResourceVertexAIEndpointDeployedModel().Schema["enable_container_logging"]; beta {
+		loggingField, loggingAPI = "enable_container_logging", "enableContainerLogging"
+	}
+	for _, value := range []bool{false, true} {
+		before, after := dedicated(1, 2, 1, 60), dedicated(1, 2, 1, 60)
+		before[loggingField], after[loggingField] = !value, value
+		tests = append(tests, struct {
+			name      string
+			before    map[string]interface{}
+			after     map[string]interface{}
+			wantModel map[string]interface{}
+			wantMask  string
+		}{
+			name: fmt.Sprintf("%s to %t", loggingField, value), before: before, after: after,
+			wantModel: map[string]interface{}{"id": "456", loggingAPI: value}, wantMask: loggingAPI,
+		})
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			config := &transport_tpg.Config{Project: "test-project", Region: "us-central1"}
+			d, diff := endpointDeployedModelUpdateData(t, tt.before, tt.after, config)
+			if diff == nil || diff.RequiresNew() {
+				t.Fatalf("change should be in-place, got diff %#v", diff)
+			}
+			body, err := resourceVertexAIEndpointDeployedModelUpdateEncoder(d, config, nil)
+			if err != nil {
+				t.Fatalf("encode update: %v", err)
+			}
+			want := map[string]interface{}{"deployedModel": tt.wantModel, "updateMask": tt.wantMask}
+			if !reflect.DeepEqual(body, want) {
+				t.Errorf("update body = %#v, want %#v", body, want)
+			}
+		})
+	}
+}
+
+func TestVertexAIEndpointDeployedModelImmutableChangesReplace(t *testing.T) {
+	automatic := func() map[string]interface{} {
+		return map[string]interface{}{
+			"endpoint":          "projects/test-project/locations/us-central1/endpoints/123",
+			"region":            "us-central1",
+			"deployed_model_id": "456",
+			"model":             "projects/test-project/locations/us-central1/models/example",
+			"automatic_resources": []interface{}{map[string]interface{}{
+				"min_replica_count": 1, "max_replica_count": 2,
+			}},
+		}
+	}
+	dedicated := func() map[string]interface{} {
+		fields := automatic()
+		delete(fields, "automatic_resources")
+		fields["dedicated_resources"] = []interface{}{map[string]interface{}{
+			"machine_spec":      []interface{}{map[string]interface{}{"machine_type": "n1-standard-2"}},
+			"min_replica_count": 1, "max_replica_count": 2,
+		}}
+		return fields
+	}
+	shared := func() map[string]interface{} {
+		fields := automatic()
+		delete(fields, "automatic_resources")
+		fields["shared_resources"] = "projects/test-project/locations/us-central1/deploymentResourcePools/pool"
+		return fields
+	}
+	type testCase struct {
+		name          string
+		before, after map[string]interface{}
+	}
+	tests := []testCase{
+		{name: "automatic to dedicated", before: automatic(), after: dedicated()},
+		{name: "dedicated to automatic", before: dedicated(), after: automatic()},
+		{name: "dedicated to shared", before: dedicated(), after: shared()},
+		{name: "shared to automatic", before: shared(), after: automatic()},
+	}
+	changedModel := automatic()
+	changedModel["model"] = "projects/test-project/locations/us-central1/models/other"
+	tests = append(tests, testCase{name: "model", before: automatic(), after: changedModel})
+	changedMachine := dedicated()
+	changedMachine["dedicated_resources"].([]interface{})[0].(map[string]interface{})["machine_spec"] =
+		[]interface{}{map[string]interface{}{"machine_type": "n1-standard-4"}}
+	tests = append(tests, testCase{name: "machine", before: dedicated(), after: changedMachine})
+	changedSpot := dedicated()
+	changedSpot["dedicated_resources"].([]interface{})[0].(map[string]interface{})["spot"] = true
+	tests = append(tests, testCase{name: "spot", before: dedicated(), after: changedSpot})
+	if _, beta := ResourceVertexAIEndpointDeployedModel().Schema["enable_container_logging"]; beta {
+		before, after := automatic(), automatic()
+		before["disable_container_logging"], after["disable_container_logging"] = false, true
+		tests = append(tests, testCase{name: "beta disable container logging", before: before, after: after})
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, diff := endpointDeployedModelUpdateData(t, tt.before, tt.after, &transport_tpg.Config{})
+			if diff == nil || !diff.RequiresNew() {
+				t.Errorf("change must replace the deployment, got diff %#v", diff)
 			}
 		})
 	}

@@ -1,0 +1,12 @@
+if obj["updateMask"] == "" {
+	return resourceVertexAIEndpointDeployedModelRead(d, meta)
+}
+
+endpoint := d.Get("endpoint").(string)
+project = tpgresource.GetProjectFromRegionalSelfLink(endpoint)
+if project == "" || project == endpoint {
+	return fmt.Errorf("Cannot determine project from endpoint %q", endpoint)
+}
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+	project = bp
+}
