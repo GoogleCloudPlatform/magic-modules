@@ -42,21 +42,6 @@ type recordedReservationReq struct {
 	body       map[string]interface{}
 }
 
-func cloneSchemaWithoutForceNew(src map[string]*schema.Schema) map[string]*schema.Schema {
-	dst := make(map[string]*schema.Schema, len(src))
-	for k, v := range src {
-		cp := *v
-		cp.ForceNew = false
-		if sub, ok := cp.Elem.(*schema.Resource); ok {
-			subCopy := *sub
-			subCopy.Schema = cloneSchemaWithoutForceNew(sub.Schema)
-			cp.Elem = &subCopy
-		}
-		dst[k] = &cp
-	}
-	return dst
-}
-
 func buildReservationUpdateData(t *testing.T, s map[string]*schema.Schema, oldCfg, newCfg map[string]interface{}) *schema.ResourceData {
 	t.Helper()
 	initDiff, err := schema.InternalMap(s).Diff(context.Background(), nil, terraform.NewResourceConfigRaw(oldCfg), nil, nil, true)
@@ -112,6 +97,8 @@ func newReservationTestServer(t *testing.T) (*httptest.Server, *[]recordedReserv
 			_, _ = w.Write([]byte(`{
 				"name": "my-res",
 				"zone": "projects/my-project/zones/us-central1-a",
+				"specificReservationRequired": false,
+				"deleteAtTime": "2030-01-01T00:00:00Z",
 				"specificReservation": {"count": "2", "instanceProperties": {"machineType": "n2-standard-2"}},
 				"shareSettings": {"shareType": "SPECIFIC_PROJECTS", "projectMap": {"222222222": {"projectId": "222222222"}}},
 				"reservationSharingPolicy": {"serviceShareType": "ALLOW_ALL"}
@@ -141,12 +128,12 @@ func TestComputeReservationUpdate_pathsAndMultiFieldIsolation(t *testing.T) {
 	t.Parallel()
 
 	r := ResourceComputeReservation()
-	mutableSchema := cloneSchemaWithoutForceNew(r.Schema)
 
 	oldCfg := map[string]interface{}{
-		"name":    "my-res",
-		"zone":    "us-central1-a",
-		"project": "my-project",
+		"name":                          "my-res",
+		"zone":                          "us-central1-a",
+		"project":                       "my-project",
+		"specific_reservation_required": true,
 		"specific_reservation": []interface{}{map[string]interface{}{
 			"count":               1,
 			"instance_properties": []interface{}{map[string]interface{}{"machine_type": "n2-standard-2"}},
@@ -163,9 +150,11 @@ func TestComputeReservationUpdate_pathsAndMultiFieldIsolation(t *testing.T) {
 		}},
 	}
 	newCfg := map[string]interface{}{
-		"name":    "my-res",
-		"zone":    "us-central1-a",
-		"project": "my-project",
+		"name":                          "my-res",
+		"zone":                          "us-central1-a",
+		"project":                       "my-project",
+		"specific_reservation_required": false,
+		"delete_at_time":                "2030-01-01T00:00:00Z",
 		"specific_reservation": []interface{}{map[string]interface{}{
 			"count":               2,
 			"instance_properties": []interface{}{map[string]interface{}{"machine_type": "n2-standard-2"}},
@@ -182,7 +171,7 @@ func TestComputeReservationUpdate_pathsAndMultiFieldIsolation(t *testing.T) {
 	}
 
 	_, reqs, cfg := newReservationTestServer(t)
-	d := buildReservationUpdateData(t, mutableSchema, oldCfg, newCfg)
+	d := buildReservationUpdateData(t, r.Schema, oldCfg, newCfg)
 	if err := r.Update(d, cfg); err != nil {
 		t.Fatalf("Update failed: %v", err)
 	}
@@ -222,6 +211,26 @@ func TestComputeReservationUpdate_pathsAndMultiFieldIsolation(t *testing.T) {
 		{
 			method: http.MethodPatch,
 			path:   resPath,
+			paths:  []string{"specificReservationRequired"},
+			body: map[string]interface{}{
+				"name":                        "my-res",
+				"zone":                        zoneLink,
+				"specificReservationRequired": false,
+			},
+		},
+		{
+			method: http.MethodPatch,
+			path:   resPath,
+			paths:  []string{"deleteAtTime"},
+			body: map[string]interface{}{
+				"name":         "my-res",
+				"zone":         zoneLink,
+				"deleteAtTime": "2030-01-01T00:00:00Z",
+			},
+		},
+		{
+			method: http.MethodPatch,
+			path:   resPath,
 			paths:  []string{"reservationSharingPolicy.serviceShareType"},
 			body: map[string]interface{}{
 				"name":                     "my-res",
@@ -242,44 +251,62 @@ func TestComputeReservationUpdate_pathsAndMultiFieldIsolation(t *testing.T) {
 }
 {{- if ne $.TargetVersionName "ga" }}
 
-func TestComputeReservationUpdate_betaShareSettingsProjects(t *testing.T) {
+func TestComputeReservationUpdate_betaProjectsAndEmergentMaintenance(t *testing.T) {
 	t.Parallel()
 
 	r := ResourceComputeReservation()
-	makeCfg := func(projects []interface{}) map[string]interface{} {
+	makeCfg := func(shareType string, projects []interface{}, em bool) map[string]interface{} {
 		return map[string]interface{}{
-			"name":    "my-res",
-			"zone":    "us-central1-a",
-			"project": "my-project",
+			"name":                        "my-res",
+			"zone":                        "us-central1-a",
+			"project":                     "my-project",
+			"enable_emergent_maintenance": em,
 			"specific_reservation": []interface{}{map[string]interface{}{
 				"count":               1,
 				"instance_properties": []interface{}{map[string]interface{}{"machine_type": "n2-standard-2"}},
 			}},
 			"share_settings": []interface{}{map[string]interface{}{
-				"share_type": "SPECIFIC_PROJECTS",
+				"share_type": shareType,
 				"projects":   projects,
 			}},
 		}
 	}
 
 	_, reqs, cfg := newReservationTestServer(t)
-	d := buildReservationUpdateData(t, r.Schema, makeCfg([]interface{}{"old-guest-proj"}), makeCfg([]interface{}{"new-guest-proj"}))
+	d := buildReservationUpdateData(
+		t,
+		r.Schema,
+		makeCfg("LOCAL", []interface{}{}, true),
+		makeCfg("SPECIFIC_PROJECTS", []interface{}{"new-guest-proj"}, false),
+	)
 	if err := r.Update(d, cfg); err != nil {
 		t.Fatalf("Update failed: %v", err)
 	}
 
+	const resPath = "/compute/v1/projects/my-project/zones/us-central1-a/reservations/my-res"
+	const zoneLink = "projects/my-project/global/zones/us-central1-a"
 	want := []recordedReservationReq{
 		{
 			method: http.MethodPatch,
-			path:   "/compute/v1/projects/my-project/zones/us-central1-a/reservations/my-res",
-			paths:  []string{"shareSettings.projects"},
+			path:   resPath,
+			paths:  []string{"shareSettings.projects", "shareSettings.shareType"},
 			body: map[string]interface{}{
 				"name": "my-res",
-				"zone": "projects/my-project/global/zones/us-central1-a",
+				"zone": zoneLink,
 				"shareSettings": map[string]interface{}{
 					"shareType": "SPECIFIC_PROJECTS",
 					"projects":  []interface{}{"new-guest-proj"},
 				},
+			},
+		},
+		{
+			method: http.MethodPatch,
+			path:   resPath,
+			paths:  []string{"enableEmergentMaintenance"},
+			body: map[string]interface{}{
+				"name":                      "my-res",
+				"zone":                      zoneLink,
+				"enableEmergentMaintenance": false,
 			},
 		},
 	}

@@ -46,6 +46,9 @@ async:
 collection_url_key: 'items'
 include_in_tgc_next: true
 cai_resource_kind: 'Reservation'
+tgc_tests:
+  - name: 'TestAccComputeReservation_enableEmergentMaintenance'
+    skip: 'The test uses beta-only field enable_emergent_maintenance not in GA tgc_next schema'
 custom_code:
   decoder: templates/terraform/decoders/compute_reservation_share_settings_decoder.go.tmpl
   tgc_decoder: 'templates/tgc_next/decoders/reservation.go.tmpl'
@@ -169,7 +172,6 @@ properties:
       When set to true, only VMs that target this reservation by name can
       consume this reservation. Otherwise, it can be consumed by VMs with
       affinity for any reservation. Defaults to false.
-    immutable: true
     # Not a hard API default, but this should help avoid a unset/true/false
     # trinary.
     default_value: false
@@ -189,7 +191,6 @@ properties:
         type: Enum
         description: |
           Type of sharing for this shared-reservation
-        immutable: true
         default_from_api: true
         enum_values:
           - 'LOCAL'
@@ -342,7 +343,6 @@ properties:
     description: |
       Absolute time in future when the reservation will be auto-deleted by Compute Engine. Timestamp is represented in RFC3339 text format.
       Cannot be used with delete_after_duration.
-    immutable: true
     default_from_api: true
     conflicts:
       - 'delete_after_duration.0.seconds'
@@ -357,14 +357,12 @@ properties:
         type: String
         description: |
           Number of seconds for the auto-delete duration.
-        immutable: true
         conflicts:
           - 'delete_at_time'
       - name: 'nanos'
         type: Integer
         description: |
           Number of nanoseconds for the auto-delete duration.
-        immutable: true
         conflicts:
           - 'delete_at_time'
   - name: 'reservationSharingPolicy'
@@ -383,12 +381,10 @@ properties:
           - 'ALLOW_ALL'
           - 'DISALLOW_ALL'
         default_from_api: true
-        immutable: true
   - name: 'enableEmergentMaintenance'
     type: Boolean
     description: |
       Indicates if this group of VMs have emergent maintenance enabled.
-    immutable: true
     ignore_read: true
     min_version: 'beta'
   - name: 'kind'

@@ -90,6 +90,11 @@
 	d.Partial(true)
 
 	// 1. Share settings (PATCH ?paths=shareSettings...).
+	shareTypeVal := "SPECIFIC_PROJECTS"
+	if st, ok := d.Get("share_settings.0.share_type").(string); ok && st != "" {
+		shareTypeVal = st
+	}
+	shareTypeChanged := d.HasChange("share_settings.0.share_type")
 {{- if ne $.TargetVersionName "ga" }}
 	if d.HasChange("share_settings.0.projects") {
 		shareSettingsProp, err := expandComputeReservationShareSettings(d.Get("share_settings"), d, config)
@@ -97,7 +102,7 @@
 			return err
 		}
 		transformed := map[string]interface{}{
-			"shareType": "SPECIFIC_PROJECTS",
+			"shareType": shareTypeVal,
 			"projects":  []interface{}{},
 		}
 		if shareSettingsMap, ok := shareSettingsProp.(map[string]interface{}); ok {
@@ -105,7 +110,11 @@
 				transformed["projects"] = projects
 			}
 		}
-		if err := sendPatch(map[string]interface{}{"shareSettings": transformed}, []string{"shareSettings.projects"}); err != nil {
+		sharePaths := []string{"shareSettings.projects"}
+		if shareTypeChanged {
+			sharePaths = append(sharePaths, "shareSettings.shareType")
+		}
+		if err := sendPatch(map[string]interface{}{"shareSettings": transformed}, sharePaths); err != nil {
 			return err
 		}
 	} else if d.HasChange("share_settings") {
@@ -143,15 +152,6 @@
 			}
 			removedPaths = append(removedPaths, "shareSettings.projectMap."+projectIdOrNum)
 		}
-		if len(removedPaths) > 0 {
-			removedShare := map[string]interface{}{
-				"shareType":  "SPECIFIC_PROJECTS",
-				"projectMap": map[string]interface{}{},
-			}
-			if err := sendPatch(map[string]interface{}{"shareSettings": removedShare}, removedPaths); err != nil {
-				return err
-			}
-		}
 
 		addedProjectMap := make(map[string]interface{})
 		var addedPaths []string
@@ -169,12 +169,38 @@
 			addedProjectMap[transformedId] = singleProject
 			addedPaths = append(addedPaths, fmt.Sprintf("shareSettings.projectMap.%v", original["id"]))
 		}
+
+		if len(removedPaths) > 0 {
+			removedShareType := "SPECIFIC_PROJECTS"
+			if shareTypeChanged && len(addedPaths) == 0 {
+				removedShareType = shareTypeVal
+				removedPaths = append(removedPaths, "shareSettings.shareType")
+			}
+			removedShare := map[string]interface{}{
+				"shareType":  removedShareType,
+				"projectMap": map[string]interface{}{},
+			}
+			if err := sendPatch(map[string]interface{}{"shareSettings": removedShare}, removedPaths); err != nil {
+				return err
+			}
+		}
 		if len(addedPaths) > 0 {
+			if shareTypeChanged {
+				addedPaths = append(addedPaths, "shareSettings.shareType")
+			}
 			addedShare := map[string]interface{}{
-				"shareType":  "SPECIFIC_PROJECTS",
+				"shareType":  shareTypeVal,
 				"projectMap": addedProjectMap,
 			}
 			if err := sendPatch(map[string]interface{}{"shareSettings": addedShare}, addedPaths); err != nil {
+				return err
+			}
+		}
+		if shareTypeChanged && len(removedPaths) == 0 && len(addedPaths) == 0 {
+			if err := sendPatch(
+				map[string]interface{}{"shareSettings": map[string]interface{}{"shareType": shareTypeVal}},
+				[]string{"shareSettings.shareType"},
+			); err != nil {
 				return err
 			}
 		}
