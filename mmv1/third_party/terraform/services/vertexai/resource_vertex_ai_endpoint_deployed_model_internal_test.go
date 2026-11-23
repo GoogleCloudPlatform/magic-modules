@@ -247,3 +247,84 @@ func TestVertexAIEndpointDeployedModelEmptyResourceBlocks(t *testing.T) {
 		})
 	}
 }
+
+func TestVertexAIEndpointDeployedModelAutoscalingTargetDefault(t *testing.T) {
+	const metricName = "aiplatform.googleapis.com/prediction/online/cpu/utilization"
+	for _, tt := range []struct {
+		name       string
+		target     int
+		wantTarget float64
+	}{
+		{name: "default target", wantTarget: 60},
+		{name: "explicit target", target: 75, wantTarget: 75},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			metric := map[string]interface{}{"metric_name": metricName}
+			if tt.target != 0 {
+				metric["target"] = tt.target
+			}
+			raw := map[string]interface{}{
+				"endpoint":          "projects/test-project/locations/us-central1/endpoints/123",
+				"deployed_model_id": "456",
+				"model":             "projects/test-project/locations/us-central1/models/example",
+				"dedicated_resources": []interface{}{map[string]interface{}{
+					"machine_spec":             []interface{}{map[string]interface{}{"machine_type": "n1-standard-2"}},
+					"min_replica_count":        1,
+					"autoscaling_metric_specs": []interface{}{metric},
+				}},
+			}
+			sm := schema.InternalMap(ResourceVertexAIEndpointDeployedModel().Schema)
+			if diags := sm.Validate(terraform.NewResourceConfigRaw(raw)); diags.HasError() {
+				t.Fatalf("configuration validation failed: %v", diags)
+			}
+			d := schema.TestResourceDataRaw(t, ResourceVertexAIEndpointDeployedModel().Schema, raw)
+			var body map[string]interface{}
+			client := &http.Client{Transport: endpointDeployedModelRoundTripper(func(req *http.Request) (*http.Response, error) {
+				response := `{}`
+				if req.Method == http.MethodPost {
+					if err := json.NewDecoder(req.Body).Decode(&body); err != nil {
+						t.Fatalf("decode request: %v", err)
+					}
+				} else {
+					responseBytes, err := json.Marshal(map[string]interface{}{
+						"deployedModels": []interface{}{map[string]interface{}{
+							"id": "456", "model": raw["model"],
+							"dedicatedResources": map[string]interface{}{
+								"machineSpec":     map[string]interface{}{"machineType": "n1-standard-2"},
+								"minReplicaCount": 1,
+								"autoscalingMetricSpecs": []interface{}{map[string]interface{}{
+									"metricName": metricName, "target": tt.wantTarget,
+								}},
+							},
+						}},
+					})
+					if err != nil {
+						t.Fatal(err)
+					}
+					response = string(responseBytes)
+				}
+				return &http.Response{StatusCode: http.StatusOK, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(response)), Request: req}, nil
+			})}
+			if err := resourceVertexAIEndpointDeployedModelCreate(d, &transport_tpg.Config{Client: client}); err != nil {
+				t.Fatalf("create failed: %v", err)
+			}
+			model := body["deployedModel"].(map[string]interface{})
+			dedicated := model["dedicatedResources"].(map[string]interface{})
+			sentMetric := dedicated["autoscalingMetricSpecs"].([]interface{})[0].(map[string]interface{})
+			if got, present := sentMetric["target"]; present != (tt.target != 0) || (present && got != float64(tt.target)) {
+				t.Errorf("sent target = %#v (present %t), configured %d", got, present, tt.target)
+			}
+			const targetKey = "dedicated_resources.0.autoscaling_metric_specs.0.target"
+			if got := d.Get(targetKey); got != int(tt.wantTarget) {
+				t.Errorf("state target = %v, want %v", got, tt.wantTarget)
+			}
+			diff, err := sm.Diff(context.Background(), d.State(), terraform.NewResourceConfigRaw(raw), nil, nil, false)
+			if err != nil {
+				t.Fatalf("plan after refresh failed: %v", err)
+			}
+			if diff != nil && diff.Attributes[targetKey] != nil {
+				t.Errorf("target caused a plan diff: %#v", diff.Attributes[targetKey])
+			}
+		})
+	}
+}

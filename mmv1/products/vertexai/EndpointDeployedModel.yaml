@@ -187,8 +187,8 @@ properties:
               required: true
             - name: target
               type: Integer
-              description: The target resource utilization percentage for the metric.
-              required: true
+              description: The target resource utilization percentage for the metric. Defaults to 60.
+              default_from_api: true
   - name: sharedResources
     type: String
     description: |
