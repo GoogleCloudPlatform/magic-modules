@@ -31,8 +31,10 @@ docs:
     modifying or deleting the underlying settings in Google Cloud.
 base_url: '{{org_id}}/securitySettings'
 self_link: '{{org_id}}/securitySettings'
-create_url: '{{org_id}}/securitySettings'
+create_url: '{{org_id}}/securitySettings?updateMask=mlRetrainingFeedbackEnabled'
 update_mask: true
+# Singleton settings object already exists once Advanced API Security is enabled;
+# acquire via PATCH with explicit updateMask (required by the server).
 create_verb: PATCH
 update_verb: PATCH
 import_format:
@@ -41,8 +43,6 @@ exclude_delete: true
 deletion_policy_exclude: true
 error_retry_predicates:
   - transport_tpg.IsApigeeRetryableError
-custom_code:
-  pre_create: templates/terraform/pre_create/apigee_security_settings.go.tmpl
 samples:
   - name: apigee_security_settings_basic
     exclude_test: true
@@ -59,6 +59,12 @@ samples:
           org_id: ORG_ID
           billing_account: BILLING_ACCT
         vars:
+          ml_retraining_feedback_enabled: null
+      - name: apigee_security_settings_basic_test
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+        vars:
           ml_retraining_feedback_enabled: true
       - name: apigee_security_settings_basic_test
         test_env_vars:
@@ -66,18 +72,6 @@ samples:
           billing_account: BILLING_ACCT
         vars:
           ml_retraining_feedback_enabled: false
-      - name: apigee_security_settings_basic_test
-        test_env_vars:
-          org_id: ORG_ID
-          billing_account: BILLING_ACCT
-        vars:
-          ml_retraining_feedback_enabled: true
-      - name: apigee_security_settings_basic_test
-        test_env_vars:
-          org_id: ORG_ID
-          billing_account: BILLING_ACCT
-        vars:
-          ml_retraining_feedback_enabled: null
 parameters:
   - name: orgId
     type: String
