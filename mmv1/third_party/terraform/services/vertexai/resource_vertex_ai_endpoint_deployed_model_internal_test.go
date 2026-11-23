@@ -298,7 +298,7 @@ func TestVertexAIEndpointDeployedModelDeleteTraffic(t *testing.T) {
 	}
 }
 
-func TestVertexAIEndpointDeployedModelEmptyResourceBlocks(t *testing.T) {
+func TestVertexAIEndpointDeployedModelResourceEncoding(t *testing.T) {
 	tests := []struct {
 		name       string
 		fields     map[string]interface{}
@@ -318,6 +318,21 @@ func TestVertexAIEndpointDeployedModelEmptyResourceBlocks(t *testing.T) {
 			stateValue: 1,
 		},
 		{
+			name: "automatic resources",
+			fields: map[string]interface{}{
+				"automatic_resources": []interface{}{map[string]interface{}{
+					"min_replica_count": 1,
+					"max_replica_count": 2,
+				}},
+			},
+			want: map[string]interface{}{"automaticResources": map[string]interface{}{
+				"minReplicaCount": float64(1), "maxReplicaCount": float64(2),
+			}},
+			response:   `{"deployedModels":[{"id":"456","model":"projects/test-project/locations/us-central1/models/example","automaticResources":{"minReplicaCount":1,"maxReplicaCount":2}}]}`,
+			stateKey:   "automatic_resources.0.max_replica_count",
+			stateValue: 2,
+		},
+		{
 			name: "empty machine spec",
 			fields: map[string]interface{}{
 				"dedicated_resources": []interface{}{map[string]interface{}{
@@ -331,6 +346,52 @@ func TestVertexAIEndpointDeployedModelEmptyResourceBlocks(t *testing.T) {
 			response:   `{"deployedModels":[{"id":"456","model":"projects/test-project/locations/us-central1/models/example","dedicatedResources":{"machineSpec":{"machineType":"n1-standard-2"},"minReplicaCount":1}}]}`,
 			stateKey:   "dedicated_resources.0.machine_spec.0.machine_type",
 			stateValue: "n1-standard-2",
+		},
+		{
+			name: "accelerated dedicated resources",
+			fields: map[string]interface{}{
+				"service_account":           "runtime@test-project.iam.gserviceaccount.com",
+				"enable_access_logging":     true,
+				"disable_container_logging": true,
+				"dedicated_resources": []interface{}{map[string]interface{}{
+					"machine_spec": []interface{}{map[string]interface{}{
+						"machine_type": "n1-standard-2", "accelerator_type": "NVIDIA_TESLA_T4", "accelerator_count": 1,
+					}},
+					"min_replica_count": 1, "required_replica_count": 1, "spot": true,
+				}},
+			},
+			want: map[string]interface{}{
+				"serviceAccount":          "runtime@test-project.iam.gserviceaccount.com",
+				"enableAccessLogging":     true,
+				"disableContainerLogging": true,
+				"dedicatedResources": map[string]interface{}{
+					"machineSpec": map[string]interface{}{
+						"machineType": "n1-standard-2", "acceleratorType": "NVIDIA_TESLA_T4", "acceleratorCount": float64(1),
+					},
+					"minReplicaCount": float64(1), "requiredReplicaCount": float64(1), "spot": true,
+				},
+			},
+			response:   `{"deployedModels":[{"id":"456","model":"projects/test-project/locations/us-central1/models/example","serviceAccount":"runtime@test-project.iam.gserviceaccount.com","enableAccessLogging":true,"disableContainerLogging":true,"dedicatedResources":{"machineSpec":{"machineType":"n1-standard-2","acceleratorType":"NVIDIA_TESLA_T4","acceleratorCount":1},"minReplicaCount":1,"requiredReplicaCount":1,"spot":true}}]}`,
+			stateKey:   "service_account",
+			stateValue: "runtime@test-project.iam.gserviceaccount.com",
+		},
+		{
+			name: "TPU topology",
+			fields: map[string]interface{}{
+				"dedicated_resources": []interface{}{map[string]interface{}{
+					"machine_spec": []interface{}{map[string]interface{}{
+						"machine_type": "ct5lp-hightpu-4t", "tpu_topology": "2x2x1",
+					}},
+					"min_replica_count": 1,
+				}},
+			},
+			want: map[string]interface{}{"dedicatedResources": map[string]interface{}{
+				"machineSpec":     map[string]interface{}{"machineType": "ct5lp-hightpu-4t", "tpuTopology": "2x2x1"},
+				"minReplicaCount": float64(1),
+			}},
+			response:   `{"deployedModels":[{"id":"456","model":"projects/test-project/locations/us-central1/models/example","dedicatedResources":{"machineSpec":{"machineType":"ct5lp-hightpu-4t","tpuTopology":"2x2x1"},"minReplicaCount":1}}]}`,
+			stateKey:   "dedicated_resources.0.machine_spec.0.tpu_topology",
+			stateValue: "2x2x1",
 		},
 		{
 			name:       "shared resources",
@@ -370,7 +431,7 @@ func TestVertexAIEndpointDeployedModelEmptyResourceBlocks(t *testing.T) {
 			if !ok {
 				t.Fatalf("missing deployedModel in request: %#v", body)
 			}
-			for _, key := range []string{"automaticResources", "dedicatedResources", "sharedResources"} {
+			for _, key := range []string{"automaticResources", "dedicatedResources", "sharedResources", "serviceAccount", "enableAccessLogging", "disableContainerLogging"} {
 				got, gotOK := model[key]
 				want, wantOK := tt.want[key]
 				if gotOK != wantOK || !reflect.DeepEqual(got, want) {

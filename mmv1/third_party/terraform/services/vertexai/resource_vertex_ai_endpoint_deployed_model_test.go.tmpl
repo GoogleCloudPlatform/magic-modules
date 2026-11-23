@@ -53,6 +53,10 @@ func TestAccVertexAIEndpointDeployedModel_mutation(t *testing.T) {
 			{
 				Config: testAccVertexAIEndpointDeployedModel_mutation(initial),
 				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_vertex_ai_endpoint_deployed_model.model", "display_name", "Terraform deployed model"),
+					resource.TestCheckResourceAttr("google_vertex_ai_endpoint_deployed_model.model", "enable_access_logging", "true"),
+					resource.TestCheckResourceAttr("google_vertex_ai_endpoint_deployed_model.model", "region", "us-central1"),
+					resource.TestCheckResourceAttr("google_vertex_ai_endpoint_deployed_model.model", "dedicated_resources.0.required_replica_count", "1"),
 					resource.TestCheckResourceAttr("google_vertex_ai_endpoint_deployed_model.model", "dedicated_resources.0.autoscaling_metric_specs.0.target", "60"),
 				),
 			},
@@ -98,9 +102,12 @@ func TestAccVertexAIEndpointDeployedModel_mutation(t *testing.T) {
 func testAccVertexAIEndpointDeployedModel_mutation(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_vertex_ai_endpoint_deployed_model" "model" {
-  endpoint          = google_vertex_ai_endpoint.endpoint.id
-  deployed_model_id = "1234567890"
-  model             = google_vertex_ai_model.model.id
+  endpoint              = google_vertex_ai_endpoint.endpoint.id
+  deployed_model_id     = "1234567890"
+  model                 = google_vertex_ai_model.model.id
+  display_name          = "Terraform deployed model"
+  enable_access_logging = true
+  region                = "us-central1"
   {{- if eq $.TargetVersionName "ga" }}
   disable_container_logging = %{container_logging}
   {{- else }}
@@ -112,8 +119,9 @@ resource "google_vertex_ai_endpoint_deployed_model" "model" {
       machine_type = "n1-standard-2"
     }
 
-    min_replica_count = 1
-    max_replica_count = %{max_replicas}
+    min_replica_count      = 1
+    max_replica_count      = %{max_replicas}
+    required_replica_count = 1
     autoscaling_metric_specs {
       metric_name = "aiplatform.googleapis.com/prediction/online/cpu/utilization"
       target      = %{target}
