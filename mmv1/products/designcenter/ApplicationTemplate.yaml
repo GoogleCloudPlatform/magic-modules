@@ -1,0 +1,279 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: ApplicationTemplate
+description: |
+  Application template in Application Design Center.
+references:
+  guides:
+    Application Design Center Overview: https://cloud.google.com/application-design-center/docs/overview
+    Design an application template: https://cloud.google.com/application-design-center/docs/design-application-templates
+  api: https://cloud.google.com/application-design-center/docs/reference/rest/v1/projects.locations.spaces.applicationTemplates
+base_url: projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates
+self_link: projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template_id}}
+create_url: projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates?applicationTemplateId={{application_template_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template_id}}
+# ApplicationTemplate CRUD methods are synchronous; override product.yaml async defaults.
+async:
+  actions: []
+samples:
+  - name: designcenter_application_template_basic
+    primary_resource_id: example
+    steps:
+      - name: designcenter_application_template_basic
+        resource_id_vars:
+          application_template_id: example-template
+        vars:
+          project: my-project-name
+          space: example-space
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+  - name: designcenter_application_template_standard
+    primary_resource_id: example
+    steps:
+      - name: designcenter_application_template_standard
+        resource_id_vars:
+          application_template_id: example-std-template
+        vars:
+          project: my-project-name
+          space: example-space
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+      - name: designcenter_application_template_standard_unset
+        resource_id_vars:
+          application_template_id: example-std-template
+        vars:
+          project: my-project-name
+          space: example-space
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+  - name: designcenter_application_template_full
+    primary_resource_id: example
+    steps:
+      - name: designcenter_application_template_full
+        resource_id_vars:
+          application_template_id: example-full-template
+        vars:
+          project: my-project-name
+          space: example-space
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+      - name: designcenter_application_template_update
+        resource_id_vars:
+          application_template_id: example-full-template
+        vars:
+          project: my-project-name
+          space: example-space
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+      - name: designcenter_application_template_unset
+        resource_id_vars:
+          application_template_id: example-full-template
+        vars:
+          project: my-project-name
+          space: example-space
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+  - name: designcenter_application_template_root_variables
+    primary_resource_id: example
+    # Excluded from docs because components must already exist before an update can set root variables.
+    exclude_basic_doc: true
+    steps:
+      - name: designcenter_application_template_root_variables_basic
+        resource_id_vars:
+          application_template_id: example-root-vars-template
+          component_id: example-component
+        vars:
+          project: my-project-name
+          space: example-space
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+      - name: designcenter_application_template_root_variables
+        resource_id_vars:
+          application_template_id: example-root-vars-template
+          component_id: example-component
+        vars:
+          project: my-project-name
+          space: example-space
+          input_variable: service_name
+          output_variable: service_uri
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+      - name: designcenter_application_template_root_variables
+        resource_id_vars:
+          application_template_id: example-root-vars-template
+          component_id: example-component
+        vars:
+          project: my-project-name
+          space: example-space
+          input_variable: location
+          output_variable: apphub_service_uri
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+parameters:
+  - name: location
+    type: String
+    description: |
+      The location of the application template.
+    required: true
+    immutable: true
+    url_param_only: true
+  - name: space
+    type: String
+    description: |
+      The ID of the space for the application template.
+    required: true
+    immutable: true
+    url_param_only: true
+  - name: application_template_id
+    type: String
+    description: |
+      The ID of the application template.
+    required: true
+    immutable: true
+    url_param_only: true
+properties:
+  - name: name
+    type: String
+    description: |
+      The resource name of the application template.
+      Format: `projects/{project}/locations/{location}/spaces/{space}/applicationTemplates/{application_template}`
+    output: true
+  - name: displayName
+    type: String
+    description: |
+      User-defined display name.
+  - name: description
+    type: String
+    description: |
+      User-defined description.
+  - name: applicationParameters
+    type: Array
+    description: |
+      Parameters to apply to all components in an application, such as the
+      project ID and region.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: key
+          type: String
+          description: |
+            The key of the parameter.
+          required: true
+        - name: value
+          type: JsonValue
+          description: |
+            The value of the parameter, as a JSON-encoded string. Use
+            `jsonencode()` to set it.
+          send_empty_value: true
+  - name: compositionType
+    type: String
+    description: |
+      Composition type of the template. Possible values include `STANDARD` and
+      `COMPOSITE`. See the [REST API documentation](https://cloud.google.com/application-design-center/docs/reference/rest/Shared.Types/ApplicationCompositionType)
+      for all supported values.
+    default_from_api: true
+    immutable: true
+  - name: rootInputVariables
+    type: Array
+    description: |
+      Root level input variables of the application template. For `STANDARD`
+      templates with `inputs_as_root_module_variables` enabled, the API
+      populates these automatically from the components.
+    default_from_api: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: variable
+          type: String
+          description: |
+            The name of the variable.
+          required: true
+        - name: componentUri
+          type: String
+          description: |
+            The URI of the component that the variable belongs to.
+          required: true
+  - name: rootOutputVariables
+    type: Array
+    description: |
+      Root level output variables of the application template. For `STANDARD`
+      templates with `inputs_as_root_module_variables` enabled, the API
+      populates these automatically from the components.
+    default_from_api: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: variable
+          type: String
+          description: |
+            The name of the variable.
+          required: true
+        - name: componentUri
+          type: String
+          description: |
+            The URI of the component that the variable belongs to.
+          required: true
+  - name: saasRuntimeContext
+    type: NestedObject
+    description: |
+      SaaS runtime context for the application template.
+    properties:
+      - name: saasNames
+        type: Array
+        description: |
+          The SaaS names, in the format
+          `projects/{project}/locations/{location}/saas/{saas}`.
+        required: true
+        item_type:
+          type: String
+  - name: inputsAsRootModuleVariables
+    type: Boolean
+    description: |
+      Whether to expose all component input variables as root-level Terraform
+      module variables. Only supported for `STANDARD` composition type
+      templates.
+    send_empty_value: true
+  - name: iacFormat
+    type: String
+    description: |
+      IaC format of the application template.
+    output: true
+  - name: latestRevision
+    type: String
+    description: |
+      Latest revision of the application template.
+    output: true
+  - name: createTime
+    type: Time
+    description: |
+      The time the application template was created.
+    output: true
+  - name: updateTime
+    type: Time
+    description: |
+      The time the application template was last updated.
+    output: true
