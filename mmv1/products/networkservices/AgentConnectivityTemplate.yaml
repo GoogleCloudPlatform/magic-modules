@@ -39,6 +39,11 @@ samples:
           agent_connectivity_template_id: my-connectivity-template
   - name: network_services_agent_connectivity_template_advanced
     primary_resource_id: default
+    bootstrap_iam:
+      - member: 'serviceAccount:service-{project_number}@gcp-sa-agentgateway.iam.gserviceaccount.com'
+        role: 'roles/compute.networkViewer'
+      - member: 'serviceAccount:service-{project_number}@gcp-sa-agentgateway.iam.gserviceaccount.com'
+        role: 'roles/dns.reader'
     steps:
       - name: network_services_agent_connectivity_template_advanced
         resource_id_vars:
