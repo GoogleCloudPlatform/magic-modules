@@ -1,2 +1,6 @@
  // Keep the original resource. This file is to override the encoder for creation.
+// manualInstanceCount is always sent (send_empty_value), but the API rejects it unless scalingMode is MANUAL.
+if scaling, ok := obj["scaling"].(map[string]interface{}); ok && scaling["scalingMode"] == "AUTOMATIC" {
+	delete(scaling, "manualInstanceCount")
+}
 return obj, nil

@@ -606,3 +606,70 @@ resource "google_cloud_run_v2_worker_pool" "default" {
 
 `, context)
 }
+
+func TestAccCloudRunV2WorkerPool_cloudrunv2WorkerPoolWithAutomaticScaling(t *testing.T) {
+	t.Parallel()
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudRunV2WorkerPoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudRunV2WorkerPool_cloudrunv2WorkerPoolWithAutomaticScaling(context, 1, 3),
+			},
+			{
+				ResourceName:            "google_cloud_run_v2_worker_pool.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "launch_stage", "deletion_protection", "scaling.0.scaling_mode", "scaling.0.manual_instance_count"},
+			},
+			{
+				Config: testAccCloudRunV2WorkerPool_cloudrunv2WorkerPoolWithAutomaticScaling(context, 2, 4),
+			},
+			{
+				ResourceName:            "google_cloud_run_v2_worker_pool.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "location", "annotations", "labels", "terraform_labels", "launch_stage", "deletion_protection", "scaling.0.scaling_mode", "scaling.0.manual_instance_count"},
+			},
+		},
+	})
+}
+
+func testAccCloudRunV2WorkerPool_cloudrunv2WorkerPoolWithAutomaticScaling(context map[string]interface{}, min, max int) string {
+	context["min_instance_count"] = min
+	context["max_instance_count"] = max
+	return acctest.Nprintf(`
+resource "google_cloud_run_v2_worker_pool" "default" {
+  name     = "tf-test-cloudrun-worker-pool%{random_suffix}"
+  description = "description creating"
+  location = "us-central1"
+  deletion_protection = false
+  launch_stage = "BETA"
+  annotations = {
+    generated-by = "magic-modules"
+  }
+  scaling {
+    scaling_mode       = "AUTOMATIC"
+    min_instance_count = %{min_instance_count}
+    max_instance_count = %{max_instance_count}
+  }
+
+  labels = {
+    label-1 = "value-1"
+  }
+  client = "client-1"
+  client_version = "client-version-1"
+  template {
+    containers {
+      name = "container-1"
+      image = "us-docker.pkg.dev/cloudrun/container/worker-pool"
+    }
+  }
+}
+
+`, context)
+}

@@ -334,7 +334,7 @@ properties:
       - name: 'manualInstanceCount'
         type: Integer
         description: |
-          The total number of instances in manual scaling mode.
+          The total number of instances in manual scaling mode. Not sent when `scaling_mode` is `AUTOMATIC`.
         send_empty_value: true
   - name: 'template'
     type: NestedObject

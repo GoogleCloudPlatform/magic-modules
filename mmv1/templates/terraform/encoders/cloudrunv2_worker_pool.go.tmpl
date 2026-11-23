@@ -1,2 +1,6 @@
 delete(obj, "name")  // Field not allowed when creating.
+// manualInstanceCount is always sent (send_empty_value), but the API rejects it unless scalingMode is MANUAL.
+if scaling, ok := obj["scaling"].(map[string]interface{}); ok && scaling["scalingMode"] == "AUTOMATIC" {
+	delete(scaling, "manualInstanceCount")
+}
 return obj, nil
