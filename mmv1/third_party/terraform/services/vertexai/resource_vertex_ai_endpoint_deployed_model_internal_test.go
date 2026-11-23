@@ -602,6 +602,28 @@ func TestVertexAIEndpointDeployedModelOmittedTargetRetainsState(t *testing.T) {
 	}
 }
 
+func TestVertexAIEndpointDeployedModelModelProjectNumberNoDiff(t *testing.T) {
+	config := func(model string) map[string]interface{} {
+		return map[string]interface{}{
+			"endpoint":          "projects/test-project/locations/us-central1/endpoints/123",
+			"region":            "us-central1",
+			"deployed_model_id": "456",
+			"model":             model,
+			"dedicated_resources": []interface{}{map[string]interface{}{
+				"machine_spec":      []interface{}{map[string]interface{}{"machine_type": "n1-standard-2"}},
+				"min_replica_count": 1,
+			}},
+		}
+	}
+	_, diff := endpointDeployedModelUpdateData(t,
+		config("projects/123456789/locations/us-central1/models/example"),
+		config("projects/test-project/locations/us-central1/models/example"),
+		&transport_tpg.Config{})
+	if diff != nil && diff.RequiresNew() {
+		t.Fatalf("model returned with a project number must not force replacement, got diff %#v", diff)
+	}
+}
+
 func TestVertexAIEndpointDeployedModelUpdatesReplicasInPlace(t *testing.T) {
 	base := func(min, max int) map[string]interface{} {
 		return map[string]interface{}{

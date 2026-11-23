@@ -170,6 +170,7 @@ properties:
       `projects/{project}/locations/{location}/models/{model}@2`.
     required: true
     immutable: true
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - name: displayName
     type: String
     description: The display name of the DeployedModel. If omitted, the Model's display name is used.
