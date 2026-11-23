@@ -18,7 +18,7 @@ resource "google_network_services_gateway" "{{$.PrimaryResourceId}}" {
     foo = "bar"
   }
   description = "my description"
-  scope = "my-scope"
+  scope = "{{index $.ResourceIdVars "scope_name"}}"
   type = "OPEN_MESH"
   ports = [443]
 }

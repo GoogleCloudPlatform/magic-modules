@@ -79,6 +79,7 @@ samples:
           resource_name: my-tls-route
           backend_service_name: my-backend-service
           health_check_name: backend-service-health-check
+          scope_name: my-scope
   - name: network_services_tls_route_target_tcp_proxy_basic
     primary_resource_id: default
     steps:
