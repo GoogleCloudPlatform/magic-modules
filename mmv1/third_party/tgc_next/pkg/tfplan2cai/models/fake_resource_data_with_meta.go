@@ -48,7 +48,8 @@ func (d *FakeResourceMeta) IsDeleted() bool {
 func NewFakeResourceDataWithMeta(kind string, resourceSchema map[string]*schema.Schema, values map[string]interface{}, isDeleted bool, tfplanAddress string) *FakeResourceDataWithMeta {
 	d := &FakeResourceDataWithMeta{
 		FakeResourceData: FakeResourceData{
-			schema: resourceSchema,
+			schema:    resourceSchema,
+			rawValues: values,
 		},
 		FakeResourceMeta: FakeResourceMeta{
 			kind:      kind,

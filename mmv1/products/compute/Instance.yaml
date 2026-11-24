@@ -41,12 +41,6 @@ include_in_tgc_next: true
 tgc_tests:
   - name: 'TestAccComputeInstance_secondaryAliasIpRange'
     skip: 'data issue with this test'
-  - name: 'TestAccComputeInstance_workloadIdentity_identityType'
-    skip: 'The test exercises beta-only field workload_identity_config.identity_type'
-  - name: 'TestAccComputeInstance_workloadIdentity_agentIdentity'
-    skip: 'The test exercises beta-only field workload_identity_config.identity_type'
-  - name: 'TestAccComputeInstance_workloadIdentity_serviceAccount'
-    skip: 'The test exercises beta-only field workload_identity_config.identity_type'
 custom_code:
 samples:
   - name: 'instance_basic'
@@ -1028,7 +1022,6 @@ properties:
         type: Enum
         description: |
           The type of identity to use.
-        min_version: beta
         default_from_api: true
         is_missing_in_cai: true
         enum_values:

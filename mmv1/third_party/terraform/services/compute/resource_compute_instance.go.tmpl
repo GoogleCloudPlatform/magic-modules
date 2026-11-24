@@ -127,13 +127,6 @@ var (
 		"shielded_instance_config.0.enable_vtpm",
 		"shielded_instance_config.0.enable_integrity_monitoring",
 	}
-	{{- if eq $.TargetVersionName "ga" }}
-
-	workloadIdentityConfigKeys = []string{
-		"workload_identity_config.0.identity",
-		"workload_identity_config.0.identity_certificate_enabled",
-	}
-	{{- end }}
 )
 
 // This checks if the project provided in subnetwork's self_link matches
@@ -175,13 +168,11 @@ func forceNewIfNetworkIPNotUpdatable(ctx context.Context, d *schema.ResourceDiff
 	return forceNewIfNetworkIPNotUpdatableFunc(d)
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func workloadIdentityConfigForceNewCustomDiff() schema.CustomizeDiffFunc {
 	return customdiff.ForceNewIf("workload_identity_config", func(_ context.Context, d *schema.ResourceDiff, meta interface{}) bool {
 		return d.Id() != "" && d.HasChange("workload_identity_config")
 	})
 }
-{{- end }}
 
 func forceNewIfNetworkIPNotUpdatableFunc(d tpgresource.TerraformResourceDiff) error {
 	oldCount, newCount := d.GetChange("network_interface.#")
@@ -1767,22 +1758,17 @@ be from 0 to 999,999,999 inclusive.`,
 						"identity": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							{{- if ne $.TargetVersionName "ga" }}
 							Computed:    true,
-							{{- end }}
 							ForceNew:    true,
 							Description: `Identity SPIFFE id.`,
 						},
 						"identity_certificate_enabled": {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							{{- if ne $.TargetVersionName "ga" }}
 							Computed:    true,
-							{{- end }}
 							ForceNew:    true,
 							Description: `Specifies whether identity certificates are enabled.`,
 						},
-						{{- if ne $.TargetVersionName "ga" }}
 						"identity_type": {
 							Type:         schema.TypeString,
 							Optional:     true,
@@ -1791,7 +1777,6 @@ be from 0 to 999,999,999 inclusive.`,
 							ValidateFunc: verify.ValidateEnum([]string{"IDENTITY_TYPE_UNSPECIFIED", "SERVICE_ACCOUNT", "AGENT_IDENTITY", ""}),
 							Description:  `The type of identity to use. Possible values: ["IDENTITY_TYPE_UNSPECIFIED", "SERVICE_ACCOUNT", "AGENT_IDENTITY"]`,
 						},
-						{{- end }}
 					},
 				},
 			},
@@ -1816,9 +1801,7 @@ be from 0 to 999,999,999 inclusive.`,
 			customdiff.ForceNewIf("boot_disk.0.initialize_params.0.provisioned_iops", func(_ context.Context, d *schema.ResourceDiff, meta interface{}) bool {
 				return d.HasChange("boot_disk.0.initialize_params.0.provisioned_iops") && !strings.Contains(d.Get("boot_disk.0.initialize_params.0.type").(string), "hyperdisk")
 			}),
-			{{- if ne $.TargetVersionName "ga" }}
 			workloadIdentityConfigForceNewCustomDiff(),
-			{{- end }}
 			validateSubnetworkProject,
 			forceNewIfNetworkIPNotUpdatable,
 			tpgresource.SetLabelsDiff,
@@ -1852,6 +1835,9 @@ func getInstance(config *transport_tpg.Config, d *schema.ResourceData) (map[stri
 		Project:   project,
 		RawURL:    url,
 		UserAgent: userAgent,
+{{- if eq $.TargetVersionName "ga" }}
+		ApiVersion: "2026-11-01",
+{{- end }}
 	})
 	if err != nil {
 		return nil, transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Instance %s", d.Get("name").(string)))
@@ -2216,6 +2202,9 @@ func resourceComputeInstanceCreate(d *schema.ResourceData, meta interface{}) err
 		RawURL:    insertUrl,
 		UserAgent: userAgent,
 		Body:      instanceBody,
+{{- if eq $.TargetVersionName "ga" }}
+		ApiVersion: "2026-11-01",
+{{- end }}
 	})
 	if err != nil {
 		return fmt.Errorf("Error creating instance: %s", err)
@@ -2647,9 +2636,9 @@ func populateComputeInstanceResourceData(d *schema.ResourceData, instance map[st
 	if err := d.Set("instance_encryption_key", flattenComputeInstanceEncryptionKey(instanceEncryptionKeyMap)); err != nil {
 		return fmt.Errorf("Error setting instance_encryption_key: %s", err)
 	}
-	{{- if ne $.TargetVersionName `ga` }}
 	if wicMap, ok := instance["workloadIdentityConfig"].(map[string]interface{}); ok && len(wicMap) > 0 {
 		flattenedWic := flattenInstanceWorkloadIdentityConfig(wicMap)
+		// instance_from_template omits identity_type from its schema until its follow-up PR lands.
 		if d.Get("source_instance_template") != nil {
 			flattenedWic = flattenWorkloadIdentityConfig(wicMap)
 		}
@@ -2662,6 +2651,7 @@ func populateComputeInstanceResourceData(d *schema.ResourceData, instance map[st
 		}
 	}
 
+	{{- if ne $.TargetVersionName `ga` }}
 	if partnerMetadataMap, ok := instance["partnerMetadata"].(map[string]interface{}); ok {
 		partnerMetadata, err := flattenPartnerMetadata(convertPartnerMetadataFromCompute(partnerMetadataMap))
 		if err != nil {
@@ -2724,6 +2714,9 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 		Project:   project,
 		RawURL:    instanceUrl,
 		UserAgent: userAgent,
+{{- if eq $.TargetVersionName "ga" }}
+		ApiVersion: "2026-11-01",
+{{- end }}
 	})
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Instance %s", d.Get("name").(string)))
@@ -2742,6 +2735,9 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					Project:   project,
 					RawURL:    instanceUrl,
 					UserAgent: userAgent,
+{{- if eq $.TargetVersionName "ga" }}
+					ApiVersion: "2026-11-01",
+{{- end }}
 				})
 				if err != nil {
 					return fmt.Errorf("Error retrieving instance: %s", err)
@@ -2758,6 +2754,9 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					RawURL:    instanceUrl,
 					UserAgent: userAgent,
 					Body:      instMap,
+{{- if eq $.TargetVersionName "ga" }}
+					ApiVersion: "2026-11-01",
+{{- end }}
 				})
 				if err != nil {
 					return fmt.Errorf("Error updating instance: %s", err)
@@ -2939,6 +2938,9 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					Project:   project,
 					RawURL:    instanceUrl,
 					UserAgent: userAgent,
+{{- if eq $.TargetVersionName "ga" }}
+					ApiVersion: "2026-11-01",
+{{- end }}
 				})
 				if err != nil {
 					return fmt.Errorf("Error retrieving instance: %s", err)
@@ -2959,6 +2961,9 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					RawURL:    instanceUrl,
 					UserAgent: userAgent,
 					Body:      instMap,
+{{- if eq $.TargetVersionName "ga" }}
+					ApiVersion: "2026-11-01",
+{{- end }}
 				})
 				if err != nil {
 					return fmt.Errorf("Error updating instance: %s", err)
@@ -3854,6 +3859,9 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					Project:   project,
 					RawURL:    instanceUrl,
 					UserAgent: userAgent,
+{{- if eq $.TargetVersionName "ga" }}
+					ApiVersion: "2026-11-01",
+{{- end }}
 				})
 				if err != nil {
 					return fmt.Errorf("Error retrieving instance: %s", err)
@@ -3870,6 +3878,9 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 					RawURL:    instanceUrl,
 					UserAgent: userAgent,
 					Body:      instMap,
+{{- if eq $.TargetVersionName "ga" }}
+					ApiVersion: "2026-11-01",
+{{- end }}
 				})
 				if err != nil {
 					return fmt.Errorf("Error updating instance: %s", err)
@@ -4165,6 +4176,9 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 						Project:   project,
 						RawURL:    instanceUrl,
 						UserAgent: userAgent,
+{{- if eq $.TargetVersionName "ga" }}
+						ApiVersion: "2026-11-01",
+{{- end }}
 					})
 					if err != nil {
 						return fmt.Errorf("Error retrieving instance: %s", err)
@@ -4181,6 +4195,9 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 						RawURL:    instanceUrl,
 						UserAgent: userAgent,
 						Body:      instMap,
+{{- if eq $.TargetVersionName "ga" }}
+						ApiVersion: "2026-11-01",
+{{- end }}
 					})
 					if err != nil {
 						return fmt.Errorf("Error updating instance: %s", err)
@@ -4204,6 +4221,9 @@ func resourceComputeInstanceUpdate(d *schema.ResourceData, meta interface{}) err
 				Project:   project,
 				RawURL:    instanceUrl,
 				UserAgent: userAgent,
+{{- if eq $.TargetVersionName "ga" }}
+				ApiVersion: "2026-11-01",
+{{- end }}
 			})
 			if err != nil {
 				return err
