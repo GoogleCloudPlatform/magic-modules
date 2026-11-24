@@ -72,18 +72,21 @@ func TestAccDataSource{{ $.Res.ResourceName }}_basic(t *testing.T) {
 			{
 				Config: testAcc{{ $step.TestStepSlug $.Res.ProductMetadata.Name $.Res.Name }}DataSource(context),
 				Check: resource.ComposeTestCheckFunc(
-					{{- if gt (len ($.Res.IgnoreReadProperties $step)) 0 }}
+					{{- if gt (len ($.Res.DatasourceIgnoreReadProperties $step)) 0 }}
+						{{- if $.Res.DatasourceHasClientVirtualFields }}
+						// Ignore client-side virtual fields because they are not returned by the API.
+						{{- end }}
 						acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 							"data.{{ $sample.ResourceType $.Res.TerraformName }}.default",
 							"{{ $sample.ResourceType $.Res.TerraformName }}.{{ $sample.PrimaryResourceId }}",
 							[]string{
-								{{- range $prop := $.Res.IgnoreReadProperties $step }}
+								{{- range $prop := $.Res.DatasourceIgnoreReadProperties $step }}
 								"{{ $prop }}",
 								{{- end }}
 							},
 						),
 					{{- else }}
-										acctest.CheckDataSourceStateMatchesResourceState("data.{{ $sample.ResourceType $.Res.TerraformName }}.default", "{{ $sample.ResourceType $.Res.TerraformName }}.{{ $sample.PrimaryResourceId }}"),
+						acctest.CheckDataSourceStateMatchesResourceState("data.{{ $sample.ResourceType $.Res.TerraformName }}.default", "{{ $sample.ResourceType $.Res.TerraformName }}.{{ $sample.PrimaryResourceId }}"),
 					{{- end }}
 					),
 			},
@@ -96,7 +99,10 @@ func testAcc{{ $step.TestStepSlug $.Res.ProductMetadata.Name $.Res.Name }}DataSo
 {{ $step.TestHCLText }}
 
 data "{{ $.Res.TerraformName }}" "default" {
-{{- range $fieldName := $.Res.DatasourceRequiredFields }}
+{{- if $.Res.VersionedProvider $sample.MinVersion }}
+  provider = google-beta
+{{- end }}
+{{- range $fieldName := $.Res.DatasourceTestFields $sample $step }}
   {{ $fieldName }} = {{ $sample.ResourceType $.Res.TerraformName }}.{{ $sample.PrimaryResourceId }}.{{ $fieldName }}
 {{- end }}
 }`,

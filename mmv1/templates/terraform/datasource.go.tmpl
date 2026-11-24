@@ -82,50 +82,101 @@ func DataSource{{ .ResourceName -}}() *schema.Resource {
 
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(rs)
 
-  {{if .DatasourceRequiredFields}}
-  tpgresource.AddRequiredFieldsToSchema(dsSchema, {{range $index, $field := .DatasourceRequiredFields}}{{if gt $index 0}}, {{end}}{{printf "%q" $field}}{{end}})
-  {{end}}
-  
-  {{if .DatasourceOptionalFields}}
-  tpgresource.AddOptionalFieldsToSchema(dsSchema, {{range $index, $field := .DatasourceOptionalFields}}{{if gt $index 0}}, {{end}}{{printf "%q" $field}}{{end}})
-  {{end}}
+	{{- if .DatasourceRemovedFields }}
+	tpgresource.DeleteFieldsFromSchema(dsSchema, {{range $index, $field := .DatasourceRemovedFields}}{{if gt $index 0}}, {{end}}{{printf "%q" $field}}{{end}})
+	{{- end }}
+	{{- range $stmt := .DatasourceNestedRemovedFieldStmts }}
+	{{ $stmt }}
+	{{- end }}
 
-  return &schema.Resource{
+	{{- if .DatasourceRequiredFields }}
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, {{range $index, $field := .DatasourceRequiredFields}}{{if gt $index 0}}, {{end}}{{printf "%q" $field}}{{end}})
+	{{- end }}
+
+	{{- if .DatasourceOptionalFields }}
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, {{range $index, $field := .DatasourceOptionalFields}}{{if gt $index 0}}, {{end}}{{printf "%q" $field}}{{end}})
+	{{- end }}
+
+	{{- range $path := .DatasourceSensitiveFieldPaths }}
+	{{ $path }}.Sensitive = true
+	{{- end }}
+
+	return &schema.Resource{
 		Read:   dataSource{{ $.ResourceName -}}Read,
 		Schema: dsSchema,
 	}
 }
 
 func dataSource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{}) error {
-  config := meta.(*transport_tpg.Config)
+	config := meta.(*transport_tpg.Config)
 
-  id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
-  if err != nil {
-        return err
-  }
+	{{- if $.DatasourceHasOptionalLocation }}
+	{{- $loc := $.DatasourceLocationProperty }}
+	{{- if and $loc (not (eq $loc.DefaultValue nil)) }}
+	location := d.Get("location").(string)
+	if location == "" {
+		location = {{ $loc.GoLiteral $loc.DefaultValue }}
+	} else {
+		location = tpgresource.GetResourceNameFromSelfLink(location)
+	}
+	{{- else }}
+	location, err := tpgresource.GetLocation(d, config)
+	if err != nil {
+		return err
+	}
+	{{- end }}
+	if err := d.Set("location", location); err != nil {
+		return fmt.Errorf("Error setting location: %s", err)
+	}
+	{{- end }}
 
-  d.SetId(id)
+	{{- if and $.Datasource $.Datasource.PreRead }}
+	{{ customTemplate $ $.Datasource.PreRead false -}}
+	{{- end }}
 
-  err = resource{{ $.ResourceName -}}Read(d, meta)
+	id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
+	if err != nil {
+		return fmt.Errorf("Error constructing id: %s", err)
+	}
+
+	d.SetId(id)
+
+	err = resource{{ $.ResourceName -}}Read(d, meta)
 	if err != nil {
 		return err
 	}
 
-  {{if $.ShouldDatasourceSetLabels}}
-	if err := tpgresource.SetDataSourceLabels(d); err != nil {
-		return err
-	}
-  {{end}}
-
-  {{if $.ShouldDatasourceSetAnnotations}}
-	if err := tpgresource.SetDataSourceAnnotations(d); err != nil {
-		return err
-	}
-  {{end}}
-
-  if d.Id() == "" {
+	if d.Id() == "" {
 		return fmt.Errorf("%s not found", id)
 	}
 
-  return nil
+	{{- range $vf := $.DatasourceClientVirtualFields }}
+	if err := d.Set("{{ $vf }}", nil); err != nil {
+		return fmt.Errorf("Error clearing client-side field {{ $vf }}: %s", err)
+	}
+	{{- end }}
+
+	{{- range $pair := $.DatasourceEffectiveBackfills }}
+	if err := d.Set("{{ $pair.Target }}", d.Get("{{ $pair.Source }}")); err != nil {
+		return fmt.Errorf("Error setting {{ $pair.Target }}: %s", err)
+	}
+	{{- end }}
+
+	{{- if $.ShouldDatasourceSetLabels }}
+	if err := tpgresource.SetDataSourceLabels(d); err != nil {
+		return err
+	}
+	{{- end }}
+
+	{{- if $.ShouldDatasourceSetAnnotations }}
+	if err := tpgresource.SetDataSourceAnnotations(d); err != nil {
+		return err
+	}
+	{{- end }}
+
+	{{- if and $.Datasource $.Datasource.PostRead }}
+	{{ customTemplate $ $.Datasource.PostRead false -}}
+	{{- end }}
+
+	return nil
 }
