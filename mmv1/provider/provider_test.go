@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"testing/fstest"
 	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
@@ -53,9 +54,10 @@ func TestTerraformVerboseLogging(t *testing.T) {
 			})
 
 			var buf bytes.Buffer
+			origLogOutput := log.Writer()
 			log.SetOutput(&buf)
 			t.Cleanup(func() {
-				log.SetOutput(log.Writer())
+				log.SetOutput(origLogOutput)
 			})
 
 			providerObj := NewTerraform(p, "ga", time.Now(), fsys)
@@ -148,27 +150,48 @@ func TestCopyDir(t *testing.T) {
 }
 
 func TestTerraformOiCS_GatesOnShouldGenerateDoc(t *testing.T) {
-	fsys := os.DirFS("..")
+	// Use stub templates instead of the real template tree so the test doesn't
+	// depend on the directory it runs from.
+	const stepConfigPath = "templates/terraform/samples/services/pubsub/oics_step.tf.tmpl"
+	fsys := fstest.MapFS{
+		stepConfigPath: &fstest.MapFile{
+			Data: []byte(`resource "google_pubsub_topic" "primary" {}` + "\n"),
+		},
+		// Like the real template, this renders the step's OiCS HCL. Its output
+		// must be non-empty, or main.tf isn't written.
+		"templates/terraform/samples/base_configs/oics_example_file.tf.tmpl": &fstest.MapFile{
+			Data: []byte("{{ $.OicsHCLText -}}\n"),
+		},
+		"templates/terraform/samples/base_configs/tutorial.md.tmpl": &fstest.MapFile{
+			Data: []byte("tutorial\n"),
+		},
+		"templates/terraform/samples/base_configs/example_backing_file.tf.tmpl": &fstest.MapFile{
+			Data: []byte("# backing file\n"),
+		},
+		"templates/terraform/samples/static/motd.tmpl": &fstest.MapFile{
+			Data: []byte("motd\n"),
+		},
+	}
 	stepBasic := &resource.Step{
 		Name:       "oics_basic",
-		ConfigPath: "templates/terraform/samples/static/motd.tmpl",
+		ConfigPath: stepConfigPath,
 	}
 	stepUpdateUndocumented := &resource.Step{
 		Name:       "oics_update_undoc",
-		ConfigPath: "templates/terraform/samples/static/motd.tmpl",
+		ConfigPath: stepConfigPath,
 	}
 	stepUpdateDocumented := &resource.Step{
 		Name:           "oics_update_doc",
-		ConfigPath:     "templates/terraform/samples/static/motd.tmpl",
+		ConfigPath:     stepConfigPath,
 		IncludeStepDoc: true,
 	}
 	stepExcludedSample := &resource.Step{
 		Name:       "oics_excluded_basic_doc",
-		ConfigPath: "templates/terraform/samples/static/motd.tmpl",
+		ConfigPath: stepConfigPath,
 	}
 	stepBetaOnly := &resource.Step{
 		Name:           "oics_beta_step",
-		ConfigPath:     "templates/terraform/samples/static/motd.tmpl",
+		ConfigPath:     stepConfigPath,
 		MinVersion:     "beta",
 		IncludeStepDoc: true,
 	}
