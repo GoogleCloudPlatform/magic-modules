@@ -1,0 +1,43 @@
+{{/*
+	The license inside this block applies to this file.
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+if d.HasChange("xmanager_config") {
+	oldV, newV := d.GetChange("xmanager_config")
+	oldLen := len(oldV.([]interface{}))
+	newLen := len(newV.([]interface{}))
+	if oldLen > 0 && newLen == 0 {
+		if err := vertexAiModelDevelopmentClusterUpdateXmanager(d, config, billingProject, userAgent, false, schema.TimeoutUpdate); err != nil {
+			_ = resourceVertexAIModelDevelopmentClusterRead(d, meta)
+			return err
+		}
+	} else if oldLen == 0 && newLen > 0 {
+		if clusterState, xmState, hasXm, statusErr := vertexAiModelDevelopmentClusterGetXmanagerStatus(d, config, billingProject, userAgent, schema.TimeoutUpdate); statusErr == nil && clusterState == "RUNNING" && hasXm && xmState == "ERROR" {
+			if err := vertexAiModelDevelopmentClusterUpdateXmanager(d, config, billingProject, userAgent, false, schema.TimeoutUpdate); err != nil {
+				_ = resourceVertexAIModelDevelopmentClusterRead(d, meta)
+				return err
+			}
+		}
+		if err := vertexAiModelDevelopmentClusterUpdateXmanager(d, config, billingProject, userAgent, true, schema.TimeoutUpdate); err != nil {
+			_ = resourceVertexAIModelDevelopmentClusterRead(d, meta)
+			return err
+		}
+	} else if oldLen > 0 && newLen > 0 {
+		if err := vertexAiModelDevelopmentClusterUpdateXmanager(d, config, billingProject, userAgent, false, schema.TimeoutUpdate); err != nil {
+			_ = resourceVertexAIModelDevelopmentClusterRead(d, meta)
+			return err
+		}
+		if err := vertexAiModelDevelopmentClusterUpdateXmanager(d, config, billingProject, userAgent, true, schema.TimeoutUpdate); err != nil {
+			_ = resourceVertexAIModelDevelopmentClusterRead(d, meta)
+			return err
+		}
+	}
+}

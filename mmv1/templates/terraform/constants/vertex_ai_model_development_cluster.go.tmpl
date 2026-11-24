@@ -164,7 +164,44 @@ func validateVertexAIModelDevelopmentClusterNodePoolVersions(d vertexAiModelDeve
 	return nil
 }
 
+func vertexAiModelDevelopmentClusterNormalizeComputeRef(v string) string {
+	v = strings.TrimSpace(v)
+	for _, prefix := range []string{
+		"https://www.googleapis.com/compute/v1/",
+		"https://www.googleapis.com/compute/beta/",
+	} {
+		if strings.HasPrefix(v, prefix) {
+			return strings.TrimPrefix(v, prefix)
+		}
+	}
+	return v
+}
+
 func resourceVertexAIModelDevelopmentClusterCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	if v, ok := diff.GetOk("xmanager_config"); ok && len(v.([]interface{})) > 0 {
+		if v2, ok2 := diff.GetOk("orchestrator_spec.0.kubernetes_spec"); !ok2 || len(v2.([]interface{})) == 0 {
+			return fmt.Errorf("xmanager_config is only supported on clusters using the GKE orchestrator (orchestrator_spec.kubernetes_spec)")
+		}
+		if diff.NewValueKnown("xmanager_config.0.network") && diff.NewValueKnown("network.0.network") {
+			xNet, okX := diff.GetOk("xmanager_config.0.network")
+			cNet, okC := diff.GetOk("network.0.network")
+			if okX && okC && xNet.(string) != "" && cNet.(string) != "" {
+				if vertexAiModelDevelopmentClusterNormalizeComputeRef(xNet.(string)) != vertexAiModelDevelopmentClusterNormalizeComputeRef(cNet.(string)) {
+					return fmt.Errorf("xmanager_config.network must match the cluster network.network")
+				}
+			}
+		}
+		if authRaw, okAuth := diff.GetOk("xmanager_config.0.auth_config"); okAuth && len(authRaw.([]interface{})) > 0 {
+			if diff.NewValueKnown("xmanager_config.0.auth_config.0.allowed_domains") &&
+				diff.NewValueKnown("xmanager_config.0.auth_config.0.allowed_emails") {
+				domains, _ := diff.Get("xmanager_config.0.auth_config.0.allowed_domains").([]interface{})
+				emails, _ := diff.Get("xmanager_config.0.auth_config.0.allowed_emails").([]interface{})
+				if len(domains) == 0 && len(emails) == 0 {
+					return fmt.Errorf("at least one of xmanager_config.0.auth_config.0.allowed_domains or xmanager_config.0.auth_config.0.allowed_emails must be specified")
+				}
+			}
+		}
+	}
 	if !vertexAiModelDevelopmentClusterNodePoolVersionsConfigured(diff) {
 		return nil
 	}
@@ -182,5 +219,175 @@ func resourceVertexAIModelDevelopmentClusterCustomDiff(_ context.Context, diff *
 		}
 	}
 	return validateVertexAIModelDevelopmentClusterNodePoolVersions(diff)
+}
+
+func vertexAiModelDevelopmentClusterGetXmanagerStatus(d *schema.ResourceData, config *transport_tpg.Config, billingProject, userAgent, timeoutKey string) (clusterState string, xmState string, hasXm bool, err error) {
+	clusterURL, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}region{{"}}"}}/modelDevelopmentClusters/{{"{{"}}model_development_cluster_id{{"}}"}}")
+	if err != nil {
+		return "", "", false, err
+	}
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    clusterURL,
+		UserAgent: userAgent,
+		Timeout:   d.Timeout(timeoutKey),
+	})
+	if err != nil {
+		return "", "", false, err
+	}
+	if cs, ok := res["clusterStatus"].(map[string]interface{}); ok {
+		clusterState, _ = cs["state"].(string)
+	}
+	if runtime, ok := res["runtime"].(map[string]interface{}); ok {
+		if xm, ok := runtime["xmanager"].(map[string]interface{}); ok && xm != nil {
+			xmState, _ = xm["state"].(string)
+			if xmState != "DELETED" {
+				hasXm = true
+			}
+		}
+	}
+	return clusterState, xmState, hasXm, nil
+}
+
+func vertexAiModelDevelopmentClusterUpdateXmanager(d *schema.ResourceData, config *transport_tpg.Config, billingProject, userAgent string, enable bool, timeoutKey string) error {
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return err
+	}
+	timeout := d.Timeout(timeoutKey)
+
+	if enable {
+		v, ok := d.GetOk("xmanager_config")
+		if !ok {
+			return nil
+		}
+		configList, ok := v.([]interface{})
+		if !ok || len(configList) == 0 {
+			return nil
+		}
+		configMap, ok := configList[0].(map[string]interface{})
+		if !ok {
+			return nil
+		}
+		obj := make(map[string]interface{})
+		instance := make(map[string]interface{})
+
+		if network, ok := configMap["network"].(string); ok && network != "" {
+			instance["network"] = vertexAiModelDevelopmentClusterNormalizeComputeRef(network)
+		}
+		if subnetwork, ok := configMap["subnetwork"].(string); ok && subnetwork != "" {
+			instance["subnetwork"] = vertexAiModelDevelopmentClusterNormalizeComputeRef(subnetwork)
+		}
+		if xprof, ok := configMap["xprof_config"].([]interface{}); ok && len(xprof) > 0 {
+			if xprofMap, ok := xprof[0].(map[string]interface{}); ok {
+				xprofObj := make(map[string]interface{})
+				if uri, ok := xprofMap["gcs_bucket_uri"].(string); ok && uri != "" {
+					xprofObj["gcsBucketUri"] = uri
+				}
+				instance["xprofConfig"] = xprofObj
+			}
+		}
+		if auth, ok := configMap["auth_config"].([]interface{}); ok && len(auth) > 0 {
+			if authMap, ok := auth[0].(map[string]interface{}); ok {
+				authObj := make(map[string]interface{})
+				if domains, ok := authMap["allowed_domains"].(*schema.Set); ok && domains.Len() > 0 {
+					dList := make([]string, 0, domains.Len())
+					for _, dom := range domains.List() {
+						dList = append(dList, dom.(string))
+					}
+					authObj["allowedDomains"] = dList
+				} else if domains, ok := authMap["allowed_domains"].([]interface{}); ok && len(domains) > 0 {
+					dList := make([]string, 0, len(domains))
+					for _, dom := range domains {
+						dList = append(dList, dom.(string))
+					}
+					authObj["allowedDomains"] = dList
+				}
+				if emails, ok := authMap["allowed_emails"].(*schema.Set); ok && emails.Len() > 0 {
+					eList := make([]string, 0, emails.Len())
+					for _, email := range emails.List() {
+						eList = append(eList, email.(string))
+					}
+					authObj["allowedEmails"] = eList
+				} else if emails, ok := authMap["allowed_emails"].([]interface{}); ok && len(emails) > 0 {
+					eList := make([]string, 0, len(emails))
+					for _, email := range emails {
+						eList = append(eList, email.(string))
+					}
+					authObj["allowedEmails"] = eList
+				}
+				if oauth, ok := authMap["oauth_client"].([]interface{}); ok && len(oauth) > 0 {
+					if oauthMap, ok := oauth[0].(map[string]interface{}); ok {
+						oauthObj := make(map[string]interface{})
+						if id, ok := oauthMap["id"].(string); ok && id != "" {
+							oauthObj["id"] = id
+						}
+						if sv, ok := oauthMap["secret_version"].(string); ok && sv != "" {
+							oauthObj["secretVersion"] = sv
+						}
+						authObj["oauthClient"] = oauthObj
+					}
+				}
+				instance["authConfig"] = authObj
+			}
+		}
+		obj["instance"] = instance
+
+		url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}region{{"}}"}}/modelDevelopmentClusters/{{"{{"}}model_development_cluster_id{{"}}"}}:enableXmanager")
+		if err != nil {
+			return err
+		}
+
+		log.Printf("[DEBUG] Enabling Xmanager on ModelDevelopmentCluster %q: %#v", d.Id(), obj)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   billingProject,
+			RawURL:    url,
+			UserAgent: userAgent,
+			Body:      obj,
+			Timeout:   timeout,
+		})
+		if err != nil {
+			return fmt.Errorf("Error enabling Xmanager: %s", err)
+		}
+
+		endpointLocation := tpgresource.LocationFromId(d.Id())
+		err = VertexAIOperationWaitTime(
+			config, res, project, endpointLocation, "Enabling Xmanager", userAgent,
+			timeout)
+		if err != nil {
+			return fmt.Errorf("Error waiting to enable Xmanager: %s", err)
+		}
+	} else {
+		url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}region{{"}}"}}/modelDevelopmentClusters/{{"{{"}}model_development_cluster_id{{"}}"}}:disableXmanager")
+		if err != nil {
+			return err
+		}
+
+		log.Printf("[DEBUG] Disabling Xmanager on ModelDevelopmentCluster %q", d.Id())
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   billingProject,
+			RawURL:    url,
+			UserAgent: userAgent,
+			Timeout:   timeout,
+		})
+		if err != nil {
+			return fmt.Errorf("Error disabling Xmanager: %s", err)
+		}
+
+		endpointLocation := tpgresource.LocationFromId(d.Id())
+		err = VertexAIOperationWaitTime(
+			config, res, project, endpointLocation, "Disabling Xmanager", userAgent,
+			timeout)
+		if err != nil {
+			return fmt.Errorf("Error waiting to disable Xmanager: %s", err)
+		}
+	}
+	return nil
 }
 {{- end }}

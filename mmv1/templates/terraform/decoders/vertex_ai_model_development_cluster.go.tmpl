@@ -36,4 +36,49 @@ if rawPools, ok := res["nodePools"].([]interface{}); ok && len(rawPools) > 0 {
 	}
 }
 
+if runtime, ok := res["runtime"].(map[string]interface{}); ok {
+	if xmanager, ok := runtime["xmanager"].(map[string]interface{}); ok && xmanager != nil {
+		state, _ := xmanager["state"].(string)
+		if state != "DELETED" {
+			instanceId, _ := xmanager["instanceId"].(string)
+			apiEndpoint, _ := xmanager["apiEndpoint"].(string)
+			uiEndpoint, _ := xmanager["uiEndpoint"].(string)
+
+			configData := make(map[string]interface{})
+			// Only preserve write-only input fields when the instance is healthy/provisioning;
+			// when state is ERROR, leaving inputs blank ensures the next plan diffs xmanager_config
+			// so post_update disables and re-enables the failed instance (or disables it on removal).
+			if state != "ERROR" {
+				if rawXmanagerConfig, ok := d.Get("xmanager_config").([]interface{}); ok && len(rawXmanagerConfig) > 0 {
+					if m, ok := rawXmanagerConfig[0].(map[string]interface{}); ok {
+						for k, v := range m {
+							configData[k] = v
+						}
+					}
+				}
+			}
+			configData["name"] = instanceId
+			configData["api_endpoint"] = apiEndpoint
+			configData["ui_endpoint"] = uiEndpoint
+			configData["state"] = state
+
+			if err := d.Set("xmanager_config", []interface{}{configData}); err != nil {
+				return nil, fmt.Errorf("Error setting xmanager_config: %s", err)
+			}
+		} else {
+			if err := d.Set("xmanager_config", nil); err != nil {
+				return nil, fmt.Errorf("Error setting xmanager_config: %s", err)
+			}
+		}
+	} else {
+		if err := d.Set("xmanager_config", nil); err != nil {
+			return nil, fmt.Errorf("Error setting xmanager_config: %s", err)
+		}
+	}
+} else {
+	if err := d.Set("xmanager_config", nil); err != nil {
+		return nil, fmt.Errorf("Error setting xmanager_config: %s", err)
+	}
+}
+
 return res, nil

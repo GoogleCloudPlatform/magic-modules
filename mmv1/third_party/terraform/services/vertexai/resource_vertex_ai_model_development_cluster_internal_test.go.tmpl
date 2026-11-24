@@ -634,4 +634,155 @@ func TestUnitVertexAIModelDevelopmentCluster_CustomDiff_NodePoolVersions(t *test
 	})
 }
 
+func TestUnitVertexAIModelDevelopmentCluster_CustomDiff_XmanagerConfig(t *testing.T) {
+	t.Parallel()
+
+	res := ResourceVertexAIModelDevelopmentCluster()
+	ctx := context.Background()
+
+	cases := []struct {
+		name    string
+		cfg     map[string]interface{}
+		wantErr string
+	}{
+		{
+			name: "rejected without kubernetes_spec",
+			cfg: map[string]interface{}{
+				"model_development_cluster_id": "test-cluster",
+				"region":                       "us-central1",
+				"orchestrator_spec":            []interface{}{map[string]interface{}{"slurm_spec": []interface{}{map[string]interface{}{}}}},
+				"xmanager_config":              []interface{}{map[string]interface{}{"network": "projects/p/global/networks/n1", "subnetwork": "projects/p/regions/us-central1/subnetworks/s1"}},
+			},
+			wantErr: "xmanager_config is only supported on clusters using the GKE orchestrator",
+		},
+		{
+			name: "rejected if network mismatches",
+			cfg: map[string]interface{}{
+				"model_development_cluster_id": "test-cluster",
+				"region":                       "us-central1",
+				"network":                      []interface{}{map[string]interface{}{"network": "projects/p/global/networks/n1"}},
+				"orchestrator_spec":            []interface{}{map[string]interface{}{"kubernetes_spec": []interface{}{map[string]interface{}{}}}},
+				"xmanager_config":              []interface{}{map[string]interface{}{"network": "projects/p/global/networks/n2", "subnetwork": "projects/p/regions/us-central1/subnetworks/s1"}},
+			},
+			wantErr: "xmanager_config.network must match the cluster network.network",
+		},
+		{
+			name: "accepts GCE self_link matching cluster network id and empty kubernetes_spec",
+			cfg: map[string]interface{}{
+				"model_development_cluster_id": "test-cluster",
+				"region":                       "us-central1",
+				"network":                      []interface{}{map[string]interface{}{"network": "projects/p/global/networks/n1"}},
+				"orchestrator_spec":            []interface{}{map[string]interface{}{"kubernetes_spec": []interface{}{nil}}},
+				"xmanager_config":              []interface{}{map[string]interface{}{"network": "https://www.googleapis.com/compute/v1/projects/p/global/networks/n1", "subnetwork": "https://www.googleapis.com/compute/v1/projects/p/regions/us-central1/subnetworks/s1"}},
+			},
+		},
+		{
+			name: "auth_config requires allowed_domains or allowed_emails",
+			cfg: map[string]interface{}{
+				"model_development_cluster_id": "test-cluster",
+				"region":                       "us-central1",
+				"network":                      []interface{}{map[string]interface{}{"network": "projects/p/global/networks/n1"}},
+				"orchestrator_spec":            []interface{}{map[string]interface{}{"kubernetes_spec": []interface{}{map[string]interface{}{}}}},
+				"xmanager_config": []interface{}{map[string]interface{}{
+					"network":    "projects/p/global/networks/n1",
+					"subnetwork": "projects/p/regions/us-central1/subnetworks/s1",
+					"auth_config": []interface{}{map[string]interface{}{
+						"oauth_client": []interface{}{map[string]interface{}{"id": "12345.apps.googleusercontent.com", "secret_version": "projects/p/secrets/s/versions/1"}},
+					}},
+				}},
+			},
+			wantErr: "allowed_domains",
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			_, err := schema.InternalMap(res.Schema).Diff(ctx, nil, terraform.NewResourceConfigRaw(tc.cfg), resourceVertexAIModelDevelopmentClusterCustomDiff, nil, true)
+			if tc.wantErr == "" && err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if tc.wantErr != "" && (err == nil || !strings.Contains(err.Error(), tc.wantErr)) {
+				t.Fatalf("expected error containing %q, got: %v", tc.wantErr, err)
+			}
+		})
+	}
+
+	t.Run("decoded ERROR state triggers 1->1 update diff on next plan", func(t *testing.T) {
+		t.Parallel()
+		stateData := res.Data(nil)
+		stateData.SetId("projects/p/locations/us-central1/modelDevelopmentClusters/test-cluster")
+		_ = stateData.Set("model_development_cluster_id", "test-cluster")
+		_ = stateData.Set("region", "us-central1")
+		_ = stateData.Set("network", []interface{}{map[string]interface{}{"network": "projects/p/global/networks/n1"}})
+		_ = stateData.Set("orchestrator_spec", []interface{}{map[string]interface{}{"kubernetes_spec": []interface{}{map[string]interface{}{}}}})
+		_ = stateData.Set("xmanager_config", []interface{}{map[string]interface{}{"network": "projects/p/global/networks/n1", "subnetwork": "projects/p/regions/us-central1/subnetworks/s1"}})
+
+		if _, err := resourceVertexAIModelDevelopmentClusterDecoder(stateData, nil, map[string]interface{}{
+			"runtime": map[string]interface{}{"xmanager": map[string]interface{}{"instanceId": "xmc-test-cluster", "state": "ERROR"}},
+		}); err != nil {
+			t.Fatalf("decoder failed: %v", err)
+		}
+		cfg := map[string]interface{}{
+			"model_development_cluster_id": "test-cluster",
+			"region":                       "us-central1",
+			"network":                      []interface{}{map[string]interface{}{"network": "projects/p/global/networks/n1"}},
+			"orchestrator_spec":            []interface{}{map[string]interface{}{"kubernetes_spec": []interface{}{map[string]interface{}{}}}},
+			"xmanager_config":              []interface{}{map[string]interface{}{"network": "projects/p/global/networks/n1", "subnetwork": "projects/p/regions/us-central1/subnetworks/s1"}},
+		}
+		diff, err := schema.InternalMap(res.Schema).Diff(ctx, stateData.State(), terraform.NewResourceConfigRaw(cfg), resourceVertexAIModelDevelopmentClusterCustomDiff, nil, true)
+		if err != nil {
+			t.Fatalf("CustomDiff failed: %v", err)
+		}
+		dWithDiff, err := schema.InternalMap(res.Schema).Data(stateData.State(), diff)
+		if err != nil || !dWithDiff.HasChange("xmanager_config") {
+			t.Fatalf("expected xmanager_config diff after ERROR state decode, err=%v", err)
+		}
+	})
+}
+
+func TestUnitVertexAIModelDevelopmentCluster_Decoder_XmanagerConfig(t *testing.T) {
+	t.Parallel()
+
+	t.Run("preserves inputs and clears omitted endpoints", func(t *testing.T) {
+		t.Parallel()
+		d := ResourceVertexAIModelDevelopmentCluster().Data(nil)
+		_ = d.Set("xmanager_config", []interface{}{map[string]interface{}{
+			"network": "projects/p/global/networks/n", "subnetwork": "projects/p/regions/us-central1/subnetworks/s",
+			"api_endpoint": "stale-api:443", "ui_endpoint": "https://stale-ui", "state": "RUNNING",
+		}})
+		if _, err := resourceVertexAIModelDevelopmentClusterDecoder(d, nil, map[string]interface{}{
+			"runtime": map[string]interface{}{"xmanager": map[string]interface{}{"instanceId": "xmc-123", "state": "PROVISIONING"}},
+		}); err != nil {
+			t.Fatalf("decoder failed: %v", err)
+		}
+		got := d.Get("xmanager_config").([]interface{})[0].(map[string]interface{})
+		if got["name"] != "xmc-123" || got["state"] != "PROVISIONING" || got["api_endpoint"] != "" || got["ui_endpoint"] != "" || got["network"] != "projects/p/global/networks/n" {
+			t.Fatalf("unexpected decoded xmanager_config: %#v", got)
+		}
+	})
+
+	for _, tc := range []struct {
+		name   string
+		apiRes map[string]interface{}
+	}{
+		{name: "clears when runtime absent", apiRes: map[string]interface{}{}},
+		{name: "clears when state is DELETED", apiRes: map[string]interface{}{"runtime": map[string]interface{}{"xmanager": map[string]interface{}{"instanceId": "xm-123", "state": "DELETED"}}}},
+	} {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			d := ResourceVertexAIModelDevelopmentCluster().Data(nil)
+			_ = d.Set("xmanager_config", []interface{}{map[string]interface{}{"network": "projects/p/global/networks/n"}})
+			if _, err := resourceVertexAIModelDevelopmentClusterDecoder(d, nil, tc.apiRes); err != nil {
+				t.Fatalf("decoder failed: %v", err)
+			}
+			if _, ok := d.GetOk("xmanager_config"); ok {
+				t.Fatalf("expected xmanager_config to be nil")
+			}
+		})
+	}
+}
+
 {{- end }}
