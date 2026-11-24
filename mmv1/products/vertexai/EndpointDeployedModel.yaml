@@ -80,12 +80,14 @@ samples:
       - name: vertex_ai_endpoint_deployed_model_basic
         vars:
           source_model: projects/my-project-name/locations/us-central1/models/my-source-model
+          deployed_model_id: '1234567890'
         resource_id_vars:
           endpoint_name: endpoint-name
           model_id: model-id
         test_env_vars:
           project_name: PROJECT_NAME
         test_vars_overrides:
+          deployed_model_id: 'fmt.Sprintf("%d", acctest.RandIntRange(t, 1000000000, 2147483647))'
           source_model: vertexai.BootstrapVertexAIModel(t, "us-central1")
         ignore_read_extra:
           - project
@@ -95,6 +97,7 @@ samples:
       - name: vertex_ai_endpoint_deployed_model_spot_service_account
         vars:
           source_model: projects/my-project-name/locations/us-central1/models/my-source-model
+          deployed_model_id: '1234567890'
         resource_id_vars:
           endpoint_name: endpoint-name
           model_id: model-id
@@ -102,38 +105,27 @@ samples:
         test_env_vars:
           project_name: PROJECT_NAME
         test_vars_overrides:
+          deployed_model_id: 'fmt.Sprintf("%d", acctest.RandIntRange(t, 1000000000, 2147483647))'
           source_model: vertexai.BootstrapVertexAIModel(t, "us-central1")
         ignore_read_extra:
           - project
-  - name: vertex_ai_endpoint_deployed_model_shared_resources
-    primary_resource_id: deployed_model
-    steps:
-      - name: vertex_ai_endpoint_deployed_model_shared_resources
-        vars:
-          source_model: projects/my-project-name/locations/us-central1/models/my-source-model
-        resource_id_vars:
-          endpoint_name: endpoint-name
-          model_id: model-id
-          deployment_resource_pool_id: deployed-model-pool
-        test_env_vars:
-          project_name: PROJECT_NAME
-        test_vars_overrides:
-          source_model: vertexai.BootstrapVertexAIModel(t, "us-central1")
-        ignore_read_extra:
-          - project
+  # Shared resources coverage lives in the handwritten test because beta requires
+  # enable_container_logging = true to match the pool's logging setting.
   - name: vertex_ai_endpoint_deployed_model_gpu
     primary_resource_id: deployed_model
     steps:
       - name: vertex_ai_endpoint_deployed_model_gpu
         vars:
           source_model: projects/my-project-name/locations/us-central1/models/my-source-model
+          deployed_model_id: '1234567890'
         resource_id_vars:
           endpoint_name: endpoint-name
           model_id: model-id
         test_env_vars:
           project_name: PROJECT_NAME
         test_vars_overrides:
-          source_model: vertexai.BootstrapVertexAIModel(t, "us-central1")
+          deployed_model_id: 'fmt.Sprintf("%d", acctest.RandIntRange(t, 1000000000, 2147483647))'
+          source_model: vertexai.BootstrapVertexAIGPUModel(t, "us-central1")
         ignore_read_extra:
           - project
 parameters:
@@ -305,6 +297,7 @@ properties:
       The shared DeploymentResourcePool to deploy on, in the format
       `projects/{project}/locations/{location}/deploymentResourcePools/{deployment_resource_pool}`.
     immutable: true
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
     exactly_one_of:
       - automatic_resources
       - dedicated_resources

@@ -11,14 +11,27 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-const sharedVertexAIModelID = "tf-bootstrap-vertex-ai-model"
+const (
+	sharedVertexAIModelID    = "tf-bootstrap-vertex-ai-model"
+	sharedVertexAIGPUModelID = "tf-bootstrap-vertex-ai-gpu-model"
+)
 
 // BootstrapVertexAIModel returns a shared Model in the test project, uploading
 // it if it does not exist. Tests use it as a copy source, so it must not be deleted.
 func BootstrapVertexAIModel(t *testing.T, region string) string {
+	return bootstrapVertexAIModel(t, region, sharedVertexAIModelID, "us-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-12:latest")
+}
+
+// BootstrapVertexAIGPUModel is like BootstrapVertexAIModel, but its serving
+// container supports accelerators.
+func BootstrapVertexAIGPUModel(t *testing.T, region string) string {
+	return bootstrapVertexAIModel(t, region, sharedVertexAIGPUModelID, "us-docker.pkg.dev/vertex-ai/prediction/tf2-gpu.2-12:latest")
+}
+
+func bootstrapVertexAIModel(t *testing.T, region, modelID, imageURI string) string {
 	project := envvar.GetTestProjectFromEnv()
 	parent := fmt.Sprintf("projects/%s/locations/%s", project, region)
-	modelName := fmt.Sprintf("%s/models/%s", parent, sharedVertexAIModelID)
+	modelName := fmt.Sprintf("%s/models/%s", parent, modelID)
 	if os.Getenv("VCR_PATH") != "" && os.Getenv("VCR_MODE") == "REPLAYING" {
 		return modelName
 	}
@@ -46,12 +59,12 @@ func BootstrapVertexAIModel(t *testing.T, region string) string {
 		RawURL:    apiURL + parent + "/models:upload",
 		UserAgent: config.UserAgent,
 		Body: map[string]interface{}{
-			"modelId": sharedVertexAIModelID,
+			"modelId": modelID,
 			"model": map[string]interface{}{
-				"displayName": sharedVertexAIModelID,
+				"displayName": modelID,
 				"artifactUri": "gs://cloud-samples-data/vertex-ai/model-deployment/models/resnet",
 				"containerSpec": map[string]interface{}{
-					"imageUri": "us-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-12:latest",
+					"imageUri": imageURI,
 				},
 			},
 		},

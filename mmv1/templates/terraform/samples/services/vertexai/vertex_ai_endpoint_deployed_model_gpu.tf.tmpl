@@ -1,6 +1,6 @@
 resource "google_vertex_ai_endpoint_deployed_model" "{{$.PrimaryResourceId}}" {
   endpoint          = google_vertex_ai_endpoint.endpoint.id
-  deployed_model_id = "1234567890"
+  deployed_model_id = "{{index $.Vars "deployed_model_id"}}"
   model             = google_vertex_ai_model.model.id
 
   dedicated_resources {

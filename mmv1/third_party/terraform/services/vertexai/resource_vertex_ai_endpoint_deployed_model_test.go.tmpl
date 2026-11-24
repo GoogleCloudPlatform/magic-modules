@@ -1,6 +1,8 @@
 package vertexai_test
 
 import (
+	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -17,10 +19,15 @@ func TestAccVertexAIEndpointDeployedModel_mutation(t *testing.T) {
 	project := envvar.GetTestProjectFromEnv()
 	sourceModel := vertexai.BootstrapVertexAIModel(t, "us-central1")
 	suffix := acctest.RandString(t, 10)
+	// A fixed deployed model ID can become unusable in a project after an aborted
+	// deployment (deploys then fail with INTERNAL), so use a random ID per test.
+	deployedModelID := fmt.Sprintf("%d", acctest.RandIntRange(t, 1000000000, 2147483647))
+	trafficSplit := fmt.Sprintf(`{"%s":100}`, deployedModelID)
 	initial := map[string]interface{}{
 		"project":           project,
 		"source_model":      sourceModel,
 		"suffix":            suffix,
+		"deployed_model_id": deployedModelID,
 		"max_replicas":      1,
 		"target":            nil,
 		"container_logging": false,
@@ -30,19 +37,21 @@ func TestAccVertexAIEndpointDeployedModel_mutation(t *testing.T) {
 		"project":           project,
 		"source_model":      sourceModel,
 		"suffix":            suffix,
+		"deployed_model_id": deployedModelID,
 		"max_replicas":      2,
 		"target":            75,
 		"container_logging": true,
-		"traffic_split":     `"{\"1234567890\":100}"`,
+		"traffic_split":     strconv.Quote(trafficSplit),
 	}
 	reset := map[string]interface{}{
 		"project":           project,
 		"source_model":      sourceModel,
 		"suffix":            suffix,
+		"deployed_model_id": deployedModelID,
 		"max_replicas":      1,
 		"target":            60,
 		"container_logging": false,
-		"traffic_split":     `"{\"1234567890\":100}"`,
+		"traffic_split":     strconv.Quote(trafficSplit),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -70,7 +79,7 @@ func TestAccVertexAIEndpointDeployedModel_mutation(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_vertex_ai_endpoint_deployed_model.model", "dedicated_resources.0.max_replica_count", "2"),
 					resource.TestCheckResourceAttr("google_vertex_ai_endpoint_deployed_model.model", "dedicated_resources.0.autoscaling_metric_specs.0.target", "75"),
-					resource.TestCheckResourceAttr("google_vertex_ai_endpoint.endpoint", "traffic_split", `{"1234567890":100}`),
+					resource.TestCheckResourceAttr("google_vertex_ai_endpoint.endpoint", "traffic_split", trafficSplit),
 					{{- if eq $.TargetVersionName "ga" }}
 					resource.TestCheckResourceAttr("google_vertex_ai_endpoint_deployed_model.model", "disable_container_logging", "true"),
 					{{- else }}
@@ -103,7 +112,7 @@ func testAccVertexAIEndpointDeployedModel_mutation(context map[string]interface{
 	return acctest.Nprintf(`
 resource "google_vertex_ai_endpoint_deployed_model" "model" {
   endpoint              = google_vertex_ai_endpoint.endpoint.id
-  deployed_model_id     = "1234567890"
+  deployed_model_id     = "%{deployed_model_id}"
   model                 = google_vertex_ai_model.model.id
   display_name          = "Terraform deployed model"
   enable_access_logging = true
@@ -140,6 +149,78 @@ resource "google_vertex_ai_endpoint" "endpoint" {
 
 resource "google_vertex_ai_model" "model" {
   model_id     = "tf-test-deployment-%{suffix}"
+  project      = "%{project}"
+  region       = "us-central1"
+  source_model = "%{source_model}"
+}
+`, context)
+}
+
+func TestAccVertexAIEndpointDeployedModel_sharedResources(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":      envvar.GetTestProjectFromEnv(),
+		"source_model": vertexai.BootstrapVertexAIModel(t, "us-central1"),
+		"suffix":       acctest.RandString(t, 10),
+		"deployed_model_id": fmt.Sprintf("%d", acctest.RandIntRange(t, 1000000000, 2147483647)),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVertexAIEndpointDeployedModelDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVertexAIEndpointDeployedModel_sharedResources(context),
+			},
+			{
+				ResourceName:      "google_vertex_ai_endpoint_deployed_model.deployed_model",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// project is inferred from the endpoint and is not returned by the API.
+				ImportStateVerifyIgnore: []string{"project"},
+			},
+		},
+	})
+}
+
+func testAccVertexAIEndpointDeployedModel_sharedResources(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_endpoint_deployed_model" "deployed_model" {
+  endpoint          = google_vertex_ai_endpoint.endpoint.id
+  deployed_model_id = "%{deployed_model_id}"
+  model             = google_vertex_ai_model.model.id
+  shared_resources  = google_vertex_ai_deployment_resource_pool.pool.id
+  {{- if ne $.TargetVersionName "ga" }}
+  # v1beta1 defaults deployed model logging to off, but pools default to on.
+  enable_container_logging = true
+  {{- end }}
+}
+
+resource "google_vertex_ai_deployment_resource_pool" "pool" {
+  name   = "tf-test-deployed-model-pool%{suffix}"
+  region = "us-central1"
+
+  dedicated_resources {
+    machine_spec {
+      machine_type = "n1-standard-2"
+    }
+
+    min_replica_count = 1
+    max_replica_count = 1
+  }
+}
+
+resource "google_vertex_ai_endpoint" "endpoint" {
+  name         = "tf-test-endpoint-name%{suffix}"
+  display_name = "Terraform deployed model endpoint"
+  location     = "us-central1"
+  region       = "us-central1"
+}
+
+resource "google_vertex_ai_model" "model" {
+  model_id     = "tf-test-model-id%{suffix}"
   project      = "%{project}"
   region       = "us-central1"
   source_model = "%{source_model}"
