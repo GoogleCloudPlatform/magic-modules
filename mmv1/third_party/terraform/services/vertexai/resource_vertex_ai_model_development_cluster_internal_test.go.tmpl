@@ -673,8 +673,19 @@ func TestUnitVertexAIModelDevelopmentCluster_CustomDiff_XmanagerConfig(t *testin
 				"region":                       "us-central1",
 				"network":                      []interface{}{map[string]interface{}{"network": "projects/p/global/networks/n1"}},
 				"orchestrator_spec":            []interface{}{map[string]interface{}{"kubernetes_spec": []interface{}{nil}}},
-				"xmanager_config":              []interface{}{map[string]interface{}{"network": "https://www.googleapis.com/compute/v1/projects/p/global/networks/n1", "subnetwork": "https://www.googleapis.com/compute/v1/projects/p/regions/us-central1/subnetworks/s1"}},
+				"xmanager_config":              []interface{}{map[string]interface{}{"network": "https://compute.googleapis.com/compute/v1/projects/p/global/networks/n1", "subnetwork": "https://www.googleapis.com/compute/v1/projects/p/regions/us-central1/subnetworks/s1"}},
 			},
+		},
+		{
+			name: "rejected if subnetwork region mismatches cluster region",
+			cfg: map[string]interface{}{
+				"model_development_cluster_id": "test-cluster",
+				"region":                       "us-central1",
+				"network":                      []interface{}{map[string]interface{}{"network": "projects/p/global/networks/n1"}},
+				"orchestrator_spec":            []interface{}{map[string]interface{}{"kubernetes_spec": []interface{}{map[string]interface{}{}}}},
+				"xmanager_config":              []interface{}{map[string]interface{}{"network": "projects/p/global/networks/n1", "subnetwork": "projects/p/regions/us-east1/subnetworks/s1"}},
+			},
+			wantErr: "xmanager_config.subnetwork region",
 		},
 		{
 			name: "auth_config requires allowed_domains or allowed_emails",
@@ -720,9 +731,18 @@ func TestUnitVertexAIModelDevelopmentCluster_CustomDiff_XmanagerConfig(t *testin
 		_ = stateData.Set("xmanager_config", []interface{}{map[string]interface{}{"network": "projects/p/global/networks/n1", "subnetwork": "projects/p/regions/us-central1/subnetworks/s1"}})
 
 		if _, err := resourceVertexAIModelDevelopmentClusterDecoder(stateData, nil, map[string]interface{}{
-			"runtime": map[string]interface{}{"xmanager": map[string]interface{}{"instanceId": "xmc-test-cluster", "state": "ERROR"}},
+			"name": "projects/12345/locations/us-central1/modelDevelopmentClusters/test-cluster",
+			"runtime": map[string]interface{}{"xmanager": map[string]interface{}{
+				"instanceId": "xmc-test-cluster",
+				"state":      "ERROR",
+				"error":      map[string]interface{}{"code": float64(9), "message": "provisioning failed"},
+			}},
 		}); err != nil {
 			t.Fatalf("decoder failed: %v", err)
+		}
+		gotErr := stateData.Get("xmanager_config.0.error").([]interface{})
+		if len(gotErr) != 1 || gotErr[0].(map[string]interface{})["message"] != "provisioning failed" {
+			t.Fatalf("expected decoded error status, got: %#v", gotErr)
 		}
 		cfg := map[string]interface{}{
 			"model_development_cluster_id": "test-cluster",
@@ -745,7 +765,7 @@ func TestUnitVertexAIModelDevelopmentCluster_CustomDiff_XmanagerConfig(t *testin
 func TestUnitVertexAIModelDevelopmentCluster_Decoder_XmanagerConfig(t *testing.T) {
 	t.Parallel()
 
-	t.Run("preserves inputs and clears omitted endpoints", func(t *testing.T) {
+	t.Run("derives full resource name, preserves inputs, and clears omitted endpoints", func(t *testing.T) {
 		t.Parallel()
 		d := ResourceVertexAIModelDevelopmentCluster().Data(nil)
 		_ = d.Set("xmanager_config", []interface{}{map[string]interface{}{
@@ -753,12 +773,14 @@ func TestUnitVertexAIModelDevelopmentCluster_Decoder_XmanagerConfig(t *testing.T
 			"api_endpoint": "stale-api:443", "ui_endpoint": "https://stale-ui", "state": "RUNNING",
 		}})
 		if _, err := resourceVertexAIModelDevelopmentClusterDecoder(d, nil, map[string]interface{}{
-			"runtime": map[string]interface{}{"xmanager": map[string]interface{}{"instanceId": "xmc-123", "state": "PROVISIONING"}},
+			"name":    "projects/12345/locations/us-central1/modelDevelopmentClusters/c1",
+			"runtime": map[string]interface{}{"xmanager": map[string]interface{}{"instanceId": "xmc-c1", "state": "PROVISIONING"}},
 		}); err != nil {
 			t.Fatalf("decoder failed: %v", err)
 		}
 		got := d.Get("xmanager_config").([]interface{})[0].(map[string]interface{})
-		if got["name"] != "xmc-123" || got["state"] != "PROVISIONING" || got["api_endpoint"] != "" || got["ui_endpoint"] != "" || got["network"] != "projects/p/global/networks/n" {
+		wantName := "projects/12345/locations/us-central1/xmanagerInstances/xmc-c1"
+		if got["name"] != wantName || got["state"] != "PROVISIONING" || got["api_endpoint"] != "" || got["ui_endpoint"] != "" || got["network"] != "projects/p/global/networks/n" {
 			t.Fatalf("unexpected decoded xmanager_config: %#v", got)
 		}
 	})

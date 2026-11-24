@@ -56,26 +56,6 @@ resource "google_storage_bucket" "bucket_alt" {
   force_destroy = true
 }
 
-resource "google_secret_manager_secret" "secret" {
-  provider  = google-beta
-  secret_id = "{{index $.ResourceIdVars "secret_id"}}"
-  replication {
-    auto {}
-  }
-}
-
-resource "google_secret_manager_secret_version" "secret_version" {
-  provider    = google-beta
-  secret      = google_secret_manager_secret.secret.id
-  secret_data = "secret-one"
-}
-
-resource "google_secret_manager_secret_version" "secret_version_alt" {
-  provider    = google-beta
-  secret      = google_secret_manager_secret.secret.id
-  secret_data = "secret-two"
-}
-
 resource "google_vertex_ai_model_development_cluster" "{{$.PrimaryResourceId}}" {
   provider                     = google-beta
   region                       = "us-east1"

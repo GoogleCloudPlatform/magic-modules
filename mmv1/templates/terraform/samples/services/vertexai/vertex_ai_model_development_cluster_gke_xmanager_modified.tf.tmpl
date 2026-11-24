@@ -56,26 +56,6 @@ resource "google_storage_bucket" "bucket_alt" {
   force_destroy = true
 }
 
-resource "google_secret_manager_secret" "secret" {
-  provider  = google-beta
-  secret_id = "{{index $.ResourceIdVars "secret_id"}}"
-  replication {
-    auto {}
-  }
-}
-
-resource "google_secret_manager_secret_version" "secret_version" {
-  provider    = google-beta
-  secret      = google_secret_manager_secret.secret.id
-  secret_data = "secret-one"
-}
-
-resource "google_secret_manager_secret_version" "secret_version_alt" {
-  provider    = google-beta
-  secret      = google_secret_manager_secret.secret.id
-  secret_data = "secret-two"
-}
-
 resource "google_vertex_ai_model_development_cluster" "{{$.PrimaryResourceId}}" {
   provider                     = google-beta
   region                       = "us-east1"
@@ -130,14 +110,6 @@ resource "google_vertex_ai_model_development_cluster" "{{$.PrimaryResourceId}}" 
     subnetwork = google_compute_subnetwork.subnet_alt.id
     xprof_config {
       gcs_bucket_uri = "gs://${google_storage_bucket.bucket_alt.name}"
-    }
-    auth_config {
-      allowed_domains = {{index $.Vars "allowed_domains"}}
-      allowed_emails  = {{index $.Vars "allowed_emails"}}
-      oauth_client {
-        id             = "67890.apps.googleusercontent.com"
-        secret_version = google_secret_manager_secret_version.secret_version_alt.name
-      }
     }
   }
 }

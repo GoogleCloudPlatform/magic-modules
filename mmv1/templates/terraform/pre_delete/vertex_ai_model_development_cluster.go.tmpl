@@ -10,24 +10,14 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
-if clusterState, xmState, hasXm, statusErr := vertexAiModelDevelopmentClusterGetXmanagerStatus(d, config, billingProject, userAgent, schema.TimeoutDelete); statusErr == nil && hasXm {
-	if clusterState == "RUNNING" && xmState != "DELETING" {
+clusterState, xmState, hasXm, statusErr := vertexAiModelDevelopmentClusterPrepareXmanagerTransition(d, config, billingProject, userAgent, schema.TimeoutDelete, true)
+if statusErr != nil {
+	return fmt.Errorf("Error checking Xmanager status before deleting ModelDevelopmentCluster %q: %s", d.Id(), statusErr)
+}
+if hasXm {
+	if clusterState == "RUNNING" {
 		if err := vertexAiModelDevelopmentClusterUpdateXmanager(d, config, billingProject, userAgent, false, schema.TimeoutDelete); err != nil {
 			return err
-		}
-	} else if xmState == "DELETING" {
-		err := tpgresource.Retry(d.Timeout(schema.TimeoutDelete), config.SleepUnit, func() *retry.RetryError {
-			_, curXmState, stillHasXm, pollErr := vertexAiModelDevelopmentClusterGetXmanagerStatus(d, config, billingProject, userAgent, schema.TimeoutDelete)
-			if pollErr != nil {
-				return retry.NonRetryableError(pollErr)
-			}
-			if stillHasXm {
-				return retry.RetryableError(fmt.Errorf("Xmanager on ModelDevelopmentCluster %q is still %s", d.Id(), curXmState))
-			}
-			return nil
-		})
-		if err != nil {
-			return fmt.Errorf("Error waiting for Xmanager deletion before deleting ModelDevelopmentCluster %q: %s", d.Id(), err)
 		}
 	} else {
 		log.Printf("[DEBUG] Skipping DisableXmanager before deleting ModelDevelopmentCluster %q (clusterState=%q, xmanagerState=%q)", d.Id(), clusterState, xmState)

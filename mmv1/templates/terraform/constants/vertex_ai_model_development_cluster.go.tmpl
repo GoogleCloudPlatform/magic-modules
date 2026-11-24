@@ -166,15 +166,21 @@ func validateVertexAIModelDevelopmentClusterNodePoolVersions(d vertexAiModelDeve
 
 func vertexAiModelDevelopmentClusterNormalizeComputeRef(v string) string {
 	v = strings.TrimSpace(v)
-	for _, prefix := range []string{
-		"https://www.googleapis.com/compute/v1/",
-		"https://www.googleapis.com/compute/beta/",
-	} {
-		if strings.HasPrefix(v, prefix) {
-			return strings.TrimPrefix(v, prefix)
+	if strings.HasPrefix(v, "https://") || strings.HasPrefix(v, "http://") {
+		if idx := strings.Index(v, "projects/"); idx >= 0 {
+			return v[idx:]
 		}
 	}
 	return v
+}
+
+func vertexAiModelDevelopmentClusterSubnetworkRegion(v string) string {
+	norm := vertexAiModelDevelopmentClusterNormalizeComputeRef(v)
+	parts := strings.Split(norm, "/")
+	if len(parts) == 6 && parts[0] == "projects" && parts[2] == "regions" && parts[4] == "subnetworks" {
+		return parts[3]
+	}
+	return ""
 }
 
 func resourceVertexAIModelDevelopmentClusterCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
@@ -188,6 +194,15 @@ func resourceVertexAIModelDevelopmentClusterCustomDiff(_ context.Context, diff *
 			if okX && okC && xNet.(string) != "" && cNet.(string) != "" {
 				if vertexAiModelDevelopmentClusterNormalizeComputeRef(xNet.(string)) != vertexAiModelDevelopmentClusterNormalizeComputeRef(cNet.(string)) {
 					return fmt.Errorf("xmanager_config.network must match the cluster network.network")
+				}
+			}
+		}
+		if diff.NewValueKnown("xmanager_config.0.subnetwork") && diff.NewValueKnown("region") {
+			xSub, okS := diff.GetOk("xmanager_config.0.subnetwork")
+			cReg, okR := diff.GetOk("region")
+			if okS && okR && xSub.(string) != "" && cReg.(string) != "" {
+				if subRegion := vertexAiModelDevelopmentClusterSubnetworkRegion(xSub.(string)); subRegion != "" && subRegion != cReg.(string) {
+					return fmt.Errorf("xmanager_config.subnetwork region %q must match the cluster region %q", subRegion, cReg.(string))
 				}
 			}
 		}
@@ -247,6 +262,50 @@ func vertexAiModelDevelopmentClusterGetXmanagerStatus(d *schema.ResourceData, co
 				hasXm = true
 			}
 		}
+	}
+	return clusterState, xmState, hasXm, nil
+}
+
+func vertexAiModelDevelopmentClusterPrepareXmanagerTransition(d *schema.ResourceData, config *transport_tpg.Config, billingProject, userAgent, timeoutKey string, waitProvisioning bool) (clusterState string, xmState string, hasXm bool, err error) {
+	clusterState, xmState, hasXm, err = vertexAiModelDevelopmentClusterGetXmanagerStatus(d, config, billingProject, userAgent, timeoutKey)
+	if err != nil {
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+			return "", "", false, nil
+		}
+		return "", "", false, err
+	}
+	needsWait := func(cs, xs string, present bool) bool {
+		if cs == "PROVISIONING" || cs == "UPDATING" {
+			return true
+		}
+		if !present {
+			return false
+		}
+		if xs == "DELETING" || (waitProvisioning && xs == "PROVISIONING") {
+			return true
+		}
+		return false
+	}
+	if !needsWait(clusterState, xmState, hasXm) {
+		return clusterState, xmState, hasXm, nil
+	}
+	retryErr := tpgresource.Retry(d.Timeout(timeoutKey), config.SleepUnit, func() *retry.RetryError {
+		cs, xs, present, pollErr := vertexAiModelDevelopmentClusterGetXmanagerStatus(d, config, billingProject, userAgent, timeoutKey)
+		if pollErr != nil {
+			if transport_tpg.IsGoogleApiErrorWithCode(pollErr, 404) {
+				clusterState, xmState, hasXm = "", "", false
+				return nil
+			}
+			return retry.NonRetryableError(pollErr)
+		}
+		clusterState, xmState, hasXm = cs, xs, present
+		if needsWait(cs, xs, present) {
+			return retry.RetryableError(fmt.Errorf("ModelDevelopmentCluster %q is in clusterState=%q, xmanagerState=%q", d.Id(), cs, xs))
+		}
+		return nil
+	})
+	if retryErr != nil {
+		return clusterState, xmState, hasXm, retryErr
 	}
 	return clusterState, xmState, hasXm, nil
 }

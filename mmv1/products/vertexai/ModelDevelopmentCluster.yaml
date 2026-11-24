@@ -203,7 +203,7 @@ samples:
       - member: serviceAccount:service-{project_number}@gcp-sa-vertex-vtc.iam.gserviceaccount.com
         role: roles/hypercomputecluster.editor
       - member: serviceAccount:service-{project_number}@gcp-sa-vertex-vtc.iam.gserviceaccount.com
-        role: roles/secretmanager.secretAccessor
+        role: roles/storage.objectAdmin
     resource_id_vars:
       model_development_cluster_id: tftest-xm
       network_name: mdc-xm-net
@@ -212,13 +212,10 @@ samples:
       firewall_name: mdc-xm-fw
       bucket_name: mdc-xm-bucket
       bucket_alt_name: mdc-xm-bucket-alt
-      secret_id: mdc-xm-secret
     test_vars_overrides:
       model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
     ignore_read_extra:
-      - xmanager_config.0.auth_config
       - xmanager_config.0.network
-      - xmanager_config.0.state
       - xmanager_config.0.subnetwork
       - xmanager_config.0.xprof_config
     steps:
@@ -226,24 +223,59 @@ samples:
         min_version: beta
       - name: vertex_ai_model_development_cluster_gke_xmanager_modified
         min_version: beta
-        vars:
-          allowed_domains: '["updated.example.com"]'
-          allowed_emails: '["admin@example.com"]'
-      - name: vertex_ai_model_development_cluster_gke_xmanager_modified
-        min_version: beta
-        vars:
-          allowed_domains: null
-          allowed_emails: '["admin@example.com"]'
-      - name: vertex_ai_model_development_cluster_gke_xmanager_modified
-        min_version: beta
-        vars:
-          allowed_domains: '["updated.example.com"]'
-          allowed_emails: null
       - name: vertex_ai_model_development_cluster_gke_xmanager_minimal
         min_version: beta
       - name: vertex_ai_model_development_cluster_gke_xmanager_disabled
         min_version: beta
       - name: vertex_ai_model_development_cluster_gke_xmanager_minimal
+        min_version: beta
+  - name: vertex_ai_model_development_cluster_gke_xmanager_auth
+    primary_resource_id: default
+    min_version: beta
+    bootstrap_iam:
+      - member: serviceAccount:service-{project_number}@gcp-sa-vertex-vtc.iam.gserviceaccount.com
+        role: roles/resourcemanager.projectIamAdmin
+      - member: serviceAccount:service-{project_number}@gcp-sa-vertex-vtc.iam.gserviceaccount.com
+        role: roles/container.admin
+      - member: serviceAccount:service-{project_number}@gcp-sa-vertex-vtc.iam.gserviceaccount.com
+        role: roles/compute.admin
+      - member: serviceAccount:service-{project_number}@gcp-sa-vertex-vtc.iam.gserviceaccount.com
+        role: roles/compute.networkAdmin
+      - member: serviceAccount:service-{project_number}@gcp-sa-vertex-vtc.iam.gserviceaccount.com
+        role: roles/hypercomputecluster.editor
+      - member: serviceAccount:service-{project_number}@gcp-sa-vertex-vtc.iam.gserviceaccount.com
+        role: roles/secretmanager.secretAccessor
+    resource_id_vars:
+      model_development_cluster_id: tftest-xma
+      network_name: mdc-xma-net
+      subnetwork_name: mdc-xma-subnet
+      firewall_name: mdc-xma-fw
+      secret_id: mdc-xma-secret
+    test_vars_overrides:
+      model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
+    ignore_read_extra:
+      - xmanager_config.0.auth_config
+      - xmanager_config.0.network
+      - xmanager_config.0.subnetwork
+    steps:
+      - name: vertex_ai_model_development_cluster_gke_xmanager_auth
+        min_version: beta
+      - name: vertex_ai_model_development_cluster_gke_xmanager_auth_modified
+        min_version: beta
+        vars:
+          allowed_domains: '["updated.example.com"]'
+          allowed_emails: '["admin@example.com"]'
+      - name: vertex_ai_model_development_cluster_gke_xmanager_auth_modified
+        min_version: beta
+        vars:
+          allowed_domains: null
+          allowed_emails: '["admin@example.com"]'
+      - name: vertex_ai_model_development_cluster_gke_xmanager_auth_modified
+        min_version: beta
+        vars:
+          allowed_domains: '["updated.example.com"]'
+          allowed_emails: null
+      - name: vertex_ai_model_development_cluster_gke_xmanager_auth_minimal
         min_version: beta
 virtual_fields:
   - name: update_mode
@@ -265,6 +297,8 @@ virtual_fields:
     description: |-
       Configuration for enabling a managed Xmanager instance on the cluster.
       Supported for GKE clusters only (`orchestrator_spec.kubernetes_spec`).
+      Xmanager instances do not support in-place updates; changing any field in
+      `xmanager_config` disables the current instance and enables a new one.
       Note: input subfields (`network`, `subnetwork`, `xprof_config`, `auth_config`)
       are write-only on `:enableXmanager` and are not populated during `terraform import`.
     properties:
@@ -327,7 +361,7 @@ virtual_fields:
                 type: String
                 required: true
                 validation:
-                  regex: ^.+\.apps\.googleusercontent\.com$
+                  regex: ^[0-9A-Za-z-]+\.apps\.googleusercontent\.com$
                 description: The OAuth 2.0 client ID, ending in `.apps.googleusercontent.com`.
               - name: secret_version
                 type: String
@@ -340,7 +374,9 @@ virtual_fields:
                   Format: `projects/{project}/secrets/{secret}/versions/{version}`.
       - name: name
         type: String
-        description: The Xmanager instance ID attached to the cluster (for example, `xmc-{cluster_id}`).
+        description: |-
+          Identifier. The resource name of the Xmanager instance attached to the cluster
+          (`projects/{project}/locations/{location}/xmanagerInstances/{xmanager_instance}`).
         output: true
       - name: api_endpoint
         type: String
@@ -354,6 +390,25 @@ virtual_fields:
         type: String
         description: The current state of the Xmanager instance (`PROVISIONING`, `RUNNING`, `DELETING`, `ERROR`).
         output: true
+      - name: error
+        type: NestedObject
+        description: Error status populated when `state` is `ERROR`.
+        output: true
+        properties:
+          - name: code
+            type: Integer
+            description: The status code, which should be an enum value of google.rpc.Code.
+            output: true
+          - name: details
+            type: Array
+            description: A list of messages that carry the error details.
+            output: true
+            item_type:
+              type: KeyValuePairs
+          - name: message
+            type: String
+            description: A developer-facing error message in English.
+            output: true
 parameters:
   - name: region
     type: String
