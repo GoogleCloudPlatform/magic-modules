@@ -1,5 +1,72 @@
-	// Accumulate the metadata update actions of a CommitTableRequest.
+	// Accumulate the requirements and metadata update actions of a
+	// CommitTableRequest. The server applies updates in order, and partition
+	// specs and sort orders are bound against the current schema, so a schema
+	// change must come before a partition spec or sort order change that
+	// references its new columns.
+	requirements := []interface{}{}
 	updateActions := []interface{}{}
+
+	if d.HasChange("schema") {
+		if schema, ok := obj["schema"].(map[string]interface{}); ok {
+			// Fail the commit rather than replace a schema that changed outside
+			// Terraform since the last refresh.
+			oldId, _ := d.GetChange("schema.0.schema_id")
+			requirements = append(requirements, map[string]interface{}{
+				"type":              "assert-current-schema-id",
+				"current-schema-id": oldId,
+			})
+			// The server assigns the new schema id, so "-1" selects the last added.
+			updateActions = append(updateActions,
+				map[string]interface{}{
+					"action": "add-schema",
+					"schema": schema,
+				},
+				map[string]interface{}{
+					"action":    "set-current-schema",
+					"schema-id": -1,
+				},
+			)
+		}
+	}
+
+	if d.HasChange("partition_spec") {
+		if spec, ok := obj["partition-spec"].(map[string]interface{}); ok {
+			oldId, _ := d.GetChange("partition_spec.0.spec_id")
+			requirements = append(requirements, map[string]interface{}{
+				"type":            "assert-default-spec-id",
+				"default-spec-id": oldId,
+			})
+			// The server assigns the spec id and partition field ids, so "-1"
+			// selects the last added spec.
+			updateActions = append(updateActions,
+				map[string]interface{}{
+					"action": "add-spec",
+					"spec":   spec,
+				},
+				map[string]interface{}{
+					"action":  "set-default-spec",
+					"spec-id": -1,
+				},
+			)
+		}
+	}
+
+	if d.HasChange("sort_order") {
+		if sortOrder := expandIcebergTableSortOrderForCommit(d.Get("sort_order")); sortOrder != nil {
+			// Add the new sort order, then make it the table's default. The
+			// server assigns the new order id, so "-1" selects the last added.
+			updateActions = append(updateActions,
+				map[string]interface{}{
+					"action":     "add-sort-order",
+					"sort-order": sortOrder,
+				},
+				map[string]interface{}{
+					"action":        "set-default-sort-order",
+					"sort-order-id": -1,
+				},
+			)
+		}
+	}
 
 	if d.HasChange("properties") {
 		oldProp, newProp := d.GetChange("properties")
@@ -36,27 +103,10 @@
 		)
 	}
 
-	if d.HasChange("sort_order") {
-		if sortOrder := expandIcebergTableSortOrderForCommit(d.Get("sort_order")); sortOrder != nil {
-			// Add the new sort order, then make it the table's default. The
-			// server assigns the new order id, so "-1" selects the last added.
-			updateActions = append(updateActions,
-				map[string]interface{}{
-					"action":     "add-sort-order",
-					"sort-order": sortOrder,
-				},
-				map[string]interface{}{
-					"action":        "set-default-sort-order",
-					"sort-order-id": -1,
-				},
-			)
-		}
-	}
-
 	if len(updateActions) > 0 {
 		// Wrap in 'updates' and 'requirements' as per CommitTableRequest
 		return map[string]interface{}{
-			"requirements": []interface{}{},
+			"requirements": requirements,
 			"updates":      updateActions,
 		}, nil
 	}

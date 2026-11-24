@@ -182,6 +182,13 @@ resource "google_biglake_iceberg_table" "my_iceberg_table" {
       required = true
     }
   }
+  partition_spec {
+    fields {
+      source_id = 1
+      name      = "id_bucket"
+      transform = "bucket[8]"
+    }
+  }
   sort_order {
     fields {
       source_id  = 1
@@ -235,6 +242,20 @@ resource "google_biglake_iceberg_table" "my_iceberg_table" {
       type     = "long"
       required = true
     }
+    fields {
+      id       = 3
+      name     = "event_time"
+      type     = "timestamptz"
+      required = false
+      doc      = "Time of the event."
+    }
+  }
+  partition_spec {
+    fields {
+      source_id = 3
+      name      = "event_day"
+      transform = "day"
+    }
   }
   sort_order {
     fields {
@@ -250,4 +271,161 @@ resource "google_biglake_iceberg_table" "my_iceberg_table" {
   }
 }
 `, context)
+}
+
+// TestAccBiglakeIcebergIcebergTable_updateBiglakeCatalog runs the schema,
+// partition spec, sort order and properties update against a table in a
+// CATALOG_TYPE_BIGLAKE catalog, whose tables live under the catalog's
+// default_location rather than in a bucket named after the catalog.
+func TestAccBiglakeIcebergIcebergTable_updateBiglakeCatalog(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBiglakeIcebergIcebergTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBiglakeIcebergIcebergTable_biglakeCatalog(context, false),
+			},
+			{
+				ResourceName:            "google_biglake_iceberg_table.my_iceberg_table",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"catalog", "namespace"},
+			},
+			{
+				Config: testAccBiglakeIcebergIcebergTable_biglakeCatalog(context, true),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_biglake_iceberg_table.my_iceberg_table", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_biglake_iceberg_table.my_iceberg_table",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"catalog", "namespace"},
+			},
+		},
+	})
+}
+
+func testAccBiglakeIcebergIcebergTable_biglakeCatalog(context map[string]interface{}, updated bool) string {
+	table := `
+resource "google_biglake_iceberg_table" "my_iceberg_table" {
+  catalog   = google_biglake_iceberg_catalog.catalog.name
+  namespace = google_biglake_iceberg_namespace.namespace.namespace_id
+  name      = "tf_test_my_table_%{random_suffix}"
+  schema {
+    type = "struct"
+    fields {
+      id       = 1
+      name     = "id"
+      type     = "long"
+      required = true
+    }
+    fields {
+      id       = 2
+      name     = "data"
+      type     = "long"
+      required = true
+    }
+  }
+  partition_spec {
+    fields {
+      source_id = 1
+      name      = "id_bucket"
+      transform = "bucket[8]"
+    }
+  }
+  sort_order {
+    fields {
+      source_id  = 1
+      transform  = "identity"
+      direction  = "asc"
+      null_order = "nulls-first"
+    }
+  }
+
+  properties = {
+    key = "initial"
+  }
+}
+`
+	if updated {
+		table = `
+resource "google_biglake_iceberg_table" "my_iceberg_table" {
+  catalog   = google_biglake_iceberg_catalog.catalog.name
+  namespace = google_biglake_iceberg_namespace.namespace.namespace_id
+  name      = "tf_test_my_table_%{random_suffix}"
+  schema {
+    type = "struct"
+    fields {
+      id       = 1
+      name     = "id"
+      type     = "long"
+      required = true
+    }
+    fields {
+      id       = 2
+      name     = "data"
+      type     = "long"
+      required = true
+    }
+    fields {
+      id       = 3
+      name     = "event_time"
+      type     = "timestamptz"
+      required = false
+      doc      = "Time of the event."
+    }
+  }
+  partition_spec {
+    fields {
+      source_id = 3
+      name      = "event_day"
+      transform = "day"
+    }
+  }
+  sort_order {
+    fields {
+      source_id  = 2
+      transform  = "bucket[4]"
+      direction  = "desc"
+      null_order = "nulls-last"
+    }
+  }
+
+  properties = {
+    key = "updated"
+  }
+}
+`
+	}
+
+	return acctest.Nprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "tf-test-my-bucket-%{random_suffix}"
+  location      = "us-central1"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_biglake_iceberg_catalog" "catalog" {
+  name             = "tf_test_catalog_%{random_suffix}"
+  catalog_type     = "CATALOG_TYPE_BIGLAKE"
+  default_location = "gs://${google_storage_bucket.bucket.name}"
+}
+
+resource "google_biglake_iceberg_namespace" "namespace" {
+  catalog = google_biglake_iceberg_catalog.catalog.name
+  namespace_id = "my_namespace_%{random_suffix}"
+}
+`+table, context)
 }
