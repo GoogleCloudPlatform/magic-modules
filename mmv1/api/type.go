@@ -1097,6 +1097,15 @@ func (t *Type) GetDescription() string {
 	return strings.TrimSpace(strings.TrimRight(t.Description, "\n"))
 }
 
+// AsDatasourceArgument returns a copy of the property marked as a Required or
+// Optional argument, so that its documentation reflects how it is used on the
+// generated data source rather than on the resource.
+func (t Type) AsDatasourceArgument(required bool) *Type {
+	t.Required = required
+	t.Output = false
+	return &t
+}
+
 func (t *Type) FieldType() []string {
 	ret := []string{}
 	if t.Required {
