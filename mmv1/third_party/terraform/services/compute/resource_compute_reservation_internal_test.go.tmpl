@@ -371,6 +371,106 @@ func TestComputeReservationUpdate_shareTypeAndProjectMapTransitions(t *testing.T
 		}
 	})
 }
+
+func TestComputeReservation_enableEmergentMaintenanceCustomizeDiffAndUpdate(t *testing.T) {
+	t.Parallel()
+
+	r := ResourceComputeReservation()
+	meta := &transport_tpg.Config{
+		Project: "my-project",
+		Zone:    "us-central1-a",
+	}
+
+	makeCfg := func(em bool) map[string]interface{} {
+		return map[string]interface{}{
+			"name":                        "my-res",
+			"zone":                        "us-central1-a",
+			"project":                     "my-project",
+			"enable_emergent_maintenance": em,
+			"specific_reservation": []interface{}{map[string]interface{}{
+				"count":               1,
+				"instance_properties": []interface{}{map[string]interface{}{"machine_type": "n2-standard-2"}},
+			}},
+		}
+	}
+
+	buildStateWithDeploymentType := func(t *testing.T, deploymentType string, em bool) *terraform.InstanceState {
+		t.Helper()
+		initDiff, err := schema.InternalMap(r.Schema).Diff(context.Background(), nil, terraform.NewResourceConfigRaw(makeCfg(em)), computeReservationEnableEmergentMaintenanceForceNew, meta, true)
+		if err != nil {
+			t.Fatalf("initial diff error: %v", err)
+		}
+		initData, err := schema.InternalMap(r.Schema).Data(nil, initDiff)
+		if err != nil {
+			t.Fatalf("initial data error: %v", err)
+		}
+		initData.SetId("projects/my-project/zones/us-central1-a/reservations/my-res")
+		if err := initData.Set("deployment_type", deploymentType); err != nil {
+			t.Fatalf("failed setting deployment_type: %v", err)
+		}
+		return initData.State()
+	}
+
+	for _, tc := range []struct {
+		name           string
+		deploymentType string
+	}{
+		{name: "emptyDeploymentType", deploymentType: ""},
+		{name: "unspecifiedDeploymentType", deploymentType: "DEPLOYMENT_TYPE_UNSPECIFIED"},
+	} {
+		t.Run(tc.name+"_forcesNew", func(t *testing.T) {
+			state := buildStateWithDeploymentType(t, tc.deploymentType, true)
+			diff, err := schema.InternalMap(r.Schema).Diff(context.Background(), state, terraform.NewResourceConfigRaw(makeCfg(false)), computeReservationEnableEmergentMaintenanceForceNew, meta, true)
+			if err != nil {
+				t.Fatalf("update diff error: %v", err)
+			}
+			if !diff.RequiresNew() {
+				t.Fatalf("expected ForceNew when deployment_type=%q, got in-place diff: %#v", tc.deploymentType, diff.Attributes)
+			}
+			attrDiff, ok := diff.Attributes["enable_emergent_maintenance"]
+			if !ok || !attrDiff.RequiresNew {
+				t.Fatalf("expected enable_emergent_maintenance RequiresNew=true, got %#v", attrDiff)
+			}
+		})
+	}
+
+	t.Run("denseDeploymentType_updatesInPlaceViaPaths", func(t *testing.T) {
+		_, reqs, cfg := newReservationTestServer(t)
+		state := buildStateWithDeploymentType(t, "DENSE", true)
+		diff, err := schema.InternalMap(r.Schema).Diff(context.Background(), state, terraform.NewResourceConfigRaw(makeCfg(false)), computeReservationEnableEmergentMaintenanceForceNew, cfg, true)
+		if err != nil {
+			t.Fatalf("update diff error: %v", err)
+		}
+		if diff.RequiresNew() {
+			t.Fatalf("expected in-place update when deployment_type=DENSE, got RequiresNew: %#v", diff.Attributes)
+		}
+		d, err := schema.InternalMap(r.Schema).Data(state, diff)
+		if err != nil {
+			t.Fatalf("update data error: %v", err)
+		}
+		if err := r.Update(d, cfg); err != nil {
+			t.Fatalf("Update failed: %v", err)
+		}
+
+		const resPath = "/compute/v1/projects/my-project/zones/us-central1-a/reservations/my-res"
+		const zoneLink = "projects/my-project/global/zones/us-central1-a"
+		want := []recordedReservationReq{
+			{
+				method: http.MethodPatch,
+				path:   resPath,
+				paths:  []string{"enableEmergentMaintenance"},
+				body: map[string]interface{}{
+					"name":                      "my-res",
+					"zone":                      zoneLink,
+					"enableEmergentMaintenance": false,
+				},
+			},
+		}
+		if !reflect.DeepEqual(*reqs, want) {
+			t.Fatalf("recorded requests mismatch:\ngot:  %#v\nwant: %#v", *reqs, want)
+		}
+	})
+}
 {{- if ne $.TargetVersionName "ga" }}
 
 func TestComputeReservationUpdate_betaShareSettingsProjects(t *testing.T) {

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
@@ -227,4 +228,66 @@ resource "google_compute_reservation" "reservation" {
   }
 }
 `, context)
+}
+
+func TestAccComputeReservation_enableEmergentMaintenance(t *testing.T) {
+	t.Parallel()
+
+	reservationName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeReservationDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeReservation_enableEmergentMaintenance(reservationName, "true"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_reservation.reservation", "enable_emergent_maintenance", "true"),
+					resource.TestCheckResourceAttr("google_compute_reservation.reservation", "deployment_type", ""),
+				),
+			},
+			{
+				ResourceName:            "google_compute_reservation.reservation",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"enable_emergent_maintenance"},
+			},
+			{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_reservation.reservation", plancheck.ResourceActionDestroyBeforeCreate),
+					},
+				},
+				Config: testAccComputeReservation_enableEmergentMaintenance(reservationName, "false"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_reservation.reservation", "enable_emergent_maintenance", "false"),
+					resource.TestCheckResourceAttr("google_compute_reservation.reservation", "deployment_type", ""),
+				),
+			},
+			{
+				ResourceName:            "google_compute_reservation.reservation",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"enable_emergent_maintenance"},
+			},
+		},
+	})
+}
+
+func testAccComputeReservation_enableEmergentMaintenance(reservationName, enableEmergentMaintenance string) string {
+	return fmt.Sprintf(`
+resource "google_compute_reservation" "reservation" {
+  name                        = %q
+  zone                        = "us-central1-c"
+  enable_emergent_maintenance = %s
+
+  specific_reservation {
+    count = 1
+    instance_properties {
+      machine_type = "e2-standard-2"
+    }
+  }
+}
+`, reservationName, enableEmergentMaintenance)
 }

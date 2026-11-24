@@ -52,6 +52,8 @@ custom_code:
   constants: 'templates/terraform/constants/reservation.go.tmpl'
   custom_update: 'templates/terraform/custom_update/compute_reservation_update.go.tmpl'
   post_read: templates/terraform/post_read/compute_reservetion.go.tmpl
+custom_diff:
+  - 'computeReservationEnableEmergentMaintenanceForceNew'
 # excluding identity due to zone value inconsistency
 exclude_identity_generation: true
 sweeper:
@@ -59,6 +61,7 @@ sweeper:
     - zone: "us-central1-a"
     - zone: "us-west1-a"
     - zone: "us-central1-f"
+    - zone: "us-central1-c"
 samples:
   - name: 'reservation_basic'
     primary_resource_id: 'gce_reservation'
@@ -384,13 +387,18 @@ properties:
           - 'DISALLOW_ALL'
         default_from_api: true
         immutable: true
+  - name: 'deploymentType'
+    type: String
+    description: |
+      Specifies the deployment strategy for this reservation. Possible values include `DENSE` and `FLEXIBLE`.
+    output: true
   - name: 'enableEmergentMaintenance'
     type: Boolean
     description: |
       Indicates if this group of VMs have emergent maintenance enabled.
-    immutable: true
+
+      ~> **Note:** Compute Engine only allows updating `enable_emergent_maintenance` in place on Hypercompute Cluster reservations (`deployment_type = "DENSE"`). On standard reservations (`deployment_type` unset), changing this field forces recreation of the reservation.
     ignore_read: true
-    min_version: 'beta'
   - name: 'kind'
     type: String
     description: |
