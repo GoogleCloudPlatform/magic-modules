@@ -59,6 +59,7 @@ sweeper:
     - zone: "us-central1-a"
     - zone: "us-west1-a"
     - zone: "us-central1-f"
+    - zone: "us-central1-c"
 samples:
   - name: 'reservation_basic'
     primary_resource_id: 'gce_reservation'
@@ -169,7 +170,6 @@ properties:
       When set to true, only VMs that target this reservation by name can
       consume this reservation. Otherwise, it can be consumed by VMs with
       affinity for any reservation. Defaults to false.
-    immutable: true
     # Not a hard API default, but this should help avoid a unset/true/false
     # trinary.
     default_value: false
@@ -189,7 +189,6 @@ properties:
         type: Enum
         description: |
           Type of sharing for this shared-reservation
-        immutable: true
         default_from_api: true
         enum_values:
           - 'LOCAL'
@@ -342,7 +341,6 @@ properties:
     description: |
       Absolute time in future when the reservation will be auto-deleted by Compute Engine. Timestamp is represented in RFC3339 text format.
       Cannot be used with delete_after_duration.
-    immutable: true
     default_from_api: true
     conflicts:
       - 'delete_after_duration.0.seconds'
@@ -357,14 +355,12 @@ properties:
         type: String
         description: |
           Number of seconds for the auto-delete duration.
-        immutable: true
         conflicts:
           - 'delete_at_time'
       - name: 'nanos'
         type: Integer
         description: |
           Number of nanoseconds for the auto-delete duration.
-        immutable: true
         conflicts:
           - 'delete_at_time'
   - name: 'reservationSharingPolicy'
@@ -383,7 +379,6 @@ properties:
           - 'ALLOW_ALL'
           - 'DISALLOW_ALL'
         default_from_api: true
-        immutable: true
   - name: 'enableEmergentMaintenance'
     type: Boolean
     description: |
