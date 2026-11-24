@@ -1366,22 +1366,17 @@ be from 0 to 999,999,999 inclusive.`,
 						"identity": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							{{- if ne $.TargetVersionName "ga" }}
 							Computed:     true,
-							{{- end }}
 							ForceNew:     true,
 							Description:  `Identity SPIFFE id.`,
 						},
 						"identity_certificate_enabled": {
 							Type:         schema.TypeBool,
 							Optional:     true,
-							{{- if ne $.TargetVersionName "ga" }}
 							Computed:     true,
-							{{- end }}
 							ForceNew:     true,
 							Description:  `Specifies whether identity certificates are enabled.`,
 						},
-						{{- if ne $.TargetVersionName "ga" }}
 						"identity_type": {
 							Type:         schema.TypeString,
 							Optional:     true,
@@ -1390,7 +1385,6 @@ be from 0 to 999,999,999 inclusive.`,
 							ValidateFunc: verify.ValidateEnum([]string{"IDENTITY_TYPE_UNSPECIFIED", "SERVICE_ACCOUNT", "AGENT_IDENTITY", ""}),
 							Description:  `The type of identity to use. Possible values: ["IDENTITY_TYPE_UNSPECIFIED", "SERVICE_ACCOUNT", "AGENT_IDENTITY"]`,
 						},
-						{{- end }}
 					},
 				},
 			},
@@ -1793,36 +1787,6 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		ReservationAffinity:        reservationAffinity,
 		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
 	}
-	if wic := expandWorkloadIdentityConfig(d); wic != nil {
-		{{- if eq $.TargetVersionName "ga" }}
-		instanceProperties.WorkloadIdentityConfig = &compute.WorkloadIdentityConfig{
-			Identity:                   wic["identity"].(string),
-			IdentityCertificateEnabled: wic["identityCertificateEnabled"].(bool),
-		}
-		{{- else }}
-		if _, hasIDType := wic["identityType"]; !hasIDType {
-			instanceProperties.WorkloadIdentityConfig = &compute.WorkloadIdentityConfig{
-				Identity:                   wic["identity"].(string),
-				IdentityCertificateEnabled: wic["identityCertificateEnabled"].(bool),
-			}
-		} else {
-			// Unpacking into typed compute.WorkloadIdentityConfig drops explicit false via omitempty
-			// unless ForceSendFields is set (unlike region_instance_template, which sends the raw map).
-			wicTyped := &compute.WorkloadIdentityConfig{}
-			if v, ok := wic["identity"].(string); ok {
-				wicTyped.Identity = v
-			}
-			if v, ok := wic["identityCertificateEnabled"].(bool); ok {
-				wicTyped.IdentityCertificateEnabled = v
-				wicTyped.ForceSendFields = append(wicTyped.ForceSendFields, "IdentityCertificateEnabled")
-			}
-			if v, ok := wic["identityType"].(string); ok {
-				wicTyped.IdentityType = v
-			}
-			instanceProperties.WorkloadIdentityConfig = wicTyped
-		}
-		{{- end }}
-	}
 	if cic := expandConfidentialInstanceConfig(d); cic != nil {
 		instanceProperties.ConfidentialInstanceConfig = &compute.ConfidentialInstanceConfig{
 			EnableConfidentialCompute: cic["enableConfidentialCompute"].(bool),
@@ -1882,6 +1846,9 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 	}
 	if props, ok := itBody["properties"].(map[string]interface{}); ok {
 		props["metadata"] = metadataMap
+		if wic := expandWorkloadIdentityConfig(d); wic != nil {
+			props["workloadIdentityConfig"] = wic
+		}
 	}
 	{{- if ne $.TargetVersionName "ga" }}
 	if len(partnerMetadataConverted) > 0 {
@@ -1902,6 +1869,9 @@ func resourceComputeInstanceTemplateCreate(d *schema.ResourceData, meta interfac
 		RawURL:    url,
 		UserAgent: userAgent,
 		Body:      itBody,
+{{- if eq $.TargetVersionName "ga" }}
+		ApiVersion: "2026-11-01",
+{{- end }}
 	})
 	if err != nil {
 		return fmt.Errorf("Error creating instance template: %s", err)
@@ -2049,6 +2019,9 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 		Project:   project,
 		RawURL:    url,
 		UserAgent: userAgent,
+{{- if eq $.TargetVersionName "ga" }}
+		ApiVersion: "2026-11-01",
+{{- end }}
 	})
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Instance Template %q", d.Get("name").(string)))
@@ -2306,25 +2279,19 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 		}
 	}
 
-	if instanceTemplate.Properties.WorkloadIdentityConfig != nil {
-		wicMap, convErr := tpgresource.ConvertToMap(instanceTemplate.Properties.WorkloadIdentityConfig)
-		if convErr != nil {
-			return fmt.Errorf("Error converting workload_identity_config: %s", convErr)
-		}
-		{{- if eq $.TargetVersionName "ga" }}
-		if err = d.Set("workload_identity_config", flattenWorkloadIdentityConfig(wicMap)); err != nil {
-			return fmt.Errorf("Error setting workload_identity_config: %s", err)
-		}
-		{{- else }}
+	var wicMap map[string]interface{}
+	if props, ok := res["properties"].(map[string]interface{}); ok {
+		wicMap, _ = props["workloadIdentityConfig"].(map[string]interface{})
+	}
+	if len(wicMap) > 0 {
 		if err = d.Set("workload_identity_config", flattenInstanceWorkloadIdentityConfig(wicMap)); err != nil {
 			return fmt.Errorf("Error setting workload_identity_config: %s", err)
 		}
-		{{- end }}
-	}{{ if ne $.TargetVersionName "ga" }} else {
+	} else {
 		if err = d.Set("workload_identity_config", nil); err != nil {
 			return fmt.Errorf("Error setting workload_identity_config: %s", err)
 		}
-	}{{ end }}
+	}
 
 	return nil
 }

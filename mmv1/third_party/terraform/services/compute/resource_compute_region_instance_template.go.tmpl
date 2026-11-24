@@ -1322,22 +1322,17 @@ be from 0 to 999,999,999 inclusive.`,
 						"identity": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							{{- if ne $.TargetVersionName "ga" }}
 							Computed:     true,
-							{{- end }}
 							ForceNew:     true,
 							Description:  `Identity SPIFFE id.`,
 						},
 						"identity_certificate_enabled": {
 							Type:         schema.TypeBool,
 							Optional:     true,
-							{{- if ne $.TargetVersionName "ga" }}
 							Computed:     true,
-							{{- end }}
 							ForceNew:     true,
 							Description:  `Specifies whether identity certificates are enabled.`,
 						},
-						{{- if ne $.TargetVersionName "ga" }}
 						"identity_type": {
 							Type:         schema.TypeString,
 							Optional:     true,
@@ -1346,7 +1341,6 @@ be from 0 to 999,999,999 inclusive.`,
 							ValidateFunc: verify.ValidateEnum([]string{"IDENTITY_TYPE_UNSPECIFIED", "SERVICE_ACCOUNT", "AGENT_IDENTITY", ""}),
 							Description:  `The type of identity to use. Possible values: ["IDENTITY_TYPE_UNSPECIFIED", "SERVICE_ACCOUNT", "AGENT_IDENTITY"]`,
 						},
-						{{- end }}
 					},
 				},
 			},
@@ -1528,6 +1522,9 @@ func resourceComputeRegionInstanceTemplateCreate(d *schema.ResourceData, meta in
 		UserAgent: userAgent,
 		Body: instanceTemplate,
 		Timeout: d.Timeout(schema.TimeoutCreate),
+{{- if eq $.TargetVersionName "ga" }}
+		ApiVersion: "2026-11-01",
+{{- end }}
 	})
 	if err != nil {
 		return fmt.Errorf("Error creating RegionInstanceTemplate: %s", err)
@@ -1582,6 +1579,9 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 		Project: project,
 		RawURL: url,
 		UserAgent: userAgent,
+{{- if eq $.TargetVersionName "ga" }}
+		ApiVersion: "2026-11-01",
+{{- end }}
 	})
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ComputeRegionInstanceTemplate %q", d.Id()))
@@ -1850,11 +1850,11 @@ func resourceComputeRegionInstanceTemplateRead(d *schema.ResourceData, meta inte
 		if err = d.Set("workload_identity_config", FlattenWorkloadIdentityConfigHTTP(wic)); err != nil {
 			return fmt.Errorf("Error setting workload_identity_config: %s", err)
 		}
-	}{{ if ne $.TargetVersionName "ga" }} else {
+	} else {
 		if err = d.Set("workload_identity_config", nil); err != nil {
 			return fmt.Errorf("Error setting workload_identity_config: %s", err)
 		}
-	}{{ end }}
+	}
     
 	return nil
 }

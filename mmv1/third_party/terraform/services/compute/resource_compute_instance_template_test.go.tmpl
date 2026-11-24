@@ -13,9 +13,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-{{- if ne $.TargetVersionName "ga" }}
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
-{{- end }}
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/tags"
@@ -6226,6 +6224,7 @@ resource "google_compute_instance_template" "foobar" {
 }
 `, suffix, suffix, suffix)
 }
+{{- end }}
 
 func TestAccComputeInstanceTemplate_workloadIdentity_identityType(t *testing.T) {
 	t.Parallel()
@@ -6481,4 +6480,3 @@ resource "google_compute_instance_template" "foobar" {
 }
 `, context)
 }
-{{- end }}

@@ -834,11 +834,11 @@ The `specific_reservation` block supports:
 
 <a name="nested_workload_identity_config"></a>The `workload_identity_config` block supports:
 
-* `identity` - (Optional) Identity SPIFFE id. Required unless `identity_type` is specified in [Beta](../guides/provider_versions.html.markdown); must be omitted when `identity_type` is `AGENT_IDENTITY`.
+* `identity` - (Optional) Identity SPIFFE id. Required unless `identity_type` is specified; must be omitted when `identity_type` is `AGENT_IDENTITY`.
 
-* `identity_certificate_enabled` - (Optional) Specifies whether identity certificates are enabled. Required unless `identity_type` is specified in [Beta](../guides/provider_versions.html.markdown); when omitted with `identity_type`, defaults to `true` for `AGENT_IDENTITY` and `false` for `SERVICE_ACCOUNT`.
+* `identity_certificate_enabled` - (Optional) Specifies whether identity certificates are enabled. Required unless `identity_type` is specified; when omitted with `identity_type`, defaults to `true` for `AGENT_IDENTITY` and `false` for `SERVICE_ACCOUNT`.
 
-* `identity_type` - (Optional, [Beta](../guides/provider_versions.html.markdown)) The type of identity to use. Note that `service_account` cannot be configured when `identity_type` is `AGENT_IDENTITY`. Possible values are: `IDENTITY_TYPE_UNSPECIFIED`, `SERVICE_ACCOUNT`, `AGENT_IDENTITY`.
+* `identity_type` - (Optional) The type of identity to use. Note that `service_account` cannot be configured when `identity_type` is `AGENT_IDENTITY`. Possible values are: `IDENTITY_TYPE_UNSPECIFIED`, `SERVICE_ACCOUNT`, `AGENT_IDENTITY`.
 
 ## Attributes Reference
 
