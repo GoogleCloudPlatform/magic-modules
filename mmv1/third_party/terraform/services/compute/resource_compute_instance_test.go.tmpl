@@ -14839,7 +14839,6 @@ resource "google_compute_instance" "foobar" {
 `, context)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeInstance_workloadIdentity_identityType(t *testing.T) {
 	t.Parallel()
 
@@ -15082,5 +15081,4 @@ resource "google_compute_instance" "foobar" {
 }
 `, context)
 }
-{{- end }}
 
