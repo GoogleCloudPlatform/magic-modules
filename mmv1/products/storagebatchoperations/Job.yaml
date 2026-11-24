@@ -59,6 +59,16 @@ samples:
         resource_id_vars:
           bucket_name: tf-sample-bucket
           job_id: tf-job
+  - name: storage_batch_operations_rewrite_storage_class
+    primary_resource_id: tf-job
+    exclude_basic_doc: true
+    steps:
+      - name: storage_batch_operations_rewrite_storage_class
+        ignore_read_extra:
+          - delete_protection
+        resource_id_vars:
+          bucket_name: tf-sample-bucket
+          job_id: tf-job
 virtual_fields:
   - name: delete_protection
     type: Boolean
@@ -273,9 +283,26 @@ properties:
     properties:
       - name: kmsKey
         type: String
-        required: true
         description: valid kms key
         immutable: true
+        at_least_one_of:
+          - rewrite_object.0.kms_key
+          - rewrite_object.0.storage_class
+      - name: storageClass
+        type: Enum
+        description: |
+          Rewrites the object to the specified storage class.
+          Setting this field will perform a full byte copy of the object if the storage class is different from the object's current storage class.
+          If Autoclass is enabled on the bucket, storage class changes are ignored by Cloud Storage.
+        immutable: true
+        at_least_one_of:
+          - rewrite_object.0.kms_key
+          - rewrite_object.0.storage_class
+        enum_values:
+          - STANDARD
+          - NEARLINE
+          - COLDLINE
+          - ARCHIVE
   - name: putObjectHold
     type: NestedObject
     description: allows to update temporary hold or eventBased hold for objects in bucket.
@@ -301,3 +328,33 @@ properties:
   - name: description
     type: String
     description: A description provided by the user for the job. Its max length is 1024 bytes when Unicode-encoded.
+  - name: loggingConfig
+    type: NestedObject
+    description: Logging configuration.
+    immutable: true
+    properties:
+      - name: logActions
+        type: Array
+        required: true
+        description: |
+          Specifies the actions to be logged.
+          Possible values include `TRANSFORM`.
+          See [LoggingConfig](https://cloud.google.com/storage/docs/batch-operations/reference/rest/v1/projects.locations.jobs#LoggingConfig) for allowed values.
+        immutable: true
+        item_type:
+          type: String
+      - name: logActionStates
+        type: Array
+        required: true
+        description: |
+          States in which Action are logged.If empty, no logs are generated.
+          Possible values include `SUCCEEDED`, `FAILED`.
+          See [LoggingConfig](https://cloud.google.com/storage/docs/batch-operations/reference/rest/v1/projects.locations.jobs#LoggingConfig) for allowed values.
+        immutable: true
+        item_type:
+          type: String
+  - name: dryRun
+    type: Boolean
+    description: |
+      If true, the job runs in dry run mode, returning the total object count and, if the object configuration is a prefix list, the bytes found from source. No transformations are performed.
+    immutable: true

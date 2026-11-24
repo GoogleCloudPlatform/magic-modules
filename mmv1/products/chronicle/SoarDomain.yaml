@@ -36,9 +36,15 @@ samples:
     min_version: beta
     steps:
       - name: "chronicle_soardomain_basic"
+        vars:
+          display_name: 'test.com'
+          environments_json: '[\"Default Environment\"]'
         test_env_vars:
           chronicle_id: 'CHRONICLE_ID'
-      - name: "chronicle_soardomain_full"
+      - name: "chronicle_soardomain_basic"
+        vars:
+          display_name: 'test1.com'
+          environments_json: '[\"*\"]'
         test_env_vars:
           chronicle_id: 'CHRONICLE_ID'
 parameters:

@@ -3,6 +3,7 @@ package google
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -335,6 +336,16 @@ func TestAddResourceChanges_createOrUpdateOrDeleteCreateOrNoopProcessed(t *testi
 			convertUnchanged: true,
 		},
 		{
+			name:             "CreateBeforeDestroy when convertUnchanged is false",
+			actions:          tfjson.Actions{"create", "delete"},
+			convertUnchanged: false,
+		},
+		{
+			name:             "CreateBeforeDestroy when convertUnchanged is true",
+			actions:          tfjson.Actions{"create", "delete"},
+			convertUnchanged: true,
+		},
+		{
 			name:             "Noop when convertUnchanged is true",
 			actions:          tfjson.Actions{"no-op"},
 			convertUnchanged: true,
@@ -497,19 +508,213 @@ func TestAddDuplicatedResources(t *testing.T) {
 			},
 		},
 	}
-	c, buf, err := newTestConverter(false)
+	c, _, err := newTestConverter(false)
 	assert.Nil(t, err)
 
 	err = c.AddResourceChanges([]*tfjson.ResourceChange{&rcb1, &rcb2, &rcp1, &rcp2})
+	assert.True(t, errors.Is(err, ErrDuplicateAsset), "expected ErrDuplicateAsset, got: %v", err)
+}
+
+func TestAddResourceChanges_duplicateAssetError(t *testing.T) {
+	cases := []struct {
+		name    string
+		changes []*tfjson.ResourceChange
+	}{
+		{
+			name: "CrossTypeCloudRunService",
+			changes: []*tfjson.ResourceChange{
+				{
+					Address:      "google_cloud_run_service.v1",
+					Mode:         "managed",
+					Type:         "google_cloud_run_service",
+					Name:         "v1",
+					ProviderName: "google",
+					Change: &tfjson.Change{
+						Actions: tfjson.Actions{"create"},
+						After: map[string]interface{}{
+							"name":     "shared-svc",
+							"project":  testProject,
+							"location": "us-central1",
+							"metadata": []interface{}{
+								map[string]interface{}{
+									"annotations": map[string]interface{}{
+										"run.googleapis.com/ingress": "internal",
+									},
+								},
+							},
+							"template": []interface{}{
+								map[string]interface{}{
+									"spec": []interface{}{
+										map[string]interface{}{
+											"containers": []interface{}{
+												map[string]interface{}{"image": "gcr.io/cloudrun/hello"},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				{
+					Address:      "google_cloud_run_v2_service.v2",
+					Mode:         "managed",
+					Type:         "google_cloud_run_v2_service",
+					Name:         "v2",
+					ProviderName: "google",
+					Change: &tfjson.Change{
+						Actions: tfjson.Actions{"create"},
+						After: map[string]interface{}{
+							"name":     "shared-svc",
+							"project":  testProject,
+							"location": "us-central1",
+							"ingress":  "INGRESS_TRAFFIC_ALL",
+							"template": []interface{}{
+								map[string]interface{}{
+									"containers": []interface{}{
+										map[string]interface{}{"image": "gcr.io/cloudrun/hello"},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "SameTypeComputeDisk",
+			changes: []*tfjson.ResourceChange{
+				{
+					Address:      "google_compute_disk.first",
+					Mode:         "managed",
+					Type:         "google_compute_disk",
+					Name:         "first",
+					ProviderName: "google",
+					Change: &tfjson.Change{
+						Actions: tfjson.Actions{"create"},
+						After: map[string]interface{}{
+							"project": testProject,
+							"name":    "same-disk",
+							"type":    "pd-ssd",
+							"zone":    "us-central1-a",
+						},
+					},
+				},
+				{
+					Address:      "google_compute_disk.second",
+					Mode:         "managed",
+					Type:         "google_compute_disk",
+					Name:         "second",
+					ProviderName: "google",
+					Change: &tfjson.Change{
+						Actions: tfjson.Actions{"create"},
+						After: map[string]interface{}{
+							"project": testProject,
+							"name":    "same-disk",
+							"type":    "pd-standard",
+							"zone":    "us-central1-a",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "SameTypeProjectWithoutBilling",
+			changes: []*tfjson.ResourceChange{
+				{
+					Address:      "google_project.first",
+					Mode:         "managed",
+					Type:         "google_project",
+					Name:         "first",
+					ProviderName: "google",
+					Change: &tfjson.Change{
+						Actions: tfjson.Actions{"create"},
+						After: map[string]interface{}{
+							"project_id": "duplicate-project-id",
+							"name":       "First Project",
+							"org_id":     "00000000000000",
+						},
+					},
+				},
+				{
+					Address:      "google_project.second",
+					Mode:         "managed",
+					Type:         "google_project",
+					Name:         "second",
+					ProviderName: "google",
+					Change: &tfjson.Change{
+						Actions: tfjson.Actions{"create"},
+						After: map[string]interface{}{
+							"project_id": "duplicate-project-id",
+							"name":       "Second Project",
+							"org_id":     "00000000000000",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			c, _, err := newTestConverter(false)
+			assert.Nil(t, err)
+			err = c.AddResourceChanges(tc.changes)
+			assert.True(t, errors.Is(err, ErrDuplicateAsset), "expected ErrDuplicateAsset, got: %v", err)
+		})
+	}
+}
+
+func TestAddResourceChanges_iamBeforeParentResourceMerged(t *testing.T) {
+	iam := &tfjson.ResourceChange{
+		Address:      "google_storage_bucket_iam_member.viewer",
+		Mode:         "managed",
+		Type:         "google_storage_bucket_iam_member",
+		Name:         "viewer",
+		ProviderName: "google",
+		Change: &tfjson.Change{
+			Actions: tfjson.Actions{"create"},
+			After: map[string]interface{}{
+				"bucket": "shared-bucket",
+				"role":   "roles/storage.objectViewer",
+				"member": "user:jane@example.com",
+			},
+		},
+	}
+	bucket := &tfjson.ResourceChange{
+		Address:       "module.m.google_storage_bucket.bucket",
+		ModuleAddress: "module.m",
+		Mode:          "managed",
+		Type:          "google_storage_bucket",
+		Name:          "bucket",
+		ProviderName:  "google",
+		Change: &tfjson.Change{
+			Actions: tfjson.Actions{"create"},
+			After: map[string]interface{}{
+				"name":     "shared-bucket",
+				"project":  testProject,
+				"location": "US",
+			},
+		},
+	}
+
+	c, _, err := newTestConverter(false)
+	assert.Nil(t, err)
+	err = c.AddResourceChanges([]*tfjson.ResourceChange{iam, bucket})
 	assert.Nil(t, err)
 
-	caiKeyBilling := "cloudbilling.googleapis.com/ProjectBillingInfo//cloudbilling.googleapis.com/projects/test-project/billingInfo"
-	assert.Contains(t, c.assets, caiKeyBilling)
-
-	caiKeyProject := "cloudresourcemanager.googleapis.com/Project//cloudresourcemanager.googleapis.com/projects/test-project"
-	assert.Contains(t, c.assets, caiKeyProject)
-
-	assert.Contains(t, buf.String(), "duplicate asset")
+	assets := c.Assets()
+	if assert.Len(t, assets, 1) {
+		assert.Equal(t, "//storage.googleapis.com/shared-bucket", assets[0].Name)
+		assert.Equal(t, "storage.googleapis.com/Bucket", assets[0].Type)
+		if assert.NotNil(t, assets[0].Resource) {
+			assert.Equal(t, "US", assets[0].Resource.Data["location"])
+		}
+		if assert.NotNil(t, assets[0].IAMPolicy) && assert.Len(t, assets[0].IAMPolicy.Bindings, 1) {
+			assert.Equal(t, "roles/storage.objectViewer", assets[0].IAMPolicy.Bindings[0].Role)
+			assert.Equal(t, []string{"user:jane@example.com"}, assets[0].IAMPolicy.Bindings[0].Members)
+		}
+	}
 }
 
 func TestAddStorageModuleAfterUnknown(t *testing.T) {

@@ -26,6 +26,15 @@ import (
 )
 
 func ResourceComputeInstanceGroupManager() *schema.Resource {
+	deletionPolicySchema := tpgresource.DeletionPolicySchemaEntry("DELETE")
+	deletionPolicySchema.Description = `Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
+When a 'terraform destroy' or 'terraform apply' would delete the instance,
+the command will fail if this field is set to "PREVENT" in Terraform state.
+When set to "ABANDON", the command will remove the resource from Terraform
+management without updating or deleting the resource in the API.
+When set to "DELETE", deleting the resource is allowed. If graceful shutdown is configured, the MIG deletion waits for all instances to shut down gracefully before deletion.
+When set to "FORCE", deleting the resource is allowed, and graceful shutdown is skipped for instance deletion even if it's configured for the instances.
+`
 	return &schema.Resource{
 		Create: resourceComputeInstanceGroupManagerCreate,
 		Read:   resourceComputeInstanceGroupManagerRead,
@@ -276,9 +285,31 @@ func ResourceComputeInstanceGroupManager() *schema.Resource {
 				Description: `The update policy for this managed instance group.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+{{- if ne $.TargetVersionName "ga" }}
+						"allowed_actions": {
+							Type:     schema.TypeSet,
+							Optional: true,
+							MinItems: 1,
+							Elem: &schema.Schema{
+								Type:         schema.TypeString,
+								ValidateFunc: validation.StringInSlice([]string{"NONE", "REFRESH", "RESTART_IN_PLACE", "RESTART", "REPLACE"}, false),
+							},
+							Set: schema.HashString,
+							ExactlyOneOf:  []string{"update_policy.0.minimal_action", "update_policy.0.allowed_actions"},
+							ConflictsWith: []string{"update_policy.0.minimal_action", "update_policy.0.most_disruptive_allowed_action"},
+							Description:   `Specifies the allowed actions list for this update. Valid values are: "NONE", "REFRESH", "RESTART_IN_PLACE", "RESTART", "REPLACE". allowed_actions is the only way to request RESTART_IN_PLACE. Conflicts with minimal_action and most_disruptive_allowed_action.`,
+						},
+
+{{- end }}
 						"minimal_action": {
 							Type:         schema.TypeString,
+{{- if ne $.TargetVersionName "ga" }}
+							Optional:      true,
+							ExactlyOneOf:  []string{"update_policy.0.minimal_action", "update_policy.0.allowed_actions"},
+							ConflictsWith: []string{"update_policy.0.allowed_actions"},
+{{- else }}
 							Required:     true,
+{{- end }}
 							ValidateFunc: validation.StringInSlice([]string{"NONE", "REFRESH", "RESTART", "REPLACE"}, false),
 							Description:  `Minimal action to be taken on an instance. You can specify either NONE to forbid any actions, REFRESH to update without stopping instances, RESTART to restart existing instances or REPLACE to delete and create new instances from the target template. If you specify a REFRESH, the Updater will attempt to perform that action only. However, if the Updater determines that the minimal action you specify is not enough to perform the update, it might perform a more disruptive action.`,
 						},
@@ -286,6 +317,9 @@ func ResourceComputeInstanceGroupManager() *schema.Resource {
 						"most_disruptive_allowed_action": {
 							Type:         schema.TypeString,
 							Optional:     true,
+{{- if ne $.TargetVersionName "ga" }}
+							ConflictsWith: []string{"update_policy.0.allowed_actions"},
+{{- end }}
 							ValidateFunc: validation.StringInSlice([]string{"NONE", "REFRESH", "RESTART", "REPLACE"}, false),
 							Description:  `Most disruptive action that is allowed to be taken on an instance. You can specify either NONE to forbid any actions, REFRESH to allow actions that do not need instance restart, RESTART to allow actions that can be applied without instance replacing or REPLACE to allow all possible actions. If the Updater determines that the minimal update action needed is more disruptive than most disruptive allowed action you specify it will not perform the update at all.`,
 						},
@@ -635,9 +669,19 @@ func ResourceComputeInstanceGroupManager() *schema.Resource {
 					},
 				},
 			},
-//UDP schema start
-            "deletion_policy": tpgresource.DeletionPolicySchemaEntry("DELETE"),
-//UDP schema end
+			{{- if ne $.TargetVersionName "ga" }}
+			"service_account": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				Description: `The service account to be used as credentials for all operations performed by the managed instance group on instances. The service account needs all permissions required to create and delete instances. By default, the service account {projectNumber}@cloudservices.gserviceaccount.com is used.`,
+			},
+			{{- end }}
+
+			//UDP schema start
+			"deletion_policy": deletionPolicySchema,
+			//UDP schema end
 		},
 		UseJSONNumber: true,
 	}
@@ -836,6 +880,9 @@ func resourceComputeInstanceGroupManagerCreate(d *schema.ResourceData, meta inte
 	{{- if ne $.TargetVersionName "ga" }}
 	if params := expandInstanceGroupManagerParamsV2(d); params != nil {
 		insertBody["params"] = params
+	}
+	if sa := d.Get("service_account").(string); sa != "" {
+		insertBody["serviceAccount"] = sa
 	}
 	{{- end }}
 
@@ -1100,6 +1147,11 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 	if err := d.Set("self_link", tpgresource.ConvertSelfLinkToV1(stringFromMap(manager, "selfLink"))); err != nil {
 		return fmt.Errorf("Error setting self_link: %s", err)
 	}
+	{{- if ne $.TargetVersionName "ga" }}
+	if err := d.Set("service_account", stringFromMap(manager, "serviceAccount")); err != nil {
+		return fmt.Errorf("Error setting service_account: %s", err)
+	}
+	{{- end }}
 
 	if err = d.Set("auto_healing_policies", flattenAutoHealingPoliciesV2(manager["autoHealingPolicies"])); err != nil {
 		return fmt.Errorf("Error setting auto_healing_policies in state: %s", err.Error())
@@ -1153,6 +1205,10 @@ func resourceComputeInstanceGroupManagerRead(d *schema.ResourceData, meta interf
 }
 
 func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta interface{}) error {
+	if tpgresource.DeletionPolicyPreUpdate(d, ResourceComputeInstanceGroupManager) {
+		return ResourceComputeInstanceGroupManager().Read(d, meta)
+	}
+
 	config := meta.(*transport_tpg.Config)
 
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
@@ -1348,6 +1404,12 @@ func resourceComputeInstanceGroupManagerUpdate(d *schema.ResourceData, meta inte
 }
 
 func resourceComputeInstanceGroupManagerDelete(d *schema.ResourceData, meta interface{}) error {
+	if ok, err := tpgresource.DeletionPolicyPreDelete(d); err != nil {
+		return err
+	} else if ok {
+		return nil
+	}
+
 	config := meta.(*transport_tpg.Config)
 
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
@@ -1365,6 +1427,13 @@ func resourceComputeInstanceGroupManagerDelete(d *schema.ResourceData, meta inte
 		return err
 	}
 
+	if d.Get("deletion_policy").(string) == "FORCE" {
+		url, err = transport_tpg.AddQueryParams(url, map[string]string{"noGracefulShutdown": "true"})
+		if err != nil {
+			return err
+		}
+	}
+
 	op, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "DELETE",
@@ -1376,7 +1445,7 @@ func resourceComputeInstanceGroupManagerDelete(d *schema.ResourceData, meta inte
 	attempt := 0
 	for err != nil && attempt < 20 {
 		attempt++
-		time.Sleep(2000 * time.Millisecond)
+		time.Sleep(2 * config.SleepUnit)
 		op, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "DELETE",
@@ -1467,11 +1536,18 @@ func waitForInstancesRefreshFunc(f getInstanceManagerFunc, waitForUpdates bool, 
 
 func computeIGMWaitForInstanceStatus(d *schema.ResourceData, meta interface{}) error {
 	waitForUpdates := d.Get("wait_for_instances_status").(string) == "UPDATED"
+	config := meta.(*transport_tpg.Config)
+	var pollInterval time.Duration
+	if config.SleepUnit > 0 && config.SleepUnit != time.Second {
+		pollInterval = config.SleepUnit
+	}
 	conf := retry.StateChangeConf{
-		Pending: []string{"creating", "error", "updating per instance configs", "reaching version target", "updating all instances config"},
-		Target:  []string{"created"},
-		Refresh: instanceGroupManagerStatusRefreshFunc(waitForUpdates, d, meta),
-		Timeout: d.Timeout(schema.TimeoutCreate),
+		Pending:      []string{"creating", "error", "updating per instance configs", "reaching version target", "updating all instances config"},
+		Target:       []string{"created"},
+		Refresh:      instanceGroupManagerStatusRefreshFunc(waitForUpdates, d, meta),
+		Timeout:      d.Timeout(schema.TimeoutCreate),
+		MinTimeout:   config.SleepUnit / 2,
+		PollInterval: pollInterval,
 	}
 	_, err := conf.WaitForState()
 	if err != nil {
@@ -1882,12 +1958,32 @@ func expandUpdatePolicy(configured []interface{}) map[string]interface{} {
 	for _, raw := range configured {
 		data := raw.(map[string]interface{})
 
+{{- if ne $.TargetVersionName "ga" }}
+		if v, ok := data["allowed_actions"]; ok && v.(*schema.Set).Len() > 0 {
+			updatePolicy["allowedActions"] = v.(*schema.Set).List()
+			updatePolicy["minimalAction"] = nil
+			updatePolicy["mostDisruptiveAllowedAction"] = nil
+		} else {
+			updatePolicy["allowedActions"] = nil
+			if minimalAction := data["minimal_action"].(string); minimalAction != "" {
+				updatePolicy["minimalAction"] = minimalAction
+			} else {
+				updatePolicy["minimalAction"] = nil
+			}
+			if mostDisruptiveAllowedAction := data["most_disruptive_allowed_action"].(string); mostDisruptiveAllowedAction != "" {
+				updatePolicy["mostDisruptiveAllowedAction"] = mostDisruptiveAllowedAction
+			} else {
+				updatePolicy["mostDisruptiveAllowedAction"] = nil
+			}
+		}
+{{- else }}
 		updatePolicy["minimalAction"] = data["minimal_action"].(string)
 		if mostDisruptiveAllowedAction := data["most_disruptive_allowed_action"].(string); mostDisruptiveAllowedAction != "" {
 			updatePolicy["mostDisruptiveAllowedAction"] = mostDisruptiveAllowedAction
 		} else {
 			updatePolicy["mostDisruptiveAllowedAction"] = nil
 		}
+{{- end }}
 		updatePolicy["type"] = data["type"].(string)
 		updatePolicy["replacementMethod"] = data["replacement_method"].(string)
 {{- if ne $.TargetVersionName "ga" }}
@@ -2098,9 +2194,18 @@ func flattenUpdatePolicy(raw interface{}) []map[string]interface{} {
 		}
 {{- if ne $.TargetVersionName "ga" }}
 		up["min_ready_sec"] = int64FromInterface(updatePolicy["minReadySec"])
-{{- end }}
+		if allowedActions := sliceFromInterface(updatePolicy["allowedActions"]); len(allowedActions) > 0 {
+			up["allowed_actions"] = schema.NewSet(schema.HashString, allowedActions)
+			up["minimal_action"] = ""
+			up["most_disruptive_allowed_action"] = ""
+		} else {
+			up["minimal_action"] = stringFromMap(updatePolicy, "minimalAction")
+			up["most_disruptive_allowed_action"] = stringFromMap(updatePolicy, "mostDisruptiveAllowedAction")
+		}
+{{- else }}
 		up["minimal_action"] = stringFromMap(updatePolicy, "minimalAction")
 		up["most_disruptive_allowed_action"] = stringFromMap(updatePolicy, "mostDisruptiveAllowedAction")
+{{- end }}
 		up["type"] = stringFromMap(updatePolicy, "type")
 		up["replacement_method"] = stringFromMap(updatePolicy, "replacementMethod")
 		results = append(results, up)

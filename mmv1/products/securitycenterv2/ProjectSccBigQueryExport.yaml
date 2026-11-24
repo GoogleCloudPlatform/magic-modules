@@ -52,11 +52,9 @@ samples:
       - name: scc_v2_project_big_query_export_config_basic
         resource_id_vars:
           big_query_export_id: my-export
-          dataset: my-dataset
           dataset_id: my_dataset_id
           name: my-export
         test_env_vars:
-          org_id: ORG_ID
           project: PROJECT_NAME
         ignore_read_extra:
           - project
@@ -148,3 +146,8 @@ properties:
       See
       [Filtering notifications](https://cloud.google.com/security-command-center/docs/how-to-api-filter-notifications)
       for information on how to write a filter.
+  - name: deletionNotificationsEnabled
+    type: Boolean
+    description: |
+      Indicates whether the notifications will be sent for deleted findings.
+    send_empty_value: true

@@ -1,5 +1,6 @@
 {
   "name": "test-monitor",
+  "description": "Monitors nightly acceptance test runs, aggregates failures across a 7-day window, correlates GitHub issues, and produces test health reports.",
   "configPath": {
     "relativePathToConfig": "config.yaml"
   }

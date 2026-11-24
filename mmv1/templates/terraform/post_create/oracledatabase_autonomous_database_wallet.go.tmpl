@@ -1,0 +1,8 @@
+// generateWallet returns the wallet only in its response, and the resource is never read.
+archiveContent, ok := res["archiveContent"]
+if !ok {
+	return fmt.Errorf("Error creating AutonomousDatabaseWallet: response didn't contain archiveContent")
+}
+if err := d.Set("archive_content", archiveContent); err != nil {
+	return fmt.Errorf("Error setting archive_content: %w", err)
+}

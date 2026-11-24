@@ -22,3 +22,16 @@ here, upstream — never in the downstream repos.
   behavior flags (`ignore_read`, `ImportStateVerifyIgnore`) without an adjacent
   comment justifying the API behavior that requires them.
 - **Verify before opening a PR**: generate, build, and run the tests relevant to what you changed.
+- **Prepare PR links with the helper script**: follow [.agents/skills/operations/prepare-pr-link/SKILL.md](.agents/skills/operations/prepare-pr-link/SKILL.md) and always generate compare URLs via `.agents/scripts/build_pr_link.py` (enforces the 63-char hard title cap, target `<= 60`, and release-note syntax).
+- **Prefer adding commits on PR updates**: once a branch is pushed or a PR is open, push new commits for subsequent
+  updates rather than amending, rebasing, or force-pushing unless instructed otherwise.
+
+## Parallel work
+
+- **Work in a git worktree**: do task work in a git worktree on its own branch. Before starting, `git fetch upstream`
+  and make sure the branch is based on current `upstream/main`. Don't switch branches or generate code in a shared
+  primary checkout.
+- **Keep the worktree until the PR is done**: push PR branches under a descriptive branch name, and keep the
+  magic-modules worktree so follow-up fixes and reviews have the checkout.
+- **Bazel in worktrees**: inside a worktree, `make` defaults to `USE_BAZEL=0` (set `USE_BAZEL=1` to override).
+- **Helper scripts**: prefer Go over Python or complex shell scripts.

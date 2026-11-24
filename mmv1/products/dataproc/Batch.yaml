@@ -30,6 +30,11 @@ delete_url: projects/{{project}}/locations/{{location}}/batches/{{batch_id}}
 collection_url_key: batches
 import_format:
   - projects/{{project}}/locations/{{location}}/batches/{{batch_id}}
+sweeper:
+  url_substitutions:
+    - region: us-central1
+    - region: us-west1
+    - region: us-east1
 timeouts:
   insert_minutes: 10
   update_minutes: 20
@@ -38,6 +43,8 @@ async:
   operation:
     base_url: '{{op_id}}'
 autogen_async: true
+error_retry_predicates:
+  - transport_tpg.DataprocResourceNotReady
 include_in_tgc_next: true
 custom_code:
   decoder: templates/terraform/decoders/cloud_dataproc_batch.go.tmpl
@@ -51,12 +58,8 @@ samples:
         ignore_read_extra:
           - runtime_config.0.properties
         resource_id_vars:
-          prevent_destroy: "true"
           subnetwork_name: default
-        test_env_vars:
-          project_name: PROJECT_NAME
         test_vars_overrides:
-          prevent_destroy: "false"
           subnetwork_name: BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-spark-test-network", "dataproc-spark-test-subnetwork")
   - name: dataproc_batch_spark_full
     primary_resource_id: example_batch_spark
@@ -68,12 +71,8 @@ samples:
           bucket_name: dataproc-bucket
           dataproc_batch: dataproc-batch
           kms_key_name: example-key
-          prevent_destroy: "true"
-        test_env_vars:
-          project_name: PROJECT_NAME
         test_vars_overrides:
-          kms_key_name: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-dataproc-batch-key1").CryptoKey.Name
-          prevent_destroy: "false"
+          kms_key_name: kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-bootstrap-dataproc-batch-key1").CryptoKey.Name
   - name: dataproc_batch_sparksql
     primary_resource_id: example_batch_sparsql
     steps:
@@ -81,12 +80,8 @@ samples:
         ignore_read_extra:
           - runtime_config.0.properties
         resource_id_vars:
-          prevent_destroy: "true"
           subnetwork_name: default
-        test_env_vars:
-          project_name: PROJECT_NAME
         test_vars_overrides:
-          prevent_destroy: "false"
           subnetwork_name: BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-sparksql-test-network", "dataproc-sparksql-test-subnetwork")
   - name: dataproc_batch_pyspark
     primary_resource_id: example_batch_pyspark
@@ -95,12 +90,8 @@ samples:
         ignore_read_extra:
           - runtime_config.0.properties
         resource_id_vars:
-          prevent_destroy: "true"
           subnetwork_name: default
-        test_env_vars:
-          project_name: PROJECT_NAME
         test_vars_overrides:
-          prevent_destroy: "false"
           subnetwork_name: BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-pyspark-test-network", "dataproc-pyspark-test-subnetwork")
   - name: dataproc_batch_sparkr
     primary_resource_id: example_batch_sparkr
@@ -109,12 +100,8 @@ samples:
         ignore_read_extra:
           - runtime_config.0.properties
         resource_id_vars:
-          prevent_destroy: "true"
           subnetwork_name: default
-        test_env_vars:
-          project_name: PROJECT_NAME
         test_vars_overrides:
-          prevent_destroy: "false"
           subnetwork_name: BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-pyspark-test-network", "dataproc-pyspark-test-subnetwork")
   - name: dataproc_batch_autotuning
     primary_resource_id: example_batch_autotuning
@@ -123,12 +110,8 @@ samples:
         ignore_read_extra:
           - runtime_config.0.properties
         resource_id_vars:
-          prevent_destroy: "true"
           subnetwork_name: default
-        test_env_vars:
-          project_name: PROJECT_NAME
         test_vars_overrides:
-          prevent_destroy: "false"
           subnetwork_name: BootstrapSubnetWithFirewallForDataprocBatches(t, "dataproc-autotuning-test-network", "dataproc-autotuning-test-subnetwork")
 parameters:
   - name: location
@@ -347,6 +330,8 @@ properties:
               type: String
           - name: kmsKey
             type: String
+            # kmsKey is not present in CAI asset
+            is_missing_in_cai: true
             description: |
               The Cloud KMS key to use for encryption.
           - name: ttl

@@ -160,11 +160,7 @@ properties:
                 - DENY
                 - ALLOW
               required: true
-              description: |-
-                The effect of the rule.
-                Possible values:
-                DENY
-                ALLOW
+              description: The effect of the rule.
             - name: excludedPrincipals
               type: Array
               description: |-

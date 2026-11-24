@@ -32,7 +32,7 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 	}{{- end }}
 {{- end }}
 
-	url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(resourceData, config, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.BaseUrl}}")
+	url, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(resourceData, config, transport_tpg.BaseUrl(Product, config)+"{{$.BaseUrl}}")
 	if err != nil {
 		return err
 	}
@@ -122,6 +122,14 @@ func List{{ $.ResourceName }}s(config *transport_tpg.Config,
 			if err = Resource{{ $.ResourceName }}Flatten(d, config, res, config, {{ if $.HasProject }}project, {{ end }}userAgent, billingProject, url, headers); err != nil {
 				return err
 			}
+{{- /* Copy list scope values onto each item so URL-scope identity fields are preserved. */ -}}
+{{- range $scope := $.ListScopeProperties }}
+			if {{ $scope.CamelizeProperty }} != "" {
+				if err := d.Set("{{ underscore $scope.Name }}", {{ $scope.CamelizeProperty }}); err != nil {
+					return fmt.Errorf("error setting {{ underscore $scope.Name }}: %w", err)
+				}
+			}
+{{- end }}
 			id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
 			if err != nil {
 				return fmt.Errorf("error constructing id: %w", err)

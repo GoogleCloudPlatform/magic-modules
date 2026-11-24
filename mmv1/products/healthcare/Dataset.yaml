@@ -32,6 +32,11 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create']
+  operation:
+    base_url: '{{op_id}}'
 error_retry_predicates:
   - transport_tpg.HealthcareDatasetNotInitialized
 custom_code:
@@ -43,8 +48,6 @@ samples:
       - name: healthcare_dataset_basic
         resource_id_vars:
           dataset_name: example-dataset
-          location: us-central1
-          time_zone: America/New_York
   - name: healthcare_dataset_cmek
     primary_resource_id: default
     exclude_test: true
@@ -52,8 +55,6 @@ samples:
       - name: healthcare_dataset_cmek
         resource_id_vars:
           dataset_name: example-dataset
-          location: us-central1
-          time_zone: America/New_York
           key_name: example-key
           keyring_name: example-keyring
 parameters:

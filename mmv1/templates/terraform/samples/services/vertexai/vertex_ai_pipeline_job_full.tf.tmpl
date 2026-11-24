@@ -1,0 +1,168 @@
+data "google_project" "project" {}
+
+resource "google_storage_bucket" "bucket" {
+  name                        = "{{index $.ResourceIdVars "storage_bucket"}}"
+  location                    = "us-central1"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+resource "google_compute_network" "vertex_network" {
+  name                    = "{{index $.ResourceIdVars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_global_address" "vertex_range" {
+  name          = "{{index $.ResourceIdVars "address_name"}}"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 24
+  network       = google_compute_network.vertex_network.id
+}
+
+resource "google_service_networking_connection" "vertex_vpc_connection" {
+  network                 = google_compute_network.vertex_network.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.vertex_range.name]
+}
+
+resource "google_compute_subnetwork" "psc_subnetwork" {
+  name          = "{{index $.ResourceIdVars "subnetwork_name"}}"
+  region        = "us-central1"
+  ip_cidr_range = "10.0.0.0/16"
+  network       = google_compute_network.vertex_network.id
+}
+
+resource "google_compute_network_attachment" "psc_attachment" {
+  name                  = "{{index $.ResourceIdVars "network_attachment_name"}}"
+  region                = "us-central1"
+  connection_preference = "ACCEPT_MANUAL"
+  subnetworks           = [google_compute_subnetwork.psc_subnetwork.id]
+
+  lifecycle {
+    ignore_changes = [producer_accept_lists]
+  }
+}
+
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
+  crypto_key_id = "{{index $.ResourceIdVars "kms_key_name"}}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+}
+
+resource "google_vertex_ai_pipeline_job" "{{$.PrimaryResourceId}}" {
+  display_name          = "{{index $.ResourceIdVars "pipeline_job_id"}}"
+  pipeline_job_id       = "{{index $.ResourceIdVars "pipeline_job_id"}}"
+  region                = "us-central1"
+  preflight_validations = false
+  deletion_policy       = "FORCE"
+  service_account       = "${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+  network               = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.vertex_network.name}"
+  reserved_ip_ranges    = [google_compute_global_address.vertex_range.name]
+  template_uri          = "https://us-kfp.pkg.dev/ml-pipeline/google-cloud-registry/hello-world/sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+
+  pipeline_spec = jsonencode({
+    components = {
+      comp-hello-world = {
+        executorLabel = "exec-hello-world"
+        inputDefinitions = {
+          parameters = {
+            param1 = {
+              parameterType = "STRING"
+            }
+          }
+        }
+      }
+    }
+    deploymentSpec = {
+      executors = {
+        exec-hello-world = {
+          container = {
+            args = [
+              "--param1",
+              "{{ "{{" }}$.inputs.parameters['param1']{{ "}}" }}"
+            ]
+            command = [
+              "sh",
+              "-c",
+              "echo \"$0\""
+            ]
+            image = "python:3.11"
+          }
+        }
+      }
+    }
+    pipelineInfo = {
+      name = "hello-world-pipeline-full"
+    }
+    root = {
+      dag = {
+        tasks = {
+          hello-world = {
+            cachingOptions = {
+              enableCache = true
+            }
+            componentRef = {
+              name = "comp-hello-world"
+            }
+            inputs = {
+              parameters = {
+                param1 = {
+                  componentInputParameter = "param1"
+                }
+              }
+            }
+            taskInfo = {
+              name = "hello-world"
+            }
+          }
+        }
+      }
+      inputDefinitions = {
+        parameters = {
+          param1 = {
+            defaultValue  = "default-val"
+            isOptional    = true
+            parameterType = "STRING"
+          }
+        }
+      }
+    }
+    schemaVersion = "2.1.0"
+    sdkVersion    = "kfp-2.7.0"
+  })
+
+  encryption_spec {
+    kms_key_name = "{{index $.ResourceIdVars "kms_key_name"}}"
+  }
+
+  psc_interface_config {
+    network_attachment = google_compute_network_attachment.psc_attachment.id
+    dns_peering_configs {
+      domain         = "example.com."
+      target_project = data.google_project.project.project_id
+      target_network = google_compute_network.vertex_network.name
+    }
+  }
+
+  runtime_config {
+    gcs_output_directory = "gs://${google_storage_bucket.bucket.name}/output"
+    failure_policy       = "PIPELINE_FAILURE_POLICY_FAIL_SLOW"
+    parameter_values = {
+      param1 = "value1"
+    }
+    input_artifacts {
+      artifact_key = "input_dataset"
+      artifact_id  = "123456789"
+    }
+  }
+
+  labels = {
+    env = "full"
+  }
+
+  depends_on = [
+    google_service_networking_connection.vertex_vpc_connection,
+    google_kms_crypto_key_iam_member.crypto_key,
+  ]
+}

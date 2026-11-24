@@ -42,11 +42,9 @@ samples:
       - name: 'chronicle_feed_gcs'
         resource_id_vars:
           resource_name: test-feeds
-          description: test-feeds-description
         test_env_vars:
           chronicle_id: 'CHRONICLE_ID'
           project_name: 'PROJECT_NAME'
-          project_number: 'PROJECT_NUMBER'
         ignore_read_extra:
           - 'feed_service_account'
   - name: 'chronicle_feed_https_push'
@@ -55,7 +53,6 @@ samples:
       - name: 'chronicle_feed_https_push'
         resource_id_vars:
           resource_name: test-feeds
-          description: test-feeds-description
         test_env_vars:
           chronicle_id: 'CHRONICLE_ID'
           project_name: 'PROJECT_NAME'
@@ -982,28 +979,7 @@ properties:
           - 'AMAZON_SQS_V2'
           - 'AZURE_BLOBSTORE_V2'
           - 'GOOGLE_CLOUD_STORAGE_EVENT_DRIVEN'
-        description: |-
-          Source Type of the feed.
-          Possible values:
-          GOOGLE_CLOUD_STORAGE
-          HTTP
-          SFTP
-          AMAZON_S3
-          AZURE_BLOBSTORE
-          API
-          AMAZON_SQS
-          PUBSUB
-          AMAZON_KINESIS_FIREHOSE
-          WEBHOOK
-          HTTPS_PUSH_GOOGLE_CLOUD_PUBSUB
-          HTTPS_PUSH_AMAZON_KINESIS_FIREHOSE
-          HTTPS_PUSH_WEBHOOK
-          AZURE_EVENT_HUB
-          GOOGLE_CLOUD_STORAGE_V2
-          AMAZON_S3_V2
-          AMAZON_SQS_V2
-          AZURE_BLOBSTORE_V2
-          GOOGLE_CLOUD_STORAGE_EVENT_DRIVEN
+        description: Source Type of the feed.
       - name: foxItStixSettings
         type: NestedObject
         description: Fox-IT STIX settings.

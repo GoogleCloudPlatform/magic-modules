@@ -138,3 +138,37 @@ properties:
     type: String
     description: The creation time.
     output: true
+  - name: organizationSubscription
+    type: NestedObject
+    description: |-
+      Config to enable subscribing to events from all projects in the
+      GoogleApiSource's org.
+    conflicts:
+      - project_subscriptions
+    properties:
+      - name: enabled
+        type: Boolean
+        description: Enable org level subscription.
+        required: true
+        send_empty_value: true
+  - name: projectSubscriptions
+    type: NestedObject
+    description: |-
+      Config to enable subscribing to all events from a list of projects.
+
+      All the projects must be in the same org as the GoogleApiSource.
+    conflicts:
+      - organization_subscription
+    properties:
+      - name: list
+        type: Array
+        description: |-
+          A list of projects to receive events from.
+
+          All the projects must be in the same org. The listed projects should have
+          the format project/{identifier} where identifier can be either the
+          project id for project number. A single list may contain both formats. At
+          most 100 projects can be listed.
+        required: true
+        item_type:
+          type: String

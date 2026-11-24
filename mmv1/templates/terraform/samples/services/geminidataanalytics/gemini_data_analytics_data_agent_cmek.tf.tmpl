@@ -1,0 +1,35 @@
+data "google_project" "project" {
+}
+
+resource "google_kms_crypto_key_iam_member" "kms_iam" {
+  crypto_key_id = "{{index $.ResourceIdVars "kms_key_name"}}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-geminidataanalytics.iam.gserviceaccount.com"
+}
+
+resource "google_gemini_data_analytics_data_agent" "{{$.PrimaryResourceId}}" {
+  location      = "us-central1"
+  data_agent_id = "{{index $.ResourceIdVars "data_agent_id"}}"
+  display_name  = "CMEK data agent"
+  description   = "Example Gemini Data Analytics data agent with customer-managed encryption."
+
+  kms_key = "{{index $.ResourceIdVars "kms_key_name"}}"
+
+  data_analytics_agent {
+    staging_context {
+      system_instruction = "Answer questions about the sample Shakespeare corpus."
+
+      datasource_references {
+        bq {
+          table_references {
+            project_id = "bigquery-public-data"
+            dataset_id = "samples"
+            table_id   = "shakespeare"
+          }
+        }
+      }
+    }
+  }
+
+  depends_on = [google_kms_crypto_key_iam_member.kms_iam]
+}

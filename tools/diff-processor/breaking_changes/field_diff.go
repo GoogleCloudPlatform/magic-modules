@@ -23,6 +23,7 @@ var FieldDiffRules = []FieldDiffRule{
 	FieldNewRequired,
 	FieldNewOptionalFieldWithDefault,
 	FieldBecomingRequired,
+	FieldBecomingForceNew,
 	FieldBecomingComputedOnly,
 	FieldOptionalComputedToOptional,
 	FieldDefaultModification,
@@ -77,12 +78,36 @@ func FieldBecomingRequiredMessages(resource, field string, fieldDiff diff.FieldD
 	return nil
 }
 
+var FieldBecomingForceNew = FieldDiffRule{
+	Identifier: "field-becoming-force-new",
+	Messages:   FieldBecomingForceNewMessages,
+}
+
+func FieldBecomingForceNewMessages(resource, field string, fieldDiff diff.FieldDiff, _ diff.ResourceDiffInterface) []string {
+	// Ignore for added / removed fields
+	if fieldDiff.Old == nil || fieldDiff.New == nil {
+		return nil
+	}
+	// Promoting an output-only (Computed-only) field to create-time configurable
+	// (Optional + ForceNew) does not break existing configs because users could
+	// not configure the field previously.
+	if !fieldDiff.Old.Optional && !fieldDiff.Old.Required {
+		return nil
+	}
+	tmpl := "Field `%s` became ForceNew on `%s`"
+	if !fieldDiff.Old.ForceNew && fieldDiff.New.ForceNew {
+		return []string{fmt.Sprintf(tmpl, field, resource)}
+	}
+
+	return nil
+}
+
 var FieldBecomingComputedOnly = FieldDiffRule{
 	Identifier: "field-becoming-computed",
 	Messages:   FieldBecomingComputedOnlyMessages,
 }
 
-func FieldBecomingComputedOnlyMessages(resource, field string, fieldDiff diff.FieldDiff, _ diff.ResourceDiffInterface) []string {
+func FieldBecomingComputedOnlyMessages(resource, field string, fieldDiff diff.FieldDiff, resourceDiff diff.ResourceDiffInterface) []string {
 	// ignore for added / removed fields
 	if fieldDiff.Old == nil || fieldDiff.New == nil {
 		return nil
@@ -90,6 +115,11 @@ func FieldBecomingComputedOnlyMessages(resource, field string, fieldDiff diff.Fi
 	// if the field is computed only already
 	// this rule doesn't apply
 	if fieldDiff.Old.Computed && !fieldDiff.Old.Optional {
+		return nil
+	}
+	// if an ancestor was already computed-only in the old schema, users could never
+	// configure this field, so marking it computed-only is not a breaking change
+	if resourceDiff != nil && resourceDiff.HasOldComputedOnlyAncestor(field) {
 		return nil
 	}
 

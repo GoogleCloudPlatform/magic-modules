@@ -7,15 +7,13 @@ go_library(
         "log_utils.go",
         "slice_utils.go",
         "string_utils.go",
+        "template_cache.go",
         "template_utils.go",
         "yaml_validator.go",
     ],
     importpath = "github.com/GoogleCloudPlatform/magic-modules/mmv1/google",
     visibility = ["//visibility:public"],
-    deps = [
-        "@com_github_golang_glog//:glog",
-        "@in_gopkg_yaml_v3//:yaml_v3",
-    ],
+    deps = ["@in_gopkg_yaml_v3//:yaml_v3"],
 )
 
 go_test(
@@ -24,6 +22,7 @@ go_test(
         "fs_test.go",
         "slice_utils_test.go",
         "string_utils_test.go",
+        "template_cache_test.go",
     ],
     embed = [":google"],
 )

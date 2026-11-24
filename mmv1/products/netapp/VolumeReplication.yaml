@@ -278,6 +278,12 @@ properties:
             enum_values:
               - ENABLED
               - PAUSED
+          - name: hotTierBypassModeEnabled
+            type: Boolean
+            description: |
+              Flag indicating that the hot tier bypass mode is enabled. Default is false.
+              Only applicable to Flex service level.
+            immutable: true
   - name: sourceVolume
     type: String
     description: |

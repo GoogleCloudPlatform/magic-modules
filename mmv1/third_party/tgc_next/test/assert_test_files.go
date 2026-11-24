@@ -348,6 +348,17 @@ func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 // Compares HCL and finds all of the keys in map1 that are not in map2
 func compareHCLFields(map1, map2, ignoredFields map[string]any, resourceSchema *schema.Resource) []string {
 	var missingKeys []string
+	// Respect lifecycle.ignore_changes from the original HCL configuration so fields
+	// explicitly ignored by the test are not flagged when CAI returns mutated values.
+	if ignoreChanges, ok := map1["lifecycle.ignore_changes"].(string); ok && ignoreChanges != "" {
+		ignoreChanges = strings.Trim(ignoreChanges, "[]")
+		for _, field := range strings.Split(ignoreChanges, ",") {
+			field = strings.Trim(strings.TrimSpace(field), "\"'")
+			if field != "" {
+				ignoredFields[field] = struct{}{}
+			}
+		}
+	}
 	for key, val := range map1 {
 		if isIgnored(key, ignoredFields) {
 			continue

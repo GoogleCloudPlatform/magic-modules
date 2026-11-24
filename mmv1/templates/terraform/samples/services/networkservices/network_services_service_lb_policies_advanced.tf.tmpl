@@ -1,6 +1,4 @@
 resource "google_network_services_service_lb_policies" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
-
   name                     = "{{index $.ResourceIdVars "resource_name"}}"
   location                 = "global"
   description              = "my description"
@@ -20,8 +18,6 @@ resource "google_network_services_service_lb_policies" "{{$.PrimaryResourceId}}"
 }
 
 resource "google_compute_backend_service" "default" {
-  provider = google-beta
-  
 	name                  = "{{index $.ResourceIdVars "backend_name"}}"
 	description           = "my description"
 	load_balancing_scheme = "INTERNAL_SELF_MANAGED"

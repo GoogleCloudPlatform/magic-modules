@@ -51,6 +51,7 @@ samples:
           ssl_certificate_name: 'default-cert'
           backend_service_name: 'backend-service'
           health_check_name: 'health-check'
+          certificate_map_name: 'certificate-map'
 parameters:
 properties:
   - name: 'creationTimestamp'

@@ -60,7 +60,7 @@ samples:
 >
 > In the new `samples` format, these two use cases are explicitly separated into different fields within a step:
 > * **`resource_id_vars`**: **Use this exclusively for resource identifier variables (such as resource names or IDs).** It will automatically prepend a `tf-test` (or `tf_test`) prefix and append a random suffix. If a resource identifier doesn't support hyphens `-` or underscores `_`, use `test_vars_overrides` instead. For non-identifier variables, use `vars`.
-> * **`vars`**: Use this for plain literal values that should be passed to the test exactly as written (replaces the need for `test_vars_overrides`). **Note:** This should ONLY be used for fields that vary between steps (for example, to test update functionality). Constant values should be hardcoded directly in the `.tf.tmpl` file.
+> * **`vars`**: Use this for plain literal values that should be passed to the test exactly as written (replaces the need for `test_vars_overrides`). **Note:** This should ONLY be used for fields that vary between steps (for example, to test update functionality). Constant values should be hardcoded directly in the `.tf.tmpl` file. Set a key to `null` to unset a field in a step (`field = null` in tests, and omitted in generated docs/OiCS).
 
 ### Update Test Comparison
 
@@ -132,7 +132,7 @@ This field is new in the `steps` object and has no direct equivalent in the old 
 
 | Old Field | New Location | Notes |
 | :--- | :--- | :--- |
-| *(N/A)* | `step.vars` | Newly added at the step level. Values are copied directly to tests. |
+| *(N/A)* | `step.vars` | Newly added at the step level. Values are copied directly to tests. Supports `null` to unset a field in a step. |
 | *(N/A)* | `step.min_version` | Newly added to set a version for a specific step |
 | *(N/A)* | `step.include_step_doc` | Explicitly forcing a step's docs generation (overriding Sample block). |
 

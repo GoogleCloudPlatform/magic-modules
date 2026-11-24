@@ -65,6 +65,45 @@ samples:
           callouts_instance_group: 'l7-ilb-callouts-ins-group'
           callouts_hc_name: 'l7-ilb-callouts-hc'
           callouts_backend_name: 'l7-ilb-callouts-backend'
+  - name: 'network_services_lb_traffic_extension_body_send_mode'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'network_services_lb_traffic_extension_body_send_mode'
+        resource_id_vars:
+          forwarding_rule_name: 'l7-ext-fr'
+          target_http_proxy_name: 'l7-ext-proxy'
+          url_map_name: 'l7-ext-urlmap'
+          backend_service_name: 'l7-ext-backend'
+          callouts_backend_name: 'l7-ext-callout'
+          lb_traffic_extension_name: 'l7-ext-traffic-ext'
+        vars:
+          supported_events: '["REQUEST_HEADERS", "REQUEST_BODY", "RESPONSE_HEADERS", "RESPONSE_BODY"]'
+          request_body_send_mode: 'BODY_SEND_MODE_STREAMED'
+          response_body_send_mode: 'BODY_SEND_MODE_STREAMED'
+      - name: 'network_services_lb_traffic_extension_body_send_mode'
+        resource_id_vars:
+          forwarding_rule_name: 'l7-ext-fr'
+          target_http_proxy_name: 'l7-ext-proxy'
+          url_map_name: 'l7-ext-urlmap'
+          backend_service_name: 'l7-ext-backend'
+          callouts_backend_name: 'l7-ext-callout'
+          lb_traffic_extension_name: 'l7-ext-traffic-ext'
+        vars:
+          supported_events: '["REQUEST_HEADERS", "REQUEST_BODY", "REQUEST_TRAILERS", "RESPONSE_HEADERS", "RESPONSE_BODY", "RESPONSE_TRAILERS"]'
+          request_body_send_mode: 'BODY_SEND_MODE_FULL_DUPLEX_STREAMED'
+          response_body_send_mode: 'BODY_SEND_MODE_FULL_DUPLEX_STREAMED'
+      - name: 'network_services_lb_traffic_extension_body_send_mode'
+        resource_id_vars:
+          forwarding_rule_name: 'l7-ext-fr'
+          target_http_proxy_name: 'l7-ext-proxy'
+          url_map_name: 'l7-ext-urlmap'
+          backend_service_name: 'l7-ext-backend'
+          callouts_backend_name: 'l7-ext-callout'
+          lb_traffic_extension_name: 'l7-ext-traffic-ext'
+        vars:
+          supported_events: '["REQUEST_HEADERS"]'
+          request_body_send_mode: null
+          response_body_send_mode: null
 parameters:
   - name: 'location'
     type: String
@@ -115,7 +154,7 @@ properties:
             The name for this extension chain. The name is logged as part of the HTTP request logs.
             The name must conform with RFC-1034, is restricted to lower-cased letters, numbers and hyphens,
             and can have a maximum length of 63 characters. Additionally, the first character must be a letter
-            and the last a letter or a number.
+            and the last character must be a letter or a number.
           required: true
         - name: 'matchCondition'
           type: NestedObject
@@ -134,7 +173,7 @@ properties:
             A set of extensions to execute for the matching request.
             At least one extension is required. Up to 3 extensions can be defined for each extension chain for
             LbTrafficExtension resource. LbRouteExtension chains are limited to 1 extension per extension chain.
-            Further documentation to be found at https://cloud.google.com/service-extensions/docs/reference/rest/v1/ExtensionChain#Extension
+            Further documentation can be found at https://cloud.google.com/service-extensions/docs/reference/rest/v1/ExtensionChain#Extension
           required: true
           item_type:
             type: NestedObject
@@ -210,6 +249,37 @@ properties:
                   Metadata associated with the extension. This field is used to pass metadata to the extension service.
                   You can set up key value pairs for metadata as you like and need.
                   f.e. {"key": "value", "key2": "value2"}.
+              - name: 'observabilityMode'
+                type: Boolean
+                description: |
+                  When set to `TRUE`, enables `observability_mode` on the `ext_proc` filter.
+                  This makes `ext_proc` calls asynchronous. Envoy doesn't check for the response from `ext_proc` calls.
+                  For more information about the filter, see: https://www.envoyproxy.io/docs/envoy/v1.32.3/api-v3/extensions/filters/http/ext_proc/v3/ext_proc.proto
+                  This field is helpful when you want to try out the extension in async log-only mode.
+                  Supported by regional `LbTrafficExtension` and `LbRouteExtension` resources.
+                  Only `STREAMED` (default) body processing mode is supported.
+              - name: 'requestBodySendMode'
+                type: Enum
+                description: |
+                  Configures the send mode for request body processing.
+                  The field can only be set if `supported_events` includes `REQUEST_BODY`.
+                  If `supported_events` includes `REQUEST_BODY`, but `request_body_send_mode` is unset, the default value `STREAMED` is used.
+                  When this field is set to `FULL_DUPLEX_STREAMED`, `supported_events` must include both `REQUEST_BODY` and `REQUEST_TRAILERS`.
+                  This field can be set only for `LbTrafficExtension` and `LbRouteExtension` resources, and only when the `service` field of the extension points to a `BackendService`.
+                enum_values:
+                  - 'BODY_SEND_MODE_STREAMED'
+                  - 'BODY_SEND_MODE_FULL_DUPLEX_STREAMED'
+              - name: 'responseBodySendMode'
+                type: Enum
+                description: |
+                  Configures the send mode for response processing. If unspecified, the default value `STREAMED` is used.
+                  The field can only be set if `supported_events` includes `RESPONSE_BODY`.
+                  If `supported_events` includes `RESPONSE_BODY`, but `response_body_send_mode` is unset, the default value `STREAMED` is used.
+                  When this field is set to `FULL_DUPLEX_STREAMED`, `supported_events` must include both `RESPONSE_BODY` and `RESPONSE_TRAILERS`.
+                  This field can be set only for `LbTrafficExtension` resources, and only when the `service` field of the extension points to a `BackendService`.
+                enum_values:
+                  - 'BODY_SEND_MODE_STREAMED'
+                  - 'BODY_SEND_MODE_FULL_DUPLEX_STREAMED'
   - name: 'loadBalancingScheme'
     type: Enum
     description: |

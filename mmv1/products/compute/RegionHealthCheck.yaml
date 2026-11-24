@@ -229,16 +229,10 @@ properties:
       greater value than checkIntervalSec.
     default_value: 5
   - name: 'type'
-    type: Enum
+    type: String
     description: |-
       The type of the health check. One of HTTP, HTTP2, HTTPS, TCP, or SSL.
     output: true
-    enum_values:
-      - 'TCP'
-      - 'SSL'
-      - 'HTTP'
-      - 'HTTPS'
-      - 'HTTP2'
   - name: 'httpHealthCheck'
     type: NestedObject
     exactly_one_of:

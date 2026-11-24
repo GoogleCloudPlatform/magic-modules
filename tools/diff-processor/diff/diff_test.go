@@ -11,12 +11,10 @@ import (
 	oldProvider "google/provider/old/google/provider"
 	oldVerify "google/provider/old/google/verify"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestNewProviderOldProviderChanges(t *testing.T) {
@@ -195,7 +193,9 @@ func TestFlattenSchema(t *testing.T) {
 		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
 			flattened := flattenSchema("", tc.resourceSchema)
-			assert.Equal(t, tc.expectFlattened, flattened)
+			if diff := cmp.Diff(tc.expectFlattened, flattened); diff != "" {
+				t.Errorf("flattenSchema() mismatch (-want +got):\n%s", diff)
+			}
 		})
 	}
 }
@@ -994,11 +994,11 @@ func TestFieldChanged(t *testing.T) {
 						diff,
 					)
 				} else {
-					t.Errorf("want %t; got %t. No field diff.\nOld field: %s\nNew field: %s\n",
+					t.Errorf("want %t; got %t. No field diff.\nOld field: %#v\nNew field: %#v\n",
 						tc.expectChanged,
 						changed,
-						spew.Sdump(tc.oldField),
-						spew.Sdump(tc.newField),
+						tc.oldField,
+						tc.newField,
 					)
 				}
 			}
@@ -1902,6 +1902,135 @@ func TestIsFieldInNewNestedStructure(t *testing.T) {
 			if result != tc.expected {
 				t.Errorf("IsFieldInNewNestedStructure(%q, %q) = %v, want %v",
 					tc.resourceName, tc.fieldPath, result, tc.expected)
+			}
+		})
+	}
+}
+
+func TestHasOldComputedOnlyAncestor(t *testing.T) {
+	cases := map[string]struct {
+		oldSchema map[string]*schema.Schema
+		fieldPath string
+		expected  bool
+	}{
+		"top-level field has no ancestor": {
+			oldSchema: map[string]*schema.Schema{
+				"top": {Type: schema.TypeString, Computed: true},
+			},
+			fieldPath: "top",
+			expected:  false,
+		},
+		"direct child of computed-only parent": {
+			oldSchema: map[string]*schema.Schema{
+				"parent": {
+					Type:     schema.TypeList,
+					Computed: true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"child": {Type: schema.TypeString, Required: true},
+						},
+					},
+				},
+			},
+			fieldPath: "parent.child",
+			expected:  true,
+		},
+		"deeply nested descendant of computed-only ancestor": {
+			oldSchema: map[string]*schema.Schema{
+				"a": {
+					Type:     schema.TypeList,
+					Computed: true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"b": {
+								Type:     schema.TypeList,
+								Optional: true,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"c": {
+											Type:     schema.TypeList,
+											Optional: true,
+											Computed: true,
+											Elem: &schema.Resource{
+												Schema: map[string]*schema.Schema{
+													"d": {Type: schema.TypeString, Required: true},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			fieldPath: "a.b.c.d",
+			expected:  true,
+		},
+		"child of optional+computed parent is not under computed-only ancestor": {
+			oldSchema: map[string]*schema.Schema{
+				"parent": {
+					Type:     schema.TypeList,
+					Optional: true,
+					Computed: true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"child": {Type: schema.TypeString, Optional: true},
+						},
+					},
+				},
+			},
+			fieldPath: "parent.child",
+			expected:  false,
+		},
+		"child of optional parent": {
+			oldSchema: map[string]*schema.Schema{
+				"parent": {
+					Type:     schema.TypeList,
+					Optional: true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"child": {Type: schema.TypeString, Required: true},
+						},
+					},
+				},
+			},
+			fieldPath: "parent.child",
+			expected:  false,
+		},
+		"child of required parent": {
+			oldSchema: map[string]*schema.Schema{
+				"parent": {
+					Type:     schema.TypeList,
+					Required: true,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"child": {Type: schema.TypeString, Required: true},
+						},
+					},
+				},
+			},
+			fieldPath: "parent.child",
+			expected:  false,
+		},
+		"nil old schema returns false": {
+			oldSchema: nil,
+			fieldPath: "parent.child",
+			expected:  false,
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			var flattenedOld map[string]*schema.Schema
+			if tc.oldSchema != nil {
+				flattenedOld = flattenSchema("", tc.oldSchema)
+			}
+			rd := ResourceDiff{
+				FlattenedSchema: FlattenedSchemaRaw{Old: flattenedOld},
+			}
+			if got := rd.HasOldComputedOnlyAncestor(tc.fieldPath); got != tc.expected {
+				t.Errorf("HasOldComputedOnlyAncestor(%q) = %v, want %v", tc.fieldPath, got, tc.expected)
 			}
 		})
 	}

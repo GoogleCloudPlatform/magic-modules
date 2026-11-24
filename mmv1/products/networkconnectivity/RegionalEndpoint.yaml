@@ -38,6 +38,7 @@ async:
     resource_inside_response: false
 autogen_async: true
 custom_code:
+  constants: templates/terraform/constants/network_connectivity_regional_endpoint.go.tmpl
 samples:
   - name: network_connectivity_regional_endpoint_regional_access
     primary_resource_id: default
@@ -105,6 +106,7 @@ properties:
       The name of the subnetwork from which the IP address will be allocated. Format: `projects/{project}/regions/{region}/subnetworks/{subnetwork}`
     default_from_api: true
     custom_flatten: templates/terraform/custom_flatten/network_connectivity_regional_endpoint_subnetwork.go.tmpl
+    diff_suppress_func: regionalEndpointSubnetworkDiffSuppress
   - name: accessType
     type: Enum
     description: |

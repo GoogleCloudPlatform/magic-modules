@@ -21,13 +21,17 @@ custom_agent:
         8. Check if the resource should go in the beta or GA provider based on the OpenAPI spec and any other guides you can find
         9. Generate the downstream provider
         10. Verify that the new resources and tests are present
-        11. Run the acceptance tests and verify that they pass. The user must provide you credentials and project variables, if they did not, prompt them for it. A sample invocation is `make testacc TEST=./google-beta/services/product TESTARGS='-run=TestAcc<Product><Resource>'`
+        11. Run the acceptance tests and verify that they pass. Credentials and project variables should be provided in the initial task prompt or environment; if missing, report the missing configuration in your report. A sample invocation is `make testacc TEST=./google-beta/services/product TESTARGS='-run=TestAcc<Product><Resource>'`
         
     - title: "Report Format"
       content: "You must return a clear, human-readable Markdown report explaining whether resource generation and testing succeeded or failed, and if it failed, what discrepancy was found."
 
   tool_names:
     - view_file
+    - list_dir
+    - replace_file_content
+    - multi_replace_file_content
+    - write_to_file
     - run_command
     - grep_search
 

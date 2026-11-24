@@ -1,10 +1,14 @@
 package api
 
 import (
+	"bytes"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
+	"gopkg.in/yaml.v3"
 )
 
 func TestProductLowestVersion(t *testing.T) {
@@ -252,6 +256,77 @@ func TestProductServiceVersion(t *testing.T) {
 
 			if got, want := tc.obj.ServiceVersion(), tc.expected; got != want {
 				t.Errorf("expected %v to be %v", got, want)
+			}
+		})
+	}
+}
+
+func TestCustomUnmarshalYAMLRejectsUnknownFields(t *testing.T) {
+	t.Parallel()
+
+	strictDecode := func(raw string, out interface{}) error {
+		dec := yaml.NewDecoder(bytes.NewReader([]byte(raw)))
+		dec.KnownFields(true)
+		return dec.Decode(out)
+	}
+
+	cases := []struct {
+		name      string
+		raw       string
+		newTarget func() interface{}
+		wantField string
+		wantLine  string
+	}{
+		{
+			name:      "Product",
+			raw:       "name: Example\npackagepath: \"\"\n",
+			newTarget: func() interface{} { return &Product{} },
+			wantField: "packagepath",
+			wantLine:  "line 2:",
+		},
+		{
+			name:      "Async nested Operation",
+			raw:       "operation:\n  base_url: '{{op_id}}'\n  result:\n    resource_inside_response: false\n",
+			newTarget: func() interface{} { return &Async{} },
+			wantField: "result",
+			wantLine:  "line 3:",
+		},
+		{
+			name:      "IamPolicy",
+			raw:       "parent_resource_attribute: id\nmethod_name_suffix: Foo\n",
+			newTarget: func() interface{} { return &resource.IamPolicy{} },
+			wantField: "method_name_suffix",
+			wantLine:  "line 2:",
+		},
+		{
+			name:      "Examples",
+			raw:       "name: basic\nnonexistent_example_key: true\n",
+			newTarget: func() interface{} { return &resource.Examples{} },
+			wantField: "nonexistent_example_key",
+			wantLine:  "line 2:",
+		},
+		{
+			name:      "Step",
+			raw:       "name: basic\nvars:\n  foo: null\nnonexistent_step_key: true\n",
+			newTarget: func() interface{} { return &resource.Step{} },
+			wantField: "nonexistent_step_key",
+			wantLine:  "line 4:",
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			err := strictDecode(tc.raw, tc.newTarget())
+			if err == nil {
+				t.Fatalf("expected unknown field %q error on %s, got nil", tc.wantField, tc.name)
+			}
+			if !strings.Contains(err.Error(), tc.wantField) || !strings.Contains(err.Error(), tc.wantLine) {
+				t.Errorf("expected error mentioning %q and %q, got: %v", tc.wantField, tc.wantLine, err)
+			}
+			if err := yaml.Unmarshal([]byte(tc.raw), tc.newTarget()); err != nil {
+				t.Errorf("expected non-strict yaml.Unmarshal to ignore unknown field %q, got: %v", tc.wantField, err)
 			}
 		})
 	}

@@ -34,6 +34,8 @@ async:
     resource_inside_response: false
 legacy_long_form_project: true
 include_in_tgc_next: true
+custom_diff:
+  - 'tpgresource.DefaultProviderRegion'
 samples:
   - name: 'region_network_firewall_policy_full'
     primary_resource_id: 'policy'

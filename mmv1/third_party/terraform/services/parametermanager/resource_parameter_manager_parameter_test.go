@@ -6,9 +6,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/parametermanager"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 )
 
 func TestAccParameterManagerParameter_labelsUpdate(t *testing.T) {
@@ -115,11 +117,9 @@ func TestAccParameterManagerParameter_kmsKeyUpdate(t *testing.T) {
 		},
 	})
 
-	context := map[string]interface{}{
-		"kms_key":       kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-parameter-manager-managed-1").CryptoKey.Name,
-		"kms_key_other": kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-parameter-manager-managed-2").CryptoKey.Name,
-		"random_suffix": acctest.RandString(t, 10),
-	}
+	kmsKey := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-parameter-manager-managed-1").CryptoKey.Name
+	kmsKeyOther := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-parameter-manager-managed-2").CryptoKey.Name
+	randomSuffix := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -127,7 +127,10 @@ func TestAccParameterManagerParameter_kmsKeyUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckParameterManagerParameterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccParameterManagerParameter_withoutkmsKey(context),
+				Config: testAccParameterManagerParameter_kmsKeyUpdate(map[string]interface{}{
+					"kms_key":       nil,
+					"random_suffix": randomSuffix,
+				}),
 			},
 			{
 				ResourceName:            "google_parameter_manager_parameter.parameter-with-kms-key",
@@ -136,7 +139,10 @@ func TestAccParameterManagerParameter_kmsKeyUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"labels", "parameter_id", "terraform_labels"},
 			},
 			{
-				Config: testAccParameterManagerParameter_kmsKeyUpdate(context),
+				Config: testAccParameterManagerParameter_kmsKeyUpdate(map[string]interface{}{
+					"kms_key":       kmsKey,
+					"random_suffix": randomSuffix,
+				}),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_parameter_manager_parameter.parameter-with-kms-key", plancheck.ResourceActionUpdate),
@@ -150,7 +156,10 @@ func TestAccParameterManagerParameter_kmsKeyUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"labels", "parameter_id", "terraform_labels"},
 			},
 			{
-				Config: testAccParameterManagerParameter_kmsKeyUpdateOther(context),
+				Config: testAccParameterManagerParameter_kmsKeyUpdate(map[string]interface{}{
+					"kms_key":       kmsKeyOther,
+					"random_suffix": randomSuffix,
+				}),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_parameter_manager_parameter.parameter-with-kms-key", plancheck.ResourceActionUpdate),
@@ -164,7 +173,10 @@ func TestAccParameterManagerParameter_kmsKeyUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"labels", "parameter_id", "terraform_labels"},
 			},
 			{
-				Config: testAccParameterManagerParameter_withoutkmsKey(context),
+				Config: testAccParameterManagerParameter_kmsKeyUpdate(map[string]interface{}{
+					"kms_key":       nil,
+					"random_suffix": randomSuffix,
+				}),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_parameter_manager_parameter.parameter-with-kms-key", plancheck.ResourceActionUpdate),
@@ -181,17 +193,6 @@ func TestAccParameterManagerParameter_kmsKeyUpdate(t *testing.T) {
 	})
 }
 
-func testAccParameterManagerParameter_withoutkmsKey(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-data "google_project" "project" {}
-
-resource "google_parameter_manager_parameter" "parameter-with-kms-key" {
-  parameter_id = "tf_test_parameter%{random_suffix}"
-  format = "JSON"
-}
-`, context)
-}
-
 func testAccParameterManagerParameter_kmsKeyUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {}
@@ -205,15 +206,49 @@ resource "google_parameter_manager_parameter" "parameter-with-kms-key" {
 `, context)
 }
 
-func testAccParameterManagerParameter_kmsKeyUpdateOther(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-data "google_project" "project" {}
+func TestAccParameterManagerParameter_tags(t *testing.T) {
+	t.Parallel()
 
-resource "google_parameter_manager_parameter" "parameter-with-kms-key" {
+	tagKey := tags.BootstrapSharedTestOrganizationTagKey(t, "parameter_manager_parameter-tagkey", map[string]interface{}{})
+
+	context := map[string]interface{}{
+		"org":           envvar.GetTestOrgFromEnv(t),
+		"tagKey":        tagKey,
+		"tagValue":      tags.BootstrapSharedTestOrganizationTagValue(t, "parameter_manager_parameter-tagvalue", tagKey),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckParameterManagerParameterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccParameterManagerParameter_tags(context),
+			},
+			{
+				ResourceName:            "google_parameter_manager_parameter.parameter-tags",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "parameter_id", "terraform_labels", "tags"},
+			},
+		},
+	})
+}
+
+func testAccParameterManagerParameter_tags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_parameter_manager_parameter" "parameter-tags" {
   parameter_id = "tf_test_parameter%{random_suffix}"
   format = "JSON"
 
-  kms_key = "%{kms_key_other}"
+  labels = {
+    environment = "test"
+  }
+
+  tags = {
+    "%{org}/%{tagKey}" = "%{tagValue}"
+  }
 }
 `, context)
 }

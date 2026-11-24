@@ -27,8 +27,28 @@ import (
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"gopkg.in/yaml.v3"
 )
+
+var (
+	testEnvVarUsageRegexp = regexp.MustCompile(`{{index \$\.TestEnvVars "([a-zA-Z_]*)"}}`)
+	varUsageRegexp        = regexp.MustCompile(`{{index \$\.Vars "([a-zA-Z_]*)"}}`)
+)
+
+func validateRegexForContents(r *regexp.Regexp, contents string, configPath string, objName string, vars map[string]string) {
+	matches := r.FindAllStringSubmatch(contents, -1)
+	for _, v := range matches {
+		found := false
+		for k := range vars {
+			if k == v[1] {
+				found = true
+				break
+			}
+		}
+		if !found {
+			log.Fatalf("Failed to find %s environment variable defined in YAML file when validating the file %s. Please define this in %s", v[1], configPath, objName)
+		}
+	}
+}
 
 // Generates configs to be shown as examples in docs and outputted as tests
 // from a shared template
@@ -128,6 +148,7 @@ type Examples struct {
 	//  - IDENTITY_USER
 	//  - CHRONICLE_ID
 	//  - VMWAREENGINE_PROJECT
+	//  - ORG_UNIT_ID
 	// This list corresponds to the `get*FromEnv` methods in provider_test.go.
 	TestEnvVars map[string]string `yaml:"test_env_vars,omitempty"`
 
@@ -184,12 +205,9 @@ type Examples struct {
 }
 
 // Set default value for fields
-func (e *Examples) UnmarshalYAML(value *yaml.Node) error {
+func (e *Examples) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type exampleAlias Examples
-	aliasObj := (*exampleAlias)(e)
-
-	err := value.Decode(aliasObj)
-	if err != nil {
+	if err := unmarshal((*exampleAlias)(e)); err != nil {
 		return err
 	}
 
@@ -281,6 +299,7 @@ func (e *Examples) LoadHCLText(sysfs fs.FS) (err error) {
 		"PAP_DESCRIPTION":      "description",
 		"CHRONICLE_ID":         "00000000-0000-0000-0000-000000000000",
 		"VMWAREENGINE_PROJECT": "my-vmwareengine-project",
+		"ORG_UNIT_ID":          "03abcxyz",
 	}
 
 	// Apply doc defaults to test_env_vars from YAML
@@ -292,11 +311,11 @@ func (e *Examples) LoadHCLText(sysfs fs.FS) (err error) {
 	if err != nil {
 		return err
 	}
-	e.DocumentationHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.DocumentationHCLText, "\n")
+	e.DocumentationHCLText = trailingBlankLineRegexp.ReplaceAllString(e.DocumentationHCLText, "\n")
 
 	// Remove region tags
-	re1 := regexp.MustCompile(`# \[[a-zA-Z_ ]+\]\n`)
-	re2 := regexp.MustCompile(`\n# \[[a-zA-Z_ ]+\]`)
+	re1 := regionTagLineRegexp
+	re2 := regionTagTrailingRegexp
 	e.DocumentationHCLText = re1.ReplaceAllString(e.DocumentationHCLText, "")
 	e.DocumentationHCLText = re2.ReplaceAllString(e.DocumentationHCLText, "")
 
@@ -340,7 +359,7 @@ func (e *Examples) LoadHCLText(sysfs fs.FS) (err error) {
 	if err != nil {
 		return err
 	}
-	e.TestHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.TestHCLText, "\n")
+	e.TestHCLText = trailingBlankLineRegexp.ReplaceAllString(e.TestHCLText, "\n")
 	// Remove region tags
 	e.TestHCLText = re1.ReplaceAllString(e.TestHCLText, "")
 	e.TestHCLText = re2.ReplaceAllString(e.TestHCLText, "")
@@ -361,9 +380,9 @@ func (e *Examples) ExecuteTemplate(sysfs fs.FS) (string, error) {
 	fileContentString := string(templateContent)
 
 	// Check that any variables in Vars or TestEnvVars used in the example are defined via YAML
-	envVarRegex := regexp.MustCompile(`{{index \$\.TestEnvVars "([a-zA-Z_]*)"}}`)
+	envVarRegex := testEnvVarUsageRegexp
 	validateRegexForContents(envVarRegex, fileContentString, e.ConfigPath, "test_env_vars", e.TestEnvVars)
-	varRegex := regexp.MustCompile(`{{index \$\.Vars "([a-zA-Z_]*)"}}`)
+	varRegex := varUsageRegexp
 	validateRegexForContents(varRegex, fileContentString, e.ConfigPath, "vars", e.Vars)
 
 	templateFileName := filepath.Base(e.ConfigPath)
@@ -422,8 +441,8 @@ func (e *Examples) SetOiCSHCLText(sysfs fs.FS) {
 	originalTestEnvVars := e.TestEnvVars
 
 	// // Remove region tags
-	re1 := regexp.MustCompile(`# \[[a-zA-Z_ ]+\]\n`)
-	re2 := regexp.MustCompile(`\n# \[[a-zA-Z_ ]+\]`)
+	re1 := regionTagLineRegexp
+	re2 := regionTagTrailingRegexp
 
 	testVars := make(map[string]string)
 	for key, value := range originalVars {
@@ -442,7 +461,7 @@ func (e *Examples) SetOiCSHCLText(sysfs fs.FS) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	e.OicsHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.OicsHCLText, "\n")
+	e.OicsHCLText = trailingBlankLineRegexp.ReplaceAllString(e.OicsHCLText, "\n")
 
 	// Remove region tags
 	e.OicsHCLText = re1.ReplaceAllString(e.OicsHCLText, "")

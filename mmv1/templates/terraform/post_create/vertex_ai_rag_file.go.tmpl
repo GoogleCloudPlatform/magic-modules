@@ -1,0 +1,10 @@
+if err := vertexAIRagFileWaitForImportAndSetName(d, config, res, project, billingProject, userAgent, d.Timeout(schema.TimeoutCreate)); err != nil {
+	d.SetId("")
+	return err
+}
+
+id, err = tpgresource.ReplaceVars(d, config, "{{ $.IdFormat }}")
+if err != nil {
+	return fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)

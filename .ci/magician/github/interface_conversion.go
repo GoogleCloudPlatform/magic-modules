@@ -27,6 +27,7 @@ func convertGHPullRequest(pr *gh.PullRequest) PullRequest {
 		Body:           pr.GetBody(),
 		Labels:         labels,
 		MergeCommitSha: pr.GetMergeCommitSHA(),
+		HeadSha:        pr.GetHead().GetSHA(),
 		Merged:         pr.GetMerged(),
 	}
 }

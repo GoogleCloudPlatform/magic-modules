@@ -1,0 +1,37 @@
+resource "google_service_account" "test_sa" {
+  account_id   = "{{index $.ResourceIdVars "account_id"}}"
+  display_name = "Test Service Account for Access Policy"
+}
+
+resource "google_iam_organization_access_policy" "access_policy" {
+  organization     = "{{index $.TestEnvVars "org_id"}}"
+  location         = "global"
+  access_policy_id = "{{index $.ResourceIdVars "access_policy_id"}}"
+  details {
+    rules {
+      effect     = "ALLOW"
+      principals = ["principal://iam.googleapis.com/projects/-/serviceAccounts/${google_service_account.test_sa.email}"]
+      operation {
+        permissions = ["eventarc.googleapis.com/messageBuses.publish"]
+      }
+    }
+  }
+}
+
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+  depends_on      = [google_iam_organization_access_policy.access_policy]
+}
+
+resource "google_iam_organizations_policy_binding" "{{$.PrimaryResourceId}}" {
+  depends_on        = [time_sleep.wait_60_seconds]
+  organization      = "{{index $.TestEnvVars "org_id"}}"
+  location          = "global"
+  display_name      = "Binding for an organization access policy"
+  policy_kind       = "ACCESS"
+  policy_binding_id = "{{index $.ResourceIdVars "org_binding_id"}}"
+  policy            = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/accessPolicies/${google_iam_organization_access_policy.access_policy.access_policy_id}"
+  target {
+    resource = "//cloudresourcemanager.googleapis.com/organizations/{{index $.TestEnvVars "org_id"}}"
+  }
+}

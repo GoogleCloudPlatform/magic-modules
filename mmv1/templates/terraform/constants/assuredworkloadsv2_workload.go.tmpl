@@ -1,0 +1,6 @@
+func assuredWorkloadsV2BillingAccountDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	if old == "" || new == "" {
+		return old == new
+	}
+	return strings.TrimPrefix(old, "billingAccounts/") == strings.TrimPrefix(new, "billingAccounts/")
+}

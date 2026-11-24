@@ -36,9 +36,6 @@ samples:
     exclude_test: true
     steps:
       - name: apigee_api_deployment_basic
-        test_env_vars:
-          org_id: ORG_ID
-          billing_account: BILLING_ACCT
   - name: apigee_api_deployment_basic_test
     primary_resource_id: api_deployment_test
     external_providers: [time]
@@ -53,9 +50,6 @@ samples:
     exclude_test: true
     steps:
       - name: apigee_api_deployment_service_account
-        test_env_vars:
-          org_id: ORG_ID
-          billing_account: BILLING_ACCT
   - name: apigee_api_deployment_service_account_test
     primary_resource_id: api_deployment_test
     external_providers: [time]

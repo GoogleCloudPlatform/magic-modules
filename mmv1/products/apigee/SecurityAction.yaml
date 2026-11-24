@@ -44,9 +44,6 @@ samples:
           global_address_name: my-address
           environment_name: my-environment
           security_action_id: my-security-action
-        test_env_vars:
-          org_id: ORG_ID
-          billing_account: BILLING_ACCT
 parameters:
   - name: orgId
     type: String

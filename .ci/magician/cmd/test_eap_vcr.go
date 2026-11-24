@@ -263,7 +263,7 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir string, rnr ExecRu
 		logBasePath := fmt.Sprintf("ci-vcr-logs/%s/refs/heads/%s", provider.Private.String(), head)
 		logBaseUrl := fmt.Sprintf("https://storage.cloud.google.com/%s", logBasePath)
 
-		testRows := buildVCRTestRows(replayingResult, recordingResult, replayingAfterRecordingResult, logBaseUrl)
+		testRows := buildVCRTestRows(replayingResult, recordingResult, replayingAfterRecordingResult, logBaseUrl, nil)
 
 		recordReplayData := recordReplay{
 			TestRows:                      testRows,

@@ -1,0 +1,126 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: AuthToken
+description: |
+  Represents an Auth Token for a Token Auth User within a Google Cloud Memorystore instance.
+
+  When token-based authentication (`TOKEN_AUTH`) is enabled on an instance (for the `default` user) or when a token auth user is created, an initial token (`version-1`) is automatically created by the API. Setting `token_id` on create (for example, `token_id = "version-1"`) acquires and manages that existing token in Terraform state instead of creating a new one, returning an error if no token with that ID exists. Omitting `token_id` creates a new server-assigned token version (`version-N`).
+
+  Each user can have at most 2 active tokens at a time and must retain at least 1 active token. To perform zero-downtime token rotation, declare two `google_memorystore_auth_token` resources (acquiring `version-1` with `token_id = "version-1"` on the first resource and creating `version-2` by omitting `token_id` on the second), update client applications to use the new token, and then remove the old token resource from the Terraform configuration.
+references:
+  guides:
+    Official Documentation: https://cloud.google.com/memorystore/docs/valkey/
+  api: https://cloud.google.com/memorystore/docs/valkey/reference/rest/v1/projects.locations.instances.tokenAuthUsers.authTokens
+docs:
+  note: |
+    Deleting the sole remaining token for a user is rejected by the API. Set `deletion_policy = "ABANDON"` to remove a user's last remaining token from Terraform state without calling the delete API (for example, before destroying the parent user or instance).
+supports_indirect_user_project_override: true
+immutable: true
+# A per-user mutex lock is required because :addAuthToken and DELETE transition the parent
+# TokenAuthUser into UPDATING state on the backend, which rejects concurrent token operations
+# for the same user with FAILED_PRECONDITION: token auth user is not in active state.
+mutex: projects/{{project}}/locations/{{location}}/instances/{{instance}}/tokenAuthUsers/{{user_id}}
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/tokenAuthUsers/{{user_id}}/authTokens
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/tokenAuthUsers/{{user_id}}/authTokens/{{token_id}}
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/tokenAuthUsers/{{user_id}}:addAuthToken
+delete_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/tokenAuthUsers/{{user_id}}/authTokens/{{token_id}}
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/tokenAuthUsers/{{user_id}}/authTokens/{{token_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/tokenAuthUsers/{{user_id}}/authTokens/{{token_id}}
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+custom_code:
+  constants: templates/terraform/constants/memorystore_auth_token.go.tmpl
+  encoder: templates/terraform/encoders/memorystore_auth_token.go.tmpl
+  pre_create: templates/terraform/pre_create/memorystore_auth_token.go.tmpl
+  post_create: templates/terraform/post_create/memorystore_auth_token.go.tmpl
+samples:
+  - name: memorystore_auth_token_basic
+    primary_resource_id: token-basic
+    steps:
+      - name: memorystore_auth_token_basic
+        resource_id_vars:
+          instance_name: token-basic-instance
+  - name: memorystore_auth_token_rotation
+    primary_resource_id: token-2
+    steps:
+      - name: memorystore_auth_token_rotation
+        resource_id_vars:
+          instance_name: token-rotation-instance
+      - name: memorystore_auth_token_rotation_update
+        resource_id_vars:
+          instance_name: token-rotation-instance
+        ignore_read_extra:
+          - deletion_policy
+parameters:
+  - name: location
+    type: String
+    description: The location of the Memorystore instance.
+    required: true
+    url_param_only: true
+  - name: instance
+    type: ResourceRef
+    resource: Instance
+    imports: instanceId
+    description: The ID or resource name of the Memorystore instance.
+    required: true
+    url_param_only: true
+    diff_suppress_func: tpgresource.CompareResourceNames
+  - name: userId
+    type: String
+    description: The unique ID (username) of the Token Auth User.
+    required: true
+    url_param_only: true
+    diff_suppress_func: tpgresource.CompareResourceNames
+properties:
+  # tokenId cannot be required: true or url_param_only: true because the Memorystore API's
+  # :addAuthToken endpoint generates sequential version-N IDs server-side and does not accept
+  # a client-specified ID at create time. Keeping default_from_api: true allows users to either
+  # omit token_id (so the server generates the next version) or specify an existing token ID
+  # (such as the initial "version-1" token auto-created with the instance or user) to acquire it.
+  - name: tokenId
+    type: String
+    api_name: name
+    description: |
+      The ID of the auth token (for example, `version-1`), or its full resource name.
+      If specified, Terraform acquires and manages the existing active token with this ID (such as the initial `version-1` token automatically created with the instance or user) and returns an error if it does not exist.
+      If omitted, a new token version will be created on the server.
+    default_from_api: true
+    diff_suppress_func: tpgresource.CompareResourceNames
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: name
+    type: String
+    description: The full resource name of the Auth Token.
+    output: true
+  - name: token
+    type: String
+    description: The generated auth token string.
+    output: true
+    sensitive: true
+  - name: createTime
+    type: Time
+    description: The creation time of the auth token.
+    output: true
+  - name: state
+    type: String
+    description: |
+      The current state of the Auth Token.
+      Possible values:
+      ACTIVE
+      CREATING
+      DELETING
+    output: true

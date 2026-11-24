@@ -6,10 +6,10 @@
 # Checks:
 # 1. Submodule check (disallows git submodules)
 # 2. gofmt formatting check
-# 3. tools/template-check (version-guard and unused-tmpl)
+# 3. tools/template-check (version-guard, unused-tmpl, and disallow-legacy-apiary)
 # 4. YAML linting check on changed product YAML files (if yamllint is installed)
 # 5. mmv1 unit tests
-# 6. internal tools & magician unit tests (go-changelog, issue-labeler, template-check, test-reader, .ci/magician)
+# 6. internal tools, magician & agent script unit tests (scoped to touched tools/, .ci/, or .agents/scripts/ files, or all with --all)
 #
 
 set -e
@@ -20,20 +20,55 @@ GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
+RUN_ALL=0
+for arg in "$@"; do
+  if [ "$arg" == "--all" ]; then
+    RUN_ALL=1
+  fi
+done
+
 echo -e "${BLUE}=== Pre-Generation & Static Checks ===${NC}"
 
-# 1. Validate environment
-if [ ! -d "mmv1" ]; then
-  echo -e "${RED}Error: This script must be run from the root of the magic-modules repository.${NC}"
-  exit 1
+# 1. Validate environment & determine repo root reliably
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null || true)"
+if [ -z "$REPO_ROOT" ] || [ ! -d "${REPO_ROOT}/mmv1" ]; then
+  if [ -d "mmv1" ]; then
+    REPO_ROOT="$(pwd)"
+  else
+    echo -e "${RED}Error: This script must be run within the magic-modules repository.${NC}"
+    exit 1
+  fi
 fi
 
-REPO_ROOT=$(pwd)
+cd "$REPO_ROOT"
+
+# Determine base ref for diff checks (prefer upstream/main for fork workflows, then origin/main, main, HEAD)
+BASE_REF=""
+for candidate in upstream/main origin/main main; do
+  if git rev-parse --verify "$candidate" >/dev/null 2>&1; then
+    BASE_REF="$candidate"
+    break
+  fi
+done
+if [ -z "$BASE_REF" ]; then
+  BASE_REF="HEAD"
+fi
+DIFF_BASE="$(git merge-base HEAD "$BASE_REF" 2>/dev/null || echo "$BASE_REF")"
+
+# Detect all changed files (committed relative to DIFF_BASE, staged, unstaged, or untracked)
+CHANGED_FILES="$(
+  {
+    git diff --name-only "$DIFF_BASE" 2>/dev/null || git diff --name-only HEAD 2>/dev/null || true
+    git ls-files --others --exclude-standard 2>/dev/null || true
+  } | sort -u
+)"
+
 SCRATCH_DIR="${REPO_ROOT}/scratch/pre-gen-checks"
 LOGS_DIR="${SCRATCH_DIR}/logs"
 mkdir -p "$LOGS_DIR"
 
-echo -e "${BLUE}Running pre-generation checks in parallel...${NC}"
+echo -e "${BLUE}Running pre-generation checks in parallel (base: ${BASE_REF})...${NC}"
 
 # Check 1: Submodule Check
 (
@@ -50,7 +85,18 @@ SUBMODULE_PID=$!
 
 # Check 2: Go Formatting Check (gofmt)
 (
-  GOFMT_OUTPUT="$(gofmt -l $(git ls-files '*.go'))"
+  GOFMT_OUTPUT=""
+  if git ls-files --cached --others --exclude-standard -- '*.go' | grep -q .; then
+    GOFMT_OUTPUT="$(
+      git ls-files -z --cached --others --exclude-standard -- '*.go' \
+        | while IFS= read -r -d '' f; do
+            if [ -f "$f" ]; then
+              printf '%s\0' "$f"
+            fi
+          done \
+        | xargs -0 gofmt -l
+    )"
+  fi
   if [ -n "$GOFMT_OUTPUT" ]; then
     echo "The following files are not formatted properly:" >&2
     echo "$GOFMT_OUTPUT" >&2
@@ -62,15 +108,91 @@ GOFMT_PID=$!
 
 # Check 3: Template Validation Checks (tools/template-check)
 (
-  cd tools/template-check
-  tmpls=$(git diff --name-only --diff-filter=d origin/main ../../*.tmpl | sed 's=^=../../=g')
-  if [ -n "$tmpls" ]; then
-    go run main.go version-guard --file-list "${tmpls//$'\n'/,}"
+  template_failed=0
+
+  # 3a. version-guard on modified/added (committed, staged, unstaged, untracked) non-deleted .tmpl files
+  tmpls_csv=""
+  while IFS= read -r f; do
+    if [ -n "$f" ] && [ -f "$REPO_ROOT/$f" ]; then
+      tmpls_csv="${tmpls_csv:+${tmpls_csv},}../../${f}"
+    fi
+  done < <(
+    {
+      git -C "$REPO_ROOT" diff --name-only --diff-filter=d "$DIFF_BASE" -- '*.tmpl' 2>/dev/null || true
+      git -C "$REPO_ROOT" ls-files --others --exclude-standard -- '*.tmpl' 2>/dev/null || true
+    } | sort -u
+  )
+
+  cd "$REPO_ROOT/tools/template-check"
+
+  if [ -n "$tmpls_csv" ]; then
+    echo "--- version-guard ---"
+    if ! go run main.go version-guard --file-list "$tmpls_csv"; then
+      template_failed=1
+    fi
+  else
+    echo "No modified .tmpl files to check; skipping version-guard."
   fi
 
-  newtmplfiles=$(git diff --name-only --diff-filter=A origin/main HEAD -- ../../mmv1 | grep .tmpl | sed 's=^=../../=g')
-  if [ -n "$newtmplfiles" ]; then
-    go run main.go unused-tmpl --file-list "${newtmplfiles//$'\n'/,}"
+  # 3b. unused-tmpl on newly added (committed, staged, or untracked) .tmpl files under mmv1/
+  newtmplfiles_csv=""
+  while IFS= read -r f; do
+    if [ -n "$f" ] && [ -f "$REPO_ROOT/$f" ]; then
+      newtmplfiles_csv="${newtmplfiles_csv:+${newtmplfiles_csv},}../../${f}"
+    fi
+  done < <(
+    {
+      git -C "$REPO_ROOT" diff --name-only --diff-filter=A "$DIFF_BASE" -- 'mmv1/*.tmpl' 2>/dev/null || true
+      git -C "$REPO_ROOT" ls-files --others --exclude-standard -- 'mmv1/*.tmpl' 2>/dev/null || true
+    } | sort -u
+  )
+
+  if [ -n "$newtmplfiles_csv" ]; then
+    echo "--- unused-tmpl ---"
+    if ! go run main.go unused-tmpl --file-list "$newtmplfiles_csv"; then
+      template_failed=1
+    fi
+  else
+    echo "No newly added mmv1 .tmpl files to check; skipping unused-tmpl."
+  fi
+
+  # 3c. disallow-legacy-apiary on tracked diffs (mirroring CI) + untracked files in checked pathspecs
+  echo "--- disallow-legacy-apiary ---"
+  if git -C "$REPO_ROOT" rev-parse --verify "$DIFF_BASE" >/dev/null 2>&1; then
+    if ! go run main.go disallow-legacy-apiary --base-ref "$DIFF_BASE"; then
+      template_failed=1
+    fi
+  else
+    echo "Base ref '${DIFF_BASE}' could not be verified; skipping tracked disallow-legacy-apiary diff check."
+  fi
+
+  untracked_apiary_files=()
+  while IFS= read -r f; do
+    if [ -n "$f" ] && [ -f "$REPO_ROOT/$f" ]; then
+      untracked_apiary_files+=("$f")
+    fi
+  done < <(
+    git -C "$REPO_ROOT" ls-files --others --exclude-standard -- \
+      'mmv1/templates/terraform/**.tmpl' \
+      'mmv1/third_party/terraform/**.go' \
+      'mmv1/third_party/terraform/**.go.tmpl' \
+      'mmv1/third_party/cai2hcl/**.go' \
+      'mmv1/third_party/tgc*/**.go' \
+      'mmv1/third_party/tgc*/**.go.tmpl' 2>/dev/null || true
+  )
+
+  if [ "${#untracked_apiary_files[@]}" -gt 0 ]; then
+    if ! (
+      for f in "${untracked_apiary_files[@]}"; do
+        git -C "$REPO_ROOT" diff --no-index -U0 -- /dev/null "$f" 2>/dev/null || true
+      done
+    ) | go run main.go disallow-legacy-apiary --diff-file -; then
+      template_failed=1
+    fi
+  fi
+
+  if [ "$template_failed" -ne 0 ]; then
+    exit 1
   fi
   echo "Template validation checks passed."
 ) > "${LOGS_DIR}/template.log" 2>&1 &
@@ -79,9 +201,19 @@ TEMPLATE_PID=$!
 # Check 4: YAML Linting Check (yamllint)
 (
   if command -v yamllint >/dev/null 2>&1; then
-    yamlfiles=$(git diff --name-only --diff-filter=d origin/main -- mmv1/products 2>/dev/null || true)
-    if [ -n "$yamlfiles" ]; then
-      yamllint -c .yamllint $yamlfiles
+    yamlfiles=()
+    while IFS= read -r f; do
+      if [ -n "$f" ] && [ -f "$f" ]; then
+        yamlfiles+=("$f")
+      fi
+    done < <(
+      {
+        git diff --name-only --diff-filter=d "$DIFF_BASE" -- 'mmv1/products/*.yaml' 'mmv1/products/*.yml' 2>/dev/null || true
+        git ls-files --others --exclude-standard -- 'mmv1/products/*.yaml' 'mmv1/products/*.yml' 2>/dev/null || true
+      } | sort -u
+    )
+    if [ "${#yamlfiles[@]}" -gt 0 ]; then
+      yamllint -c .yamllint "${yamlfiles[@]}"
       echo "YAML lint check passed for modified product YAML files."
     else
       echo "No modified product YAML files to lint. YAML lint check passed."
@@ -98,13 +230,42 @@ YAMLLINT_PID=$!
 ) > "${LOGS_DIR}/mmv1_unit.log" 2>&1 &
 MMV1_PID=$!
 
-# Check 6: Tool & CI Unit Tests
+# Check 6: Tool & CI Unit Tests (diff-scoped unless --all or RUN_ALL=1)
 (
-  (cd tools/go-changelog && go test ./...)
-  (cd tools/issue-labeler && go test ./...)
-  (cd tools/template-check && go test ./...)
-  (cd tools/test-reader && go test ./...)
-  (cd .ci/magician && go test ./...)
+  ran_any=0
+  if [ "$RUN_ALL" -eq 1 ] || echo "$CHANGED_FILES" | grep -q '^tools/go-changelog/'; then
+    echo "Testing tools/go-changelog..."
+    (cd tools/go-changelog && go test ./...)
+    ran_any=1
+  fi
+  if [ "$RUN_ALL" -eq 1 ] || echo "$CHANGED_FILES" | grep -q '^tools/issue-labeler/'; then
+    echo "Testing tools/issue-labeler..."
+    (cd tools/issue-labeler && go test ./...)
+    ran_any=1
+  fi
+  if [ "$RUN_ALL" -eq 1 ] || echo "$CHANGED_FILES" | grep -q '^tools/template-check/'; then
+    echo "Testing tools/template-check..."
+    (cd tools/template-check && go test ./...)
+    ran_any=1
+  fi
+  if [ "$RUN_ALL" -eq 1 ] || echo "$CHANGED_FILES" | grep -q '^tools/test-reader/'; then
+    echo "Testing tools/test-reader..."
+    (cd tools/test-reader && go test ./...)
+    ran_any=1
+  fi
+  if [ "$RUN_ALL" -eq 1 ] || echo "$CHANGED_FILES" | grep -q '^\.ci/'; then
+    echo "Testing .ci/magician..."
+    (cd .ci/magician && go test ./...)
+    ran_any=1
+  fi
+  if [ "$RUN_ALL" -eq 1 ] || echo "$CHANGED_FILES" | grep -q '^\.agents/scripts/'; then
+    echo "Testing .agents/scripts..."
+    python3 -m unittest discover -s .agents/scripts -p "test_*.py"
+    ran_any=1
+  fi
+  if [ "$ran_any" -eq 0 ]; then
+    echo "No changes detected in tools/, .ci/, or .agents/scripts/; skipping tool unit tests (use --all to run)."
+  fi
 ) > "${LOGS_DIR}/tools_unit.log" 2>&1 &
 TOOLS_PID=$!
 
@@ -128,40 +289,48 @@ wait $TOOLS_PID
 TOOLS_STATUS=$?
 set -e
 
-echo -e "\n${BLUE}=====================================================${NC}"
-echo -e "${BLUE}=== Submodule Check Logs ===${NC}"
-echo -e "${BLUE}=====================================================${NC}"
-cat "${LOGS_DIR}/submodule.log"
-
-echo -e "\n${BLUE}=====================================================${NC}"
-echo -e "${BLUE}=== Go Formatting Check Logs ===${NC}"
-echo -e "${BLUE}=====================================================${NC}"
-cat "${LOGS_DIR}/gofmt.log"
-
-echo -e "\n${BLUE}=====================================================${NC}"
-echo -e "${BLUE}=== Template Validation Check Logs ===${NC}"
-echo -e "${BLUE}=====================================================${NC}"
-cat "${LOGS_DIR}/template.log"
-
-echo -e "\n${BLUE}=====================================================${NC}"
-echo -e "${BLUE}=== YAML Lint Check Logs ===${NC}"
-echo -e "${BLUE}=====================================================${NC}"
-cat "${LOGS_DIR}/yamllint.log"
-
-echo -e "\n${BLUE}=====================================================${NC}"
-echo -e "${BLUE}=== MMv1 Unit Test Logs ===${NC}"
-echo -e "${BLUE}=====================================================${NC}"
-cat "${LOGS_DIR}/mmv1_unit.log"
-
-echo -e "\n${BLUE}=====================================================${NC}"
-echo -e "${BLUE}=== Tool & Magician Unit Test Logs ===${NC}"
-echo -e "${BLUE}=====================================================${NC}"
-cat "${LOGS_DIR}/tools_unit.log"
-
-if [ $SUBMODULE_STATUS -ne 0 ] || [ $GOFMT_STATUS -ne 0 ] || [ $TEMPLATE_STATUS -ne 0 ] || [ $YAMLLINT_STATUS -ne 0 ] || [ $MMV1_STATUS -ne 0 ] || [ $TOOLS_STATUS -ne 0 ]; then
-  echo -e "\n${RED}=== Pre-generation & static checks failed! ===${NC}"
-  exit 1
-else
+# Quiet on success: only output failure logs when something fails
+if [ $SUBMODULE_STATUS -eq 0 ] && [ $GOFMT_STATUS -eq 0 ] && [ $TEMPLATE_STATUS -eq 0 ] && [ $YAMLLINT_STATUS -eq 0 ] && [ $MMV1_STATUS -eq 0 ] && [ $TOOLS_STATUS -eq 0 ]; then
   echo -e "\n${GREEN}=== All pre-generation & static checks passed successfully! ===${NC}"
+  echo "  ✓ Submodule check passed"
+  echo "  ✓ Go formatting check passed (gofmt)"
+  echo "  ✓ Template validation checks passed (version-guard, unused-tmpl, disallow-legacy-apiary)"
+  echo "  ✓ YAML lint check passed"
+  echo "  ✓ MMv1 core unit tests passed"
+  echo "  ✓ Tool & CI unit tests passed"
   exit 0
+else
+  echo -e "\n${RED}=== Pre-generation & static checks failed! ===${NC}"
+
+  if [ $SUBMODULE_STATUS -ne 0 ]; then
+    echo -e "\n${RED}=== Submodule Check Logs ===${NC}"
+    cat "${LOGS_DIR}/submodule.log"
+  fi
+
+  if [ $GOFMT_STATUS -ne 0 ]; then
+    echo -e "\n${RED}=== Go Formatting Check Logs (gofmt) ===${NC}"
+    cat "${LOGS_DIR}/gofmt.log"
+  fi
+
+  if [ $TEMPLATE_STATUS -ne 0 ]; then
+    echo -e "\n${RED}=== Template Validation Check Logs ===${NC}"
+    cat "${LOGS_DIR}/template.log"
+  fi
+
+  if [ $YAMLLINT_STATUS -ne 0 ]; then
+    echo -e "\n${RED}=== YAML Lint Check Logs ===${NC}"
+    cat "${LOGS_DIR}/yamllint.log"
+  fi
+
+  if [ $MMV1_STATUS -ne 0 ]; then
+    echo -e "\n${RED}=== MMv1 Unit Test Logs ===${NC}"
+    cat "${LOGS_DIR}/mmv1_unit.log"
+  fi
+
+  if [ $TOOLS_STATUS -ne 0 ]; then
+    echo -e "\n${RED}=== Tool & Magician Unit Test Logs ===${NC}"
+    cat "${LOGS_DIR}/tools_unit.log"
+  fi
+
+  exit 1
 fi

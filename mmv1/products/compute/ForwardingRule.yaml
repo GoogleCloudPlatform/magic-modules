@@ -113,7 +113,6 @@ samples:
         resource_id_vars:
           forwarding_rule_name: 'website-forwarding-rule'
           backend_name: 'website-backend'
-          network_name: 'website-net'
         ignore_read_extra:
           - 'port_range'
   - name: 'forwarding_rule_externallb_byoipv6'
@@ -123,9 +122,8 @@ samples:
         resource_id_vars:
           forwarding_rule_name: 'byoipv6-forwarding-rule'
           backend_name: 'website-backend'
-          network_name: 'website-net'
-          ip_address: '"2600:1901:4457:1::/96"'
-          ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp"'
+          ip_address: '2600:1901:4457:1::/96'
+          ip_collection_url: 'projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp'
         test_vars_overrides:
           ip_address: 'fmt.Sprintf("2600:1901:4457:1:%d:%d::/96", acctest.RandIntRange(t, 0, 9999), acctest.RandIntRange(t, 0, 9999))'
           ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp"'
@@ -159,9 +157,6 @@ samples:
           forwarding_rule_name: 'l3-forwarding-rule'
           service_name: 'service'
           health_check_name: 'health-check'
-        test_vars_overrides:
-          # for backward compatible
-          service_name: '"service" + randomSuffix'
   - name: 'forwarding_rule_internallb'
     primary_resource_id: 'default'
     steps:
@@ -363,7 +358,6 @@ properties:
       When reading an `IPAddress`, the API always returns the IP
       address number.
     default_from_api: true
-    diff_suppress_func: 'InternalIpDiffSuppress'
   - name: 'IPProtocol'
     type: Enum
     description: |
@@ -440,10 +434,11 @@ properties:
   - name: 'network'
     type: ResourceRef
     description: |
-      This field is not used for external load balancing.
+      This field is not used for global external load balancing.
 
-      For Internal TCP/UDP Load Balancing, this field identifies the network that
-      the load balanced IP should belong to for this Forwarding Rule.
+      For Internal TCP/UDP Load Balancing and Regional External Load Balancing (`EXTERNAL_MANAGED`),
+      this field identifies the network that the load balanced IP should belong to
+      for this Forwarding Rule.
       If the subnetwork is specified, the network of the subnetwork will be used.
       If neither subnetwork nor this field is specified, the default network will
       be used.
@@ -521,8 +516,9 @@ properties:
     type: ResourceRef
     description: |
       This field identifies the subnetwork that the load balanced IP should
-      belong to for this Forwarding Rule, used in internal load balancing and
-      network load balancing with IPv6.
+      belong to for this Forwarding Rule, used in internal load balancing,
+      network load balancing with IPv6, and regional external (`EXTERNAL_MANAGED`)
+      load balancing with IPv6.
 
       If the network specified is in auto subnet mode, this field is optional.
       However, a subnetwork must be specified if the network is in custom subnet

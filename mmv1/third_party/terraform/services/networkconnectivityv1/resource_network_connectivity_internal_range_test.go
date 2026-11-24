@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/networkconnectivityv1"
@@ -75,7 +76,7 @@ func TestAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesBa
 func testAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesBasicExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_connectivity_internal_range" "default" {
-  name    = "basic%{random_suffix}"
+  name    = "tf-test-basic%{random_suffix}"
   description = "Test internal range"
   network = google_compute_network.default.name
   usage   = "FOR_VPC"
@@ -99,7 +100,7 @@ resource "google_compute_network" "default" {
 func testAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_connectivity_internal_range" "default" {
-  name    = "basic%{random_suffix}"
+  name    = "tf-test-basic%{random_suffix}"
   description = "Updated description"
   network = google_compute_network.default.name
   usage   = "FOR_VPC"
@@ -171,7 +172,7 @@ func TestAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesEx
 func testAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesExternalRangesExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_connectivity_internal_range" "default" {
-  name    = "basic%{random_suffix}"
+  name    = "tf-test-basic%{random_suffix}"
   description = "Test internal range for resources outside the VPC"
   network = google_compute_network.default.name
   usage   = "EXTERNAL_TO_VPC"
@@ -189,7 +190,7 @@ resource "google_compute_network" "default" {
 func testAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesExternalRangesExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_connectivity_internal_range" "default" {
-  name    = "basic%{random_suffix}"
+  name    = "tf-test-basic%{random_suffix}"
   description = "Updated description"
   network = google_compute_network.default.name
   usage   = "EXTERNAL_TO_VPC"
@@ -258,7 +259,7 @@ func TestAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesEx
 func testAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesExcludeCIDRExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_connectivity_internal_range" "default" {
-  name    = "basic%{random_suffix}"
+  name    = "tf-test-basic%{random_suffix}"
   description = "Test internal range exclude CIDR"
   network = google_compute_network.default.name
 
@@ -326,7 +327,7 @@ func TestAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesIP
 func testAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesIPv6Example_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_connectivity_internal_range" "default" {
-  name    = "basic%{random_suffix}"
+  name    = "tf-test-basic%{random_suffix}"
   description = "Test internal range IPv6"
   network = google_compute_network.default.name
   ip_cidr_range = "1234:0:1:1::/64"
@@ -383,13 +384,157 @@ func TestAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesIm
 func testAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesImmutableExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_network_connectivity_internal_range" "default" {
-  name    = "basic%{random_suffix}"
+  name    = "tf-test-basic%{random_suffix}"
   description = "Test internal range Immutable"
   network = google_compute_network.default.name
   ip_cidr_range = "11.11.20.0/24"
   usage   = "FOR_VPC"
   peering = "FOR_SELF"
   immutable = true
+}
+
+resource "google_compute_network" "default" {
+  name                    = "tf-test-internal-ranges%{random_suffix}"
+  auto_create_subnetworks = false
+}
+`, context)
+}
+
+func TestAccNetworkConnectivityInternalRange_purpose(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	resourceName := "google_network_connectivity_internal_range.default"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetworkConnectivityv1InternalRangeDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkConnectivityInternalRange_purpose_omitted(context),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "network", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetworkConnectivityInternalRange_purpose_vpcSubnet(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "network", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetworkConnectivityInternalRange_purpose_internalAddress(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionReplace),
+					},
+				},
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "network", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetworkConnectivityInternalRange_purpose_internalAddressUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction(resourceName, plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "network", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccNetworkConnectivityInternalRange_purpose_omitted(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_network_connectivity_internal_range" "default" {
+  name          = "tf-test-purpose%{random_suffix}"
+  description   = "Test internal range default purpose"
+  network       = google_compute_network.default.name
+  ip_cidr_range = "10.0.0.0/24"
+  usage         = "FOR_VPC"
+  peering       = "FOR_SELF"
+}
+
+resource "google_compute_network" "default" {
+  name                    = "tf-test-internal-ranges%{random_suffix}"
+  auto_create_subnetworks = false
+}
+`, context)
+}
+
+func testAccNetworkConnectivityInternalRange_purpose_vpcSubnet(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_network_connectivity_internal_range" "default" {
+  name          = "tf-test-purpose%{random_suffix}"
+  description   = "Test internal range VPC_SUBNET"
+  network       = google_compute_network.default.name
+  ip_cidr_range = "10.0.0.0/24"
+  usage         = "FOR_VPC"
+  peering       = "FOR_SELF"
+  purpose       = "VPC_SUBNET"
+}
+
+resource "google_compute_network" "default" {
+  name                    = "tf-test-internal-ranges%{random_suffix}"
+  auto_create_subnetworks = false
+}
+`, context)
+}
+
+func testAccNetworkConnectivityInternalRange_purpose_internalAddress(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_network_connectivity_internal_range" "default" {
+  name          = "tf-test-purpose%{random_suffix}"
+  description   = "Test internal range INTERNAL_ADDRESS"
+  network       = google_compute_network.default.name
+  ip_cidr_range = "10.0.0.0/24"
+  usage         = "FOR_VPC"
+  peering       = "FOR_SELF"
+  purpose       = "INTERNAL_ADDRESS"
+}
+
+resource "google_compute_network" "default" {
+  name                    = "tf-test-internal-ranges%{random_suffix}"
+  auto_create_subnetworks = false
+}
+`, context)
+}
+
+func testAccNetworkConnectivityInternalRange_purpose_internalAddressUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_network_connectivity_internal_range" "default" {
+  name          = "tf-test-purpose%{random_suffix}"
+  description   = "Updated internal range INTERNAL_ADDRESS"
+  network       = google_compute_network.default.name
+  ip_cidr_range = "10.0.0.0/24"
+  usage         = "FOR_VPC"
+  peering       = "FOR_SELF"
+  purpose       = "INTERNAL_ADDRESS"
 }
 
 resource "google_compute_network" "default" {

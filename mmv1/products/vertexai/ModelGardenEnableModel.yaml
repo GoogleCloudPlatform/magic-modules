@@ -81,12 +81,8 @@ properties:
     min_version: beta
     output: true
   - name: enablementState
-    type: Enum
+    type: String
     description: |
       Output only. The result of the model enablement.
     min_version: beta
     output: true
-    enum_values:
-      - ENABLEMENT_STATE_UNSPECIFIED
-      - ENABLEMENT_STATE_SUCCEEDED
-      - ENABLEMENT_STATE_FAILED

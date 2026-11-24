@@ -45,7 +45,7 @@ const (
 	testLabel         = "terraform-3.0"
 	testOrg           = "GoogleCloudPlatform"
 	testTeam          = "terraform"
-	workflowFileName  = "test-tpg.yml"
+	workflowFileName  = "test-tgc.yml"
 )
 
 func skipIfNoToken(t *testing.T) *Client {
@@ -265,7 +265,7 @@ func TestIntegrationCreateWorkflowDispatchEvent(t *testing.T) {
 		t.Skip("Skipping workflow dispatch test: set RUN_WORKFLOW_DISPATCH_TEST=true to run")
 	}
 
-	if err := client.CreateWorkflowDispatchEvent("test-tpg.yml", map[string]any{
+	if err := client.CreateWorkflowDispatchEvent(workflowFileName, map[string]any{
 		"owner":     "modular-magician",
 		"repo":      testRepo,
 		"branch":    "main",

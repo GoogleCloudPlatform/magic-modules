@@ -4,7 +4,7 @@ resource "google_oracle_database_goldengate_connection_assignment" "{{$.PrimaryR
   location                            = "us-east4"
   project                             = "{{index $.ResourceIdVars "project"}}"
   labels = {
-    "label-one" = "value-one"
+    "label-one" = "{{index $.Vars "label_value"}}"
   }
 
   properties {

@@ -1,0 +1,3 @@
+if !d.Get("enabled").(bool) {
+	url = strings.TrimSuffix(url, ":enableIdentityConnector") + ":disableIdentityConnector"
+}

@@ -1,0 +1,18 @@
+resource "google_vertex_ai_rag_file" "{{$.PrimaryResourceId}}" {
+  region     = "europe-west4"
+  rag_corpus = google_vertex_ai_rag_corpus.rag_corpus.name
+
+  # The Google Drive file must be shared with
+  # service-PROJECT_NUMBER@gcp-sa-vertex-rag.iam.gserviceaccount.com.
+  google_drive_source {
+    resource_ids {
+      resource_id   = "GOOGLE_DRIVE_FILE_ID"
+      resource_type = "RESOURCE_TYPE_FILE"
+    }
+  }
+}
+
+resource "google_vertex_ai_rag_corpus" "rag_corpus" {
+  display_name = "{{index $.ResourceIdVars "corpus_display_name"}}"
+  region       = "europe-west4"
+}

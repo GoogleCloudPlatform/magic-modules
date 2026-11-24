@@ -1,11 +1,17 @@
 package test
 
 import (
+	"bufio"
+	"bytes"
 	"os"
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"strings"
 	"testing"
+
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
+	"gopkg.in/yaml.v3"
 )
 
 func TestTemplatesStillNeedToBeTemplates(t *testing.T) {
@@ -82,5 +88,123 @@ func TestTemplatesStillNeedToBeTemplates(t *testing.T) {
 		t.Errorf("\nConsider removing the .tmpl extension from these files.")
 	} else {
 		t.Logf("All .tmpl files in third_party directory properly contain template syntax.")
+	}
+}
+
+func TestWebsiteDocsFrontmatter(t *testing.T) {
+	_, testFilePath, _, ok := runtime.Caller(0)
+	if !ok {
+		t.Fatal("Failed to get current test file path")
+	}
+	docsDir := filepath.Join(filepath.Dir(filepath.Dir(testFilePath)), "third_party", "terraform", "website", "docs")
+
+	err := filepath.Walk(docsDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			if os.IsNotExist(err) && path == docsDir {
+				t.Logf("Warning: third_party/terraform/website/docs directory not found at %s", docsDir)
+				return nil
+			}
+			return err
+		}
+		if info.IsDir() || filepath.Ext(path) != ".markdown" {
+			return nil
+		}
+
+		relPath, _ := filepath.Rel(docsDir, path)
+		subDir := strings.Split(relPath, string(filepath.Separator))[0]
+
+		content, err := os.ReadFile(path)
+		if err != nil {
+			t.Errorf("%s: failed to read file: %v", relPath, err)
+			return nil
+		}
+
+		if bytes.Contains(content, []byte("\r\n")) {
+			t.Errorf("%s: contains CRLF (\\r\\n) line endings; use LF (\\n) so frontmatter headers are inserted properly", relPath)
+		}
+
+		text := strings.ReplaceAll(string(content), "\r\n", "\n")
+		if !strings.HasPrefix(text, "---\n") {
+			t.Errorf("%s: missing opening YAML frontmatter delimiter '---'", relPath)
+			return nil
+		}
+
+		rest := strings.TrimPrefix(text, "---\n")
+		endIdx := strings.Index(rest, "\n---\n")
+		if endIdx == -1 {
+			t.Errorf("%s: missing closing YAML frontmatter delimiter '---'", relPath)
+			return nil
+		}
+
+		frontmatterRaw := rest[:endIdx]
+		var fm map[string]any
+		if err := yaml.Unmarshal([]byte(frontmatterRaw), &fm); err != nil {
+			t.Errorf("%s: invalid YAML frontmatter: %v", relPath, err)
+			return nil
+		}
+
+		if fm == nil {
+			t.Errorf("%s: empty YAML frontmatter", relPath)
+			return nil
+		}
+
+		if strings.Contains(relPath, string(filepath.Separator)) && subDir != "guides" && subDir != "functions" {
+			subcat, ok := fm["subcategory"].(string)
+			if !ok || strings.TrimSpace(subcat) == "" {
+				t.Errorf("%s: missing or empty 'subcategory' in YAML frontmatter", relPath)
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("Error walking website docs directory: %v", err)
+	}
+}
+
+func TestWebsiteDocsNoInternalRefs(t *testing.T) {
+	_, testFilePath, _, ok := runtime.Caller(0)
+	if !ok {
+		t.Fatal("Failed to get current test file path")
+	}
+	docsDir := filepath.Join(filepath.Dir(filepath.Dir(testFilePath)), "third_party", "terraform", "website", "docs")
+
+	err := filepath.Walk(docsDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			if os.IsNotExist(err) && path == docsDir {
+				t.Logf("Warning: third_party/terraform/website/docs directory not found at %s", docsDir)
+				return nil
+			}
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		if !strings.HasSuffix(path, ".markdown") && !strings.HasSuffix(path, ".markdown.tmpl") {
+			return nil
+		}
+
+		relPath, _ := filepath.Rel(docsDir, path)
+		f, err := os.Open(path)
+		if err != nil {
+			t.Errorf("%s: failed to open file: %v", relPath, err)
+			return nil
+		}
+		defer f.Close()
+
+		scanner := bufio.NewScanner(f)
+		scanner.Buffer(make([]byte, 64*1024), 1024*1024)
+		for lineNum := 1; scanner.Scan(); lineNum++ {
+			if err := api.ValidateNoInternalRefs(scanner.Text(), "%s:%d", relPath, lineNum); err != nil {
+				t.Error(err)
+			}
+		}
+		if err := scanner.Err(); err != nil {
+			t.Errorf("%s: failed to scan file: %v", relPath, err)
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("Error walking website docs directory: %v", err)
 	}
 }

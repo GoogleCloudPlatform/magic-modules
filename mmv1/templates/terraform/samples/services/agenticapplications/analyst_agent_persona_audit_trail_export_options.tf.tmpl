@@ -1,0 +1,17 @@
+resource "google_agentic_applications_analyst_agent_persona" "{{$.PrimaryResourceId}}" {
+  project                  = "{{index $.TestEnvVars "project_number"}}"
+  location                 = "us"
+  analyst_agent_persona_id = "{{index $.ResourceIdVars "persona_id"}}"
+  display_name             = "Test Analyst Persona Audit Trail Export"
+  display_description      = "Sample analyst agent persona description"
+  model_description        = "Sample model description"
+  role                     = "ANALYST_ROLE_GENERIC_FINANCE_ANALYST"
+
+  artifacts_config {
+    audit_trail_export_options {
+      append_audit_trail          = true
+      export_format               = "MARKDOWN"
+      export_audit_trail_artifact = true
+    }
+  }
+}

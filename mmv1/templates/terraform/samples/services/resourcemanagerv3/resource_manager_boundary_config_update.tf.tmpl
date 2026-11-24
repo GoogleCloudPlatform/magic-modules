@@ -1,0 +1,34 @@
+resource "google_folder" "folder" {
+  display_name        = "{{index $.ResourceIdVars "folder_name"}}"
+  parent              = "organizations/{{index $.TestEnvVars "org_id"}}"
+  deletion_protection = false
+}
+
+resource "google_folder_iam_member" "folder_editor" {
+  folder = google_folder.folder.folder_id
+  role   = "roles/resourcemanager.editor"
+  member = "serviceAccount:{{index $.TestEnvVars "service_account"}}"
+}
+
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+  depends_on      = [google_folder_iam_member.folder_editor]
+}
+
+resource "google_tags_tag_key" "boundary_config" {
+  parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
+  short_name  = "{{index $.ResourceIdVars "tag_key_short_name"}}"
+  description = "Partitioning tag key used by boundaries under this folder."
+}
+
+resource "google_tags_tag_key" "boundary_config_2" {
+  parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
+  short_name  = "{{index $.ResourceIdVars "tag_key_short_name_2"}}"
+  description = "Second partitioning tag key used by boundaries under this folder."
+}
+
+resource "google_resource_manager_boundary_config" "{{$.PrimaryResourceId}}" {
+  parent     = google_folder.folder.name
+  tag_key    = google_tags_tag_key.boundary_config_2.namespaced_name
+  depends_on = [time_sleep.wait_60_seconds]
+}

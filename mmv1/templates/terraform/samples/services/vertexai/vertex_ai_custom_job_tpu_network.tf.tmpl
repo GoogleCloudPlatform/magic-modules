@@ -1,0 +1,59 @@
+resource "google_vertex_ai_custom_job" "{{.PrimaryResourceId}}" {
+  display_name = "{{index $.ResourceIdVars "display_name"}}"
+  region       = "us-central1"
+
+  job_spec {
+    network            = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.vertex_network.name}"
+    reserved_ip_ranges = [google_compute_global_address.vertex_range.name]
+
+    worker_pool_specs {
+      replica_count = 1
+
+      machine_spec {
+        machine_type = "n1-standard-4"
+        tpu_topology = "2x2"
+
+        reservation_affinity {
+          reservation_affinity_type = "SPECIFIC_RESERVATION"
+          key                       = "compute.googleapis.com/reservation-name"
+          values                    = ["projects/${data.google_project.project.number}/zones/us-central1-z/reservations/example-reservation"]
+        }
+      }
+
+      disk_spec {
+        boot_disk_type    = "pd-ssd"
+        boot_disk_size_gb = 100
+      }
+
+      container_spec {
+        image_uri = "us-docker.pkg.dev/vertex-ai/training/tf-cpu.2-12.py310:latest"
+        command   = ["echo", "test"]
+      }
+    }
+  }
+
+  depends_on = [
+    google_service_networking_connection.vertex_vpc_connection,
+  ]
+}
+
+resource "google_compute_network" "vertex_network" {
+  name                    = "{{index $.ResourceIdVars "network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_global_address" "vertex_range" {
+  name          = "{{index $.ResourceIdVars "address_name"}}"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  prefix_length = 24
+  network       = google_compute_network.vertex_network.id
+}
+
+resource "google_service_networking_connection" "vertex_vpc_connection" {
+  network                 = google_compute_network.vertex_network.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.vertex_range.name]
+}
+
+data "google_project" "project" {}

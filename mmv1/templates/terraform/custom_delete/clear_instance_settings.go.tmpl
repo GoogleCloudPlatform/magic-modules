@@ -1,4 +1,4 @@
-url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instanceSettings")
+url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instanceSettings")
 if err != nil {
         return err
 }
@@ -44,6 +44,6 @@ if err != nil {
 	log.Printf("[DEBUG] Finished emptying InstanceSettings %#v", res)
 }
 
-time.Sleep(1 * time.Minute)
+time.Sleep(60 * config.SleepUnit)
 
 return nil

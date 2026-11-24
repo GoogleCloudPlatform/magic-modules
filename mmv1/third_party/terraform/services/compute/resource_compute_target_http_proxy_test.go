@@ -8,16 +8,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/services/compute"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccComputeTargetHttpProxy_update(t *testing.T) {
 	t.Parallel()
 
-	target := fmt.Sprintf("thttp-test-%s", acctest.RandString(t, 10))
-	backend := fmt.Sprintf("thttp-test-%s", acctest.RandString(t, 10))
-	hc := fmt.Sprintf("thttp-test-%s", acctest.RandString(t, 10))
-	urlmap1 := fmt.Sprintf("thttp-test-%s", acctest.RandString(t, 10))
-	urlmap2 := fmt.Sprintf("thttp-test-%s", acctest.RandString(t, 10))
+	target := fmt.Sprintf("tf-test-thttp-%s", acctest.RandString(t, 10))
+	backend := fmt.Sprintf("tf-test-thttp-%s", acctest.RandString(t, 10))
+	hc := fmt.Sprintf("tf-test-thttp-%s", acctest.RandString(t, 10))
+	urlmap1 := fmt.Sprintf("tf-test-thttp-%s", acctest.RandString(t, 10))
+	urlmap2 := fmt.Sprintf("tf-test-thttp-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -57,13 +58,19 @@ func testAccCheckComputeTargetHttpProxyExists(t *testing.T, n string) resource.T
 		config := acctest.GoogleProviderConfig(t)
 		name := rs.Primary.Attributes["name"]
 
-		found, err := compute.NewClient(config, config.UserAgent).TargetHttpProxies.Get(
-			config.Project, name).Do()
+		url := fmt.Sprintf("%sprojects/%s/global/targetHttpProxies/%s", transport_tpg.BaseUrl(compute.Product, config), config.Project, name)
+		found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   config.Project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
 		if err != nil {
 			return err
 		}
 
-		if found.Name != name {
+		if found["name"] != name {
 			return fmt.Errorf("TargetHttpProxy not found")
 		}
 

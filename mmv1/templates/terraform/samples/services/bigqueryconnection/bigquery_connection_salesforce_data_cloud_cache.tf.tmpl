@@ -1,0 +1,13 @@
+resource "google_bigquery_connection" "{{$.PrimaryResourceId}}" {
+  connection_id = "{{index $.ResourceIdVars "connection_id"}}"
+  location      = "US"
+
+  salesforce_data_cloud {
+    instance_uri = "{{index $.Vars "instance_uri"}}"
+    tenant_id    = "{{index $.Vars "tenant_id"}}"
+
+    cross_cloud_cache_options {
+      enabled = {{index $.Vars "cache_enabled"}}
+    }
+  }
+}

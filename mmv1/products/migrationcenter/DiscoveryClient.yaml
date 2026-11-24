@@ -48,8 +48,9 @@ samples:
           display_name: Terraform integration test display
           description: Terraform integration test description
           ttl: 86400s
+          expire_time: null
           label_value: value
-      - name: migration_center_discovery_client_update
+      - name: migration_center_discovery_client_basic
         resource_id_vars:
           discovery_client_id: discovery-client-test
           source_id: source-test
@@ -59,6 +60,7 @@ samples:
           service_account: google_service_account.default_2.email
           display_name: Terraform integration test display updated
           description: Terraform integration test description updated
+          ttl: null
           expire_time: "2030-01-02T00:00:00Z"
           label_value: value_updated
 parameters:

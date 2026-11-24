@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 const unusedTmplDesc = "Check whether any template files are not used in product yamls"
@@ -153,16 +153,16 @@ func processInputFiles(fileList []string) (customTmpls []string, examples []stri
 	return
 }
 
-func (t *tree) walkTree(tree map[any]any) {
+func (t *tree) walkTree(tree map[string]any) {
 	for _, value := range tree {
 		switch v := value.(type) {
 		case []any:
 			for _, v1 := range v {
-				if val, ok := v1.(map[any]any); ok {
+				if val, ok := v1.(map[string]any); ok {
 					t.walkTree(val)
 				}
 			}
-		case map[any]any:
+		case map[string]any:
 			t.walkTree(v)
 		case string:
 			if strings.HasSuffix(v, ".tmpl") {
@@ -216,10 +216,10 @@ func findTmpls(yamlFiles []string) (map[string]bool, error) {
 			if err != nil {
 				continue
 			}
-			var m map[any]any
+			var m map[string]any
 			if err := yaml.Unmarshal(b, &m); err == nil {
-				for k, v := range m {
-					if keyStr, ok := k.(string); ok && keyStr == "name" {
+				for keyStr, v := range m {
+					if keyStr == "name" {
 						if nameStr, ok := v.(string); ok {
 							productNames[filepath.Dir(yamlFile)] = nameStr
 						}
@@ -234,7 +234,7 @@ func findTmpls(yamlFiles []string) (map[string]bool, error) {
 		if err != nil {
 			return nil, err
 		}
-		var m map[any]any
+		var m map[string]any
 		if err := yaml.Unmarshal(b, &m); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal yaml file %s: %s", yamlFile, err)
 		}
@@ -243,22 +243,20 @@ func findTmpls(yamlFiles []string) (map[string]bool, error) {
 		hasStateUpgraders := false
 		hasIdentityUpgraders := false
 
-		for k, v := range m {
-			if keyStr, ok := k.(string); ok {
-				if keyStr == "name" {
-					if nameStr, ok := v.(string); ok {
-						resName = nameStr
-					}
+		for keyStr, v := range m {
+			if keyStr == "name" {
+				if nameStr, ok := v.(string); ok {
+					resName = nameStr
 				}
-				if keyStr == "state_upgraders" {
-					if su, ok := v.(bool); ok && su {
-						hasStateUpgraders = true
-					}
+			}
+			if keyStr == "state_upgraders" {
+				if su, ok := v.(bool); ok && su {
+					hasStateUpgraders = true
 				}
-				if keyStr == "identity_upgraders" {
-					if iu, ok := v.(bool); ok && iu {
-						hasIdentityUpgraders = true
-					}
+			}
+			if keyStr == "identity_upgraders" {
+				if iu, ok := v.(bool); ok && iu {
+					hasIdentityUpgraders = true
 				}
 			}
 		}

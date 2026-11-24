@@ -163,3 +163,44 @@ func TestStringFirstSentence(t *testing.T) {
 		})
 	}
 }
+
+func TestExtractTemplateVariables(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		description string
+		s           string
+		expected    []string
+	}{
+		{
+			description: "no variables",
+			s:           "https://looker.googleapis.com/v1/",
+			expected:    nil,
+		},
+		{
+			description: "single variable",
+			s:           "https://looker.{{region}}.rep.googleapis.com/v1/",
+			expected:    []string{"region"},
+		},
+		{
+			description: "multiple variables in order",
+			s:           "projects/{{project}}/locations/{{location}}/repositories/{{name}}",
+			expected:    []string{"project", "location", "name"},
+		},
+		{
+			description: "url-encoded variables are ignored",
+			s:           "projects/{{project}}/secrets/{{%secret}}",
+			expected:    []string{"project"},
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			if got := ExtractTemplateVariables(tc.s); !reflect.DeepEqual(got, tc.expected) {
+				t.Errorf("ExtractTemplateVariables(%q) = %q, want %q", tc.s, got, tc.expected)
+			}
+		})
+	}
+}

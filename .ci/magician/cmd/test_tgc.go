@@ -23,6 +23,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type ttGithub interface {
+	CreateWorkflowDispatchEvent(string, map[string]any) error
+}
+
 var testTGCCmd = &cobra.Command{
 	Use:   "test-tgc",
 	Short: "Run tgc unit tests via workflow dispatch",

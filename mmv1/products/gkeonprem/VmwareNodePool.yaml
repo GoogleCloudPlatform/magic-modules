@@ -48,8 +48,6 @@ samples:
         resource_id_vars:
           name: my-nodepool
           cluster: my-cluster
-        test_env_vars:
-          project: fake-backend-360322
   - name: gkeonprem_vmware_node_pool_full
     primary_resource_id: nodepool-full
     steps:
@@ -57,8 +55,6 @@ samples:
         resource_id_vars:
           name: my-nodepool
           cluster: my-cluster
-        test_env_vars:
-          project: fake-backend-360322
 parameters:
   - name: name
     type: String
@@ -245,30 +241,17 @@ properties:
                 Last time the condition transit from one status to another.
               output: true
             - name: state
-              type: Enum
+              type: String
               description: The lifecycle state of the condition.
               output: true
-              enum_values:
-                - STATE_UNSPECIFIED
-                - STATE_TRUE
-                - STATE_FALSE
-                - STATE_UNKNOWN
   - name: uid
     type: String
     description: The unique identifier of the node pool.
     output: true
   - name: state
-    type: Enum
+    type: String
     description: The current state of this cluster.
     output: true
-    enum_values:
-      - STATE_UNSPECIFIED
-      - PROVISIONING
-      - RUNNING
-      - RECONCILING
-      - STOPPING
-      - ERROR
-      - DEGRADED
   - name: reconciling
     type: Boolean
     description: |

@@ -1,0 +1,109 @@
+log.Printf("[DEBUG] Beginning custom_delete for Vertex AI CustomJob %q", d.Id())
+
+billingProject := ""
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+	return fmt.Errorf("Error fetching project for CustomJob: %s", err)
+}
+billingProject = project
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+	billingProject = bp
+}
+
+jobUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}region{{"}}"}}/customJobs/{{"{{"}}name{{"}}"}}")
+if err != nil {
+	return err
+}
+
+// 1. Fetch current job state
+getRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	Project:   billingProject,
+	RawURL:    jobUrl,
+	UserAgent: userAgent,
+})
+if err != nil {
+	return transport_tpg.HandleNotFoundError(err, d, "CustomJob")
+}
+
+state, _ := getRes["state"].(string)
+log.Printf("[DEBUG] CustomJob %q current state: %s", d.Id(), state)
+
+// Terminal states do not require cancellation
+isTerminal := false
+switch state {
+case "JOB_STATE_SUCCEEDED", "JOB_STATE_FAILED", "JOB_STATE_CANCELLED", "JOB_STATE_EXPIRED", "JOB_STATE_PARTIALLY_SUCCEEDED":
+	isTerminal = true
+}
+
+if !isTerminal {
+	cancelUrl := jobUrl + ":cancel"
+	log.Printf("[DEBUG] Cancelling CustomJob %q before deletion via %s", d.Id(), cancelUrl)
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   billingProject,
+		RawURL:    cancelUrl,
+		UserAgent: userAgent,
+		Body:      map[string]interface{}{},
+		Timeout:   d.Timeout(schema.TimeoutDelete),
+	})
+	if err != nil {
+		if !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+			log.Printf("[WARN] Failed to cancel CustomJob %q: %s", d.Id(), err)
+		}
+	}
+
+	// Wait for the job to reach a terminal state
+	err = retry.RetryContext(context.Background(), d.Timeout(schema.TimeoutDelete), func() *retry.RetryError {
+		pollRes, pollErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    jobUrl,
+			UserAgent: userAgent,
+		})
+		if pollErr != nil {
+			if transport_tpg.IsGoogleApiErrorWithCode(pollErr, 404) {
+				return nil
+			}
+			return retry.NonRetryableError(pollErr)
+		}
+		pollState, _ := pollRes["state"].(string)
+		switch pollState {
+		case "JOB_STATE_SUCCEEDED", "JOB_STATE_FAILED", "JOB_STATE_CANCELLED", "JOB_STATE_EXPIRED", "JOB_STATE_PARTIALLY_SUCCEEDED":
+			return nil
+		default:
+			return retry.RetryableError(fmt.Errorf("CustomJob %q is in state %s, waiting for terminal state", d.Id(), pollState))
+		}
+	})
+	if err != nil {
+		return fmt.Errorf("Error waiting for CustomJob %q to be cancelled/terminal: %s", d.Id(), err)
+	}
+}
+
+// 2. Delete the CustomJob
+log.Printf("[DEBUG] Deleting CustomJob %q via %s", d.Id(), jobUrl)
+deleteRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "DELETE",
+	Project:   billingProject,
+	RawURL:    jobUrl,
+	UserAgent: userAgent,
+	Timeout:   d.Timeout(schema.TimeoutDelete),
+})
+if err != nil {
+	return transport_tpg.HandleNotFoundError(err, d, "CustomJob")
+}
+
+endpointLocation := tpgresource.LocationFromId(d.Id())
+err = VertexAIOperationWaitTime(
+	config, deleteRes, project, endpointLocation, "Deleting CustomJob", userAgent,
+	d.Timeout(schema.TimeoutDelete))
+if err != nil {
+	return err
+}
+
+log.Printf("[DEBUG] Finished deleting CustomJob %q: %#v", d.Id(), deleteRes)
+return nil

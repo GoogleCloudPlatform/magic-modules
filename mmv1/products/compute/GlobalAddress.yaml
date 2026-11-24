@@ -39,6 +39,8 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 include_in_tgc_next: true
+api_version:
+  ga: '2026-11-01'
 custom_code:
   pre_create: 'templates/terraform/pre_create/compute_global_address.go.tmpl'
   post_create: 'templates/terraform/post_create/labels.tmpl'
@@ -57,6 +59,14 @@ samples:
         min_version: 'beta'
         resource_id_vars:
           global_address_name: 'global-psconnect-ip'
+          network_name: 'my-network-name'
+  - name: 'global_address_psc_internal_range'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'global_address_psc_internal_range'
+        resource_id_vars:
+          global_address_name: 'global-psc-ir-ip'
+          internal_range_name: 'psc-internal-range'
           network_name: 'my-network-name'
 parameters:
 properties:
@@ -140,6 +150,10 @@ properties:
       * VPC_PEERING - for peer networks
 
       * PRIVATE_SERVICE_CONNECT - for ([Beta](../guides/provider_versions.html.markdown)) only) Private Service Connect networks
+
+      * PASSTHROUGH_LOAD_BALANCER_AVAILABILITY_GROUP0 - for Global External Passthrough Network Load Balancers
+
+      * PASSTHROUGH_LOAD_BALANCER_AVAILABILITY_GROUP1 - for Global External Passthrough Network Load Balancers
   - name: 'network'
     type: ResourceRef
     description: |
@@ -151,3 +165,17 @@ properties:
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Network'
     imports: 'selfLink'
+  - name: 'ipCollection'
+    type: String
+    description: |
+      Reference to an InternalRange to allocate the address from. Only applicable
+      when `address_type` is `INTERNAL` and `purpose` is `PRIVATE_SERVICE_CONNECT`.
+      The InternalRange must have `purpose` set to `INTERNAL_ADDRESS`.
+      Use one of the following formats to specify an InternalRange:
+      Full resource URL, as in:
+        * `https://networkconnectivity.googleapis.com/v1/projects/{{projectId}}/locations/global/internalRanges/{{internal-range-name}}`
+      Partial URL, as in:
+        * `projects/{{projectId}}/locations/global/internalRanges/{{internal-range-name}}`
+    custom_expand: 'templates/terraform/custom_expand/networkconnectivity_internal_range_ref.go.tmpl'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+    is_missing_in_cai: true

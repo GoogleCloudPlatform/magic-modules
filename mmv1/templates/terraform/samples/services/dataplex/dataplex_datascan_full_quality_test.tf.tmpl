@@ -107,6 +107,10 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
         priority = "high"
       }
       non_null_expectation {}
+      debug_queries {
+        description = "test debug query description"
+        sql_statement = "select * from $${data()} where address is null"
+      }
     }
 
     rules {

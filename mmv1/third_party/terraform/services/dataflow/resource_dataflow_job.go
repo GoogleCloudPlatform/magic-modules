@@ -554,7 +554,7 @@ func resourceDataflowJobDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Retry updating the state while the job is not ready to be canceled/drained.
-	err = retry.Retry(time.Minute*time.Duration(15), func() *retry.RetryError {
+	err = tpgresource.Retry(time.Minute*time.Duration(15), config.SleepUnit, func() *retry.RetryError {
 		// To terminate a dataflow job, we update the job with a requested
 		// terminal state.
 		job := &dataflow.Job{
@@ -572,7 +572,7 @@ func resourceDataflowJobDelete(d *schema.ResourceData, meta interface{}) error {
 			if strings.Contains(gerr.Message, "not yet ready for canceling") {
 				// Retry cancelling job if it's not ready.
 				// Sleep to avoid hitting update quota with repeated attempts.
-				time.Sleep(5 * time.Second)
+				time.Sleep(5 * config.SleepUnit)
 				return retry.RetryableError(updateErr)
 			}
 
@@ -593,7 +593,7 @@ func resourceDataflowJobDelete(d *schema.ResourceData, meta interface{}) error {
 	ok := shouldStopDataflowJobDeleteQuery(d.Get("state").(string), skipWait)
 	for !ok {
 		log.Printf("[DEBUG] Waiting for job with job state %q to terminate...", d.Get("state").(string))
-		time.Sleep(5 * time.Second)
+		time.Sleep(5 * config.SleepUnit)
 
 		err = resourceDataflowJobRead(d, meta)
 		if err != nil {
@@ -739,7 +739,7 @@ func jobHasUpdate(d *schema.ResourceData, resourceSchema map[string]*schema.Sche
 }
 
 func waitForDataflowJobToBeUpdated(d *schema.ResourceData, config *transport_tpg.Config, replacementJobID, userAgent string, timeout time.Duration) error {
-	return retry.Retry(timeout, func() *retry.RetryError {
+	return tpgresource.Retry(timeout, config.SleepUnit, func() *retry.RetryError {
 		project, err := tpgresource.GetProject(d, config)
 		if err != nil {
 			return retry.NonRetryableError(err)

@@ -44,7 +44,7 @@ func TestAccCloudIdentityGroup(t *testing.T) {
 		// yet, we don't have a race condition
 		// see https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
 		tc := tc
-		t.Run(name, func(t *testing.T) {
+		acctest.RunVcrSubtest(t, name, func(t *testing.T) {
 			tc(t)
 		})
 	}
@@ -116,6 +116,12 @@ func testAccCloudIdentityGroup_cloudIdentityGroupsBasicExampleTest(t *testing.T)
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"initial_group_config"},
+			},
+			{
+				ResourceName:       "google_cloud_identity_group.cloud_identity_group_basic",
+				ImportState:        true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},
 		},
 	})

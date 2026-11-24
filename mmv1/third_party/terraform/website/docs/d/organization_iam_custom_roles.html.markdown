@@ -1,7 +1,7 @@
 ---
 subcategory: "Cloud Platform"
 description: |-
-Get information about a Google Cloud Organization IAM Custom Roles.
+  Get information about a Google Cloud Organization IAM Custom Roles.
 ---
 
 # google_organization_iam_custom_roles

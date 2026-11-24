@@ -1,0 +1,190 @@
+package resourcemanager
+
+import (
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-framework/list"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
+	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"google.golang.org/api/cloudresourcemanager/v1"
+	"google.golang.org/api/iam/v1"
+)
+
+// Service account resource name addressed by the account's email or unique ID.
+var serviceAccountResourceNameRegex = "^" + verify.ServiceAccountLinkRegexPrefix + `[^\s/]+$`
+
+var IamServiceAccountSchema = map[string]*schema.Schema{
+	"service_account_id": {
+		Type:         schema.TypeString,
+		Required:     true,
+		ForceNew:     true,
+		ValidateFunc: verify.ValidateRegexp(serviceAccountResourceNameRegex),
+	},
+}
+
+type ServiceAccountIamUpdater struct {
+	serviceAccountId string
+	d                tpgresource.TerraformResourceData
+	Config           *transport_tpg.Config
+}
+
+func NewServiceAccountIamUpdater(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (tpgiamresource.ResourceIamUpdater, error) {
+	return &ServiceAccountIamUpdater{
+		serviceAccountId: d.Get("service_account_id").(string),
+		d:                d,
+		Config:           config,
+	}, nil
+}
+
+func ServiceAccountIdParseFunc(d *schema.ResourceData, _ *transport_tpg.Config) error {
+	if err := d.Set("service_account_id", d.Id()); err != nil {
+		return fmt.Errorf("Error setting service_account_id: %s", err)
+	}
+	return nil
+}
+
+// ServiceAccountIamParentResourceIdentityParser returns the parent service account's id.
+func ServiceAccountIamParentResourceIdentityParser(d *schema.ResourceData, identity *schema.IdentityData, _ *transport_tpg.Config) (string, error) {
+	v, ok := identity.GetOk("service_account_id")
+	if !ok {
+		return "", fmt.Errorf("import identity is missing attribute %q", "service_account_id")
+	}
+	s, ok := v.(string)
+	if !ok || s == "" {
+		return "", fmt.Errorf("import identity attribute %q must be a non-empty string", "service_account_id")
+	}
+	return s, nil
+}
+
+func (u *ServiceAccountIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.Policy, error) {
+	userAgent, err := tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
+	if err != nil {
+		return nil, err
+	}
+
+	p, err := iambeta.NewClient(u.Config, userAgent).Projects.ServiceAccounts.GetIamPolicy(u.serviceAccountId).OptionsRequestedPolicyVersion(tpgiamresource.IamPolicyVersion).Do()
+
+	if err != nil {
+		return nil, fmt.Errorf("Error retrieving IAM policy for %s: %w", u.DescribeResource(), err)
+	}
+
+	cloudResourcePolicy, err := iamToResourceManagerPolicy(p)
+	if err != nil {
+		return nil, err
+	}
+
+	return cloudResourcePolicy, nil
+}
+
+func (u *ServiceAccountIamUpdater) SetResourceIamPolicy(policy *cloudresourcemanager.Policy) error {
+	iamPolicy, err := resourceManagerToIamPolicy(policy)
+	if err != nil {
+		return err
+	}
+
+	userAgent, err := tpgresource.GenerateUserAgentString(u.d, u.Config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	_, err = iambeta.NewClient(u.Config, userAgent).Projects.ServiceAccounts.SetIamPolicy(u.GetResourceId(), &iam.SetIamPolicyRequest{
+		Policy: iamPolicy,
+	}).Do()
+
+	if err != nil {
+		return fmt.Errorf("Error setting IAM policy for %s: %w", u.DescribeResource(), err)
+	}
+
+	return nil
+}
+
+func (u *ServiceAccountIamUpdater) GetResourceId() string {
+	return u.serviceAccountId
+}
+
+func (u *ServiceAccountIamUpdater) GetMutexKey() string {
+	return fmt.Sprintf("iam-service-account-%s", u.serviceAccountId)
+}
+
+func (u *ServiceAccountIamUpdater) DescribeResource() string {
+	return fmt.Sprintf("service account '%s'", u.serviceAccountId)
+}
+
+func resourceManagerToIamPolicy(p *cloudresourcemanager.Policy) (*iam.Policy, error) {
+	out := &iam.Policy{}
+	err := tpgresource.Convert(p, out)
+	if err != nil {
+		return nil, fmt.Errorf("Cannot convert a v1 policy to a iam policy: %w", err)
+	}
+	return out, nil
+}
+
+func iamToResourceManagerPolicy(p *iam.Policy) (*cloudresourcemanager.Policy, error) {
+	out := &cloudresourcemanager.Policy{}
+	err := tpgresource.Convert(p, out)
+	if err != nil {
+		return nil, fmt.Errorf("Cannot convert a iam policy to a v1 policy: %w", err)
+	}
+	return out, nil
+}
+
+func ServiceAccountIamMemberResource() *schema.Resource {
+	return tpgiamresource.ResourceIamMember(
+		IamServiceAccountSchema,
+		NewServiceAccountIamUpdater,
+		ServiceAccountIdParseFunc,
+		tpgiamresource.IamWithParentResourceIdentity(ServiceAccountIamParentResourceIdentityParser),
+	)
+}
+
+// NewServiceAccountIamMemberListResource returns the list implementation for google_service_account_iam_member.
+func NewServiceAccountIamMemberListResource() list.ListResource {
+	return tpgiamresource.NewIamMemberListResource(
+		"google_service_account_iam_member",
+		ServiceAccountIamMemberResource(),
+		NewServiceAccountIamUpdater,
+		tpgiamresource.IamMemberListCallConfig{
+			ParentResourceField: "service_account_id",
+			EnableRoleFilter:    true,
+			EnableMemberFilter:  true,
+		},
+	)
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_service_account_iam_member",
+		ProductName: "resourcemanager",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      ServiceAccountIamMemberResource(),
+	}.Register()
+	registry.FrameworkListResource{
+		Name:        "google_service_account_iam_member",
+		ProductName: "resourcemanager",
+		Func:        NewServiceAccountIamMemberListResource,
+	}.Register()
+	registry.Schema{
+		Name:        "google_service_account_iam_binding",
+		ProductName: "resourcemanager",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamBinding(IamServiceAccountSchema, NewServiceAccountIamUpdater, ServiceAccountIdParseFunc),
+	}.Register()
+	registry.Schema{
+		Name:        "google_service_account_iam_policy",
+		ProductName: "resourcemanager",
+		Type:        registry.SchemaTypeIAMResource,
+		Schema:      tpgiamresource.ResourceIamPolicy(IamServiceAccountSchema, NewServiceAccountIamUpdater, ServiceAccountIdParseFunc),
+	}.Register()
+	registry.Schema{
+		Name:        "google_service_account_iam_policy",
+		ProductName: "resourcemanager",
+		Type:        registry.SchemaTypeIAMDataSource,
+		Schema:      tpgiamresource.DataSourceIamPolicy(IamServiceAccountSchema, NewServiceAccountIamUpdater),
+	}.Register()
+}

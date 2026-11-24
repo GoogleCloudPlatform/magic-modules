@@ -43,7 +43,7 @@ func testAccAlloydbCluster_secondaryClusterMandatoryFields(context map[string]in
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
-  location   = "us-central1"
+  location   = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -120,7 +120,7 @@ func testAccAlloydbCluster_secondaryClusterMissingSecondaryConfig(context map[st
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
-  location   = "us-central1"
+  location   = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -193,7 +193,7 @@ func testAccAlloydbCluster_secondaryClusterDefinedSecondaryConfigButMissingClust
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
-  location   = "us-central1"
+  location   = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -273,7 +273,7 @@ func testAccAlloydbCluster_secondaryClusterDefinedSecondaryConfigButClusterTypeI
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
-  location   = "us-central1"
+  location   = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -368,7 +368,7 @@ func testAccAlloydbCluster_secondaryClusterUpdate(context map[string]interface{}
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
-  location   = "us-central1"
+  location   = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -454,7 +454,7 @@ func testAccAlloydbCluster_secondaryClusterUsingCMEK(context map[string]interfac
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
-  location   = "us-central1"
+  location   = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -549,7 +549,7 @@ func testAccAlloydbCluster_secondaryClusterWithNetworkConfig(context map[string]
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
-  location   = "us-central1"
+  location   = "us-east1"
   network_config {
 		network    = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.default.name}"
   }
@@ -632,7 +632,7 @@ func testAccAlloydbCluster_secondaryClusterWithNetworkConfigAndAllocatedIPRange(
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
-  location   = "us-central1"
+  location   = "us-east1"
   network_config {
 		network    = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.default.name}"
 		allocated_ip_range = data.google_compute_global_address.private_ip_alloc.name
@@ -730,7 +730,7 @@ func testAccAlloydbInstance_secondaryClusterWithInstance(context map[string]inte
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
-  location   = "us-central1"
+  location   = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -801,7 +801,7 @@ func testAccAlloydbCluster_secondaryClusterPromote(context map[string]interface{
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
-  location   = "us-central1"
+  location   = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -901,7 +901,7 @@ func testAccAlloydbCluster_secondaryClusterPromoteAndSimultaneousUpdate(context 
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
-  location   = "us-central1"
+  location   = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -1103,7 +1103,7 @@ func testAccAlloydbCluster_secondaryClusterPromoteAndUpdate(context map[string]i
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
-  location   = "us-central1"
+  location   = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -1207,7 +1207,7 @@ func testAccAlloydbInstance_secondaryClusterWithInstanceAndNetworkConfigAndAlloc
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
-  location   = "us-central1"
+  location   = "us-east1"
   network_config {
     network    = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.default.name}"
     allocated_ip_range = data.google_compute_global_address.private_ip_alloc.name
@@ -1232,7 +1232,7 @@ resource "google_alloydb_instance" "primary" {
 
 resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
-  location     = "us-south1"
+  location     = "us-east1"
   network_config {
     network    = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.default.name}"
     allocated_ip_range = data.google_compute_global_address.private_ip_alloc.name
@@ -1284,7 +1284,7 @@ func testAccAlloydbCluster_secondaryClusterPromoteWithNetworkConfigAndAllocatedI
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
-  location   = "us-central1"
+  location   = "us-east1"
   network_config {
     network    = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.default.name}"
     allocated_ip_range = data.google_compute_global_address.private_ip_alloc.name
@@ -1309,7 +1309,7 @@ resource "google_alloydb_instance" "primary" {
 
 resource "google_alloydb_cluster" "secondary" {
   cluster_id   = "tf-test-alloydb-secondary-cluster%{random_suffix}"
-  location     = "us-south1"
+  location     = "us-east1"
   network_config {
     network    = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.default.name}"
     allocated_ip_range = data.google_compute_global_address.private_ip_alloc.name
@@ -1358,7 +1358,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndAddAndDeleteAutomatedBackup
 
 	context := map[string]interface{}{
 		"random_suffix":              acctest.RandString(t, 10),
-		"secondary_cluster_location": "us-south1",
+		"secondary_cluster_location": "us-east1",
 		"network_name":               servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"hour":                       23,
 	}
@@ -1412,7 +1412,7 @@ func testAccAlloydbCluster_secondaryClusterPromoteAndAddAutomatedBackupPolicyAnd
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
-  location   = "us-central1"
+  location   = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -1508,7 +1508,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndDeleteTimeBasedRetentionPol
 
 	context := map[string]interface{}{
 		"random_suffix":              acctest.RandString(t, 10),
-		"secondary_cluster_location": "us-south1",
+		"secondary_cluster_location": "us-east1",
 		"network_name":               servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 	}
 
@@ -1561,7 +1561,7 @@ func testAccAlloydbCluster_secondaryClusterPromoteWithTimeBasedRetentionPolicy(c
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
-  location   = "us-central1"
+  location   = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -1656,7 +1656,7 @@ func testAccAlloydbCluster_secondaryClusterPromoteWithoutTimeBasedRetentionPolic
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
-  location   = "us-central1"
+  location   = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }
@@ -1750,7 +1750,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndAddContinuousBackupConfig(t
 
 	context := map[string]interface{}{
 		"random_suffix":              acctest.RandString(t, 10),
-		"secondary_cluster_location": "us-south1",
+		"secondary_cluster_location": "us-east1",
 		"network_name":               servicenetworking.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 	}
 
@@ -1794,7 +1794,7 @@ func testAccAlloydbCluster_secondaryClusterPromoteAndAddContinuousBackupConfig(c
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "primary" {
   cluster_id = "tf-test-alloydb-primary-cluster%{random_suffix}"
-  location   = "us-central1"
+  location   = "us-east1"
   network_config {
     network = data.google_compute_network.default.id
   }

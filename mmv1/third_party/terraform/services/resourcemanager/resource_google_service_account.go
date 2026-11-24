@@ -189,12 +189,13 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 		"Creating Service Account",
 		d.Timeout(schema.TimeoutCreate),
 		3, // Number of consecutive occurences.
+		config.SleepUnit,
 	)
 
 	// We can't guarantee complete consistency even after polling,
 	// so sleep for some additional time to reduce the likelihood of
 	// eventual consistency failures.
-	time.Sleep(10 * time.Second)
+	time.Sleep(10 * config.SleepUnit)
 
 	return nil
 }
@@ -382,6 +383,7 @@ func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}
 		"Updating Service Account",
 		1*time.Minute,
 		3, // Number of consecutive occurences.
+		config.SleepUnit,
 	)
 
 	if err != nil {
@@ -391,7 +393,7 @@ func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}
 	// This API is meant to be synchronous, but in practice it shows the old value for
 	// a few milliseconds after the update goes through. 5 seconds is more than enough
 	// time to ensure following reads are correct.
-	time.Sleep(time.Second * 5)
+	time.Sleep(5 * config.SleepUnit)
 
 	return tpgresource.SetResourceIdentityAttributes(d, map[string]interface{}{
 		"email":   sa.Email,

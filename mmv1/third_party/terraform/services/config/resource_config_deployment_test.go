@@ -56,7 +56,7 @@ func TestAccConfigDeployment_basic(t *testing.T) {
 func testAccConfigDeployment_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_service_account" "sa" {
-  account_id   = "im-basic-test-sa-%{random_suffix}"
+  account_id   = "tf-test-im-basic-%{random_suffix}"
   display_name = "Infra Manager Basic Test SA"
 }
 
@@ -91,7 +91,7 @@ resource "google_config_deployment" "basic" {
     }
     input_values {
       variable_name = "network_name"
-      input_value   = jsonencode("test-network-%{random_suffix}")
+      input_value   = jsonencode("tf-test-network-%{random_suffix}")
     }
   }
 
@@ -106,7 +106,7 @@ resource "google_config_deployment" "basic" {
 func testAccConfigDeployment_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_service_account" "sa" {
-  account_id   = "im-basic-test-sa-%{random_suffix}"
+  account_id   = "tf-test-im-basic-%{random_suffix}"
   display_name = "Infra Manager Basic Test SA"
 }
 
@@ -160,7 +160,7 @@ resource "google_config_deployment" "basic" {
     }
     input_values {
       variable_name = "network_name"
-      input_value   = jsonencode("test-network-%{random_suffix}")
+      input_value   = jsonencode("tf-test-network-%{random_suffix}")
     }
   }
 
@@ -194,6 +194,15 @@ func TestAccConfigDeployment_full(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "force_destroy", "labels", "annotations"},
 			},
+			{
+				Config: testAccConfigDeployment_fullUpdate(context),
+			},
+			{
+				ResourceName:            "google_config_deployment.full",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "force_destroy", "labels", "annotations"},
+			},
 		},
 	})
 }
@@ -201,7 +210,7 @@ func TestAccConfigDeployment_full(t *testing.T) {
 func testAccConfigDeployment_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_service_account" "sa" {
-  account_id   = "im-full-test-sa-%{random_suffix}"
+  account_id   = "tf-test-im-full-%{random_suffix}"
   display_name = "Infra Manager Full Test SA"
 }
 
@@ -218,7 +227,7 @@ resource "google_project_iam_member" "storage_viewer" {
 }
 
 resource "google_storage_bucket" "blueprint_bucket" {
-  name          = "im-blueprint-bucket-%{random_suffix}"
+  name          = "tf-test-im-blueprint-bucket-%{random_suffix}"
   location      = "US"
   force_destroy = true
 }
@@ -230,7 +239,7 @@ resource "google_storage_bucket_object" "blueprint_object" {
 }
 
 resource "google_storage_bucket" "artifacts_bucket" {
-  name          = "im-artifacts-bucket-%{random_suffix}"
+  name          = "tf-test-im-artifacts-bucket-%{random_suffix}"
   location      = "US"
   force_destroy = true
 }
@@ -254,7 +263,81 @@ resource "google_config_deployment" "full" {
     
     input_values {
       variable_name = "instance_name"
-      input_value   = jsonencode("test-instance-%{random_suffix}")
+      input_value   = jsonencode("tf-test-instance-%{random_suffix}")
+    }
+  }
+
+  artifacts_gcs_bucket = "gs://${google_storage_bucket.artifacts_bucket.name}"
+
+  depends_on = [
+    google_project_iam_member.binding,
+    google_project_iam_member.storage_viewer
+  ]
+}
+`, context)
+}
+
+func testAccConfigDeployment_fullUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_service_account" "sa" {
+  account_id   = "tf-test-im-full-%{random_suffix}"
+  display_name = "Infra Manager Full Test SA"
+}
+
+resource "google_project_iam_member" "binding" {
+  project = "%{project}"
+  role    = "roles/config.agent"
+  member  = "serviceAccount:${google_service_account.sa.email}"
+}
+
+resource "google_project_iam_member" "storage_viewer" {
+  project = "%{project}"
+  role    = "roles/storage.objectViewer"
+  member  = "serviceAccount:${google_service_account.sa.email}"
+}
+
+resource "google_storage_bucket" "blueprint_bucket" {
+  name          = "tf-test-im-blueprint-bucket-%{random_suffix}"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_storage_bucket_object" "blueprint_object" {
+  name   = "blueprint.zip"
+  bucket = google_storage_bucket.blueprint_bucket.name
+  source = "test-fixtures/blueprint.zip"
+}
+
+resource "google_storage_bucket" "artifacts_bucket" {
+  name          = "tf-test-im-artifacts-bucket-%{random_suffix}"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_config_deployment" "full" {
+  name            = "tf-test-full-deployment-%{random_suffix}"
+  location        = "us-central1"
+  service_account = "projects/%{project}/serviceAccounts/${google_service_account.sa.email}"
+  force_destroy   = true
+
+  labels = {
+    environment = "updated"
+  }
+
+  annotations = {
+    purpose = "full-field-testing"
+  }
+
+  provider_config {
+    source_type = "SERVICE_MAINTAINED"
+  }
+
+  terraform_blueprint {
+    gcs_source = "gs://${google_storage_bucket.blueprint_bucket.name}/${google_storage_bucket_object.blueprint_object.name}"
+
+    input_values {
+      variable_name = "instance_name"
+      input_value   = jsonencode("tf-test-instance-%{random_suffix}")
     }
   }
 

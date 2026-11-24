@@ -1,0 +1,56 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2024 Google LLC. All Rights Reserved.
+
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+	    http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+
+// expand{{$.GetPrefix}}{{$.TitlelizeProperty}} uses raw config inspection so that an explicitly
+// configured `{{ underscore $.Name }} = 0` reaches the API, while an unconfigured field stays out
+// of the request entirely.
+//
+// `{{ underscore $.Name }}` is Optional + Computed, and 0 is the zero value for ints in Terraform
+// SDKv2, so resource data alone cannot distinguish "the practitioner asked for 0" from "the
+// practitioner said nothing". Neither of the two simple options works:
+//
+//   - Omitting every 0 (the default expander behavior) drops a configured 0, the API substitutes
+//     its own default, and the next plan shows a permanent diff.
+//   - Sending every 0 (send_empty_value) makes unconfigured TTLs explicit, which both overrides the
+//     API-side default and breaks cache modes that forbid TTLs, e.g. the API rejects
+//     "default_ttl cannot be specified with USE_ORIGIN_HEADERS cache_mode".
+//
+// Returning a *int64 threads the needle: a non-nil pointer is not an empty value, so a configured 0
+// is included in the request, while nil leaves the field out.
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	ttl, ok := v.(int)
+	if !ok {
+		return nil, nil
+	}
+	if ttl != 0 {
+		return ttl, nil
+	}
+{{- if not (contains $.ResourceMetadata.ProductMetadata.Compiler "terraformgoogleconversion") }}
+
+	// A 0 is only meaningful when it came from the configuration rather than from the zero value of
+	// an unset field.
+	if rd, ok := d.(*schema.ResourceData); ok {
+		path := cty.GetAttrPath("cdn_policy").IndexInt(0).GetAttr("{{ underscore $.Name }}")
+		if val, _ := rd.GetRawConfigAt(path); !val.IsNull() && val.IsKnown() {
+			zero := int64(0)
+			return &zero, nil
+		}
+	}
+{{- end }}
+
+	return nil, nil
+}

@@ -1,0 +1,221 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Attribute
+description: |-
+  An attribute in API Hub is a name-value pair that can be attached to API Hub
+  resources, such as APIs, versions, and deployments, depending on the
+  attribute's scope. This resource manages user-defined attributes.
+  System-defined attributes are predefined by API Hub and can't be created or
+  deleted.
+references:
+  guides:
+    Official Documentation: https://cloud.google.com/apigee/docs/apihub/what-is-api-hub
+    Manage attributes: https://cloud.google.com/apigee/docs/apihub/manage-attributes
+  api: https://cloud.google.com/apigee/docs/reference/apis/apihub/rest/v1/projects.locations.attributes
+docs:
+  note: |-
+    An API Hub instance (`google_apihub_api_hub_instance`) must already exist
+    in the project and location.
+  warning: |-
+    Changing `scope` or `data_type`, or decreasing `cardinality`, recreates the
+    attribute. Deleting an attribute also deletes all of its associations with
+    API Hub resources. Set `deletion_policy = "PREVENT"` to block accidental
+    deletion.
+base_url: projects/{{project}}/locations/{{location}}/attributes
+self_link: projects/{{project}}/locations/{{location}}/attributes/{{attribute_id}}
+create_url: projects/{{project}}/locations/{{location}}/attributes?attributeId={{attribute_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/attributes/{{attribute_id}}
+custom_diff:
+  - customdiff.ForceNewIfChange("cardinality", isApihubAttributeCardinalityDecrease)
+autogen_status: QXR0cmlidXRlQXV0b2dlblYyQWdlbnQ=
+custom_code:
+  constants: templates/terraform/constants/apihub_attribute.go.tmpl
+samples:
+  # Attributes require an API Hub instance in the project. apihub_attribute_enum
+  # uses BootstrapApihubInstanceProject to share one persistent bootstrapped
+  # project and instance per test environment, while apihub_attribute_basic is a
+  # minimal STRING docs example.
+  - name: apihub_attribute_basic
+    primary_resource_id: default
+    exclude_test: true
+    steps:
+      - name: apihub_attribute_basic
+        resource_id_vars:
+          attribute_id: example-attribute
+  - name: apihub_attribute_enum
+    primary_resource_id: default
+    steps:
+      - name: apihub_attribute_enum
+        resource_id_vars:
+          attribute_id: example-enum-attribute
+        vars:
+          project: null
+          display_name: Example Enum Attribute
+          description: Initial enum attribute description
+          cardinality: null
+          first_value_id: value-1
+          first_value_display_name: Value 1
+          first_value_description: First allowed value
+          second_value_description: null
+          third_value_id: value-3
+          third_value_display_name: Value 3
+          third_value_description: null
+        test_vars_overrides:
+          project: BootstrapApihubInstanceProject(t)
+      - name: apihub_attribute_enum
+        resource_id_vars:
+          attribute_id: example-enum-attribute
+        vars:
+          project: null
+          display_name: Example Enum Attribute Updated
+          description: Updated enum attribute description
+          cardinality: 3
+          first_value_id: value-1
+          first_value_display_name: Value 1 Updated
+          first_value_description: First allowed value updated
+          second_value_description: Second allowed value
+          third_value_id: value-3
+          third_value_display_name: Value 3
+          third_value_description: null
+        test_vars_overrides:
+          project: BootstrapApihubInstanceProject(t)
+      # Unsets description and cardinality (cardinality keeps its last value),
+      # removes value-1, moves value-3 ahead of value-2, clears the description
+      # of value-2, and adds value-4.
+      - name: apihub_attribute_enum
+        resource_id_vars:
+          attribute_id: example-enum-attribute
+        vars:
+          project: null
+          display_name: Example Enum Attribute Updated
+          description: null
+          cardinality: null
+          first_value_id: value-3
+          first_value_display_name: Value 3
+          first_value_description: null
+          second_value_description: null
+          third_value_id: value-4
+          third_value_display_name: Value 4
+          third_value_description: Fourth allowed value
+        test_vars_overrides:
+          project: BootstrapApihubInstanceProject(t)
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: The location of the API Hub instance, for example `us-central1`.
+    immutable: true
+    url_param_only: true
+  - name: attributeId
+    type: String
+    required: true
+    description: |-
+      The ID to use for the attribute, which becomes the final component of the
+      attribute's resource name. It must be unique within the API Hub instance,
+      4-500 characters long, and can contain letters, numbers, hyphens (`-`),
+      and underscores (`_`).
+    immutable: true
+    url_param_only: true
+properties:
+  - name: name
+    type: String
+    description: |-
+      The resource name of the attribute, in the format
+      `projects/{project}/locations/{location}/attributes/{attribute}`.
+    output: true
+  - name: displayName
+    type: String
+    required: true
+    description: The display name of the attribute.
+  - name: description
+    type: String
+    description: The description of the attribute.
+  - name: definitionType
+    type: String
+    description: |-
+      The definition type of the attribute. Possible values are
+      `SYSTEM_DEFINED` and `USER_DEFINED`.
+    output: true
+  - name: scope
+    type: String
+    required: true
+    immutable: true
+    description: |-
+      The scope of the attribute, which is the type of API Hub resource the
+      attribute can be attached to. Possible values include `API`, `VERSION`,
+      `SPEC`, `API_OPERATION`, `DEPLOYMENT`, `DEPENDENCY`, `DEFINITION`,
+      `EXTERNAL_API`, and `PLUGIN`.
+  - name: dataType
+    type: String
+    required: true
+    immutable: true
+    description: |-
+      The data type of the attribute's values. Possible values include `ENUM`,
+      `JSON`, `STRING`, and `URI`.
+  - name: allowedValues
+    type: Array
+    description: |-
+      The list of allowed values, required when `data_type` is `ENUM`. An
+      attribute can have at most 1000 allowed values. Once set, the list can't
+      be updated to be empty. Removing an allowed value also removes it from
+      any API Hub resources that use it.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: id
+          type: String
+          required: true
+          description: |-
+            The ID of the allowed value. It must be unique within the attribute,
+            3-500 characters long, and can contain letters, numbers, hyphens
+            (`-`), and underscores (`_`).
+        - name: displayName
+          type: String
+          required: true
+          description: The display name of the allowed value.
+        - name: description
+          type: String
+          description: The detailed description of the allowed value.
+        - name: immutable
+          type: Boolean
+          description: |-
+            Whether the allowed value is immutable. Immutable allowed values
+            can't be updated or deleted.
+          output: true
+  - name: cardinality
+    type: Integer
+    default_from_api: true
+    description: |-
+      The maximum number of values the attribute can have when it's attached
+      to an API Hub resource. Must be between 1 and 20. A cardinality of 1
+      means the attribute is single-valued. Defaults to `1`. Cardinality can
+      only be increased in place; decreasing it recreates the attribute.
+  - name: mandatory
+    type: Boolean
+    description: |-
+      Whether the attribute is mandatory for the resource type in `scope`.
+      Only system-defined attributes can be mandatory.
+    output: true
+  - name: createTime
+    type: String
+    description: The time at which the attribute was created.
+    output: true
+  - name: updateTime
+    type: String
+    description: The time at which the attribute was last updated.
+    output: true

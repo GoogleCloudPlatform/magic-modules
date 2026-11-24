@@ -5,5 +5,11 @@ resource "google_gke_hub_fleet" "default" {
       mode = "DISABLED"
       vulnerability_mode = "VULNERABILITY_DISABLED"
     }
+    compliance_posture_config {
+      mode = "ENABLED"
+    }
+  }
+  labels = {
+    env = "prod"
   }
 }

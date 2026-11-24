@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -80,6 +81,15 @@ var Rfc1918Networks = []string{
 	"10.0.0.0/8",
 	"172.16.0.0/12",
 	"192.168.0.0/16",
+}
+
+// ValidateKmsKeyWithoutVersion rejects Cloud KMS key names that include a
+// crypto key version.
+func ValidateKmsKeyWithoutVersion(v interface{}, k string) (ws []string, errors []error) {
+	if strings.Contains(v.(string), "/cryptoKeyVersions/") {
+		errors = append(errors, fmt.Errorf("%q must specify a KMS Key, not a KMS KeyVersion; remove the /cryptoKeyVersions/ suffix", k))
+	}
+	return
 }
 
 // validateGCEName ensures that a field matches the requirements for Compute Engine resource names
@@ -398,10 +408,25 @@ type StringValidationTestCase struct {
 	ExpectError bool
 }
 
+// compiledRegexps memoizes the patterns passed to ValidateRegexp. Validators
+// are built while the provider's resource schemas are, so the patterns are
+// compiled lazily on first use rather than eagerly at build time, but a given
+// pattern is only ever compiled once.
+var compiledRegexps sync.Map // map[string]*regexp.Regexp
+
+func compileRegexp(re string) *regexp.Regexp {
+	if compiled, ok := compiledRegexps.Load(re); ok {
+		return compiled.(*regexp.Regexp)
+	}
+	compiled := regexp.MustCompile(re)
+	compiledRegexps.Store(re, compiled)
+	return compiled
+}
+
 func ValidateRegexp(re string) schema.SchemaValidateFunc {
 	return func(v interface{}, k string) (ws []string, errors []error) {
 		value := v.(string)
-		if !regexp.MustCompile(re).MatchString(value) {
+		if !compileRegexp(re).MatchString(value) {
 			errors = append(errors, fmt.Errorf(
 				"%q (%q) doesn't match regexp %q", k, value, re))
 		}

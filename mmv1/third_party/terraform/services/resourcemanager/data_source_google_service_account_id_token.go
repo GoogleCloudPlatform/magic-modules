@@ -1,6 +1,7 @@
 package resourcemanager
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -14,7 +15,6 @@ import (
 	"google.golang.org/api/option"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"golang.org/x/net/context"
 )
 
 const (

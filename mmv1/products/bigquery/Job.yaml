@@ -57,10 +57,6 @@ samples:
       - name: 'bigquery_job_query'
         resource_id_vars:
           job_id: 'job_query'
-          account_name: 'bqowner'
-        test_vars_overrides:
-          # for backward compatible
-          account_name: '"bqowner" + randomSuffix'
         ignore_read_extra:
           - 'etag'
           - 'status.0.state'
@@ -82,10 +78,6 @@ samples:
       - name: 'bigquery_job_query_table_reference'
         resource_id_vars:
           job_id: 'job_query'
-          account_name: 'bqowner'
-        test_vars_overrides:
-          # for backward compatible
-          account_name: '"bqowner" + randomSuffix'
         ignore_read_extra:
           - 'etag'
           - 'query.0.default_dataset.0.dataset_id'
@@ -140,14 +132,11 @@ samples:
       - name: 'bigquery_job_copy'
         resource_id_vars:
           job_id: 'job_copy'
-          account_name: 'bqowner'
           kms_key_name: 'example-key'
         test_env_vars:
           project: 'PROJECT_NAME'
         test_vars_overrides:
           'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key1").CryptoKey.Name'
-          # for backward compatible
-          account_name: '"bqowner" + randomSuffix'
         ignore_read_extra:
           - 'etag'
           - 'status.0.state'
@@ -159,14 +148,11 @@ samples:
       - name: 'bigquery_job_copy_table_reference'
         resource_id_vars:
           job_id: 'job_copy'
-          account_name: 'bqowner'
           kms_key_name: 'example-key'
         test_env_vars:
           project: 'PROJECT_NAME'
         test_vars_overrides:
           'kms_key_name': 'kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-bootstrap-bigquery-job-key2").CryptoKey.Name'
-          # for backward compatible
-          account_name: '"bqowner" + randomSuffix'
         ignore_read_extra:
           - 'etag'
           - 'copy.0.destination_table.0.table_id'
@@ -179,10 +165,6 @@ samples:
       - name: 'bigquery_job_extract'
         resource_id_vars:
           job_id: 'job_extract'
-          account_name: 'bqowner'
-        test_vars_overrides:
-          # for backward compatible
-          account_name: '"bqowner" + randomSuffix'
         ignore_read_extra:
           - 'etag'
           - 'status.0.state'
@@ -194,10 +176,6 @@ samples:
       - name: 'bigquery_job_extract_table_reference'
         resource_id_vars:
           job_id: 'job_extract'
-          account_name: 'bqowner'
-        test_vars_overrides:
-          # for backward compatible
-          account_name: '"bqowner" + randomSuffix'
         ignore_read_extra:
           - 'etag'
           - 'extract.0.source_table.0.table_id'

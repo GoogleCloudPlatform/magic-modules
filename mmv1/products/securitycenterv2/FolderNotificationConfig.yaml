@@ -135,3 +135,8 @@ properties:
           [Filtering notifications](https://cloud.google.com/security-command-center/docs/how-to-api-filter-notifications)
           for information on how to write a filter.
         required: true
+  - name: deletionNotificationsEnabled
+    type: Boolean
+    description: |
+      Indicates whether the notifications will be sent for deleted findings.
+    send_empty_value: true

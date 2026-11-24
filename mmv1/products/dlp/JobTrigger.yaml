@@ -42,33 +42,18 @@ samples:
     primary_resource_id: basic
     steps:
       - name: dlp_job_trigger_basic
-        resource_id_vars:
-          trigger: trigger
-        test_vars_overrides:
-          # for backward compatible
-          trigger: '"trigger" + randomSuffix'
         test_env_vars:
           project: PROJECT_NAME
   - name: dlp_job_trigger_bigquery_row_limit
     primary_resource_id: bigquery_row_limit
     steps:
       - name: dlp_job_trigger_bigquery_row_limit
-        resource_id_vars:
-          trigger: trigger
-        test_vars_overrides:
-          # for backward compatible
-          trigger: '"trigger" + randomSuffix'
         test_env_vars:
           project: PROJECT_NAME
   - name: dlp_job_trigger_bigquery_row_limit_percentage
     primary_resource_id: bigquery_row_limit_percentage
     steps:
       - name: dlp_job_trigger_bigquery_row_limit_percentage
-        resource_id_vars:
-          trigger: trigger
-        test_vars_overrides:
-          # for backward compatible
-          trigger: '"trigger" + randomSuffix'
         test_env_vars:
           project: PROJECT_NAME
   - name: dlp_job_trigger_publish_to_dataplex_catalog
@@ -76,11 +61,6 @@ samples:
     exclude_basic_doc: true
     steps:
       - name: dlp_job_trigger_publish_to_dataplex_catalog
-        resource_id_vars:
-          trigger: trigger
-        test_vars_overrides:
-          # for backward compatible
-          trigger: '"trigger" + randomSuffix'
         test_env_vars:
           project: PROJECT_NAME
   - name: dlp_job_trigger_scc_output
@@ -88,11 +68,6 @@ samples:
     exclude_basic_doc: true
     steps:
       - name: dlp_job_trigger_scc_output
-        resource_id_vars:
-          trigger: trigger
-        test_vars_overrides:
-          # for backward compatible
-          trigger: '"trigger" + randomSuffix'
         test_env_vars:
           project: PROJECT_NAME
   - name: dlp_job_trigger_job_notification_emails
@@ -121,11 +96,6 @@ samples:
     primary_resource_id: inspect
     steps:
       - name: dlp_job_trigger_inspect
-        resource_id_vars:
-          trigger: trigger
-        test_vars_overrides:
-          # for backward compatible
-          trigger: '"trigger" + randomSuffix'
         test_env_vars:
           project: PROJECT_NAME
   - name: dlp_job_trigger_publish_to_stackdriver
@@ -146,33 +116,30 @@ samples:
     primary_resource_id: basic
     steps:
       - name: dlp_job_trigger_multiple_actions
-        resource_id_vars:
-          trigger: trigger
-        test_vars_overrides:
-          # for backward compatible
-          trigger: '"trigger" + randomSuffix'
         test_env_vars:
           project: PROJECT_NAME
   - name: dlp_job_trigger_cloud_storage_optional_timespan_autopopulation
     primary_resource_id: basic
     steps:
       - name: dlp_job_trigger_cloud_storage_optional_timespan_autopopulation
-        resource_id_vars:
-          trigger: trigger
-        test_vars_overrides:
-          # for backward compatible
-          trigger: '"trigger" + randomSuffix'
         test_env_vars:
           project: PROJECT_NAME
   - name: dlp_job_trigger_timespan_config_big_query
     primary_resource_id: timespan_config_big_query
     steps:
       - name: dlp_job_trigger_timespan_config_big_query
-        resource_id_vars:
-          trigger: trigger
-        test_vars_overrides:
-          # for backward compatible
-          trigger: '"trigger" + randomSuffix'
+        test_env_vars:
+          project: PROJECT_NAME
+  - name: dlp_job_trigger_min_likelihood_per_info_type
+    primary_resource_id: min_likelihood_per_info_type
+    steps:
+      - name: dlp_job_trigger_min_likelihood_per_info_type
+        test_env_vars:
+          project: PROJECT_NAME
+      - name: dlp_job_trigger_min_likelihood_per_info_type_update
+        test_env_vars:
+          project: PROJECT_NAME
+      - name: dlp_job_trigger_without_min_likelihood_per_info_type
         test_env_vars:
           project: PROJECT_NAME
 parameters:
@@ -289,6 +256,56 @@ properties:
               - POSSIBLE
               - LIKELY
               - VERY_LIKELY
+          - name: minLikelihoodPerInfoType
+            type: Array
+            description: |
+              Minimum likelihood per infotype. For each infotype, a user can specify a minimum likelihood.
+              The system only returns a finding if its likelihood is above this threshold. If this field
+              is not set, the system uses the InspectConfig min_likelihood.
+            item_type:
+              type: NestedObject
+              properties:
+                - name: infoType
+                  type: NestedObject
+                  description: |
+                    Type of information the likeliness threshold applies to. Only one likelihood per info_type should be provided.
+                    If InfoTypeLikelihood does not have an info_type, the configuration fails.
+                  properties:
+                    - name: name
+                      type: String
+                      description: |
+                        Name of the information type. Either a name of your choosing when creating a CustomInfoType, or one of the names listed
+                        at https://cloud.google.com/dlp/docs/infotypes-reference when specifying a built-in type.
+                      required: true
+                    - name: version
+                      type: String
+                      description: |
+                        Version name for this InfoType.
+                    - name: sensitivityScore
+                      type: NestedObject
+                      description: |
+                        Optional custom sensitivity for this InfoType. This only applies to data profiling.
+                      properties:
+                        - name: score
+                          type: Enum
+                          description: |
+                            The sensitivity score applied to the resource.
+                          required: true
+                          enum_values:
+                            - SENSITIVITY_LOW
+                            - SENSITIVITY_MODERATE
+                            - SENSITIVITY_HIGH
+                - name: minLikelihood
+                  type: Enum
+                  description: |
+                    Only returns findings equal or above this threshold. See https://cloud.google.com/dlp/docs/likelihood for more info.
+                  required: true
+                  enum_values:
+                    - VERY_UNLIKELY
+                    - UNLIKELY
+                    - POSSIBLE
+                    - LIKELY
+                    - VERY_LIKELY
           - name: limits
             type: NestedObject
             description: Configuration to control the number of findings returned.

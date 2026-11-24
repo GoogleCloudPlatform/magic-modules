@@ -52,8 +52,6 @@ samples:
         resource_id_vars:
           pipeline_name: some-pipeline
           topic_name: some-topic
-        test_env_vars:
-          project_id: PROJECT_NAME
   - name: eventarc_pipeline_with_http_destination
     primary_resource_id: primary
     steps:
@@ -72,8 +70,6 @@ samples:
         resource_id_vars:
           pipeline_name: some-pipeline
           workflow_name: some-workflow
-        test_env_vars:
-          project_id: PROJECT_NAME
   - name: eventarc_pipeline_with_oidc_and_json_format
     primary_resource_id: primary
     steps:

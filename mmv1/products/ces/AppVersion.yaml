@@ -116,6 +116,16 @@ properties:
                       Whether the callback is disabled. Disabled callbacks are ignored by the
                       agent.
                     output: true
+                  - name: proactiveExecutionEnabled
+                    type: Boolean
+                    description: |-
+                      If enabled, the callback will also be executed on intermediate model
+                      outputs. This setting only affects after model callback.
+                      **ENABLE WITH CAUTION**. Typically after model callback only needs to be
+                      executed after receiving all model responses. Enabling proactive execution
+                      may have negative implication on the execution cost and latency, and
+                      should only be enabled in rare situations.
+                    output: true
                   - name: pythonCode
                     type: String
                     description: The python code to execute for the callback.
@@ -141,6 +151,16 @@ properties:
                     description: |-
                       Whether the callback is disabled. Disabled callbacks are ignored by the
                       agent.
+                    output: true
+                  - name: proactiveExecutionEnabled
+                    type: Boolean
+                    description: |-
+                      If enabled, the callback will also be executed on intermediate model
+                      outputs. This setting only affects after model callback.
+                      **ENABLE WITH CAUTION**. Typically after model callback only needs to be
+                      executed after receiving all model responses. Enabling proactive execution
+                      may have negative implication on the execution cost and latency, and
+                      should only be enabled in rare situations.
                     output: true
                   - name: pythonCode
                     type: String
@@ -168,6 +188,16 @@ properties:
                       Whether the callback is disabled. Disabled callbacks are ignored by the
                       agent.
                     output: true
+                  - name: proactiveExecutionEnabled
+                    type: Boolean
+                    description: |-
+                      If enabled, the callback will also be executed on intermediate model
+                      outputs. This setting only affects after model callback.
+                      **ENABLE WITH CAUTION**. Typically after model callback only needs to be
+                      executed after receiving all model responses. Enabling proactive execution
+                      may have negative implication on the execution cost and latency, and
+                      should only be enabled in rare situations.
+                    output: true
                   - name: pythonCode
                     type: String
                     description: The python code to execute for the callback.
@@ -192,6 +222,16 @@ properties:
                     description: |-
                       Whether the callback is disabled. Disabled callbacks are ignored by the
                       agent.
+                    output: true
+                  - name: proactiveExecutionEnabled
+                    type: Boolean
+                    description: |-
+                      If enabled, the callback will also be executed on intermediate model
+                      outputs. This setting only affects after model callback.
+                      **ENABLE WITH CAUTION**. Typically after model callback only needs to be
+                      executed after receiving all model responses. Enabling proactive execution
+                      may have negative implication on the execution cost and latency, and
+                      should only be enabled in rare situations.
                     output: true
                   - name: pythonCode
                     type: String
@@ -219,6 +259,16 @@ properties:
                       Whether the callback is disabled. Disabled callbacks are ignored by the
                       agent.
                     output: true
+                  - name: proactiveExecutionEnabled
+                    type: Boolean
+                    description: |-
+                      If enabled, the callback will also be executed on intermediate model
+                      outputs. This setting only affects after model callback.
+                      **ENABLE WITH CAUTION**. Typically after model callback only needs to be
+                      executed after receiving all model responses. Enabling proactive execution
+                      may have negative implication on the execution cost and latency, and
+                      should only be enabled in rare situations.
+                    output: true
                   - name: pythonCode
                     type: String
                     description: The python code to execute for the callback.
@@ -244,6 +294,16 @@ properties:
                     description: |-
                       Whether the callback is disabled. Disabled callbacks are ignored by the
                       agent.
+                    output: true
+                  - name: proactiveExecutionEnabled
+                    type: Boolean
+                    description: |-
+                      If enabled, the callback will also be executed on intermediate model
+                      outputs. This setting only affects after model callback.
+                      **ENABLE WITH CAUTION**. Typically after model callback only needs to be
+                      executed after receiving all model responses. Enabling proactive execution
+                      may have negative implication on the execution cost and latency, and
+                      should only be enabled in rare situations.
                     output: true
                   - name: pythonCode
                     type: String
@@ -402,6 +462,77 @@ properties:
                     output: true
                     item_type:
                       type: String
+            - name: transferRules
+              type: Array
+              description: |-
+                List of transfer rules for the agent.
+                If multiple rules match, the first one in the list will be used.
+              output: true
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: childAgent
+                    type: String
+                    description: |-
+                      The resource name of the child agent the rule applies to.
+                      Format: `projects/{project}/locations/{location}/apps/{app}/agents/{agent}`
+                    output: true
+                  - name: deterministicTransfer
+                    type: NestedObject
+                    description: |-
+                      Deterministic transfer rule. When the condition evaluates to true, the
+                      transfer occurs.
+                    output: true
+                    properties:
+                      - name: expressionCondition
+                        type: NestedObject
+                        description: |-
+                          A rule that evaluates a session state condition. If the condition
+                          evaluates to true, the transfer occurs.
+                        output: true
+                        properties:
+                          - name: expression
+                            type: String
+                            description: The string representation of cloud.api.Expression condition.
+                            output: true
+                      - name: pythonCodeCondition
+                        type: NestedObject
+                        description: |-
+                          A rule that uses Python code block to evaluate the conditions. If the
+                          condition evaluates to true, the transfer occurs.
+                        output: true
+                        properties:
+                          - name: pythonCode
+                            type: String
+                            description: |-
+                              The python code to execute. The function must be named
+                              `should_trigger_transfer_callback`.
+                            output: true
+                  - name: direction
+                    type: String
+                    description: |-
+                      The direction of the transfer.
+                      Possible values:
+                      * PARENT_TO_CHILD
+                      * CHILD_TO_PARENT
+                    output: true
+                  - name: disablePlannerTransfer
+                    type: NestedObject
+                    description: |-
+                      A rule that prevents the planner from transferring to the target agent.
+                    output: true
+                    properties:
+                      - name: expressionCondition
+                        type: NestedObject
+                        description: |-
+                          If the condition evaluates to true, planner will not be allowed to
+                          transfer to the target agent.
+                        output: true
+                        properties:
+                          - name: expression
+                            type: String
+                            description: The string representation of cloud.api.Expression condition.
+                            output: true
             - name: updateTime
               type: String
               description: Timestamp when the agent was last updated.
@@ -705,6 +836,33 @@ properties:
                         description: |-
                           The success threshold for semantic similarity. Must be an integer
                           between 0 and 4. Default is >= 3.
+                        output: true
+                      - name: semanticSimilarityChannel
+                        type: String
+                        description: |-
+                          The semantic similarity channel to use for evaluation.
+                          Possible values:
+                          SEMANTIC_SIMILARITY_CHANNEL_UNSPECIFIED
+                          TEXT
+                          AUDIO
+                        output: true
+                  - name: toolMatchingSettings
+                    type: NestedObject
+                    description: |-
+                      The tool matching settings. An extra tool call is a tool call that is
+                      present in the execution but does not match any tool call in the golden
+                      expectation.
+                    output: true
+                    properties:
+                      - name: extraToolCallBehavior
+                        type: String
+                        description: |-
+                          Defines the behavior when an extra tool call is encountered. An extra
+                          tool call is a tool call that is present in the execution but does
+                          not match any tool call in the golden expectation.
+                          Possible values:
+                          FAIL
+                          ALLOW
                         output: true
               - name: goldenHallucinationMetricBehavior
                 type: String
@@ -1031,10 +1189,9 @@ properties:
                       description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.
                       output: true
                     - name: defs
-                      type: String
+                      type: JsonValue
                       description: A map of definitions for use by ref. Only allowed at the root of the schema.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: default
                       type: String
                       description: |-
@@ -1044,33 +1201,28 @@ properties:
                         with the defined 'type' and other schema constraints.
                       output: true
                     - name: additionalProperties
-                      type: String
+                      type: JsonValue
                       description: |-
                         Optional. Defines the schema for additional properties allowed in an object.
                         The value must be a valid JSON string representing the Schema object.
                         (Note: OpenAPI also allows a boolean, this definition expects a Schema JSON).
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: anyOf
-                      type: String
+                      type: JsonValue
                       description: Optional. The instance value should be valid against at least one of the schemas in this list.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: prefixItems
-                      type: String
+                      type: JsonValue
                       description: Optional. Schemas of initial elements of Type.ARRAY.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: properties
-                      type: String
+                      type: JsonValue
                       description: Properties of Type.OBJECT.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: items
-                      type: String
+                      type: JsonValue
                       description: Schema of the elements of Type.ARRAY.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
           - name: clientCertificateSettings
             type: NestedObject
             description: |-
@@ -1259,10 +1411,9 @@ properties:
                           output: true
                           properties:
                             - name: args
-                              type: String
+                              type: JsonValue
                               description: The input parameters and values for the tool in JSON object format.
                               output: true
-                              custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                             - name: displayName
                               type: String
                               description: Display name of the tool.
@@ -1311,14 +1462,13 @@ properties:
                               description: The matching ID of the tool call the response is for.
                               output: true
                             - name: response
-                              type: String
+                              type: JsonValue
                               description: |-
                                 The tool execution result in JSON object format.
                                 Use "output" key to specify tool response and "error" key to specify
                                 error details (if any). If "output" and "error" keys are not specified,
                                 then whole "response" is treated as tool execution result.
                               output: true
-                              custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                             - name: tool
                               type: String
                               description: |-
@@ -1343,12 +1493,11 @@ properties:
                                     The tool ID to filter the tools to retrieve the schema for.
                                   output: true
                         - name: updatedVariables
-                          type: String
+                          type: JsonValue
                           description: |-
                             A struct represents variables that were updated in the conversation,
                             keyed by variable names.
                           output: true
-                          custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                   - name: role
                     type: String
                     description: The role within the conversation, e.g., user, agent.
@@ -1447,6 +1596,16 @@ properties:
                         Whether the callback is disabled. Disabled callbacks are ignored by the
                         agent.
                       output: true
+                    - name: proactiveExecutionEnabled
+                      type: Boolean
+                      description: |-
+                        If enabled, the callback will also be executed on intermediate model
+                        outputs. This setting only affects after model callback.
+                        **ENABLE WITH CAUTION**. Typically after model callback only needs to be
+                        executed after receiving all model responses. Enabling proactive execution
+                        may have negative implication on the execution cost and latency, and
+                        should only be enabled in rare situations.
+                      output: true
                     - name: pythonCode
                       type: String
                       description: The python code to execute for the callback.
@@ -1467,6 +1626,16 @@ properties:
                       description: |-
                         Whether the callback is disabled. Disabled callbacks are ignored by the
                         agent.
+                      output: true
+                    - name: proactiveExecutionEnabled
+                      type: Boolean
+                      description: |-
+                        If enabled, the callback will also be executed on intermediate model
+                        outputs. This setting only affects after model callback.
+                        **ENABLE WITH CAUTION**. Typically after model callback only needs to be
+                        executed after receiving all model responses. Enabling proactive execution
+                        may have negative implication on the execution cost and latency, and
+                        should only be enabled in rare situations.
                       output: true
                     - name: pythonCode
                       type: String
@@ -1489,6 +1658,16 @@ properties:
                         Whether the callback is disabled. Disabled callbacks are ignored by the
                         agent.
                       output: true
+                    - name: proactiveExecutionEnabled
+                      type: Boolean
+                      description: |-
+                        If enabled, the callback will also be executed on intermediate model
+                        outputs. This setting only affects after model callback.
+                        **ENABLE WITH CAUTION**. Typically after model callback only needs to be
+                        executed after receiving all model responses. Enabling proactive execution
+                        may have negative implication on the execution cost and latency, and
+                        should only be enabled in rare situations.
+                      output: true
                     - name: pythonCode
                       type: String
                       description: The python code to execute for the callback.
@@ -1509,6 +1688,16 @@ properties:
                       description: |-
                         Whether the callback is disabled. Disabled callbacks are ignored by the
                         agent.
+                      output: true
+                    - name: proactiveExecutionEnabled
+                      type: Boolean
+                      description: |-
+                        If enabled, the callback will also be executed on intermediate model
+                        outputs. This setting only affects after model callback.
+                        **ENABLE WITH CAUTION**. Typically after model callback only needs to be
+                        executed after receiving all model responses. Enabling proactive execution
+                        may have negative implication on the execution cost and latency, and
+                        should only be enabled in rare situations.
                       output: true
                     - name: pythonCode
                       type: String
@@ -1848,10 +2037,9 @@ properties:
                       description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.
                       output: true
                     - name: defs
-                      type: String
+                      type: JsonValue
                       description: A map of definitions for use by ref. Only allowed at the root of the schema.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: default
                       type: String
                       description: |-
@@ -1861,33 +2049,28 @@ properties:
                         with the defined 'type' and other schema constraints.
                       output: true
                     - name: additionalProperties
-                      type: String
+                      type: JsonValue
                       description: |-
                         Optional. Defines the schema for additional properties allowed in an object.
                         The value must be a valid JSON string representing the Schema object.
                         (Note: OpenAPI also allows a boolean, this definition expects a Schema JSON).
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: anyOf
-                      type: String
+                      type: JsonValue
                       description: Optional. The instance value should be valid against at least one of the schemas in this list.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: prefixItems
-                      type: String
+                      type: JsonValue
                       description: Optional. Schemas of initial elements of Type.ARRAY.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: properties
-                      type: String
+                      type: JsonValue
                       description: Properties of Type.OBJECT.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: items
-                      type: String
+                      type: JsonValue
                       description: Schema of the elements of Type.ARRAY.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                 - name: response
                   type: NestedObject
                   description: Represents a select subset of an OpenAPI 3.0 schema object.
@@ -1958,10 +2141,9 @@ properties:
                       description: Indicate the items in the array must be unique. Only applies to TYPE.ARRAY.
                       output: true
                     - name: defs
-                      type: String
+                      type: JsonValue
                       description: A map of definitions for use by ref. Only allowed at the root of the schema.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: default
                       type: String
                       description: |-
@@ -1971,33 +2153,28 @@ properties:
                         with the defined 'type' and other schema constraints.
                       output: true
                     - name: additionalProperties
-                      type: String
+                      type: JsonValue
                       description: |-
                         Optional. Defines the schema for additional properties allowed in an object.
                         The value must be a valid JSON string representing the Schema object.
                         (Note: OpenAPI also allows a boolean, this definition expects a Schema JSON).
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: anyOf
-                      type: String
+                      type: JsonValue
                       description: Optional. The instance value should be valid against at least one of the schemas in this list.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: prefixItems
-                      type: String
+                      type: JsonValue
                       description: Optional. Schemas of initial elements of Type.ARRAY.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: properties
-                      type: String
+                      type: JsonValue
                       description: Properties of Type.OBJECT.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                     - name: items
-                      type: String
+                      type: JsonValue
                       description: Schema of the elements of Type.ARRAY.
                       output: true
-                      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
             - name: createTime
               type: String
               description: Timestamp when the tool was created.
@@ -2490,7 +2667,6 @@ properties:
                         token](https://cloud.google.com/docs/authentication/token-types#id) generated
                         from service agent.
                       allow_empty_object: true
-                      send_empty_value: true
                       output: true
                       properties: [] # Explicitly show no properties
                 - name: description

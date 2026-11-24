@@ -16,6 +16,7 @@ package resource
 import (
 	"fmt"
 	"log"
+	"maps"
 	"slices"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
@@ -76,6 +77,15 @@ type Sample struct {
 	// If set, this will override the default resource type implied from the
 	// object parent
 	PrimaryResourceType string `yaml:"primary_resource_type,omitempty"`
+
+	// Sample-level defaults inherited by steps (step entries override sample entries)
+	ConfigPath        string            `yaml:"config_path,omitempty"`
+	ResourceIdVars    map[string]string `yaml:"resource_id_vars,omitempty"`
+	Vars              StepVars          `yaml:"vars,omitempty"`
+	TestEnvVars       map[string]string `yaml:"test_env_vars,omitempty"`
+	TestVarsOverrides map[string]string `yaml:"test_vars_overrides,omitempty"`
+	OicsVarsOverrides map[string]string `yaml:"oics_vars_overrides,omitempty"`
+	IgnoreReadExtra   []string          `yaml:"ignore_read_extra,omitempty"`
 
 	// Steps
 	Steps []*Step
@@ -142,6 +152,11 @@ func (s *Sample) ResourceType(terraformName string) string {
 func (s *Sample) Validate(rName string) (es []error) {
 	if s.Name == "" {
 		es = append(es, fmt.Errorf("missing `name` for one sample in resource %s", rName))
+	}
+	for _, k := range slices.Sorted(maps.Keys(s.Vars)) {
+		if _, exists := s.ResourceIdVars[k]; exists {
+			es = append(es, fmt.Errorf("variable key '%s' cannot exist in both 'vars' and 'resource_id_vars' for sample '%s' of resource '%s'", k, s.Name, rName))
+		}
 	}
 	es = append(es, s.ValidateExternalProviders()...)
 

@@ -50,8 +50,6 @@ samples:
           folder_display_name: folder-name
         test_env_vars:
           org_id: ORG_ID
-        test_vars_overrides:
-          sleep: "true"
 parameters:
   - name: folder
     type: String

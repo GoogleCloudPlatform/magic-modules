@@ -62,16 +62,10 @@ samples:
     steps:
       - name: vertex_ai_featurestore_entitytype
         resource_id_vars:
-          name: terraform
-          project: vertex-ai
+          name: terraform_entitytype
           kms_key_name: kms-name
-        test_env_vars:
-          org_id: ORG_ID
-          billing_account: BILLING_ACCT
         test_vars_overrides:
           kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
-          # for backward compatible
-          name: '"terraform" + randomSuffix'
   - name: vertex_ai_featurestore_entitytype_with_beta_fields
     primary_resource_id: entity
     min_version: beta
@@ -79,16 +73,10 @@ samples:
       - name: vertex_ai_featurestore_entitytype_with_beta_fields
         min_version: beta
         resource_id_vars:
-          name: terraform2
-          project: vertex-ai
+          name: terraform_entitytype_2
           kms_key_name: kms-name
-        test_env_vars:
-          org_id: ORG_ID
-          billing_account: BILLING_ACCT
         test_vars_overrides:
           kms_key_name: kms.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name
-          # for backward compatible
-          name: '"terraform2" + randomSuffix'
 parameters:
   - name: featurestore
     type: String

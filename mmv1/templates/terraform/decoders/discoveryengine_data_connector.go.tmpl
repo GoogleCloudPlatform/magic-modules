@@ -1,0 +1,46 @@
+{{/*
+	Copyright 2026 Google LLC. All Rights Reserved.
+
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+			http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+entitiesRaw, ok := res["entities"].([]interface{})
+if !ok || len(entitiesRaw) == 0 {
+	return res, nil
+}
+
+filtered := make([]interface{}, 0, len(entitiesRaw))
+for _, raw := range entitiesRaw {
+	entityMap, ok := raw.(map[string]interface{})
+	if !ok {
+		filtered = append(filtered, raw)
+		continue
+	}
+
+	// Server-synthesized placeholder/parent entities (such as "root" for outlook and "site"
+	// for sharepoint) have no backing dataStore. Strip them unconditionally when they carry no
+	// parent-level params or keyPropertyMappings so existing states containing stale placeholders
+	// heal on refresh, while preserving placeholders with explicit parent filters/mappings.
+	dataStore, _ := entityMap["dataStore"].(string)
+	if dataStore == "" {
+		paramsMap, _ := entityMap["params"].(map[string]interface{})
+		kpmMap, _ := entityMap["keyPropertyMappings"].(map[string]interface{})
+		if len(paramsMap) == 0 && len(kpmMap) == 0 {
+			continue
+		}
+	}
+
+	filtered = append(filtered, raw)
+}
+
+res["entities"] = filtered
+return res, nil

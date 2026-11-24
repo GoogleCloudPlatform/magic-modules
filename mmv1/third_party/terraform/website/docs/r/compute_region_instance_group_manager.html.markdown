@@ -142,7 +142,8 @@ The following arguments are supported:
     the command will fail if this field is set to "PREVENT" in Terraform state.
     When set to "ABANDON", the command will remove the resource from Terraform
     management without updating or deleting the resource in the API.
-    When set to "DELETE", deleting the resource is allowed.
+    When set to "DELETE", deleting the resource is allowed. If graceful shutdown is configured, the MIG waits for all instances to shut down gracefully before deletion.
+    When set to "FORCE", deleting the resource is allowed, and graceful shutdown is skipped for instance deletion even if it's configured for the instances.
 
 - - -
 
@@ -217,6 +218,8 @@ group. You can specify one or more values. For more information, see the [offici
 
 * `resource_policies` - (Optional) Resource policies for this managed instance group. Structure is [documented below](#nested_resource_policies).
 
+* `service_account` - (Optional, [Beta](../guides/provider_versions.html.markdown)) The service account to be used as credentials for all operations performed by the managed instance group on instances. The service account needs all permissions required to create and delete instances. By default, the service account {projectNumber}@cloudservices.gserviceaccount.com is used.
+
 - - -
 
 The `standby_policy` block supports:
@@ -240,9 +243,11 @@ update_policy {
 }
 ```
 
-* `minimal_action` - (Required) - Minimal action to be taken on an instance. You can specify either `NONE` to forbid any actions, `REFRESH` to update without stopping instances, `RESTART` to restart existing instances or `REPLACE` to delete and create new instances from the target template. If you specify a `REFRESH`, the Updater will attempt to perform that action only. However, if the Updater determines that the minimal action you specify is not enough to perform the update, it might perform a more disruptive action.
+* `minimal_action` - (Optional) - Minimal action to be taken on an instance. You can specify either `NONE` to forbid any actions, `REFRESH` to update without stopping instances, `RESTART` to restart existing instances or `REPLACE` to delete and create new instances from the target template. If you specify a `REFRESH`, the Updater will attempt to perform that action only. However, if the Updater determines that the minimal action you specify is not enough to perform the update, it might perform a more disruptive action. Required in the `google` provider; optional in `google-beta` when `allowed_actions` is set (conflicts with `allowed_actions`).
 
-* `most_disruptive_allowed_action` - (Optional) - Most disruptive action that is allowed to be taken on an instance. You can specify either NONE to forbid any actions, REFRESH to allow actions that do not need instance restart, RESTART to allow actions that can be applied without instance replacing or REPLACE to allow all possible actions. If the Updater determines that the minimal update action needed is more disruptive than most disruptive allowed action you specify it will not perform the update at all.
+* `allowed_actions` - (Optional, [Beta](../guides/provider_versions.html.markdown)) - Specifies the allowed actions list for this update. Valid values are: `"NONE"`, `"REFRESH"`, `"RESTART_IN_PLACE"`, `"RESTART"`, `"REPLACE"`. `allowed_actions` is the only way to request `RESTART_IN_PLACE`. Conflicts with `minimal_action` and `most_disruptive_allowed_action`.
+
+* `most_disruptive_allowed_action` - (Optional) - Most disruptive action that is allowed to be taken on an instance. You can specify either NONE to forbid any actions, REFRESH to allow actions that do not need instance restart, RESTART to allow actions that can be applied without instance replacing or REPLACE to allow all possible actions. If the Updater determines that the minimal update action needed is more disruptive than most disruptive allowed action you specify it will not perform the update at all. Conflicts with `allowed_actions`.
 
 * `type` - (Required) - The type of update process. You can specify either `PROACTIVE` so that the instance group manager proactively executes actions in order to bring instances to their target versions or `OPPORTUNISTIC` so that no action is proactively executed but the update will be performed as part of other actions (for example, resizes or recreateInstances calls).
 
@@ -299,8 +304,8 @@ instance_flexibility_policy {
     name = "instance_selection_name"
     rank = 1
     machine_types = ["n1-standard-16"]
-    min_cpu_platform = "Intel Skylake"      //google-beta only
-    disks {                                 //google-beta only
+    min_cpu_platform = "Intel Skylake"
+    disks {
         auto_delete = true
         boot        = true
         device_name = "boot-disk"
@@ -321,8 +326,8 @@ instance_selections {
   name = "instance_selection_name"
   rank = 1
   machine_types = ["n1-standard-1", "n1-standard-16"]
-  min_cpu_platform = "Intel Skylake"      //google-beta only
-  disks {                                 //google-beta only
+  min_cpu_platform = "Intel Skylake"
+  disks {
     auto_delete = true
     boot        = true
     device_name = "boot-disk"
@@ -336,8 +341,8 @@ instance_selections {
 * `name` - (Required), Name of the instance selection, e.g. instance_selection_with_n1_machines_types. Instance selection names must be unique within the flexibility policy.
 * `rank` - (Optional), Preference of this instance selection. Lower number means higher preference. Managed instance group will first try to create a VM based on the machine-type with lowest rank and fallback to next rank based on availability. Machine types and instance selections with the same rank have the same preference.
 * `machine_types` - (Required), A list of full machine-type names, e.g. "n1-standard-16".
-* `min_cpu_platform` - (Optional [Beta](../guides/provider_versions.html.markdown)), Name of the minimum CPU platform to be used by this instance selection. e.g. "Intel Ice Lake".
-* `disks` - (Optional [Beta](../guides/provider_versions.html.markdown)), List of disks to be attached to the instances created from this selection. Structure is [documented below](#nested_disks).
+* `min_cpu_platform` - (Optional), Name of the minimum CPU platform to be used by this instance selection. e.g. "Intel Ice Lake".
+* `disks` - (Optional), List of disks to be attached to the instances created from this selection. Structure is [documented below](#nested_disks).
 
 - - -
 
@@ -630,6 +635,8 @@ exported:
 
 * `self_link` - The URL of the created resource.
 
+* `status` - The status of this managed instance group.
+
 The `status` block holds:
 
 * `is_stable` - A bit indicating whether the managed instance group is in a stable state. A stable state means that: none of the instances in the managed instance group is currently undergoing any type of change (for example, creation, restart, or deletion); no future changes are scheduled for instances in the managed instance group; and the managed instance group itself is not being modified.
@@ -642,7 +649,7 @@ The `status` block holds:
 
 The `version_target` block holds:
 
-* `version_target` - A bit indicating whether version target has been reached in this managed instance group, i.e. all instances are in their target version. Instances' target version are specified by version field on Instance Group Manager.
+* `is_reached` - A bit indicating whether version target has been reached in this managed instance group, i.e. all instances are in their target version. Instances' target version are specified by version field on Instance Group Manager.
 
 The `all_instances_config` block holds:
 
@@ -667,7 +674,7 @@ This resource provides the following
 
 - `create` - Default is 15 minutes.
 - `update` - Default is 15 minutes.
-- `delete` - Default is 15 minutes.
+- `delete` - Default is 15 minutes. Note if graceful shutdown is configured on the instance template and not skipped with `deletion_policy = "FORCE"` it can take up to 6 hours.
 
 
 ## Import

@@ -1,0 +1,26 @@
+resource "google_vertex_ai_rag_corpus" "{{$.PrimaryResourceId}}" {
+  display_name = "{{index $.ResourceIdVars "display_name"}}"
+  description  = "A RAG corpus with Pinecone"
+  region       = "europe-west4"
+
+  vector_db_config {
+    pinecone {
+      index_name = "test-index"
+    }
+
+    api_auth {
+      api_key_config {
+        api_key_string = "secret-api-key"
+      }
+    }
+
+    rag_embedding_model_config {
+      vertex_prediction_endpoint {
+        endpoint = "projects/${data.google_project.project.number}/locations/europe-west4/publishers/google/models/text-embedding-005"
+      }
+    }
+  }
+}
+
+data "google_project" "project" {
+}

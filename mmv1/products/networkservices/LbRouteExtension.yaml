@@ -95,6 +95,51 @@ samples:
         ignore_read_extra:
           - 'port_range'
           - 'target'
+  - name: 'network_services_lb_route_extension_metadata'
+    primary_resource_id: 'default'
+    steps:
+      - name: 'network_services_lb_route_extension_metadata'
+        resource_id_vars:
+          ilb_network_name: 'l7-ilb-network'
+          proxy_subnet_name: 'l7-ilb-proxy-subnet'
+          backend_subnet_name: 'l7-ilb-subnet'
+          hc_name: 'l7-ilb-hc'
+          backend_service_name: 'l7-ilb-backend'
+          callouts_backend_name: 'l7-ilb-callouts-backend'
+          regional_url_map_name: 'l7-ilb-regional-url-map'
+          target_http_proxy_name: 'l7-ilb-target-http-proxy'
+          forwarding_rule_name: 'l7-ilb-forwarding-rule'
+          lb_route_extension_name: 'l7-ilb-route-ext'
+        vars:
+          metadata: '{ key1 = "value1", fr = "{forwarding_rule_id}" }'
+      - name: 'network_services_lb_route_extension_metadata'
+        resource_id_vars:
+          ilb_network_name: 'l7-ilb-network'
+          proxy_subnet_name: 'l7-ilb-proxy-subnet'
+          backend_subnet_name: 'l7-ilb-subnet'
+          hc_name: 'l7-ilb-hc'
+          backend_service_name: 'l7-ilb-backend'
+          callouts_backend_name: 'l7-ilb-callouts-backend'
+          regional_url_map_name: 'l7-ilb-regional-url-map'
+          target_http_proxy_name: 'l7-ilb-target-http-proxy'
+          forwarding_rule_name: 'l7-ilb-forwarding-rule'
+          lb_route_extension_name: 'l7-ilb-route-ext'
+        vars:
+          metadata: '{ key1 = "value1-updated", key2 = "value2" }'
+      - name: 'network_services_lb_route_extension_metadata'
+        resource_id_vars:
+          ilb_network_name: 'l7-ilb-network'
+          proxy_subnet_name: 'l7-ilb-proxy-subnet'
+          backend_subnet_name: 'l7-ilb-subnet'
+          hc_name: 'l7-ilb-hc'
+          backend_service_name: 'l7-ilb-backend'
+          callouts_backend_name: 'l7-ilb-callouts-backend'
+          regional_url_map_name: 'l7-ilb-regional-url-map'
+          target_http_proxy_name: 'l7-ilb-target-http-proxy'
+          forwarding_rule_name: 'l7-ilb-forwarding-rule'
+          lb_route_extension_name: 'l7-ilb-route-ext'
+        vars:
+          metadata: null
 parameters:
   - name: 'location'
     type: String
@@ -276,3 +321,12 @@ properties:
     enum_values:
       - 'INTERNAL_MANAGED'
       - 'EXTERNAL_MANAGED'
+  - name: 'metadata'
+    type: KeyValuePairs
+    description: |
+      The metadata provided here is included as part of the `metadata_context` (of type `google.protobuf.Struct`) in the `ProcessingRequest` message sent to the extension server.
+      The metadata applies to all extensions in all extensions chains in this resource.
+      The metadata is available under the key `com.google.lb_route_extension.<resource_name>`.
+      The following variables are supported in the metadata: `{forwarding_rule_id}` - substituted with the forwarding rule's fully qualified resource name.
+      This field must not be set if at least one of the extension chains contains plugin extensions. Setting it results in a validation error.
+      You can set metadata at either the resource level or the extension level. The extension level metadata is recommended because you can pass a different set of metadata through each extension to the backend.

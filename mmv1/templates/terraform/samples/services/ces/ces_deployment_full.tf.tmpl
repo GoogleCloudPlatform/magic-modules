@@ -22,6 +22,7 @@ resource "google_ces_deployment" "{{$.PrimaryResourceId}}" {
         channel_type = "API"
         disable_barge_in_control = true
         disable_dtmf = true
+        noise_suppression_level = "{{index $.Vars "noise_suppression_level"}}"
         persona_property {
             persona = "CHATTY"
         }
@@ -37,5 +38,11 @@ resource "google_ces_deployment" "{{$.PrimaryResourceId}}" {
                 enable_recaptcha = true
             }
         }
+    }
+    modality = "MODALITY_TEXT"
+    model_settings {
+        model          = "gemini-3.0-flash-001"
+        temperature    = 0.5
+        thinking_level = "LOW"
     }
 }

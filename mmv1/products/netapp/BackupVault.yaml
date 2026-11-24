@@ -35,8 +35,6 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-# Skipping the sweeper since we need to sweep multiple regions
-exclude_sweeper: true
 async:
   type: OpAsync
   operation:
@@ -46,6 +44,13 @@ async:
     resource_inside_response: false
 autogen_async: true
 include_in_tgc_next: true
+sweeper:
+  url_substitutions:
+    - location: us-central1
+    - location: us-east4
+    - location: us-west1
+    - location: us-west2
+    - location: us-west4
 custom_code:
 samples:
   - name: netapp_backup_vault
@@ -152,16 +157,10 @@ properties:
       backup encryption. Format:
       `projects/{{project}}/locations/{{location}}/kmsConfigs/{{kms_config}}`
   - name: encryptionState
-    type: Enum
+    type: String
     description: |
       Encryption state of customer-managed encryption keys (CMEK) backups.
     output: true
-    enum_values:
-      - ENCRYPTION_STATE_UNSPECIFIED
-      - ENCRYPTION_STATE_PENDING
-      - ENCRYPTION_STATE_COMPLETED
-      - ENCRYPTION_STATE_IN_PROGRESS
-      - ENCRYPTION_STATE_FAILED
   - name: backupsCryptoKeyVersion
     type: String
     description: |

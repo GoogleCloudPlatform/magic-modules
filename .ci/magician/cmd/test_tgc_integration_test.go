@@ -51,6 +51,11 @@ func TestShouldRunTests(t *testing.T) {
 			expected:     false,
 		},
 		{
+			name:         "pkg/provider/provider_register_services.go file (ignored by default)",
+			changedFiles: []string{"pkg/provider/provider_register_services.go"},
+			expected:     false,
+		},
+		{
 			name:         "pkg/services cai2hcl file (no longer exception)",
 			changedFiles: []string{"pkg/services/compute/compute_disk_cai2hcl.go"},
 			expected:     false,

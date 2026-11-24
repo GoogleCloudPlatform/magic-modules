@@ -61,7 +61,8 @@ nested_query:
   modify_by_patch: false
 custom_code:
   encoder: 'templates/terraform/encoders/compute_network_endpoint.go.tmpl'
-  decoder: 'templates/terraform/decoders/unwrap_resource.go.tmpl'
+  decoder: 'templates/terraform/decoders/compute_network_endpoint.go.tmpl'
+  post_create: 'templates/terraform/post_create/compute_network_endpoint.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/compute_network_endpoint.go.tmpl'
   custom_import: 'templates/terraform/custom_import/compute_network_endpoint.go.tmpl'
 exclude_tgc: true
@@ -124,4 +125,17 @@ properties:
       IPv4 address of network endpoint. The IP address must belong
       to a VM in GCE (either the primary IP or as part of an aliased IP
       range).
-    required: true
+    at_least_one_of:
+      - 'ip_address'
+      - 'ipv6_address'
+  - name: 'ipv6Address'
+    type: String
+    description: |
+      IPv6 address of network endpoint. The result of parsing the endpoint config,
+      or empty if IPv6 is not used.
+    at_least_one_of:
+      - 'ip_address'
+      - 'ipv6_address'
+    diff_suppress_func: 'tpgresource.IpAddressDiffSuppress'
+    custom_expand: 'templates/terraform/custom_expand/ip_address_canonicalize.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/ip_address_canonicalize.go.tmpl'

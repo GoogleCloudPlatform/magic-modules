@@ -45,18 +45,12 @@ samples:
       - name: biglake_hive_catalog
         resource_id_vars:
           name: my_hive_catalog
-        test_env_vars:
-          GOOGLE_BILLING_PROJECT: PROJECT
-          USER_PROJECT_OVERRIDE: "true"
   - name: biglake_hive_catalog_full
     primary_resource_id: my_hive_catalog
     steps:
       - name: biglake_hive_catalog_full
         resource_id_vars:
           name: my_hive_catalog
-        test_env_vars:
-          GOOGLE_BILLING_PROJECT: PROJECT
-          USER_PROJECT_OVERRIDE: "true"
 parameters:
   - name: name
     type: String
@@ -105,13 +99,8 @@ properties:
           description: The region of the replica, e.g., `us-east1`.
           output: true
         - name: state
-          type: Enum
+          type: String
           description: If the catalog is replicated to multiple regions, this enum describes the current state of the replica. STATE_UNSPECIFIED - The replica state is unknown. STATE_PRIMARY - The replica is the writable primary. STATE_PRIMARY_IN_PROGRESS - The replica has been recently assigned as the primary, but not all databases are writeable yet. STATE_SECONDARY - The replica is a read-only secondary replica.
           output: true
-          enum_values:
-            - STATE_UNSPECIFIED
-            - STATE_PRIMARY
-            - STATE_PRIMARY_IN_PROGRESS
-            - STATE_SECONDARY
     description: Output only. The replicas for the catalog metadata.
     output: true

@@ -14,7 +14,7 @@ import (
 func TestAccEphemeralServiceAccountKey_create(t *testing.T) {
 	t.Parallel()
 
-	accountID := "a" + acctest.RandString(t, 10)
+	accountID := "tf-test-a" + acctest.RandString(t, 10)
 	displayName := "Terraform Test"
 	project := envvar.GetTestProjectFromEnv()
 	expectedServiceAccountEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", accountID, project)
@@ -58,7 +58,12 @@ resource "time_sleep" "wait_60_seconds" {
 }
 
 func testAccEphemeralServiceAccountKey_create(accountID, displayName string) string {
-	return acctest.EchoResourceConfig("ephemeral.google_service_account_key.key") + fmt.Sprintf(`
+	return fmt.Sprintf(`
+provider "echo" {
+  data = ephemeral.google_service_account_key.key
+}
+resource "echo" "test" {}
+
 resource "google_service_account" "service_account" {
 	account_id   = "%s"
 	display_name = "%s"
@@ -79,7 +84,7 @@ ephemeral "google_service_account_key" "key" {
 func TestAccEphemeralServiceAccountKey_upload(t *testing.T) {
 	t.Parallel()
 
-	accountID := "b" + acctest.RandString(t, 10)
+	accountID := "tf-test-b" + acctest.RandString(t, 10)
 	displayName := "Terraform Test Two"
 	project := envvar.GetTestProjectFromEnv()
 	expectedServiceAccountEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", accountID, project)
@@ -121,7 +126,12 @@ resource "time_sleep" "wait_60_seconds" {
 }
 
 func testAccEphemeralServiceAccountKey_upload(accountID, displayName string) string {
-	return acctest.EchoResourceConfig("ephemeral.google_service_account_key.key") + fmt.Sprintf(`
+	return fmt.Sprintf(`
+provider "echo" {
+  data = ephemeral.google_service_account_key.key
+}
+resource "echo" "test" {}
+
 resource "google_service_account" "service_account" {
 	account_id   = "%s"
 	display_name = "%s"
@@ -173,7 +183,12 @@ resource "google_service_account_key" "acceptance" {
 }
 
 func testAccEphemeralServiceAccountKey_fetch(accountID string) string {
-	return acctest.EchoResourceConfig("ephemeral.google_service_account_key.key") + fmt.Sprintf(`
+	return fmt.Sprintf(`
+provider "echo" {
+  data = ephemeral.google_service_account_key.key
+}
+resource "echo" "test" {}
+
 resource "google_service_account_key" "acceptance" {
   service_account_id = "%s"
   public_key_type    = "TYPE_X509_PEM_FILE"

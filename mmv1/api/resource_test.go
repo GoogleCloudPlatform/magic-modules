@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strings"
 	"testing"
+	"testing/fstest"
 
 	"github.com/google/go-cmp/cmp"
 
@@ -680,6 +681,34 @@ func TestResourceAddExtraFields(t *testing.T) {
 		}
 	})
 
+	t.Run("KeyValueLabels and KeyValueAnnotations with metadata parent consolidates CustomDiff", func(t *testing.T) {
+		t.Parallel()
+
+		resource := createTestResource("testresource", "terraform")
+		parent := &api.Type{Name: "metadata"}
+
+		labelsType := &api.Type{
+			Name: "labels",
+			Type: "KeyValueLabels",
+		}
+		annotationsType := &api.Type{
+			Name: "annotations",
+			Type: "KeyValueAnnotations",
+		}
+
+		props := []*api.Type{labelsType, annotationsType}
+		resource.AddExtraFields(props, parent)
+
+		expectedDiff := "tpgresource.SetMetadataLabelsAndAnnotationsDiff"
+		if !slices.Contains(resource.CustomDiff, expectedDiff) {
+			t.Errorf("Expected CustomDiff to contain %s, got %v", expectedDiff, resource.CustomDiff)
+		}
+		if slices.Contains(resource.CustomDiff, "tpgresource.SetMetadataLabelsDiff") ||
+			slices.Contains(resource.CustomDiff, "tpgresource.SetMetadataAnnotationsDiff") {
+			t.Errorf("Expected individual metadata CustomDiffs to be replaced by consolidated CustomDiff, got %v", resource.CustomDiff)
+		}
+	})
+
 	t.Run("KeyValueAnnotations property adds effective annotations", func(t *testing.T) {
 		t.Parallel()
 
@@ -1253,5 +1282,570 @@ func TestResourceFirstRunnableTestConfig(t *testing.T) {
 				t.Errorf("got %v, want %q", got.Sample, tc.wantName)
 			}
 		})
+	}
+}
+
+func TestResourceShouldGenerateSweepers(t *testing.T) {
+	t.Parallel()
+	p := &api.Product{
+		Name: "test",
+		Version: &product.Version{
+			Name:    "ga",
+			BaseUrl: "https://example.googleapis.com/v1/",
+		},
+	}
+
+	cases := []struct {
+		description string
+		resource    api.Resource
+		want        bool
+	}{
+		{
+			description: "standard resource with DELETE verb generates sweeper",
+			resource: api.Resource{
+				BaseUrl:         "projects/{{project}}/locations/{{location}}/widgets",
+				DeleteVerb:      "DELETE",
+				ProductMetadata: p,
+			},
+			want: true,
+		},
+		{
+			description: "resource with pre_delete still generates sweeper",
+			resource: api.Resource{
+				BaseUrl:    "projects/{{project}}/locations/{{location}}/widgets",
+				DeleteVerb: "DELETE",
+				CustomCode: resource.CustomCode{
+					PreDelete: "templates/terraform/pre_delete/some_pre_delete.go.tmpl",
+				},
+				ProductMetadata: p,
+			},
+			want: true,
+		},
+		{
+			description: "resource with non-DELETE delete_verb does not generate sweeper",
+			resource: api.Resource{
+				BaseUrl:         "projects/{{project}}/policy",
+				DeleteVerb:      "PUT",
+				ProductMetadata: p,
+			},
+			want: false,
+		},
+		{
+			description: "resource with exclude_sweeper does not generate sweeper",
+			resource: api.Resource{
+				BaseUrl:         "projects/{{project}}/locations/{{location}}/widgets",
+				DeleteVerb:      "DELETE",
+				ExcludeSweeper:  true,
+				ProductMetadata: p,
+			},
+			want: false,
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			if got := tc.resource.ShouldGenerateSweepers(); got != tc.want {
+				t.Errorf("ShouldGenerateSweepers() = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestResourceApiVersion(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		description string
+		resource    api.Resource
+		want        string
+	}{
+		{
+			description: "empty ApiVersions returns empty string",
+			resource: api.Resource{
+				TargetVersionName: "ga",
+			},
+			want: "",
+		},
+		{
+			description: "exact match for ga",
+			resource: api.Resource{
+				ApiVersions: map[string]string{
+					"ga": "2026-11-01",
+				},
+				TargetVersionName: "ga",
+			},
+			want: "2026-11-01",
+		},
+		{
+			description: "empty TargetVersionName defaults to ga",
+			resource: api.Resource{
+				ApiVersions: map[string]string{
+					"ga": "2026-11-01",
+				},
+			},
+			want: "2026-11-01",
+		},
+		{
+			description: "beta falls back to ga when only ga is set",
+			resource: api.Resource{
+				ApiVersions: map[string]string{
+					"ga": "2026-11-01",
+				},
+				TargetVersionName: "beta",
+			},
+			want: "2026-11-01",
+		},
+		{
+			description: "nightly uses nightly when both ga and nightly are set",
+			resource: api.Resource{
+				ApiVersions: map[string]string{
+					"ga":      "2026-11-01",
+					"nightly": "2026-11-01-preview",
+				},
+				TargetVersionName: "nightly",
+			},
+			want: "2026-11-01-preview",
+		},
+		{
+			description: "beta falls back to ga when ga and nightly are set",
+			resource: api.Resource{
+				ApiVersions: map[string]string{
+					"ga":      "2026-11-01",
+					"nightly": "2026-11-01-preview",
+				},
+				TargetVersionName: "beta",
+			},
+			want: "2026-11-01",
+		},
+		{
+			description: "nightly falls back to beta when ga and beta are set",
+			resource: api.Resource{
+				ApiVersions: map[string]string{
+					"ga":   "2026-05-01",
+					"beta": "2026-11-01",
+				},
+				TargetVersionName: "nightly",
+			},
+			want: "2026-11-01",
+		},
+		{
+			description: "ga does not use higher version when only nightly is set",
+			resource: api.Resource{
+				ApiVersions: map[string]string{
+					"nightly": "2026-11-01-preview",
+				},
+				TargetVersionName: "ga",
+			},
+			want: "",
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			if got := tc.resource.ApiVersion(); got != tc.want {
+				t.Errorf("ApiVersion() = %q, want %q", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestResourceValidateApiVersions(t *testing.T) {
+	t.Parallel()
+
+	baseResource := func(apiVersions map[string]string) api.Resource {
+		return api.Resource{
+			Name:        "TestResource",
+			Description: "A test resource",
+			Exclude:     true,
+			CreateVerb:  "POST",
+			ReadVerb:    "GET",
+			DeleteVerb:  "DELETE",
+			UpdateVerb:  "PUT",
+			ApiVersions: apiVersions,
+		}
+	}
+
+	t.Run("valid provider versions pass validation", func(t *testing.T) {
+		t.Parallel()
+		r := baseResource(map[string]string{
+			"ga":      "2026-11-01",
+			"beta":    "2026-11-01-beta",
+			"nightly": "2026-11-01-preview",
+		})
+		if errs := r.Validate(); len(errs) != 0 {
+			t.Errorf("Validate() returned unexpected errors: %v", errs)
+		}
+	})
+
+	t.Run("invalid provider version fails validation", func(t *testing.T) {
+		t.Parallel()
+		r := baseResource(map[string]string{
+			"v1": "2026-11-01",
+		})
+		errs := r.Validate()
+		if len(errs) != 1 || !strings.Contains(errs[0].Error(), `invalid provider version "v1" in `+"`api_version`") {
+			t.Errorf("Validate() = %v, want error containing invalid provider version \"v1\"", errs)
+		}
+	})
+}
+
+func TestMergeApiVersions(t *testing.T) {
+	t.Parallel()
+
+	t.Run("merges override map into existing map", func(t *testing.T) {
+		t.Parallel()
+		base := &api.Resource{
+			Name: "UrlMap",
+			ApiVersions: map[string]string{
+				"ga": "2026-11-01",
+			},
+		}
+		override := api.Resource{
+			ApiVersions: map[string]string{
+				"nightly": "2026-11-01-preview",
+			},
+		}
+
+		api.Merge(reflect.ValueOf(base), reflect.ValueOf(override), "nightly")
+
+		want := map[string]string{
+			"ga":      "2026-11-01",
+			"nightly": "2026-11-01-preview",
+		}
+		if diff := cmp.Diff(want, base.ApiVersions); diff != "" {
+			t.Errorf("Merge() ApiVersions mismatch (-want +got):\n%s", diff)
+		}
+	})
+
+	t.Run("sets map when base map is nil", func(t *testing.T) {
+		t.Parallel()
+		base := &api.Resource{
+			Name: "UrlMap",
+		}
+		override := api.Resource{
+			ApiVersions: map[string]string{
+				"nightly": "2026-11-01-preview",
+			},
+		}
+
+		api.Merge(reflect.ValueOf(base), reflect.ValueOf(override), "nightly")
+
+		want := map[string]string{
+			"nightly": "2026-11-01-preview",
+		}
+		if diff := cmp.Diff(want, base.ApiVersions); diff != "" {
+			t.Errorf("Merge() ApiVersions mismatch (-want +got):\n%s", diff)
+		}
+	})
+}
+
+func TestResource_TestSampleSetUp_ContentAwareSlugDedup(t *testing.T) {
+	t.Parallel()
+
+	sysfs := fstest.MapFS{
+		"templates/terraform/samples/services/pubsub/shared.tf.tmpl": &fstest.MapFile{
+			Data: []byte(`resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "label"}}"
+}
+`),
+		},
+		"templates/terraform/samples/services/pubsub/alt.tf.tmpl": &fstest.MapFile{
+			Data: []byte(`resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
+  name   = "static"
+  labels = { mode = "alt" }
+}
+`),
+		},
+	}
+
+	p := &api.Product{
+		Name: "Pubsub",
+		Versions: []*product.Version{
+			{Name: "ga"},
+			{Name: "beta"},
+		},
+	}
+	r := api.Resource{
+		Name:              "Topic",
+		ProductMetadata:   p,
+		SourceYamlFile:    "products/pubsub/Topic.yaml",
+		TargetVersionName: "ga",
+		Samples: []*resource.Sample{
+			{
+				Name:              "topic_docs_only",
+				PrimaryResourceId: "primary",
+				ExcludeTest:       true,
+				Steps: []*resource.Step{
+					{
+						Name:       "shared",
+						ConfigPath: "templates/terraform/samples/services/pubsub/shared.tf.tmpl",
+						Vars:       resource.StepVars{"label": "docs"},
+					},
+				},
+			},
+			{
+				Name:              "topic_update",
+				PrimaryResourceId: "primary",
+				Steps: []*resource.Step{
+					{
+						Name:       "shared",
+						ConfigPath: "templates/terraform/samples/services/pubsub/shared.tf.tmpl",
+						Vars:       resource.StepVars{"label": "v1"},
+					},
+					{
+						// Identical TestHCLText ("%{label}") -> reuses single NewConfigFunc & StepSlug
+						Name:       "shared",
+						ConfigPath: "templates/terraform/samples/services/pubsub/shared.tf.tmpl",
+						Vars:       resource.StepVars{"label": "v2"},
+					},
+					{
+						// Same step.Name ("shared") but distinct TestHCLText -> disambiguated slug
+						Name:       "shared",
+						ConfigPath: "templates/terraform/samples/services/pubsub/alt.tf.tmpl",
+					},
+				},
+			},
+		},
+	}
+
+	r.TestSampleSetUp(sysfs)
+
+	if len(r.Samples[0].NewConfigFuncs) != 0 {
+		t.Fatalf("ExcludeTest sample NewConfigFuncs len = %d, want 0", len(r.Samples[0].NewConfigFuncs))
+	}
+	if len(r.Samples[1].NewConfigFuncs) != 2 {
+		t.Fatalf("topic_update NewConfigFuncs len = %d, want 2", len(r.Samples[1].NewConfigFuncs))
+	}
+	if got := r.Samples[1].Steps[0].StepSlug; got != "shared" {
+		t.Errorf("step 0 StepSlug = %q, want %q", got, "shared")
+	}
+	if got := r.Samples[1].Steps[1].StepSlug; got != "shared" {
+		t.Errorf("step 1 StepSlug = %q, want %q (reused)", got, "shared")
+	}
+	if got := r.Samples[1].Steps[2].StepSlug; got != "topic_update_step3" {
+		t.Errorf("step 2 StepSlug = %q, want %q", got, "topic_update_step3")
+	}
+}
+
+func TestResource_FirstTestConfig_StepMinVersion(t *testing.T) {
+	t.Parallel()
+
+	p := &api.Product{
+		Name: "Pubsub",
+		Versions: []*product.Version{
+			{Name: "ga"},
+			{Name: "beta"},
+		},
+	}
+	betaOnlyStep := &resource.Step{Name: "beta_step", MinVersion: "beta"}
+	gaFallbackStep := &resource.Step{Name: "ga_step"}
+	secondSampleStep := &resource.Step{Name: "second_ga_step"}
+
+	r := api.Resource{
+		Name:              "Topic",
+		ProductMetadata:   p,
+		TargetVersionName: "ga",
+		Samples: []*resource.Sample{
+			{
+				Name:              "all_beta_steps",
+				TargetVersionName: "ga",
+				Steps:             []*resource.Step{{Name: "only_beta", MinVersion: "beta"}},
+			},
+			{
+				Name:              "mixed_steps",
+				TargetVersionName: "ga",
+				Steps:             []*resource.Step{betaOnlyStep, gaFallbackStep},
+			},
+			{
+				Name:              "second_sample",
+				TargetVersionName: "ga",
+				Steps:             []*resource.Step{secondSampleStep},
+			},
+		},
+	}
+
+	if got := r.FirstTestConfig().Step; got != gaFallbackStep {
+		t.Errorf("FirstTestConfig().Step = %+v, want gaFallbackStep", got)
+	}
+	if got := r.FirstRunnableTestConfig().Step; got != gaFallbackStep {
+		t.Errorf("FirstRunnableTestConfig().Step = %+v, want gaFallbackStep", got)
+	}
+	testSamples := r.TestSamples()
+	if len(testSamples) != 2 || testSamples[0].Name != "mixed_steps" {
+		t.Errorf("TestSamples() = %v, want 2 samples starting with mixed_steps", testSamples)
+	}
+}
+
+func TestResourceValidateInternalRefs(t *testing.T) {
+	t.Parallel()
+
+	baseResource := func() api.Resource {
+		return api.Resource{
+			Name:        "TestResource",
+			Description: "A public resource description. See https://cloud.google.com/docs.",
+			Exclude:     true,
+			CreateVerb:  "POST",
+			ReadVerb:    "GET",
+			DeleteVerb:  "DELETE",
+			UpdateVerb:  "PUT",
+			References: resource.ReferenceLinks{
+				Api:    "https://cloud.google.com/service/docs/reference/rest",
+				Guides: map[string]string{"Official Documentation": "https://cloud.google.com/service/docs"},
+			},
+			Docs: resource.Docs{
+				Note: "Public note referencing https://go.dev/doc and https://beyondcorp.googleapis.com/v1/.",
+			},
+		}
+	}
+
+	cases := []struct {
+		name      string
+		mutate    func(*api.Resource)
+		wantError string
+	}{
+		{
+			name:   "valid public resource passes",
+			mutate: func(*api.Resource) {},
+		},
+		{
+			name:      "corp.google.com in description",
+			mutate:    func(r *api.Resource) { r.Description = "See https://corp.google.com/internal." },
+			wantError: `resource TestResource ` + "`description`" + ` must not contain internal Google reference "corp.google.com"`,
+		},
+		{
+			name:      "goto.google.com in references.api",
+			mutate:    func(r *api.Resource) { r.References.Api = "https://goto.google.com/api-ref" },
+			wantError: `resource TestResource ` + "`references.api`" + ` must not contain internal Google reference "goto.google.com"`,
+		},
+		{
+			name:      "corp.google.com in references.guides value",
+			mutate:    func(r *api.Resource) { r.References.Guides["Internal Guide"] = "https://g3doc.corp.google.com/guide" },
+			wantError: `resource TestResource ` + "`references.guides[\"Internal Guide\"]`" + ` must not contain internal Google reference "corp.google.com"`,
+		},
+		{
+			name:      "https://go/ in references.guides key",
+			mutate:    func(r *api.Resource) { r.References.Guides["See https://go/guide"] = "https://cloud.google.com/docs" },
+			wantError: `resource TestResource ` + "`references.guides[\"See https://go/guide\"]`" + ` must not contain internal Google reference "go/"`,
+		},
+		{
+			name:      "bare go/ link in description",
+			mutate:    func(r *api.Resource) { r.Description = "See go/cloud-ai-gcp-pool for details." },
+			wantError: `resource TestResource ` + "`description`" + ` must not contain internal Google reference "go/"`,
+		},
+		{
+			name:      "b/ bug link in docs.note",
+			mutate:    func(r *api.Resource) { r.Docs.Note = "Tracked in b/360405077." },
+			wantError: `resource TestResource ` + "`docs.note`" + ` must not contain internal Google reference "b/"`,
+		},
+		{
+			name:      "google3/ in docs.note",
+			mutate:    func(r *api.Resource) { r.Docs.Note = "See google3/cloud/foo/README.md" },
+			wantError: `resource TestResource ` + "`docs.note`" + ` must not contain internal Google reference "google3/"`,
+		},
+		{
+			name:      "//depot/ in docs.warning",
+			mutate:    func(r *api.Resource) { r.Docs.Warning = "See //depot/google3/cloud/foo.proto" },
+			wantError: `resource TestResource ` + "`docs.warning`" + ` must not contain internal Google reference "//depot/"`,
+		},
+		{
+			name:      "case-insensitive GOTO.GOOGLE.COM in deprecation_message",
+			mutate:    func(r *api.Resource) { r.DeprecationMessage = "See HTTPS://GOTO.GOOGLE.COM/sunset." },
+			wantError: `resource TestResource ` + "`deprecation_message`" + ` must not contain internal Google reference "goto.google.com"`,
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			r := baseResource()
+			tc.mutate(&r)
+
+			errs := r.Validate()
+			if tc.wantError == "" {
+				if len(errs) != 0 {
+					t.Fatalf("expected no errors, got: %v", errs)
+				}
+				return
+			}
+			for _, err := range errs {
+				if strings.Contains(err.Error(), tc.wantError) {
+					return
+				}
+			}
+			t.Fatalf("expected error containing %q, got: %v", tc.wantError, errs)
+		})
+	}
+}
+
+func TestResource_TestSampleSetUp_ZeroStepShorthandAndBetaValidateUnderGA(t *testing.T) {
+	t.Parallel()
+
+	sysfs := fstest.MapFS{
+		"templates/terraform/samples/services/pubsub/topic_basic.tf.tmpl": &fstest.MapFile{
+			Data: []byte(`resource "google_pubsub_topic" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.ResourceIdVars "topic_id"}}"
+}
+`),
+		},
+		"templates/iam_body.tf.tmpl": &fstest.MapFile{
+			Data: []byte(`topic = google_pubsub_topic.primary.name`),
+		},
+	}
+
+	p := &api.Product{
+		Name:     "Pubsub",
+		Versions: []*product.Version{{Name: "ga"}, {Name: "beta"}},
+	}
+	r := api.Resource{
+		Name:              "Topic",
+		Description:       "desc",
+		Exclude:           true,
+		CreateVerb:        "POST",
+		ReadVerb:          "GET",
+		DeleteVerb:        "DELETE",
+		UpdateVerb:        "PUT",
+		ProductMetadata:   p,
+		SourceYamlFile:    "products/pubsub/Topic.yaml",
+		TargetVersionName: "ga",
+		IamPolicy: &resource.IamPolicy{
+			SampleConfigBody:   "templates/iam_body.tf.tmpl",
+			FetchIamPolicyVerb: "GET",
+			SetIamPolicyVerb:   "POST",
+		},
+		Samples: []*resource.Sample{
+			{
+				// 0-step shorthand on first sample must populate Steps[0] BEFORE FirstTestConfig()
+				Name:              "topic_basic",
+				PrimaryResourceId: "primary",
+				ResourceIdVars:    map[string]string{"topic_id": "my-topic"},
+			},
+			{
+				// Beta-only sample with unnamed step must still pass Validate() under TargetVersionName="ga"
+				Name:              "topic_beta",
+				PrimaryResourceId: "primary",
+				MinVersion:        "beta",
+				Steps:             []*resource.Step{{}},
+			},
+		},
+	}
+
+	r.TestSampleSetUp(sysfs)
+
+	if len(r.Samples[0].Steps) != 1 || r.Samples[0].Steps[0].Name != "topic_basic" {
+		t.Fatalf("0-step shorthand failed: got %+v", r.Samples[0].Steps)
+	}
+	if r.FirstTestConfig().Step != r.Samples[0].Steps[0] {
+		t.Errorf("FirstTestConfig().Step did not resolve to expanded 0-step sample")
+	}
+	if r.Samples[0].Steps[0].IamHCLText == "" {
+		t.Errorf("expected IamHCLText to be populated on expanded 0-step first sample")
+	}
+	if errs := r.Validate(); len(errs) != 0 {
+		t.Errorf("Validate() under GA returned unexpected errors: %v", errs)
 	}
 }

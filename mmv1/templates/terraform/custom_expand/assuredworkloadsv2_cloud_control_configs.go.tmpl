@@ -1,0 +1,151 @@
+{{/* The license inside this block applies to this file
+  Copyright 2026 Google LLC. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. */ -}}
+// expand{{$.GetPrefix}}{{$.TitlelizeProperty}} expands cloud_control_configs.
+//
+// A parameter value is a oneof, so the API rejects a parameter_value that sets
+// no value. `bool_value = false`, `number_value = 0`, and `string_value = ""`
+// are zero values that the generated expanders drop, so the raw configuration
+// is inspected to send them when they are configured, while unset sibling
+// values are omitted.
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	configured := func(string) bool { return false }
+{{- if not (contains $.ResourceMetadata.ProductMetadata.Compiler "terraformgoogleconversion") }}
+	if rd, ok := d.(interface {
+		GetRawConfigAt(cty.Path) (cty.Value, diag.Diagnostics)
+	}); ok {
+		configured = func(path string) bool {
+			var p cty.Path
+			for _, step := range strings.Split(path, ".") {
+				if i, err := strconv.Atoi(step); err == nil {
+					p = p.IndexInt(i)
+				} else {
+					p = p.GetAttr(step)
+				}
+			}
+			val, diags := rd.GetRawConfigAt(p)
+			return !diags.HasError() && !val.IsNull()
+		}
+	}
+{{- end }}
+	return assuredWorkloadsV2ExpandCloudControlConfigs(v, configured)
+}
+
+// assuredWorkloadsV2ExpandCloudControlConfigs expands cloud_control_configs.
+// configured reports whether the attribute at the given dot-separated path
+// (for example "cloud_control_configs.0.parameters.1.parameter_value.0.bool_value")
+// is set in the configuration.
+func assuredWorkloadsV2ExpandCloudControlConfigs(v interface{}, configured func(string) bool) ([]interface{}, error) {
+	if v == nil {
+		return nil, nil
+	}
+	l := v.([]interface{})
+	req := make([]interface{}, 0, len(l))
+	for i, raw := range l {
+		if raw == nil {
+			continue
+		}
+		original := raw.(map[string]interface{})
+		path := fmt.Sprintf("cloud_control_configs.%d", i)
+		transformed := make(map[string]interface{})
+		if val, ok := original["cloud_control"].(string); ok && val != "" {
+			transformed["cloudControl"] = val
+		}
+		if val, ok := original["cloud_control_revision"].(int); ok && val != 0 {
+			transformed["cloudControlRevision"] = val
+		}
+		if val, ok := original["enforcement_mode"].(string); ok && val != "" {
+			transformed["enforcementMode"] = val
+		}
+		if params, ok := original["parameters"].([]interface{}); ok && len(params) > 0 {
+			expanded := make([]interface{}, 0, len(params))
+			for j, rawParam := range params {
+				if rawParam == nil {
+					continue
+				}
+				param, err := assuredWorkloadsV2ExpandParameter(rawParam.(map[string]interface{}), fmt.Sprintf("%s.parameters.%d", path, j), configured, true)
+				if err != nil {
+					return nil, err
+				}
+				expanded = append(expanded, param)
+			}
+			transformed["parameters"] = expanded
+		}
+		req = append(req, transformed)
+	}
+	return req, nil
+}
+
+// assuredWorkloadsV2ExpandParameter expands a parameter (name and parameter_value)
+// at the dot-separated path. allowOneof is false for the sub-parameter of a oneof_value, which
+// has no oneof_value of its own.
+func assuredWorkloadsV2ExpandParameter(raw map[string]interface{}, path string, configured func(string) bool, allowOneof bool) (map[string]interface{}, error) {
+	transformed := make(map[string]interface{})
+	name, _ := raw["name"].(string)
+	if name != "" {
+		transformed["name"] = name
+	}
+	if pv, ok := raw["parameter_value"].([]interface{}); ok && len(pv) > 0 {
+		var rawPV map[string]interface{}
+		if pv[0] != nil {
+			rawPV, _ = pv[0].(map[string]interface{})
+		}
+		value, err := assuredWorkloadsV2ExpandParamValue(rawPV, path+".parameter_value.0", configured, allowOneof)
+		if err != nil {
+			return nil, fmt.Errorf("parameter %q: %w", name, err)
+		}
+		transformed["parameterValue"] = value
+	}
+	return transformed, nil
+}
+
+// assuredWorkloadsV2ExpandParamValue expands a parameter_value block at path. A
+// string list or oneof value is sent when its block is present; a string,
+// boolean, or number value is sent when it is non-zero or explicitly
+// configured.
+func assuredWorkloadsV2ExpandParamValue(raw map[string]interface{}, path string, configured func(string) bool, allowOneof bool) (map[string]interface{}, error) {
+	transformed := make(map[string]interface{})
+	if val, _ := raw["string_value"].(string); val != "" || configured(path+".string_value") {
+		transformed["stringValue"] = val
+	}
+	if list, ok := raw["string_list_value"].([]interface{}); ok && len(list) > 0 {
+		var values []interface{}
+		if list[0] != nil {
+			values, _ = list[0].(map[string]interface{})["values"].([]interface{})
+		}
+		if values == nil {
+			values = []interface{}{}
+		}
+		transformed["stringListValue"] = map[string]interface{}{"values": values}
+	}
+	if val, _ := raw["bool_value"].(bool); val || configured(path+".bool_value") {
+		transformed["boolValue"] = val
+	}
+	if val, _ := raw["number_value"].(float64); val != 0 || configured(path+".number_value") {
+		transformed["numberValue"] = val
+	}
+	if allowOneof {
+		if list, ok := raw["oneof_value"].([]interface{}); ok && len(list) > 0 && list[0] != nil {
+			sub, err := assuredWorkloadsV2ExpandParameter(list[0].(map[string]interface{}), path+".oneof_value.0", configured, false)
+			if err != nil {
+				return nil, err
+			}
+			transformed["oneofValue"] = sub
+		}
+	}
+	if len(transformed) > 1 {
+		return nil, fmt.Errorf("exactly one of string_value, bool_value, number_value, string_list_value or oneof_value must be set")
+	}
+	return transformed, nil
+}

@@ -78,7 +78,6 @@ samples:
                 location = "gs://example-bucket/skewed_location_1"
               }
             }
-          col_comment: "col comment"
           stored_as_sub_dirs: false
           partition_keys: |
             partition_keys {
@@ -86,9 +85,6 @@ samples:
               type    = "STRING"
               comment = "date partition"
             }
-        test_env_vars:
-          GOOGLE_BILLING_PROJECT: 'PROJECT'
-          USER_PROJECT_OVERRIDE: 'true'
 
       - name: 'biglake_hive_table'
         resource_id_vars:
@@ -141,7 +137,6 @@ samples:
                 location = "gs://example-bucket/skewed_location_2"
               }
             }
-          col_comment: "updated col comment"
           stored_as_sub_dirs: true
           partition_keys: |
             partition_keys {
@@ -154,9 +149,6 @@ samples:
               type    = "STRING"
               comment = "country partition"
             }
-        test_env_vars:
-          GOOGLE_BILLING_PROJECT: 'PROJECT'
-          USER_PROJECT_OVERRIDE: 'true'
 
 parameters:
   - name: 'catalog'

@@ -25,7 +25,7 @@ userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 		obj["firewallPolicy"] = firewallPolicyProp
 	}
 
-	url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}locations/global/firewallPolicies/{{"{{"}}firewall_policy{{"}}"}}/addAssociation?replaceExistingAssociation=true")
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"locations/global/firewallPolicies/{{"{{"}}firewall_policy{{"}}"}}/addAssociation?replaceExistingAssociation=true")
 	if err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	d.SetId(id)
 
 	//following the swapover briefly both associations exist and this can cause operations to fail
-	time.Sleep(60 * time.Second)
+	time.Sleep(60 * config.SleepUnit)
 	//end `custom_update` changed zone
 
 	return resourceComputeFirewallPolicyAssociationRead(d, meta)

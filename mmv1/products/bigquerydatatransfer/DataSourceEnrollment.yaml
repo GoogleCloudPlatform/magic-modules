@@ -90,9 +90,156 @@ parameters:
       this only exists because the API offers no project-level unenroll method. Override it only if
       `us` is not routable for the project, for example under a data-residency organization policy.
 properties:
+  - name: 'name'
+    type: String
+    output: true
+    description: |
+      The resource name of the data source.
   - name: 'displayName'
     type: String
     output: true
     description: |
       User friendly name of the enrolled data source, for example
       `Google Cloud Carbon Footprint Exports`.
+  - name: 'description'
+    type: String
+    output: true
+    description: |
+      User friendly data source description string.
+  - name: 'clientId'
+    type: String
+    output: true
+    description: |
+      Data source client id which should be used to receive refresh token.
+  - name: 'scopes'
+    type: Array
+    output: true
+    item_type:
+      type: String
+    description: |
+      Api auth scopes for which refresh token needs to be obtained.
+  - name: 'updateDeadlineSeconds'
+    type: Integer
+    output: true
+    description: |
+      The number of seconds to wait for a transfer to start before declaring the failure.
+  - name: 'defaultSchedule'
+    type: String
+    output: true
+    description: |
+      Default data transfer schedule.
+  - name: 'supportsCustomSchedule'
+    type: Boolean
+    output: true
+    description: |
+      Specifies whether the data source supports a user defined schedule.
+  - name: 'parameters'
+    type: Array
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'paramId'
+          type: String
+          output: true
+          description: |
+            Parameter identifier.
+        - name: 'displayName'
+          type: String
+          output: true
+          description: |
+            User friendly parameter name.
+        - name: 'description'
+          type: String
+          output: true
+          description: |
+            Parameter description.
+        - name: 'type'
+          type: String
+          output: true
+          description: |
+            Parameter type.
+        - name: 'required'
+          type: Boolean
+          output: true
+          description: |
+            Is parameter required.
+        - name: 'validationRegex'
+          type: String
+          output: true
+          description: |
+            Regular expression which can be used for parameter validation.
+        - name: 'allowedValues'
+          type: Array
+          output: true
+          item_type:
+            type: String
+          description: |
+            All possible values for parameters with fixed list of options.
+        - name: 'minValue'
+          type: Double
+          output: true
+          description: |
+            For integer and double values specifies minimum allowed value.
+        - name: 'maxValue'
+          type: Double
+          output: true
+          description: |
+            For integer and double values specifies maximum allowed value.
+        - name: 'validationDescription'
+          type: String
+          output: true
+          description: |
+            Description of the requirements for this field, in case the user input does not fulfill the regex.
+        - name: 'validationHelpUrl'
+          type: String
+          output: true
+          description: |
+            URL to a help document to further explain the naming requirements.
+        - name: 'immutable'
+          type: Boolean
+          output: true
+          description: |
+            Cannot be changed after initial transfer config creation. Applies only to custom data sources.
+        - name: 'deprecated'
+          type: Boolean
+          output: true
+          description: |
+            If true, it should not be used in new transfers, and it should not be visible to users.
+        - name: 'maxListSize'
+          type: Integer
+          output: true
+          description: |
+            For list parameters, the max size of the list.
+    description: |
+      Data source parameters.
+  - name: 'helpUrl'
+    type: String
+    output: true
+    description: |
+      Url to the documentation about the data source.
+  - name: 'authorizationType'
+    type: String
+    output: true
+    description: |
+      Indicates the type of authorization.
+  - name: 'dataRefreshType'
+    type: String
+    output: true
+    description: |
+      Data refresh type.
+  - name: 'defaultDataRefreshWindowDays'
+    type: Integer
+    output: true
+    description: |
+      Default data refresh window on days.
+  - name: 'manualRunsDisabled'
+    type: Boolean
+    output: true
+    description: |
+      Disables support for manual transfer runs.
+  - name: 'minimumScheduleInterval'
+    type: String
+    output: true
+    description: |
+      The minimum interval between two scheduled runs.

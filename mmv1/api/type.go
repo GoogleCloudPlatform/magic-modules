@@ -16,15 +16,34 @@ package api
 import (
 	"fmt"
 	"log"
+	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v3"
 )
+
+// Existing resources that combine default_from_api with output.
+// These are grandfathered to avoid breaking existing resource schemas.
+// Do not add new fields to this list; see:
+// https://github.com/hashicorp/terraform-provider-google/issues/18832
+var defaultFromApiConflictAllowlist = []string{
+	"DataPolicy.etag",
+	"EkmConnection.service_resolvers.server_certificates.subject_alternative_dns_names",
+	"LinkedDataset.bigquery_dataset",
+	"Rule.rule_id",
+}
+
+// Existing output-only fields under a writable parent that also set send_empty_value,
+// grandfathered to avoid changing existing request-expansion behavior.
+// Keys use "<product_folder>/<Resource>.<field_path>". Do not add new fields to this list.
+var sendEmptyValueOutputAllowlist = []string{
+	"agentidentity/AuthProvider.auth_provider_type_params.ge_auth_provider",
+}
 
 // Represents a property type
 type Type struct {
@@ -500,12 +519,47 @@ func (t *Type) Validate(rName string) (es []error) {
 	}
 
 	// Check type is valid. Also allow empty as it's currently used in unit tests.
-	if !slices.Contains([]string{"Boolean", "Double", "Integer", "String", "Time", "Enum", "ResourceRef", "NestedObject", "Array", "KeyValuePairs", "KeyValueLabels", "KeyValueTerraformLabels", "KeyValueEffectiveLabels", "KeyValueAnnotations", "Map", "Fingerprint"}, t.Type) {
+	if !slices.Contains([]string{"Boolean", "Double", "Integer", "String", "Time", "Enum", "ResourceRef", "NestedObject", "Array", "KeyValuePairs", "KeyValueLabels", "KeyValueTerraformLabels", "KeyValueEffectiveLabels", "KeyValueAnnotations", "Map", "Fingerprint", "JsonValue"}, t.Type) {
 		es = append(es, fmt.Errorf("property %s unknown type %q in resource %s", fullFieldPath, t.Type, rName))
+	}
+
+	if t.CustomExpand == "templates/terraform/custom_expand/json_schema.tmpl" ||
+		t.CustomExpand == "templates/terraform/custom_expand/json_value.tmpl" ||
+		t.CustomFlatten == "templates/terraform/custom_flatten/json_schema.tmpl" {
+		es = append(es, fmt.Errorf("property %s cannot use json_schema.tmpl or json_value.tmpl in resource %s; use type JsonValue instead", fullFieldPath, rName))
 	}
 
 	if t.Output && t.Required {
 		es = append(es, fmt.Errorf("property %s cannot be output and required at the same time in resource %s.", fullFieldPath, rName))
+	}
+
+	if t.Required && t.hasOutputAncestor() {
+		es = append(es, fmt.Errorf("property %s cannot be required because it has an output ancestor in resource %s", fullFieldPath, rName))
+	}
+
+	if t.Output && (t.IsA("Enum") || (t.IsA("Array") && t.ItemType != nil && t.ItemType.IsA("Enum"))) {
+		es = append(es, fmt.Errorf("property %s cannot be an output-only Enum in resource %s; use String instead", fullFieldPath, rName))
+	}
+
+	if !t.isExcluded() && t.IsA("Enum") && len(t.EnumValues) == 0 {
+		es = append(es, fmt.Errorf("property %s of type Enum must specify non-empty enum_values in resource %s", fullFieldPath, rName))
+	}
+
+	if !t.isExcluded() && (t.IsA("Enum") || (t.IsA("Array") && t.ItemType != nil && t.ItemType.IsA("Enum"))) &&
+		strings.Contains(strings.ToLower(t.Description), "possible values:") {
+		es = append(es, fmt.Errorf("property %s cannot manually include 'Possible values:' in description in resource %s; enum_values are appended automatically", fullFieldPath, rName))
+	}
+
+	if !t.isExcluded() && t.SendEmptyValue && t.Output && !slices.Contains(sendEmptyValueOutputAllowlist, t.allowlistKey(rName, fullFieldPath)) {
+		es = append(es, fmt.Errorf("property %s cannot set both send_empty_value and output in resource %s", fullFieldPath, rName))
+	}
+
+	if t.DefaultFromApi && t.Required {
+		es = append(es, fmt.Errorf("property %s cannot set both default_from_api and required in resource %s", fullFieldPath, rName))
+	}
+
+	if t.DefaultFromApi && t.Output && !slices.Contains(defaultFromApiConflictAllowlist, fmt.Sprintf("%s.%s", rName, fullFieldPath)) {
+		es = append(es, fmt.Errorf("property %s cannot set both default_from_api and output in resource %s", fullFieldPath, rName))
 	}
 
 	if t.DefaultFromApi && t.DefaultValue != nil {
@@ -519,6 +573,20 @@ func (t *Type) Validate(rName string) (es []error) {
 	if t.WriteOnly && t.Sensitive {
 		es = append(es, fmt.Errorf("property %s cannot be write_only and sensitive at the same time in resource %s", fullFieldPath, rName))
 	}
+
+	for _, f := range []struct{ name, val string }{
+		{"description", t.Description},
+		{"deprecation_message", t.DeprecationMessage},
+		{"removed_message", t.RemovedMessage},
+	} {
+		if err := ValidateNoInternalRefs(f.val, "property %s `%s` in resource %s", fullFieldPath, f.name, rName); err != nil {
+			es = append(es, err)
+		}
+	}
+
+	es = append(es, t.validateDefaultValue(fullFieldPath, rName)...)
+	es = append(es, t.validateEnumValues(fullFieldPath, rName)...)
+	es = append(es, t.validateRequiredConstraints(fullFieldPath, rName)...)
 
 	t.validateLabelsField()
 
@@ -547,17 +615,103 @@ func (t *Type) Validate(rName string) (es []error) {
 		es = append(es, fmt.Errorf("property %s cannot set update_mask_fields because it is nested in resource %s", fullFieldPath, rName))
 	}
 
+	if !t.isExcluded() {
+		es = append(es, t.validateSchemaPathConstraint(fullFieldPath, rName, "conflicts", "ConflictsWith", &t.Conflicts, &t.ConflictsGroup, Type.Conflicting)...)
+		es = append(es, t.validateSchemaPathConstraint(fullFieldPath, rName, "at_least_one_of", "AtLeastOneOf", &t.AtLeastOneOf, &t.AtLeastOneOfGroup, Type.AtLeastOneOfList)...)
+		es = append(es, t.validateSchemaPathConstraint(fullFieldPath, rName, "exactly_one_of", "ExactlyOneOf", &t.ExactlyOneOf, &t.ExactlyOneOfGroup, Type.ExactlyOneOfList)...)
+		es = append(es, t.validateSchemaPathConstraint(fullFieldPath, rName, "required_with", "RequiredWith", &t.RequiredWith, &t.RequiredWithGroup, Type.RequiredWithList)...)
+	}
+
 	return es
+}
+
+// Validate a schema-path constraint list (`conflicts`, `at_least_one_of`,
+// `exactly_one_of`, or `required_with`), first culling entries that are valid
+// in the maximum schema version for the run (e.g. beta) when generating a
+// lower version (e.g. GA).
+func (t *Type) validateSchemaPathConstraint(
+	fullFieldPath, rName, yamlAttr, schemaAttr string,
+	rawField *[]string,
+	groupField **[]string,
+	getter func(Type) []string,
+) []error {
+	raw := getter(*t)
+	if len(raw) == 0 {
+		return nil
+	}
+
+	filtered := make([]string, 0, len(raw))
+	for _, entry := range raw {
+		_, resolved := t.ResourceMetadata.resolvePropertySchemaPath(entry)
+		if resolved == "" && t.isValidHigherVersionConstraint(entry, getter) {
+			continue
+		}
+		filtered = append(filtered, entry)
+	}
+	if len(filtered) != len(raw) {
+		*rawField = filtered
+		if *groupField != nil {
+			*groupField = &filtered
+		}
+	}
+
+	var es []error
+	for _, entry := range getter(*t) {
+		if _, path := t.ResourceMetadata.resolvePropertySchemaPath(entry); path == "" {
+			es = append(es, fmt.Errorf("property %s has `%s` entry %q that resolved to an empty %s in resource %s", fullFieldPath, yamlAttr, entry, schemaAttr, rName))
+		}
+	}
+	return es
+}
+
+// Hierarchical exclusion check against self, parent (if nested), resource
+func (t *Type) isExcluded() bool {
+	if t.Exclude {
+		return true
+	}
+	if t.ParentMetadata != nil {
+		return t.ParentMetadata.isExcluded()
+	}
+	if t.ResourceMetadata != nil {
+		return t.ResourceMetadata.IsExcluded()
+	}
+	return false
+}
+
+// allowlistKey returns "<product_folder>/<Resource>.<field_path>" for scoping validation allowlists.
+func (t *Type) allowlistKey(rName, fullFieldPath string) string {
+	productFolder := ""
+	if t != nil && t.ResourceMetadata != nil && t.ResourceMetadata.ProductMetadata != nil {
+		if t.ResourceMetadata.ProductMetadata.PackagePath != "" {
+			productFolder = filepath.Base(t.ResourceMetadata.ProductMetadata.PackagePath)
+		} else if t.ResourceMetadata.ProductMetadata.Name != "" {
+			productFolder = strings.ToLower(t.ResourceMetadata.ProductMetadata.Name)
+		}
+	}
+	if productFolder == "" {
+		return fmt.Sprintf("%s.%s", rName, fullFieldPath)
+	}
+	return fmt.Sprintf("%s/%s.%s", productFolder, rName, fullFieldPath)
+}
+
+// hasOutputAncestor reports whether any ancestor of t has Output set to true.
+func (t *Type) hasOutputAncestor() bool {
+	if t == nil {
+		return false
+	}
+	seen := map[*Type]bool{t: true}
+	for p := t.ParentMetadata; p != nil && !seen[p]; p = p.ParentMetadata {
+		seen[p] = true
+		if p.Output {
+			return true
+		}
+	}
+	return false
 }
 
 // TODO rewrite: add validations
 // check :description, required: true
 // check :update_verb, allowed: %i[POST PUT PATCH NONE],
-// check_default_value_property
-// check_conflicts
-// check_at_least_one_of
-// check_exactly_one_of
-// check_required_with
 // check the allowed fields for each type, for example, KeyName is only allowed for Map
 
 // Returns a slice of Terraform field names representing where the field is nested within the parent resource.
@@ -678,30 +832,91 @@ func (t Type) FWResourceType() string {
 	return path[len(path)-1]
 }
 
-// TODO rewrite: validation
-// func (t *Type) check_default_value_property() {
-// return if @default_value.nil?
+func (t *Type) validateDefaultValue(fullFieldPath, rName string) (es []error) {
+	if t.DefaultValue == nil {
+		return nil
+	}
 
-// case self
-// when Api::Type::String
-//   clazz = ::String
-// when Api::Type::Integer
-//   clazz = ::Integer
-// when Api::Type::Double
-//   clazz = ::Float
-// when Api::Type::Enum
-//   clazz = ::Symbol
-// when Api::Type::Boolean
-//   clazz = :boolean
-// when Api::Type::ResourceRef
-//   clazz = [::String, ::Hash]
-// else
-//   raise "Update 'check_default_value_property' method to support " \
-//         "default value for type //{self.class}"
-// end
+	if t.Required {
+		es = append(es, fmt.Errorf("property %s cannot set both default_value and required in resource %s", fullFieldPath, rName))
+	}
 
-// check :default_value, type: clazz
-// }
+	if t.Output {
+		es = append(es, fmt.Errorf("property %s cannot set both default_value and output in resource %s", fullFieldPath, rName))
+	}
+
+	switch {
+	case t.IsA("Boolean"):
+		if _, ok := t.DefaultValue.(bool); !ok {
+			es = append(es, fmt.Errorf("property %s has default_value %v of type %T, expected bool for Boolean in resource %s", fullFieldPath, t.DefaultValue, t.DefaultValue, rName))
+		}
+	case t.IsA("Integer"):
+		switch t.DefaultValue.(type) {
+		case int, int64:
+		default:
+			es = append(es, fmt.Errorf("property %s has default_value %v of type %T, expected int or int64 for Integer in resource %s", fullFieldPath, t.DefaultValue, t.DefaultValue, rName))
+		}
+	case t.IsA("Double"):
+		switch t.DefaultValue.(type) {
+		case float64, int, int64:
+		default:
+			es = append(es, fmt.Errorf("property %s has default_value %v of type %T, expected float64, int, or int64 for Double in resource %s", fullFieldPath, t.DefaultValue, t.DefaultValue, rName))
+		}
+	case t.IsA("String"), t.IsA("Enum"), t.IsA("ResourceRef"):
+		val, ok := t.DefaultValue.(string)
+		if !ok {
+			es = append(es, fmt.Errorf("property %s has default_value %v of type %T, expected string for %s in resource %s", fullFieldPath, t.DefaultValue, t.DefaultValue, t.Type, rName))
+		} else if t.IsA("Enum") && len(t.EnumValues) > 0 && !slices.Contains(t.EnumValues, val) {
+			es = append(es, fmt.Errorf("property %s has default_value %q which is not in enum_values %v in resource %s", fullFieldPath, val, t.EnumValues, rName))
+		}
+	default:
+		es = append(es, fmt.Errorf("property %s cannot set default_value for type %s in resource %s", fullFieldPath, t.Type, rName))
+	}
+
+	return es
+}
+
+func (t *Type) validateEnumValues(fullFieldPath, rName string) (es []error) {
+	if !t.IsA("Enum") || len(t.EnumValues) == 0 {
+		return nil
+	}
+
+	seen := make(map[string]struct{}, len(t.EnumValues))
+	reported := make(map[string]struct{})
+	for _, v := range t.EnumValues {
+		if _, dup := seen[v]; dup {
+			if _, already := reported[v]; !already {
+				es = append(es, fmt.Errorf("property %s has duplicate enum_values entry %q in resource %s", fullFieldPath, v, rName))
+				reported[v] = struct{}{}
+			}
+		}
+		seen[v] = struct{}{}
+	}
+
+	return es
+}
+
+func (t *Type) validateRequiredConstraints(fullFieldPath, rName string) (es []error) {
+	if !t.Required {
+		return nil
+	}
+
+	hasConstraint := func(raw []string, group *[]string) bool {
+		return len(raw) > 0 || (group != nil && len(*group) > 0)
+	}
+
+	if hasConstraint(t.Conflicts, t.ConflictsGroup) {
+		es = append(es, fmt.Errorf("property %s cannot set both required and conflicts in resource %s", fullFieldPath, rName))
+	}
+	if hasConstraint(t.ExactlyOneOf, t.ExactlyOneOfGroup) {
+		es = append(es, fmt.Errorf("property %s cannot set both required and exactly_one_of in resource %s", fullFieldPath, rName))
+	}
+	if hasConstraint(t.AtLeastOneOf, t.AtLeastOneOfGroup) {
+		es = append(es, fmt.Errorf("property %s cannot set both required and at_least_one_of in resource %s", fullFieldPath, rName))
+	}
+
+	return es
+}
 
 // Returns list of properties that are in conflict with this property.
 func (t Type) Conflicting() []string {
@@ -784,6 +999,8 @@ func (t *Type) ExcludeIfNotInVersion(version *product.Version) {
 		}
 	} else if t.IsA("Array") && t.ItemType.IsA("NestedObject") {
 		t.ItemType.ExcludeIfNotInVersion(version)
+	} else if t.IsA("Map") && t.ValueType != nil {
+		t.ValueType.ExcludeIfNotInVersion(version)
 	}
 }
 
@@ -957,6 +1174,8 @@ func (t Type) TFType(s string) string {
 		return "schema.TypeSet"
 	case "Fingerprint":
 		return "schema.TypeString"
+	case "JsonValue":
+		return "schema.TypeString"
 	}
 
 	return "schema.TypeString"
@@ -995,6 +1214,8 @@ func (t Type) GetFWType() string {
 	case "Map":
 		return "Map"
 	case "Fingerprint":
+		return "String"
+	case "JsonValue":
 		return "String"
 	}
 
@@ -1462,78 +1683,76 @@ func (t *Type) ProviderOnly() bool {
 	return parent != nil && parent.ProviderOnly()
 }
 
-// Returns an updated path for a given Terraform field path (e.g.
-// 'a_field', 'parent_field.0.child_name'). Returns nil if the property
-// is not included in the resource's properties and removes keys that have
-// been flattened
-// FYI: Fields that have been renamed should use the new name, however, flattened
-// fields still need to be included, ie:
-// flattenedField > newParent > renameMe should be passed to this function as
-// flattened_field.0.new_parent.0.im_renamed
-// TODO: Change format of input for
-// exactly_one_of/at_least_one_of/etc to use camelcase, MM properities and
-// convert to snake in this method
-func (t *Type) GetPropertySchemaPath(schemaPath string) string {
-	nestedProps := t.ResourceMetadata.UserProperites()
-
-	pathSegments := strings.Split(schemaPath, ".0.")
-	var pathTkns []string
-	for i, pname := range pathSegments {
-		camelPname := google.Camelize(pname, "lower")
-		prop := findPropByNameInFlattenedList(nestedProps, camelPname)
-
-		// if we couldn't find it, see if it was renamed at the top level
-		if prop == nil {
-			prop = findPropByNameInFlattenedList(nestedProps, schemaPath)
-		}
-
-		if prop == nil {
-			return ""
-		}
-
-		// Terraform SDK rejects ExactlyOneOf/ConflictsWith/etc. paths that
-		// traverse an unbounded TypeList (TypeArray without MaxSize:1) as an
-		// intermediate segment. The terminal segment itself may be any type, so
-		// only apply this guard to non-final path tokens.
-		isIntermediate := i < len(pathSegments)-1
-		if isIntermediate && prop.IsA("Array") && (prop.MaxSize == nil || *prop.MaxSize != 1) {
-			return ""
-		}
-
-		nestedProps = prop.NestedProperties()
-		if !prop.FlattenObject {
-			pathTkns = append(pathTkns, google.Underscore(pname))
-		}
+func (t *Type) isValidHigherVersionConstraint(targetPath string, getter func(Type) []string) bool {
+	if t.ResourceMetadata == nil || t.ResourceMetadata.maxVersionSchema == nil {
+		return false
+	}
+	highSchema := t.ResourceMetadata.maxVersionSchema
+	_, highSelfPath := highSchema.resolvePropertySchemaPath(strings.Join(t.Lineage(), ".0."))
+	if highSelfPath == "" {
+		return false
 	}
 
-	if len(pathTkns) == 0 || pathTkns[len(pathTkns)-1] == "" {
-		return ""
+	highTarget, highTargetPath := highSchema.resolvePropertySchemaPath(targetPath)
+	if highTarget == nil || highTargetPath == "" {
+		return false
 	}
 
-	return strings.Join(pathTkns[:], ".0.")
+	for _, rev := range getter(*highTarget) {
+		if _, revPath := highSchema.resolvePropertySchemaPath(rev); revPath == highSelfPath {
+			return true
+		}
+	}
+	return false
 }
 
-// findPropByNameInFlattenedList searches for a property by camelCase name in a
-// list of properties. It also searches recursively inside any FlattenObject
-// nested objects, since those appear as top-level fields in the Terraform schema.
-func findPropByNameInFlattenedList(props []*Type, name string) *Type {
-	for _, p := range props {
-		if p.Name == name {
-			return p
-		}
-		if p.FlattenObject {
-			if found := findPropByNameInFlattenedList(p.UserProperties(), name); found != nil {
-				return found
-			}
+// Deep clone Type for Resource.maxVersionSchema referencing copied Resource and Type values
+func (t *Type) cloneForMaxSchema(res *Resource, parent *Type) *Type {
+	if t == nil {
+		return nil
+	}
+	c := *t
+	c.ResourceMetadata = res
+	c.ParentMetadata = parent
+	c.Conflicts = slices.Clone(t.Conflicts)
+	if t.ConflictsGroup != nil {
+		cg := slices.Clone(*t.ConflictsGroup)
+		c.ConflictsGroup = &cg
+	}
+	c.AtLeastOneOf = slices.Clone(t.AtLeastOneOf)
+	if t.AtLeastOneOfGroup != nil {
+		ag := slices.Clone(*t.AtLeastOneOfGroup)
+		c.AtLeastOneOfGroup = &ag
+	}
+	c.ExactlyOneOf = slices.Clone(t.ExactlyOneOf)
+	if t.ExactlyOneOfGroup != nil {
+		eg := slices.Clone(*t.ExactlyOneOfGroup)
+		c.ExactlyOneOfGroup = &eg
+	}
+	c.RequiredWith = slices.Clone(t.RequiredWith)
+	if t.RequiredWithGroup != nil {
+		rg := slices.Clone(*t.RequiredWithGroup)
+		c.RequiredWithGroup = &rg
+	}
+	if t.Properties != nil {
+		c.Properties = make([]*Type, len(t.Properties))
+		for i, p := range t.Properties {
+			c.Properties[i] = p.cloneForMaxSchema(res, &c)
 		}
 	}
-	return nil
+	if t.ItemType != nil {
+		c.ItemType = t.ItemType.cloneForMaxSchema(res, &c)
+	}
+	if t.ValueType != nil {
+		c.ValueType = t.ValueType.cloneForMaxSchema(res, &c)
+	}
+	return &c
 }
 
 func (t Type) GetPropertySchemaPathList(propertyList []string) []string {
 	var list []string
 	for _, path := range propertyList {
-		path = t.GetPropertySchemaPath(path)
+		_, path = t.ResourceMetadata.resolvePropertySchemaPath(path)
 		if path != "" {
 			list = append(list, path)
 		}
@@ -1542,13 +1761,7 @@ func (t Type) GetPropertySchemaPathList(propertyList []string) []string {
 }
 
 func (t Type) IsJsonField() bool {
-	if t.CustomFlatten == "templates/terraform/custom_flatten/json_schema.tmpl" {
-		return true
-	}
-	if t.CustomExpand == "templates/terraform/custom_expand/json_schema.tmpl" || t.CustomExpand == "templates/terraform/custom_expand/json_value.tmpl" {
-		return true
-	}
-	return false
+	return t.IsA("JsonValue")
 }
 
 // Checks if the empty value should be set in CAI assets during tfplan2cai conversion

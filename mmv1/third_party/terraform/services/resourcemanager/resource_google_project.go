@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -240,7 +239,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 
 	// Sleep to let the billing account settle before other resources
 	// try to use this project.
-	time.Sleep(15 * time.Second)
+	time.Sleep(15 * config.SleepUnit)
 
 	err = resourceGoogleProjectRead(d, meta)
 	if err != nil {
@@ -261,20 +260,20 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 		}
 
 		if err = EnableServiceUsageProjectServices([]string{"compute.googleapis.com"}, project.ProjectId, billingProject, userAgent, config, d.Timeout(schema.TimeoutCreate)); err != nil {
-			return errwrap.Wrapf("Error enabling the Compute Engine API required to delete the default network: {{err}} ", err)
+			return fmt.Errorf("Error enabling the Compute Engine API required to delete the default network: %w ", err)
 		}
 
 		err = forceDeleteComputeNetwork(d, config, project.ProjectId, "default")
 		// Retry if API is not yet enabled.
 		if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 403) {
-			time.Sleep(15 * time.Second)
+			time.Sleep(15 * config.SleepUnit)
 			err = forceDeleteComputeNetwork(d, config, project.ProjectId, "default")
 		}
 		if err != nil {
 			if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 				log.Printf("[DEBUG] Default network not found for project %q, no need to delete it", project.ProjectId)
 			} else {
-				return errwrap.Wrapf(fmt.Sprintf("Error deleting default network in project %s: {{err}}", project.ProjectId), err)
+				return fmt.Errorf("Error deleting default network in project %s: %w", project.ProjectId, err)
 			}
 		}
 	}
@@ -668,7 +667,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *transport_tpg.Con
 			UserAgent: userAgent,
 		})
 		if err != nil {
-			return errwrap.Wrapf("Error listing firewall rules in proj: {{err}}", err)
+			return fmt.Errorf("Error listing firewall rules in proj: %w", err)
 		}
 
 		items, _ := resp["items"].([]interface{})
@@ -687,7 +686,7 @@ func forceDeleteComputeNetwork(d *schema.ResourceData, config *transport_tpg.Con
 				UserAgent: userAgent,
 			})
 			if err != nil {
-				return errwrap.Wrapf("Error deleting firewall: {{err}}", err)
+				return fmt.Errorf("Error deleting firewall: %w", err)
 			}
 			err = tpgcompute.ComputeOperationWaitTime(config, op, projectId, "Deleting Firewall", userAgent, d.Timeout(schema.TimeoutCreate))
 			if err != nil {
@@ -748,7 +747,7 @@ func updateProjectBillingAccount(d *schema.ResourceData, config *transport_tpg.C
 		if baName == name {
 			return nil
 		}
-		time.Sleep(3 * time.Second)
+		time.Sleep(3 * config.SleepUnit)
 	}
 	return fmt.Errorf("Timed out waiting for billing account to return correct value.  Waiting for %s, got %s.",
 		name, strings.TrimPrefix(ba.BillingAccountName, "billingAccounts/"))
@@ -764,7 +763,7 @@ func deleteComputeNetwork(project, network, userAgent string, config *transport_
 		UserAgent: userAgent,
 	})
 	if err != nil {
-		return errwrap.Wrapf("Error deleting network: {{err}}", err)
+		return fmt.Errorf("Error deleting network: %w", err)
 	}
 
 	err = tpgcompute.ComputeOperationWaitTime(config, op, project, "Deleting Network", userAgent, 10*time.Minute)
@@ -852,7 +851,7 @@ func doEnableServicesRequest(services []string, project, billingProject, userAge
 				ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.ServiceUsageServiceBeingActivated},
 			})
 			if err != nil {
-				return errwrap.Wrapf("failed on request preconditions: {{err}}", err)
+				return fmt.Errorf("failed on request preconditions: %w", err)
 			}
 
 			waitErr := tpgserviceusage.ServiceUsageOperationWait(config, op, billingProject, fmt.Sprintf("Enable Project %q Services: %+v", project, services), userAgent, timeout)
@@ -867,7 +866,7 @@ func doEnableServicesRequest(services []string, project, billingProject, userAge
 	})
 
 	if logicalErr != nil {
-		return errwrap.Wrapf("failed to enable services: {{err}}", logicalErr)
+		return fmt.Errorf("failed to enable services: %w", logicalErr)
 	}
 
 	return nil
@@ -927,7 +926,7 @@ func ListCurrentlyEnabledServices(project, billingProject, userAgent string, con
 		Timeout: timeout,
 	})
 	if err != nil {
-		return nil, errwrap.Wrapf(fmt.Sprintf("Failed to list enabled services for project %s: {{err}}", project), err)
+		return nil, fmt.Errorf("Failed to list enabled services for project %s: %w", project, err)
 	}
 	return apiServices, nil
 }
@@ -938,7 +937,7 @@ func ListCurrentlyEnabledServices(project, billingProject, userAgent string, con
 func waitForServiceUsageEnabledServices(services []string, project, billingProject, userAgent string, config *transport_tpg.Config, timeout time.Duration) error {
 	missing := make([]string, 0, len(services))
 	delay := time.Duration(0)
-	interval := time.Second
+	interval := config.SleepUnit
 	err := transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
 			// Get the list of services that are enabled on the project
@@ -970,7 +969,7 @@ func waitForServiceUsageEnabledServices(services []string, project, billingProje
 		Timeout: timeout,
 	})
 	if err != nil {
-		return errwrap.Wrap(err, fmt.Errorf("failed to enable some service(s) %q for project %s", missing, project))
+		return fmt.Errorf("failed to enable some service(s) %q for project %s: %w", missing, project, err)
 	}
 	return nil
 }

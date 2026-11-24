@@ -1,4 +1,4 @@
-load("@rules_go//go:def.bzl", "go_library")
+load("@rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "loader",
@@ -14,7 +14,14 @@ go_library(
         "//mmv1/api/resource",
         "//mmv1/api/utils",
         "//mmv1/google",
-        "@com_github_golang_glog//:glog",
-        "@org_golang_x_exp//slices",
+    ],
+)
+
+go_test(
+    name = "loader_test",
+    srcs = ["loader_test.go"],
+    deps = [
+        ":loader",
+        "//mmv1/google",
     ],
 )

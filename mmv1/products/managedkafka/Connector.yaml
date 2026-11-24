@@ -39,9 +39,6 @@ samples:
           cps_topic_name: my-cps-topic
           secondary_subnet_id: my-secondary-subnetwork-00
           topic_id: my-topic
-        test_env_vars:
-          billing_account: BILLING_ACCT
-          org_id: ORG_ID
 parameters:
   - name: location
     type: String

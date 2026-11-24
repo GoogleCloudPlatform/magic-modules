@@ -1,0 +1,39 @@
+{{/*
+	The license inside this block applies to this file.
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+if rawPools, ok := res["nodePools"].([]interface{}); ok && len(rawPools) > 0 {
+	apiData := make([]map[string]interface{}, 0, len(rawPools))
+	for _, raw := range rawPools {
+		if m, ok := raw.(map[string]interface{}); ok {
+			apiData = append(apiData, m)
+		}
+	}
+	configData := []map[string]interface{}{}
+	if rawConfig, ok := d.Get("node_pools").([]interface{}); ok {
+		for _, item := range rawConfig {
+			if m, ok := item.(map[string]interface{}); ok {
+				configData = append(configData, m)
+			}
+		}
+	}
+	if sorted, err := tpgresource.SortMapsByConfigOrder(configData, apiData, "id"); err == nil {
+		sortedInterfaces := make([]interface{}, len(sorted))
+		for i, item := range sorted {
+			sortedInterfaces[i] = item
+		}
+		res["nodePools"] = sortedInterfaces
+	} else {
+		log.Printf("[ERROR] Could not sort nodePools in API response: %s", err)
+	}
+}
+
+return res, nil

@@ -47,8 +47,6 @@ samples:
           display_name: basic_custom_module
         test_env_vars:
           org_id: ORG_ID
-        test_vars_overrides:
-          sleep: "true"
   - name: scc_management_organization_security_health_analytics_custom_module_full
     primary_resource_id: example
     exclude_test: true
@@ -58,8 +56,6 @@ samples:
           display_name: full_custom_module
         test_env_vars:
           org_id: ORG_ID
-        test_vars_overrides:
-          sleep: "true"
 parameters:
   - name: organization
     type: String

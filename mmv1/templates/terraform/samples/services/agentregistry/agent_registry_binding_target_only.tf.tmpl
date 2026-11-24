@@ -1,0 +1,34 @@
+resource "google_agent_registry_binding" "{{$.PrimaryResourceId}}" {
+  location     = "us-central1"
+  binding_id   = "{{index $.ResourceIdVars "binding"}}"
+  display_name = "Target Only Binding"
+  description  = "Agent registry binding without source"
+
+  target {
+    identifier = data.google_agent_registry_agent.default.urn
+  }
+
+  auth_provider_binding {
+    auth_provider = google_agent_identity_auth_provider.default.id
+    scopes        = ["https://www.googleapis.com/auth/cloud-platform"]
+    continue_uri  = "https://example.com/continue"
+  }
+
+  depends_on = [google_agent_identity_auth_provider.default]
+}
+
+data "google_agent_registry_agent" "default" {
+  location = "us-central1"
+  filter   = "displayName:Workspace Agent"
+}
+
+resource "google_agent_identity_auth_provider" "default" {
+  location         = "us-central1"
+  auth_provider_id = "{{index $.ResourceIdVars "binding"}}"
+
+  auth_provider_type_params {
+    api_key {
+      api_key = "test-api-key-value"
+    }
+  }
+}

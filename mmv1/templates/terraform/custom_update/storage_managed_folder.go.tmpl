@@ -1,9 +1,75 @@
-_ = config
-
-// we can only get here if force_destroy was updated
 if d.Get("force_destroy") != nil {
 	if err := d.Set("force_destroy", d.Get("force_destroy")); err != nil {
 		return fmt.Errorf("Error updating force_destroy: %s", err)
+	}
+}
+
+if d.HasChange("rapid_cache_config") {
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	oldVal, newVal := d.GetChange("rapid_cache_config")
+	oldRapidCacheConfigProp, err := expandStorageManagedFolderRapidCacheConfig(oldVal, d, config)
+	if err != nil {
+		return err
+	}
+	newRapidCacheConfigProp, err := expandStorageManagedFolderRapidCacheConfig(newVal, d, config)
+	if err != nil {
+		return err
+	}
+
+	obj := make(map[string]interface{})
+	if newRapidCacheConfigProp == nil {
+		obj["rapidCacheConfig"] = nil
+	} else {
+		newConfigMap := newRapidCacheConfigProp.(map[string]interface{})
+		if oldRapidCacheConfigProp != nil {
+			if oldConfigMap, ok := oldRapidCacheConfigProp.(map[string]interface{}); ok {
+				oldPolicies, _ := oldConfigMap["policies"].(map[string]interface{})
+				newPolicies, ok := newConfigMap["policies"].(map[string]interface{})
+				if !ok || newPolicies == nil {
+					newPolicies = make(map[string]interface{})
+					newConfigMap["policies"] = newPolicies
+				}
+				for oldKey := range oldPolicies {
+					if _, exists := newPolicies[oldKey]; !exists {
+						newPolicies[oldKey] = nil
+					}
+				}
+			}
+		}
+		obj["rapidCacheConfig"] = newConfigMap
+	}
+
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{"b/{{bucket}}/managedFolders/{{%name}}"}}")
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[DEBUG] Updating ManagedFolder %q: %#v", d.Id(), obj)
+	headers := make(http.Header)
+
+	billingProject := ""
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "PATCH",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      obj,
+		Timeout:   d.Timeout(schema.TimeoutUpdate),
+		Headers:   headers,
+	})
+	if err != nil {
+		return fmt.Errorf("Error updating ManagedFolder %q: %s", d.Id(), err)
+	} else {
+		log.Printf("[DEBUG] Finished updating ManagedFolder %q: %#v", d.Id(), res)
 	}
 }
 
@@ -22,8 +88,7 @@ if err == nil && identity != nil {
 		}
 	}
 } else {
-	log.Printf("[DEBUG] (Read) identity not set: %s", err)
+	log.Printf("[DEBUG] (Update) identity not set: %s", err)
 }
 
-// all other fields are immutable, don't do anything else
-return nil
+return resourceStorageManagedFolderRead(d, meta)

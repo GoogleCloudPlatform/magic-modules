@@ -1,0 +1,21 @@
+	endpointLocation := tpgresource.LocationFromId(d.Id())
+	if opName, ok := res["name"].(string); ok && opName != "" {
+		w, waitErr := createDiscoveryEngineWaiter(config, res, project, endpointLocation, "Updating UserLicense", userAgent)
+		if waitErr != nil {
+			return fmt.Errorf("Error waiting to update UserLicense: %s", waitErr)
+		}
+		if waitErr = tpgresource.OperationWait(w, "Updating UserLicense", d.Timeout(schema.TimeoutUpdate), config.PollInterval); waitErr != nil {
+			return fmt.Errorf("Error waiting to update UserLicense: %s", waitErr)
+		}
+		if len(w.CommonOperationWaiter.Op.Response) > 0 {
+			var opRes map[string]interface{}
+			if unmarshalErr := json.Unmarshal([]byte(w.CommonOperationWaiter.Op.Response), &opRes); unmarshalErr != nil {
+				return fmt.Errorf("Error decoding UserLicense operation response: %s", unmarshalErr)
+			}
+			if batchErr := checkDiscoveryEngineUserLicenseBatchErrors(opRes); batchErr != nil {
+				return fmt.Errorf("Error updating UserLicense %q: %s", d.Id(), batchErr)
+			}
+		}
+	} else if batchErr := checkDiscoveryEngineUserLicenseBatchErrors(res); batchErr != nil {
+		return fmt.Errorf("Error updating UserLicense %q: %s", d.Id(), batchErr)
+	}

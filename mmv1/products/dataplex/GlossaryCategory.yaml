@@ -31,14 +31,10 @@ samples:
     primary_resource_id: category_test_id
     steps:
       - name: dataplex_glossary_category_basic
-        resource_id_vars:
-          category_name: category-basic
   - name: dataplex_glossary_category_full
     primary_resource_id: category_test_id_full
     steps:
       - name: dataplex_glossary_category_full
-        resource_id_vars:
-          category_name: category-full
 parameters:
   - name: location
     type: String

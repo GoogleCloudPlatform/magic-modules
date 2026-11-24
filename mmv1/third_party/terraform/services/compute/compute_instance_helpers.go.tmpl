@@ -228,12 +228,6 @@ func expandScheduling(v interface{}) (map[string]interface{}, error) {
 			result["hostErrorTimeoutSeconds"] = int64(v.(int))
 		}
 	}
-{{- if ne $.TargetVersionName "ga" }}
-
-	if v, ok := original["maintenance_interval"]; ok && v.(string) != "" {
-		result["maintenanceInterval"] = v.(string)
-	}
-
 	if v, ok := original["graceful_shutdown"]; ok {
 		transformedGracefulShutdown, err := expandGracefulShutdown(v)
 		if err != nil {
@@ -243,11 +237,16 @@ func expandScheduling(v interface{}) (map[string]interface{}, error) {
 			result["gracefulShutdown"] = transformedGracefulShutdown
 		}
 	}
+{{- if ne $.TargetVersionName "ga" }}
+
+	if v, ok := original["maintenance_interval"]; ok && v.(string) != "" {
+		result["maintenanceInterval"] = v.(string)
+	}
 
 	if v, ok := original["skip_guest_os_shutdown"]; ok {
 		result["skipGuestOsShutdown"] = v.(bool)
 	}
-
+{{- end }}
 	if v, ok := original["preemption_notice_duration"]; ok {
 		transformedPreemptionNoticeDuration, err := expandComputePreemptionNoticeDuration(v)
 		if err != nil {
@@ -257,7 +256,6 @@ func expandScheduling(v interface{}) (map[string]interface{}, error) {
 			result["preemptionNoticeDuration"] = transformedPreemptionNoticeDuration
 		}
 	}
-{{- end }}
 	if v, ok := original["local_ssd_recovery_timeout"]; ok {
 		transformedLocalSsdRecoveryTimeout, err := expandComputeLocalSsdRecoveryTimeout(v)
 		if err != nil {
@@ -356,7 +354,6 @@ func expandComputeLocalSsdRecoveryTimeoutSeconds(v interface{}) (interface{}, er
 	return v, nil
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func expandGracefulShutdown(v interface{}) (map[string]interface{}, error) {
 	l := v.([]interface{})
 	if len(l) == 0 || l[0] == nil {
@@ -398,7 +395,6 @@ func expandGracefulShutdownMaxDuration(v interface{}) (map[string]interface{}, e
 
 	return result, nil
 }
-{{ end }}
 
 func flattenScheduling(resp map[string]interface{}) []map[string]interface{} {
 	schedulingMap := map[string]interface{}{
@@ -427,21 +423,21 @@ func flattenScheduling(resp map[string]interface{}) []map[string]interface{} {
 		schedulingMap["host_error_timeout_seconds"] = h
 	}
 
+	if gs, ok := resp["gracefulShutdown"].(map[string]interface{}); ok {
+		schedulingMap["graceful_shutdown"] = flattenGracefulShutdown(gs)
+	}
+
 {{ if ne $.TargetVersionName `ga` -}}
 	schedulingMap["skip_guest_os_shutdown"] = resp["skipGuestOsShutdown"]
 
 	if mi, ok := resp["maintenanceInterval"].(string); ok && mi != "" {
 		schedulingMap["maintenance_interval"] = mi
 	}
-
-	if gs, ok := resp["gracefulShutdown"].(map[string]interface{}); ok {
-		schedulingMap["graceful_shutdown"] = flattenGracefulShutdown(gs)
-	}
+{{- end }}
 
 	if pnd, ok := resp["preemptionNoticeDuration"].(map[string]interface{}); ok {
 		schedulingMap["preemption_notice_duration"] = flattenComputePreemptionNoticeDuration(pnd)
 	}
-{{- end }}
 
 	if lsrt, ok := resp["localSsdRecoveryTimeout"].(map[string]interface{}); ok {
 		schedulingMap["local_ssd_recovery_timeout"] = flattenComputeLocalSsdRecoveryTimeout(lsrt)
@@ -502,7 +498,6 @@ func flattenComputeLocalSsdRecoveryTimeout(v map[string]interface{}) []interface
 	return []interface{}{transformed}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func flattenGracefulShutdown(v map[string]interface{}) []interface{} {
 	if v == nil {
 		return nil
@@ -561,7 +556,6 @@ func flattenComputePreemptionNoticeDuration(v map[string]interface{}) []interfac
 	transformed["seconds"] = getInt(v["seconds"])
 	return []interface{}{transformed}
 }
-{{- end }}
 
 func flattenAccessConfigs(accessConfigs []interface{}) ([]map[string]interface{}, string) {
 	flattened := make([]map[string]interface{}, 0, len(accessConfigs))
@@ -727,6 +721,14 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 		if !ok && iface["igmpQuery"] != nil {
 			log.Printf("[WARN] flattenNetworkInterfaces: unexpected type for igmpQuery at index %d: %T", i, iface["igmpQuery"])
 		}
+		enableVpcScopedDns, ok := iface["enableVpcScopedDns"].(bool)
+		if !ok && iface["enableVpcScopedDns"] != nil {
+			log.Printf("[WARN] flattenNetworkInterfaces: unexpected type for enableVpcScopedDns at index %d: %T", i, iface["enableVpcScopedDns"])
+		}
+		serviceClassId, ok := iface["serviceClassId"].(string)
+		if !ok && iface["serviceClassId"] != nil {
+			log.Printf("[WARN] flattenNetworkInterfaces: unexpected type for serviceClassId at index %d: %T", i, iface["serviceClassId"])
+		}
 
 		subnet, err := tpgresource.ParseSubnetworkFieldValue(subnetwork, d, config)
 		if err != nil {
@@ -735,24 +737,26 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 		region = subnet.Region
 
 		flattened[i] = map[string]interface{}{
-			"network_ip":          networkIP,
-			"network":             tpgresource.ConvertSelfLinkToV1(network),
-			"parent_nic_name":     parentNicName,
-			"vlan":                flattenNetworkInterfaceInt64(iface["vlan"]),
-			"subnetwork":          tpgresource.ConvertSelfLinkToV1(subnetwork),
-			"subnetwork_project":  subnet.Project,
-			"access_config":       ac,
-			"alias_ip_range":      FlattenAliasIpRangeHTTP(d, aliasIpRanges, i),
+			"network_ip":                  networkIP,
+			"network":                     tpgresource.ConvertSelfLinkToV1(network),
+			"parent_nic_name":             parentNicName,
+			"vlan":                        flattenNetworkInterfaceInt64(iface["vlan"]),
+			"subnetwork":                  tpgresource.ConvertSelfLinkToV1(subnetwork),
+			"subnetwork_project":          subnet.Project,
+			"access_config":               ac,
+			"alias_ip_range":              FlattenAliasIpRangeHTTP(d, aliasIpRanges, i),
 			{{ if ne $.TargetVersionName `ga` -}}
 			"alias_ipv6_range":     flattenIpv6AliasRange(d, getInterfaceSlice(iface["aliasIpv6Ranges"]), i),
 			{{- end }}
-			"nic_type":            nicType,
-			"stack_type":          stackType,
-			"ipv6_access_config": flattenIpv6AccessConfigs(ipv6AccessConfigs),
-			"ipv6_address":        ipv6Address,
-			"queue_count":         flattenNetworkInterfaceInt64(iface["queueCount"]),
+			"nic_type":                    nicType,
+			"stack_type":                  stackType,
+			"ipv6_access_config":          flattenIpv6AccessConfigs(ipv6AccessConfigs),
+			"ipv6_address":                ipv6Address,
+			"queue_count":                 flattenNetworkInterfaceInt64(iface["queueCount"]),
 			"internal_ipv6_prefix_length": flattenNetworkInterfaceInt64(iface["internalIpv6PrefixLength"]),
-			"igmp_query":          igmpQuery,
+			"igmp_query":                  igmpQuery,
+			"enable_vpc_scoped_dns":       enableVpcScopedDns,
+			"service_class_id":            serviceClassId,
 		}
 		// Instance template interfaces never have names, so they're absent
 		// in the instance template network_interface schema. We want to use the
@@ -944,6 +948,12 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 		}
 		if networkAttachment != "" {
 			iface["networkAttachment"] = networkAttachment
+		}
+		if v, ok := data["enable_vpc_scoped_dns"].(bool); ok && v {
+			iface["enableVpcScopedDns"] = v
+		}
+		if v, ok := data["service_class_id"].(string); ok && v != "" {
+			iface["serviceClassId"] = v
 		}
 		if v := int64(data["vlan"].(int)); v != 0 {
 			iface["vlan"] = v
@@ -1213,6 +1223,20 @@ func flattenConfidentialInstanceConfig(ConfidentialInstanceConfig map[string]int
 	{{"}}"}}
 }
 
+func performanceMonitoringUnitDiffSuppress(_ string, old, new string, d *schema.ResourceData) bool {
+	// DiffSuppressFunc runs during planning, before IsNewResource is marked during apply.
+	// An empty ID identifies a resource that does not exist in state yet, so a new resource
+	// must send an explicitly configured STANDARD value to the API.
+	if d == nil || d.Id() == "" {
+		return false
+	}
+
+	// Existing resources may have recorded an empty value after the suppressor from
+	// https://github.com/GoogleCloudPlatform/magic-modules/pull/17887 omitted an
+	// explicitly configured STANDARD value during creation.
+	return (old == "" && new == "STANDARD") || (old == "STANDARD" && new == "")
+}
+
 func expandAdvancedMachineFeatures(d tpgresource.TerraformResourceData) map[string]interface{} {
 	if _, ok := d.GetOk("advanced_machine_features"); !ok {
 		return nil
@@ -1293,16 +1317,10 @@ func schedulingHasChangeRequiringReboot(d *schema.ResourceData) bool {
 	oScheduling := o.([]interface{})[0].(map[string]interface{})
 	newScheduling := n.([]interface{})[0].(map[string]interface{})
 
-{{ if ne $.TargetVersionName `ga` -}}
 	return hasNodeAffinitiesChanged(oScheduling, newScheduling) ||
 		hasMaxRunDurationChanged(oScheduling, newScheduling) ||
 		hasGracefulShutdownChangedWithReboot(d, oScheduling, newScheduling) ||
 		hasTerminationTimeChanged(oScheduling, newScheduling)
-{{- else }}
-	return (hasNodeAffinitiesChanged(oScheduling, newScheduling) ||
-		hasMaxRunDurationChanged(oScheduling, newScheduling) ||
-		hasTerminationTimeChanged(oScheduling, newScheduling))
-{{- end }}
 }
 
 // Terraform doesn't correctly calculate changes on schema.Set, so we do it manually
@@ -1346,13 +1364,12 @@ func schedulingHasChangeWithoutReboot(d *schema.ResourceData) bool {
 	if oScheduling["host_error_timeout_seconds"] != newScheduling["host_error_timeout_seconds"] {
 		return true
 	}
+	if hasGracefulShutdownChanged(oScheduling, newScheduling) {
+		return true
+	}
 {{- if ne $.TargetVersionName "ga" }}
 
 	if oScheduling["skip_guest_os_shutdown"] != newScheduling["skip_guest_os_shutdown"] {
-		return true
-	}
-
-	if hasGracefulShutdownChanged(oScheduling, newScheduling) {
 		return true
 	}
 {{- end }}
@@ -1378,7 +1395,6 @@ func hasTerminationTimeChanged(oScheduling, nScheduling map[string]interface{}) 
 	return false
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func hasGracefulShutdownChangedWithReboot(d *schema.ResourceData, oScheduling, nScheduling map[string]interface{}) bool {
 	allow_stopping_for_update := d.Get("allow_stopping_for_update").(bool)
 	if !allow_stopping_for_update {
@@ -1429,7 +1445,6 @@ func hasGracefulShutdownChanged(oScheduling, nScheduling map[string]interface{})
 
 	return false
 }
-{{- end }}
 
 func hasMaxRunDurationChanged(oScheduling, nScheduling map[string]interface{}) bool {
 	oMrd := oScheduling["max_run_duration"].([]interface{})

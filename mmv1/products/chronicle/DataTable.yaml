@@ -108,13 +108,7 @@ properties:
           immutable: true
         - name: columnType
           type: Enum
-          description: |-
-            Column type can be STRING, CIDR (Ex- 10.1.1.0/24), REGEX
-            Possible values:
-            STRING
-            REGEX
-            CIDR
-            NUMBER
+          description: Column type can be STRING, CIDR (Ex- 10.1.1.0/24), REGEX
           enum_values:
             - STRING
             - REGEX
@@ -207,16 +201,12 @@ properties:
         item_type:
           type: String
   - name: updateSource
-    type: Enum
+    type: String
     description: |-
       Possible values:
       USER
       RULE
       SEARCH
-    enum_values:
-      - USER
-      - RULE
-      - SEARCH
     output: true
   - name: updateTime
     type: String

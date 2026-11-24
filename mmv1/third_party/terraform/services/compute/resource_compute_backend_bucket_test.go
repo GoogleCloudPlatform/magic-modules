@@ -151,7 +151,7 @@ func TestAccComputeBackendBucket_withCompressionMode(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeBackendBucket_withCompressionMode(backendName, storageName, "DISABLED"),
+				Config: testAccComputeBackendBucket_withCompressionMode(backendName, storageName, true, "DISABLED"),
 			},
 			{
 				ResourceName:      "google_compute_backend_bucket.foobar",
@@ -159,7 +159,15 @@ func TestAccComputeBackendBucket_withCompressionMode(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeBackendBucket_withCompressionMode(backendName, storageName, "AUTOMATIC"),
+				Config: testAccComputeBackendBucket_withCompressionMode(backendName, storageName, true, "AUTOMATIC"),
+			},
+			{
+				ResourceName:      "google_compute_backend_bucket.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeBackendBucket_withCompressionMode(backendName, storageName, false, "AUTOMATIC"),
 			},
 			{
 				ResourceName:      "google_compute_backend_bucket.foobar",
@@ -369,12 +377,12 @@ resource "google_compute_security_policy" "policy" {
 `, bucketName, polLink, bucketName, polName)
 }
 
-func testAccComputeBackendBucket_withCompressionMode(backendName, storageName, compressionMode string) string {
+func testAccComputeBackendBucket_withCompressionMode(backendName, storageName string, enableCdn bool, compressionMode string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_bucket" "foobar" {
   name             = "%s"
   bucket_name      = google_storage_bucket.bucket_one.name
-  enable_cdn       = true
+  enable_cdn       = %t
   compression_mode = "%s"
 }
 
@@ -382,7 +390,7 @@ resource "google_storage_bucket" "bucket_one" {
   name     = "%s"
   location = "EU"
 }
-`, backendName, compressionMode, storageName)
+`, backendName, enableCdn, compressionMode, storageName)
 }
 
 func testAccComputeBackendBucket_withCdnPolicy4(backendName, storageName string, age, code, ttl int) string {

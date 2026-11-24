@@ -42,9 +42,6 @@ samples:
           cluster_id: my-cluster
           connect_cluster_id: my-connect-cluster
           secondary_subnet_id: my-secondary-subnetwork
-        test_env_vars:
-          billing_account: BILLING_ACCT
-          org_id: ORG_ID
 parameters:
   - name: location
     type: String

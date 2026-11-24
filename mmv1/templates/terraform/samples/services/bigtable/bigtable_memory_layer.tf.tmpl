@@ -1,0 +1,35 @@
+resource "google_bigtable_instance" "instance" {
+  name          = "{{index $.ResourceIdVars "instance_name"}}"
+  instance_type = "PRODUCTION"
+  edition       = "ENTERPRISE_PLUS"
+  cluster {
+    cluster_id   = "{{index $.ResourceIdVars "cluster_id"}}"
+    zone         = "us-central1-b"
+    num_nodes    = 1
+    storage_type = "SSD"
+  }
+
+  deletion_protection = false
+}
+
+resource "google_bigtable_memory_layer" "{{$.PrimaryResourceId}}" {
+  instance = google_bigtable_instance.instance.name
+  cluster  = google_bigtable_instance.instance.cluster[0].cluster_id
+}
+
+resource "google_bigtable_app_profile" "ap" {
+  instance       = google_bigtable_instance.instance.name
+  app_profile_id = "{{index $.ResourceIdVars "app_profile_name"}}"
+
+  single_cluster_routing {
+    cluster_id                 = google_bigtable_memory_layer.{{$.PrimaryResourceId}}.cluster
+    allow_transactional_writes = true
+  }
+
+  standard_isolation {
+    priority = "PRIORITY_LOW"
+    memory_config {}
+  }
+
+  ignore_warnings = true
+}

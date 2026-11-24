@@ -28,20 +28,6 @@ resource "google_project_service" "ailogic" {
   service = "firebasevertexai.googleapis.com"
 }
 
-resource "google_apikeys_key" "gemini" {
-  provider  = google-beta
-  project  = google_project.project.project_id
-
-  name         = "{{index $.ResourceIdVars "api_key_id"}}"
-  display_name = "Gemini Developer API key"
-
-  restrictions {
-    api_targets {
-      service = "generativelanguage.googleapis.com"
-    }
-  }
-}
-
 # It takes a while for permissions to propagate
 # If your Terraform setup has a retry mechanism, this wait is unnecessary
 resource "time_sleep" "wait_30s" {
@@ -57,10 +43,6 @@ resource "google_firebase_ai_logic_config" "default" {
   provider  = google-beta
   project   = google_firebase_project.default.project
   location  = "global"
-
-  generative_language_config {
-    api_key = google_apikeys_key.gemini.key_string
-  }
 
   telemetry_config {
     mode = "ALL"

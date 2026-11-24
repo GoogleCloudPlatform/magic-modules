@@ -379,6 +379,137 @@ func TestComputeBreakingChanges(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "nested required field under computed-only ancestor becoming computed-only is not breaking",
+			oldResourceMap: map[string]*schema.Resource{
+				"google-x": {
+					Schema: map[string]*schema.Schema{
+						"output-block": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"direct-child": {Type: schema.TypeString, Required: true},
+									"nested": {
+										Type:     schema.TypeList,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"deep-child": {Type: schema.TypeString, Required: true},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			newResourceMap: map[string]*schema.Resource{
+				"google-x": {
+					Schema: map[string]*schema.Schema{
+						"output-block": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"direct-child": {Type: schema.TypeString, Computed: true},
+									"nested": {
+										Type:     schema.TypeList,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"deep-child": {Type: schema.TypeString, Computed: true},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "nested field under optional+computed ancestor becoming computed-only is breaking",
+			oldResourceMap: map[string]*schema.Resource{
+				"google-x": {
+					Schema: map[string]*schema.Schema{
+						"oc-block": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"child": {Type: schema.TypeString, Required: true},
+								},
+							},
+						},
+					},
+				},
+			},
+			newResourceMap: map[string]*schema.Resource{
+				"google-x": {
+					Schema: map[string]*schema.Schema{
+						"oc-block": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"child": {Type: schema.TypeString, Computed: true},
+								},
+							},
+						},
+					},
+				},
+			},
+			wantViolations: []BreakingChange{
+				{
+					Message:                "Field `oc-block.child` became Computed only on `google-x`",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/breaking-changes/breaking-changes#field-becoming-computed",
+				},
+			},
+		},
+		{
+			name: "nested field under optional ancestor becoming computed-only is breaking",
+			oldResourceMap: map[string]*schema.Resource{
+				"google-x": {
+					Schema: map[string]*schema.Schema{
+						"opt-block": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"child": {Type: schema.TypeString, Required: true},
+								},
+							},
+						},
+					},
+				},
+			},
+			newResourceMap: map[string]*schema.Resource{
+				"google-x": {
+					Schema: map[string]*schema.Schema{
+						"opt-block": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"child": {Type: schema.TypeString, Computed: true},
+								},
+							},
+						},
+					},
+				},
+			},
+			wantViolations: []BreakingChange{
+				{
+					Message:                "Field `opt-block.child` became Computed only on `google-x`",
+					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/breaking-changes/breaking-changes#field-becoming-computed",
+				},
+			},
+		},
 	}
 
 	for _, tc := range cases {

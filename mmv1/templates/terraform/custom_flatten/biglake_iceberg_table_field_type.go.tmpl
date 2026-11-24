@@ -1,0 +1,11 @@
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	// List, map and struct types are JSON objects; primitive types are plain strings.
+	if _, ok := v.(map[string]interface{}); !ok {
+		return v
+	}
+	b, err := json.Marshal(v)
+	if err != nil {
+		log.Printf("[ERROR] failed to marshal field type to JSON: %v", err)
+	}
+	return string(b)
+}

@@ -155,6 +155,38 @@ resource "google_recaptcha_enterprise_key" "primary" {
 
 
 ```
+## Example Usage - express_key
+A basic test of recaptcha enterprise key that can be used by reCAPTCHA Express
+```hcl
+resource "google_recaptcha_enterprise_key" "primary" {
+  display_name = "display-name-one"
+  project      = "my-project-name"
+
+  express_settings {}
+
+  labels = {
+    label-one = "value-one"
+  }
+}
+
+
+```
+## Example Usage - universal_key
+A basic test of recaptcha enterprise key that can be used by universal frontend integrations
+```hcl
+resource "google_recaptcha_enterprise_key" "primary" {
+  display_name = "display-name-one"
+  project      = "my-project-name"
+
+  universal_settings {}
+
+  labels = {
+    label-one = "value-one"
+  }
+}
+
+
+```
 
 ## Argument Reference
 
@@ -171,10 +203,16 @@ The following arguments are supported:
 * `android_settings` -
   (Optional)
   Settings for keys that can be used by Android apps.
+  Structure is [documented below](#nested_android_settings).
   
+* `express_settings` -
+  (Optional)
+  Settings for keys that can be used by reCAPTCHA Express.
+
 * `ios_settings` -
   (Optional)
   Settings for keys that can be used by iOS apps.
+  Structure is [documented below](#nested_ios_settings).
   
 * `labels` -
   (Optional)
@@ -190,14 +228,21 @@ Please refer to the field `effective_labels` for all of the labels present on th
 * `testing_options` -
   (Optional)
   Options for user acceptance testing.
+  Structure is [documented below](#nested_testing_options).
+
+* `universal_settings` -
+  (Optional)
+  Settings for keys that can be used by universal frontend integrations.
   
 * `waf_settings` -
   (Optional)
   Settings specific to keys that can be used for WAF (Web Application Firewall).
+  Structure is [documented below](#nested_waf_settings).
   
 * `web_settings` -
   (Optional)
   Settings for keys that can be used by websites.
+  Structure is [documented below](#nested_web_settings).
 
 * `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
    When a 'terraform destroy' or 'terraform apply' would delete the resource,
@@ -207,7 +252,7 @@ Please refer to the field `effective_labels` for all of the labels present on th
    When set to "DELETE", deleting the resource is allowed. 
 
 
-The `android_settings` block supports:
+<a name="nested_android_settings"></a>The `android_settings` block supports:
     
 * `allow_all_package_names` -
   (Optional)
@@ -217,7 +262,7 @@ The `android_settings` block supports:
   (Optional)
   Android package names of apps allowed to use the key. Example: 'com.companyname.appname'
     
-The `ios_settings` block supports:
+<a name="nested_ios_settings"></a>The `ios_settings` block supports:
     
 * `allow_all_bundle_ids` -
   (Optional)
@@ -227,7 +272,7 @@ The `ios_settings` block supports:
   (Optional)
   iOS bundle ids of apps allowed to use the key. Example: 'com.companyname.productname.appname'
     
-The `testing_options` block supports:
+<a name="nested_testing_options"></a>The `testing_options` block supports:
     
 * `testing_challenge` -
   (Optional)
@@ -237,7 +282,7 @@ The `testing_options` block supports:
   (Optional)
   All assessments for this Key will return this score. Must be between 0 (likely not legitimate) and 1 (likely legitimate) inclusive.
     
-The `waf_settings` block supports:
+<a name="nested_waf_settings"></a>The `waf_settings` block supports:
     
 * `waf_feature` -
   (Required)
@@ -247,7 +292,7 @@ The `waf_settings` block supports:
   (Required)
   The WAF service that uses this key. Possible values: CA, FASTLY
     
-The `web_settings` block supports:
+<a name="nested_web_settings"></a>The `web_settings` block supports:
     
 * `allow_all_domains` -
   (Optional)
@@ -272,27 +317,27 @@ The `web_settings` block supports:
 * `challenge_settings` -
   (Optional)
   Settings for POLICY_BASED_CHALLENGE keys to control when a challenge is triggered.
-  Structure is documented below.
+  Structure is [documented below](#nested_web_settings_challenge_settings).
 
-The `challenge_settings` block supports:
+<a name="nested_web_settings_challenge_settings"></a>The `challenge_settings` block supports:
 
 * `default_settings` -
   (Required)
   Defines when a challenge is triggered by default.
-  Structure is documented below.
+  Structure is [documented below](#nested_web_settings_challenge_settings_default_settings).
 
 * `action_settings` -
   (Optional)
   The action to score threshold map. The action name should be the same as the action name passed in the `data-action` attribute. Action names are case-insensitive.
-  Structure is documented below.
+  Structure is [documented below](#nested_web_settings_challenge_settings_action_settings).
 
-The `default_settings` block supports:
+<a name="nested_web_settings_challenge_settings_default_settings"></a>The `default_settings` block supports:
 
 * `score_threshold` -
   (Required)
   A challenge is triggered if the end-user score is below that threshold. Value must be between 0 and 1 (inclusive).
 
-The `action_settings` block supports:
+<a name="nested_web_settings_challenge_settings_action_settings"></a>The `action_settings` block supports:
 
 * `action` -
   (Required)

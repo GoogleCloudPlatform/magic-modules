@@ -1,0 +1,14 @@
+resource "google_cloud_identity_inbound_oidc_sso_profile" "{{$.PrimaryResourceId}}" {
+  customer     = "customers/{{index $.TestEnvVars "cust_id"}}"
+  display_name = "{{index $.ResourceIdVars "display_name"}}"
+
+  idp_config {
+    issuer_uri          = "{{index $.Vars "issuer_uri"}}"
+    change_password_uri = "{{index $.Vars "change_password_uri"}}"
+  }
+
+  rp_config {
+    client_id     = "{{index $.Vars "client_id"}}"
+    client_secret = "{{index $.Vars "client_secret"}}"
+  }
+}

@@ -6,9 +6,6 @@ import (
 	"log"
 	"os"
 	"strings"
-
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 var GA_VERSION = "ga"
@@ -111,7 +108,6 @@ func createMap(packageNames []string, servicesDir string) (string, error) {
         "displayName" to "%s",
         "path" to "%s"
     )` // No trailing comma
-	caser := cases.Title(language.English)
 
 	var b strings.Builder
 	// Add copyright header
@@ -127,12 +123,16 @@ func createMap(packageNames []string, servicesDir string) (string, error) {
 	b.WriteString("var services = mapOf(\n")
 	for i, p := range packageNames {
 		path := fmt.Sprintf("%s/%s", servicesDir, p)
+		displayName := p
+		if len(p) > 0 {
+			displayName = strings.ToUpper(p[:1]) + p[1:]
+		}
 		var e string
 		if i < (len(packageNames) - 1) {
-			e = fmt.Sprintf(entryTemplate, p, p, caser.String(p), path)
+			e = fmt.Sprintf(entryTemplate, p, p, displayName, path)
 		} else {
 			// Final entry in map doesn't have comma
-			e = fmt.Sprintf(lastEntryTemplate, p, p, caser.String(p), path)
+			e = fmt.Sprintf(lastEntryTemplate, p, p, displayName, path)
 		}
 
 		_, err := fmt.Fprint(&b, e)

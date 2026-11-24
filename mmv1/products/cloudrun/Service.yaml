@@ -76,16 +76,12 @@ samples:
       - name: 'cloud_run_service_basic'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-srv'
-        test_env_vars:
-          project: 'PROJECT_NAME'
   - name: 'cloud_run_service_gpu'
     primary_resource_id: 'default'
     steps:
       - name: 'cloud_run_service_gpu'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-srv'
-        test_env_vars:
-          project: 'PROJECT_NAME'
   - name: 'cloud_run_service_sql'
     primary_resource_id: 'default'
     steps:
@@ -107,8 +103,6 @@ samples:
       - name: 'cloud_run_service_noauth'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-srv'
-        test_env_vars:
-          project: 'PROJECT_NAME'
   - name: 'cloud_run_service_multiple_environment_variables'
     primary_resource_id: 'default'
     exclude_basic_doc: true
@@ -116,8 +110,6 @@ samples:
       - name: 'cloud_run_service_multiple_environment_variables'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-srv'
-        test_env_vars:
-          project: 'PROJECT_NAME'
         ignore_read_extra:
           - 'autogenerate_revision_name'
   - name: 'cloud_run_service_secret_environment_variables'
@@ -131,8 +123,6 @@ samples:
         test_vars_overrides:
           # for backward compatible
           secret_id: '"secret" + randomSuffix'
-        test_env_vars:
-          project: 'PROJECT_NAME'
         ignore_read_extra:
           - 'autogenerate_revision_name'
   - name: 'cloud_run_service_secret_volumes'
@@ -146,8 +136,6 @@ samples:
         test_vars_overrides:
           # for backward compatible
           secret_id: '"secret" + randomSuffix'
-        test_env_vars:
-          project: 'PROJECT_NAME'
         ignore_read_extra:
           - 'autogenerate_revision_name'
   - name: 'cloud_run_service_probes'
@@ -162,8 +150,6 @@ samples:
       - name: 'cloud_run_service_readiness_probe'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-srv-rp'
-        test_env_vars:
-          project: 'PROJECT_NAME'
   - name: 'cloud_run_service_multicontainer'
     primary_resource_id: 'default'
     min_version: 'beta'
@@ -171,24 +157,18 @@ samples:
       - name: 'cloud_run_service_multicontainer'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-srv'
-        test_env_vars:
-          project: 'PROJECT_NAME'
   - name: 'cloud_run_service_iap'
     primary_resource_id: 'default'
     steps:
       - name: 'cloud_run_service_iap'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-srv'
-        test_env_vars:
-          project: 'PROJECT_NAME'
   - name: 'cloud_run_service_sandbox'
     primary_resource_id: 'default'
     steps:
       - name: 'cloud_run_service_sandbox'
         resource_id_vars:
           cloud_run_service_name: 'cloudrun-srv'
-        test_env_vars:
-          project: 'PROJECT_NAME'
 virtual_fields:
   - name: 'autogenerate_revision_name'
     description: |
@@ -387,14 +367,12 @@ properties:
           - name: 'spec'
             type: NestedObject
             description: RevisionSpec holds the desired state of the Revision (from the client).
-            required: true
             default_from_api: true
             properties:
               - name: 'containers'
                 type: Array
                 description: |-
                   Containers defines the unit of execution for this Revision.
-                required: true
                 default_from_api: true
                 item_type:
                   type: NestedObject
@@ -639,10 +617,6 @@ properties:
                             TcpSocket specifies an action involving a TCP port.
                           send_empty_value: true
                           allow_empty_object: true
-                          exactly_one_of:
-                            - 'template.0.spec.0.containers.0.startup_probe.0.tcp_socket'
-                            - 'template.0.spec.0.containers.0.startup_probe.0.http_get'
-                            - 'template.0.spec.0.containers.0.startup_probe.0.grpc'
                           properties:
                             - name: 'port'
                               type: Integer
@@ -656,10 +630,6 @@ properties:
                             HttpGet specifies the http request to perform.
                           send_empty_value: true
                           allow_empty_object: true
-                          exactly_one_of:
-                            - 'template.0.spec.0.containers.0.startup_probe.0.tcp_socket'
-                            - 'template.0.spec.0.containers.0.startup_probe.0.http_get'
-                            - 'template.0.spec.0.containers.0.startup_probe.0.grpc'
                           properties:
                             - name: 'path'
                               type: String
@@ -696,10 +666,6 @@ properties:
                             GRPC specifies an action involving a GRPC port.
                           send_empty_value: true
                           allow_empty_object: true
-                          exactly_one_of:
-                            - 'template.0.spec.0.containers.0.startup_probe.0.tcp_socket'
-                            - 'template.0.spec.0.containers.0.startup_probe.0.http_get'
-                            - 'template.0.spec.0.containers.0.startup_probe.0.grpc'
                           properties:
                             - name: 'port'
                               type: Integer
@@ -748,9 +714,6 @@ properties:
                             HttpGet specifies the http request to perform.
                           send_empty_value: true
                           allow_empty_object: true
-                          exactly_one_of:
-                            - 'template.0.spec.0.containers.0.readiness_probe.0.http_get'
-                            - 'template.0.spec.0.containers.0.readiness_probe.0.grpc'
                           properties:
                             - name: 'path'
                               type: String
@@ -769,9 +732,6 @@ properties:
                             GRPC specifies an action involving a GRPC port.
                           send_empty_value: true
                           allow_empty_object: true
-                          exactly_one_of:
-                            - 'template.0.spec.0.containers.0.readiness_probe.0.http_get'
-                            - 'template.0.spec.0.containers.0.readiness_probe.0.grpc'
                           properties:
                             - name: 'port'
                               type: Integer
@@ -822,9 +782,6 @@ properties:
                             HttpGet specifies the http request to perform.
                           send_empty_value: true
                           allow_empty_object: true
-                          exactly_one_of:
-                            - 'template.0.spec.0.containers.0.liveness_probe.0.http_get'
-                            - 'template.0.spec.0.containers.0.liveness_probe.0.grpc'
                           properties:
                             - name: 'path'
                               type: String
@@ -861,9 +818,6 @@ properties:
                             GRPC specifies an action involving a GRPC port.
                           send_empty_value: true
                           allow_empty_object: true
-                          exactly_one_of:
-                            - 'template.0.spec.0.containers.0.liveness_probe.0.http_get'
-                            - 'template.0.spec.0.containers.0.liveness_probe.0.grpc'
                           properties:
                             - name: 'port'
                               type: Integer
@@ -1031,7 +985,7 @@ properties:
                           description: |-
                             If true, mount the NFS volume as read only in all mounts. Defaults to false.
               - name: 'servingState'
-                type: Enum
+                type: String
                 description: |-
                   ServingState holds a value describing the state the resources
                   are in for this Revision.
@@ -1039,10 +993,6 @@ properties:
                   that the system will manipulate this based on routability and load.
                 output: true
                 deprecation_message: '`serving_state` is deprecated and will be removed in a future major release. This field is not supported by the Cloud Run API.'
-                enum_values:
-                  - 'ACTIVE'
-                  - 'RESERVE'
-                  - 'RETIRED'
   - name: 'status'
     type: NestedObject
     description: The current status of the Service.

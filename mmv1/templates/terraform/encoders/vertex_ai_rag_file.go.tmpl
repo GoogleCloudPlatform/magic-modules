@@ -1,0 +1,7 @@
+// ragFiles:import expects all import settings nested under importRagFilesConfig.
+importRagFilesConfig := make(map[string]interface{}, len(obj))
+for k, v := range obj {
+	importRagFilesConfig[k] = v
+}
+
+return map[string]interface{}{"importRagFilesConfig": importRagFilesConfig}, nil

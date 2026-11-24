@@ -1,0 +1,637 @@
+// Copyright 2026 Google Inc.
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package vertexai
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"context"
+	"strings"
+	"testing"
+
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+)
+
+func testModelDevelopmentClusterToCtyValue(v interface{}) cty.Value {
+	switch val := v.(type) {
+	case nil:
+		return cty.NullVal(cty.DynamicPseudoType)
+	case string:
+		return cty.StringVal(val)
+	case bool:
+		return cty.BoolVal(val)
+	case int:
+		return cty.NumberIntVal(int64(val))
+	case int64:
+		return cty.NumberIntVal(val)
+	case float64:
+		return cty.NumberFloatVal(val)
+	case []interface{}:
+		if len(val) == 0 {
+			return cty.ListValEmpty(cty.DynamicPseudoType)
+		}
+		elems := make([]cty.Value, len(val))
+		for i, item := range val {
+			elems[i] = testModelDevelopmentClusterToCtyValue(item)
+		}
+		return cty.TupleVal(elems)
+	case map[string]interface{}:
+		attrs := make(map[string]cty.Value, len(val))
+		for k, item := range val {
+			attrs[k] = testModelDevelopmentClusterToCtyValue(item)
+		}
+		return cty.ObjectVal(attrs)
+	default:
+		return cty.NullVal(cty.DynamicPseudoType)
+	}
+}
+
+func testModelDevelopmentClusterResourceData(t *testing.T, res *schema.Resource, stateMap, configMap map[string]interface{}) *schema.ResourceData {
+	t.Helper()
+	sm := schema.InternalMap(res.Schema)
+	var s *terraform.InstanceState
+	if stateMap != nil {
+		stateDiff, err := sm.Diff(context.Background(), nil, terraform.NewResourceConfigRaw(stateMap), nil, nil, true)
+		if err != nil {
+			t.Fatalf("error creating state diff: %v", err)
+		}
+		stateData, err := sm.Data(nil, stateDiff)
+		if err != nil {
+			t.Fatalf("error creating state data: %v", err)
+		}
+		stateData.SetId("projects/test-project/locations/us-central1/modelDevelopmentClusters/test-cluster")
+		s = stateData.State()
+	}
+	diff, err := sm.Diff(context.Background(), s, terraform.NewResourceConfigRaw(configMap), nil, nil, false)
+	if err != nil {
+		t.Fatalf("error creating config diff: %v", err)
+	}
+	d, err := sm.Data(s, diff)
+	if err != nil {
+		t.Fatalf("error creating resource data: %v", err)
+	}
+	return d
+}
+
+func TestUnitVertexAIModelDevelopmentCluster_GkeVersionDiffSuppress(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		name       string
+		k          string
+		old        string
+		new        string
+		cpState    string
+		cpConfig   string
+		suppressed bool
+	}{
+		{
+			name:       "control_plane_version service default wildcard matches non-empty old",
+			k:          "orchestrator_spec.0.kubernetes_spec.0.control_plane_version",
+			old:        "1.35.8-gke.1796000",
+			new:        "-",
+			suppressed: true,
+		},
+		{
+			name:       "control_plane_version service default wildcard does not suppress empty old",
+			k:          "orchestrator_spec.0.kubernetes_spec.0.control_plane_version",
+			old:        "",
+			new:        "-",
+			suppressed: false,
+		},
+		{
+			name:       "node_pool_versions wildcard suppresses when matching control_plane_version",
+			k:          "orchestrator_spec.0.kubernetes_spec.0.node_pool_versions.cpu1",
+			old:        "1.35.8-gke.1796000",
+			new:        "-",
+			cpState:    "1.35.8-gke.1796000",
+			cpConfig:   "1.35.8-gke.1796000",
+			suppressed: true,
+		},
+		{
+			name:       "node_pool_versions wildcard suppresses when control_plane_version config is wildcard and state matches",
+			k:          "orchestrator_spec.0.kubernetes_spec.0.node_pool_versions.cpu1",
+			old:        "1.35.8-gke.1796000",
+			new:        "-",
+			cpState:    "1.35.8-gke.1796000",
+			cpConfig:   "-",
+			suppressed: true,
+		},
+		{
+			name:       "node_pool_versions wildcard does not suppress when control_plane_version is upgrading",
+			k:          "orchestrator_spec.0.kubernetes_spec.0.node_pool_versions.cpu1",
+			old:        "1.35.8-gke.1796000",
+			new:        "-",
+			cpState:    "1.35.8-gke.1796000",
+			cpConfig:   "1.36",
+			suppressed: false,
+		},
+		{
+			name:       "node_pool_versions wildcard does not suppress when node pool lags behind control_plane_version",
+			k:          "orchestrator_spec.0.kubernetes_spec.0.node_pool_versions.cpu1",
+			old:        "1.34.1-gke.100",
+			new:        "-",
+			cpState:    "1.35.8-gke.1796000",
+			cpConfig:   "1.35.8-gke.1796000",
+			suppressed: false,
+		},
+		{
+			name:       "node_pool_versions wildcard does not suppress when node pool patch lags and control_plane_version config is minor prefix",
+			k:          "orchestrator_spec.0.kubernetes_spec.0.node_pool_versions.cpu1",
+			old:        "1.35.1-gke.100",
+			new:        "-",
+			cpState:    "1.35.8-gke.1796000",
+			cpConfig:   "1.35",
+			suppressed: false,
+		},
+		{
+			name:       "node_pool_versions wildcard suppresses when node pool matches state control_plane_version and config is minor prefix",
+			k:          "orchestrator_spec.0.kubernetes_spec.0.node_pool_versions.cpu1",
+			old:        "1.35.8-gke.1796000",
+			new:        "-",
+			cpState:    "1.35.8-gke.1796000",
+			cpConfig:   "1.35",
+			suppressed: true,
+		},
+		{
+			name:       "node_pool_versions wildcard does not suppress when ResourceData is nil",
+			k:          "orchestrator_spec.0.kubernetes_spec.0.node_pool_versions.cpu1",
+			old:        "1.35.8-gke.1796000",
+			new:        "-",
+			suppressed: false,
+		},
+		{
+			name:       "major and minor match without patch in config",
+			k:          "orchestrator_spec.0.kubernetes_spec.0.control_plane_version",
+			old:        "1.35.8-gke.1796000",
+			new:        "1.35",
+			suppressed: true,
+		},
+		{
+			name:       "minor mismatch",
+			k:          "orchestrator_spec.0.kubernetes_spec.0.control_plane_version",
+			old:        "1.35.8-gke.1796000",
+			new:        "1.36",
+			suppressed: false,
+		},
+		{
+			name:       "major mismatch",
+			k:          "orchestrator_spec.0.kubernetes_spec.0.control_plane_version",
+			old:        "1.35.8-gke.1796000",
+			new:        "2.35",
+			suppressed: false,
+		},
+		{
+			name:       "major minor patch match without gke suffix in config",
+			k:          "orchestrator_spec.0.kubernetes_spec.0.control_plane_version",
+			old:        "1.35.8-gke.1796000",
+			new:        "1.35.8",
+			suppressed: true,
+		},
+		{
+			name:       "patch mismatch",
+			k:          "orchestrator_spec.0.kubernetes_spec.0.control_plane_version",
+			old:        "1.35.8-gke.1796000",
+			new:        "1.35.7",
+			suppressed: false,
+		},
+		{
+			name:       "full version and gke suffix match",
+			k:          "orchestrator_spec.0.kubernetes_spec.0.control_plane_version",
+			old:        "1.35.8-gke.1796000",
+			new:        "1.35.8-gke.1796000",
+			suppressed: true,
+		},
+		{
+			name:       "gke suffix mismatch",
+			k:          "orchestrator_spec.0.kubernetes_spec.0.control_plane_version",
+			old:        "1.35.8-gke.1796000",
+			new:        "1.35.8-gke.1000",
+			suppressed: false,
+		},
+		{
+			name:       "empty old value",
+			k:          "orchestrator_spec.0.kubernetes_spec.0.control_plane_version",
+			old:        "",
+			new:        "1.35",
+			suppressed: false,
+		},
+		{
+			name:       "empty new value",
+			k:          "orchestrator_spec.0.kubernetes_spec.0.control_plane_version",
+			old:        "1.35.8-gke.1796000",
+			new:        "",
+			suppressed: false,
+		},
+		{
+			name:       "both empty",
+			k:          "orchestrator_spec.0.kubernetes_spec.0.control_plane_version",
+			old:        "",
+			new:        "",
+			suppressed: true,
+		},
+	}
+
+	res := ResourceVertexAIModelDevelopmentCluster()
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			var d *schema.ResourceData
+			if tc.cpState != "" || tc.cpConfig != "" {
+				stateMap := map[string]interface{}{
+					"orchestrator_spec": []interface{}{
+						map[string]interface{}{
+							"kubernetes_spec": []interface{}{
+								map[string]interface{}{
+									"control_plane_version": tc.cpState,
+								},
+							},
+						},
+					},
+				}
+				configMap := map[string]interface{}{
+					"orchestrator_spec": []interface{}{
+						map[string]interface{}{
+							"kubernetes_spec": []interface{}{
+								map[string]interface{}{
+									"control_plane_version": tc.cpConfig,
+								},
+							},
+						},
+					},
+				}
+				d = testModelDevelopmentClusterResourceData(t, res, stateMap, configMap)
+			}
+			got := vertexAiModelDevelopmentClusterGkeVersionDiffSuppress(tc.k, tc.old, tc.new, d)
+			if got != tc.suppressed {
+				t.Errorf("vertexAiModelDevelopmentClusterGkeVersionDiffSuppress(%q, %q, %q) = %v, want %v", tc.k, tc.old, tc.new, got, tc.suppressed)
+			}
+		})
+	}
+}
+
+func TestUnitVertexAIModelDevelopmentCluster_ValidateNodePoolVersions(t *testing.T) {
+	t.Parallel()
+	res := ResourceVertexAIModelDevelopmentCluster()
+
+	t.Run("missing node pool ID", func(t *testing.T) {
+		t.Parallel()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"node_pools": []interface{}{
+				map[string]interface{}{
+					"id":   "pool-1",
+					"zone": "us-central1-a",
+					"machine_spec": []interface{}{
+						map[string]interface{}{"machine_type": "n2-standard-4"},
+					},
+				},
+				map[string]interface{}{
+					"id":   "pool-2",
+					"zone": "us-central1-a",
+					"machine_spec": []interface{}{
+						map[string]interface{}{"machine_type": "n2-standard-4"},
+					},
+				},
+			},
+			"orchestrator_spec": []interface{}{
+				map[string]interface{}{
+					"kubernetes_spec": []interface{}{
+						map[string]interface{}{
+							"node_pool_ids": []interface{}{"pool-1", "pool-2"},
+							"node_pool_versions": map[string]interface{}{
+								"pool-1": "1.30",
+							},
+						},
+					},
+				},
+			},
+		})
+		err := validateVertexAIModelDevelopmentClusterNodePoolVersions(d)
+		if err == nil {
+			t.Fatalf("expected error for missing node pool ID, got nil")
+		}
+		if !strings.Contains(err.Error(), "must include all node pool IDs") || !strings.Contains(err.Error(), "pool-2") {
+			t.Errorf("unexpected error message: %v", err)
+		}
+	})
+
+	t.Run("unknown node pool ID", func(t *testing.T) {
+		t.Parallel()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"node_pools": []interface{}{
+				map[string]interface{}{
+					"id":   "pool-1",
+					"zone": "us-central1-a",
+					"machine_spec": []interface{}{
+						map[string]interface{}{"machine_type": "n2-standard-4"},
+					},
+				},
+			},
+			"orchestrator_spec": []interface{}{
+				map[string]interface{}{
+					"kubernetes_spec": []interface{}{
+						map[string]interface{}{
+							"node_pool_ids": []interface{}{"pool-1"},
+							"node_pool_versions": map[string]interface{}{
+								"pool-1":       "1.30",
+								"pool-unknown": "1.30",
+							},
+						},
+					},
+				},
+			},
+		})
+		err := validateVertexAIModelDevelopmentClusterNodePoolVersions(d)
+		if err == nil {
+			t.Fatalf("expected error for unknown node pool ID, got nil")
+		}
+		if !strings.Contains(err.Error(), "unknown node pool ID") || !strings.Contains(err.Error(), "pool-unknown") {
+			t.Errorf("unexpected error message: %v", err)
+		}
+	})
+
+	t.Run("valid matching node pool IDs", func(t *testing.T) {
+		t.Parallel()
+		d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+			"node_pools": []interface{}{
+				map[string]interface{}{
+					"id":   "pool-1",
+					"zone": "us-central1-a",
+					"machine_spec": []interface{}{
+						map[string]interface{}{"machine_type": "n2-standard-4"},
+					},
+				},
+				map[string]interface{}{
+					"id":   "pool-2",
+					"zone": "us-central1-a",
+					"machine_spec": []interface{}{
+						map[string]interface{}{"machine_type": "n2-standard-4"},
+					},
+				},
+			},
+			"orchestrator_spec": []interface{}{
+				map[string]interface{}{
+					"kubernetes_spec": []interface{}{
+						map[string]interface{}{
+							"node_pool_ids": []interface{}{"pool-1", "pool-2"},
+							"node_pool_versions": map[string]interface{}{
+								"pool-1": "1.30",
+								"pool-2": "-",
+							},
+						},
+					},
+				},
+			},
+		})
+		if err := validateVertexAIModelDevelopmentClusterNodePoolVersions(d); err != nil {
+			t.Fatalf("unexpected validation error: %v", err)
+		}
+	})
+}
+
+func TestUnitVertexAIModelDevelopmentCluster_CustomDiff_NodePoolVersions(t *testing.T) {
+	t.Parallel()
+
+	res := ResourceVertexAIModelDevelopmentCluster()
+	ctx := context.Background()
+
+	t.Run("custom diff passes when node_pool_versions matches top-level node_pools", func(t *testing.T) {
+		t.Parallel()
+		c := terraform.NewResourceConfigRaw(map[string]interface{}{
+			"model_development_cluster_id": "test-cluster",
+			"region":                       "us-central1",
+			"node_pools": []interface{}{
+				map[string]interface{}{
+					"id":   "pool-1",
+					"zone": "us-central1-a",
+					"machine_spec": []interface{}{
+						map[string]interface{}{"machine_type": "n2-standard-4"},
+					},
+				},
+			},
+			"orchestrator_spec": []interface{}{
+				map[string]interface{}{
+					"kubernetes_spec": []interface{}{
+						map[string]interface{}{
+							"node_pool_ids": []interface{}{"pool-1"},
+							"node_pool_versions": map[string]interface{}{
+								"pool-1": "-",
+							},
+						},
+					},
+				},
+			},
+		})
+		if _, err := schema.InternalMap(res.Schema).Diff(ctx, nil, c, resourceVertexAIModelDevelopmentClusterCustomDiff, nil, true); err != nil {
+			t.Fatalf("expected CustomDiff to pass, got: %v", err)
+		}
+	})
+
+	t.Run("custom diff fails when node_pool_versions misses a pool from node_pools", func(t *testing.T) {
+		t.Parallel()
+		c := terraform.NewResourceConfigRaw(map[string]interface{}{
+			"model_development_cluster_id": "test-cluster",
+			"region":                       "us-central1",
+			"node_pools": []interface{}{
+				map[string]interface{}{
+					"id":   "pool-1",
+					"zone": "us-central1-a",
+					"machine_spec": []interface{}{
+						map[string]interface{}{"machine_type": "n2-standard-4"},
+					},
+				},
+				map[string]interface{}{
+					"id":   "pool-2",
+					"zone": "us-central1-a",
+					"machine_spec": []interface{}{
+						map[string]interface{}{"machine_type": "n2-standard-4"},
+					},
+				},
+			},
+			"orchestrator_spec": []interface{}{
+				map[string]interface{}{
+					"kubernetes_spec": []interface{}{
+						map[string]interface{}{
+							"node_pool_ids": []interface{}{"pool-1", "pool-2"},
+							"node_pool_versions": map[string]interface{}{
+								"pool-1": "-",
+							},
+						},
+					},
+				},
+			},
+		})
+		if _, err := schema.InternalMap(res.Schema).Diff(ctx, nil, c, resourceVertexAIModelDevelopmentClusterCustomDiff, nil, true); err == nil || !strings.Contains(err.Error(), "missing: pool-2") {
+			t.Fatalf("expected CustomDiff missing pool-2 error, got: %v", err)
+		}
+	})
+
+	t.Run("custom diff passes when node_pool_versions is omitted in config and node_pools adds or removes pools", func(t *testing.T) {
+		t.Parallel()
+		sm := schema.InternalMap(res.Schema)
+		stateMap := map[string]interface{}{
+			"model_development_cluster_id": "test-cluster",
+			"region":                       "us-central1",
+			"node_pools": []interface{}{
+				map[string]interface{}{
+					"id":   "pool-1",
+					"zone": "us-central1-a",
+					"machine_spec": []interface{}{
+						map[string]interface{}{"machine_type": "n2-standard-4"},
+					},
+				},
+				map[string]interface{}{
+					"id":   "pool-2",
+					"zone": "us-central1-a",
+					"machine_spec": []interface{}{
+						map[string]interface{}{"machine_type": "n2-standard-4"},
+					},
+				},
+			},
+			"orchestrator_spec": []interface{}{
+				map[string]interface{}{
+					"kubernetes_spec": []interface{}{
+						map[string]interface{}{
+							"control_plane_version": "1.30.5-gke.1014001",
+							"node_pool_versions": map[string]interface{}{
+								"pool-1": "1.30.5-gke.1014001",
+								"pool-2": "1.30.5-gke.1014001",
+							},
+						},
+					},
+				},
+			},
+		}
+		stateDiff, err := sm.Diff(ctx, nil, terraform.NewResourceConfigRaw(stateMap), nil, nil, true)
+		if err != nil {
+			t.Fatalf("error creating state diff: %v", err)
+		}
+		stateData, err := sm.Data(nil, stateDiff)
+		if err != nil {
+			t.Fatalf("error creating state data: %v", err)
+		}
+		stateData.SetId("projects/test-project/locations/us-central1/modelDevelopmentClusters/test-cluster")
+
+		// Add pool-3 while omitting node_pool_versions in HCL
+		addPoolConfig := map[string]interface{}{
+			"model_development_cluster_id": "test-cluster",
+			"region":                       "us-central1",
+			"node_pools": []interface{}{
+				map[string]interface{}{
+					"id":   "pool-1",
+					"zone": "us-central1-a",
+					"machine_spec": []interface{}{
+						map[string]interface{}{"machine_type": "n2-standard-4"},
+					},
+				},
+				map[string]interface{}{
+					"id":   "pool-2",
+					"zone": "us-central1-a",
+					"machine_spec": []interface{}{
+						map[string]interface{}{"machine_type": "n2-standard-4"},
+					},
+				},
+				map[string]interface{}{
+					"id":   "pool-3",
+					"zone": "us-central1-a",
+					"machine_spec": []interface{}{
+						map[string]interface{}{"machine_type": "n2-standard-4"},
+					},
+				},
+			},
+			"orchestrator_spec": []interface{}{
+				map[string]interface{}{
+					"kubernetes_spec": []interface{}{
+						map[string]interface{}{},
+					},
+				},
+			},
+		}
+		sAdd := stateData.State()
+		sAdd.RawConfig = testModelDevelopmentClusterToCtyValue(addPoolConfig)
+		if _, err := sm.Diff(ctx, sAdd, terraform.NewResourceConfigRaw(addPoolConfig), resourceVertexAIModelDevelopmentClusterCustomDiff, nil, true); err != nil {
+			t.Fatalf("expected CustomDiff to pass when adding a node pool with node_pool_versions omitted in config, got: %v", err)
+		}
+
+		// Remove pool-2 while omitting node_pool_versions in HCL
+		removePoolConfig := map[string]interface{}{
+			"model_development_cluster_id": "test-cluster",
+			"region":                       "us-central1",
+			"node_pools": []interface{}{
+				map[string]interface{}{
+					"id":   "pool-1",
+					"zone": "us-central1-a",
+					"machine_spec": []interface{}{
+						map[string]interface{}{"machine_type": "n2-standard-4"},
+					},
+				},
+			},
+			"orchestrator_spec": []interface{}{
+				map[string]interface{}{
+					"kubernetes_spec": []interface{}{
+						map[string]interface{}{},
+					},
+				},
+			},
+		}
+		sRemove := stateData.State()
+		sRemove.RawConfig = testModelDevelopmentClusterToCtyValue(removePoolConfig)
+		if _, err := sm.Diff(ctx, sRemove, terraform.NewResourceConfigRaw(removePoolConfig), resourceVertexAIModelDevelopmentClusterCustomDiff, nil, true); err != nil {
+			t.Fatalf("expected CustomDiff to pass when removing a node pool with node_pool_versions omitted in config, got: %v", err)
+		}
+
+		// When node_pool_versions IS explicitly configured in HCL on update and misses added pool, validation fails
+		explicitMissingConfig := map[string]interface{}{
+			"model_development_cluster_id": "test-cluster",
+			"region":                       "us-central1",
+			"node_pools": []interface{}{
+				map[string]interface{}{
+					"id":   "pool-1",
+					"zone": "us-central1-a",
+					"machine_spec": []interface{}{
+						map[string]interface{}{"machine_type": "n2-standard-4"},
+					},
+				},
+				map[string]interface{}{
+					"id":   "pool-2",
+					"zone": "us-central1-a",
+					"machine_spec": []interface{}{
+						map[string]interface{}{"machine_type": "n2-standard-4"},
+					},
+				},
+			},
+			"orchestrator_spec": []interface{}{
+				map[string]interface{}{
+					"kubernetes_spec": []interface{}{
+						map[string]interface{}{
+							"node_pool_ids": []interface{}{"pool-1", "pool-2"},
+							"node_pool_versions": map[string]interface{}{
+								"pool-1": "1.30.5-gke.1014001",
+							},
+						},
+					},
+				},
+			},
+		}
+		sExplicitMissing := stateData.State()
+		sExplicitMissing.RawConfig = testModelDevelopmentClusterToCtyValue(explicitMissingConfig)
+		if _, err := sm.Diff(ctx, sExplicitMissing, terraform.NewResourceConfigRaw(explicitMissingConfig), resourceVertexAIModelDevelopmentClusterCustomDiff, nil, true); err == nil || !strings.Contains(err.Error(), "missing: pool-2") {
+			t.Fatalf("expected CustomDiff missing pool-2 error when node_pool_versions is configured in HCL, got: %v", err)
+		}
+	})
+}
+
+{{- end }}

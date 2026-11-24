@@ -1,0 +1,22 @@
+resource "google_compute_global_address" "{{$.PrimaryResourceId}}" {
+  name          = "{{index $.ResourceIdVars "global_address_name"}}"
+  address_type  = "INTERNAL"
+  purpose       = "PRIVATE_SERVICE_CONNECT"
+  network       = google_compute_network.network.id
+  address       = "10.0.0.5"
+  ip_collection = google_network_connectivity_internal_range.range.id
+}
+
+resource "google_network_connectivity_internal_range" "range" {
+  name          = "{{index $.ResourceIdVars "internal_range_name"}}"
+  network       = google_compute_network.network.self_link
+  usage         = "FOR_VPC"
+  peering       = "FOR_SELF"
+  purpose       = "INTERNAL_ADDRESS"
+  ip_cidr_range = "10.0.0.0/24"
+}
+
+resource "google_compute_network" "network" {
+  name                    = "{{index $.ResourceIdVars "network_name"}}"
+  auto_create_subnetworks = false
+}

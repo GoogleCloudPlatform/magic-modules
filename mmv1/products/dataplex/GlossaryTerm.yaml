@@ -31,15 +31,11 @@ samples:
     primary_resource_id: term_test_id
     steps:
       - name: dataplex_glossary_term_basic
-        resource_id_vars:
-          term_name: term-basic
   - name: dataplex_glossary_term_full
     primary_resource_id: term_test_id_full
     external_providers: [time]
     steps:
       - name: dataplex_glossary_term_full
-        resource_id_vars:
-          term_name: term-full
 parameters:
   - name: location
     type: String

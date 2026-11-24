@@ -49,6 +49,9 @@ parameters:
     type: String
     description: The zone of the pubsub lite topic.
     url_param_only: true
+    # zone is a URL parameter not returned by the API
+    ignore_read: true
+    default_from_api: true
   - name: name
     type: String
     description: Name of the topic.

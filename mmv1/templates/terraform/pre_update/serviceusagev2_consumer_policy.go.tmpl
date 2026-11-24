@@ -10,15 +10,21 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+    billingProject = bp
+}
+project = billingProject
+
 newRules := d.Get("enable_rules")
 newServices := getServices(newRules)
+newCatalogs := getCatalogs(newRules)
 
 // check dependencies if the "respect_dependencies" flag is enabled
 validateDependenciesEnabled := d.Get("validate_dependencies").(bool)
 
 if validateDependenciesEnabled {
     name := fmt.Sprintf("%s/consumerPolicies/%s", d.Get("parent"), d.Get("name"))
-    analysisRequest := NewAnalysisRequest(name, newServices)
+    analysisRequest := NewAnalysisRequest(name, newServices, newCatalogs)
     req := transport_tpg.SendRequestOptions{
         Config:    config,
         Method:    "POST",
@@ -38,7 +44,7 @@ if validateDependenciesEnabled {
     timeout := d.Timeout(schema.TimeoutCreate)
     var opRes map[string]interface{}
     err = ServiceUsageV2OperationWaitTimeWithResponse(
-        config, resp, &opRes, "Updating ConsumerPolicy", config.UserAgent, timeout)
+        config, resp, &opRes, billingProject, "Updating ConsumerPolicy", config.UserAgent, timeout)
 
     if err != nil {
         return err
@@ -59,15 +65,13 @@ if validateDependenciesEnabled {
             }
         }
         if sb.Len() > 0 {
-            return fmt.Errorf("There are additional services for which all necessary dependencies haven't been added. Please add these missing dependencies:\n%s", sb.String())
+            return fmt.Errorf("There are additional services for which all necessary dependencies haven't been added. Please add these missing dependencies:\n%s\nTo skip dependency validation, set validate_dependencies to false.", sb.String())
         }
     }
 }
 
-if !d.Get("check_usage_on_remove").(bool) {
-    if url, err = transport_tpg.AddQueryParams(url, map[string]string{"force": "true"}); err != nil {
-        return err
-    }
+if url, err = transport_tpg.AddQueryParams(url, map[string]string{"force": "true"}); err != nil {
+    return err
 }
 
 log.Printf("[DEBUG] Update policy request: %v", obj)

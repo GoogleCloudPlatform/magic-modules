@@ -1,0 +1,112 @@
+resource "google_storage_bucket" "dest" {
+  provider      = google-beta
+  name          = "{{index $.ResourceIdVars "bucket_name"}}"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_network_services_edge_cache_origin" "default" {
+  provider       = google-beta
+  name           = "{{index $.ResourceIdVars "origin_name"}}"
+  origin_address = google_storage_bucket.dest.url
+  description    = "The default bucket for media edge test"
+  max_attempts   = 2
+  timeout {
+    connect_timeout = "10s"
+  }
+}
+
+resource "google_network_services_edge_cache_service" "default" {
+  provider    = google-beta
+  name        = "{{index $.ResourceIdVars "service_name"}}"
+  description = "my edge cache service"
+  routing {
+    host_rule {
+      description  = "host rule description"
+      hosts        = ["sslcert.tf-test.club"]
+      path_matcher = "routes"
+    }
+    path_matcher {
+      name = "routes"
+      route_rule {
+        description = "a route rule to match against"
+        priority    = 1
+        match_rule {
+          prefix_match = "/"
+        }
+        origin = google_network_services_edge_cache_origin.default.name
+        route_action {
+          cdn_policy {
+            cache_mode  = "CACHE_ALL_STATIC"
+            default_ttl = "3600s"
+          }
+        }
+        header_action {
+          response_header_to_add {
+            header_name  = "x-cache-status"
+            header_value = "{cdn_cache_status}"
+          }
+        }
+      }
+    }
+  }
+}
+
+resource "google_network_services_cdn_edge_extension" "{{$.PrimaryResourceId}}" {
+  provider    = google-beta
+  name        = "{{index $.ResourceIdVars "cdn_edge_extension_name"}}"
+  description = "my cdn edge extension"
+  location    = "global"
+
+  target {
+    resources = [google_network_services_edge_cache_service.default.id]
+  }
+
+  extension_chains {
+    name = "chain1"
+
+    match_condition {
+      cel_expression = "request.host == 'example.com'"
+    }
+
+    extensions {
+      name               = "ext1"
+      service            = google_network_services_wasm_plugin.wasm-plugin.id
+      fail_open          = false
+      supported_events   = ["REQUEST_HEADERS", "RESPONSE_HEADERS"]
+      forward_headers    = ["custom-header"]
+      forward_attributes = ["request.host", "request.path"]
+    }
+  }
+
+  labels = {
+    foo = "bar"
+  }
+}
+
+resource "google_network_services_wasm_plugin" "wasm-plugin" {
+  provider    = google-beta
+  name        = "{{index $.ResourceIdVars "wasm_plugin_name"}}"
+  description = "my wasm plugin"
+
+  main_version_id = "v1"
+
+  labels = {
+    test_label = "test_value"
+  }
+  log_config {
+    enable        = true
+    sample_rate   = 1
+    min_log_level = "WARN"
+  }
+
+  versions {
+    version_name = "v1"
+    description  = "v1 version of my wasm plugin"
+    image_uri    = "projects/{{index $.TestEnvVars "project"}}/locations/us-central1/repositories/{{index $.ResourceIdVars "repository_name"}}/genericArtifacts/my-wasm-plugin:v1"
+
+    labels = {
+      test_label = "test_value"
+    }
+  }
+}

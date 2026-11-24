@@ -1,7 +1,7 @@
 resource "google_dataproc_batch" "{{$.PrimaryResourceId}}" {
 
     batch_id      = "tf-test-batch%{random_suffix}"
-    location      = "us-central1"
+    location      = "us-east1"
 
     runtime_config {
       properties    = { "spark.dynamicAllocation.enabled": "false", "spark.executor.instances": "2" }

@@ -27,7 +27,7 @@ func TestAccLoggingOrganizationExclusion(t *testing.T) {
 		// yet, we don't have a race condition
 		// see https://github.com/golang/go/wiki/CommonMistakes#using-goroutines-on-loop-iterator-variables
 		tc := tc
-		t.Run(name, func(t *testing.T) {
+		acctest.RunVcrSubtest(t, name, func(t *testing.T) {
 			tc(t)
 		})
 	}
@@ -149,16 +149,36 @@ resource "google_logging_organization_exclusion" "basic" {
 }
 
 func testAccLoggingOrganizationExclusion_multipleCfg(exclusionName, orgId string) string {
-	s := ""
-	for i := 0; i < 3; i++ {
-		s += fmt.Sprintf(`
-resource "google_logging_organization_exclusion" "basic%d" {
-	name             = "%s%d"
+	return fmt.Sprintf(`
+resource "google_logging_organization_exclusion" "basic0" {
+	name             = "%s0"
 	org_id           = "%s"
 	description      = "Basic Organization Logging Exclusion"
 	filter           = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
 }
-`, i, exclusionName, i, orgId, envvar.GetTestProjectFromEnv())
-	}
-	return s
+
+resource "google_logging_organization_exclusion" "basic1" {
+	name             = "%s1"
+	org_id           = "%s"
+	description      = "Basic Organization Logging Exclusion"
+	filter           = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
+}
+
+resource "google_logging_organization_exclusion" "basic2" {
+	name             = "%s2"
+	org_id           = "%s"
+	description      = "Basic Organization Logging Exclusion"
+	filter           = "logName=\"projects/%s/logs/compute.googleapis.com%%2Factivity_log\" AND severity>=ERROR"
+}
+`,
+		exclusionName,
+		orgId,
+		envvar.GetTestProjectFromEnv(),
+		exclusionName,
+		orgId,
+		envvar.GetTestProjectFromEnv(),
+		exclusionName,
+		orgId,
+		envvar.GetTestProjectFromEnv(),
+	)
 }

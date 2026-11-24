@@ -1,0 +1,18 @@
+resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
+  location    = "global"
+  description = "An agent coaching generator."
+  agent_coaching_context {
+    version              = "2.5"
+    overarching_guidance = "Be helpful and polite."
+    output_language_code = "en"
+    instructions {
+      display_name     = "Greeting"
+      display_details  = "Greet the customer warmly"
+      condition        = "Customer starts the conversation"
+      agent_action     = "Say hello and ask how to help"
+      system_action    = "Log greeting event"
+      triggering_event = "END_OF_UTTERANCE"
+    }
+  }
+  trigger_event = "END_OF_UTTERANCE"
+}

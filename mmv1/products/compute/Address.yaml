@@ -113,8 +113,8 @@ samples:
         resource_id_vars:
           address_name: 'test-address'
           sub_pdp_name: 'test-sub-pdp'
-          sub_pdp_ip_cidr: '"136.124.3.120/32"'
-          root_pdp_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-enhanced-pdp-136-124-3-120-29"'
+          sub_pdp_ip_cidr: '136.124.3.120/32'
+          root_pdp_url: 'projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-enhanced-pdp-136-124-3-120-29'
         test_vars_overrides:
           sub_pdp_ip_cidr: 'fmt.Sprintf("136.124.3.%d/32", 120 + acctest.RandIntRange(t, 0, 7))'
           root_pdp_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-enhanced-pdp-136-124-3-120-29"'
@@ -188,6 +188,10 @@ properties:
       configure Private Service Connect. Only global internal addresses can use
       this purpose.
 
+      * SYSTEM_MANAGED for regional internal IP address that is reserved and
+      managed internally. It can not be assigned to compute resources such as
+      VM and internal load balancer.
+
       This should only be set when using an Internal address.
     default_from_api: true
   - name: 'networkTier'
@@ -206,7 +210,8 @@ properties:
       The URL of the subnetwork in which to reserve the address. If an IP
       address is specified, it must be within the subnetwork's IP range.
       This field can only be used with INTERNAL type with
-      GCE_ENDPOINT/DNS_RESOLVER purposes.
+      GCE_ENDPOINT/DNS_RESOLVER purposes, or with EXTERNAL type IPv6 addresses
+      when `ipv6_endpoint_type` is `VM` or `NETLB`.
     default_from_api: true
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Subnetwork'

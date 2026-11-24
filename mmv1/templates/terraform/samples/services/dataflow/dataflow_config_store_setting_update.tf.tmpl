@@ -1,0 +1,11 @@
+data "google_project" "project" {
+}
+
+resource "google_dataflow_config_store_setting" "{{.PrimaryResourceId}}" {
+  parent                  = "projects/${data.google_project.project.number}"
+  location                = "us-central1"
+  config_store_setting_id = "default_launcher_machine_type"
+  value {
+    string_value = "n2-standard-4"
+  }
+}

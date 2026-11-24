@@ -194,6 +194,7 @@ parameters:
     enum_values:
       - 'DELETION_RETENTION_UNSPECIFIED'
       - 'MINIMUM'
+      - 'NO_RETENTION'
 properties:
   - name: 'name'
     type: String

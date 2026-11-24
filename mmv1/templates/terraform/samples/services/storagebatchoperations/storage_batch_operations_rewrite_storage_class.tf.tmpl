@@ -1,0 +1,24 @@
+resource "google_storage_bucket" "bucket" {
+  name                        = "{{index $.ResourceIdVars "bucket_name"}}"
+  location                    = "us-central1"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+resource "google_storage_batch_operations_job" "{{$.PrimaryResourceId}}" {
+  job_id = "{{index $.ResourceIdVars "job_id"}}"
+  bucket_list {
+    buckets {
+      bucket = google_storage_bucket.bucket.name
+      prefix_list {
+        included_object_prefixes = [
+          "bkt"
+        ]
+      }
+    }
+  }
+  rewrite_object {
+    storage_class = "NEARLINE"
+  }
+  delete_protection = false
+}

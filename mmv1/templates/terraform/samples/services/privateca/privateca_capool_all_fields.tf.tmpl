@@ -52,6 +52,12 @@ resource "google_privateca_ca_pool" "{{$.PrimaryResourceId}}" {
         title = "My title"
       }
     }
+    passthrough_extensions {
+      known_extensions = ["EXTENDED_KEY_USAGE", "BASE_KEY_USAGE"]
+      additional_extensions {
+        object_id_path = [1, 5]
+      }
+    }
     baseline_values {
       aia_ocsp_servers = ["example.com"]
       additional_extensions {

@@ -1,0 +1,351 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Workload
+description: |
+  An Assured Workloads V2 workload applies a compliance framework, such as a
+  Data Boundary framework, and its cloud controls to a Google Cloud folder or
+  project.
+references:
+  guides:
+    Assured Workloads Overview: https://cloud.google.com/assured-workloads/docs/overview
+  api: https://cloud.google.com/assured-workloads/docs/reference/rest/v2/organizations.locations.workloads
+base_url: organizations/{{organization}}/locations/{{location}}/workloads
+self_link: organizations/{{organization}}/locations/{{location}}/workloads/{{workload_id}}
+create_url: organizations/{{organization}}/locations/{{location}}/workloads?workloadId={{workload_id}}
+update_verb: PATCH
+update_mask: true
+id_format: organizations/{{organization}}/locations/{{location}}/workloads/{{workload_id}}
+import_format:
+  - organizations/{{organization}}/locations/{{location}}/workloads/{{workload_id}}
+  - '{{organization}}/{{location}}/{{workload_id}}'
+exclude_sweeper: true
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: false
+async:
+  type: OpAsync
+  actions:
+    - create
+    - update
+    - delete
+custom_code:
+  constants: templates/terraform/constants/assuredworkloadsv2_workload.go.tmpl
+  test_check_destroy: templates/terraform/custom_check_destroy/assuredworkloadsv2_workload.go.tmpl
+docs:
+  note: |
+    Workloads have no project, so Assured Workloads attributes API quota and
+    billing to the client project of your credentials unless a billing project
+    is set. Set `billing_project` and `user_project_override = true` in the
+    provider configuration to use a project where the Assured Workloads API is
+    enabled. `resource_config` is not returned by the API, so it is not
+    populated on import.
+samples:
+  - name: assured_workloads_v2_workload_basic
+    primary_resource_id: workload
+    steps:
+      - name: assured_workloads_v2_workload_basic
+        resource_id_vars:
+          workload_id: example-workload
+          project_id: aw-target
+        test_env_vars:
+          org_id: ORG_ID
+          billing_account: BILLING_ACCT
+          billing_project: PROJECT_NAME
+parameters:
+  - name: organization
+    type: String
+    description: The ID of the parent organization of the workload, for example `123456789`.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: location
+    type: String
+    description: |
+      The location of the workload, for example `us-east4`. Requests are
+      sent to the regional `{location}-assuredworkloads.googleapis.com`
+      endpoint for this location.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: workloadId
+    type: String
+    description: |
+      The user-assigned identifier for the workload, which must be unique within
+      the parent organization and location. It can contain only letters,
+      numbers, hyphens and underscores.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: name
+    type: String
+    description: |
+      The resource name of the workload, in the format
+      `organizations/{organization}/locations/{location}/workloads/{workload}`.
+    output: true
+  - name: description
+    type: String
+    description: The user-provided description of the workload.
+    immutable: true
+  - name: resourceConfig
+    type: NestedObject
+    description: |
+      The target Google Cloud folder or project where the compliance controls
+      are deployed. Exactly one target must be specified.
+    required: true
+    immutable: true
+    # The API doesn't return resource_config; computed_target_resource holds
+    # the resolved target.
+    ignore_read: true
+    properties:
+      - name: existingProject
+        type: String
+        description: |
+          An existing Google Cloud project, in the format
+          `projects/{project_id_or_number}`.
+        immutable: true
+        exactly_one_of:
+          - resource_config.0.existing_project
+          - resource_config.0.existing_folder
+          - resource_config.0.new_project_config
+          - resource_config.0.new_folder_config
+      - name: existingFolder
+        type: String
+        description: An existing Google Cloud folder, in the format `folders/{folder}`.
+        immutable: true
+        exactly_one_of:
+          - resource_config.0.existing_project
+          - resource_config.0.existing_folder
+          - resource_config.0.new_project_config
+          - resource_config.0.new_folder_config
+      - name: newProjectConfig
+        type: NestedObject
+        description: |
+          Configuration to provision a new Google Cloud project. Deleting the
+          workload does not delete the provisioned project.
+        immutable: true
+        exactly_one_of:
+          - resource_config.0.existing_project
+          - resource_config.0.existing_folder
+          - resource_config.0.new_project_config
+          - resource_config.0.new_folder_config
+        properties:
+          - name: parent
+            type: String
+            description: |
+              The parent resource where the project is created, in the format
+              `organizations/{organization}` or `folders/{folder}`.
+            required: true
+            immutable: true
+          - name: displayName
+            type: String
+            description: The display name of the new project.
+            required: true
+            immutable: true
+          - name: billingAccount
+            type: String
+            description: |
+              The billing account to link to the new project, in the format
+              `billingAccounts/{billing_account}` or `{billing_account}`.
+            required: true
+            immutable: true
+            diff_suppress_func: assuredWorkloadsV2BillingAccountDiffSuppress
+            custom_expand: templates/terraform/custom_expand/assuredworkloadsv2_billing_account.go.tmpl
+      - name: newFolderConfig
+        type: NestedObject
+        description: |
+          Configuration to provision a new Google Cloud folder. Deleting the
+          workload does not delete the provisioned folder.
+        immutable: true
+        exactly_one_of:
+          - resource_config.0.existing_project
+          - resource_config.0.existing_folder
+          - resource_config.0.new_project_config
+          - resource_config.0.new_folder_config
+        properties:
+          - name: parent
+            type: String
+            description: |
+              The parent resource where the folder is created, in the format
+              `organizations/{organization}` or `folders/{folder}`.
+            required: true
+            immutable: true
+          - name: displayName
+            type: String
+            description: The display name of the new folder.
+            required: true
+            immutable: true
+  - name: computedTargetResource
+    type: String
+    description: |
+      The resolved target resource, in the format `projects/{project_number}`
+      or `folders/{folder_id}`.
+    output: true
+  - name: targetResourceDisplayName
+    type: String
+    description: The display name of the target resource.
+    output: true
+  - name: framework
+    type: NestedObject
+    description: The compliance framework applied by the workload.
+    required: true
+    update_mask_fields:
+      - 'framework.majorRevisionId'
+    properties:
+      - name: framework
+        type: String
+        description: |
+          The resource name of the Compliance Manager framework, in the format
+          `organizations/{organization}/locations/{location}/frameworks/{framework}`.
+          The framework location must match the workload location (`eu` for
+          `europe` workloads).
+        required: true
+        immutable: true
+      - name: majorRevisionId
+        type: Integer
+        description: |
+          The major revision of the framework. If omitted, the latest revision
+          is used. The revision can only be increased in place, and only for
+          built-in frameworks.
+        default_from_api: true
+  - name: cloudControlConfigs
+    type: Array
+    description: |
+      The cloud control configurations enforced on the workload. Every cloud
+      control of the framework revision that supports the deployment mode must
+      be listed, with the revision used by the framework: in monitor mode every
+      control that supports `DETECTIVE` is deployed in `DETECTIVE` mode, and in
+      monitor and prevent mode every control that supports `PREVENTIVE` is
+      deployed in `PREVENTIVE` mode and the remaining controls that support
+      `DETECTIVE` are deployed in `DETECTIVE` mode. Controls can't be moved from
+      `PREVENTIVE` back to `DETECTIVE`.
+    required: true
+    custom_expand: templates/terraform/custom_expand/assuredworkloadsv2_cloud_control_configs.go.tmpl
+    item_type:
+      type: NestedObject
+      properties:
+        - name: cloudControl
+          type: String
+          description: |
+            The resource name of the cloud control, in the format
+            `organizations/{organization}/locations/{location}/cloudControls/{cloud_control}`.
+            The location must match the workload location.
+          required: true
+        - name: cloudControlRevision
+          type: Integer
+          description: The major revision of the cloud control.
+          required: true
+        - name: enforcementMode
+          type: String
+          description: |
+            The enforcement mode of the cloud control. Possible values are
+            `PREVENTIVE` and `DETECTIVE`. See the
+            [API documentation](https://cloud.google.com/assured-workloads/docs/reference/rest/v2/organizations.locations.workloads)
+            for the current list of values.
+          required: true
+        - name: parameters
+          type: Array
+          description: The parameters of the cloud control configuration.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: name
+                type: String
+                description: The name of the parameter.
+                required: true
+              - name: parameterValue
+                type: NestedObject
+                description: The value of the parameter. Exactly one value must be set.
+                required: true
+                properties:
+                  - name: stringValue
+                    type: String
+                    description: A string value.
+                  - name: boolValue
+                    type: Boolean
+                    description: A boolean value.
+                  - name: numberValue
+                    type: Double
+                    description: A double value.
+                  - name: stringListValue
+                    type: NestedObject
+                    description: A list of strings.
+                    properties:
+                      - name: values
+                        type: Array
+                        description: The strings in the list.
+                        required: true
+                        item_type:
+                          type: String
+                  - name: oneofValue
+                    type: NestedObject
+                    description: A sub-parameter value.
+                    properties:
+                      - name: name
+                        type: String
+                        description: The name of the sub-parameter.
+                        required: true
+                      - name: parameterValue
+                        type: NestedObject
+                        description: The value of the sub-parameter. Exactly one value must be set.
+                        required: true
+                        properties:
+                          - name: stringValue
+                            type: String
+                            description: A string value.
+                          - name: boolValue
+                            type: Boolean
+                            description: A boolean value.
+                          - name: numberValue
+                            type: Double
+                            description: A double value.
+                          - name: stringListValue
+                            type: NestedObject
+                            description: A list of strings.
+                            properties:
+                              - name: values
+                                type: Array
+                                description: The strings in the list.
+                                required: true
+                                item_type:
+                                  type: String
+  - name: kajEnrollmentType
+    type: String
+    description: |
+      The Key Access Transparency choice for the workload. Possible values are
+      `KEY_ACCESS_TRANSPARENCY_ENABLED` and `KEY_ACCESS_TRANSPARENCY_DISABLED`.
+      It can be set only for frameworks that support Key Access Transparency
+      and only when at least one cloud control is in `PREVENTIVE` mode. If
+      omitted, the service enables Key Access Transparency for eligible
+      frameworks deployed in `PREVENTIVE` mode.
+    default_from_api: true
+  - name: state
+    type: String
+    description: The current lifecycle state of the workload, for example `ACTIVE`.
+    output: true
+  - name: createTime
+    type: String
+    description: The time the workload was created.
+    output: true
+  - name: updateTime
+    type: String
+    description: The time the workload was last updated.
+    output: true
+  - name: etag
+    type: String
+    description: An opaque concurrency control token calculated by the server.
+    output: true

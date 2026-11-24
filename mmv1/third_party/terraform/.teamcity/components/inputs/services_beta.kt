@@ -91,6 +91,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Assuredworkloads",
         "path" to "./google-beta/services/assuredworkloads"
     ),
+    "assuredworkloadsv2" to mapOf(
+        "name" to "assuredworkloadsv2",
+        "displayName" to "Assuredworkloadsv2",
+        "path" to "./google-beta/services/assuredworkloadsv2"
+    ),
     "backupdr" to mapOf(
         "name" to "backupdr",
         "displayName" to "Backupdr",
@@ -391,6 +396,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Deploymentmanager",
         "path" to "./google-beta/services/deploymentmanager"
     ),
+    "designcenter" to mapOf(
+        "name" to "designcenter",
+        "displayName" to "Designcenter",
+        "path" to "./google-beta/services/designcenter"
+    ),
     "developerconnect" to mapOf(
         "name" to "developerconnect",
         "displayName" to "Developerconnect",
@@ -515,6 +525,11 @@ var ServicesListBeta = mapOf(
         "name" to "gemini",
         "displayName" to "Gemini",
         "path" to "./google-beta/services/gemini"
+    ),
+    "geminidataanalytics" to mapOf(
+        "name" to "geminidataanalytics",
+        "displayName" to "Gemini Data Analytics",
+        "path" to "./google-beta/services/geminidataanalytics"
     ),
     "gkebackup" to mapOf(
         "name" to "gkebackup",
@@ -685,6 +700,11 @@ var ServicesListBeta = mapOf(
         "name" to "networkservices",
         "displayName" to "Networkservices",
         "path" to "./google-beta/services/networkservices"
+    ),
+    "networkservices2" to mapOf(
+        "name" to "networkservices2",
+        "displayName" to "Networkservices2",
+        "path" to "./google-beta/services/networkservices2"
     ),
     "observability" to mapOf(
         "name" to "observability",

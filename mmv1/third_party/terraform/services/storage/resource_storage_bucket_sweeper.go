@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"log"
 	"runtime"
+	"strings"
 
-	"github.com/gammazero/workerpool"
 	"github.com/hashicorp/terraform-provider-google/google/sweeper"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -82,7 +83,7 @@ func deleteObjects(config *transport_tpg.Config, bucket string) bool {
 		if len(res.Items) == 0 {
 			break
 		}
-		wp := workerpool.New(runtime.NumCPU() - 1)
+		wp := tpgresource.NewWorkerPool(runtime.NumCPU() - 1)
 
 		for _, object := range res.Items {
 			log.Printf("[DEBUG] Found %s", object.Name)
@@ -165,7 +166,11 @@ func testSweepStorageBucket(region string) error {
 
 		id := obj["name"].(string)
 		// Increment count and skip if resource is not sweepable.
-		if !sweeper.IsSweepableTestResource(id) {
+		// The bucket in TestAccStorageBucketListResource_queryIdentity is deliberately
+		// named "0-tf-test-..." so that it sorts first in the alphabetically-ordered
+		// list query the test asserts against. Accept that prefix too, so the bucket is
+		// still swept.
+		if !sweeper.IsSweepableTestResource(id) && !strings.HasPrefix(id, "0-tf-test") {
 			nonPrefixCount++
 			continue
 		}

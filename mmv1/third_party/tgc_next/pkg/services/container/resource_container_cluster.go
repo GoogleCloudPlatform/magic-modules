@@ -11,7 +11,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"google.golang.org/api/container/v1"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/registry"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v7/pkg/tpgresource"
@@ -119,6 +118,8 @@ var (
 		"addons_config.0.pod_snapshot_config",
 		"addons_config.0.slurm_operator_config",
 		"addons_config.0.node_readiness_config",
+		"addons_config.0.agent_sandbox_config",
+		"addons_config.0.high_scale_checkpointing_config",
 	}
 
 	privateClusterConfigKeys = []string{
@@ -671,6 +672,39 @@ func ResourceContainerCluster() *schema.Resource {
 									"enabled": {
 										Type:     schema.TypeBool,
 										Required: true,
+									},
+								},
+							},
+						},
+						"high_scale_checkpointing_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `The status of the High Scale Checkpointing addon. Defaults to disabled; set enabled = true to enable.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Required: true,
+									},
+								},
+							},
+						},
+						"agent_sandbox_config": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							Computed:     true,
+							AtLeastOneOf: addonsConfigKeys,
+							MaxItems:     1,
+							Description:  `The status of the Agent Sandbox addon. It is disabled by default. Set enabled = true to enable.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: `Whether the Agent Sandbox feature is enabled.`,
 									},
 								},
 							},
@@ -2064,6 +2098,25 @@ func ResourceContainerCluster() *schema.Resource {
 				},
 			},
 
+			"managed_opentelemetry_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: `Configuration for Managed OpenTelemetry pipeline.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"scope": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Computed:         true,
+							Description:      "The scope of the Managed OpenTelemetry pipeline. Available options include NONE and COLLECTION_AND_INSTRUMENTATION_COMPONENTS. See https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/projects.locations.clusters#managedopentelemetryconfig for more information. To disable the feature, explicitly set this to NONE.",
+							DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("SCOPE_UNSPECIFIED"),
+						},
+					},
+				},
+			},
+
 			// Defaults to "VPC_NATIVE" during create only
 			"networking_mode": {
 				Type:         schema.TypeString,
@@ -3114,19 +3167,6 @@ func BinaryAuthorizationDiffSuppress(k, old, new string, r *schema.ResourceData)
 	}
 
 	return false
-}
-
-func validateNodePoolAutoConfig(cluster *container.Cluster) error {
-	if cluster == nil || cluster.NodePoolAutoConfig == nil {
-		return nil
-	}
-	if cluster.NodePoolAutoConfig != nil && cluster.NodePoolAutoConfig.NetworkTags != nil && len(cluster.NodePoolAutoConfig.NetworkTags.Tags) > 0 {
-		if (cluster.Autopilot == nil || !cluster.Autopilot.Enabled) && (cluster.Autoscaling == nil || !cluster.Autoscaling.EnableNodeAutoprovisioning) {
-			return fmt.Errorf("node_pool_auto_config network tags can only be set if enable_autopilot or cluster_autoscaling is enabled")
-		}
-	}
-
-	return nil
 }
 
 func containerClusterSurgeSettingsCustomizeDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {

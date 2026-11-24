@@ -49,6 +49,8 @@ samples:
         test_env_vars:
           org_id: ORG_ID
           billing_account: BILLING_ACCT
+        ignore_read_extra:
+          - update_time
   - name: developer_connect_insights_config_projects
     external_providers: [time]
     primary_resource_id: insights_config_projects
@@ -58,6 +60,8 @@ samples:
         test_env_vars:
           org_id: ORG_ID
           billing_account: BILLING_ACCT
+        ignore_read_extra:
+          - update_time
 parameters:
   - name: location
     type: String
@@ -91,7 +95,7 @@ properties:
       - name: projectIds
         type: Array
         description: The project IDs. Format {project}.
-        diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+        diff_suppress_func: tpgresource.CompareProjectNames
         item_type:
           type: String
         immutable: true
@@ -212,7 +216,7 @@ properties:
             For GKE, this is the cluster name.
             For Cloud Run, this is the service name.
           immutable: true
-          required: true
+          output: true
         - name: state
           type: String
           description: |-
@@ -233,7 +237,7 @@ properties:
                 Format:
                 `projects/{project}/locations/{location}/clusters/{cluster}`.
               immutable: true
-              required: true
+              output: true
             - name: deployment
               type: String
               description: |-

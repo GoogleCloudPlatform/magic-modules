@@ -38,6 +38,12 @@ timeouts:
   insert_minutes: 60
   update_minutes: 120
   delete_minutes: 30
+sweeper:
+  url_substitutions:
+    - region: us-central1
+    - region: us-west1
+    - region: us-east4
+    - region: northamerica-south1
 async:
   type: OpAsync
   operation:
@@ -67,11 +73,6 @@ samples:
           ip2_network2_name: ip2-net2
           forwarding_rule1_network2_name: fwd1-net2
           forwarding_rule2_network2_name: fwd2-net2
-        test_vars_overrides:
-          # for backward compatible
-          network1_name: '"net1" + randomSuffix'
-          # for backward compatible
-          network2_name: '"network2" + randomSuffix'
   - name: memorystore_instance_desired_user_and_auto_created_endpoints
     primary_resource_id: instance-user-auto-conn
     steps:
@@ -87,13 +88,6 @@ samples:
           ip2_network2_name: ip2-net2
           forwarding_rule1_network2_name: fwd1-net2
           forwarding_rule2_network2_name: fwd2-net2
-        test_vars_overrides:
-          # for backward compatible
-          network1_name: '"net1" + randomSuffix'
-          # for backward compatible
-          policy_name: '"scpolicy" + randomSuffix'
-          # for backward compatible
-          network2_name: '"network2" + randomSuffix'
 parameters:
   - name: name
     type: String
@@ -159,10 +153,10 @@ properties:
                     description: The service attachment which is the target of the PSC connection, in the form of projects/{project-id}/regions/{region}/serviceAttachments/{service-attachment-id}.
                     required: true
                   - name: pscConnectionStatus
-                    type: Enum
+                    type: String
                     description: "Output Only. The status of the PSC connection: whether a connection exists and ACTIVE or it no longer exists. \n Possible values:\n ACTIVE \n NOT_FOUND"
                     output: true
                   - name: connectionType
-                    type: Enum
+                    type: String
                     description: "Output Only. Type of a PSC Connection. \n Possible values:\n CONNECTION_TYPE_DISCOVERY \n CONNECTION_TYPE_PRIMARY \n CONNECTION_TYPE_READER"
                     output: true

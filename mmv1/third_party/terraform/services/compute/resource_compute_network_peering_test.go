@@ -9,13 +9,14 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/compute"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccComputeNetworkPeering_basic(t *testing.T) {
 	t.Parallel()
 
 	primaryNetworkName := fmt.Sprintf("tf-test-network-peering-1-%d", acctest.RandInt(t))
-	peeringName := fmt.Sprintf("peering-test-1-%d", acctest.RandInt(t))
+	peeringName := fmt.Sprintf("tf-test-peering-test-1-%d", acctest.RandInt(t))
 	importId := fmt.Sprintf("%s/%s/%s", envvar.GetTestProjectFromEnv(), primaryNetworkName, peeringName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -41,7 +42,7 @@ func TestAccComputeNetworkPeering_subnetRoutes(t *testing.T) {
 	t.Parallel()
 
 	primaryNetworkName := fmt.Sprintf("tf-test-network-peering-1-%d", acctest.RandInt(t))
-	peeringName := fmt.Sprintf("peering-test-%d", acctest.RandInt(t))
+	peeringName := fmt.Sprintf("tf-test-peering-%d", acctest.RandInt(t))
 	importId := fmt.Sprintf("%s/%s/%s", envvar.GetTestProjectFromEnv(), primaryNetworkName, peeringName)
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -66,7 +67,7 @@ func TestAccComputeNetworkPeering_customRoutesUpdate(t *testing.T) {
 	t.Parallel()
 
 	primaryNetworkName := fmt.Sprintf("tf-test-network-peering-1-%d", acctest.RandInt(t))
-	peeringName := fmt.Sprintf("peering-test-%d", acctest.RandInt(t))
+	peeringName := fmt.Sprintf("tf-test-peering-%d", acctest.RandInt(t))
 	importId := fmt.Sprintf("%s/%s/%s", envvar.GetTestProjectFromEnv(), primaryNetworkName, peeringName)
 	suffix := acctest.RandString(t, 10)
 
@@ -187,8 +188,14 @@ func testAccComputeNetworkPeeringDestroyProducer(t *testing.T) func(s *terraform
 				continue
 			}
 
-			_, err := compute.NewClient(config, config.UserAgent).Networks.Get(
-				config.Project, rs.Primary.ID).Do()
+			url := fmt.Sprintf("%sprojects/%s/global/networks/%s", transport_tpg.BaseUrl(compute.Product, config), config.Project, rs.Primary.ID)
+			_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   config.Project,
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
 			if err == nil {
 				return fmt.Errorf("Network peering still exists")
 			}
@@ -219,7 +226,7 @@ resource "google_compute_network" "network2" {
 resource "google_compute_network_peering" "bar" {
   network      = google_compute_network.network2.self_link
   peer_network = google_compute_network.network1.self_link
-  name         = "peering-test-2-%s"
+  name         = "tf-test-peering-test-2-%s"
   import_custom_routes = true
   export_custom_routes = true		
 }
@@ -249,7 +256,7 @@ resource "google_compute_network_peering" "bar" {
 }
 
 func testAccComputeNetworkPeeringDefaultCustomRoutes(primaryNetworkName, peeringName, suffix string) string {
-	s := `
+	return fmt.Sprintf(`
 resource "google_compute_network" "network1" {
   name                    = "%s"
   auto_create_subnetworks = false
@@ -269,9 +276,8 @@ resource "google_compute_network" "network2" {
 resource "google_compute_network_peering" "bar" {
   network      = google_compute_network.network2.self_link
   peer_network = google_compute_network.network1.self_link
-  name         = "peering-test-2-%s"
-}`
-	return fmt.Sprintf(s, primaryNetworkName, peeringName, suffix, suffix)
+  name         = "tf-test-peering-test-2-%s"
+}`, primaryNetworkName, peeringName, suffix, suffix)
 }
 
 func testAccComputeNetworkPeering_stackTypeDefault(primaryNetworkName, peeringNetworkName, peeringName string) string {

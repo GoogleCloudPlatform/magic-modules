@@ -1,0 +1,11 @@
+resource "google_storage_control_project_feature_config" "{{$.PrimaryResourceId}}" {
+  provider          = google-beta
+  feature_config_id = "{{index $.ResourceIdVars "feature_config_id"}}"
+
+  auto_annotate_config {
+    models {
+      name = "object-detector"
+    }
+    processing_location = "us"
+  }
+}

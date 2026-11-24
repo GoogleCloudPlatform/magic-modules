@@ -55,6 +55,21 @@ if d.HasChange("deploy_config.0.dedicated_resources.0.autoscaling_metric_specs")
 	dedicatedResources["autoscalingMetricSpecs"] = expanded
 	updateMask = append(updateMask, "dedicatedResources.autoscalingMetricSpecs")
 }
+{{- if ne $.TargetVersionName "ga" }}
+if d.HasChange("deploy_config.0.dedicated_resources.0.initial_replica_count") {
+	dedicatedResources["initialReplicaCount"] = d.Get("deploy_config.0.dedicated_resources.0.initial_replica_count")
+	updateMask = append(updateMask, "dedicatedResources.initialReplicaCount")
+}
+if d.HasChange("deploy_config.0.dedicated_resources.0.scale_to_zero_spec") {
+	expanded, err := expandVertexAIEndpointWithModelGardenDeploymentDeployConfigDedicatedResourcesScaleToZeroSpec(
+		d.Get("deploy_config.0.dedicated_resources.0.scale_to_zero_spec"), d, config)
+	if err != nil {
+		return err
+	}
+	dedicatedResources["scaleToZeroSpec"] = expanded
+	updateMask = append(updateMask, "dedicatedResources.scaleToZeroSpec")
+}
+{{- end }}
 
 if len(updateMask) == 0 {
 	return resourceVertexAIEndpointWithModelGardenDeploymentRead(d, meta)
@@ -68,7 +83,7 @@ body := map[string]interface{}{
 	"updateMask": strings.Join(updateMask, ","),
 }
 
-url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}VertexAIBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/endpoints/{{"{{"}}endpoint{{"}}"}}:mutateDeployedModel")
+url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/endpoints/{{"{{"}}endpoint{{"}}"}}:mutateDeployedModel")
 if err != nil {
 	return err
 }
@@ -91,7 +106,7 @@ if err != nil {
 }
 
 err = VertexAIOperationWaitTime(
-	config, res, project, "Updating EndpointWithModelGardenDeployment", userAgent,
+	config, res, project, tpgresource.LocationFromId(d.Id()), "Updating EndpointWithModelGardenDeployment", userAgent,
 	d.Timeout(schema.TimeoutUpdate))
 if err != nil {
 	return fmt.Errorf("Error waiting to update EndpointWithModelGardenDeployment %q: %s", d.Id(), err)

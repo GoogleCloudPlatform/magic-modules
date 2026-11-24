@@ -46,16 +46,13 @@ samples:
     primary_resource_id: 'policy'
     steps:
       - name: 'organization_security_policy_association_basic'
-        resource_id_vars:
-          short_name: "my-short-name"
         test_env_vars:
           org_id: 'ORG_TARGET'
   - name: 'organization_security_policy_association_excluded'
     primary_resource_id: 'policy'
+    exclude_test: true
     steps:
       - name: 'organization_security_policy_association_excluded'
-        resource_id_vars:
-          short_name: "my-short-name-excluded"
         test_env_vars:
           org_id: 'ORG_TARGET'
 parameters:

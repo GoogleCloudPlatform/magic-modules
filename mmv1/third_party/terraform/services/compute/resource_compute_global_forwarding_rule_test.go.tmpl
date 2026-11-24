@@ -14,12 +14,12 @@ import (
 func TestAccComputeGlobalForwardingRule_updateTarget(t *testing.T) {
 	t.Parallel()
 
-	fr := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(t, 10))
-	proxy := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(t, 10))
-	proxyUpdated := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(t, 10))
-	backend := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(t, 10))
-	hc := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(t, 10))
-	urlmap := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(t, 10))
+	fr := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
+	proxy := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
+	proxyUpdated := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
+	backend := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
+	hc := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
+	urlmap := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -60,11 +60,11 @@ func TestAccComputeGlobalForwardingRule_updateTarget(t *testing.T) {
 func TestAccComputeGlobalForwardingRule_ipv6(t *testing.T) {
 	t.Parallel()
 
-	fr := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(t, 10))
-	proxy := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(t, 10))
-	backend := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(t, 10))
-	hc := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(t, 10))
-	urlmap := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(t, 10))
+	fr := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
+	proxy := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
+	backend := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
+	hc := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
+	urlmap := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -91,11 +91,11 @@ func TestAccComputeGlobalForwardingRule_ipv6(t *testing.T) {
 func TestAccComputeGlobalForwardingRule_labels(t *testing.T) {
 	t.Parallel()
 
-	fr := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(t, 10))
-	proxy := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(t, 10))
-	backend := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(t, 10))
-	hc := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(t, 10))
-	urlmap := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(t, 10))
+	fr := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
+	proxy := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
+	backend := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
+	hc := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
+	urlmap := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -127,8 +127,11 @@ func TestAccComputeGlobalForwardingRule_labels(t *testing.T) {
 func TestAccComputeGlobalForwardingRule_allApisLabels(t *testing.T) {
 	t.Parallel()
 
+	// NOTE: no tf-test prefix. PSC Google APIs forwarding rule names must match
+	// ^[a-z][a-z0-9]{0,19}$ (no hyphens or underscores), so neither "tf-test" nor
+	// "tf_test" is a legal prefix for this resource.
 	fr := fmt.Sprintf("frtest%s", acctest.RandString(t, 10))
-	address := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(t, 10))
+	address := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -160,8 +163,11 @@ func TestAccComputeGlobalForwardingRule_allApisLabels(t *testing.T) {
 func TestAccComputeGlobalForwardingRule_vpcscLabels(t *testing.T) {
 	t.Parallel()
 
+	// NOTE: no tf-test prefix. PSC Google APIs forwarding rule names must match
+	// ^[a-z][a-z0-9]{0,19}$ (no hyphens or underscores), so neither "tf-test" nor
+	// "tf_test" is a legal prefix for this resource.
 	fr := fmt.Sprintf("frtest%s", acctest.RandString(t, 10))
-	address := fmt.Sprintf("forwardrule-test-%s", acctest.RandString(t, 10))
+	address := fmt.Sprintf("tf-test-forwardrule-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -371,11 +377,11 @@ func TestUnitComputeGlobalForwardingRule_InternalIpDiffSuppress(t *testing.T) {
 func TestAccComputeGlobalForwardingRule_updateCanaryMigration(t *testing.T) {
 	t.Parallel()
 
-	fr := fmt.Sprintf("fr-canary-mgiration-%s", acctest.RandString(t, 10))
-	proxy := fmt.Sprintf("pr-canary-mgiration-%s", acctest.RandString(t, 10))
-	urlmap := fmt.Sprintf("um-canary-mgiration-%s", acctest.RandString(t, 10))
-	backendservice := fmt.Sprintf("bs-canary-mgiration-%s", acctest.RandString(t, 10))
-	address := fmt.Sprintf("addr-canary-mgiration-%s", acctest.RandString(t, 10))
+	fr := fmt.Sprintf("tf-test-fr-canary-mgiration-%s", acctest.RandString(t, 10))
+	proxy := fmt.Sprintf("tf-test-pr-canary-mgiration-%s", acctest.RandString(t, 10))
+	urlmap := fmt.Sprintf("tf-test-um-canary-mgiration-%s", acctest.RandString(t, 10))
+	backendservice := fmt.Sprintf("tf-test-bs-canary-mgiration-%s", acctest.RandString(t, 10))
+	address := fmt.Sprintf("tf-test-addr-canary-mgiration-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1102,4 +1108,70 @@ resource "google_compute_global_address" "my_global_ip" {
   name = "%s"
 }
 `, fr, percentage, proxy, urlmap, backendservice, address)
+}
+
+func TestAccComputeGlobalForwardingRule_ExternalPassthrough(t *testing.T) {
+	t.Parallel()
+
+	fr := fmt.Sprintf("tf-test-fr-%s", acctest.RandString(t, 10))
+	backendservice := fmt.Sprintf("tf-test-bs-%s", acctest.RandString(t, 10))
+	address0 := fmt.Sprintf("tf-test-addr0-%s", acctest.RandString(t, 10))
+	address1 := fmt.Sprintf("tf-test-addr1-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeGlobalForwardingRuleDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeGlobalForwardingRule_externalPassthrough(fr, backendservice, address0, address1, "google_compute_backend_service.my_backend_service.name"),
+			},
+			{
+				ResourceName:            "google_compute_global_forwarding_rule.forwarding_rule",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"port_range"},
+			},
+			{
+				Config: testAccComputeGlobalForwardingRule_externalPassthrough(fr, backendservice, address0, address1, "google_compute_backend_service.my_backend_service.id"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectEmptyPlan(),
+					},
+				},
+			},
+		},
+	})
+}
+
+func testAccComputeGlobalForwardingRule_externalPassthrough(fr, backendservice, address0, address1, backendServiceRef string) string {
+	return fmt.Sprintf(`
+resource "google_compute_global_forwarding_rule" "forwarding_rule" {
+  name                  = "%s"
+  ip_protocol           = "TCP"
+  port_range            = "80"
+  load_balancing_scheme = "EXTERNAL_PASSTHROUGH"
+  backend_service       = %s
+  ip_addresses          = [
+    google_compute_global_address.my_global_ip0.address,
+    google_compute_global_address.my_global_ip1.address
+  ]
+}
+
+resource "google_compute_backend_service" "my_backend_service" {
+  name                  = "%s"
+  protocol              = "UNSPECIFIED"
+  load_balancing_scheme = "EXTERNAL_PASSTHROUGH"
+}
+
+resource "google_compute_global_address" "my_global_ip0" {
+  name    = "%s"
+  purpose = "PASSTHROUGH_LOAD_BALANCER_AVAILABILITY_GROUP0"
+}
+
+resource "google_compute_global_address" "my_global_ip1" {
+  name    = "%s"
+  purpose = "PASSTHROUGH_LOAD_BALANCER_AVAILABILITY_GROUP1"
+}
+`, fr, backendServiceRef, backendservice, address0, address1)
 }

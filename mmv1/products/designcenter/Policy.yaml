@@ -1,0 +1,175 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Policy
+description: |
+  A policy within an application template.
+references:
+  guides:
+    Application Design Center Overview: https://cloud.google.com/application-design-center/docs/overview
+    Enforce security policies: https://cloud.google.com/application-design-center/docs/enforce-security-policies
+  api: https://cloud.google.com/application-design-center/docs/reference/rest/v1/projects.locations.spaces.applicationTemplates.policies
+base_url: projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/policies
+self_link: projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/policies/{{policy_id}}
+create_url: projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/policies?policyId={{policy_id}}
+update_mask: true
+update_verb: PATCH
+import_format:
+  - projects/{{project}}/locations/{{location}}/spaces/{{space}}/applicationTemplates/{{application_template}}/policies/{{policy_id}}
+# Policy CRUD methods are synchronous; override product.yaml async defaults.
+async:
+  actions: []
+samples:
+  - name: designcenter_policy_basic
+    primary_resource_id: example
+    steps:
+      - name: designcenter_policy_basic
+        resource_id_vars:
+          policy_id: example-policy
+        vars:
+          project: my-project-name
+          space: example-space
+          application_template: example-template
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          application_template: BootstrapDesignCenterApplicationTemplate(t)
+      - name: designcenter_policy_full
+        resource_id_vars:
+          policy_id: example-policy
+        vars:
+          project: my-project-name
+          space: example-space
+          application_template: example-template
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          application_template: BootstrapDesignCenterApplicationTemplate(t)
+      - name: designcenter_policy_update
+        resource_id_vars:
+          policy_id: example-policy
+        vars:
+          project: my-project-name
+          space: example-space
+          application_template: example-template
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          application_template: BootstrapDesignCenterApplicationTemplate(t)
+      - name: designcenter_policy_unset
+        resource_id_vars:
+          policy_id: example-policy
+        vars:
+          project: my-project-name
+          space: example-space
+          application_template: example-template
+        test_vars_overrides:
+          project: BootstrapDesignCenterProject(t)
+          space: BootstrapDesignCenterSpace(t)
+          application_template: BootstrapDesignCenterApplicationTemplate(t)
+parameters:
+  - name: location
+    type: String
+    description: |
+      The location of the policy.
+    required: true
+    immutable: true
+    url_param_only: true
+  - name: space
+    type: String
+    description: |
+      The space in which the policy is defined.
+    required: true
+    immutable: true
+    url_param_only: true
+  - name: application_template
+    type: String
+    description: |
+      The application template to which the policy belongs.
+    required: true
+    immutable: true
+    url_param_only: true
+  - name: policy_id
+    type: String
+    description: |
+      The ID of the policy.
+    required: true
+    immutable: true
+    url_param_only: true
+properties:
+  - name: name
+    type: String
+    description: |
+      The resource name of the policy.
+      Format: `projects/{project}/locations/{location}/spaces/{space}/applicationTemplates/{application_template}/policies/{policy_id}`
+    output: true
+  - name: policyType
+    type: String
+    description: |
+      The type of the policy, which determines the domain of the policy.
+      Possible values include `COMPLIANCE_FRAMEWORK`.
+    required: true
+  - name: policyUri
+    type: String
+    description: |
+      The URI of the policy (for example,
+      `projects/{project_number}/locations/global/frameworks/{framework}` or
+      `organizations/{organization}/locations/global/frameworks/{framework}`).
+    exactly_one_of:
+      - policy_uri
+      - policy_revision_uri
+  - name: policyRevisionUri
+    type: String
+    description: |
+      The revision URI of the policy (for example,
+      `projects/{project_number}/locations/global/frameworks/{framework}`).
+    exactly_one_of:
+      - policy_uri
+      - policy_revision_uri
+  - name: displayName
+    type: String
+    description: |
+      The display name of the policy.
+  - name: description
+    type: String
+    description: |
+      A description of the policy.
+  - name: applyConditions
+    type: Array
+    description: |
+      Conditions under which this policy applies. A condition uses the
+      `criticality` and `environment` parameters of the application template.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: conditionKey
+          type: String
+          description: |
+            The key of the parameter for the condition.
+          required: true
+        - name: conditionValue
+          type: String
+          description: |
+            The value of the parameter for the condition.
+          required: true
+  - name: createTime
+    type: Time
+    description: |
+      The time the policy was created.
+    output: true
+  - name: updateTime
+    type: Time
+    description: |
+      The time the policy was last updated.
+    output: true

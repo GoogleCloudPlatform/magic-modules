@@ -1,0 +1,29 @@
+resource "google_data_loss_prevention_content_policy" "{{$.PrimaryResourceId}}" {
+  parent       = "projects/{{index $.TestEnvVars "project"}}/locations/{{index $.TestEnvVars "location"}}"
+  display_name = "tf-test-dlp-content-policy-basic"
+
+  inspect_config {
+    info_types {
+      name = "EMAIL_ADDRESS"
+    }
+    min_likelihood = "POSSIBLE"
+  }
+
+  rules {
+    conditions {
+      info_type_condition {
+        info_types {
+          info_type_names = ["EMAIL_ADDRESS"]
+        }
+        min_count = 1
+      }
+    }
+    action {
+      return_verdict = "BLOCK"
+    }
+  }
+
+  default_action {
+    return_verdict = "ALLOW"
+  }
+}

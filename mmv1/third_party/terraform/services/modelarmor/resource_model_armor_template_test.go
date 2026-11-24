@@ -58,7 +58,7 @@ func TestAccModelArmorTemplate_update(t *testing.T) {
 	templateId := fmt.Sprintf("modelarmor-test-update-%s", acctest.RandString(t, 5))
 
 	context := map[string]interface{}{
-		"location":   "us-central1",
+		"location":   "us",
 		"templateId": templateId,
 	}
 
@@ -111,8 +111,8 @@ func testAccModelArmorTemplate_initial(context map[string]interface{}) string {
           }
           sdp_settings {
             advanced_config {
-              inspect_template     = "projects/llm-firewall-demo/locations/us-central1/inspectTemplates/t2"
-              deidentify_template  = "projects/llm-firewall-demo/locations/us-central1/deidentifyTemplates/t3"
+              inspect_template     = "projects/llm-firewall-demo/locations/us/inspectTemplates/t2"
+              deidentify_template  = "projects/llm-firewall-demo/locations/us/deidentifyTemplates/t3"
             }
           }
           pi_and_jailbreak_filter_settings {
@@ -121,6 +121,29 @@ func testAccModelArmorTemplate_initial(context map[string]interface{}) string {
           }
           malicious_uri_filter_settings {
             filter_enforcement = "ENABLED"
+          }
+          filter_rule_settings {
+            rule_sets {
+              filter_types = ["PROMPT_INJECTION_AND_JAILBREAK", "RESPONSIBLE_AI"]
+              rules {
+                exclusion_rule {
+                  matching_scope = "MATCHING_SCOPE_PARTIAL_MATCH"
+                  dictionary {
+                    word_list {
+                      words = ["allowphrase1", "allowphrase2"]
+                    }
+                  }
+                }
+              }
+              rules {
+                exclusion_rule {
+                  matching_scope = "MATCHING_SCOPE_FULL_MATCH"
+                  regex {
+                    pattern = "^safe_pattern_[0-9]+$"
+                  }
+                }
+              }
+            }
           }
         }
         template_metadata {
@@ -135,6 +158,8 @@ func testAccModelArmorTemplate_initial(context map[string]interface{}) string {
           custom_prompt_safety_error_message       = "This is a custom error message for prompt"
           custom_llm_response_safety_error_code    = 401
           enforcement_type                         = "INSPECT_ONLY"
+          modalities                               = ["MODALITY_TEXT", "MODALITY_IMAGE"]
+          data_residency_compliant                 = true
         }
       }
     `, context)
@@ -206,6 +231,16 @@ func TestAccModelArmorTemplate_removeTemplateMetadata(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccModelArmorTemplate_withTemplateMetadata(context),
+				Check: resource.ComposeTestCheckFunc(
+					// data_residency_compliant is not configured, so the API default for new
+					// templates (true) is read back into state.
+					resource.TestCheckResourceAttr("google_model_armor_template.test-no-metadata", "template_metadata.0.data_residency_compliant", "true"),
+				),
+			},
+			{
+				Config:             testAccModelArmorTemplate_withTemplateMetadata(context),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
 			},
 			{
 				Config: testAccModelArmorTemplate_noTemplateMetadata(context),
@@ -242,7 +277,7 @@ resource "google_model_armor_template" "test-no-metadata" {
 func testAccModelArmorTemplate_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
       resource "google_model_armor_template" "test-resource" {
-        location    = "us-central1"
+        location    = "us"
         template_id = "%{templateId}"
         labels = {
             "test-label" = "env-testing-updated"
@@ -266,6 +301,29 @@ func testAccModelArmorTemplate_update(context map[string]interface{}) string {
           malicious_uri_filter_settings {
             filter_enforcement = "DISABLED"
           }
+          filter_rule_settings {
+            rule_sets {
+              filter_types = ["RESPONSIBLE_AI"]
+              rules {
+                exclusion_rule {
+                  matching_scope = "MATCHING_SCOPE_FULL_MATCH"
+                  dictionary {
+                    word_list {
+                      words = ["updatedphrase1"]
+                    }
+                  }
+                }
+              }
+              rules {
+                exclusion_rule {
+                  matching_scope = "MATCHING_SCOPE_PARTIAL_MATCH"
+                  regex {
+                    pattern = "^updated_pattern_[a-z]+$"
+                  }
+                }
+              }
+            }
+          }
         }
         template_metadata {
           custom_llm_response_safety_error_message = "Updated LLM error message"
@@ -279,6 +337,8 @@ func testAccModelArmorTemplate_update(context map[string]interface{}) string {
           custom_prompt_safety_error_message       = "Updated prompt error message"
           custom_llm_response_safety_error_code    = 500
           enforcement_type                         = "INSPECT_AND_BLOCK"
+          modalities                               = ["MODALITY_TEXT"]
+          data_residency_compliant                 = true
         }
       }
     `, context)

@@ -39,6 +39,11 @@ async:
   result:
     resource_inside_response: true
 autogen_async: true
+generate_list_resource: true
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-east1"
 custom_code:
 samples:
   - name: gkebackup_restorechannel_basic
@@ -50,8 +55,6 @@ samples:
           destination_project: projects/24240755850
         test_vars_overrides:
           destination_project: '"projects/24240755850"'
-        test_env_vars:
-          project: PROJECT_NAME
 parameters:
   - name: location
     type: String

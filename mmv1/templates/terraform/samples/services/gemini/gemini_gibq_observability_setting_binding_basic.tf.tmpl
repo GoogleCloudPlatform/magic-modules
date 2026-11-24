@@ -1,0 +1,21 @@
+data "google_project" "project" {
+}
+
+resource "google_gemini_gibq_observability_setting" "basic" {
+    gibq_observability_setting_id = "{{index $.ResourceIdVars "gibq_observability_setting_id"}}"
+    location = "global"
+    labels = {"my_key": "my_value"}
+    conversational_analytics_setting {
+      metrics_enabled = true
+      traces_enabled = true
+      feedback_enabled = true
+      logging_enabled = true
+    }
+}
+
+resource "google_gemini_gibq_observability_setting_binding" "{{$.PrimaryResourceId}}" {
+    gibq_observability_setting_id = google_gemini_gibq_observability_setting.basic.gibq_observability_setting_id
+    setting_binding_id = "{{index $.ResourceIdVars "setting_binding_id"}}"
+    location = "global"
+    target = "projects/${data.google_project.project.number}"
+}

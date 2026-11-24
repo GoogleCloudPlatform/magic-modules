@@ -65,7 +65,6 @@ samples:
           network_name: default
           subnetwork_name: default
         test_env_vars:
-          project: PROJECT_NAME
           location: REGION
         test_vars_overrides:
           network_name: compute.BootstrapSharedTestNetwork(t, "gke-cluster")

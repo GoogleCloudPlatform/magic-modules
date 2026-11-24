@@ -19,12 +19,9 @@ description: |
 references:
   guides:
     Policy API overview: https://docs.cloud.google.com/identity/docs/concepts/overview-policies
-  api: https://cloud.google.com/identity/docs/reference/rest/v1beta1/policies
-docs:
-  note: This is available only in beta
+  api: https://cloud.google.com/identity/docs/reference/rest/v1/policies
 # API settings
 base_url: policies
-min_version: beta
 self_link: '{{name}}'
 create_url: policies
 delete_url: '{{name}}'
@@ -39,6 +36,9 @@ async:
   result:
     resource_inside_response: true
 autogen_async: true
+# Policy names are server-assigned numeric IDs (policies/{id}) that never carry the tf-test
+# prefix, so a generated sweeper could never safely identify test resources.
+exclude_sweeper: true
 custom_code:
   update_encoder: templates/terraform/update_encoder/cloud_identity_policy_update_mask.go.tmpl
   constants: templates/terraform/custom_code/cloud_identity_policy_constants.go.tmpl
@@ -46,13 +46,16 @@ custom_code:
 samples:
   - name: cloudidentity_policy_basic
     primary_resource_id: primary
-    # Created a handwritten test as otherwise example will have to override scopes causing confusion for end users.
-    exclude_test: true
-    min_version: beta
+    skip_test: Acceptance test requires Google Workspace admin privileges not held by the CI service account
     steps:
       - name: cloudidentity_policy_basic
-        resource_id_vars:
-        min_version: beta
+        test_env_vars:
+          cust_id: CUST_ID
+          org_unit_id: ORG_UNIT_ID
+      - name: cloudidentity_policy_basic_update
+        test_env_vars:
+          cust_id: CUST_ID
+          org_unit_id: ORG_UNIT_ID
 properties:
   - name: name
     description: |
@@ -77,7 +80,14 @@ properties:
         type: String
         immutable: true
       - name: orgUnit
-        description: The OrgUnit the query applies to.
+        description: |-
+          The OrgUnit the query applies to, in the format `orgUnits/{org_unit_id}`.
+          `{org_unit_id}` is the obfuscated org unit ID, the same value the Admin SDK
+          Directory API returns as `orgUnitId` without its `id:` prefix. Org unit paths
+          and display names are not resolved and are rejected for most settings.
+          For detector settings (`settings/detector.*`), the API ignores this value and
+          always applies the policy to, and returns, the customer's root org unit, so any
+          other value produces a diff; set it to the root org unit's ID.
         type: String
         immutable: true
         required: true

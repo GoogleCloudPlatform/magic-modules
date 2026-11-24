@@ -209,7 +209,8 @@ is desired, you will need to modify your state file manually using
     **Note**: [`allow_stopping_for_update`](#allow_stopping_for_update) must be set to true or your instance must have a `desired_status` of `TERMINATED` in order to update this field.
 
 * `params` - (Optional) Additional instance parameters.
-.
+    Structure is [documented below](#nested_params).
+
 * `project` - (Optional) The ID of the project in which the resource belongs. If it
     is not provided, the provider project is used.
 
@@ -252,7 +253,7 @@ is desired, you will need to modify your state file manually using
 
 * `key_revocation_action_type` - (optional) Action to be taken when a customer's encryption key is revoked. Supports `STOP` and `NONE`, with `NONE` being the default.
 
-* `instance_encryption_key` - (optional) Configuration for data encryption on the instance with encryption keys. Structure is [documented below](#nested_instance_encryption_key`).
+* `instance_encryption_key` - (optional) Configuration for data encryption on the instance with encryption keys. Structure is [documented below](#nested_instance_encryption_key).
 
 * `erase_windows_vss_signature` - (optional) [Beta](../guides/provider_versions.html.markdown) Specifies whether the disks restored from source snapshots or source machine image should erase Windows specific VSS signature.
 
@@ -309,6 +310,8 @@ is desired, you will need to modify your state file manually using
     disk even if it's currently attached to another instance. If you try to force attach a zonal
     disk to an instance, you will receive an error. Setting this parameter cause VM recreation.
 
+* `interface` - (Optional) The disk interface used for attaching this disk. One of SCSI or NVME. (This field is shared with attached_disk and only used for specific cases, please don't specify this field without advice from Google.)
+
 <a name="nested_initialize_params"></a>The `initialize_params` block supports:
 
 * `size` - (Optional) The size of the image in gigabytes. If not specified, it
@@ -333,7 +336,7 @@ is desired, you will need to modify your state file manually using
 
 * `snapshot` - (Optional) The snapshot from which to initialize this disk. To create a disk with a snapshot that you created, specify the snapshot name in the following format: `global/snapshots/my-backup`
 
-* `source_snapshot_encryption_key` - (Optional) Encryption key used to decrypt the given snapshot. Structure is [documented below](#nested_source_snapshot_ecryption_key).
+* `source_snapshot_encryption_key` - (Optional) Encryption key used to decrypt the given snapshot. Structure is [documented below](#nested_source_snapshot_encryption_key).
 
 * `architecture` - (Optional) The architecture of the attached disk. Valid values are `ARM64` or `x86_64`.
 
@@ -344,18 +347,17 @@ is desired, you will need to modify your state file manually using
 * `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk.
     This sets the number of I/O operations per second that the disk can handle.
     For more details,see the [Hyperdisk documentation](https://cloud.google.com/compute/docs/disks/hyperdisks).
-    Note: Updating currently is only supported for hyperdisk skus via disk update
-    api/gcloud without the need to delete and recreate the disk, hyperdisk allows
-    for an update of IOPS every 4 hours. To update your hyperdisk more frequently,
-    you'll need to manually delete and recreate it.
+    Note: Updating in place is only supported for hyperdisk skus; changing this
+    value on other disk types (e.g. pd-extreme) will force recreation of the instance.
+    Hyperdisk allows for an update of IOPS every 4 hours; to update more
+    frequently than that, you'll need to manually delete and recreate the disk.
 
 * `provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk.
     This sets the number of throughput mb per second that the disk can handle.
     For more details,see the [Hyperdisk documentation](https://cloud.google.com/compute/docs/disks/hyperdisks).
-    Note: Updating currently is only supported for hyperdisk skus via disk update
-    api/gcloud without the need to delete and recreate the disk, hyperdisk allows
-    for an update of throughput every 4 hours. To update your hyperdisk more
-    frequently, you'll need to manually delete and recreate it.
+    Note: This is only supported for hyperdisk skus, and can be updated in place.
+    Hyperdisk allows for an update of throughput every 4 hours; to update more
+    frequently than that, you'll need to manually delete and recreate the disk.
 
 * `enable_confidential_compute` - (Optional) Whether this disk is using confidential compute mode.
     Note: Only supported on hyperdisk skus, disk_encryption_key is required when setting to true.
@@ -372,6 +374,10 @@ is desired, you will need to modify your state file manually using
 <a name="nested_scratch_disk"></a>The `scratch_disk` block supports:
 
 * `interface` - (Required) The disk interface to use for attaching this disk; either SCSI or NVME.
+
+* `device_name` - (Optional) Name with which the attached disk is accessible under /dev/disk/by-id/
+
+* `size` - (Optional) The size of the disk in gigabytes. One of 375 or 3000. Defaults to 375.
 
 <a name="nested_attached_disk"></a>The `attached_disk` block supports:
 
@@ -401,7 +407,11 @@ is desired, you will need to modify your state file manually using
 
 * `disk_encryption_service_account` - (Optional) The service account being used for the encryption request for the given KMS key. If absent, the Compute Engine default service account is used.
 
-<a name="nested_source_image_encryption_key"></a>The `source_snapshot_encryption_key` block supports:
+* `force_attach` - (Optional) boolean field that determines whether to force attach the regional
+    disk even if it's currently attached to another instance. If you try to force attach a zonal
+    disk to an instance, you will receive an error. Setting this parameter cause VM recreation.
+
+<a name="nested_source_image_encryption_key"></a>The `source_image_encryption_key` block supports:
 
 * `raw_key` - (Optional)  A 256-bit [customer-supplied encryption key]
     (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption),
@@ -436,10 +446,6 @@ is desired, you will need to modify your state file manually using
     may be set.
 
 * `kms_key_service_account` - (Optional) The service account being used for the encryption request for the given KMS key. If absent, the Compute Engine default service account is used.
-
-* `force_attach` - (Optional) boolean field that determines whether to force attach the regional
-    disk even if it's currently attached to another instance. If you try to force attach a zonal
-    disk to an instance, you will receive an error. Setting this parameter cause VM recreation.
 
 <a name="nested_network_performance_config"></a>The `network_performance_config` block supports:
 
@@ -490,6 +496,10 @@ is desired, you will need to modify your state file manually using
 
 * `network_attachment` - (Optional) The URL of the network attachment that this interface should connect to in the following format: `projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}`.
 
+* `enable_vpc_scoped_dns` - (Optional) If true, DNS resolution will be enabled over this interface. Only valid with `network_attachment`.
+
+* `service_class_id` - (Optional) Producer Service's Service class Id for the region of this network interface. Can only be used with `network_attachment`. It is not possible to use on its own; however, `network_attachment` can be used without `service_class_id`.
+
 * `vlan` - (Optional) VLAN tag of a dynamic network interface, must be an integer in the range from 2 to 255 inclusively.
 
 * `igmp_query` - (Optional) Indicates whether igmp query is enabled on the network interface or not. If enabled, also indicates the version of IGMP supported.
@@ -499,6 +509,10 @@ is desired, you will need to modify your state file manually using
 * `ipv6_access_config` - (Optional) An array of IPv6 access configurations for this interface.
 Currently, only one IPv6 access config, DIRECT_IPV6, is supported. If there is no ipv6AccessConfig
 specified, then this instance will have no external IPv6 Internet access. Structure [documented below](#nested_ipv6_access_config).
+
+* `internal_ipv6_prefix_length` - (Optional) The prefix length of the primary internal IPv6 range.
+
+* `ipv6_address` - (Optional) An IPv6 internal network address for this network interface. If not specified, Google Cloud will automatically assign an internal IPv6 address from the instance's subnetwork.
 
 * `queue_count` - (Optional) The networking queue count that's specified by users for the network interface. Both Rx and Tx queues will be set to this number. It will be empty if not specified.
 
@@ -611,11 +625,11 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `local_ssd_recovery_timeout` -  (Optional) (../guides/provider_versions.html.markdown) Specifies the maximum amount of time a Local Ssd Vm should wait while recovery of the Local Ssd state is attempted. Its value should be in between 0 and 168 hours with hour granularity and the default value being 1 hour. Structure is [documented below](#nested_local_ssd_recovery_timeout).
 
-* `graceful_shutdown` -  (Optional) [Beta](../guides/provider_versions.html.markdown) Settings for the instance to perform a graceful shutdown. Structure is [documented below](#nested_graceful_shutdown).
+* `graceful_shutdown` - (Optional) Settings for the instance to perform a graceful shutdown. Structure is [documented below](#nested_graceful_shutdown).
 
 * `skip_guest_os_shutdown` - (Optional) [Beta](../guides/provider_versions.html.markdown) Boolean parameter. Default is false and there will be 120 seconds between GCE ACPI G2 Soft Off and ACPI G3 Mechanical Off for Standard VMs and 30 seconds for Spot VMs.
 
-* `preemption_notice_duration` - (Optional) [Beta](../guides/provider_versions.html.markdown) Specifies the Metadata Service preemption notice duration before the GCE ACPI G2 Soft Off signal is triggered for Spot VMs only. If not specified, there will be no wait before the G2 Soft Off signal is triggered. Structure is [documented below](#nested_preemption_notice_duration).
+* `preemption_notice_duration` - (Optional) Specifies the Metadata Service preemption notice duration before the GCE ACPI G2 Soft Off signal is triggered for Spot VMs only. If not specified, there will be no wait before the G2 Soft Off signal is triggered. Structure is [documented below](#nested_preemption_notice_duration).
 
 <a name="nested_graceful_shutdown"></a>The `graceful_shutdown` block supports:
 
@@ -623,15 +637,17 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `max_duration` (Optional) The time allotted for the instance to gracefully shut down.
     If the graceful shutdown isn't complete after this time, then the instance
-    transitions to the STOPPING state. Structure is documented below:
+    transitions to the STOPPING state. Structure is [documented below](#nested_max_duration).
 
-    * `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
-        resolution. Durations less than one second are represented with a 0
-        `seconds` field and a positive `nanos` field. Must be from 0 to
-        999,999,999 inclusive.
+<a name="nested_max_duration"></a>The `max_duration` block supports:
 
-    * `seconds` - (Required) Span of time at a resolution of a second.
-        The value must be between 1 and 3600, which is 3,600 seconds (one hour).`
+* `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
+    resolution. Durations less than one second are represented with a 0
+    `seconds` field and a positive `nanos` field. Must be from 0 to
+    999,999,999 inclusive.
+
+* `seconds` - (Required) Span of time at a resolution of a second.
+    The value must be between 1 and 3600, which is 3,600 seconds (one hour).
 
 <a name="nested_preemption_notice_duration"></a>The `preemption_notice_duration` block supports:
 
@@ -718,6 +734,8 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `performance_monitoring_unit` - (Optional) [The PMU](https://cloud.google.com/compute/docs/pmu-overview) is a hardware component within the CPU core that monitors how the processor runs code. Valid values for the level of PMU are `STANDARD`, `ENHANCED`, and `ARCHITECTURAL`.
 
+    ~> **Note:** Early 8.X.0 provider versions dropped an explicitly configured `STANDARD` value when creating the resource. On affected resources the diff stays suppressed, so Terraform reports no changes. For `google_compute_instance`, apply once with another level (`ENHANCED` or `ARCHITECTURAL`) and then again with `STANDARD`; this requires `allow_stopping_for_update`. For instance templates the field is `ForceNew`, so use `terraform apply -replace=...` instead.
+
 * `enable_uefi_networking` - (Optional) Whether to enable UEFI networking for instance creation.
 
 <a name="nested_reservation_affinity"></a>The `reservation_affinity` block supports:
@@ -760,10 +778,18 @@ exported:
 
 * `cpu_platform` - The CPU platform used by this instance.
 
-* `ipv6_access_type` - One of EXTERNAL, INTERNAL to indicate whether the IP can be accessed from the Internet.
+* `network_interface.0.ipv6_access_type` - One of EXTERNAL, INTERNAL to indicate whether the IP can be accessed from the Internet.
 This field is always inherited from its subnetwork.
 
 * `current_status` - The current status of the instance. This could be one of the following values: PROVISIONING, STAGING, RUNNING, STOPPING, SUSPENDING, SUSPENDED, REPAIRING, and TERMINATED. For more information about the status of the instance, see [Instance life cycle](https://cloud.google.com/compute/docs/instances/instance-life-cycle).
+
+* `network_interface.0.name` - The name of the interface.
+
+* `network_interface.0.access_config.0.security_policy` - [Beta](../guides/provider_versions.html.markdown) The URL of the security policy applied to this access config. To set it, use `network_interface.security_policy`.
+
+* `network_interface.0.ipv6_access_config.0.security_policy` - [Beta](../guides/provider_versions.html.markdown) The URL of the security policy applied to this IPv6 access config. To set it, use `network_interface.security_policy`.
+
+* `instance_encryption_key.0.sha256` - The SHA256 hash of the customer's encryption key.
 
 * `network_interface.0.network_ip` - The internal ip address of the instance, either manually or dynamically assigned.
 

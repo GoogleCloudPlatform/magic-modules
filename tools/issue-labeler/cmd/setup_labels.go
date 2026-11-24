@@ -16,7 +16,6 @@
 package cmd
 
 import (
-	"flag"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -36,7 +35,6 @@ var setupLabels = &cobra.Command{
 }
 
 func execSetupLabels(repo string) error {
-	flag.Set("logtostderr", "true")
 	regexpLabels, err := labeler.BuildRegexLabels(labeler.EnrolledTeamsYaml)
 	if err != nil {
 		return fmt.Errorf("building regex labels: %w", err)

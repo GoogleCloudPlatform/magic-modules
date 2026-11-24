@@ -34,6 +34,12 @@ func testAccAccessContextManagerAuthorizedOrgsDesc_basicTest(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"parent"},
 			},
+			{
+				ResourceName:       "google_access_context_manager_authorized_orgs_desc.authorized-orgs-desc",
+				ImportState:        true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
+			},
 		},
 	})
 }
@@ -42,7 +48,7 @@ func testAccAccessContextManagerAuthorizedOrgsDesc_accessContextManagerAuthorize
 	return acctest.Nprintf(`
 resource "google_access_context_manager_authorized_orgs_desc" "authorized-orgs-desc" {
   parent = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}"
-  name   = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/authorizedOrgsDescs/fakeDescName"
+  name   = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/authorizedOrgsDescs/tf_test_fakeDescName"
   authorization_type = "AUTHORIZATION_TYPE_TRUST"
   asset_type = "ASSET_TYPE_CREDENTIAL_STRENGTH"
   authorization_direction = "AUTHORIZATION_DIRECTION_TO"

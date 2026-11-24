@@ -8,14 +8,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/services/compute"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccComputeTargetTcpProxy_update(t *testing.T) {
 	t.Parallel()
 
-	target := fmt.Sprintf("ttcp-test-%s", acctest.RandString(t, 10))
-	backend := fmt.Sprintf("ttcp-test-%s", acctest.RandString(t, 10))
-	hc := fmt.Sprintf("ttcp-test-%s", acctest.RandString(t, 10))
+	target := fmt.Sprintf("tf-test-ttcp-%s", acctest.RandString(t, 10))
+	backend := fmt.Sprintf("tf-test-ttcp-%s", acctest.RandString(t, 10))
+	hc := fmt.Sprintf("tf-test-ttcp-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -54,13 +55,19 @@ func testAccCheckComputeTargetTcpProxyExists(t *testing.T, n string) resource.Te
 		config := acctest.GoogleProviderConfig(t)
 		name := rs.Primary.Attributes["name"]
 
-		found, err := compute.NewClient(config, config.UserAgent).TargetTcpProxies.Get(
-			config.Project, name).Do()
+		url := fmt.Sprintf("%sprojects/%s/global/targetTcpProxies/%s", transport_tpg.BaseUrl(compute.Product, config), config.Project, name)
+		found, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   config.Project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+		})
 		if err != nil {
 			return err
 		}
 
-		if found.Name != name {
+		if found["name"] != name {
 			return fmt.Errorf("TargetTcpProxy not found")
 		}
 

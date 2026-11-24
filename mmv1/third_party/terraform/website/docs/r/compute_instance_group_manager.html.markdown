@@ -236,9 +236,9 @@ group. You can specify only one value. Structure is [documented below](#nested_a
 * `all_instances_config` - (Optional)
   Properties to set on all instances in the group. After setting
   allInstancesConfig on the group, you must update the group's instances to
-  apply the configuration.
+  apply the configuration. Structure is [documented below](#nested_all_instances_config).
 
-* `standby_policy` - (Optional) The standby policy for stopped and suspended instances. Structure is documented below. For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/suspended-and-stopped-vms-in-mig).
+* `standby_policy` - (Optional) The standby policy for stopped and suspended instances. Structure is [documented below](#nested_standby_policy). For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/suspended-and-stopped-vms-in-mig).
 
 * `target_suspended_size` - (Optional) The target number of suspended instances for this managed instance group.
 
@@ -258,16 +258,21 @@ group. You can specify only one value. Structure is [documented below](#nested_a
 
 * `target_size_policy` - (Optional) The policy that specifies how the MIG creates its VMs to achieve the target size. Structure is [documented below](#nested_target_size_policy).
 
+* `instance_lifecycle_policy` - (Optional) The instance lifecycle policy for this managed instance group. Structure is [documented below](#nested_instance_lifecycle_policy).
+
+* `service_account` - (Optional, [Beta](../guides/provider_versions.html.markdown)) The service account to be used as credentials for all operations performed by the managed instance group on instances. The service account needs all permissions required to create and delete instances. By default, the service account {projectNumber}@cloudservices.gserviceaccount.com is used.
+
 * `deletion_policy` - (Optional) Whether Terraform will be prevented from destroying the resource. Defaults to "DELETE".
     When a 'terraform destroy' or 'terraform apply' would delete the resource,
     the command will fail if this field is set to "PREVENT" in Terraform state.
     When set to "ABANDON", the command will remove the resource from Terraform
     management without updating or deleting the resource in the API.
-    When set to "DELETE", deleting the resource is allowed.
+    When set to "DELETE", deleting the resource is allowed. If graceful shutdown is configured, the MIG waits for all instances to shut down gracefully before deletion.
+    When set to "FORCE", deleting the resource is allowed, and graceful shutdown is skipped for instance deletion even if it's configured for the instances.
 
 - - -
 
-The `standby_policy` block supports:
+<a name="nested_standby_policy"></a>The `standby_policy` block supports:
 
 * `initial_delay_sec` - (Optional) - Specifies the number of seconds that the MIG should wait to suspend or stop a VM after that VM was created. The initial delay gives the initialization script the time to prepare your VM for a quick scale out. The value of initial delay must be between 0 and 3600 seconds. The default value is 0.
 * `mode` - (Optional) - Defines how a MIG resumes or starts VMs from a standby pool when the group scales out. Valid options are: `MANUAL`, `SCALE_OUT_POOL`. If `MANUAL`(default), you have full control over which VMs are stopped and suspended in the MIG. If `SCALE_OUT_POOL`, the MIG uses the VMs from the standby pools to accelerate the scale out by resuming or starting them and then automatically replenishes the standby pool with new VMs to maintain the target sizes.
@@ -287,9 +292,11 @@ update_policy {
 }
 ```
 
-* `minimal_action` - (Required) - Minimal action to be taken on an instance. You can specify either `NONE` to forbid any actions, `REFRESH` to update without stopping instances, `RESTART` to restart existing instances or `REPLACE` to delete and create new instances from the target template. If you specify a `REFRESH`, the Updater will attempt to perform that action only. However, if the Updater determines that the minimal action you specify is not enough to perform the update, it might perform a more disruptive action.
+* `minimal_action` - (Optional) - Minimal action to be taken on an instance. You can specify either `NONE` to forbid any actions, `REFRESH` to update without stopping instances, `RESTART` to restart existing instances or `REPLACE` to delete and create new instances from the target template. If you specify a `REFRESH`, the Updater will attempt to perform that action only. However, if the Updater determines that the minimal action you specify is not enough to perform the update, it might perform a more disruptive action. Required in the `google` provider; optional in `google-beta` when `allowed_actions` is set (conflicts with `allowed_actions`).
 
-* `most_disruptive_allowed_action` - (Optional) - Most disruptive action that is allowed to be taken on an instance. You can specify either NONE to forbid any actions, REFRESH to allow actions that do not need instance restart, RESTART to allow actions that can be applied without instance replacing or REPLACE to allow all possible actions. If the Updater determines that the minimal update action needed is more disruptive than most disruptive allowed action you specify it will not perform the update at all.
+* `allowed_actions` - (Optional, [Beta](../guides/provider_versions.html.markdown)) - Specifies the allowed actions list for this update. Valid values are: `"NONE"`, `"REFRESH"`, `"RESTART_IN_PLACE"`, `"RESTART"`, `"REPLACE"`. `allowed_actions` is the only way to request `RESTART_IN_PLACE`. Conflicts with `minimal_action` and `most_disruptive_allowed_action`.
+
+* `most_disruptive_allowed_action` - (Optional) - Most disruptive action that is allowed to be taken on an instance. You can specify either NONE to forbid any actions, REFRESH to allow actions that do not need instance restart, RESTART to allow actions that can be applied without instance replacing or REPLACE to allow all possible actions. If the Updater determines that the minimal update action needed is more disruptive than most disruptive allowed action you specify it will not perform the update at all. Conflicts with `allowed_actions`.
 
 * `type` - (Required) - The type of update process. You can specify either `PROACTIVE` so that the instance group manager proactively executes actions in order to bring instances to their target versions or `OPPORTUNISTIC` so that no action is proactively executed but the update will be performed as part of other actions (for example, resizes or recreateInstances calls).
 
@@ -464,37 +471,39 @@ exported:
 
 * `instance_group` - The full URL of the instance group created by the manager.
 
+* `instance_group_manager_id` - The unique identifier number for the resource. This identifier is defined by the server.
+
 * `self_link` - The URL of the created resource.
 
-* `status` - The status of this managed instance group.
+* `status` - The status of this managed instance group. Structure is [documented below](#nested_status).
 
-The `status` block holds:
+<a name="nested_status"></a>The `status` block holds:
 
 * `is_stable` - A bit indicating whether the managed instance group is in a stable state. A stable state means that: none of the instances in the managed instance group is currently undergoing any type of change (for example, creation, restart, or deletion); no future changes are scheduled for instances in the managed instance group; and the managed instance group itself is not being modified.
 
-* `version_target` - A status of consistency of Instances' versions with their target version specified by version field on Instance Group Manager.
+* `version_target` - A status of consistency of Instances' versions with their target version specified by version field on Instance Group Manager. Structure is [documented below](#nested_status_version_target).
 
-* `all_instances_config` - Status of all-instances configuration on the group.
+* `all_instances_config` - Status of all-instances configuration on the group. Structure is [documented below](#nested_status_all_instances_config).
 
-* `stateful` - Stateful status of the given Instance Group Manager.
+* `stateful` - Stateful status of the given Instance Group Manager. Structure is [documented below](#nested_status_stateful).
 
-The `version_target` block holds:
+<a name="nested_status_version_target"></a>The `version_target` block holds:
 
-* `version_target` - A bit indicating whether version target has been reached in this managed instance group, i.e. all instances are in their target version. Instances' target version are specified by version field on Instance Group Manager.
+* `is_reached` - A bit indicating whether version target has been reached in this managed instance group, i.e. all instances are in their target version. Instances' target version are specified by version field on Instance Group Manager.
 
-The `all_instances_config` block holds:
+<a name="nested_status_all_instances_config"></a>The `all_instances_config` block holds:
 
 * `effective` -  A bit indicating whether this configuration has been applied to all managed instances in the group.
 
 * `current_revision` - Current all-instances configuration revision. This value is in RFC3339 text format.
 
-The `stateful` block holds:
+<a name="nested_status_stateful"></a>The `stateful` block holds:
 
 * `has_stateful_config` - A bit indicating whether the managed instance group has stateful configuration, that is, if you have configured any items in a stateful policy or in per-instance configs. The group might report that it has no stateful config even when there is still some preserved state on a managed instance, for example, if you have deleted all PICs but not yet applied those deletions.
 
-* `per_instance_configs` - Status of per-instance configs on the instances.
+* `per_instance_configs` - Status of per-instance configs on the instances. Structure is [documented below](#nested_status_stateful_per_instance_configs).
 
-The `per_instance_configs` block holds:
+<a name="nested_status_stateful_per_instance_configs"></a>The `per_instance_configs` block holds:
 
 * `all_effective` - A bit indicating if all of the group's per-instance configs (listed in the output of a listPerInstanceConfigs API call) have status `EFFECTIVE` or there are no per-instance-configs.
 
@@ -505,7 +514,7 @@ This resource provides the following
 
 - `create` - Default is 15 minutes.
 - `update` - Default is 15 minutes.
-- `delete` - Default is 15 minutes.
+- `delete` - Default is 15 minutes. Note if graceful shutdown is configured on the instance template and not skipped with `deletion_policy = "FORCE"` it can take up to 6 hours.
 
 
 ## Import

@@ -1,6 +1,7 @@
 package transport
 
 import (
+	"fmt"
 	"strconv"
 	"testing"
 
@@ -78,6 +79,50 @@ func TestIsCommonRetryableErrorCode_otherError(t *testing.T) {
 		Body: "Some unretryable issue",
 	}
 	isRetryable, _ := isCommonRetryableErrorCode(&err)
+	if isRetryable {
+		t.Errorf("Error incorrectly detected as retryable")
+	}
+}
+
+func TestIsResourceNotReadyError_retryable(t *testing.T) {
+	err := googleapi.Error{
+		Code: 400,
+		Body: `{"error":{"code":400,"message":"The resource 'projects/test-project/regions/us-east1/serviceAttachments/test-psc-sa' is not ready","errors":[{"message":"The resource 'projects/test-project/regions/us-east1/serviceAttachments/test-psc-sa' is not ready","domain":"global","reason":"resourceNotReady"}]}}`,
+	}
+	isRetryable, _ := isResourceNotReadyError(&err)
+	if !isRetryable {
+		t.Errorf("Error not detected as retryable")
+	}
+}
+
+func TestIsResourceNotReadyError_otherError(t *testing.T) {
+	err := googleapi.Error{
+		Code: 400,
+		Body: `{"error":{"code":400,"message":"Invalid value for field 'resource.name'","errors":[{"message":"Invalid value for field 'resource.name'","domain":"global","reason":"invalid"}]}}`,
+	}
+	isRetryable, _ := isResourceNotReadyError(&err)
+	if isRetryable {
+		t.Errorf("Error incorrectly detected as retryable")
+	}
+}
+
+func TestDataprocResourceNotReady_retryable(t *testing.T) {
+	err := googleapi.Error{
+		Code: 400,
+		Body: `{"error":{"code":400,"message":"The resource 'projects/test-project/regions/us-south1/subnetworks/default' is not ready","status":"INVALID_ARGUMENT","errors":[{"message":"The resource 'projects/test-project/regions/us-south1/subnetworks/default' is not ready","domain":"global","reason":"badRequest"}]}}`,
+	}
+	isRetryable, _ := DataprocResourceNotReady(&err)
+	if !isRetryable {
+		t.Errorf("Error not detected as retryable")
+	}
+}
+
+func TestDataprocResourceNotReady_otherError(t *testing.T) {
+	err := googleapi.Error{
+		Code: 400,
+		Body: `{"error":{"code":400,"message":"Invalid value for field 'cluster.name'","status":"INVALID_ARGUMENT"}}`,
+	}
+	isRetryable, _ := DataprocResourceNotReady(&err)
 	if isRetryable {
 		t.Errorf("Error incorrectly detected as retryable")
 	}
@@ -274,5 +319,149 @@ func TestExternalIpServiceNotActive(t *testing.T) {
 	isRetryable, _ := ExternalIpServiceNotActive(&err)
 	if !isRetryable {
 		t.Errorf("Error not detected as retryable")
+	}
+}
+
+func TestIsAgentConnectivityTemplateInUse(t *testing.T) {
+	inUseMessage := "Resource '\"projects/ci-test-project-188019/locations/us-central1/agentConnectivityTemplates/tf-test-my-full-agent-gateway6sn0ed1rvk-template\"' is already being used by resource(s) '\"//networkservices.googleapis.com/projects/1067888929963/locations/us-central1/agentGateways/tf-test-my-full-agent-gateway6sn0ed1rvk\"'"
+	expectedRetryReason := "waiting for AgentConnectivityTemplate to no longer be referenced"
+
+	cases := map[string]struct {
+		err            error
+		expected       bool
+		expectedReason string
+	}{
+		"nil error": {
+			err:            nil,
+			expected:       false,
+			expectedReason: "",
+		},
+		// The shape networkservices actually returns: the JSON error.message is
+		// decoded into Message, so Error() renders "googleapi: Error 400: <Message>".
+		"googleapi 400 in use with message": {
+			err: &googleapi.Error{
+				Code:    400,
+				Message: inUseMessage,
+				Body:    fmt.Sprintf(`{"error":{"code":400,"message":%q,"status":"FAILED_PRECONDITION"}}`, inUseMessage),
+			},
+			expected:       true,
+			expectedReason: expectedRetryReason,
+		},
+		// Body-only errors have an empty Message, so Error() falls back to
+		// "googleapi: got HTTP response code 400 with body: <Body>".
+		"googleapi 400 in use with body only": {
+			err: &googleapi.Error{
+				Code: 400,
+				Body: inUseMessage,
+			},
+			expected:       true,
+			expectedReason: expectedRetryReason,
+		},
+		// Not retryable: Error() renders Message only, so a marker confined to Body
+		// is unreachable. Retrying these would require inspecting gerr.Body directly.
+		"googleapi 400 in use with marker only in body": {
+			err: &googleapi.Error{
+				Code:    400,
+				Message: "Precondition check failed.",
+				Body:    fmt.Sprintf(`{"error":{"code":400,"message":%q,"status":"FAILED_PRECONDITION"}}`, inUseMessage),
+			},
+			expected:       false,
+			expectedReason: "",
+		},
+		"googleapi 400 other error": {
+			err: &googleapi.Error{
+				Code:    400,
+				Message: "Some other 400 error",
+			},
+			expected:       false,
+			expectedReason: "",
+		},
+		"wrapped standard error in use": {
+			err:            fmt.Errorf("Error when reading or editing AgentConnectivityTemplate: googleapi: Error 400: %s", inUseMessage),
+			expected:       true,
+			expectedReason: expectedRetryReason,
+		},
+		"other standard error": {
+			err:            fmt.Errorf("Some other error"),
+			expected:       false,
+			expectedReason: "",
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			isRetryable, reason := IsAgentConnectivityTemplateInUse(tc.err)
+			if isRetryable != tc.expected || reason != tc.expectedReason {
+				t.Errorf("IsAgentConnectivityTemplateInUse(%v) = (%v, %q), want (%v, %q)", tc.err, isRetryable, reason, tc.expected, tc.expectedReason)
+			}
+		})
+	}
+}
+
+func TestIsSubnetworkNotReadyLROError_retryable(t *testing.T) {
+	opErr := fmt.Errorf("Error code 9, message: The resource 'projects/test-project/regions/us-central1/subnetworks/default' is not ready")
+	isRetryable, _ := IsSubnetworkNotReadyLROError(opErr)
+	if !isRetryable {
+		t.Errorf("expected LRO error for subnetwork not ready to be retryable")
+	}
+}
+
+func TestIsSubnetworkNotReadyLROError_otherError(t *testing.T) {
+	opErr := fmt.Errorf("Error code 13, message: Internal error")
+	isRetryable, _ := IsSubnetworkNotReadyLROError(opErr)
+	if isRetryable {
+		t.Errorf("expected unrelated LRO error to not be retryable")
+	}
+}
+
+func TestIsResourceManagerBoundaryRetryableError(t *testing.T) {
+	cases := map[string]struct {
+		err      error
+		expected bool
+	}{
+		"boundaryConfig update 403 on folder": {
+			err: &googleapi.Error{
+				Code: 403,
+				Body: `{"error":{"code":403,"message":"Permission 'resourcemanager.boundaryConfigs.update' denied on resource '//cloudresourcemanager.googleapis.com/folders/1064415617689/boundaryConfig' (or it may not exist).","status":"PERMISSION_DENIED"}}`,
+			},
+			expected: true,
+		},
+		"boundary create 403 on folder": {
+			err: &googleapi.Error{
+				Code: 403,
+				Body: `{"error":{"code":403,"message":"Permission 'resourcemanager.boundaries.create' denied on resource '//cloudresourcemanager.googleapis.com/folders/1064415617689' (or it may not exist).","status":"PERMISSION_DENIED"}}`,
+			},
+			expected: true,
+		},
+		"boundary get 403 on folder boundary": {
+			err: &googleapi.Error{
+				Code: 403,
+				Body: `{"error":{"code":403,"message":"Permission 'resourcemanager.boundaries.get' denied on resource '//cloudresourcemanager.googleapis.com/folders/1064415617689/boundaries/tf-test-bnd123' (or it may not exist).","status":"PERMISSION_DENIED"}}`,
+			},
+			expected: true,
+		},
+		"non-403 error": {
+			err: &googleapi.Error{
+				Code: 400,
+				Body: `{"error":{"code":400,"message":"Invalid argument"}}`,
+			},
+			expected: false,
+		},
+		"unrelated 403 error": {
+			err: &googleapi.Error{
+				Code: 403,
+				Body: `{"error":{"code":403,"message":"Permission 'resourcemanager.boundaryConfigs.update' denied on resource '//cloudresourcemanager.googleapis.com/organizations/123456789/boundaryConfig' (or it may not exist)."}}`,
+			},
+			expected: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			isRetryable, _ := IsResourceManagerBoundaryRetryableError(tc.err)
+			if isRetryable != tc.expected {
+				t.Errorf("IsResourceManagerBoundaryRetryableError(%v) = %v, want %v", tc.err, isRetryable, tc.expected)
+			}
+		})
 	}
 }

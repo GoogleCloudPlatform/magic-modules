@@ -114,7 +114,7 @@ properties:
     type: String
     description: A user-specified description of the pool. Cannot exceed 256 characters.
   - name: state
-    type: Enum
+    type: String
     description: |
       Output only. The state of the pool.
        * STATE_UNSPECIFIED: State unspecified.
@@ -127,10 +127,6 @@ properties:
          existing tokens to access resources. If the pool is undeleted, existing
          tokens grant access again.
     output: true
-    enum_values:
-      - STATE_UNSPECIFIED
-      - ACTIVE
-      - DELETED
   - name: disabled
     type: Boolean
     description: |

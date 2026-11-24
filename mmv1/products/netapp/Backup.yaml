@@ -49,7 +49,9 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-# Skipping the sweeper since we need to sweep multiple regions
+# Backups are children of a backupVault, so the list URL needs a vault id that
+# the generated sweeper cannot supply. Swept by the handwritten
+# resource_netapp_backup_sweeper.go instead.
 exclude_sweeper: true
 async:
   type: OpAsync

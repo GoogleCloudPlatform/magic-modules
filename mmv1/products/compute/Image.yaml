@@ -151,6 +151,7 @@ properties:
             - 'TDX_CAPABLE'
             - 'SEV_LIVE_MIGRATABLE_V2'
             - 'SNP_SVSM_CAPABLE'
+            - 'SUSPEND_SAFE_FPR'
   - name: 'imageEncryptionKey'
     type: NestedObject
     description: |

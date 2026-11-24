@@ -1,0 +1,27 @@
+func vertexAIPipelineJobPipelineSpecDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if old == "" || new == "" {
+		return old == new
+	}
+	var oldMap, newMap map[string]interface{}
+	if err := json.Unmarshal([]byte(old), &oldMap); err != nil {
+		return false
+	}
+	if err := json.Unmarshal([]byte(new), &newMap); err != nil {
+		return false
+	}
+	// The API populates both deploymentSpec and deploymentConfig on read even though
+	// only one of them may be specified on create.
+	if _, ok := newMap["deploymentConfig"]; !ok {
+		delete(oldMap, "deploymentConfig")
+	}
+	if _, ok := newMap["deploymentSpec"]; !ok {
+		delete(oldMap, "deploymentSpec")
+	}
+	if _, ok := oldMap["deploymentConfig"]; !ok {
+		delete(newMap, "deploymentConfig")
+	}
+	if _, ok := oldMap["deploymentSpec"]; !ok {
+		delete(newMap, "deploymentSpec")
+	}
+	return reflect.DeepEqual(oldMap, newMap)
+}

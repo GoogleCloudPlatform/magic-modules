@@ -20,6 +20,7 @@ import (
 	"magician/exec"
 	"magician/source"
 	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -63,8 +64,24 @@ func execSyncBranchCmd(syncBranchPrefix, baseBranch, sha, githubToken string, ru
 		return nil
 	}
 
-	_, err := runner.Run("git", []string{"push", fmt.Sprintf("https://modular-magician:%s@github.com/GoogleCloudPlatform/magic-modules", githubToken), fmt.Sprintf("%s:%s", sha, syncBranch)}, nil)
-	return err
+	remote := fmt.Sprintf("https://modular-magician:%s@github.com/GoogleCloudPlatform/magic-modules", githubToken)
+	refspec := fmt.Sprintf("%s:%s", sha, syncBranch)
+	return syncBranchPushWithRetry(runner, remote, refspec)
+}
+
+func syncBranchPushWithRetry(runner source.Runner, remote, refspec string) error {
+	var err error
+	for attempt := 0; ; attempt++ {
+		if _, err = runner.Run("git", []string{"push", remote, refspec}, nil); err == nil {
+			return nil
+		}
+		if attempt >= len(pushRetryBackoffs) {
+			break
+		}
+		fmt.Printf("Push of %s failed (attempt %d of %d), retrying in %s: %v\n", refspec, attempt+1, len(pushRetryBackoffs)+1, pushRetryBackoffs[attempt], err)
+		time.Sleep(pushRetryBackoffs[attempt])
+	}
+	return fmt.Errorf("push of %s failed after %d attempts: %w", refspec, len(pushRetryBackoffs)+1, err)
 }
 
 func init() {

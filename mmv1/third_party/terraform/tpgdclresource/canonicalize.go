@@ -2,14 +2,13 @@ package tpgdclresource
 
 import (
 	"fmt"
+	"log"
 	"net/url"
 	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
-
-	glog "github.com/golang/glog"
 )
 
 var selfLinkIgnorableComponents = map[string]struct{}{
@@ -541,7 +540,7 @@ func DeriveFieldArray(pattern string, cVal []string, fs ...any) ([]string, error
 		allFs = append(allFs, f.(*string))
 	}
 	for _, cv := range cVal {
-		glog.Infof("deriving %q from %q, %v", pattern, cv, append(allFs, &cv))
+		log.Printf("[INFO] deriving %q from %q, %v", pattern, cv, append(allFs, &cv))
 		sval, err := DeriveField(pattern, &cv, append(allFs, &cv)...)
 		if err != nil {
 			return nil, err
@@ -550,7 +549,7 @@ func DeriveFieldArray(pattern string, cVal []string, fs ...any) ([]string, error
 			return nil, fmt.Errorf("got nil back from DeriveField for %q", cv)
 		}
 		s = append(s, *sval)
-		glog.Infof("derived %q", *sval)
+		log.Printf("[INFO] derived %q", *sval)
 	}
 	return s, nil
 }
@@ -650,7 +649,13 @@ func IsEmptyValueIndirect(i any) bool {
 		return false
 	}
 
-	if !iv.IsValid() || iv.IsZero() {
+	if !iv.IsValid() {
+		return true
+	}
+	if iv.Kind() == reflect.Struct && iv.NumField() == 1 && iv.FieldByName("empty").IsValid() {
+		return iv.FieldByName("empty").Bool()
+	}
+	if iv.IsZero() {
 		return true
 	}
 	if hasEmptyStructField(i) {

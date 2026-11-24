@@ -108,6 +108,7 @@ parameters:
     # required: true
     immutable: true
     ignore_read: true
+    default_from_api: true
 properties:
   - name: enabled
     type: Boolean

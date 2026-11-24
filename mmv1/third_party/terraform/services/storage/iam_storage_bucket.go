@@ -3,7 +3,7 @@ package storage
 import (
 	"fmt"
 
-	"github.com/hashicorp/errwrap"
+	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"google.golang.org/api/cloudresourcemanager/v1"
 
@@ -111,13 +111,13 @@ func (u *StorageBucketIamUpdater) GetResourceIamPolicy() (*cloudresourcemanager.
 		Body:      obj,
 	})
 	if err != nil {
-		return nil, errwrap.Wrapf(fmt.Sprintf("Error retrieving IAM policy for %s: {{err}}", u.DescribeResource()), err)
+		return nil, fmt.Errorf("Error retrieving IAM policy for %s: %w", u.DescribeResource(), err)
 	}
 
 	out := &cloudresourcemanager.Policy{}
 	err = tpgresource.Convert(policy, out)
 	if err != nil {
-		return nil, errwrap.Wrapf("Cannot convert a policy to a resource manager policy: {{err}}", err)
+		return nil, fmt.Errorf("Cannot convert a policy to a resource manager policy: %w", err)
 	}
 
 	return out, nil
@@ -155,7 +155,7 @@ func (u *StorageBucketIamUpdater) SetResourceIamPolicy(policy *cloudresourcemana
 		Timeout:   u.d.Timeout(schema.TimeoutCreate),
 	})
 	if err != nil {
-		return errwrap.Wrapf(fmt.Sprintf("Error setting IAM policy for %s: {{err}}", u.DescribeResource()), err)
+		return fmt.Errorf("Error setting IAM policy for %s: %w", u.DescribeResource(), err)
 	}
 
 	return nil
@@ -182,12 +182,51 @@ func (u *StorageBucketIamUpdater) DescribeResource() string {
 	return fmt.Sprintf("storage bucket %q", u.GetResourceId())
 }
 
+// StorageBucketIamParentResourceIdentityParser resolves the parent bucket id from import identity.
+func StorageBucketIamParentResourceIdentityParser(d *schema.ResourceData, identity *schema.IdentityData, config *transport_tpg.Config) (string, error) {
+	return tpgiamresource.ParseIamResourceIdentity(d, identity, config, tpgiamresource.IamResourceIdentityConfig{
+		Params: []tpgiamresource.IamIdentityParam{
+			{Key: "bucket", IdentityKey: "bucket"},
+		},
+		UriFormat: "b/%s",
+	})
+}
+
+func StorageBucketIamMemberResource() *schema.Resource {
+	return tpgiamresource.ResourceIamMember(
+		StorageBucketIamSchema,
+		StorageBucketIamUpdaterProducer,
+		StorageBucketIdParseFunc,
+		tpgiamresource.IamCreateTimeOut(20),
+		tpgiamresource.IamWithParentResourceIdentity(StorageBucketIamParentResourceIdentityParser),
+	)
+}
+
+// NewStorageBucketIamMemberListResource returns the list implementation for google_storage_bucket_iam_member.
+func NewStorageBucketIamMemberListResource() list.ListResource {
+	return tpgiamresource.NewIamMemberListResource(
+		"google_storage_bucket_iam_member",
+		StorageBucketIamMemberResource(),
+		StorageBucketIamUpdaterProducer,
+		tpgiamresource.IamMemberListCallConfig{
+			ParentResourceField: "bucket",
+			EnableRoleFilter:    true,
+			EnableMemberFilter:  true,
+		},
+	)
+}
+
 func init() {
 	registry.Schema{
 		Name:        "google_storage_bucket_iam_member",
 		ProductName: "storage",
 		Type:        registry.SchemaTypeIAMResource,
-		Schema:      tpgiamresource.ResourceIamMember(StorageBucketIamSchema, StorageBucketIamUpdaterProducer, StorageBucketIdParseFunc, tpgiamresource.IamCreateTimeOut(20)),
+		Schema:      StorageBucketIamMemberResource(),
+	}.Register()
+	registry.FrameworkListResource{
+		Name:        "google_storage_bucket_iam_member",
+		ProductName: "storage",
+		Func:        NewStorageBucketIamMemberListResource,
 	}.Register()
 	registry.Schema{
 		Name:        "google_storage_bucket_iam_binding",
