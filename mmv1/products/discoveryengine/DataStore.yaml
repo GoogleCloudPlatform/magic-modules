@@ -108,6 +108,15 @@ samples:
       - name: 'discoveryengine_datastore_acl_config'
         resource_id_vars:
           data_store_id: 'data-store-id'
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'GET'
+  allowed_iam_role: 'roles/discoveryengine.viewer'
+  parent_resource_attribute: 'data_store_id'
+  sample_config_body: 'templates/terraform/iam/example_config_body/discovery_engine_data_store.tf.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}'
+    - '{{data_store_id}}'
 parameters:
   - name: 'location'
     type: String
