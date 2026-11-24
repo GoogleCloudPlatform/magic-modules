@@ -52,7 +52,6 @@ timeouts:
   insert_minutes: 60
   update_minutes: 60
   delete_minutes: 60
-exclude_identity_generation: true
 supports_indirect_user_project_override: true
 async:
   type: OpAsync
@@ -89,8 +88,6 @@ samples:
         test_vars_overrides:
           deployed_model_id: 'fmt.Sprintf("%d", acctest.RandIntRange(t, 1000000000, 2147483647))'
           source_model: vertexai.BootstrapVertexAIModel(t, "us-central1")
-        ignore_read_extra:
-          - project
   - name: vertex_ai_endpoint_deployed_model_spot_service_account
     primary_resource_id: deployed_model
     steps:
@@ -107,10 +104,22 @@ samples:
         test_vars_overrides:
           deployed_model_id: 'fmt.Sprintf("%d", acctest.RandIntRange(t, 1000000000, 2147483647))'
           source_model: vertexai.BootstrapVertexAIModel(t, "us-central1")
-        ignore_read_extra:
-          - project
-  # Shared resources coverage lives in the handwritten test because beta requires
-  # enable_container_logging = true to match the pool's logging setting.
+  - name: vertex_ai_endpoint_deployed_model_shared_resources
+    primary_resource_id: deployed_model
+    steps:
+      - name: vertex_ai_endpoint_deployed_model_shared_resources
+        vars:
+          source_model: projects/my-project-name/locations/us-central1/models/my-source-model
+          deployed_model_id: '1234567890'
+        resource_id_vars:
+          endpoint_name: endpoint-name
+          model_id: model-id
+          deployment_resource_pool_id: deployed-model-pool
+        test_env_vars:
+          project_name: PROJECT_NAME
+        test_vars_overrides:
+          deployed_model_id: 'fmt.Sprintf("%d", acctest.RandIntRange(t, 1000000000, 2147483647))'
+          source_model: vertexai.BootstrapVertexAIModel(t, "us-central1")
   - name: vertex_ai_endpoint_deployed_model_gpu
     primary_resource_id: deployed_model
     steps:
@@ -126,8 +135,6 @@ samples:
         test_vars_overrides:
           deployed_model_id: 'fmt.Sprintf("%d", acctest.RandIntRange(t, 1000000000, 2147483647))'
           source_model: vertexai.BootstrapVertexAIGPUModel(t, "us-central1")
-        ignore_read_extra:
-          - project
 parameters:
   - name: endpoint
     type: ResourceRef
@@ -180,29 +187,32 @@ properties:
     description: Whether online prediction access logs are sent to Cloud Logging.
     default_from_api: true
     immutable: true
-  # The mutation API supports disableContainerLogging only in v1.
-  - name: disableContainerLogging
+  # v1 only has disableContainerLogging, while v1beta1 has both
+  # disableContainerLogging and enableContainerLogging and only accepts
+  # enableContainerLogging in mutateDeployedModel. A single
+  # enable_container_logging field is exposed in both providers; in GA it is
+  # mapped onto the negated disableContainerLogging API field.
+  - name: enableContainerLogging
     type: Boolean
+    api_name: disableContainerLogging
     description: |
-      Whether container `stderr` and `stdout` logging is disabled. This is only
-      supported for custom-trained Models and AutoML Tabular Models.
+      Whether container `stderr` and `stdout` logging is enabled. This is only
+      supported for custom-trained Models and AutoML Tabular Models. If unset,
+      the API default is used (enabled in the `google` provider, disabled in
+      the `google-beta` provider).
     default_from_api: true
     exact_version: ga
-  - name: disableContainerLogging
-    type: Boolean
-    description: |
-      Whether container `stderr` and `stdout` logging is disabled. This is only
-      supported for custom-trained Models and AutoML Tabular Models.
-    default_from_api: true
-    exact_version: beta
-    immutable: true
+    custom_expand: 'templates/terraform/custom_expand/vertex_ai_endpoint_deployed_model_enable_container_logging.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/vertex_ai_endpoint_deployed_model_enable_container_logging.go.tmpl'
   - name: enableContainerLogging
     type: Boolean
     description: |
       Whether container `stderr` and `stdout` logging is enabled. This is only
-      supported for custom-trained Models and AutoML Tabular Models.
+      supported for custom-trained Models and AutoML Tabular Models. If unset,
+      the API default is used (enabled in the `google` provider, disabled in
+      the `google-beta` provider).
     default_from_api: true
-    min_version: beta
+    exact_version: beta
   - name: automaticResources
     type: NestedObject
     description: Resources for which Vertex AI automatically manages the machine configuration.

@@ -366,9 +366,8 @@ func TestVertexAIEndpointDeployedModelResourceEncoding(t *testing.T) {
 		{
 			name: "accelerated dedicated resources",
 			fields: map[string]interface{}{
-				"service_account":           "runtime@test-project.iam.gserviceaccount.com",
-				"enable_access_logging":     true,
-				"disable_container_logging": true,
+				"service_account":       "runtime@test-project.iam.gserviceaccount.com",
+				"enable_access_logging": true,
 				"dedicated_resources": []interface{}{map[string]interface{}{
 					"machine_spec": []interface{}{map[string]interface{}{
 						"machine_type": "n1-standard-2", "accelerator_type": "NVIDIA_TESLA_T4", "accelerator_count": 1,
@@ -377,9 +376,8 @@ func TestVertexAIEndpointDeployedModelResourceEncoding(t *testing.T) {
 				}},
 			},
 			want: map[string]interface{}{
-				"serviceAccount":          "runtime@test-project.iam.gserviceaccount.com",
-				"enableAccessLogging":     true,
-				"disableContainerLogging": true,
+				"serviceAccount":      "runtime@test-project.iam.gserviceaccount.com",
+				"enableAccessLogging": true,
 				"dedicatedResources": map[string]interface{}{
 					"machineSpec": map[string]interface{}{
 						"machineType": "n1-standard-2", "acceleratorType": "NVIDIA_TESLA_T4", "acceleratorCount": float64(1),
@@ -387,7 +385,7 @@ func TestVertexAIEndpointDeployedModelResourceEncoding(t *testing.T) {
 					"minReplicaCount": float64(1), "requiredReplicaCount": float64(1), "spot": true,
 				},
 			},
-			response:   `{"deployedModels":[{"id":"456","model":"projects/test-project/locations/us-central1/models/example","serviceAccount":"runtime@test-project.iam.gserviceaccount.com","enableAccessLogging":true,"disableContainerLogging":true,"dedicatedResources":{"machineSpec":{"machineType":"n1-standard-2","acceleratorType":"NVIDIA_TESLA_T4","acceleratorCount":1},"minReplicaCount":1,"requiredReplicaCount":1,"spot":true}}]}`,
+			response:   `{"deployedModels":[{"id":"456","model":"projects/test-project/locations/us-central1/models/example","serviceAccount":"runtime@test-project.iam.gserviceaccount.com","enableAccessLogging":true,"dedicatedResources":{"machineSpec":{"machineType":"n1-standard-2","acceleratorType":"NVIDIA_TESLA_T4","acceleratorCount":1},"minReplicaCount":1,"requiredReplicaCount":1,"spot":true}}]}`,
 			stateKey:   "service_account",
 			stateValue: "runtime@test-project.iam.gserviceaccount.com",
 		},
@@ -447,7 +445,7 @@ func TestVertexAIEndpointDeployedModelResourceEncoding(t *testing.T) {
 			if !ok {
 				t.Fatalf("missing deployedModel in request: %#v", body)
 			}
-			for _, key := range []string{"automaticResources", "dedicatedResources", "sharedResources", "serviceAccount", "enableAccessLogging", "disableContainerLogging"} {
+			for _, key := range []string{"automaticResources", "dedicatedResources", "sharedResources", "serviceAccount", "enableAccessLogging", "enableContainerLogging", "disableContainerLogging"} {
 				got, gotOK := model[key]
 				want, wantOK := tt.want[key]
 				if gotOK != wantOK || !reflect.DeepEqual(got, want) {
@@ -734,13 +732,18 @@ func TestVertexAIEndpointDeployedModelMutationPayloads(t *testing.T) {
 			wantMask: "dedicatedResources.autoscalingMetricSpecs",
 		},
 	}
-	loggingField, loggingAPI := "disable_container_logging", "disableContainerLogging"
-	if _, beta := ResourceVertexAIEndpointDeployedModel().Schema["enable_container_logging"]; beta {
-		loggingField, loggingAPI = "enable_container_logging", "enableContainerLogging"
-	}
+{{- if eq $.TargetVersionName "ga" }}
+	loggingAPI, negate := "disableContainerLogging", true
+{{- else }}
+	loggingAPI, negate := "enableContainerLogging", false
+{{- end }}
 	for _, value := range []bool{false, true} {
 		before, after := dedicated(1, 2, 1, 60), dedicated(1, 2, 1, 60)
-		before[loggingField], after[loggingField] = !value, value
+		before["enable_container_logging"], after["enable_container_logging"] = !value, value
+		sent := value
+		if negate {
+			sent = !value
+		}
 		tests = append(tests, struct {
 			name      string
 			before    map[string]interface{}
@@ -748,8 +751,8 @@ func TestVertexAIEndpointDeployedModelMutationPayloads(t *testing.T) {
 			wantModel map[string]interface{}
 			wantMask  string
 		}{
-			name: fmt.Sprintf("%s to %t", loggingField, value), before: before, after: after,
-			wantModel: map[string]interface{}{"id": "456", loggingAPI: value}, wantMask: loggingAPI,
+			name: fmt.Sprintf("enable_container_logging to %t", value), before: before, after: after,
+			wantModel: map[string]interface{}{"id": "456", loggingAPI: sent}, wantMask: loggingAPI,
 		})
 	}
 	for _, tt := range tests {
@@ -818,11 +821,6 @@ func TestVertexAIEndpointDeployedModelImmutableChangesReplace(t *testing.T) {
 	changedSpot := dedicated()
 	changedSpot["dedicated_resources"].([]interface{})[0].(map[string]interface{})["spot"] = true
 	tests = append(tests, testCase{name: "spot", before: dedicated(), after: changedSpot})
-	if _, beta := ResourceVertexAIEndpointDeployedModel().Schema["enable_container_logging"]; beta {
-		before, after := automatic(), automatic()
-		before["disable_container_logging"], after["disable_container_logging"] = false, true
-		tests = append(tests, testCase{name: "beta disable container logging", before: before, after: after})
-	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			_, diff := endpointDeployedModelUpdateData(t, tt.before, tt.after, &transport_tpg.Config{})
@@ -832,3 +830,20 @@ func TestVertexAIEndpointDeployedModelImmutableChangesReplace(t *testing.T) {
 		})
 	}
 }
+{{- if eq $.TargetVersionName "ga" }}
+
+func TestVertexAIEndpointDeployedModelFlattenEnableContainerLogging(t *testing.T) {
+	for _, tt := range []struct {
+		api  interface{}
+		want bool
+	}{
+		{api: nil, want: true},
+		{api: false, want: true},
+		{api: true, want: false},
+	} {
+		if got := flattenVertexAIEndpointDeployedModelEnableContainerLogging(tt.api, nil, nil); got != tt.want {
+			t.Errorf("disableContainerLogging %#v flattened to %#v, want %t", tt.api, got, tt.want)
+		}
+	}
+}
+{{- end }}

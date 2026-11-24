@@ -36,17 +36,17 @@ for _, resources := range []struct {
 		deployedModel[resources.apiName] = changed
 	}
 }
-{{- if eq $.TargetVersionName "ga" }}
-if d.HasChange("disable_container_logging") {
-	deployedModel["disableContainerLogging"] = d.Get("disable_container_logging")
-	updateMask = append(updateMask, "disableContainerLogging")
-}
-{{- else }}
 if d.HasChange("enable_container_logging") {
+{{- if eq $.TargetVersionName "ga" }}
+	// v1 mutateDeployedModel only accepts disableContainerLogging.
+	deployedModel["disableContainerLogging"] = !d.Get("enable_container_logging").(bool)
+	updateMask = append(updateMask, "disableContainerLogging")
+{{- else }}
+	// v1beta1 mutateDeployedModel only accepts enableContainerLogging.
 	deployedModel["enableContainerLogging"] = d.Get("enable_container_logging")
 	updateMask = append(updateMask, "enableContainerLogging")
-}
 {{- end }}
+}
 return map[string]interface{}{
 	"deployedModel": deployedModel,
 	"updateMask": strings.Join(updateMask, ","),
