@@ -249,6 +249,170 @@ func TestComputeReservationUpdate_pathsAndMultiFieldIsolation(t *testing.T) {
 		t.Fatalf("recorded requests mismatch:\ngot:  %#v\nwant: %#v", *reqs, want)
 	}
 }
+
+func TestComputeReservationUpdate_shareTypeAndProjectMapTransitions(t *testing.T) {
+	t.Parallel()
+
+	r := ResourceComputeReservation()
+	const resPath = "/compute/v1/projects/my-project/zones/us-central1-a/reservations/my-res"
+	const zoneLink = "projects/my-project/global/zones/us-central1-a"
+
+	baseReservationCfg := func(share map[string]interface{}) map[string]interface{} {
+		return map[string]interface{}{
+			"name":           "my-res",
+			"zone":           "us-central1-a",
+			"project":        "my-project",
+			"delete_at_time": "2030-01-01T00:00:00Z",
+			"specific_reservation": []interface{}{map[string]interface{}{
+				"count":               1,
+				"instance_properties": []interface{}{map[string]interface{}{"machine_type": "n2-standard-2"}},
+			}},
+			"share_settings": []interface{}{share},
+		}
+	}
+
+	t.Run("sharedToLocal_withOmittedProjectId", func(t *testing.T) {
+		_, reqs, cfg := newReservationTestServer(t)
+		oldCfg := baseReservationCfg(map[string]interface{}{
+			"share_type": "SPECIFIC_PROJECTS",
+			"project_map": []interface{}{
+				// Omit optional project_id to verify fallback to id.
+				map[string]interface{}{"id": "old-guest-proj"},
+			},
+		})
+		newCfg := baseReservationCfg(map[string]interface{}{
+			"share_type": "LOCAL",
+		})
+
+		d := buildReservationUpdateData(t, r.Schema, oldCfg, newCfg)
+		if err := r.Update(d, cfg); err != nil {
+			t.Fatalf("Update failed: %v", err)
+		}
+
+		want := []recordedReservationReq{
+			{
+				method: http.MethodPatch,
+				path:   resPath,
+				paths:  []string{"shareSettings.projectMap.111111111", "shareSettings.shareType"},
+				body: map[string]interface{}{
+					"name":          "my-res",
+					"zone":          zoneLink,
+					"shareSettings": map[string]interface{}{"shareType": "LOCAL", "projectMap": map[string]interface{}{}},
+				},
+			},
+		}
+		if !reflect.DeepEqual(*reqs, want) {
+			t.Fatalf("recorded requests mismatch:\ngot:  %#v\nwant: %#v", *reqs, want)
+		}
+	})
+
+	t.Run("localToShared_withProjectMap", func(t *testing.T) {
+		_, reqs, cfg := newReservationTestServer(t)
+		oldCfg := baseReservationCfg(map[string]interface{}{
+			"share_type": "LOCAL",
+		})
+		newCfg := baseReservationCfg(map[string]interface{}{
+			"share_type": "SPECIFIC_PROJECTS",
+			"project_map": []interface{}{
+				map[string]interface{}{"id": "new-guest-proj", "project_id": "new-guest-proj"},
+			},
+		})
+
+		d := buildReservationUpdateData(t, r.Schema, oldCfg, newCfg)
+		if err := r.Update(d, cfg); err != nil {
+			t.Fatalf("Update failed: %v", err)
+		}
+
+		want := []recordedReservationReq{
+			{
+				method: http.MethodPatch,
+				path:   resPath,
+				paths:  []string{"shareSettings.projectMap.new-guest-proj", "shareSettings.shareType"},
+				body: map[string]interface{}{
+					"name": "my-res",
+					"zone": zoneLink,
+					"shareSettings": map[string]interface{}{
+						"shareType":  "SPECIFIC_PROJECTS",
+						"projectMap": map[string]interface{}{"new-guest-proj": map[string]interface{}{"projectId": "new-guest-proj"}},
+					},
+				},
+			},
+		}
+		if !reflect.DeepEqual(*reqs, want) {
+			t.Fatalf("recorded requests mismatch:\ngot:  %#v\nwant: %#v", *reqs, want)
+		}
+	})
+
+	t.Run("shareTypeOnly_withoutProjectMapChanges", func(t *testing.T) {
+		_, reqs, cfg := newReservationTestServer(t)
+		oldCfg := baseReservationCfg(map[string]interface{}{
+			"share_type": "SPECIFIC_PROJECTS",
+		})
+		newCfg := baseReservationCfg(map[string]interface{}{
+			"share_type": "LOCAL",
+		})
+
+		d := buildReservationUpdateData(t, r.Schema, oldCfg, newCfg)
+		if err := r.Update(d, cfg); err != nil {
+			t.Fatalf("Update failed: %v", err)
+		}
+
+		want := []recordedReservationReq{
+			{
+				method: http.MethodPatch,
+				path:   resPath,
+				paths:  []string{"shareSettings.shareType"},
+				body: map[string]interface{}{
+					"name":          "my-res",
+					"zone":          zoneLink,
+					"shareSettings": map[string]interface{}{"shareType": "LOCAL"},
+				},
+			},
+		}
+		if !reflect.DeepEqual(*reqs, want) {
+			t.Fatalf("recorded requests mismatch:\ngot:  %#v\nwant: %#v", *reqs, want)
+		}
+	})
+
+	t.Run("switchDeleteAtTimeToDeleteAfterDuration", func(t *testing.T) {
+		_, reqs, cfg := newReservationTestServer(t)
+		oldCfg := baseReservationCfg(map[string]interface{}{
+			"share_type": "LOCAL",
+		})
+		newCfg := map[string]interface{}{
+			"name":    "my-res",
+			"zone":    "us-central1-a",
+			"project": "my-project",
+			"specific_reservation": []interface{}{map[string]interface{}{
+				"count":               1,
+				"instance_properties": []interface{}{map[string]interface{}{"machine_type": "n2-standard-2"}},
+			}},
+			"share_settings":        []interface{}{map[string]interface{}{"share_type": "LOCAL"}},
+			"delete_after_duration": []interface{}{map[string]interface{}{"seconds": "7200"}},
+		}
+
+		d := buildReservationUpdateData(t, r.Schema, oldCfg, newCfg)
+		if err := r.Update(d, cfg); err != nil {
+			t.Fatalf("Update failed: %v", err)
+		}
+
+		want := []recordedReservationReq{
+			{
+				method: http.MethodPatch,
+				path:   resPath,
+				paths:  []string{"deleteAfterDuration"},
+				body: map[string]interface{}{
+					"name":                "my-res",
+					"zone":                zoneLink,
+					"deleteAfterDuration": map[string]interface{}{"seconds": "7200"},
+				},
+			},
+		}
+		if !reflect.DeepEqual(*reqs, want) {
+			t.Fatalf("recorded requests mismatch:\ngot:  %#v\nwant: %#v", *reqs, want)
+		}
+	})
+}
 {{- if ne $.TargetVersionName "ga" }}
 
 func TestComputeReservationUpdate_betaProjectsAndEmergentMaintenance(t *testing.T) {

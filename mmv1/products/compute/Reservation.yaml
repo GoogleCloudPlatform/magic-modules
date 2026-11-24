@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2026 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -385,6 +385,8 @@ properties:
     type: Boolean
     description: |
       Indicates if this group of VMs have emergent maintenance enabled.
+
+      ~> **Note:** Compute Engine only supports updating `enable_emergent_maintenance` in place on Hypercompute Cluster (Extended) reservations. On standard reservations, modifying this field in place fails with an API error and requires replacing the reservation (for example via `terraform apply -replace`).
     ignore_read: true
     min_version: 'beta'
   - name: 'kind'

@@ -141,7 +141,10 @@
 		var removedPaths []string
 		for _, raw := range before.Difference(after).List() {
 			original := raw.(map[string]interface{})
-			projectId := fmt.Sprintf("%s", original["project_id"])
+			projectId, _ := original["project_id"].(string)
+			if projectId == "" {
+				projectId, _ = original["id"].(string)
+			}
 			projectIdOrNum := projectId
 			if _, err := strconv.Atoi(projectId); err != nil {
 				rmProj, err := rmClient.NewClient(config, userAgent).Projects.Get(projectId).Do()
@@ -215,7 +218,8 @@
 	var setPatches []reservationPatch
 {{- $maskGroups := $.GetPropertyUpdateMasksGroups $.UpdateBodyProperties "" }}
 {{- range $prop := $.UpdateBodyProperties }}
-{{- if ne $prop.Name "shareSettings" }}
+{{- $propPaths := index $maskGroups (underscore $prop.Name) }}
+{{- if and (ne $prop.Name "shareSettings") $propPaths }}
 
 	if d.HasChange("{{ underscore $prop.Name }}") {
 		patchObj := make(map[string]interface{})
@@ -240,7 +244,7 @@
 		}
 {{- end }}
 		p := reservationPatch{
-			paths: []string{"{{ join (index $maskGroups (underscore $prop.Name)) "\", \"" }}"},
+			paths: []string{"{{ join $propPaths "\", \"" }}"},
 			body:  patchObj,
 		}
 		if len(patchObj) == 0 {
