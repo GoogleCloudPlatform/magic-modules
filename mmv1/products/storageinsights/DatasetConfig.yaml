@@ -27,6 +27,9 @@ update_mask: false
 update_verb: PATCH
 import_format:
   - projects/{{project}}/locations/{{location}}/datasetConfigs/{{dataset_config_id}}
+datasource_experimental:
+  generate: true
+  exclude_test: true
 async: !ruby/object:Api::OpAsync
   operation: !ruby/object:Api::OpAsync::Operation
     base_url: '{{op_id}}'
