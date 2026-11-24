@@ -136,14 +136,12 @@ samples:
           workstation_cluster_name: workstation-cluster
           workstation_config_name: workstation-config
       - name: workstation_config_boost_update
-        min_version: beta
         resource_id_vars:
           workstation_cluster_name: workstation-cluster
           workstation_config_name: workstation-config
         vars:
           enable_automatic_failover: 'true'
       - name: workstation_config_boost_update
-        min_version: beta
         resource_id_vars:
           workstation_cluster_name: workstation-cluster
           workstation_config_name: workstation-config
@@ -468,7 +466,6 @@ properties:
                   type: Boolean
                   description: |
                     Indicates if this boost config is eligible for automatic failover when the service cannot provision the default VM type. Defaults to false.
-                  min_version: beta
                 - name: accelerators
                   type: Array
                   description: |
