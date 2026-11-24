@@ -8,6 +8,9 @@
 
 	if d.HasChange("schema") {
 		if schema, ok := obj["schema"].(map[string]interface{}); ok {
+			// After an earlier update, state still holds the previous schema id.
+			// The server assigns the new one, so don't send it.
+			delete(schema, "schema-id")
 			// Fail the commit rather than replace a schema that changed outside
 			// Terraform since the last refresh.
 			oldId, _ := d.GetChange("schema.0.schema_id")
@@ -31,13 +34,15 @@
 
 	if d.HasChange("partition_spec") {
 		if spec, ok := obj["partition-spec"].(map[string]interface{}); ok {
+			delete(spec, "spec-id")
 			oldId, _ := d.GetChange("partition_spec.0.spec_id")
 			requirements = append(requirements, map[string]interface{}{
 				"type":            "assert-default-spec-id",
 				"default-spec-id": oldId,
 			})
-			// The server assigns the spec id and partition field ids, so "-1"
-			// selects the last added spec.
+			// The server assigns the spec id, so "-1" selects the last added
+			// spec. Partition field ids are assigned in pre_update, which can
+			// read the table's partition history.
 			updateActions = append(updateActions,
 				map[string]interface{}{
 					"action": "add-spec",
@@ -53,6 +58,11 @@
 
 	if d.HasChange("sort_order") {
 		if sortOrder := expandIcebergTableSortOrderForCommit(d.Get("sort_order")); sortOrder != nil {
+			oldId, _ := d.GetChange("sort_order.0.order_id")
+			requirements = append(requirements, map[string]interface{}{
+				"type":                  "assert-default-sort-order-id",
+				"default-sort-order-id": oldId,
+			})
 			// Add the new sort order, then make it the table's default. The
 			// server assigns the new order id, so "-1" selects the last added.
 			updateActions = append(updateActions,
