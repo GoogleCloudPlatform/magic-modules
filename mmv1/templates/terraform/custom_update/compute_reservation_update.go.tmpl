@@ -96,7 +96,7 @@
 	}
 	shareTypeChanged := d.HasChange("share_settings.0.share_type")
 {{- if ne $.TargetVersionName "ga" }}
-	if d.HasChange("share_settings.0.projects") {
+	if d.HasChange("share_settings.0.projects") && !d.HasChange("share_settings.0.project_map") {
 		shareSettingsProp, err := expandComputeReservationShareSettings(d.Get("share_settings"), d, config)
 		if err != nil {
 			return err
