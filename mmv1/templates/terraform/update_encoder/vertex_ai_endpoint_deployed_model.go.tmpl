@@ -5,10 +5,6 @@ for _, resources := range []struct {
 	apiName       string
 	fields        []struct{ terraformName, apiName string }
 }{
-	{"automatic_resources", "automaticResources", []struct{ terraformName, apiName string }{
-		{"min_replica_count", "minReplicaCount"},
-		{"max_replica_count", "maxReplicaCount"},
-	}},
 	{"dedicated_resources", "dedicatedResources", []struct{ terraformName, apiName string }{
 		{"min_replica_count", "minReplicaCount"},
 		{"max_replica_count", "maxReplicaCount"},

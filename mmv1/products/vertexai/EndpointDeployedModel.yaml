@@ -213,28 +213,10 @@ properties:
       the `google-beta` provider).
     default_from_api: true
     exact_version: beta
-  - name: automaticResources
-    type: NestedObject
-    description: Resources for which Vertex AI automatically manages the machine configuration.
-    allow_empty_object: true
-    exactly_one_of:
-      - automatic_resources
-      - dedicated_resources
-      - shared_resources
-    properties:
-      - name: minReplicaCount
-        type: Integer
-        description: The minimum number of replicas that will always be deployed.
-        default_from_api: true
-      - name: maxReplicaCount
-        type: Integer
-        description: The maximum number of replicas that may be deployed.
-        default_from_api: true
   - name: dedicatedResources
     type: NestedObject
     description: Dedicated resources used by the DeployedModel.
     exactly_one_of:
-      - automatic_resources
       - dedicated_resources
       - shared_resources
     properties:
@@ -259,10 +241,6 @@ properties:
           - name: acceleratorCount
             type: Integer
             description: The number of accelerators attached to the machine.
-            immutable: true
-          - name: tpuTopology
-            type: String
-            description: The TPU topology.
             immutable: true
       - name: minReplicaCount
         type: Integer
@@ -309,7 +287,6 @@ properties:
     immutable: true
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
     exactly_one_of:
-      - automatic_resources
       - dedicated_resources
       - shared_resources
   - name: modelVersionId

@@ -29,9 +29,10 @@ func endpointDeployedModelTestData(t *testing.T) *schema.ResourceData {
 		"endpoint":          "projects/test-project/locations/us-central1/endpoints/123",
 		"deployed_model_id": "456",
 		"model":             "projects/test-project/locations/us-central1/models/example",
-		"automatic_resources": []interface{}{
-			map[string]interface{}{"min_replica_count": 1},
-		},
+		"dedicated_resources": []interface{}{map[string]interface{}{
+			"machine_spec":      []interface{}{map[string]interface{}{"machine_type": "n1-standard-2"}},
+			"min_replica_count": 1,
+		}},
 	})
 }
 
@@ -44,7 +45,7 @@ func TestVertexAIEndpointDeployedModelCreateUsesEndpointRegion(t *testing.T) {
 				hosts = append(hosts, req.URL.Host)
 				body := `{}`
 				if req.Method == http.MethodGet {
-					body = `{"deployedModels":[{"id":"456","model":"projects/test-project/locations/us-central1/models/example","automaticResources":{"minReplicaCount":1}}]}`
+					body = `{"deployedModels":[{"id":"456","model":"projects/test-project/locations/us-central1/models/example","dedicatedResources":{"machineSpec":{"machineType":"n1-standard-2"},"minReplicaCount":1}}]}`
 				} else if req.Method == http.MethodPost {
 					var request map[string]interface{}
 					if err := json.NewDecoder(req.Body).Decode(&request); err != nil {
@@ -123,7 +124,7 @@ func TestVertexAIEndpointDeployedModelQuotaProject(t *testing.T) {
 					if strings.Contains(req.URL.Path, "/operations/") {
 						body = `{"name":"projects/test-project/locations/us-central1/endpoints/123/operations/op1","done":true}`
 					} else if req.Method == http.MethodGet {
-						body = `{"deployedModels":[{"id":"456","model":"projects/test-project/locations/us-central1/models/example","automaticResources":{"minReplicaCount":1}}]}`
+						body = `{"deployedModels":[{"id":"456","model":"projects/test-project/locations/us-central1/models/example","dedicatedResources":{"machineSpec":{"machineType":"n1-standard-2"},"minReplicaCount":1}}]}`
 					}
 					return &http.Response{
 						StatusCode: http.StatusOK,
@@ -146,7 +147,8 @@ func TestVertexAIEndpointDeployedModelQuotaProject(t *testing.T) {
 							"region":            "us-central1",
 							"deployed_model_id": "456",
 							"model":             "projects/test-project/locations/us-central1/models/example",
-							"automatic_resources": []interface{}{map[string]interface{}{
+							"dedicated_resources": []interface{}{map[string]interface{}{
+								"machine_spec":      []interface{}{map[string]interface{}{"machine_type": "n1-standard-2"}},
 								"min_replica_count": min,
 							}},
 						}
@@ -324,31 +326,6 @@ func TestVertexAIEndpointDeployedModelResourceEncoding(t *testing.T) {
 		stateValue interface{}
 	}{
 		{
-			name: "empty automatic resources",
-			fields: map[string]interface{}{
-				"automatic_resources": []interface{}{map[string]interface{}{}},
-			},
-			want:       map[string]interface{}{"automaticResources": map[string]interface{}{}},
-			response:   `{"deployedModels":[{"id":"456","model":"projects/test-project/locations/us-central1/models/example","automaticResources":{}}]}`,
-			stateKey:   "automatic_resources.#",
-			stateValue: 1,
-		},
-		{
-			name: "automatic resources",
-			fields: map[string]interface{}{
-				"automatic_resources": []interface{}{map[string]interface{}{
-					"min_replica_count": 1,
-					"max_replica_count": 2,
-				}},
-			},
-			want: map[string]interface{}{"automaticResources": map[string]interface{}{
-				"minReplicaCount": float64(1), "maxReplicaCount": float64(2),
-			}},
-			response:   `{"deployedModels":[{"id":"456","model":"projects/test-project/locations/us-central1/models/example","automaticResources":{"minReplicaCount":1,"maxReplicaCount":2}}]}`,
-			stateKey:   "automatic_resources.0.max_replica_count",
-			stateValue: 2,
-		},
-		{
 			name: "empty machine spec",
 			fields: map[string]interface{}{
 				"dedicated_resources": []interface{}{map[string]interface{}{
@@ -390,24 +367,6 @@ func TestVertexAIEndpointDeployedModelResourceEncoding(t *testing.T) {
 			stateValue: "runtime@test-project.iam.gserviceaccount.com",
 		},
 		{
-			name: "TPU topology",
-			fields: map[string]interface{}{
-				"dedicated_resources": []interface{}{map[string]interface{}{
-					"machine_spec": []interface{}{map[string]interface{}{
-						"machine_type": "ct5lp-hightpu-4t", "tpu_topology": "2x2x1",
-					}},
-					"min_replica_count": 1,
-				}},
-			},
-			want: map[string]interface{}{"dedicatedResources": map[string]interface{}{
-				"machineSpec":     map[string]interface{}{"machineType": "ct5lp-hightpu-4t", "tpuTopology": "2x2x1"},
-				"minReplicaCount": float64(1),
-			}},
-			response:   `{"deployedModels":[{"id":"456","model":"projects/test-project/locations/us-central1/models/example","dedicatedResources":{"machineSpec":{"machineType":"ct5lp-hightpu-4t","tpuTopology":"2x2x1"},"minReplicaCount":1}}]}`,
-			stateKey:   "dedicated_resources.0.machine_spec.0.tpu_topology",
-			stateValue: "2x2x1",
-		},
-		{
 			name:       "shared resources",
 			fields:     map[string]interface{}{"shared_resources": "projects/test-project/locations/us-central1/deploymentResourcePools/pool"},
 			want:       map[string]interface{}{"sharedResources": "projects/test-project/locations/us-central1/deploymentResourcePools/pool"},
@@ -445,7 +404,7 @@ func TestVertexAIEndpointDeployedModelResourceEncoding(t *testing.T) {
 			if !ok {
 				t.Fatalf("missing deployedModel in request: %#v", body)
 			}
-			for _, key := range []string{"automaticResources", "dedicatedResources", "sharedResources", "serviceAccount", "enableAccessLogging", "enableContainerLogging", "disableContainerLogging"} {
+			for _, key := range []string{"dedicatedResources", "sharedResources", "serviceAccount", "enableAccessLogging", "enableContainerLogging", "disableContainerLogging"} {
 				got, gotOK := model[key]
 				want, wantOK := tt.want[key]
 				if gotOK != wantOK || !reflect.DeepEqual(got, want) {
@@ -629,7 +588,8 @@ func TestVertexAIEndpointDeployedModelUpdatesReplicasInPlace(t *testing.T) {
 			"region":            "us-central1",
 			"deployed_model_id": "456",
 			"model":             "projects/test-project/locations/us-central1/models/example",
-			"automatic_resources": []interface{}{map[string]interface{}{
+			"dedicated_resources": []interface{}{map[string]interface{}{
+				"machine_spec":      []interface{}{map[string]interface{}{"machine_type": "n1-standard-2"}},
 				"min_replica_count": min, "max_replica_count": max,
 			}},
 		}
@@ -653,7 +613,7 @@ func TestVertexAIEndpointDeployedModelUpdatesReplicasInPlace(t *testing.T) {
 		case strings.Contains(req.URL.Path, "/operations/"):
 			response = `{"name":"projects/test-project/locations/us-central1/endpoints/123/operations/op1","done":true}`
 		default:
-			response = `{"deployedModels":[{"id":"456","model":"projects/test-project/locations/us-central1/models/example","automaticResources":{"minReplicaCount":2,"maxReplicaCount":4}}]}`
+			response = `{"deployedModels":[{"id":"456","model":"projects/test-project/locations/us-central1/models/example","dedicatedResources":{"machineSpec":{"machineType":"n1-standard-2"},"minReplicaCount":2,"maxReplicaCount":4}}]}`
 		}
 		return &http.Response{StatusCode: http.StatusOK, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(response)), Request: req}, nil
 	})}
@@ -671,9 +631,9 @@ func TestVertexAIEndpointDeployedModelUpdatesReplicasInPlace(t *testing.T) {
 	want := map[string]interface{}{
 		"deployedModel": map[string]interface{}{
 			"id":                 "456",
-			"automaticResources": map[string]interface{}{"minReplicaCount": float64(2), "maxReplicaCount": float64(4)},
+			"dedicatedResources": map[string]interface{}{"minReplicaCount": float64(2), "maxReplicaCount": float64(4)},
 		},
-		"updateMask": "automaticResources.minReplicaCount,automaticResources.maxReplicaCount",
+		"updateMask": "dedicatedResources.minReplicaCount,dedicatedResources.maxReplicaCount",
 	}
 	if !reflect.DeepEqual(body, want) {
 		t.Errorf("update body = %#v, want %#v", body, want)
@@ -775,29 +735,21 @@ func TestVertexAIEndpointDeployedModelMutationPayloads(t *testing.T) {
 }
 
 func TestVertexAIEndpointDeployedModelImmutableChangesReplace(t *testing.T) {
-	automatic := func() map[string]interface{} {
+	dedicated := func() map[string]interface{} {
 		return map[string]interface{}{
 			"endpoint":          "projects/test-project/locations/us-central1/endpoints/123",
 			"region":            "us-central1",
 			"deployed_model_id": "456",
 			"model":             "projects/test-project/locations/us-central1/models/example",
-			"automatic_resources": []interface{}{map[string]interface{}{
+			"dedicated_resources": []interface{}{map[string]interface{}{
+				"machine_spec":      []interface{}{map[string]interface{}{"machine_type": "n1-standard-2"}},
 				"min_replica_count": 1, "max_replica_count": 2,
 			}},
 		}
 	}
-	dedicated := func() map[string]interface{} {
-		fields := automatic()
-		delete(fields, "automatic_resources")
-		fields["dedicated_resources"] = []interface{}{map[string]interface{}{
-			"machine_spec":      []interface{}{map[string]interface{}{"machine_type": "n1-standard-2"}},
-			"min_replica_count": 1, "max_replica_count": 2,
-		}}
-		return fields
-	}
 	shared := func() map[string]interface{} {
-		fields := automatic()
-		delete(fields, "automatic_resources")
+		fields := dedicated()
+		delete(fields, "dedicated_resources")
 		fields["shared_resources"] = "projects/test-project/locations/us-central1/deploymentResourcePools/pool"
 		return fields
 	}
@@ -806,14 +758,12 @@ func TestVertexAIEndpointDeployedModelImmutableChangesReplace(t *testing.T) {
 		before, after map[string]interface{}
 	}
 	tests := []testCase{
-		{name: "automatic to dedicated", before: automatic(), after: dedicated()},
-		{name: "dedicated to automatic", before: dedicated(), after: automatic()},
 		{name: "dedicated to shared", before: dedicated(), after: shared()},
-		{name: "shared to automatic", before: shared(), after: automatic()},
+		{name: "shared to dedicated", before: shared(), after: dedicated()},
 	}
-	changedModel := automatic()
+	changedModel := dedicated()
 	changedModel["model"] = "projects/test-project/locations/us-central1/models/other"
-	tests = append(tests, testCase{name: "model", before: automatic(), after: changedModel})
+	tests = append(tests, testCase{name: "model", before: dedicated(), after: changedModel})
 	changedMachine := dedicated()
 	changedMachine["dedicated_resources"].([]interface{})[0].(map[string]interface{})["machine_spec"] =
 		[]interface{}{map[string]interface{}{"machine_type": "n1-standard-4"}}
