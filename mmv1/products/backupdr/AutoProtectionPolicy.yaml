@@ -34,6 +34,8 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
+custom_code:
+  decoder: templates/terraform/decoders/backup_dr_auto_protection_policy.go.tmpl
 samples:
   - name: backup_dr_auto_protection_policy_basic
     primary_resource_id: my-auto-protection-policy
@@ -135,7 +137,6 @@ properties:
         - name: backupPlan
           type: String
           required: true
-          diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
           description: |
             The resource name of the backup plan to apply to the matching resources, in the format
             `projects/{project}/locations/{location}/backupPlans/{backup_plan_id}`. The backup plan

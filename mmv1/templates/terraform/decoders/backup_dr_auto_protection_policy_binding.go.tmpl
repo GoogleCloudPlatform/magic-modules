@@ -4,4 +4,10 @@ if v := res["state"]; v == "DELETION_INITIATED" {
 	return nil, nil
 }
 
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
+if err := normalizeBackupDRAutoProtectionPolicyBindingScope(d, meta, res); err != nil {
+	return nil, err
+}
+{{- end }}
+
 return res, nil
