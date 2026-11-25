@@ -39,10 +39,13 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 exclude_sweeper: true
+custom_diff:
+  - 'billingBudgetSpendCapAddedCustomizeDiff'
 schema_version: 1
 state_upgraders: true
 custom_code:
   constants: templates/terraform/constants/billing_budget.tmpl
+  pre_update: templates/terraform/pre_update/billing_budget.go.tmpl
 samples:
   - name: billing_budget_basic
     primary_resource_id: budget
@@ -112,6 +115,22 @@ samples:
         test_vars_overrides:
           # for backward compatible
           display_name: '"Example Billing Budget" + randomSuffix'
+        test_env_vars:
+          billing_acct: MASTER_BILLING_ACCT
+  - name: billing_budget_spend_cap
+    primary_resource_id: budget
+    # In CI this sample got a bare 400 on the master billing account. CI uses
+    # that account to create subaccounts, so it is likely a parent account.
+    # Google does not document whether parent accounts can hold spend caps.
+    # The exact cause is not confirmed. Generated tests can only use the
+    # billing accounts the generator maps, so this sample is excluded.
+    # The handwritten spend cap tests run when GOOGLE_SPEND_CAP_BILLING_ACCOUNT
+    # is set.
+    exclude_test: true
+    steps:
+      - name: billing_budget_spend_cap
+        resource_id_vars:
+          display_name: Example Spend Cap Budget
         test_env_vars:
           billing_acct: MASTER_BILLING_ACCT
   - name: billing_budget_optional
@@ -541,3 +560,60 @@ properties:
       - OWNERSHIP_SCOPE_UNSPECIFIED
       - ALL_USERS
       - BILLING_ACCOUNT
+  - name: spendCap
+    type: NestedObject
+    description: |
+      The spend cap configured for this budget. When set, usage of the
+      budget's service is paused once spend exceeds the budget amount, until
+      the next period or until the cap is lifted. Spend cap budgets must
+      filter on exactly one project and one eligible service, use
+      `EXCLUDE_ALL_CREDITS`, a `MONTH` calendar period, a `specified_amount`,
+      threshold rules of 0.5, 0.8 and 1.0 on `CURRENT_SPEND`, and
+      `enable_project_level_recipients = true`. See
+      https://cloud.google.com/billing/docs/how-to/budgets-spend-caps.
+
+      Of the budget's settings, only the display name, amount, project and
+      service can be changed, and only while the cap is not enforced. While
+      `output_state` is `ENFORCED`, only `input_state` can be changed, to lift
+      the cap. A budget whose spend cap is `ENFORCED` cannot be deleted. Apply
+      `input_state = AWAITING_NEXT_PERIOD` before destroying it, or wait for
+      the next period to start. The API rejects a spend cap budget whose
+      project and service match an existing spend cap budget. Removing the
+      `spend_cap` block converts the budget back to an alerts-only budget.
+      Adding a `spend_cap` block to an existing budget replaces the budget.
+    update_mask_fields:
+      - spendCap.inputState
+    custom_flatten: templates/terraform/custom_flatten/billing_budget_spend_cap.go.tmpl
+    properties:
+      - name: inputState
+        type: Enum
+        description: |
+          The desired state of the spend cap. Must be `CONFIGURED` on create.
+          Set to `AWAITING_NEXT_PERIOD` to lift an enforced cap until the next
+          period starts. The API accepts it only while `output_state` is
+          `ENFORCED` and otherwise returns `INVALID_ARGUMENT`. After the next
+          period starts, set it back to `CONFIGURED`, because every update of a
+          capped budget re-sends this field and `AWAITING_NEXT_PERIOD` is
+          rejected once the cap is no longer enforced. An update made while the
+          cap is lifted also re-sends the current value of this field.
+
+          The API does not return this field. A cap lifted outside Terraform
+          is visible in `output_state` (`AWAITING_NEXT_PERIOD`) and does not
+          produce a diff on this field. Any later Terraform update of the
+          budget re-sends `input_state = CONFIGURED`, which may re-activate a
+          cap lifted outside Terraform. On import, Terraform sets it to
+          `CONFIGURED`.
+        required: true
+        enum_values:
+          - CONFIGURED
+          - AWAITING_NEXT_PERIOD
+      - name: outputState
+        type: String
+        description: |
+          The actual resting state of the spend cap. Possible values: `STATE_UNSPECIFIED`, `CONFIGURED`, `ENFORCED`, `AWAITING_NEXT_PERIOD`.
+        output: true
+      - name: reconciling
+        type: Boolean
+        description: |
+          Whether the server is processing a state transition.
+        output: true
