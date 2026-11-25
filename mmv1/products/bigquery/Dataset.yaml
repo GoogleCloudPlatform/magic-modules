@@ -38,10 +38,19 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 include_in_tgc_next: true
+error_retry_predicates:
+  - 'IsBigQueryDatasetBackfillError'
+custom_diff:
+  - 'resourceBigQueryDatasetFailoverReplicasCustomizeDiff'
 custom_code:
   constants: 'templates/terraform/constants/bigquery_dataset.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/bigquery_dataset.go.tmpl'
+  post_create: 'templates/terraform/post_create/bigquery_dataset.go.tmpl'
   pre_read: 'templates/terraform/pre_read/bigquery_dataset.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/bigquery_dataset.go.tmpl'
+  post_update: 'templates/terraform/post_update/bigquery_dataset.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/bigquery_dataset.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/bigquery_dataset.go.tmpl'
 generate_list_resource: true
 exclude_sweeper: true
 samples:
@@ -165,6 +174,10 @@ virtual_fields:
       If set to `true`, delete all the tables in the
       dataset when destroying the resource; otherwise,
       destroying the resource will fail if tables are present.
+      For replicated datasets, secondary replicas are dropped and any
+      failover reservation is disassociated prior to deletion; when set
+      to `false`, this cleanup is skipped and deletion fails if tables,
+      routines, or models are present.
     type: Boolean
     default_value: false
 parameters:
@@ -521,3 +534,96 @@ properties:
         description: |
           The storage location URI for all tables in the dataset. Equivalent to hive metastore's
           database locationUri. Maximum length of 1024 characters.
+  - name: 'failoverReservationId'
+    type: String
+    description: |
+      The failover reservation associated with the dataset, in regionless format.
+      For example, `{admin_project}.{failover_reservation}`.
+      See [Managed disaster recovery overview](https://cloud.google.com/bigquery/docs/managed-disaster-recovery#overview)
+      for more information.
+  - name: 'replicas'
+    type: Array
+    is_set: true
+    default_from_api: true
+    set_hash_func: 'resourceBigqueryDatasetReplicasHash'
+    custom_expand: 'templates/terraform/custom_expand/bigquery_dataset_replicas.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/bigquery_dataset_replicas.go.tmpl'
+    description: |
+      The list of replicas in a cross-region replicated or disaster recovery dataset.
+      When adding replicas, the primary replica in the dataset's location must be included.
+      Once a dataset has replicas configured, the primary replica cannot be dropped; to drop
+      all secondary replicas, specify only the primary replica in `replicas`.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'id'
+          type: String
+          required: true
+          description: |
+            The user-visible string identifier for this dataset replica. For example, `us-east4-replica`.
+        - name: 'location'
+          type: String
+          required: true
+          diff_suppress_func: 'tpgresource.CaseDiffSuppress'
+          description: |
+            The logical BigQuery region where this replica is located. This is uppercase if `US` or `EU`,
+            otherwise a lowercase cloud region like `asia-northeast1`.
+            See [Dataset locations](https://cloud.google.com/bigquery/docs/locations) for more information.
+        - name: 'replicaOptions'
+          type: NestedObject
+          is_missing_in_cai: true
+          description: |
+            Contains modification options for the replica when creating or adding the replica,
+            such as setting a Cloud KMS encryption key. These options are write-only in the
+            BigQuery API (not populated on `terraform import` or `google_bigquery_dataset`
+            data source reads) and immutable after the replica is created.
+          properties:
+            - name: 'defaultKmsKeyName'
+              type: String
+              description: |
+                The default Cloud KMS encryption key resource name for the replica.
+                When `default_encryption_configuration` is set on the dataset, a KMS key
+                must be provided on all replicas (including the primary replica) when
+                creating the dataset with `replicas` in a single step, and on each newly
+                added secondary replica when adding replicas to an existing dataset via
+                update; otherwise this field must not be set. This value is immutable after
+                the replica is created (changing a non-empty value on an existing replica
+                forces dataset replacement) and write-only in the BigQuery API (not returned
+                on `terraform import` or `google_bigquery_dataset` data source reads).
+        - name: 'replicaState'
+          type: String
+          output: true
+          description: |
+            The current replication state of the replica. Possible values include `PRIMARY`, `SECONDARY`,
+            `ASSIGNED_PRIMARY`, `PREVIOUSLY_ASSIGNED_PRIMARY`, and `BACKFILLING`.
+            See the [API documentation](https://cloud.google.com/bigquery/docs/reference/rest/v2/datasets#ReplicaState)
+            for more information.
+        - name: 'creationTime'
+          type: String
+          output: true
+          description: |
+            The timestamp when the replica was created, in RFC3339 format.
+        - name: 'backfillCompletionTime'
+          type: String
+          output: true
+          description: |
+            The time when the backfill was completed and the replica is ready to use, in RFC3339 format.
+        - name: 'primaryAssignmentTime'
+          type: String
+          output: true
+          description: |
+            The time at which the replica was assigned primary, in RFC3339 format.
+            Only one replica has this field populated at any point.
+        - name: 'primaryAssignmentCompletionTime'
+          type: String
+          output: true
+          description: |
+            After a new primary assignment is made, the time that the dataset's data has been
+            fully replicated to the replica, in RFC3339 format.
+        - name: 'failoverReservationUri'
+          type: String
+          output: true
+          description: |
+            The failover reservation resource name for the replica's region if this replica is
+            used for disaster recovery (DR), in the format
+            `projects/{project}/locations/{location}/reservations/{reservation}`.
