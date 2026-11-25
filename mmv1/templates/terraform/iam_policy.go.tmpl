@@ -48,7 +48,7 @@ func init() {
         Name: "{{ $.TerraformName }}_iam_binding",
         ProductName: "{{ $.ProductMetadata.Name }}",
         Type: registry.SchemaTypeIAMResource,
-        Schema: tpgiamresource.ResourceIamBinding({{ $.ResourceName }}IamSchema, {{ $.ResourceName }}IamUpdaterProducer, {{ $.ResourceName }}IdParseFunc{{ if $.IamPolicy.DeprecationMessage }}, tpgiamresource.IamWithDeprecationMessage("{{ $.IamPolicy.DeprecationMessage }}"){{- end }}{{ if $.IamPolicy.MaxBackoffTimeoutSeconds }}, tpgiamresource.IamWithMaxBackoffSeconds({{ $.IamPolicy.MaxBackoffTimeoutSeconds }}){{- end }}),
+        Schema: New{{ $.ResourceName }}IamBindingResource(),
     }.Register()
     registry.Schema{
         Name: "{{ $.TerraformName }}_iam_member",
@@ -77,6 +77,24 @@ func init() {
     }.Register()
 }
 {{- end }}
+
+// New{{ $.ResourceName }}IamBindingResource returns the {{ $.TerraformName }}_iam_binding
+// managed resource. It is shared by the managed resource registration and the 
+// list resource, so both stay in sync.
+func New{{ $.ResourceName }}IamBindingResource() *schema.Resource {
+    return tpgiamresource.ResourceIamBinding(
+        {{ $.ResourceName }}IamSchema,
+        {{ $.ResourceName }}IamUpdaterProducer,
+        {{ $.ResourceName }}IdParseFunc,
+        tpgiamresource.IamWithParentResourceIdentity({{ $.ResourceName }}IamParentParentResourceIdentityParser),
+		{{- if $.IamPolicy.DeprecationMessage }}
+		tpgiamresource.IamWithDeprecationMessage("{{ $.IamPolicy.DeprecationMessage }}"),
+		{{- end }}
+		{{- if $.IamPolicy.MaxBackoffTimeoutSeconds }}
+		tpgiamresource.IamWithMaxBackoffSeconds({{ $.IamPolicy.MaxBackoffTimeoutSeconds }}),
+		{{- end }}
+    )
+}
 
 // New{{ $.ResourceName }}IamMemberResource returns the {{ $.TerraformName }}_iam_member
 // managed resource. It is shared by the managed resource registration and the 
