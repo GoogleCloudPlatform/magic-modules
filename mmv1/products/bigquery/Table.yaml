@@ -35,6 +35,9 @@ iam_policy:
   allowed_iam_role: 'roles/bigquery.dataOwner'
   parent_resource_attribute: 'table_id'
   iam_policy_version: '1'
+  list_resource:
+    member_iam_resource:
+      generate: true
 custom_code:
 samples:
   - name: 'bigquery_bigquery_table'
