@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
@@ -39,6 +40,11 @@ func TestAccComputeSharedReservation_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"zone", "share_settings"},
 			},
 			{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_reservation.gce_reservation", plancheck.ResourceActionUpdate),
+					},
+				},
 				Config: testAccComputeReservation_sharedReservation_update(context),
 			},
 			{
@@ -48,6 +54,39 @@ func TestAccComputeSharedReservation_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"zone", "share_settings"},
 			},
 			{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_reservation.gce_reservation", plancheck.ResourceActionUpdate),
+					},
+				},
+				Config: testAccComputeReservation_sharedReservation_basic(context),
+			},
+			{
+				ResourceName:            "google_compute_reservation.gce_reservation",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone", "share_settings"},
+			},
+			{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_reservation.gce_reservation", plancheck.ResourceActionUpdate),
+					},
+				},
+				Config: testAccComputeReservation_sharedReservation_local(context),
+			},
+			{
+				ResourceName:            "google_compute_reservation.gce_reservation",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone", "share_settings"},
+			},
+			{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_reservation.gce_reservation", plancheck.ResourceActionUpdate),
+					},
+				},
 				Config: testAccComputeReservation_sharedReservation_basic(context),
 			},
 			{
@@ -268,6 +307,105 @@ resource "google_compute_reservation" "gce_reservation" {
       id = google_project.guest_project_third.project_id
       project_id = google_project.guest_project_third.project_id
     }
+  }
+  depends_on = [google_org_policy_policy.shared_reservation_org_policy, time_sleep.wait_120_seconds]
+}
+`, context)
+}
+
+func testAccComputeReservation_sharedReservation_local(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_project" "owner_project" {
+  project_id      = "tf-test%{random_suffix}"
+  name            = "tf-test%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
+}
+
+resource "time_sleep" "wait_60_seconds" {
+  create_duration = "60s"
+  depends_on = [google_project.owner_project, google_project.guest_project, google_project.guest_project_second, google_project.guest_project_third]
+}
+
+resource "google_project_service" "compute" {
+  project = google_project.owner_project.project_id
+  service = "compute.googleapis.com"
+  depends_on = [time_sleep.wait_60_seconds]
+}
+
+resource "google_project" "guest_project" {
+  project_id      = "tf-test-2%{random_suffix}"
+  name            = "tf-test-2%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_project" "guest_project_second" {
+  project_id      = "tf-test-3%{random_suffix}"
+  name            = "tf-test-3%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_project" "guest_project_third" {
+  project_id      = "tf-test-4%{random_suffix}"
+  name            = "tf-test-4%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_org_policy_policy" "shared_reservation_org_policy" {
+  name   = "projects/${google_project.owner_project.project_id}/policies/compute.sharedReservationsOwnerProjects"
+  parent = "projects/${google_project.owner_project.project_id}"
+
+  spec {
+    rules {
+      allow_all = "TRUE"
+    }
+  }
+}
+
+resource "google_project_service" "compute_second_project" {
+  project = google_project.guest_project.project_id
+  service = "compute.googleapis.com"
+  depends_on = [time_sleep.wait_60_seconds]
+}
+
+resource "google_project_service" "compute_third_project" {
+  project = google_project.guest_project_second.project_id
+  service = "compute.googleapis.com"
+  depends_on = [time_sleep.wait_60_seconds]
+}
+
+resource "google_project_service" "compute_fourth_project" {
+  project = google_project.guest_project_third.project_id
+  service = "compute.googleapis.com"
+  depends_on = [time_sleep.wait_60_seconds]
+}
+
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_project_service.compute, google_project_service.compute_second_project, google_project_service.compute_third_project, google_project_service.compute_fourth_project]
+}
+
+resource "google_compute_reservation" "gce_reservation" {
+  project = google_project.owner_project.project_id
+  name = "my-reservation"
+  zone = "us-central1-a"
+
+  specific_reservation {
+    count = 1
+    instance_properties {
+      min_cpu_platform = "Intel Cascade Lake"
+      machine_type     = "n2-standard-2"
+    }
+  }
+  share_settings {
+    share_type = "LOCAL"
   }
   depends_on = [google_org_policy_policy.shared_reservation_org_policy, time_sleep.wait_120_seconds]
 }

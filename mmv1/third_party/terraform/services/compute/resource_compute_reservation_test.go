@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/compute"
@@ -50,6 +51,7 @@ func TestAccComputeReservation_deleteAtTime(t *testing.T) {
 	reservationName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	deleteTime := time.Now().UTC().Add(24 * time.Hour) // Set delete_at_time to 24 hours in the future
 	deleteAtTimeRFC3339 := deleteTime.Format(time.RFC3339)
+	updatedDeleteAtTimeRFC3339 := deleteTime.Add(2 * time.Hour).Format(time.RFC3339)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -68,17 +70,27 @@ func TestAccComputeReservation_deleteAtTime(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_reservation.reservation", plancheck.ResourceActionUpdate),
+					},
+				},
+				Config: testAccComputeReservation_deleteAtTime(reservationName, updatedDeleteAtTimeRFC3339),
+			},
+			{
+				ResourceName:      "google_compute_reservation.reservation",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
 
 func TestAccComputeReservation_deleteAfterDuration(t *testing.T) {
-	acctest.SkipIfVcr(t) // timestamp
 	t.Parallel()
 
 	reservationName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	deleteTime := time.Now().UTC().Add(24 * time.Hour) // Set delete_at_time to 24 hours in the future
-	deleteAtTimeRFC3339 := deleteTime.Format(time.RFC3339)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -86,17 +98,44 @@ func TestAccComputeReservation_deleteAfterDuration(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeReservationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccComputeReservation_deleteAtTime_deleteAfterDuration(reservationName, deleteAtTimeRFC3339, deleteTime.Unix()),
+				Config:      testAccComputeReservation_deleteAtTime_deleteAfterDuration(reservationName, "2099-01-01T00:00:00Z", 7200),
 				ExpectError: regexp.MustCompile("Conflicting configuration arguments"),
 			},
 			{
-				Config: testAccComputeReservation_deleteAfterDuration(reservationName, deleteTime.Unix()),
+				Config: testAccComputeReservation_deleteAfterDuration(reservationName, 7200),
 			},
 			{
 				ResourceName:            "google_compute_reservation.reservation",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"delete_after_duration"},
+			},
+			{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_reservation.reservation", plancheck.ResourceActionUpdate),
+					},
+				},
+				Config: testAccComputeReservation_deleteAfterDuration(reservationName, 10800),
+			},
+			{
+				ResourceName:            "google_compute_reservation.reservation",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"delete_after_duration"},
+			},
+			{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_reservation.reservation", plancheck.ResourceActionUpdate),
+					},
+				},
+				Config: testAccComputeReservation_deleteAfterDurationClear(reservationName),
+			},
+			{
+				ResourceName:      "google_compute_reservation.reservation",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -122,15 +161,14 @@ resource "google_compute_reservation" "reservation" {
 func testAccComputeReservation_deleteAtTime(reservationName, time string) string {
 	return fmt.Sprintf(`
 resource "google_compute_reservation" "reservation" {
-  name = "%s"
-  zone = "us-central1-a"
+  name           = "%s"
+  zone           = "us-central1-c"
   delete_at_time = "%s"
 
   specific_reservation {
-    count = 2
+    count = 1
     instance_properties {
-      min_cpu_platform = "Intel Cascade Lake"
-      machine_type     = "n2-standard-2"
+      machine_type = "e2-standard-2"
     }
   }
 }
@@ -141,37 +179,53 @@ func testAccComputeReservation_deleteAfterDuration(reservationName string, durat
 	return fmt.Sprintf(`
 resource "google_compute_reservation" "reservation" {
   name = "%s"
-  zone = "us-central1-a"
+  zone = "us-central1-c"
   delete_after_duration {
-	seconds = %d
+    seconds = %d
+    nanos   = 0
   }
 
   specific_reservation {
-    count = 2
+    count = 1
     instance_properties {
-      min_cpu_platform = "Intel Cascade Lake"
-      machine_type     = "n2-standard-2"
+      machine_type = "e2-standard-2"
     }
   }
 }
 `, reservationName, duration)
 }
 
-func testAccComputeReservation_deleteAtTime_deleteAfterDuration(reservationName, time string, duration int64) string {
+func testAccComputeReservation_deleteAfterDurationClear(reservationName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_reservation" "reservation" {
   name = "%s"
-  zone = "us-central1-a"
+  zone = "us-central1-c"
+
+  specific_reservation {
+    count = 1
+    instance_properties {
+      machine_type = "e2-standard-2"
+    }
+  }
+}
+`, reservationName)
+}
+
+func testAccComputeReservation_deleteAtTime_deleteAfterDuration(reservationName, time string, duration int64) string {
+	return fmt.Sprintf(`
+resource "google_compute_reservation" "reservation" {
+  name           = "%s"
+  zone           = "us-central1-c"
   delete_at_time = "%s"
   delete_after_duration {
-	seconds = %d
+    seconds = %d
+    nanos   = 0
   }
 
   specific_reservation {
-    count = 2
+    count = 1
     instance_properties {
-      min_cpu_platform = "Intel Cascade Lake"
-      machine_type     = "n2-standard-2"
+      machine_type = "e2-standard-2"
     }
   }
 }
@@ -227,4 +281,73 @@ resource "google_compute_reservation" "reservation" {
   }
 }
 `, context)
+}
+
+func TestAccComputeReservation_updatePathsFields(t *testing.T) {
+	t.Parallel()
+
+	reservationName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeReservationDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeReservation_updatePathsFields(reservationName, "2", "true", "DISALLOW_ALL"),
+			},
+			{
+				ResourceName:      "google_compute_reservation.reservation",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_reservation.reservation", plancheck.ResourceActionUpdate),
+					},
+				},
+				Config: testAccComputeReservation_updatePathsFields(reservationName, "1", "false", "ALLOW_ALL"),
+			},
+			{
+				ResourceName:      "google_compute_reservation.reservation",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_reservation.reservation", plancheck.ResourceActionUpdate),
+					},
+				},
+				Config: testAccComputeReservation_updatePathsFields(reservationName, "1", "true", "DISALLOW_ALL"),
+			},
+			{
+				ResourceName:      "google_compute_reservation.reservation",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeReservation_updatePathsFields(reservationName, count, specificRequired, serviceShareType string) string {
+	return fmt.Sprintf(`
+resource "google_compute_reservation" "reservation" {
+  name                          = %q
+  zone                          = "us-central1-c"
+  specific_reservation_required = %s
+
+  reservation_sharing_policy {
+    service_share_type = %q
+  }
+
+  specific_reservation {
+    count = %s
+    instance_properties {
+      machine_type = "e2-standard-2"
+    }
+  }
+}
+`, reservationName, specificRequired, serviceShareType, count)
 }
