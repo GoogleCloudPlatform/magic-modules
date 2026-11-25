@@ -1,0 +1,69 @@
+resource "google_storage_bucket" "bucket" {
+  name                        = "{{index $.ResourceIdVars "bucket_name"}}"
+  location                    = "us-central1"
+  force_destroy               = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_biglake_iceberg_catalog" "catalog" {
+  name         = google_storage_bucket.bucket.name
+  catalog_type = "CATALOG_TYPE_GCS_BUCKET"
+}
+
+resource "google_biglake_iceberg_namespace" "namespace" {
+  catalog      = google_biglake_iceberg_catalog.catalog.name
+  namespace_id = "{{index $.ResourceIdVars "namespace_id"}}"
+}
+
+resource "google_biglake_iceberg_namespace" "other_namespace" {
+  catalog      = google_biglake_iceberg_catalog.catalog.name
+  namespace_id = "{{index $.ResourceIdVars "other_namespace_id"}}"
+}
+
+resource "google_biglake_iceberg_view" "my_iceberg_view" {
+  catalog   = google_biglake_iceberg_catalog.catalog.name
+  namespace = google_biglake_iceberg_namespace.namespace.namespace_id
+  name      = "{{index $.ResourceIdVars "view_name"}}"
+
+  schema {
+    type = "struct"
+    fields {
+      id       = 1
+      name     = "id"
+      type     = "long"
+      required = true
+      doc      = "Updated ID description"
+    }
+    fields {
+      id       = 2
+      name     = "name"
+      type     = "string"
+      required = false
+    }
+    identifier_field_ids = [1]
+  }
+
+  view_version {
+    default_catalog   = google_biglake_iceberg_catalog.catalog.name
+    default_namespace = [google_biglake_iceberg_namespace.other_namespace.namespace_id]
+    summary = {
+      "engine-name"    = "spark"
+      "engine-version" = "3.5"
+    }
+    representations {
+      type    = "sql"
+      sql     = "SELECT id, name FROM my_table"
+      dialect = "spark"
+    }
+    representations {
+      type    = "sql"
+      sql     = "SELECT id, name FROM my_table"
+      dialect = "trino"
+    }
+  }
+
+  properties = {
+    key   = "value"
+    owner = "analytics"
+  }
+}
