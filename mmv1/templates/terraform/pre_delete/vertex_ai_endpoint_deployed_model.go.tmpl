@@ -1,0 +1,95 @@
+project = billingProject
+
+endpointURL, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{"{{"}}endpoint{{"}}"}}")
+if err != nil {
+	return err
+}
+endpoint, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config: config, Method: "GET", Project: billingProject, RawURL: endpointURL,
+	UserAgent: userAgent, Timeout: d.Timeout(schema.TimeoutDelete),
+})
+if err != nil {
+	return transport_tpg.HandleNotFoundError(err, d, "EndpointDeployedModel")
+}
+
+deployedModelID := d.Get("deployed_model_id").(string)
+receivesTraffic, otherReceivesTraffic := false, false
+percents := map[string]int{}
+if rawSplit := endpoint["trafficSplit"]; rawSplit != nil {
+	split, ok := rawSplit.(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("Invalid traffic split on endpoint %q: expected an object, got %T", d.Get("endpoint"), rawSplit)
+	}
+	for modelID, rawPercent := range split {
+		percent, ok := rawPercent.(float64)
+		if !ok || percent < 0 || percent > 100 || float64(int(percent)) != percent {
+			return fmt.Errorf("Invalid traffic percentage for deployed model %q on endpoint %q: %v", modelID, d.Get("endpoint"), rawPercent)
+		}
+		percents[modelID] = int(percent)
+		if percent > 0 {
+			if modelID == deployedModelID {
+				receivesTraffic = true
+			} else {
+				otherReceivesTraffic = true
+			}
+		}
+	}
+}
+
+var redistributedSplit map[string]interface{}
+if receivesTraffic && otherReceivesTraffic {
+	// Hand this model's share to the remaining recipients in proportion to
+	// their current share, using largest remainders so the split stays whole.
+	total, othersTotal := 0, 0
+	var recipients []string
+	for modelID, percent := range percents {
+		total += percent
+		if modelID != deployedModelID && percent > 0 {
+			othersTotal += percent
+			recipients = append(recipients, modelID)
+		}
+	}
+	sort.Strings(recipients)
+	newSplit, remainders, assigned := map[string]int{}, map[string]int{}, 0
+	for modelID, percent := range percents {
+		if modelID != deployedModelID {
+			newSplit[modelID] = percent
+		}
+	}
+	for _, modelID := range recipients {
+		scaled := percents[modelID] * total
+		newSplit[modelID] = scaled / othersTotal
+		remainders[modelID] = scaled % othersTotal
+		assigned += newSplit[modelID]
+	}
+	sort.SliceStable(recipients, func(i, j int) bool { return remainders[recipients[i]] > remainders[recipients[j]] })
+	for i := 0; assigned < total; i++ {
+		newSplit[recipients[i]]++
+		assigned++
+	}
+	redistributedSplit = map[string]interface{}{}
+	for modelID, percent := range newSplit {
+		redistributedSplit[modelID] = percent
+	}
+	log.Printf("[DEBUG] Redistributing traffic of deployed model %q on endpoint %q: %v", deployedModelID, d.Get("endpoint"), newSplit)
+} else if receivesTraffic {
+	etag, ok := endpoint["etag"].(string)
+	if !ok || etag == "" {
+		return fmt.Errorf("Cannot safely clear traffic on endpoint %q before undeploying model %q: endpoint response has no etag", d.Get("endpoint"), d.Get("deployed_model_id"))
+	}
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config: config, Method: "PATCH", Project: billingProject, RawURL: endpointURL + "?updateMask=trafficSplit",
+		UserAgent: userAgent, Timeout: d.Timeout(schema.TimeoutDelete),
+		Body: map[string]interface{}{"trafficSplit": map[string]interface{}{}, "etag": etag},
+	})
+	if err != nil {
+		return fmt.Errorf("Error clearing endpoint traffic before undeploying model %q; verify the traffic split and retry: %w", d.Get("deployed_model_id"), err)
+	}
+}
+
+obj = map[string]interface{}{
+	"deployedModelId": deployedModelID,
+}
+if redistributedSplit != nil {
+	obj["trafficSplit"] = redistributedSplit
+}

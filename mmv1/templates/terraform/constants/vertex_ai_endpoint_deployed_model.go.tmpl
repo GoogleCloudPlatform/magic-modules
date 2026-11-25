@@ -1,0 +1,12 @@
+func resourceVertexAIEndpointDeployedModelCustomDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	if d.Id() == "" {
+		return nil
+	}
+	oldValue, newValue := d.GetChange("dedicated_resources")
+	if (len(oldValue.([]interface{})) == 0) != (len(newValue.([]interface{})) == 0) {
+		if err := d.ForceNew("dedicated_resources"); err != nil {
+			return fmt.Errorf("Error marking dedicated_resources for replacement: %s", err)
+		}
+	}
+	return nil
+}
