@@ -20,6 +20,7 @@ references:
   api: https://cloud.google.com/dataproc-gdc/docs/reference/rest/v1/projects.locations.serviceInstances
 base_url: projects/{{project}}/locations/{{location}}/serviceInstances
 immutable: true
+generate_list_resource: true
 self_link: projects/{{project}}/locations/{{location}}/serviceInstances/{{service_instance_id}}
 create_url: projects/{{project}}/locations/{{location}}/serviceInstances?serviceInstanceId={{service_instance_id}}
 id_format: projects/{{project}}/locations/{{location}}/serviceInstances/{{service_instance_id}}
@@ -42,6 +43,16 @@ samples:
     skip_test: https://github.com/hashicorp/terraform-provider-google/issues/21173
     steps:
       - name: dataprocgdc_serviceinstance
+        resource_id_vars:
+          service_instance_id: tf-e2e-service-instance
+          project: my-project
+        test_vars_overrides:
+          project: '"gdce-cluster-monitoring"'
+  - name: dataprocgdc_service_instance_list_test
+    primary_resource_id: service-instance
+    exclude_basic_doc: true
+    steps:
+      - name: dataprocgdc_service_instance_list_test
         resource_id_vars:
           service_instance_id: tf-e2e-service-instance
           project: my-project
