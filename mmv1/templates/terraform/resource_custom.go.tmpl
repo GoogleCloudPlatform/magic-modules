@@ -1,0 +1,178 @@
+{{/* The license inside this block applies to this file
+  Copyright 2024 Google LLC. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. */ -}}
+// Copyright IBM Corp. 2014, 2026
+// SPDX-License-Identifier: MPL-2.0
+
+{{$.CodeHeader TemplatePath}}
+
+package {{ lower $.ProductMetadata.Name }}
+
+import (
+    "context"
+    "encoding/base64"
+    "encoding/json"
+    "fmt"
+    "log"
+    "net/http"
+    "net/url"
+    "reflect"
+    "regexp"
+    "runtime"
+    "slices"
+    "sort"
+    "strconv"
+    "strings"
+    "time"
+
+    "github.com/gammazero/workerpool"
+    "github.com/hashicorp/errwrap"
+    "github.com/hashicorp/go-cty/cty"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+    {{- if and (and $.IdentitySchemaVersion $.IdentityUpgraders) (not $.ExcludeRead) }}
+    "github.com/hashicorp/terraform-plugin-go/tftypes"
+    {{- end }}
+    rmClient "{{ $.ImportPath }}/services/resourcemanager/client"
+    "{{ $.ImportPath }}/tpgresource"
+    transport_tpg "{{ $.ImportPath }}/transport"
+    "{{ $.ImportPath }}/verify"
+
+    "google.golang.org/api/googleapi"
+)
+
+var (
+    _ = context.WithCancel
+    _ = base64.NewDecoder
+    _ = json.Marshal
+    _ = fmt.Sprintf
+    _ = log.Print
+    _ = http.Get
+    _ = url.QueryUnescape
+    _ = reflect.ValueOf
+    _ = regexp.Match
+    _ = runtime.GOARCH
+    _ = slices.Min([]int{1})
+    _ = sort.IntSlice{}
+    _ = strconv.Atoi
+    _ = strings.Trim
+    _ = time.Now
+    _ = workerpool.New
+    _ = errwrap.Wrap
+    _ = cty.BoolVal
+    _ = customdiff.All
+    _ = id.UniqueId
+    _ = retry.Retry
+    _ = schema.Noop
+    _ = structure.ExpandJsonFromString
+    _ = validation.All
+    _ = rmClient.NewClient
+    _ = tpgresource.SetLabels
+    _ = transport_tpg.Config{}
+    _ = verify.ValidateEnum
+    _ = googleapi.Error{}
+)
+
+{{ if $.CustomCode.CustomCreate -}}
+func resource{{ $.ResourceName }}CustomCreate(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	{{ customTemplate $ $.CustomCode.CustomCreate false -}}
+}
+{{ end }}
+
+{{ if and ($.CustomCode.CustomUpdate) ($.Updatable) -}}
+func resource{{ $.ResourceName }}CustomUpdate(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	{{ customTemplate $ $.CustomCode.CustomUpdate false -}}
+}
+{{ end }}
+
+{{ if and ($.CustomCode.CustomDelete) (not $.ExcludeDelete) -}}
+func resource{{ $.ResourceName }}CustomDelete(d *schema.ResourceData, meta interface{}) error {
+{{- if and ($.GetAsync) (and (and ($.GetAsync.IsA "OpAsync") $.GetAsync.IncludeProject) ($.GetAsync.Allow "delete")) }}
+    var project string
+{{- end }}
+    config := meta.(*transport_tpg.Config)
+    userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+    if err != nil {
+        return err
+    }
+	{{ customTemplate $ $.CustomCode.CustomDelete false -}}
+}
+{{ end }}
+
+{{ if and ($.CustomCode.CustomImport) (not $.ExcludeImport) -}}
+func resource{{ $.ResourceName }}CustomImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	{{ customTemplate $ $.CustomCode.CustomImport false -}}
+}
+{{ end }}
+
+{{- if $.CustomCode.Encoder }}
+func resource{{ $.ResourceName -}}Encoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+{{ customTemplate $ $.CustomCode.Encoder false -}}
+}
+{{ end -}}
+
+{{- if $.CustomCode.UpdateEncoder }}
+func resource{{ $.ResourceName -}}UpdateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+    {{ customTemplate $ $.CustomCode.UpdateEncoder false -}}
+}
+{{- end }}
+
+{{- if $.CustomCode.Decoder }}
+func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
+    {{ customTemplate $ $.CustomCode.Decoder false -}}
+}
+{{- end }}
+
+{{- if $.CustomCode.PostCreateFailure }}
+func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta interface{}, err error) error {
+    log.Printf("[DEBUG] Error before post_create_failure hook: %v", err)
+    {{ customTemplate $ $.CustomCode.PostCreateFailure false -}}
+}
+{{- end }}
+
+{{- if $.CustomCode.PostUpdateFailure }}
+func resource{{ $.ResourceName -}}PostUpdateFailure(d *schema.ResourceData, meta interface{}, err error) error {
+    log.Printf("[DEBUG] Error before post_update_failure hook: %v", err)
+    {{ customTemplate $ $.CustomCode.PostUpdateFailure false -}}
+}
+{{- end }}
+
+{{- if $.CustomCode.PostDeleteFailure }}
+func resource{{ $.ResourceName -}}PostDeleteFailure(d *schema.ResourceData, meta interface{}, err error) error {
+    log.Printf("[DEBUG] Error before post_delete_failure hook: %v", err)
+    {{ customTemplate $ $.CustomCode.PostDeleteFailure false -}}
+}
+{{- end }}
+
+{{- if and $.SchemaVersion $.StateUpgraders }}
+    {{ customTemplate $ $.StateMigrationFile false -}}
+{{- end }}
+
+{{- if and (and $.IdentitySchemaVersion $.IdentityUpgraders) (not $.ExcludeRead) }}
+    {{ customTemplate $ $.IdentityUpgraderFile false -}}
+{{- end }}
+
+{{- range $prop := $.CustomFlattenProperties }}
+{{ customTemplate $prop $prop.CustomFlatten false }}
+{{- end }}
+
+{{- range $prop := $.CustomExpandProperties }}
+{{ customTemplate $prop $prop.CustomExpand true }}
+{{- end }}
