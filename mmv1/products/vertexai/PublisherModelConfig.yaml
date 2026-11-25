@@ -1,0 +1,234 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: PublisherModelConfig
+description: |-
+  Manages the per-model configuration for a Vertex AI Model Garden publisher
+  model in a given location (regional or `global`).
+
+  Each publisher model has a single configuration per project and location;
+  creating or updating this resource authoritatively replaces that
+  configuration, and destroying this resource clears all configuration settings
+  on the publisher model.
+references:
+  guides:
+    Inference metadata logging: https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/capabilities/inference-metadata-logging
+    Use models in Model Garden: https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/use-models
+  api: https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.publishers.models/setPublisherModelConfig
+base_url: projects/{{project}}/locations/{{region}}/publishers/{{publisher}}/models/{{model}}
+min_version: beta
+self_link: projects/{{project}}/locations/{{region}}/publishers/{{publisher}}/models/{{model}}:fetchPublisherModelConfig
+create_url: projects/{{project}}/locations/{{region}}/publishers/{{publisher}}/models/{{model}}:setPublisherModelConfig
+delete_url: projects/{{project}}/locations/{{region}}/publishers/{{publisher}}/models/{{model}}:setPublisherModelConfig
+update_url: projects/{{project}}/locations/{{region}}/publishers/{{publisher}}/models/{{model}}:setPublisherModelConfig
+update_verb: POST
+delete_verb: POST
+id_format: projects/{{project}}/locations/{{region}}/publishers/{{publisher}}/models/{{model}}
+import_format:
+  - projects/{{project}}/locations/{{region}}/publishers/{{publisher}}/models/{{model}}
+mutex: projects/{{project}}/locations/{{region}}/publishers/{{publisher}}/models/{{model}}
+# SetPublisherModelConfig returns an LRO when mutating configuration, or a
+# synchronous 409 ALREADY_EXISTS error without an LRO when the target
+# configuration already matches. Operation polling is handled conditionally in
+# post_create, post_update, and post_delete while 409 ALREADY_EXISTS is ignored
+# in post_create_failure, post_update_failure, and post_delete_failure.
+custom_code:
+  encoder: templates/terraform/encoders/vertex_ai_publisher_model_config.go.tmpl
+  decoder: templates/terraform/decoders/vertex_ai_publisher_model_config.go.tmpl
+  constants: templates/terraform/constants/vertex_ai_publisher_model_config.go.tmpl
+  pre_create: templates/terraform/pre_create/vertex_ai_publisher_model_config.go.tmpl
+  post_create: templates/terraform/post_create/vertex_ai_publisher_model_config.go.tmpl
+  post_create_failure: templates/terraform/post_create_failure/vertex_ai_publisher_model_config.go.tmpl
+  pre_read: templates/terraform/pre_create/vertex_ai_publisher_model_config.go.tmpl
+  pre_update: templates/terraform/pre_create/vertex_ai_publisher_model_config.go.tmpl
+  post_update: templates/terraform/post_update/vertex_ai_publisher_model_config.go.tmpl
+  post_update_failure: templates/terraform/post_create_failure/vertex_ai_publisher_model_config.go.tmpl
+  pre_delete: templates/terraform/pre_delete/vertex_ai_publisher_model_config.go.tmpl
+  post_delete: templates/terraform/post_delete/vertex_ai_publisher_model_config.go.tmpl
+  post_delete_failure: templates/terraform/post_create_failure/vertex_ai_publisher_model_config.go.tmpl
+  test_check_destroy: templates/terraform/custom_check_destroy/vertex_ai_publisher_model_config.go.tmpl
+samples:
+  - name: vertex_ai_publisher_model_config_basic
+    primary_resource_id: config
+    steps:
+      - name: vertex_ai_publisher_model_config_basic
+        vars:
+          state: ENABLED
+      - name: vertex_ai_publisher_model_config_basic
+        vars:
+          state: DISABLED
+  - name: vertex_ai_publisher_model_config_global
+    primary_resource_id: config
+    steps:
+      - name: vertex_ai_publisher_model_config_global
+        vars:
+          state: ENABLED
+      - name: vertex_ai_publisher_model_config_global
+        vars:
+          state: DISABLED
+  - name: vertex_ai_publisher_model_config_full
+    primary_resource_id: config
+    steps:
+      - name: vertex_ai_publisher_model_config_full
+        resource_id_vars:
+          dataset_id: publisher_model_logs
+      - name: vertex_ai_publisher_model_config_full_update
+        resource_id_vars:
+          dataset_id: publisher_model_logs
+      - name: vertex_ai_publisher_model_config_full_clear_logging
+        resource_id_vars:
+          dataset_id: publisher_model_logs
+  - name: vertex_ai_publisher_model_config_data_sharing
+    primary_resource_id: config
+    skip_test: Requires an organization without third-party model provider data-sharing restrictions
+    steps:
+      - name: vertex_ai_publisher_model_config_data_sharing
+      - name: vertex_ai_publisher_model_config_data_sharing_update
+  - name: vertex_ai_publisher_model_config_singleton_lifecycle
+    primary_resource_id: tf_test_first
+    exclude_basic_doc: true
+    steps:
+      - name: vertex_ai_publisher_model_config_singleton_lifecycle
+        vars:
+          state: ENABLED
+      - name: vertex_ai_publisher_model_config_singleton_lifecycle
+        vars:
+          state: DISABLED
+parameters:
+  - name: region
+    type: String
+    description: |-
+      The location of the publisher model, for example `global` or `us-central1`.
+      If not specified, the provider region is used.
+    immutable: true
+    url_param_only: true
+    ignore_read: true
+    default_from_api: true
+  - name: publisher
+    type: String
+    description: The Model Garden publisher identifier, for example `google` or `anthropic`.
+    required: true
+    immutable: true
+    url_param_only: true
+  - name: model
+    type: String
+    description: The publisher model identifier, for example `gemini-2.5-flash` or `claude-sonnet-4-5`.
+    required: true
+    immutable: true
+    url_param_only: true
+properties:
+  - name: inferenceEventLoggingConfig
+    type: NestedObject
+    description: |-
+      Configures emission of the per-request
+      `aiplatform.googleapis.com/inference_request` Cloud Logging log, which
+      records structured per-request metadata (such as principal, traffic type,
+      and token usage) for publisher-model traffic on the model. This is
+      distinct from `logging_config`, which logs raw request and response
+      payloads to a BigQuery table.
+    at_least_one_of:
+      - inference_event_logging_config
+      - logging_config
+      - claude_feature_config
+      - data_sharing_enabled_provider
+    properties:
+      - name: state
+        type: Enum
+        description: |-
+          Whether emission of the `aiplatform.googleapis.com/inference_request`
+          log is enabled.
+        required: true
+        enum_values:
+          - ENABLED
+          - DISABLED
+  - name: loggingConfig
+    type: NestedObject
+    description: |-
+      Configuration for logging prediction requests and responses to a BigQuery
+      table.
+    at_least_one_of:
+      - inference_event_logging_config
+      - logging_config
+      - claude_feature_config
+      - data_sharing_enabled_provider
+    properties:
+      - name: enabled
+        type: Boolean
+        description: Whether request-response logging is enabled.
+        send_empty_value: true
+      - name: samplingRate
+        type: Double
+        description: |-
+          Percentage of requests to be logged, expressed as a fraction in the
+          range `(0, 1]`.
+      - name: errorSamplingRate
+        type: Double
+        description: |-
+          Percentage of failed requests to be logged, expressed as a fraction in
+          the range `[0, 1]`. Only non-transient errors (such as `500/Internal`
+          errors) are logged.
+      - name: enableOtelLogging
+        type: Boolean
+        description: |-
+          Used for large models. If true, in addition to the original large
+          model logs, logs are converted into OpenTelemetry schema format and
+          saved in the `otel_log` column. Defaults to `false`.
+        send_empty_value: true
+      - name: bigqueryDestination
+        type: NestedObject
+        description: BigQuery destination for request-response logging.
+        properties:
+          - name: outputUri
+            type: String
+            description: |-
+              BigQuery URI to a project, dataset, or table, up to 2000
+              characters long, in the form `bq://projectId`,
+              `bq://projectId.bqDatasetId`, or
+              `bq://projectId.bqDatasetId.bqTableId`. When a 3-part table URI is
+              specified, the dataset must already exist; when a 1-part or 2-part
+              URI is specified with `enabled = true`, Vertex AI creates and
+              persists a `request_response_logging` table URI. Prefer a full
+              3-part `bq://projectId.bqDatasetId.bqTableId` URI to avoid plan
+              diffs from server-side table name defaults.
+            required: true
+  - name: claudeFeatureConfig
+    type: NestedObject
+    description: Configuration for Claude-specific features on Anthropic publisher models.
+    allow_empty_object: true
+    at_least_one_of:
+      - inference_event_logging_config
+      - logging_config
+      - claude_feature_config
+      - data_sharing_enabled_provider
+    properties:
+      - name: advancedAiEnabled
+        type: Boolean
+        description: |-
+          Indicates whether advanced AI features (data retention opt-in) are
+          enabled for this publisher model.
+        send_empty_value: true
+  - name: dataSharingEnabledProvider
+    type: Enum
+    description: |-
+      The model provider (publisher) for which the customer has enabled data
+      sharing. For publisher models that are configured to require data
+      sharing, a prediction request is only allowed when the model's publisher
+      matches this provider; otherwise, the request is rejected.
+    at_least_one_of:
+      - inference_event_logging_config
+      - logging_config
+      - claude_feature_config
+      - data_sharing_enabled_provider
+    enum_values:
+      - ANTHROPIC

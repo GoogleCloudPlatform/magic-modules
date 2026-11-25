@@ -1,0 +1,10 @@
+resource "google_vertex_ai_publisher_model_config" "{{$.PrimaryResourceId}}" {
+  provider  = google-beta
+  region    = "us-central1"
+  publisher = "google"
+  model     = "gemini-2.5-flash"
+
+  inference_event_logging_config {
+    state = "{{index $.Vars "state"}}"
+  }
+}

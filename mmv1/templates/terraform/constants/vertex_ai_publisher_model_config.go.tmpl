@@ -1,0 +1,41 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
+import "errors"
+
+// vertexAIPublisherModelConfigGlobalURL rewrites "global" location URLs to the
+// non-regional aiplatform.<domain> endpoint while leaving regional and custom URLs unchanged.
+func vertexAIPublisherModelConfigGlobalURL(url string) string {
+	return strings.Replace(url, "://global-aiplatform.", "://aiplatform.", 1)
+}
+
+// isVertexAIPublisherModelConfigAlreadyExistsError reports whether err is a 409
+// ALREADY_EXISTS response (returned when config already matches, distinct from 409 ABORTED).
+func isVertexAIPublisherModelConfigAlreadyExistsError(err error) bool {
+	var gerr *googleapi.Error
+	if !errors.As(err, &gerr) || gerr == nil || gerr.Code != http.StatusConflict {
+		return false
+	}
+	return strings.Contains(gerr.Body, "ALREADY_EXISTS") || strings.Contains(strings.ToLower(gerr.Message), "already exists")
+}
+
+// waitForVertexAIPublisherModelConfigOp polls the SetPublisherModelConfig LRO,
+// or returns nil when a synchronous 409 ALREADY_EXISTS left res nil.
+func waitForVertexAIPublisherModelConfigOp(d *schema.ResourceData, config *transport_tpg.Config, res map[string]interface{}, project, activity, userAgent string, timeout time.Duration) error {
+	if res == nil {
+		return nil
+	}
+	endpointLocation := tpgresource.LocationFromId(d.Id())
+	return VertexAIOperationWaitTime(config, res, project, endpointLocation, activity, userAgent, timeout)
+}
+{{- end }}
