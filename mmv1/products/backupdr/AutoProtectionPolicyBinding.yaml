@@ -135,7 +135,7 @@ properties:
     type: String
     output: true
     description: |
-      The etag of the binding, used for optimistic concurrency control.
+      The etag of the binding.
   - name: createTime
     type: String
     output: true

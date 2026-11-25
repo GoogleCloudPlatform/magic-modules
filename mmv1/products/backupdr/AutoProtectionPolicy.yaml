@@ -150,7 +150,7 @@ properties:
     type: String
     output: true
     description: |
-      The etag of the auto protection policy, used for optimistic concurrency control.
+      The etag of the auto protection policy.
   - name: createTime
     type: String
     output: true
