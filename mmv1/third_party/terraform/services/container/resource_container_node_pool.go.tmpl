@@ -68,6 +68,7 @@ func (nodePoolCache *nodePoolCache) refreshIfNeeded(d *schema.ResourceData, conf
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("NodePools from cluster %q", nodePoolInfo.cluster))
 	}
 
+	delete(nodePoolCache.nodePools, nodePoolInfo.fullyQualifiedName(name))
 	updateTime := time.Now()
 	for _, nodePool := range listNodePoolsResponse.NodePools {
 		nodePoolCache.nodePools[nodePoolInfo.fullyQualifiedName(nodePool.Name)] = &nodePoolWithUpdateTime{
