@@ -392,10 +392,9 @@ func ListPages(opt ListPagesOptions) error {
 		}
 		// Handle pagination for next loop, or break loop
 		v, ok := res["nextPageToken"]
-		if ok {
+		if ok && v != nil && v.(string) != "" {
 			params["pageToken"] = v.(string)
-		}
-		if !ok {
+		} else {
 			break
 		}
 	}

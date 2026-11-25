@@ -53,6 +53,8 @@ samples:
     steps:
       - name: network_security_authorization_policy_basic
         min_version: beta
+        vars:
+          location: us-central1
         resource_id_vars:
           resource_name: my-authorization-policy
   - name: network_security_authorization_policy_destinations
