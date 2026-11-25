@@ -69,10 +69,21 @@ func (nodePoolCache *nodePoolCache) refreshIfNeeded(d *schema.ResourceData, conf
 	}
 
 	updateTime := time.Now()
+	listed := make(map[string]bool, len(listNodePoolsResponse.NodePools))
 	for _, nodePool := range listNodePoolsResponse.NodePools {
-		nodePoolCache.nodePools[nodePoolInfo.fullyQualifiedName(nodePool.Name)] = &nodePoolWithUpdateTime{
+		key := nodePoolInfo.fullyQualifiedName(nodePool.Name)
+		listed[key] = true
+		nodePoolCache.nodePools[key] = &nodePoolWithUpdateTime{
 			nodePool:  nodePool,
 			updateTime: updateTime,
+		}
+	}
+	// Drop cached node pools of this cluster that the API no longer lists, such as
+	// pools deleted outside Terraform, so reads do not keep finding them.
+	clusterPrefix := nodePoolInfo.fullyQualifiedName("")
+	for key := range nodePoolCache.nodePools {
+		if strings.HasPrefix(key, clusterPrefix) && !listed[key] {
+			delete(nodePoolCache.nodePools, key)
 		}
 	}
 	return nil
