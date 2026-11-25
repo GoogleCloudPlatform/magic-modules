@@ -15,4 +15,8 @@ resource "google_dialogflow_generator" "{{$.PrimaryResourceId}}" {
     }
   }
   trigger_event = "END_OF_UTTERANCE"
+  suggestion_deduping_config {
+    enable_deduping      = {{index $.Vars "enable_deduping"}}
+    similarity_threshold = {{index $.Vars "similarity_threshold"}}
+  }
 }
