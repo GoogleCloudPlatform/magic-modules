@@ -362,16 +362,11 @@ func ParseIntHTTP(v interface{}) int {
 }
 
 func FlattenWorkloadIdentityConfigHTTP(v interface{}) []map[string]interface{} {
-	if v == nil {
+	config, ok := v.(map[string]interface{})
+	if !ok {
 		return nil
 	}
-	config := v.(map[string]interface{})
-	return []map[string]interface{}{
-		{
-			"identity":                     config["identity"],
-			"identity_certificate_enabled": config["identityCertificateEnabled"],
-		},
-	}
+	return flattenInstanceWorkloadIdentityConfig(config)
 }
 
 type diskCharacteristics struct {

@@ -42,11 +42,16 @@ type getResult struct {
 
 // Compare to https://github.com/hashicorp/terraform-plugin-sdk/blob/97b4465/helper/schema/resource_data.go#L15
 type FakeResourceData struct {
-	reader   schema.FieldReader
-	schema   map[string]*schema.Schema
-	identity *schema.IdentityData
-	id       string
-	state    map[string]string
+	reader    schema.FieldReader
+	schema    map[string]*schema.Schema
+	identity  *schema.IdentityData
+	id        string
+	state     map[string]string
+	rawValues map[string]interface{}
+}
+
+func (d *FakeResourceData) RawValues() map[string]interface{} {
+	return d.rawValues
 }
 
 // Id returns the ID of the resource from state.
