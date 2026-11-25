@@ -264,8 +264,7 @@ properties:
               description: |
                 List of Trust Anchors to be used while performing validation against a given
                 `TrustStore`. The incoming end entity's certificate must be chained up to one of the
-                trust anchors here.
-              required: true
+                trust anchors here. Optional when `trust_default_shared_ca` is set.
               item_type:
                 type: NestedObject
                 description: |
