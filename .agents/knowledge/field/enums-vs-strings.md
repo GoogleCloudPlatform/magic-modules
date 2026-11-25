@@ -5,7 +5,7 @@ topics: [field]
 task_types: [field-add, new-resource]
 source: docs/content/best-practices/validation.md + the schema-review skill's original trade-off note
 status: draft
-last_verified: 2026-07-09
+last_verified: 2026-11-17
 ---
 
 # Enum vs. String
@@ -29,7 +29,11 @@ last_verified: 2026-07-09
 
 **Rules for Enum:**
 - Omit the `FIELD_NAME_UNSPECIFIED` value from `enum_values` — it is the proto convention's first enum
-  value, representing 0/unset, not a real choice.
+  value, representing 0/unset, not a real choice. (On handwritten `Optional: true, Computed: true` `TypeString`
+  fields using `validation.StringInSlice` without diff suppression, likewise omit `*_UNSPECIFIED` unless the API
+  persists it as a distinct user-settable value.)
+- Do not manually write `Possible values:` in `description:` on `Enum` (or `Array` of `Enum`) — Magic Modules
+  appends `enum_values` automatically to schema and website docs.
 - Enums validate against the list automatically; a custom `validation` **overrides** that default — if you
   add one, it must re-verify the enum values itself.
 
