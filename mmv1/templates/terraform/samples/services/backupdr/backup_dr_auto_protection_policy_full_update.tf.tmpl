@@ -27,10 +27,10 @@ resource "google_backup_dr_backup_plan" "instance_backup_plan" {
   }
 }
 
-resource "google_backup_dr_backup_plan" "disk_backup_plan" {
+resource "google_backup_dr_backup_plan" "updated_instance_backup_plan" {
   location       = "us-central1"
-  backup_plan_id = "{{index $.ResourceIdVars "disk_backup_plan_id"}}"
-  resource_type  = "compute.googleapis.com/Disk"
+  backup_plan_id = "{{index $.ResourceIdVars "updated_instance_backup_plan_id"}}"
+  resource_type  = "compute.googleapis.com/Instance"
   backup_vault   = google_backup_dr_backup_vault.my_backup_vault.id
 
   backup_rules {
@@ -53,7 +53,7 @@ resource "google_backup_dr_backup_plan" "disk_backup_plan" {
 resource "google_backup_dr_auto_protection_policy" "{{$.PrimaryResourceId}}" {
   location                  = "us-central1"
   auto_protection_policy_id = "{{index $.ResourceIdVars "auto_protection_policy_id"}}"
-  description               = "Protects staging disks."
+  description               = "Protects staging VMs."
 
   criteria {
     matching_conditions {
@@ -65,7 +65,7 @@ resource "google_backup_dr_auto_protection_policy" "{{$.PrimaryResourceId}}" {
   }
 
   backup_plan_details {
-    resource_type = "compute.googleapis.com/Disk"
-    backup_plan   = google_backup_dr_backup_plan.disk_backup_plan.name
+    resource_type = "compute.googleapis.com/Instance"
+    backup_plan   = google_backup_dr_backup_plan.updated_instance_backup_plan.name
   }
 }
