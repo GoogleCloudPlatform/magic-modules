@@ -37,7 +37,7 @@ Use `custom_code.constants` to inject top-level code in a resource file. This is
   CustomizeDiff functions, and so on.
 - Methods
 
-Any custom functions added should have thorough [unit tests]({{< ref "/test/test#add-unit-tests" >}}).
+Custom functions with branching or parsing logic (such as regexes, ID/URL parsers, state upgraders, or multi-case diff suppressors) should have [unit tests]({{< ref "/test/test#add-unit-tests" >}}). Trivial wrappers or reuse of existing `tpgresource` helpers are covered by acceptance tests.
 
 ## Modify the API request or response
 
@@ -154,8 +154,8 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 
 The parameters the function receives are:
 
-- `v`: The value for the field
-- `d`:  Terraform resource data. Use `d.Get("field_name")` to get a field's current value.
+- `v`: The value for the field returned by the API. Populate readable fields unconditionally from `v` (do not guard the flattener on `!d.GetOk(...)`), because `terraform import` (`ImportStatePassthrough`) begins with only `id` in state.
+- `d`: Terraform resource data. Read prior state via `d.Get("field_name")` inside a flattener only for [write-only or sensitive inputs omitted by `GET`]({{< ref "/develop/diffs#ignore_read" >}}) (such as `mmv1/templates/terraform/custom_flatten/alloydb_cluster_input_user_flatten.go.tmpl`, paired with `ImportStateVerifyIgnore`).
 - `config`: Config object. Can be used to make API calls.
 
 The function returns a final value that will be stored in Terraform state for the field, which will be compared with the user's configuration to determine if there is a diff.
