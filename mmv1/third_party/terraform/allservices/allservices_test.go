@@ -141,6 +141,7 @@ var ignoredFields = map[string]bool{
 	"google_sourcerepo_repository.create_ignore_already_exists":           true,
 	"google_vertex_ai_featurestore_entitytype.region":                     true,
 	"google_vertex_ai_featurestore_entitytype_feature.region":             true,
+	"google_vertex_ai_publisher_model_config.region":                      true,
 	"google_workflows_workflow.name_prefix":                               true,
 
 	// query / URL params - need to decide how to handle, but don't impact coverage

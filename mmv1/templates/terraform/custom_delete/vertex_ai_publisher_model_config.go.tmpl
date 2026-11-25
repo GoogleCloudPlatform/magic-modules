@@ -1,0 +1,41 @@
+{{- /*
+	The license inside this block applies to this file
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+// The API has no delete method. Destroying the resource disables the logging settings that
+// were managed by Terraform and then removes the resource from state.
+obj := make(map[string]interface{})
+updateMask := []string{}
+if _, ok := d.GetOk("inference_event_logging_config"); ok {
+	obj["inferenceEventLoggingConfig"] = map[string]interface{}{"state": "DISABLED"}
+	updateMask = append(updateMask, "inferenceEventLoggingConfig")
+}
+if _, ok := d.GetOk("logging_config"); ok {
+	obj["loggingConfig"] = map[string]interface{}{"enabled": false}
+	updateMask = append(updateMask, "loggingConfig")
+}
+
+if len(updateMask) == 0 {
+	log.Printf("[DEBUG] PublisherModelConfig %q manages no logging settings; nothing to disable", d.Id())
+	return nil
+}
+
+log.Printf("[DEBUG] Disabling PublisherModelConfig logging settings for %q", d.Id())
+if err := vertexAIPublisherModelConfigSet(d, config, userAgent, obj, updateMask, "Deleting", d.Timeout(schema.TimeoutDelete)); err != nil {
+	if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		log.Printf("[DEBUG] PublisherModelConfig %q not found; nothing to disable", d.Id())
+		return nil
+	}
+	return err
+}
+
+log.Printf("[DEBUG] Finished disabling PublisherModelConfig %q", d.Id())
+return nil
