@@ -441,6 +441,21 @@ properties:
             - 'LONG'
             - 'SHORT'
           min_version: 'beta'
+        - name: 'preference'
+          type: Enum
+          description: |
+            This field indicates whether this backend should be fully utilized before sending traffic to backends
+            with default preference. This field cannot be set when loadBalancingScheme is set to 'EXTERNAL'.
+            See [Preferred backends](https://cloud.google.com/load-balancing/docs/service-lb-policy) for the
+            load balancers that support it. The possible values are:
+              - PREFERRED: Backends with this preference level will be filled up to their capacity limits first,
+                based on RTT.
+              - DEFAULT: If preferred backends don't have enough capacity, backends in this layer would be used and
+                traffic would be assigned based on the load balancing algorithm you use. This is the default.
+          enum_values:
+            - 'PREFERRED'
+            - 'DEFAULT'
+          min_version: 'beta'
         - name: 'customMetrics'
           type: Array
           description: |

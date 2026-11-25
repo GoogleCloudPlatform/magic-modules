@@ -548,6 +548,60 @@ func TestAccComputeRegionBackendService_withTrafficDuration(t *testing.T) {
 		},
 	})
 }
+
+func TestAccComputeRegionBackendService_withBackendPreferenceInternalManaged(t *testing.T) {
+	t.Parallel()
+
+	testAccComputeRegionBackendService_backendPreferenceTest(t, "INTERNAL_MANAGED")
+}
+
+func TestAccComputeRegionBackendService_withBackendPreferenceExternalManaged(t *testing.T) {
+	t.Parallel()
+
+	testAccComputeRegionBackendService_backendPreferenceTest(t, "EXTERNAL_MANAGED")
+}
+
+func testAccComputeRegionBackendService_backendPreferenceTest(t *testing.T, loadBalancingScheme string) {
+	serviceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	igPrimaryName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	igBackupName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	checkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionBackendService_withBackendPreference(
+					serviceName, igPrimaryName, igBackupName, checkName, loadBalancingScheme, "PREFERRED", "DEFAULT", 1000),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// max_rate_per_instance changes together with preference because preference is not part of
+				// resourceGoogleComputeBackendServiceBackendHash: when the backend set hashes are unchanged, the
+				// SDK skips the set diff, so a preference-only change is not detected. The import step below still
+				// verifies that the swapped preferences were sent to and returned by the API.
+				Config: testAccComputeRegionBackendService_withBackendPreference(
+					serviceName, igPrimaryName, igBackupName, checkName, loadBalancingScheme, "DEFAULT", "PREFERRED", 2000),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_region_backend_service.foobar", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
 {{- end }}
 
 func TestAccComputeRegionBackendService_withLogConfig(t *testing.T) {
@@ -2292,6 +2346,71 @@ resource "google_compute_region_health_check" "hc1" {
   }
 }
 `, serviceName, duration, igName, itName, checkName)
+}
+
+func testAccComputeRegionBackendService_withBackendPreference(
+	serviceName, igPrimaryName, igBackupName, checkName, loadBalancingScheme, primaryPreference, backupPreference string, maxRatePerInstance int) string {
+	return fmt.Sprintf(`
+data "google_compute_network" "default" {
+  name = "default"
+}
+
+resource "google_compute_region_backend_service" "foobar" {
+  name                  = "%s"
+  region                = "us-central1"
+  load_balancing_scheme = "%s"
+  protocol              = "HTTP"
+  port_name             = "http"
+  health_checks         = [google_compute_region_health_check.hc.id]
+
+  backend {
+    group                 = google_compute_instance_group.primary.self_link
+    balancing_mode        = "RATE"
+    max_rate_per_instance = %d
+    capacity_scaler       = 1.0
+    preference            = "%s"
+  }
+
+  backend {
+    group                 = google_compute_instance_group.backup.self_link
+    balancing_mode        = "RATE"
+    max_rate_per_instance = %d
+    capacity_scaler       = 1.0
+    preference            = "%s"
+  }
+}
+
+resource "google_compute_instance_group" "primary" {
+  name    = "%s"
+  zone    = "us-central1-a"
+  network = data.google_compute_network.default.id
+
+  named_port {
+    name = "http"
+    port = 80
+  }
+}
+
+resource "google_compute_instance_group" "backup" {
+  name    = "%s"
+  zone    = "us-central1-a"
+  network = data.google_compute_network.default.id
+
+  named_port {
+    name = "http"
+    port = 80
+  }
+}
+
+resource "google_compute_region_health_check" "hc" {
+  name   = "%s"
+  region = "us-central1"
+
+  http_health_check {
+    port = 80
+  }
+}
+`, serviceName, loadBalancingScheme, maxRatePerInstance, primaryPreference, maxRatePerInstance, backupPreference, igPrimaryName, igBackupName, checkName)
 }
 {{- end }}
 
