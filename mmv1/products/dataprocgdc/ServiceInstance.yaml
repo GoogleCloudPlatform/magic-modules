@@ -48,6 +48,16 @@ samples:
           project: my-project
         test_vars_overrides:
           project: '"gdce-cluster-monitoring"'
+  - name: dataprocgdc_service_instance_list_test
+    primary_resource_id: service-instance
+    exclude_basic_doc: true
+    steps:
+      - name: dataprocgdc_service_instance_list_test
+        resource_id_vars:
+          service_instance_id: tf-e2e-service-instance
+          project: my-project
+        test_vars_overrides:
+          project: '"gdce-cluster-monitoring"'
 parameters:
   - name: location
     type: String
