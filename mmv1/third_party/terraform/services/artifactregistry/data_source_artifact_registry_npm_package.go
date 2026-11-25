@@ -96,8 +96,7 @@ func DataSourceArtifactRegistryNpmPackageRead(d *schema.ResourceData, meta inter
 	if version != "" {
 		// fetch package by version
 		// https://cloud.google.com/artifact-registry/docs/reference/rest/v1/projects.locations.repositories.npmPackages/get
-		packageUrlSafe := url.QueryEscape(packageName)
-		urlRequest, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf(transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/npmPackages/%s:%s", packageUrlSafe, version))
+		urlRequest, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf(transport_tpg.BaseUrl(Product, config)+"projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/npmPackages/%s", artifactResourceRef(packageName, ":", version)))
 		if err != nil {
 			return fmt.Errorf("Error setting api endpoint")
 		}
