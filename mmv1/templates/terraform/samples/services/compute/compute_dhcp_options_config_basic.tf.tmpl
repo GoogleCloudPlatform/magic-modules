@@ -1,0 +1,6 @@
+resource "google_compute_dhcp_options_config" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+
+  name   = "{{index $.ResourceIdVars "dhcp_options_config_name"}}"
+  region = "us-central1"
+}

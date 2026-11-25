@@ -1,0 +1,590 @@
+package compute
+{{- if ne $.TargetVersionName "ga" }}
+
+import (
+	"context"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func TestUnitComputeDhcpOptionsConfig_deletePolicy(t *testing.T) {
+	t.Parallel()
+
+	const (
+		project = "test-project"
+		region  = "us-central1"
+		name    = "test-dhcp"
+		resPath = "/projects/test-project/regions/us-central1/dhcpOptionsConfigs/test-dhcp"
+		opPath  = "/projects/test-project/regions/us-central1/operations/op-1"
+	)
+
+	cases := []struct {
+		name           string
+		deletionPolicy string
+		getStatus      int
+		associations   map[string]interface{}
+		deleteStatus   int
+		deleteErrMsg   string
+		wantErrSubstr  string
+		wantCalls      []string
+		wantClearedId  bool
+	}{
+		{
+			name:          "unset deletion_policy tries delete and fails on association error",
+			deleteStatus:  http.StatusBadRequest,
+			deleteErrMsg:  "The dhcpOptionsConfig resource 'test-dhcp' is already being used by 'projects/test-project/global/networks/net-1'",
+			wantErrSubstr: "is already being used by",
+			wantCalls:     []string{"DELETE " + resPath},
+		},
+		{
+			name:           "DELETE tries delete directly and fails on association error",
+			deletionPolicy: "DELETE",
+			deleteStatus:   http.StatusBadRequest,
+			deleteErrMsg:   "The dhcpOptionsConfig resource 'test-dhcp' is already being used by 'projects/test-project/global/networks/net-1'",
+			wantErrSubstr:  "is already being used by",
+			wantCalls:      []string{"DELETE " + resPath},
+		},
+		{
+			name:           "DELETE deletes directly when no associations exist",
+			deletionPolicy: "DELETE",
+			wantCalls: []string{
+				"DELETE " + resPath,
+				"GET " + opPath,
+			},
+		},
+		{
+			name:           "FORCE clears associations then deletes",
+			deletionPolicy: "FORCE",
+			getStatus:      http.StatusOK,
+			associations: map[string]interface{}{
+				"assoc-1": map[string]interface{}{
+					"network": "projects/test-project/global/networks/net-1",
+				},
+			},
+			wantCalls: []string{
+				"GET " + resPath,
+				"PATCH " + resPath + "?updateMask=associations",
+				"GET " + opPath,
+				"DELETE " + resPath,
+				"GET " + opPath,
+			},
+		},
+		{
+			name:           "FORCE with empty associations skips PATCH and deletes directly",
+			deletionPolicy: "FORCE",
+			getStatus:      http.StatusOK,
+			associations:   map[string]interface{}{},
+			wantCalls: []string{
+				"GET " + resPath,
+				"DELETE " + resPath,
+				"GET " + opPath,
+			},
+		},
+		{
+			name:           "FORCE not found on pre-delete GET clears id cleanly",
+			deletionPolicy: "FORCE",
+			getStatus:      http.StatusNotFound,
+			wantCalls:      []string{"GET " + resPath},
+			wantClearedId:  true,
+		},
+		{
+			name:           "PREVENT fails before making any HTTP calls",
+			deletionPolicy: "PREVENT",
+			wantErrSubstr:  "cannot destroy ComputeDhcpOptionsConfig without setting deletion_policy=\"DELETE\"",
+			wantCalls:      nil,
+		},
+		{
+			name:           "ABANDON removes from state without making any HTTP calls",
+			deletionPolicy: "ABANDON",
+			wantCalls:      nil,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			var calls []string
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				call := r.Method + " " + r.URL.Path
+				if um := r.URL.Query().Get("updateMask"); um != "" {
+					call += "?updateMask=" + um
+				}
+				calls = append(calls, call)
+				w.Header().Set("Content-Type", "application/json")
+
+				switch {
+				case r.Method == http.MethodGet && r.URL.Path == resPath:
+					if tc.getStatus == http.StatusNotFound {
+						w.WriteHeader(http.StatusNotFound)
+						_ = json.NewEncoder(w).Encode(map[string]interface{}{
+							"error": map[string]interface{}{
+								"code":    404,
+								"message": "not found",
+							},
+						})
+						return
+					}
+					body := map[string]interface{}{"name": name}
+					if tc.associations != nil {
+						body["associations"] = tc.associations
+					}
+					_ = json.NewEncoder(w).Encode(body)
+
+				case r.Method == http.MethodPatch && r.URL.Path == resPath:
+					if got := r.URL.Query().Get("updateMask"); got != "associations" {
+						t.Errorf("PATCH updateMask = %q, want %q", got, "associations")
+					}
+					var patchBody map[string]interface{}
+					if err := json.NewDecoder(r.Body).Decode(&patchBody); err != nil {
+						t.Errorf("failed to decode PATCH body: %v", err)
+					} else if len(patchBody) != 0 {
+						t.Errorf("PATCH body = %#v, want empty object", patchBody)
+					}
+					_ = json.NewEncoder(w).Encode(map[string]interface{}{
+						"name":   "op-1",
+						"region": "projects/" + project + "/regions/" + region,
+						"status": "RUNNING",
+					})
+
+				case r.Method == http.MethodDelete && r.URL.Path == resPath:
+					if tc.deleteStatus >= http.StatusBadRequest {
+						w.WriteHeader(tc.deleteStatus)
+						_ = json.NewEncoder(w).Encode(map[string]interface{}{
+							"error": map[string]interface{}{
+								"code":    tc.deleteStatus,
+								"message": tc.deleteErrMsg,
+							},
+						})
+						return
+					}
+					_ = json.NewEncoder(w).Encode(map[string]interface{}{
+						"name":   "op-1",
+						"region": "projects/" + project + "/regions/" + region,
+						"status": "RUNNING",
+					})
+
+				case r.Method == http.MethodGet && r.URL.Path == opPath:
+					_ = json.NewEncoder(w).Encode(map[string]interface{}{
+						"name":   "op-1",
+						"region": "projects/" + project + "/regions/" + region,
+						"status": "DONE",
+					})
+
+				default:
+					t.Errorf("unexpected request: %s", call)
+					http.NotFound(w, r)
+				}
+			}))
+			defer server.Close()
+
+			cfg := &transport_tpg.Config{
+				Context:      context.Background(),
+				Client:       server.Client(),
+				Project:      project,
+				Region:       region,
+				PollInterval: time.Millisecond,
+				CustomEndpoints: map[string]string{
+					"compute_custom_endpoint": server.URL + "/",
+				},
+			}
+
+			raw := map[string]interface{}{
+				"name":    name,
+				"region":  region,
+				"project": project,
+			}
+			if tc.deletionPolicy != "" {
+				raw["deletion_policy"] = tc.deletionPolicy
+			}
+
+			res := ResourceComputeDhcpOptionsConfig()
+			d := schema.TestResourceDataRaw(t, res.Schema, raw)
+			d.SetId("projects/" + project + "/regions/" + region + "/dhcpOptionsConfigs/" + name)
+
+			err := res.Delete(d, cfg)
+			if tc.wantErrSubstr != "" {
+				if err == nil {
+					t.Fatalf("Delete() error = nil, want substring %q", tc.wantErrSubstr)
+				}
+				if !strings.Contains(err.Error(), tc.wantErrSubstr) {
+					t.Fatalf("Delete() error = %q, want substring %q", err.Error(), tc.wantErrSubstr)
+				}
+			} else if err != nil {
+				t.Fatalf("Delete() unexpected error: %v", err)
+			}
+
+			if tc.wantClearedId && d.Id() != "" {
+				t.Errorf("d.Id() = %q, want empty", d.Id())
+			}
+
+			if len(calls) != len(tc.wantCalls) {
+				t.Fatalf("calls = %v, want %v", calls, tc.wantCalls)
+			}
+			for i := range tc.wantCalls {
+				if calls[i] != tc.wantCalls[i] {
+					t.Errorf("calls[%d] = %q, want %q", i, calls[i], tc.wantCalls[i])
+				}
+			}
+		})
+	}
+}
+
+func TestUnitComputeDhcpOptionsConfig_associationHash(t *testing.T) {
+	t.Parallel()
+
+	if got := computeDhcpOptionsConfigAssociationHash(nil); got != 0 {
+		t.Fatalf("computeDhcpOptionsConfigAssociationHash(nil) = %d, want 0", got)
+	}
+	if got := computeDhcpOptionsConfigAssociationHash("not-a-map"); got != 0 {
+		t.Fatalf("computeDhcpOptionsConfigAssociationHash(string) = %d, want 0", got)
+	}
+
+	baseHash := computeDhcpOptionsConfigAssociationHash(map[string]interface{}{
+		"name":    "assoc-1",
+		"network": "net-1",
+	})
+
+	equivalentInputs := []map[string]interface{}{
+		{
+			"name":    "assoc-1",
+			"network": "projects/my-project/global/networks/net-1",
+		},
+		{
+			"name":    "assoc-1",
+			"network": "https://www.googleapis.com/compute/v1/projects/my-project/global/networks/net-1",
+		},
+		{
+			"name":    "assoc-1",
+			"network": "https://www.googleapis.com/compute/beta/projects/123456789012/global/networks/net-1",
+		},
+		{
+			"name":       "assoc-1",
+			"network":    "projects/my-project/global/networks/net-1",
+			"network_id": "999999",
+			"state":      "ACTIVE",
+		},
+	}
+
+	for _, in := range equivalentInputs {
+		if got := computeDhcpOptionsConfigAssociationHash(in); got != baseHash {
+			t.Errorf("hash(%v) = %d, want %d", in, got, baseHash)
+		}
+	}
+
+	diffNameHash := computeDhcpOptionsConfigAssociationHash(map[string]interface{}{
+		"name":    "assoc-2",
+		"network": "net-1",
+	})
+	if diffNameHash == baseHash {
+		t.Errorf("expected different hash when association name differs, got %d", diffNameHash)
+	}
+
+	diffNetHash := computeDhcpOptionsConfigAssociationHash(map[string]interface{}{
+		"name":    "assoc-1",
+		"network": "net-2",
+	})
+	if diffNetHash == baseHash {
+		t.Errorf("expected different hash when network differs, got %d", diffNetHash)
+	}
+}
+
+func TestUnitComputeDhcpOptionsConfig_associationNetworkDiffSuppress(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		name string
+		old  string
+		new  string
+		want bool
+	}{
+		{
+			name: "both empty returns false for TypeSet diffSet safety",
+			old:  "",
+			new:  "",
+			want: false,
+		},
+		{
+			name: "empty new on TypeSet element removal returns false",
+			old:  "https://www.googleapis.com/compute/beta/projects/794360760068/global/networks/net-1",
+			new:  "",
+			want: false,
+		},
+		{
+			name: "empty old on TypeSet element addition returns false",
+			old:  "",
+			new:  "projects/test-project/global/networks/net-1",
+			want: false,
+		},
+		{
+			name: "short network name matches API self link",
+			old:  "https://www.googleapis.com/compute/beta/projects/794360760068/global/networks/net-1",
+			new:  "net-1",
+			want: true,
+		},
+		{
+			name: "different short network name is not suppressed",
+			old:  "https://www.googleapis.com/compute/beta/projects/794360760068/global/networks/net-1",
+			new:  "net-2",
+			want: false,
+		},
+		{
+			name: "project number in API state matches project ID in config",
+			old:  "https://www.googleapis.com/compute/beta/projects/794360760068/global/networks/net-1",
+			new:  "projects/test-project/global/networks/net-1",
+			want: true,
+		},
+		{
+			name: "project ID in API state matches project number in config",
+			old:  "https://www.googleapis.com/compute/beta/projects/test-project/global/networks/net-1",
+			new:  "projects/794360760068/global/networks/net-1",
+			want: true,
+		},
+		{
+			name: "v1 self link matches beta self link",
+			old:  "https://www.googleapis.com/compute/beta/projects/test-project/global/networks/net-1",
+			new:  "https://www.googleapis.com/compute/v1/projects/test-project/global/networks/net-1",
+			want: true,
+		},
+		{
+			name: "different project IDs are not suppressed",
+			old:  "https://www.googleapis.com/compute/beta/projects/project-a/global/networks/net-1",
+			new:  "projects/project-b/global/networks/net-1",
+			want: false,
+		},
+		{
+			name: "different network names in full paths are not suppressed",
+			old:  "https://www.googleapis.com/compute/beta/projects/794360760068/global/networks/net-1",
+			new:  "projects/test-project/global/networks/net-2",
+			want: false,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := computeDhcpOptionsConfigAssociationNetworkDiffSuppress("associations.0.network", tc.old, tc.new, nil)
+			if got != tc.want {
+				t.Errorf("computeDhcpOptionsConfigAssociationNetworkDiffSuppress(%q, %q) = %v, want %v", tc.old, tc.new, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestUnitComputeDhcpOptionsConfig_sweeper(t *testing.T) {
+	t.Parallel()
+
+	const (
+		project  = "test-project"
+		region   = "us-central1"
+		listPath = "/projects/test-project/regions/us-central1/dhcpOptionsConfigs"
+		opPath   = "/projects/test-project/regions/us-central1/operations/op-sweep"
+	)
+
+	var calls []string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		call := r.Method + " " + r.URL.Path
+		if um := r.URL.Query().Get("updateMask"); um != "" {
+			call += "?updateMask=" + um
+		}
+		calls = append(calls, call)
+		w.Header().Set("Content-Type", "application/json")
+
+		switch {
+		case r.Method == http.MethodGet && r.URL.Path == listPath:
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"items": []interface{}{
+					map[string]interface{}{
+						"name": "prod-keep-me",
+						"associations": map[string]interface{}{
+							"assoc-prod": map[string]interface{}{"network": "projects/test-project/global/networks/prod-net"},
+						},
+					},
+					map[string]interface{}{
+						"name": "tf-test-with-assoc",
+						"associations": map[string]interface{}{
+							"assoc-1": map[string]interface{}{"network": "projects/test-project/global/networks/tf-test-net"},
+						},
+					},
+					map[string]interface{}{
+						"name": "tf-test-no-assoc",
+					},
+				},
+			})
+
+		case r.Method == http.MethodPatch || r.Method == http.MethodDelete:
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"name":   "op-sweep",
+				"region": "projects/" + project + "/regions/" + region,
+				"status": "RUNNING",
+			})
+
+		case r.Method == http.MethodGet && r.URL.Path == opPath:
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"name":   "op-sweep",
+				"region": "projects/" + project + "/regions/" + region,
+				"status": "DONE",
+			})
+
+		default:
+			t.Errorf("unexpected request: %s", call)
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+
+	cfg := &transport_tpg.Config{
+		Context:      context.Background(),
+		Client:       server.Client(),
+		Project:      project,
+		Region:       region,
+		PollInterval: time.Millisecond,
+		CustomEndpoints: map[string]string{
+			"compute_custom_endpoint": server.URL + "/",
+		},
+	}
+
+	if err := sweepComputeDhcpOptionsConfigsInRegion(cfg, region); err != nil {
+		t.Fatalf("sweepComputeDhcpOptionsConfigsInRegion() unexpected error: %v", err)
+	}
+
+	wantCalls := []string{
+		"GET " + listPath,
+		"PATCH " + listPath + "/tf-test-with-assoc?updateMask=associations",
+		"GET " + opPath,
+		"DELETE " + listPath + "/tf-test-with-assoc",
+		"GET " + opPath,
+		"DELETE " + listPath + "/tf-test-no-assoc",
+		"GET " + opPath,
+	}
+	if len(calls) != len(wantCalls) {
+		t.Fatalf("calls = %v, want %v", calls, wantCalls)
+	}
+	for i := range wantCalls {
+		if calls[i] != wantCalls[i] {
+			t.Errorf("calls[%d] = %q, want %q", i, calls[i], wantCalls[i])
+		}
+	}
+}
+
+func TestUnitComputeDhcpOptionsConfig_dataSourceAndDefaultRegion(t *testing.T) {
+	t.Parallel()
+
+	const (
+		project = "test-project"
+		region  = "us-central1"
+		name    = "test-dhcp"
+		resPath = "/projects/test-project/regions/us-central1/dhcpOptionsConfigs/test-dhcp"
+	)
+
+	var calls []string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls = append(calls, r.Method+" "+r.URL.Path)
+		w.Header().Set("Content-Type", "application/json")
+		if r.Method == http.MethodGet && r.URL.Path == resPath {
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"id":                "123456789",
+				"name":              name,
+				"description":       "unit test config",
+				"region":            "https://www.googleapis.com/compute/beta/projects/" + project + "/regions/" + region,
+				"selfLink":          "https://www.googleapis.com/compute/beta" + resPath,
+				"leaseTimeSec":      float64(3600),
+				"domainName":        "corp.example.com",
+				"creationTimestamp": "2026-11-12T00:00:00.000-08:00",
+				"associations": map[string]interface{}{
+					"assoc-1": map[string]interface{}{
+						"network":   "https://www.googleapis.com/compute/beta/projects/" + project + "/global/networks/net-1",
+						"networkId": "111",
+						"state":     "ACTIVE",
+					},
+				},
+			})
+			return
+		}
+		t.Errorf("unexpected request: %s %s", r.Method, r.URL.Path)
+		http.NotFound(w, r)
+	}))
+	defer server.Close()
+
+	cfg := &transport_tpg.Config{
+		Context:      context.Background(),
+		Client:       server.Client(),
+		Project:      project,
+		Region:       region,
+		PollInterval: time.Millisecond,
+		CustomEndpoints: map[string]string{
+			"compute_custom_endpoint": server.URL + "/",
+		},
+	}
+
+	ds := DataSourceComputeDhcpOptionsConfig()
+	if !ds.Schema["name"].Required {
+		t.Errorf("datasource name schema Required = false, want true")
+	}
+	if !ds.Schema["region"].Optional || ds.Schema["region"].Required {
+		t.Errorf("datasource region schema = {Optional:%v Required:%v}, want {Optional:true Required:false}", ds.Schema["region"].Optional, ds.Schema["region"].Required)
+	}
+	if !ds.Schema["project"].Optional || ds.Schema["project"].Required {
+		t.Errorf("datasource project schema = {Optional:%v Required:%v}, want {Optional:true Required:false}", ds.Schema["project"].Optional, ds.Schema["project"].Required)
+	}
+
+	for _, tc := range []struct {
+		name string
+		raw  map[string]interface{}
+	}{
+		{
+			name: "default region and project from provider config",
+			raw: map[string]interface{}{
+				"name": name,
+			},
+		},
+		{
+			name: "explicit region and project",
+			raw: map[string]interface{}{
+				"name":    name,
+				"region":  region,
+				"project": project,
+			},
+		},
+	} {
+		d := schema.TestResourceDataRaw(t, ds.Schema, tc.raw)
+		if err := ds.Read(d, cfg); err != nil {
+			t.Fatalf("datasource Read(%s) unexpected error: %v", tc.name, err)
+		}
+		if got := d.Id(); got != "projects/"+project+"/regions/"+region+"/dhcpOptionsConfigs/"+name {
+			t.Errorf("datasource Id() = %q, want %q", got, "projects/"+project+"/regions/"+region+"/dhcpOptionsConfigs/"+name)
+		}
+		if got := d.Get("region").(string); got != region {
+			t.Errorf("datasource region = %q, want %q", got, region)
+		}
+		if got := d.Get("project").(string); got != project {
+			t.Errorf("datasource project = %q, want %q", got, project)
+		}
+		if got := d.Get("name").(string); got != name {
+			t.Errorf("datasource name = %q, want %q", got, name)
+		}
+		if got := d.Get("lease_time_sec").(int); got != 3600 {
+			t.Errorf("datasource lease_time_sec = %d, want 3600", got)
+		}
+	}
+
+	res := ResourceComputeDhcpOptionsConfig()
+	rd := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+		"name": name,
+	})
+	rd.SetId("projects/" + project + "/regions/" + region + "/dhcpOptionsConfigs/" + name)
+	if err := res.Read(rd, cfg); err != nil {
+		t.Fatalf("resource Read() unexpected error: %v", err)
+	}
+	if got := rd.Get("region").(string); got != region {
+		t.Errorf("resource region after Read = %q, want %q", got, region)
+	}
+	if len(calls) != 3 {
+		t.Errorf("GET call count = %d, want 3", len(calls))
+	}
+}
+{{- end }}
