@@ -353,7 +353,7 @@ resource "google_hypercomputecluster_cluster" "cluster" {
           local_mount = "/home"
         }
 {{- if ne $.TargetVersionName "ga" }}
-        network_tags = ["tag1"]
+        network_tags = ["tag1", "tag2"]
 {{- end }}
       }
       node_sets {
