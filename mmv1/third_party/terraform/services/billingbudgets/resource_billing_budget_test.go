@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/billingbudgets"
@@ -669,5 +670,247 @@ resource "google_billing_budget" "budget" {
   }
 }
 
+`, context)
+}
+
+// A capped budget needs spendCap.inputState in every update mask, and the API
+// never returns it. This changes only the amount, then removes the cap while
+// changing the amount again, and checks import after each step.
+//
+// The API allows one spend cap per project and service. Each spend cap test
+// creates its own project and also uses its own service, as a second
+// safeguard against overlapping caps. The sample uses C7E2-9256-1C43 (Gemini
+// Enterprise Agent Platform), this test AEFD-7695-64FA (Gemini API) and
+// TestAccBillingBudget_spendCapAdd 152E-C115-5142 (Cloud Run).
+func TestAccBillingBudget_spendCapUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		// The budget's account must bill the filtered project. For regular budgets,
+		// a parent of the project's billing account also seems to work
+		// (TestAccBillingBudget_budgetFilterProjectsOrdering), but that is not
+		// documented. So the budget and the project share BILLING_ACCT, and these
+		// tests do not rely on a parent account.
+		"org":           envvar.GetTestOrgFromEnv(t),
+		"billing_acct":  envvar.GetTestBillingAccountFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+		"service":       "AEFD-7695-64FA",
+		"units":         "100",
+	}
+	contextUpdate := map[string]interface{}{
+		"org":           context["org"],
+		"billing_acct":  context["billing_acct"],
+		"random_suffix": context["random_suffix"],
+		"service":       context["service"],
+		"units":         "200",
+	}
+	contextRemoved := map[string]interface{}{
+		"org":           context["org"],
+		"billing_acct":  context["billing_acct"],
+		"random_suffix": context["random_suffix"],
+		"service":       context["service"],
+		"units":         "300",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBillingBudgetsBudgetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBillingBudget_spendCap(context),
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBillingBudget_spendCap(contextUpdate),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_billing_budget.budget", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBillingBudget_spendCapRemoved(contextRemoved),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_billing_budget.budget", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_billing_budget.budget", "spend_cap.#", "0"),
+					resource.TestCheckResourceAttr("google_billing_budget.budget", "amount.0.specified_amount.0.units", "300"),
+				),
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+// The API refuses to turn a regular budget into a spend cap budget, so adding
+// a spend_cap block must replace the budget.
+func TestAccBillingBudget_spendCapAdd(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		// See TestAccBillingBudget_spendCapUpdate.
+		"org":           envvar.GetTestOrgFromEnv(t),
+		"billing_acct":  envvar.GetTestBillingAccountFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+		"service":       "152E-C115-5142",
+		"units":         "100",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBillingBudgetsBudgetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBillingBudget_spendCapRemoved(context),
+				Check:  resource.TestCheckResourceAttr("google_billing_budget.budget", "spend_cap.#", "0"),
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBillingBudget_spendCap(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_billing_budget.budget", plancheck.ResourceActionReplace),
+					},
+				},
+				Check: resource.TestCheckResourceAttr("google_billing_budget.budget", "spend_cap.0.input_state", "CONFIGURED"),
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccBillingBudget_spendCap(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_billing_account" "account" {
+  billing_account = "%{billing_acct}"
+}
+
+resource "google_project" "project" {
+  project_id      = "tf-test-%{random_suffix}"
+  name            = "tf-test-%{random_suffix}"
+  org_id          = "%{org}"
+  billing_account = "%{billing_acct}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_billing_budget" "budget" {
+  billing_account = data.google_billing_account.account.id
+  display_name    = "tf-test-spend-cap%{random_suffix}"
+
+  budget_filter {
+    projects               = ["projects/${google_project.project.number}"]
+    services               = ["services/%{service}"]
+    credit_types_treatment = "EXCLUDE_ALL_CREDITS"
+    calendar_period        = "MONTH"
+  }
+
+  amount {
+    specified_amount {
+      # No currency_code, so the budget uses the billing account's currency.
+      units = "%{units}"
+    }
+  }
+
+  threshold_rules {
+    threshold_percent = 0.5
+    spend_basis       = "CURRENT_SPEND"
+  }
+  threshold_rules {
+    threshold_percent = 0.8
+    spend_basis       = "CURRENT_SPEND"
+  }
+  threshold_rules {
+    threshold_percent = 1.0
+    spend_basis       = "CURRENT_SPEND"
+  }
+
+  all_updates_rule {
+    monitoring_notification_channels = []
+    enable_project_level_recipients  = true
+  }
+
+  spend_cap {
+    input_state = "CONFIGURED"
+  }
+}
+`, context)
+}
+
+func testAccBillingBudget_spendCapRemoved(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_billing_account" "account" {
+  billing_account = "%{billing_acct}"
+}
+
+resource "google_project" "project" {
+  project_id      = "tf-test-%{random_suffix}"
+  name            = "tf-test-%{random_suffix}"
+  org_id          = "%{org}"
+  billing_account = "%{billing_acct}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_billing_budget" "budget" {
+  billing_account = data.google_billing_account.account.id
+  display_name    = "tf-test-spend-cap%{random_suffix}"
+
+  budget_filter {
+    projects               = ["projects/${google_project.project.number}"]
+    services               = ["services/%{service}"]
+    credit_types_treatment = "EXCLUDE_ALL_CREDITS"
+    calendar_period        = "MONTH"
+  }
+
+  amount {
+    specified_amount {
+      # No currency_code, so the budget uses the billing account's currency.
+      units = "%{units}"
+    }
+  }
+
+  threshold_rules {
+    threshold_percent = 0.5
+    spend_basis       = "CURRENT_SPEND"
+  }
+  threshold_rules {
+    threshold_percent = 0.8
+    spend_basis       = "CURRENT_SPEND"
+  }
+  threshold_rules {
+    threshold_percent = 1.0
+    spend_basis       = "CURRENT_SPEND"
+  }
+
+  all_updates_rule {
+    monitoring_notification_channels = []
+    enable_project_level_recipients  = true
+  }
+}
 `, context)
 }
