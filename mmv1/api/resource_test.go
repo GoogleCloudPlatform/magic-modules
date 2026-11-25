@@ -1892,11 +1892,14 @@ func TestDatasourceCodegenHelpers(t *testing.T) {
 		},
 	}
 
-	if got, want := r.DatasourceRequiredFields(), []string{"location", "odbnetwork", "odb_dns_zone_id"}; !slices.Equal(got, want) {
+	if got, want := r.DatasourceRequiredFields(), []string{"odbnetwork", "odb_dns_zone_id"}; !slices.Equal(got, want) {
 		t.Errorf("DatasourceRequiredFields() = %v, want %v", got, want)
 	}
-	if got, want := r.DatasourceOptionalFields(), []string{"project"}; !slices.Equal(got, want) {
+	if got, want := r.DatasourceOptionalFields(), []string{"project", "location"}; !slices.Equal(got, want) {
 		t.Errorf("DatasourceOptionalFields() = %v, want %v", got, want)
+	}
+	if !r.DatasourceHasOptionalLocation() {
+		t.Errorf("expected DatasourceHasOptionalLocation() to be true")
 	}
 	if got, want := r.DatasourceRemovedFields(), []string{"password_wo"}; !slices.Equal(got, want) {
 		t.Errorf("DatasourceRemovedFields() = %v, want %v", got, want)
@@ -1921,7 +1924,17 @@ func TestDatasourceCodegenHelpers(t *testing.T) {
 		t.Errorf("DatasourceEffectiveBackfills() = %+v, want %+v", got, wantBackfills)
 	}
 
-	step := &resource.Step{}
+	step := &resource.Step{
+		TestHCLText: `
+resource "google_oracle_database_odb_dns_zone" "default" {
+  odb_dns_zone_id = "my-zone"
+  odbnetwork      = "my-net"
+  location        = "europe-west2"
+  project         = "oasis-terraform-testing-prod"
+}
+`,
+	}
+	sample := &resource.Sample{PrimaryResourceId: "default"}
 
 	// reserved_ip_range is backfilled from effective_reserved_ip_range so it should NOT be ignored,
 	// whereas client-side deletion_protection MUST be ignored (and block_names output virtual field kept).
@@ -1934,5 +1947,72 @@ func TestDatasourceCodegenHelpers(t *testing.T) {
 	}
 	if slices.Contains(gotIgnores, "reserved_ip_range") {
 		t.Errorf("expected DatasourceIgnoreReadProperties not to contain backfilled reserved_ip_range, got %v", gotIgnores)
+	}
+
+	// Non-default location ("europe-west2") and explicit project should be forwarded onto the test data block.
+	wantTestFields := []string{"odbnetwork", "odb_dns_zone_id", "project", "location"}
+	if got := r.DatasourceTestFields(sample, step); !slices.Equal(got, wantTestFields) {
+		t.Errorf("DatasourceTestFields() = %v, want %v", got, wantTestFields)
+	}
+
+	// Default CI region ("us-central1") should be omitted so generated test exercises provider-default fallback.
+	defaultRegionStep := &resource.Step{
+		TestHCLText: `
+resource "google_oracle_database_odb_dns_zone" "default" {
+  odb_dns_zone_id = "my-zone"
+  odbnetwork      = "my-net"
+  location        = "us-central1"
+}
+`,
+	}
+	wantDefaultTestFields := []string{"odbnetwork", "odb_dns_zone_id"}
+	if got := r.DatasourceTestFields(sample, defaultRegionStep); !slices.Equal(got, wantDefaultTestFields) {
+		t.Errorf("DatasourceTestFields(us-central1) = %v, want %v", got, wantDefaultTestFields)
+	}
+
+	// Multi-parent resource without {{project}} and without location default_value keeps location Required by default.
+	multiParent := api.Resource{
+		Name:            "LogView",
+		ProductMetadata: p,
+		BaseUrl:         "{{parent}}/locations/{{location}}/buckets/{{bucket}}/views",
+		IdFormat:        "{{parent}}/locations/{{location}}/buckets/{{bucket}}/views/{{name}}",
+		Parameters: []*api.Type{
+			{Name: "parent", Type: "String", UrlParamOnly: true},
+			{Name: "location", Type: "String", UrlParamOnly: true},
+			{Name: "bucket", Type: "String", UrlParamOnly: true},
+			{Name: "name", Type: "String", Required: true},
+		},
+	}
+	if got, want := multiParent.DatasourceRequiredFields(), []string{"parent", "location", "bucket", "name"}; !slices.Equal(got, want) {
+		t.Errorf("multiParent.DatasourceRequiredFields() = %v, want %v", got, want)
+	}
+	if multiParent.DatasourceHasOptionalLocation() {
+		t.Errorf("expected multiParent.DatasourceHasOptionalLocation() to be false")
+	}
+
+	// Non-project resource WITH explicit location default_value (e.g. FolderIntelligenceConfig) makes location Optional.
+	folderScoped := multiParent
+	folderScoped.Parameters = []*api.Type{
+		{Name: "parent", Type: "String", UrlParamOnly: true},
+		{Name: "location", Type: "String", DefaultValue: "global"},
+		{Name: "bucket", Type: "String", UrlParamOnly: true},
+		{Name: "name", Type: "String", Required: true},
+	}
+	if !folderScoped.DatasourceHasOptionalLocation() {
+		t.Errorf("expected folderScoped.DatasourceHasOptionalLocation() to be true when DefaultValue != nil")
+	}
+
+	// Explicit required_fields / optional_fields / delete_fields overrides on Datasource.
+	r.Datasource.RequiredFields = []string{"location"}
+	r.Datasource.OptionalFields = []string{"odbnetwork"}
+	r.Datasource.DeleteFields = []string{"reserved_ip_range"}
+	if got, want := r.DatasourceRequiredFields(), []string{"location", "odb_dns_zone_id"}; !slices.Equal(got, want) {
+		t.Errorf("overridden DatasourceRequiredFields() = %v, want %v", got, want)
+	}
+	if got, want := r.DatasourceOptionalFields(), []string{"project", "odbnetwork"}; !slices.Equal(got, want) {
+		t.Errorf("overridden DatasourceOptionalFields() = %v, want %v", got, want)
+	}
+	if got, want := r.DatasourceRemovedFields(), []string{"password_wo", "reserved_ip_range"}; !slices.Equal(got, want) {
+		t.Errorf("overridden DatasourceRemovedFields() = %v, want %v", got, want)
 	}
 }
