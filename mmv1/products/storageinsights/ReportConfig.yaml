@@ -31,6 +31,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 include_in_tgc_next: true
+generate_list_resource: true
 custom_code:
 samples:
   - name: storage_insights_report_config
