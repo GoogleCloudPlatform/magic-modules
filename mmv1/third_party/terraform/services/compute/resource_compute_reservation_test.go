@@ -230,6 +230,9 @@ resource "google_compute_reservation" "reservation" {
 `, context)
 }
 
+// Standard on-demand reservations omit enableEmergentMaintenance on GET (requiring
+// ImportStateVerifyIgnore when configured true), whereas Hypercompute Cluster (DENSE)
+// reservations return explicit true/false on GET (tested in resource_compute_reservation_internal_test.go).
 func TestAccComputeReservation_enableEmergentMaintenance(t *testing.T) {
 	t.Parallel()
 
@@ -266,10 +269,9 @@ func TestAccComputeReservation_enableEmergentMaintenance(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            "google_compute_reservation.reservation",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"enable_emergent_maintenance"},
+				ResourceName:      "google_compute_reservation.reservation",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
