@@ -403,6 +403,26 @@ properties:
                   A maximum of 64 network tags are allowed.
                 item_type:
                   type: String
+              - name: serviceAccount
+                type: NestedObject
+                description: |-
+                  Service account to attach to login node instances. If not set, the
+                  [Compute Engine default service
+                  account](https://cloud.google.com/compute/docs/access/service-accounts#default_service_account)
+                  is used. Changing this restarts the login node instances, which interrupts
+                  active SSH sessions.
+                properties:
+                  - name: email
+                    type: String
+                    description: Email address of the service account.
+                  - name: scopes
+                    type: Array
+                    is_set: true
+                    description: |-
+                      OAuth scopes to grant to the service account. Defaults to
+                      `https://www.googleapis.com/auth/cloud-platform`.
+                    item_type:
+                      type: String
               - name: startupScript
                 type: String
                 description: |-
@@ -506,6 +526,25 @@ properties:
                     number of additional nodes the cluster can bring online. Leave empty if you
                     do not want the cluster to create nodes dynamically, and instead rely only
                     on static nodes.
+                - name: serviceAccount
+                  type: NestedObject
+                  description: |-
+                    Service account to attach to VM instances in the nodeset. If not set, the
+                    [Compute Engine default service
+                    account](https://cloud.google.com/compute/docs/access/service-accounts#default_service_account)
+                    is used. Cannot be changed after the nodeset is created.
+                  properties:
+                    - name: email
+                      type: String
+                      description: Email address of the service account.
+                    - name: scopes
+                      type: Array
+                      is_set: true
+                      description: |-
+                        OAuth scopes to grant to the service account. Defaults to
+                        `https://www.googleapis.com/auth/cloud-platform`.
+                      item_type:
+                        type: String
                 - name: staticNodeCount
                   type: String
                   diff_suppress_func: tpgresource.EmptyOrDefaultStringSuppress("0")
