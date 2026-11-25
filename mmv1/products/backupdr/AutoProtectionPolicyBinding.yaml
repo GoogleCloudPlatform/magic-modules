@@ -122,7 +122,7 @@ properties:
     type: String
     required: true
     # The API returns the scope with the project number, even when it was set with the project ID.
-    diff_suppress_func: tpgresource.ProjectNumberDiffSuppress
+    diff_suppress_func: backupDRAutoProtectionProjectDiffSuppress
     description: |
       The container that the policy is applied to, in the format `projects/{project}`.
   - name: state
