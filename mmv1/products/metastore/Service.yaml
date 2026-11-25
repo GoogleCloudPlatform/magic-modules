@@ -33,6 +33,9 @@ iam_policy:
     - '{{service_id}}'
 import_format:
   - projects/{{project}}/locations/{{location}}/services/{{service_id}}
+datasource_experimental:
+  generate: true
+  exclude_test: true
 timeouts:
   insert_minutes: 75
   update_minutes: 75
