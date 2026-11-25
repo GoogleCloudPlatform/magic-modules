@@ -1,3 +1,8 @@
 if err := addIcebergTableAccessDelegationHeader(d, config, billingProject, userAgent, headers); err != nil {
 	return err
 }
+if d.HasChange("partition_spec") && obj != nil {
+	if err := assignIcebergTablePartitionFieldIds(d, config, billingProject, userAgent, headers, obj); err != nil {
+		return err
+	}
+}

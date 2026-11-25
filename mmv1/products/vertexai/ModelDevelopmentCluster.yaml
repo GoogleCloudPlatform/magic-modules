@@ -221,61 +221,21 @@ samples:
     steps:
       - name: vertex_ai_model_development_cluster_gke_xmanager
         min_version: beta
-      - name: vertex_ai_model_development_cluster_gke_xmanager_modified
+        vars:
+          network_ref: google_compute_network.net.id
+          subnetwork_ref: google_compute_subnetwork.subnet.id
+          bucket_res: bucket
+      - name: vertex_ai_model_development_cluster_gke_xmanager
         min_version: beta
+        vars:
+          network_ref: google_compute_network.net.self_link
+          subnetwork_ref: google_compute_subnetwork.subnet_alt.id
+          bucket_res: bucket_alt
       - name: vertex_ai_model_development_cluster_gke_xmanager_minimal
         min_version: beta
       - name: vertex_ai_model_development_cluster_gke_xmanager_disabled
         min_version: beta
       - name: vertex_ai_model_development_cluster_gke_xmanager_minimal
-        min_version: beta
-  - name: vertex_ai_model_development_cluster_gke_xmanager_auth
-    primary_resource_id: default
-    min_version: beta
-    bootstrap_iam:
-      - member: serviceAccount:service-{project_number}@gcp-sa-vertex-vtc.iam.gserviceaccount.com
-        role: roles/resourcemanager.projectIamAdmin
-      - member: serviceAccount:service-{project_number}@gcp-sa-vertex-vtc.iam.gserviceaccount.com
-        role: roles/container.admin
-      - member: serviceAccount:service-{project_number}@gcp-sa-vertex-vtc.iam.gserviceaccount.com
-        role: roles/compute.admin
-      - member: serviceAccount:service-{project_number}@gcp-sa-vertex-vtc.iam.gserviceaccount.com
-        role: roles/compute.networkAdmin
-      - member: serviceAccount:service-{project_number}@gcp-sa-vertex-vtc.iam.gserviceaccount.com
-        role: roles/hypercomputecluster.editor
-      - member: serviceAccount:service-{project_number}@gcp-sa-vertex-vtc.iam.gserviceaccount.com
-        role: roles/secretmanager.secretAccessor
-    resource_id_vars:
-      model_development_cluster_id: tftest-xma
-      network_name: mdc-xma-net
-      subnetwork_name: mdc-xma-subnet
-      firewall_name: mdc-xma-fw
-      secret_id: mdc-xma-secret
-    test_vars_overrides:
-      model_development_cluster_id: '"tfgen" + randomSuffix[:5]'
-    ignore_read_extra:
-      - xmanager_config.0.auth_config
-      - xmanager_config.0.network
-      - xmanager_config.0.subnetwork
-    steps:
-      - name: vertex_ai_model_development_cluster_gke_xmanager_auth
-        min_version: beta
-      - name: vertex_ai_model_development_cluster_gke_xmanager_auth_modified
-        min_version: beta
-        vars:
-          allowed_domains: '["updated.example.com"]'
-          allowed_emails: '["admin@example.com"]'
-      - name: vertex_ai_model_development_cluster_gke_xmanager_auth_modified
-        min_version: beta
-        vars:
-          allowed_domains: null
-          allowed_emails: '["admin@example.com"]'
-      - name: vertex_ai_model_development_cluster_gke_xmanager_auth_modified
-        min_version: beta
-        vars:
-          allowed_domains: '["updated.example.com"]'
-          allowed_emails: null
-      - name: vertex_ai_model_development_cluster_gke_xmanager_auth_minimal
         min_version: beta
 virtual_fields:
   - name: update_mode
@@ -299,7 +259,7 @@ virtual_fields:
       Supported for GKE clusters only (`orchestrator_spec.kubernetes_spec`).
       Xmanager instances do not support in-place updates; changing any field in
       `xmanager_config` disables the current instance and enables a new one.
-      Note: input subfields (`network`, `subnetwork`, `xprof_config`, `auth_config`)
+      Note: input subfields (`network`, `subnetwork`, `xprof_config`)
       are write-only on `:enableXmanager` and are not populated during `terraform import`.
     properties:
       - name: network
@@ -330,48 +290,6 @@ virtual_fields:
             description: |-
               The Google Cloud Storage bucket URI (`gs://<bucket>`) in the user project
               for XProf trace data.
-      - name: auth_config
-        type: NestedObject
-        description: |-
-          Configuration for Xmanager per-user authentication. At least one of
-          `allowed_domains` or `allowed_emails` must be specified when `auth_config` is set.
-        properties:
-          - name: allowed_domains
-            type: Array
-            max_size: 100
-            description: |-
-              Email domains whose verified accounts may access the Xmanager instance
-              (for example, `example.com`). Maximum 100 domains.
-            item_type:
-              type: String
-          - name: allowed_emails
-            type: Array
-            max_size: 1000
-            description: |-
-              Individual verified email addresses allowed to access the Xmanager instance.
-              Maximum 1000 emails.
-            item_type:
-              type: String
-          - name: oauth_client
-            type: NestedObject
-            required: true
-            description: OAuth 2.0 Web application client in the cluster's project.
-            properties:
-              - name: id
-                type: String
-                required: true
-                validation:
-                  regex: ^[0-9A-Za-z-]+\.apps\.googleusercontent\.com$
-                description: The OAuth 2.0 client ID, ending in `.apps.googleusercontent.com`.
-              - name: secret_version
-                type: String
-                required: true
-                validation:
-                  regex: ^projects/[^/]+/secrets/[^/]+/versions/[^/]+$
-                description: |-
-                  The Secret Manager secret version holding the OAuth client secret in the
-                  cluster's project.
-                  Format: `projects/{project}/secrets/{secret}/versions/{version}`.
       - name: name
         type: String
         description: |-

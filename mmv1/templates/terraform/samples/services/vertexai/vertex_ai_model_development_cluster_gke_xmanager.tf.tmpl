@@ -106,10 +106,10 @@ resource "google_vertex_ai_model_development_cluster" "{{$.PrimaryResourceId}}" 
   }
 
   xmanager_config {
-    network    = google_compute_network.net.id
-    subnetwork = google_compute_subnetwork.subnet.id
+    network    = {{index $.Vars "network_ref"}}
+    subnetwork = {{index $.Vars "subnetwork_ref"}}
     xprof_config {
-      gcs_bucket_uri = "gs://${google_storage_bucket.bucket.name}"
+      gcs_bucket_uri = "gs://${google_storage_bucket.{{index $.Vars "bucket_res"}}.name}"
     }
   }
 }

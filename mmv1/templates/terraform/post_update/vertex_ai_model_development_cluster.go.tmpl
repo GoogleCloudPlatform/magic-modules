@@ -18,20 +18,13 @@ if d.HasChange("xmanager_config") {
 	if statusErr != nil {
 		return fmt.Errorf("Error checking Xmanager status while updating ModelDevelopmentCluster %q: %s", d.Id(), statusErr)
 	}
-	if oldLen > 0 && newLen == 0 {
-		if hasXm {
-			if err := vertexAiModelDevelopmentClusterUpdateXmanager(d, config, billingProject, userAgent, false, schema.TimeoutUpdate); err != nil {
-				_ = resourceVertexAIModelDevelopmentClusterRead(d, meta)
-				return err
-			}
+	if hasXm && (newLen == 0 || oldLen > 0 || clusterState == "RUNNING") {
+		if err := vertexAiModelDevelopmentClusterUpdateXmanager(d, config, billingProject, userAgent, false, schema.TimeoutUpdate); err != nil {
+			_ = resourceVertexAIModelDevelopmentClusterRead(d, meta)
+			return err
 		}
-	} else if newLen > 0 {
-		if hasXm && (oldLen > 0 || clusterState == "RUNNING") {
-			if err := vertexAiModelDevelopmentClusterUpdateXmanager(d, config, billingProject, userAgent, false, schema.TimeoutUpdate); err != nil {
-				_ = resourceVertexAIModelDevelopmentClusterRead(d, meta)
-				return err
-			}
-		}
+	}
+	if newLen > 0 {
 		if err := vertexAiModelDevelopmentClusterUpdateXmanager(d, config, billingProject, userAgent, true, schema.TimeoutUpdate); err != nil {
 			_ = resourceVertexAIModelDevelopmentClusterRead(d, meta)
 			return err
