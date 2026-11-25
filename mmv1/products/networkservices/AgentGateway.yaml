@@ -42,6 +42,11 @@ error_retry_predicates: ['transport_tpg.IsAgentGatewayInUseError']
 samples:
   - name: network_services_agent_gateway_full
     primary_resource_id: default
+    bootstrap_iam:
+      - member: 'serviceAccount:service-{project_number}@gcp-sa-agentgateway.iam.gserviceaccount.com'
+        role: 'roles/compute.networkViewer'
+      - member: 'serviceAccount:service-{project_number}@gcp-sa-agentgateway.iam.gserviceaccount.com'
+        role: 'roles/dns.reader'
     steps:
       - name: network_services_agent_gateway_full
         resource_id_vars:
@@ -55,6 +60,11 @@ samples:
   - name: network_services_agent_gateway_dns_peering
     exclude_basic_doc: true
     primary_resource_id: default
+    bootstrap_iam:
+      - member: 'serviceAccount:service-{project_number}@gcp-sa-agentgateway.iam.gserviceaccount.com'
+        role: 'roles/compute.networkViewer'
+      - member: 'serviceAccount:service-{project_number}@gcp-sa-agentgateway.iam.gserviceaccount.com'
+        role: 'roles/dns.reader'
     steps:
       - name: network_services_agent_gateway_dns_peering
         resource_id_vars:
