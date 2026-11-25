@@ -17,15 +17,5 @@ type Datasource struct {
 	// boolean to determine whether the datasource file should be generated
 	Generate bool `yaml:"generate"`
 	// boolean to determine whether tests should be generated for a datasource
-	ExcludeTest bool `yaml:"exclude_test,omitempty"`
-	// URI or schema fields forced to Required (overrides default optional scope fields)
-	RequiredFields []string `yaml:"required_fields,omitempty"`
-	// Additional fields forced to Optional on the datasource schema
-	OptionalFields []string `yaml:"optional_fields,omitempty"`
-	// Top-level fields to remove from the generated datasource schema
-	DeleteFields []string `yaml:"delete_fields,omitempty"`
-	// Custom template path executed before constructing the ID and calling resource Read
-	PreRead string `yaml:"pre_read,omitempty"`
-	// Custom template path executed after resource Read and state post-processing
-	PostRead string `yaml:"post_read,omitempty"`
+	ExcludeTest bool `yaml:"exclude_test"`
 }

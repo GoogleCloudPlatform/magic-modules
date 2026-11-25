@@ -110,30 +110,6 @@ func DataSource{{ .ResourceName -}}() *schema.Resource {
 func dataSource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	{{- if $.DatasourceHasOptionalLocation }}
-	{{- $loc := $.DatasourceLocationProperty }}
-	{{- if and $loc (not (eq $loc.DefaultValue nil)) }}
-	location := d.Get("location").(string)
-	if location == "" {
-		location = {{ $loc.GoLiteral $loc.DefaultValue }}
-	} else {
-		location = tpgresource.GetResourceNameFromSelfLink(location)
-	}
-	{{- else }}
-	location, err := tpgresource.GetLocation(d, config)
-	if err != nil {
-		return err
-	}
-	{{- end }}
-	if err := d.Set("location", location); err != nil {
-		return fmt.Errorf("Error setting location: %s", err)
-	}
-	{{- end }}
-
-	{{- if and $.Datasource $.Datasource.PreRead }}
-	{{ customTemplate $ $.Datasource.PreRead false -}}
-	{{- end }}
-
 	id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
@@ -172,10 +148,6 @@ func dataSource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{
 	if err := tpgresource.SetDataSourceAnnotations(d); err != nil {
 		return err
 	}
-	{{- end }}
-
-	{{- if and $.Datasource $.Datasource.PostRead }}
-	{{ customTemplate $ $.Datasource.PostRead false -}}
 	{{- end }}
 
 	return nil

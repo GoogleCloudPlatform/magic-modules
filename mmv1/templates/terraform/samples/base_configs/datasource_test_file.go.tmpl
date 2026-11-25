@@ -102,7 +102,7 @@ data "{{ $.Res.TerraformName }}" "default" {
 {{- if $.Res.VersionedProvider $sample.MinVersion }}
   provider = google-beta
 {{- end }}
-{{- range $fieldName := $.Res.DatasourceTestFields $sample $step }}
+{{- range $fieldName := $.Res.DatasourceRequiredFields }}
   {{ $fieldName }} = {{ $sample.ResourceType $.Res.TerraformName }}.{{ $sample.PrimaryResourceId }}.{{ $fieldName }}
 {{- end }}
 }`,

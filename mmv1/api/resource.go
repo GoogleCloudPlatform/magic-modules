@@ -2816,11 +2816,11 @@ func (r Resource) ShouldDatasourceSetAnnotations() bool {
 }
 
 func isDefaultDatasourceOptionalField(field string) bool {
-	return field == "project" || field == "region" || field == "zone" || field == "location"
+	return field == "project" || field == "region" || field == "zone"
 }
 
 // DatasourceRequiredFields returns a list of fields from the resource's URI
-// (plus any explicit overrides) that should be marked as "Required".
+// that should be marked as "Required".
 func (r Resource) DatasourceRequiredFields() []string {
 	requiredFields := []string{}
 	removed := r.DatasourceRemovedFields()
@@ -2829,18 +2829,8 @@ func (r Resource) DatasourceRequiredFields() []string {
 		if slices.Contains(removed, field) {
 			continue
 		}
-		if r.Datasource != nil && slices.Contains(r.Datasource.OptionalFields, field) {
-			continue
-		}
-		if !isDefaultDatasourceOptionalField(field) || (r.Datasource != nil && slices.Contains(r.Datasource.RequiredFields, field)) {
+		if !isDefaultDatasourceOptionalField(field) {
 			if !slices.Contains(requiredFields, field) {
-				requiredFields = append(requiredFields, field)
-			}
-		}
-	}
-	if r.Datasource != nil {
-		for _, field := range r.Datasource.RequiredFields {
-			if !slices.Contains(removed, field) && !slices.Contains(requiredFields, field) {
 				requiredFields = append(requiredFields, field)
 			}
 		}
@@ -2849,7 +2839,7 @@ func (r Resource) DatasourceRequiredFields() []string {
 }
 
 // DatasourceOptionalFields returns a list of fields from the resource's URI
-// (plus any explicit overrides) that should be marked as "Optional".
+// that should be marked as "Optional".
 func (r Resource) DatasourceOptionalFields() []string {
 	optionalFields := []string{}
 	removed := r.DatasourceRemovedFields()
@@ -2858,50 +2848,13 @@ func (r Resource) DatasourceOptionalFields() []string {
 		if slices.Contains(removed, field) {
 			continue
 		}
-		if r.Datasource != nil && slices.Contains(r.Datasource.RequiredFields, field) {
-			continue
-		}
-		if isDefaultDatasourceOptionalField(field) || (r.Datasource != nil && slices.Contains(r.Datasource.OptionalFields, field)) {
+		if isDefaultDatasourceOptionalField(field) {
 			if !slices.Contains(optionalFields, field) {
 				optionalFields = append(optionalFields, field)
 			}
 		}
 	}
-	if r.Datasource != nil {
-		for _, field := range r.Datasource.OptionalFields {
-			if !slices.Contains(removed, field) && !slices.Contains(optionalFields, field) {
-				optionalFields = append(optionalFields, field)
-			}
-		}
-	}
 	return optionalFields
-}
-
-// DatasourceHasOptionalLocation reports whether `location` is an Optional
-// argument on the generated data source that must be resolved before ReplaceVars.
-func (r Resource) DatasourceHasOptionalLocation() bool {
-	return slices.Contains(r.DatasourceOptionalFields(), "location")
-}
-
-// DatasourceLocationProperty returns the resource's `location` property if defined.
-func (r Resource) DatasourceLocationProperty() *Type {
-	for _, p := range r.AllUserProperties() {
-		if google.Underscore(p.Name) == "location" {
-			return p
-		}
-	}
-	return nil
-}
-
-// HasExplicitProjectProperty reports whether `project` is explicitly declared in
-// AllUserProperties (as opposed to synthesized from {{project}} in URLs).
-func (r Resource) HasExplicitProjectProperty() bool {
-	for _, p := range r.AllUserProperties() {
-		if google.Underscore(p.Name) == "project" {
-			return true
-		}
-	}
-	return false
 }
 
 func datasourceChildProperties(p *Type) []*Type {
@@ -2923,8 +2876,8 @@ func datasourceChildProperties(p *Type) []*Type {
 	return out
 }
 
-// DatasourceRemovedFields returns top-level write-only properties and explicit
-// datasource_experimental.delete_fields that should be deleted from dsSchema.
+// DatasourceRemovedFields returns top-level write-only properties that should
+// be deleted from dsSchema.
 func (r Resource) DatasourceRemovedFields() []string {
 	var fields []string
 	var collectTop func(props []*Type)
@@ -2943,9 +2896,6 @@ func (r Resource) DatasourceRemovedFields() []string {
 		}
 	}
 	collectTop(r.AllUserProperties())
-	if r.Datasource != nil {
-		fields = append(fields, r.Datasource.DeleteFields...)
-	}
 	slices.Sort(fields)
 	return slices.Compact(fields)
 }
@@ -3026,12 +2976,12 @@ func (r Resource) DatasourceClientVirtualFields() []string {
 	for _, vf := range r.VirtualFields {
 		if !vf.Exclude && !vf.Output {
 			name := google.Underscore(vf.Name)
-			if !slices.Contains(removed, name) {
+			if !slices.Contains(removed, name) && !slices.Contains(fields, name) {
 				fields = append(fields, name)
 			}
 		}
 	}
-	if !r.ExcludeDelete && !r.DeletionPolicyExclude && !slices.Contains(removed, "deletion_policy") {
+	if !r.ExcludeDelete && !r.DeletionPolicyExclude && !slices.Contains(removed, "deletion_policy") && !slices.Contains(fields, "deletion_policy") {
 		fields = append(fields, "deletion_policy")
 	}
 	return fields
@@ -3099,61 +3049,6 @@ func (r Resource) DatasourceIgnoreReadProperties(s *resource.Step) []string {
 	}
 	slices.Sort(props)
 	return slices.Compact(props)
-}
-
-// DatasourceTestFields returns the fields to set on the generated test's `data`
-// block: all required fields plus any optional scope fields explicitly set on
-// the primary resource to a non-provider-default value (so tests exercise
-// provider-default fallback whenever possible without 404ing on custom scopes).
-func (r Resource) DatasourceTestFields(sample *resource.Sample, step *resource.Step) []string {
-	fields := slices.Clone(r.DatasourceRequiredFields())
-	if sample == nil || step == nil || step.TestHCLText == "" {
-		return fields
-	}
-
-	resHeader := fmt.Sprintf("resource %q %q {", sample.ResourceType(r.TerraformName()), sample.PrimaryResourceId)
-	idx := strings.Index(step.TestHCLText, resHeader)
-	if idx == -1 {
-		return fields
-	}
-	block := step.TestHCLText[idx+len(resHeader):]
-	if endIdx := strings.Index(block, "\n}"); endIdx != -1 {
-		block = block[:endIdx]
-	}
-
-	attrValues := make(map[string]string)
-	for _, line := range strings.Split(block, "\n") {
-		trimmed := strings.TrimSpace(line)
-		if strings.HasPrefix(trimmed, "#") || strings.HasPrefix(trimmed, "//") {
-			continue
-		}
-		eq := strings.IndexByte(trimmed, '=')
-		if eq <= 0 {
-			continue
-		}
-		key := strings.TrimSpace(trimmed[:eq])
-		val := strings.TrimSpace(trimmed[eq+1:])
-		if !strings.ContainsAny(key, " \t{}\"") {
-			attrValues[key] = val
-		}
-	}
-
-	for _, optField := range r.DatasourceOptionalFields() {
-		val, exists := attrValues[optField]
-		if !exists {
-			continue
-		}
-		if (optField == "location" || optField == "region") && val == `"us-central1"` {
-			continue
-		}
-		if optField == "zone" && val == `"us-central1-a"` {
-			continue
-		}
-		if !slices.Contains(fields, optField) {
-			fields = append(fields, optField)
-		}
-	}
-	return fields
 }
 
 func (r Resource) ShouldGenerateSweepers() bool {
