@@ -164,25 +164,6 @@ func validateVertexAIModelDevelopmentClusterNodePoolVersions(d vertexAiModelDeve
 	return nil
 }
 
-func vertexAiModelDevelopmentClusterNormalizeComputeRef(v string) string {
-	v = strings.TrimSpace(v)
-	if strings.HasPrefix(v, "https://") || strings.HasPrefix(v, "http://") {
-		if idx := strings.Index(v, "projects/"); idx >= 0 {
-			return v[idx:]
-		}
-	}
-	return v
-}
-
-func vertexAiModelDevelopmentClusterSubnetworkRegion(v string) string {
-	norm := vertexAiModelDevelopmentClusterNormalizeComputeRef(v)
-	parts := strings.Split(norm, "/")
-	if len(parts) == 6 && parts[0] == "projects" && parts[2] == "regions" && parts[4] == "subnetworks" {
-		return parts[3]
-	}
-	return ""
-}
-
 func resourceVertexAIModelDevelopmentClusterCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	if v, ok := diff.GetOk("xmanager_config"); ok && len(v.([]interface{})) > 0 {
 		if v2, ok2 := diff.GetOk("orchestrator_spec.0.kubernetes_spec"); !ok2 || len(v2.([]interface{})) == 0 {
@@ -192,7 +173,15 @@ func resourceVertexAIModelDevelopmentClusterCustomDiff(_ context.Context, diff *
 			xNet, okX := diff.GetOk("xmanager_config.0.network")
 			cNet, okC := diff.GetOk("network.0.network")
 			if okX && okC && xNet.(string) != "" && cNet.(string) != "" {
-				if vertexAiModelDevelopmentClusterNormalizeComputeRef(xNet.(string)) != vertexAiModelDevelopmentClusterNormalizeComputeRef(cNet.(string)) {
+				normX := strings.TrimSpace(xNet.(string))
+				if rel, err := tpgresource.GetRelativePath(normX); err == nil {
+					normX = rel
+				}
+				normC := strings.TrimSpace(cNet.(string))
+				if rel, err := tpgresource.GetRelativePath(normC); err == nil {
+					normC = rel
+				}
+				if normX != normC {
 					return fmt.Errorf("xmanager_config.network must match the cluster network.network")
 				}
 			}
@@ -201,7 +190,7 @@ func resourceVertexAIModelDevelopmentClusterCustomDiff(_ context.Context, diff *
 			xSub, okS := diff.GetOk("xmanager_config.0.subnetwork")
 			cReg, okR := diff.GetOk("region")
 			if okS && okR && xSub.(string) != "" && cReg.(string) != "" {
-				if subRegion := vertexAiModelDevelopmentClusterSubnetworkRegion(xSub.(string)); subRegion != "" && subRegion != cReg.(string) {
+				if subRegion := tpgresource.GetRegionFromRegionalSelfLink(xSub.(string)); subRegion != xSub.(string) && subRegion != cReg.(string) {
 					return fmt.Errorf("xmanager_config.subnetwork region %q must match the cluster region %q", subRegion, cReg.(string))
 				}
 			}
@@ -307,6 +296,11 @@ func vertexAiModelDevelopmentClusterUpdateXmanager(d *schema.ResourceData, confi
 	}
 	timeout := d.Timeout(timeoutKey)
 
+	verb := ":disableXmanager"
+	action := "Disabling Xmanager"
+	errVerb := "disable"
+	var body map[string]interface{}
+
 	if enable {
 		v, ok := d.GetOk("xmanager_config")
 		if !ok {
@@ -320,14 +314,19 @@ func vertexAiModelDevelopmentClusterUpdateXmanager(d *schema.ResourceData, confi
 		if !ok {
 			return nil
 		}
-		obj := make(map[string]interface{})
 		instance := make(map[string]interface{})
 
 		if network, ok := configMap["network"].(string); ok && network != "" {
-			instance["network"] = vertexAiModelDevelopmentClusterNormalizeComputeRef(network)
+			if rel, err := tpgresource.GetRelativePath(strings.TrimSpace(network)); err == nil {
+				network = rel
+			}
+			instance["network"] = network
 		}
 		if subnetwork, ok := configMap["subnetwork"].(string); ok && subnetwork != "" {
-			instance["subnetwork"] = vertexAiModelDevelopmentClusterNormalizeComputeRef(subnetwork)
+			if rel, err := tpgresource.GetRelativePath(strings.TrimSpace(subnetwork)); err == nil {
+				subnetwork = rel
+			}
+			instance["subnetwork"] = subnetwork
 		}
 		if xprof, ok := configMap["xprof_config"].([]interface{}); ok && len(xprof) > 0 {
 			if xprofMap, ok := xprof[0].(map[string]interface{}); ok {
@@ -338,60 +337,33 @@ func vertexAiModelDevelopmentClusterUpdateXmanager(d *schema.ResourceData, confi
 				instance["xprofConfig"] = xprofObj
 			}
 		}
-		obj["instance"] = instance
+		body = map[string]interface{}{"instance": instance}
+		verb = ":enableXmanager"
+		action = "Enabling Xmanager"
+		errVerb = "enable"
+	}
 
-		url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}region{{"}}"}}/modelDevelopmentClusters/{{"{{"}}model_development_cluster_id{{"}}"}}:enableXmanager")
-		if err != nil {
-			return err
-		}
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}region{{"}}"}}/modelDevelopmentClusters/{{"{{"}}model_development_cluster_id{{"}}"}}"+verb)
+	if err != nil {
+		return err
+	}
 
-		log.Printf("[DEBUG] Enabling Xmanager on ModelDevelopmentCluster %q: %#v", d.Id(), obj)
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "POST",
-			Project:   billingProject,
-			RawURL:    url,
-			UserAgent: userAgent,
-			Body:      obj,
-			Timeout:   timeout,
-		})
-		if err != nil {
-			return fmt.Errorf("Error enabling Xmanager: %s", err)
-		}
+	log.Printf("[DEBUG] %s on ModelDevelopmentCluster %q", action, d.Id())
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      body,
+		Timeout:   timeout,
+	})
+	if err != nil {
+		return fmt.Errorf("Error %s: %s", strings.ToLower(action), err)
+	}
 
-		endpointLocation := tpgresource.LocationFromId(d.Id())
-		err = VertexAIOperationWaitTime(
-			config, res, project, endpointLocation, "Enabling Xmanager", userAgent,
-			timeout)
-		if err != nil {
-			return fmt.Errorf("Error waiting to enable Xmanager: %s", err)
-		}
-	} else {
-		url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}region{{"}}"}}/modelDevelopmentClusters/{{"{{"}}model_development_cluster_id{{"}}"}}:disableXmanager")
-		if err != nil {
-			return err
-		}
-
-		log.Printf("[DEBUG] Disabling Xmanager on ModelDevelopmentCluster %q", d.Id())
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "POST",
-			Project:   billingProject,
-			RawURL:    url,
-			UserAgent: userAgent,
-			Timeout:   timeout,
-		})
-		if err != nil {
-			return fmt.Errorf("Error disabling Xmanager: %s", err)
-		}
-
-		endpointLocation := tpgresource.LocationFromId(d.Id())
-		err = VertexAIOperationWaitTime(
-			config, res, project, endpointLocation, "Disabling Xmanager", userAgent,
-			timeout)
-		if err != nil {
-			return fmt.Errorf("Error waiting to disable Xmanager: %s", err)
-		}
+	if err := VertexAIOperationWaitTime(config, res, project, tpgresource.LocationFromId(d.Id()), action, userAgent, timeout); err != nil {
+		return fmt.Errorf("Error waiting to %s Xmanager: %s", errVerb, err)
 	}
 	return nil
 }

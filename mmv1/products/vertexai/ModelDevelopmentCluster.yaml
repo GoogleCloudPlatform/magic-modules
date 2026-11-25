@@ -221,8 +221,16 @@ samples:
     steps:
       - name: vertex_ai_model_development_cluster_gke_xmanager
         min_version: beta
-      - name: vertex_ai_model_development_cluster_gke_xmanager_modified
+        vars:
+          network_ref: google_compute_network.net.id
+          subnetwork_ref: google_compute_subnetwork.subnet.id
+          bucket_res: bucket
+      - name: vertex_ai_model_development_cluster_gke_xmanager
         min_version: beta
+        vars:
+          network_ref: google_compute_network.net.self_link
+          subnetwork_ref: google_compute_subnetwork.subnet_alt.id
+          bucket_res: bucket_alt
       - name: vertex_ai_model_development_cluster_gke_xmanager_minimal
         min_version: beta
       - name: vertex_ai_model_development_cluster_gke_xmanager_disabled
