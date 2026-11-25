@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2026 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -32,7 +32,6 @@ base_url: 'projects/{{project}}/zones/{{zone}}/reservations'
 has_self_link: true
 update_url: 'projects/{{project}}/zones/{{zone}}/reservations/{{name}}'
 update_verb: 'PATCH'
-update_mask: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -51,8 +50,7 @@ custom_code:
   decoder: templates/terraform/decoders/compute_reservation_share_settings_decoder.go.tmpl
   tgc_decoder: 'templates/tgc_next/decoders/reservation.go.tmpl'
   constants: 'templates/terraform/constants/reservation.go.tmpl'
-  update_encoder: 'templates/terraform/update_encoder/reservation.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/shared_reservation_update.go.tmpl'
+  custom_update: 'templates/terraform/custom_update/compute_reservation_update.go.tmpl'
   post_read: templates/terraform/post_read/compute_reservetion.go.tmpl
 # excluding identity due to zone value inconsistency
 exclude_identity_generation: true
@@ -374,6 +372,8 @@ properties:
     description: |
       Sharing policy for reservations with Google Cloud managed services.
     default_from_api: true
+    update_mask_fields:
+      - 'reservationSharingPolicy.serviceShareType'
     properties:
       - name: 'serviceShareType'
         type: Enum

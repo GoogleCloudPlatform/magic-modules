@@ -1,0 +1,307 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	billingProject := ""
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return fmt.Errorf("Error fetching project for Reservation: %s", err)
+	}
+	billingProject = project
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
+	basePatchURL, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/reservations/{{"{{"}}name{{"}}"}}")
+	if err != nil {
+		return err
+	}
+
+	nameProp, err := expandComputeReservationName(d.Get("name"), d, config)
+	if err != nil {
+		return fmt.Errorf("Invalid value for name: %s", err)
+	}
+	zoneProp, err := expandComputeReservationZone(d.Get("zone"), d, config)
+	if err != nil {
+		return fmt.Errorf("Invalid value for zone: %s", err)
+	}
+
+	// Compute Reservations PATCH requires ?paths=<camelCase> (not ?updateMask=, which
+	// converts camelCase to snake_case and is rejected by GCE), requires resource.name
+	// in every PATCH body, and only permits updating one property group per PATCH call.
+	sendPatch := func(body map[string]interface{}, paths []string) error {
+		if len(paths) == 0 {
+			return nil
+		}
+		reqBody := make(map[string]interface{}, len(body)+2)
+		if v, ok := d.GetOkExists("name"); !tpgresource.IsEmptyValue(reflect.ValueOf(nameProp)) && (ok || !reflect.DeepEqual(v, nameProp)) {
+			reqBody["name"] = nameProp
+		}
+		if v, ok := d.GetOkExists("zone"); !tpgresource.IsEmptyValue(reflect.ValueOf(zoneProp)) && (ok || !reflect.DeepEqual(v, zoneProp)) {
+			reqBody["zone"] = zoneProp
+		}
+		for k, v := range body {
+			reqBody[k] = v
+		}
+
+		rawPaths := make([]interface{}, len(paths))
+		for i, p := range paths {
+			rawPaths[i] = p
+		}
+		patchURL, err := transport_tpg.AddArrayQueryParams(basePatchURL, "paths", rawPaths)
+		if err != nil {
+			return err
+		}
+
+		log.Printf("[DEBUG] Updating Reservation %q (paths=%v): %#v", d.Id(), paths, reqBody)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "PATCH",
+			Project:   billingProject,
+			RawURL:    patchURL,
+			UserAgent: userAgent,
+			Body:      reqBody,
+			Timeout:   d.Timeout(schema.TimeoutUpdate),
+			Headers:   make(http.Header),
+		})
+		if err != nil {
+			return fmt.Errorf("Error updating Reservation %q: %s", d.Id(), err)
+		}
+		log.Printf("[DEBUG] Finished updating Reservation %q: %#v", d.Id(), res)
+
+		return ComputeOperationWaitTime(
+			config, res, project, "Updating Reservation", userAgent,
+			d.Timeout(schema.TimeoutUpdate))
+	}
+
+	d.Partial(true)
+
+	// 1. Share settings (PATCH ?paths=shareSettings...).
+	shareTypeVal := "SPECIFIC_PROJECTS"
+	if st, ok := d.Get("share_settings.0.share_type").(string); ok && st != "" {
+		shareTypeVal = st
+	}
+	shareTypeChanged := d.HasChange("share_settings.0.share_type")
+{{- if ne $.TargetVersionName "ga" }}
+	if d.HasChange("share_settings.0.projects") && !d.HasChange("share_settings.0.project_map") {
+		shareSettingsProp, err := expandComputeReservationShareSettings(d.Get("share_settings"), d, config)
+		if err != nil {
+			return err
+		}
+		transformed := map[string]interface{}{
+			"shareType": shareTypeVal,
+			"projects":  []interface{}{},
+		}
+		if shareSettingsMap, ok := shareSettingsProp.(map[string]interface{}); ok {
+			if projects, ok := shareSettingsMap["projects"]; ok {
+				transformed["projects"] = projects
+			}
+		}
+		sharePaths := []string{"shareSettings.projects"}
+		if shareTypeChanged {
+			sharePaths = append(sharePaths, "shareSettings.shareType")
+		}
+		if err := sendPatch(map[string]interface{}{"shareSettings": transformed}, sharePaths); err != nil {
+			return err
+		}
+	} else if d.HasChange("share_settings") {
+{{- else }}
+	if d.HasChange("share_settings") {
+{{- end }}
+		oldShare, newShare := d.GetChange("share_settings")
+
+		before := schema.NewSet(schema.HashString, []interface{}{})
+		if oldSlice, ok := oldShare.([]interface{}); ok && len(oldSlice) > 0 && oldSlice[0] != nil {
+			if oldMap, ok := oldSlice[0].(map[string]interface{})["project_map"].(*schema.Set); ok {
+				before = oldMap
+			}
+		}
+		after := schema.NewSet(schema.HashString, []interface{}{})
+		if newSlice, ok := newShare.([]interface{}); ok && len(newSlice) > 0 && newSlice[0] != nil {
+			if newMap, ok := newSlice[0].(map[string]interface{})["project_map"].(*schema.Set); ok {
+				after = newMap
+			}
+		}
+
+		// GCE rejects simultaneous project additions and removals in a single PATCH;
+		// process removals first, then additions.
+		var removedPaths []string
+		for _, raw := range before.Difference(after).List() {
+			original := raw.(map[string]interface{})
+			projectId, _ := original["project_id"].(string)
+			if projectId == "" {
+				projectId, _ = original["id"].(string)
+			}
+			projectIdOrNum := projectId
+			if _, err := strconv.Atoi(projectId); err != nil {
+				rmProj, err := rmClient.NewClient(config, userAgent).Projects.Get(projectId).Do()
+				if err != nil {
+					return fmt.Errorf("Invalid value for projectId: %s", err)
+				}
+				projectIdOrNum = fmt.Sprintf("%d", rmProj.ProjectNumber)
+			}
+			removedPaths = append(removedPaths, "shareSettings.projectMap."+projectIdOrNum)
+		}
+
+		addedProjectMap := make(map[string]interface{})
+		var addedPaths []string
+		for _, raw := range after.Difference(before).List() {
+			original := raw.(map[string]interface{})
+			singleProject := make(map[string]interface{})
+			transformedProjectId := original["project_id"]
+			if val := reflect.ValueOf(transformedProjectId); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+				singleProject["projectId"] = transformedProjectId
+			}
+			transformedId, err := tpgresource.ExpandString(original["id"], d, config)
+			if err != nil {
+				return fmt.Errorf("Invalid value for id: %s", err)
+			}
+			addedProjectMap[transformedId] = singleProject
+			addedPaths = append(addedPaths, fmt.Sprintf("shareSettings.projectMap.%v", original["id"]))
+		}
+
+		if len(removedPaths) > 0 {
+			removedShareType := "SPECIFIC_PROJECTS"
+			if shareTypeChanged && len(addedPaths) == 0 {
+				removedShareType = shareTypeVal
+				removedPaths = append(removedPaths, "shareSettings.shareType")
+			}
+			removedShare := map[string]interface{}{
+				"shareType":  removedShareType,
+				"projectMap": map[string]interface{}{},
+			}
+			if err := sendPatch(map[string]interface{}{"shareSettings": removedShare}, removedPaths); err != nil {
+				return err
+			}
+		}
+		if len(addedPaths) > 0 {
+			if shareTypeChanged {
+				addedPaths = append(addedPaths, "shareSettings.shareType")
+			}
+			addedShare := map[string]interface{}{
+				"shareType":  shareTypeVal,
+				"projectMap": addedProjectMap,
+			}
+			if err := sendPatch(map[string]interface{}{"shareSettings": addedShare}, addedPaths); err != nil {
+				return err
+			}
+		}
+		if shareTypeChanged && len(removedPaths) == 0 && len(addedPaths) == 0 {
+			if err := sendPatch(
+				map[string]interface{}{"shareSettings": map[string]interface{}{"shareType": shareTypeVal}},
+				[]string{"shareSettings.shareType"},
+			); err != nil {
+				return err
+			}
+		}
+	}
+
+	// 2. All other updatable reservation properties (isolated PATCH ?paths=... per property).
+	type reservationPatch struct {
+		paths []string
+		body  map[string]interface{}
+	}
+	var clearPatches []reservationPatch
+	var setPatches []reservationPatch
+{{- $maskGroups := $.GetPropertyUpdateMasksGroups $.UpdateBodyProperties "" }}
+{{- range $prop := $.UpdateBodyProperties }}
+{{- $propPaths := index $maskGroups (underscore $prop.Name) }}
+{{- if and (ne $prop.Name "shareSettings") $propPaths }}
+
+	if d.HasChange("{{ underscore $prop.Name }}") {
+		patchObj := make(map[string]interface{})
+		{{ $prop.CamelizeProperty }}Prop, err := expand{{ $.ResourceName }}{{ camelize $prop.Name "upper" }}({{ if $prop.FlattenObject }}nil{{ else if $prop.WriteOnly }}tpgresource.GetRawConfigAttributeAsString(d, "{{ underscore $prop.Name }}"){{ else }}d.Get("{{ underscore $prop.Name }}"){{ end }}, d, config)
+		if err != nil {
+			return err
+{{- if $prop.SendEmptyValue }}
+		} else if v, ok := d.GetOkExists("{{ underscore $prop.Name }}"); ok || !reflect.DeepEqual(v, {{ $prop.CamelizeProperty }}Prop) {
+			patchObj["{{ $prop.ApiName }}"] = {{ $prop.CamelizeProperty }}Prop
+		}
+{{- else if $prop.FlattenObject }}
+		} else if !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.CamelizeProperty }}Prop)) {
+			patchObj["{{ $prop.ApiName }}"] = {{ $prop.CamelizeProperty }}Prop
+		}
+{{- else if eq $prop.Type "Boolean" }}
+		} else {
+			patchObj["{{ $prop.ApiName }}"] = {{ $prop.CamelizeProperty }}Prop
+		}
+{{- else }}
+		} else if v, ok := d.GetOkExists("{{ underscore $prop.Name }}"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, {{ $prop.CamelizeProperty }}Prop)) {
+			patchObj["{{ $prop.ApiName }}"] = {{ $prop.CamelizeProperty }}Prop
+		}
+{{- end }}
+		p := reservationPatch{
+			paths: []string{"{{ join $propPaths "\", \"" }}"},
+			body:  patchObj,
+		}
+		if len(patchObj) == 0 {
+			clearPatches = append(clearPatches, p)
+		} else {
+			setPatches = append(setPatches, p)
+		}
+	}
+{{- end }}
+{{- end }}
+
+	for _, p := range append(clearPatches, setPatches...) {
+		if err := sendPatch(p.body, p.paths); err != nil {
+			return err
+		}
+	}
+
+	// 3. Resize (POST .../reservations/{{ "{{" }}name{{ "}}" }}/resize).
+	if d.HasChange("specific_reservation.0.count") {
+		specificReservationProp, err := expandComputeReservationSpecificReservation(d.Get("specific_reservation"), d, config)
+		if err != nil {
+			return err
+		}
+		resizeObj := make(map[string]interface{})
+		if srMap, ok := specificReservationProp.(map[string]interface{}); ok && srMap["count"] != nil {
+			resizeObj["specificSkuCount"] = srMap["count"]
+		}
+
+		resizeURL, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/reservations/{{"{{"}}name{{"}}"}}/resize")
+		if err != nil {
+			return err
+		}
+
+		log.Printf("[DEBUG] Resizing Reservation %q: %#v", d.Id(), resizeObj)
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   billingProject,
+			RawURL:    resizeURL,
+			UserAgent: userAgent,
+			Body:      resizeObj,
+			Timeout:   d.Timeout(schema.TimeoutUpdate),
+			Headers:   make(http.Header),
+		})
+		if err != nil {
+			return fmt.Errorf("Error updating Reservation %q: %s", d.Id(), err)
+		}
+		log.Printf("[DEBUG] Finished resizing Reservation %q: %#v", d.Id(), res)
+
+		err = ComputeOperationWaitTime(
+			config, res, project, "Updating Reservation", userAgent,
+			d.Timeout(schema.TimeoutUpdate))
+		if err != nil {
+			return err
+		}
+	}
+
+	d.Partial(false)
+
+	return resourceComputeReservationRead(d, meta)
