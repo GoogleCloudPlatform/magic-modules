@@ -70,8 +70,7 @@ properties:
   - name: name
     type: String
     description: |
-      Resource name of the repository, of the form `{{repo}}`.
-      The repo name may contain slashes. eg, `name/with/slash`
+      Resource name of the repository. The repo name may contain slashes. eg, `name/with/slash`
     required: true
     immutable: true
     custom_flatten: templates/terraform/custom_flatten/repository_short_name_from_name.go.tmpl
