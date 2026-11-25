@@ -1,0 +1,58 @@
+func TagsTagKeyPurposeDataDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	switch k {
+	case "purpose_data.organization":
+		if new == "auto" && old != "" {
+			return true
+		}
+		return strings.TrimPrefix(old, "organizations/") == strings.TrimPrefix(new, "organizations/")
+	case "purpose_data.network":
+		if old == "" || new == "" {
+			return old == new
+		}
+		if tpgresource.CompareSelfLinkOrResourceName("", old, new, d) {
+			return true
+		}
+		oldProject, oldNetwork, oldIsSelfLink := parsePurposeDataNetwork(old)
+		newProject, newNetwork, newIsSelfLink := parsePurposeDataNetwork(new)
+		if oldProject == "" || newProject == "" {
+			return false
+		}
+		if oldIsSelfLink && newIsSelfLink {
+			if oldNetwork != newNetwork {
+				return false
+			}
+			return oldProject == newProject || isNumericString(oldProject) != isNumericString(newProject)
+		}
+		if oldIsSelfLink != newIsSelfLink {
+			return oldProject == newProject || isNumericString(oldProject) || isNumericString(newProject)
+		}
+		return oldProject == newProject && oldNetwork == newNetwork
+	default:
+		return old == new
+	}
+}
+
+func parsePurposeDataNetwork(s string) (project, network string, isSelfLink bool) {
+	parts := strings.Split(s, "/")
+	for i, part := range parts {
+		if part == "projects" && i+4 < len(parts) && parts[i+2] == "global" && parts[i+3] == "networks" && parts[i+1] != "" && parts[i+4] != "" {
+			return parts[i+1], parts[i+4], true
+		}
+	}
+	if len(parts) == 2 && parts[0] != "" && parts[1] != "" {
+		return parts[0], parts[1], false
+	}
+	return "", "", false
+}
+
+func isNumericString(s string) bool {
+	if s == "" {
+		return false
+	}
+	for _, r := range s {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
+}
