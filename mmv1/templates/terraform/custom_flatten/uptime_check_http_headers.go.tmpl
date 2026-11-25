@@ -1,0 +1,28 @@
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+  // When `mask_headers` is true, the API returns every header value as
+  // "******". Keep the configured value for those headers so that the
+  // masked response does not produce a perpetual diff.
+  if v == nil {
+    return v
+  }
+  apiHeaders, ok := v.(map[string]interface{})
+  if !ok {
+    return v
+  }
+  configHeaders, ok := d.Get("http_check.0.headers").(map[string]interface{})
+  if !ok || len(configHeaders) == 0 {
+    return v
+  }
+
+  transformed := make(map[string]interface{}, len(apiHeaders))
+  for k, apiValue := range apiHeaders {
+    if s, ok := apiValue.(string); ok && s == "******" {
+      if configValue, ok := configHeaders[k]; ok {
+        transformed[k] = configValue
+        continue
+      }
+    }
+    transformed[k] = apiValue
+  }
+  return transformed
+}
