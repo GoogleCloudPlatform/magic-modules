@@ -3,10 +3,12 @@ package bigquery_test
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	bigquery_tpg "github.com/hashicorp/terraform-provider-google/google/services/bigquery"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/bigqueryreservation"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	_ "github.com/hashicorp/terraform-provider-google/google/services/tags"
@@ -1175,4 +1177,951 @@ resource "google_bigquery_dataset" "test" {
   default_rounding_mode = "%s"
 }
 `, datasetID, roundingMode)
+}
+
+func TestAccBigQueryDataset_replicasLifecycle(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_crr_%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryDatasetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryDataset_replicasNone(datasetID),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "replicas.#", "0"),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccBigQueryDataset_replicasTwo(datasetID),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_bigquery_dataset.test", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "replicas.#", "2"),
+					testAccCheckBigQueryDatasetReplicasMetadata("google_bigquery_dataset.test", 2, false),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccBigQueryDataset_replicasThree(datasetID),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_bigquery_dataset.test", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "replicas.#", "3"),
+					testAccCheckBigQueryDatasetReplicasMetadata("google_bigquery_dataset.test", 3, false),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccBigQueryDataset_replicasPrimaryOnly(datasetID),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_bigquery_dataset.test", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "replicas.#", "1"),
+					testAccCheckBigQueryDatasetReplicasMetadata("google_bigquery_dataset.test", 1, false),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func TestAccBigQueryDataset_replicasCmek(t *testing.T) {
+	t.Parallel()
+
+	pid := envvar.GetTestProjectFromEnv()
+	datasetID := fmt.Sprintf("tf_test_crr_cmek_%s", acctest.RandString(t, 10))
+	kmsCentral1 := kms.BootstrapKMSKeyInLocation(t, "us-central1")
+	kmsEast4 := kms.BootstrapKMSKeyInLocation(t, "us-east4")
+	kmsEast4Alt := kms.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east4", "tf-bootstrap-bq-crr-us-east4-alt")
+	kmsWest1 := kms.BootstrapKMSKeyInLocation(t, "us-west1")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryDatasetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Create CMEK dataset without replicas first so the primary replica
+				// inherits default_encryption_configuration on update (BigQuery requires
+				// replica_options on all replicas including primary during datasets.insert).
+				Config: testAccBigQueryDataset_replicasCmekNone(pid, datasetID, kmsCentral1.CryptoKey.Name),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "replicas.#", "0"),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccBigQueryDataset_replicasCmekTwo(pid, datasetID, kmsCentral1.CryptoKey.Name, kmsEast4.CryptoKey.Name),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_bigquery_dataset.test", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "replicas.#", "2"),
+					testAccCheckBigQueryDatasetReplicasMetadata("google_bigquery_dataset.test", 2, false),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "replicas"},
+			},
+			{
+				Config: testAccBigQueryDataset_replicasCmekThree(pid, datasetID, kmsCentral1.CryptoKey.Name, kmsEast4.CryptoKey.Name, kmsWest1.CryptoKey.Name),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_bigquery_dataset.test", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "replicas.#", "3"),
+					testAccCheckBigQueryDatasetReplicasMetadata("google_bigquery_dataset.test", 3, false),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "replicas"},
+			},
+			{
+				Config: testAccBigQueryDataset_replicasCmekPrimaryOnly(pid, datasetID, kmsCentral1.CryptoKey.Name, kmsEast4.CryptoKey.Name, kmsWest1.CryptoKey.Name),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_bigquery_dataset.test", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "replicas.#", "1"),
+					testAccCheckBigQueryDatasetReplicasMetadata("google_bigquery_dataset.test", 1, false),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				// Populate write-only replica_options on the existing primary replica ("" -> key)
+				// and re-add the secondary replica in-place without forcing replacement.
+				Config: testAccBigQueryDataset_replicasCmekTwoWithPrimaryKey(pid, datasetID, kmsCentral1.CryptoKey.Name, kmsEast4.CryptoKey.Name, kmsEast4Alt.CryptoKey.Name, kmsWest1.CryptoKey.Name),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_bigquery_dataset.test", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "replicas.#", "2"),
+					testAccCheckBigQueryDatasetReplicasMetadata("google_bigquery_dataset.test", 2, false),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "replicas"},
+			},
+			{
+				// Mutating a non-empty default_kms_key_name on an existing replica (2 -> 2)
+				// forces replacement and exercises single-step CMEK dataset creation with replicas.
+				Config: testAccBigQueryDataset_replicasCmekTwoKeyReplaced(pid, datasetID, kmsCentral1.CryptoKey.Name, kmsEast4.CryptoKey.Name, kmsEast4Alt.CryptoKey.Name, kmsWest1.CryptoKey.Name),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_bigquery_dataset.test", plancheck.ResourceActionReplace),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "replicas.#", "2"),
+					testAccCheckBigQueryDatasetReplicasMetadata("google_bigquery_dataset.test", 2, false),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "replicas"},
+			},
+		},
+	})
+}
+
+func TestAccBigQueryDataset_failoverReservation(t *testing.T) {
+	t.Parallel()
+
+	pid := envvar.GetTestProjectFromEnv()
+	suffix := acctest.RandString(t, 10)
+	datasetID := fmt.Sprintf("tf_test_dr_%s", suffix)
+	resName1 := fmt.Sprintf("tf-test-dr-res1-%s", suffix)
+	resName2 := fmt.Sprintf("tf-test-dr-res2-%s", suffix)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryDatasetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryDataset_failoverReservationRes1(datasetID, resName1, resName2),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "failover_reservation_id", fmt.Sprintf("%s.%s", pid, resName1)),
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "replicas.#", "2"),
+					testAccCheckBigQueryDatasetReplicasMetadata("google_bigquery_dataset.test", 2, true),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccBigQueryDataset_failoverReservationRes2(datasetID, resName1, resName2),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_bigquery_dataset.test", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "failover_reservation_id", fmt.Sprintf("%s.%s", pid, resName2)),
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "replicas.#", "2"),
+					testAccCheckBigQueryDatasetReplicasMetadata("google_bigquery_dataset.test", 2, true),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				// Simultaneously disassociate failover_reservation_id and drop the secondary replica
+				// (exercises pre_update disassociation before PUT replica drop and GetRawConfig fallback).
+				Config: testAccBigQueryDataset_failoverReservationDisassociatedPrimaryOnly(datasetID, resName1, resName2),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_bigquery_dataset.test", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "failover_reservation_id", ""),
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "replicas.#", "1"),
+					testAccCheckBigQueryDatasetReplicasMetadata("google_bigquery_dataset.test", 1, false),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				// Simultaneously add back the secondary replica and associate failover_reservation_id
+				// (exercises post_update replica backfill wait before PATCH failover association).
+				Config: testAccBigQueryDataset_failoverReservationRes1(datasetID, resName1, resName2),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_bigquery_dataset.test", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "failover_reservation_id", fmt.Sprintf("%s.%s", pid, resName1)),
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "replicas.#", "2"),
+					testAccCheckBigQueryDatasetReplicasMetadata("google_bigquery_dataset.test", 2, true),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccBigQueryDataset_failoverReservationDisassociated(datasetID, resName1, resName2),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_bigquery_dataset.test", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "failover_reservation_id", ""),
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "replicas.#", "2"),
+					testAccCheckBigQueryDatasetReplicasMetadata("google_bigquery_dataset.test", 2, false),
+				),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccCheckBigQueryDatasetReplicasMetadata(resourceName string, expectedCount int, expectFailoverURI bool) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("resource not found in state: %s", resourceName)
+		}
+		attrs := rs.Primary.Attributes
+		var primaryCount int
+		var secondaryCount int
+		seenIndices := map[string]bool{}
+		for k := range attrs {
+			if !strings.HasPrefix(k, "replicas.") {
+				continue
+			}
+			parts := strings.Split(k, ".")
+			if len(parts) < 3 || parts[1] == "#" {
+				continue
+			}
+			seenIndices[parts[1]] = true
+		}
+		if len(seenIndices) != expectedCount {
+			return fmt.Errorf("expected %d replicas in state for %s, got %d", expectedCount, resourceName, len(seenIndices))
+		}
+		for idx := range seenIndices {
+			prefix := "replicas." + idx + "."
+			state := attrs[prefix+"replica_state"]
+			if attrs[prefix+"creation_time"] == "" {
+				return fmt.Errorf("expected non-empty creation_time at %s", prefix)
+			}
+			if attrs[prefix+"backfill_completion_time"] == "" {
+				return fmt.Errorf("expected non-empty backfill_completion_time at %s (state=%q)", prefix, state)
+			}
+			switch state {
+			case "PRIMARY":
+				primaryCount++
+				if attrs[prefix+"primary_assignment_time"] == "" {
+					return fmt.Errorf("expected non-empty primary_assignment_time on PRIMARY replica at %s", prefix)
+				}
+				if attrs[prefix+"primary_assignment_completion_time"] == "" {
+					return fmt.Errorf("expected non-empty primary_assignment_completion_time on PRIMARY replica at %s", prefix)
+				}
+			case "SECONDARY":
+				secondaryCount++
+			default:
+				return fmt.Errorf("unexpected replica_state %q at %s", state, prefix)
+			}
+			if expectFailoverURI && attrs[prefix+"failover_reservation_uri"] == "" {
+				return fmt.Errorf("expected non-empty failover_reservation_uri at %s", prefix)
+			}
+			if !expectFailoverURI && attrs[prefix+"failover_reservation_uri"] != "" {
+				return fmt.Errorf("expected empty failover_reservation_uri at %s, got %q", prefix, attrs[prefix+"failover_reservation_uri"])
+			}
+		}
+		if primaryCount != 1 || secondaryCount != expectedCount-1 {
+			return fmt.Errorf("expected 1 PRIMARY and %d SECONDARY replicas, got %d PRIMARY and %d SECONDARY", expectedCount-1, primaryCount, secondaryCount)
+		}
+		return nil
+	}
+}
+
+func testAccBigQueryDataset_replicasNone(datasetID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id  = "%s"
+  description = "CRR lifecycle test"
+  location    = "us-central1"
+}
+`, datasetID)
+}
+
+func testAccBigQueryDataset_replicasTwo(datasetID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id  = "%s"
+  description = "CRR lifecycle test"
+  location    = "us-central1"
+
+  replicas {
+    id       = "us-central1-primary"
+    location = "us-central1"
+  }
+
+  replicas {
+    id       = "us-east4-secondary"
+    location = "us-east4"
+  }
+}
+`, datasetID)
+}
+
+func testAccBigQueryDataset_replicasThree(datasetID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id  = "%s"
+  description = "CRR lifecycle test"
+  location    = "us-central1"
+
+  replicas {
+    id       = "us-central1-primary"
+    location = "us-central1"
+  }
+
+  replicas {
+    id       = "us-east4-secondary"
+    location = "us-east4"
+  }
+
+  replicas {
+    id       = "us-west1-secondary"
+    location = "us-west1"
+  }
+}
+`, datasetID)
+}
+
+func testAccBigQueryDataset_replicasPrimaryOnly(datasetID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id  = "%s"
+  description = "CRR lifecycle test"
+  location    = "us-central1"
+
+  replicas {
+    id       = "us-central1-primary"
+    location = "us-central1"
+  }
+}
+`, datasetID)
+}
+
+func testAccBigQueryDataset_replicasCmekNone(pid, datasetID, kmsCentral1 string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_kms_crypto_key_iam_member" "kms_central1" {
+  crypto_key_id = "%s"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:bq-${data.google_project.project.number}@bigquery-encryption.iam.gserviceaccount.com"
+}
+
+resource "google_bigquery_dataset" "test" {
+  dataset_id  = "%s"
+  description = "CRR CMEK test"
+  location    = "us-central1"
+
+  default_encryption_configuration {
+    kms_key_name = "%s"
+  }
+
+  depends_on = [
+    google_kms_crypto_key_iam_member.kms_central1,
+  ]
+}
+`, pid, kmsCentral1, datasetID, kmsCentral1)
+}
+
+func testAccBigQueryDataset_replicasCmekTwo(pid, datasetID, kmsCentral1, kmsEast4 string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_kms_crypto_key_iam_member" "kms_central1" {
+  crypto_key_id = "%s"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:bq-${data.google_project.project.number}@bigquery-encryption.iam.gserviceaccount.com"
+}
+
+resource "google_kms_crypto_key_iam_member" "kms_east4" {
+  crypto_key_id = "%s"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:bq-${data.google_project.project.number}@bigquery-encryption.iam.gserviceaccount.com"
+}
+
+resource "google_bigquery_dataset" "test" {
+  dataset_id  = "%s"
+  description = "CRR CMEK test"
+  location    = "us-central1"
+
+  default_encryption_configuration {
+    kms_key_name = "%s"
+  }
+
+  replicas {
+    id       = "us-central1"
+    location = "us-central1"
+  }
+
+  replicas {
+    id       = "us-east4"
+    location = "us-east4"
+    replica_options {
+      default_kms_key_name = "%s"
+    }
+  }
+
+  depends_on = [
+    google_kms_crypto_key_iam_member.kms_central1,
+    google_kms_crypto_key_iam_member.kms_east4,
+  ]
+}
+`, pid, kmsCentral1, kmsEast4, datasetID, kmsCentral1, kmsEast4)
+}
+
+func testAccBigQueryDataset_replicasCmekThree(pid, datasetID, kmsCentral1, kmsEast4, kmsWest1 string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_kms_crypto_key_iam_member" "kms_central1" {
+  crypto_key_id = "%s"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:bq-${data.google_project.project.number}@bigquery-encryption.iam.gserviceaccount.com"
+}
+
+resource "google_kms_crypto_key_iam_member" "kms_east4" {
+  crypto_key_id = "%s"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:bq-${data.google_project.project.number}@bigquery-encryption.iam.gserviceaccount.com"
+}
+
+resource "google_kms_crypto_key_iam_member" "kms_west1" {
+  crypto_key_id = "%s"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:bq-${data.google_project.project.number}@bigquery-encryption.iam.gserviceaccount.com"
+}
+
+resource "google_bigquery_dataset" "test" {
+  dataset_id  = "%s"
+  description = "CRR CMEK test"
+  location    = "us-central1"
+
+  default_encryption_configuration {
+    kms_key_name = "%s"
+  }
+
+  replicas {
+    id       = "us-central1"
+    location = "us-central1"
+  }
+
+  replicas {
+    id       = "us-east4"
+    location = "us-east4"
+    replica_options {
+      default_kms_key_name = "%s"
+    }
+  }
+
+  replicas {
+    id       = "us-west1"
+    location = "us-west1"
+    replica_options {
+      default_kms_key_name = "%s"
+    }
+  }
+
+  depends_on = [
+    google_kms_crypto_key_iam_member.kms_central1,
+    google_kms_crypto_key_iam_member.kms_east4,
+    google_kms_crypto_key_iam_member.kms_west1,
+  ]
+}
+`, pid, kmsCentral1, kmsEast4, kmsWest1, datasetID, kmsCentral1, kmsEast4, kmsWest1)
+}
+
+func testAccBigQueryDataset_replicasCmekPrimaryOnly(pid, datasetID, kmsCentral1, kmsEast4, kmsWest1 string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_kms_crypto_key_iam_member" "kms_central1" {
+  crypto_key_id = "%s"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:bq-${data.google_project.project.number}@bigquery-encryption.iam.gserviceaccount.com"
+}
+
+resource "google_kms_crypto_key_iam_member" "kms_east4" {
+  crypto_key_id = "%s"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:bq-${data.google_project.project.number}@bigquery-encryption.iam.gserviceaccount.com"
+}
+
+resource "google_kms_crypto_key_iam_member" "kms_west1" {
+  crypto_key_id = "%s"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:bq-${data.google_project.project.number}@bigquery-encryption.iam.gserviceaccount.com"
+}
+
+resource "google_bigquery_dataset" "test" {
+  dataset_id  = "%s"
+  description = "CRR CMEK test"
+  location    = "us-central1"
+
+  default_encryption_configuration {
+    kms_key_name = "%s"
+  }
+
+  replicas {
+    id       = "us-central1"
+    location = "us-central1"
+  }
+
+  depends_on = [
+    google_kms_crypto_key_iam_member.kms_central1,
+    google_kms_crypto_key_iam_member.kms_east4,
+    google_kms_crypto_key_iam_member.kms_west1,
+  ]
+}
+`, pid, kmsCentral1, kmsEast4, kmsWest1, datasetID, kmsCentral1)
+}
+
+func testAccBigQueryDataset_replicasCmekTwoWithPrimaryKey(pid, datasetID, kmsCentral1, kmsEast4, kmsEast4Alt, kmsWest1 string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_kms_crypto_key_iam_member" "kms_central1" {
+  crypto_key_id = "%s"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:bq-${data.google_project.project.number}@bigquery-encryption.iam.gserviceaccount.com"
+}
+
+resource "google_kms_crypto_key_iam_member" "kms_east4" {
+  crypto_key_id = "%s"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:bq-${data.google_project.project.number}@bigquery-encryption.iam.gserviceaccount.com"
+}
+
+resource "google_kms_crypto_key_iam_member" "kms_east4_alt" {
+  crypto_key_id = "%s"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:bq-${data.google_project.project.number}@bigquery-encryption.iam.gserviceaccount.com"
+}
+
+resource "google_kms_crypto_key_iam_member" "kms_west1" {
+  crypto_key_id = "%s"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:bq-${data.google_project.project.number}@bigquery-encryption.iam.gserviceaccount.com"
+}
+
+resource "google_bigquery_dataset" "test" {
+  dataset_id  = "%s"
+  description = "CRR CMEK test"
+  location    = "us-central1"
+
+  default_encryption_configuration {
+    kms_key_name = "%s"
+  }
+
+  replicas {
+    id       = "us-central1"
+    location = "us-central1"
+    replica_options {
+      default_kms_key_name = "%s"
+    }
+  }
+
+  replicas {
+    id       = "us-east4"
+    location = "us-east4"
+    replica_options {
+      default_kms_key_name = "%s"
+    }
+  }
+
+  depends_on = [
+    google_kms_crypto_key_iam_member.kms_central1,
+    google_kms_crypto_key_iam_member.kms_east4,
+    google_kms_crypto_key_iam_member.kms_east4_alt,
+    google_kms_crypto_key_iam_member.kms_west1,
+  ]
+}
+`, pid, kmsCentral1, kmsEast4, kmsEast4Alt, kmsWest1, datasetID, kmsCentral1, kmsCentral1, kmsEast4)
+}
+
+func testAccBigQueryDataset_replicasCmekTwoKeyReplaced(pid, datasetID, kmsCentral1, kmsEast4, kmsEast4Alt, kmsWest1 string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {
+  project_id = "%s"
+}
+
+resource "google_kms_crypto_key_iam_member" "kms_central1" {
+  crypto_key_id = "%s"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:bq-${data.google_project.project.number}@bigquery-encryption.iam.gserviceaccount.com"
+}
+
+resource "google_kms_crypto_key_iam_member" "kms_east4" {
+  crypto_key_id = "%s"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:bq-${data.google_project.project.number}@bigquery-encryption.iam.gserviceaccount.com"
+}
+
+resource "google_kms_crypto_key_iam_member" "kms_east4_alt" {
+  crypto_key_id = "%s"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:bq-${data.google_project.project.number}@bigquery-encryption.iam.gserviceaccount.com"
+}
+
+resource "google_kms_crypto_key_iam_member" "kms_west1" {
+  crypto_key_id = "%s"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:bq-${data.google_project.project.number}@bigquery-encryption.iam.gserviceaccount.com"
+}
+
+resource "google_bigquery_dataset" "test" {
+  dataset_id  = "%s"
+  description = "CRR CMEK test"
+  location    = "us-central1"
+
+  default_encryption_configuration {
+    kms_key_name = "%s"
+  }
+
+  replicas {
+    id       = "us-central1"
+    location = "us-central1"
+    replica_options {
+      default_kms_key_name = "%s"
+    }
+  }
+
+  replicas {
+    id       = "us-east4"
+    location = "us-east4"
+    replica_options {
+      default_kms_key_name = "%s"
+    }
+  }
+
+  depends_on = [
+    google_kms_crypto_key_iam_member.kms_central1,
+    google_kms_crypto_key_iam_member.kms_east4,
+    google_kms_crypto_key_iam_member.kms_east4_alt,
+    google_kms_crypto_key_iam_member.kms_west1,
+  ]
+}
+`, pid, kmsCentral1, kmsEast4, kmsEast4Alt, kmsWest1, datasetID, kmsCentral1, kmsCentral1, kmsEast4Alt)
+}
+
+func testAccBigQueryDataset_failoverReservationRes1(datasetID, resName1, resName2 string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_reservation" "res1" {
+  name               = "%s"
+  location           = "us-central1"
+  secondary_location = "us-east4"
+  slot_capacity      = 0
+  edition            = "ENTERPRISE_PLUS"
+  ignore_idle_slots  = true
+  concurrency        = 0
+  autoscale {
+    max_slots = 100
+  }
+}
+
+resource "google_bigquery_reservation" "res2" {
+  name               = "%s"
+  location           = "us-central1"
+  secondary_location = "us-east4"
+  slot_capacity      = 0
+  edition            = "ENTERPRISE_PLUS"
+  ignore_idle_slots  = true
+  concurrency        = 0
+  autoscale {
+    max_slots = 100
+  }
+}
+
+resource "google_bigquery_dataset" "test" {
+  dataset_id              = "%s"
+  description             = "Managed DR dataset test"
+  location                = "us-central1"
+  failover_reservation_id = "${google_bigquery_reservation.res1.project}.${google_bigquery_reservation.res1.name}"
+
+  replicas {
+    id       = "us-central1"
+    location = "us-central1"
+  }
+
+  replicas {
+    id       = "us-east4"
+    location = "us-east4"
+  }
+}
+`, resName1, resName2, datasetID)
+}
+
+func testAccBigQueryDataset_failoverReservationRes2(datasetID, resName1, resName2 string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_reservation" "res1" {
+  name               = "%s"
+  location           = "us-central1"
+  secondary_location = "us-east4"
+  slot_capacity      = 0
+  edition            = "ENTERPRISE_PLUS"
+  ignore_idle_slots  = true
+  concurrency        = 0
+  autoscale {
+    max_slots = 100
+  }
+}
+
+resource "google_bigquery_reservation" "res2" {
+  name               = "%s"
+  location           = "us-central1"
+  secondary_location = "us-east4"
+  slot_capacity      = 0
+  edition            = "ENTERPRISE_PLUS"
+  ignore_idle_slots  = true
+  concurrency        = 0
+  autoscale {
+    max_slots = 100
+  }
+}
+
+resource "google_bigquery_dataset" "test" {
+  dataset_id              = "%s"
+  description             = "Managed DR dataset test"
+  location                = "us-central1"
+  failover_reservation_id = "${google_bigquery_reservation.res2.project}.${google_bigquery_reservation.res2.name}"
+
+  replicas {
+    id       = "us-central1"
+    location = "us-central1"
+  }
+
+  replicas {
+    id       = "us-east4"
+    location = "us-east4"
+  }
+}
+`, resName1, resName2, datasetID)
+}
+
+func testAccBigQueryDataset_failoverReservationDisassociated(datasetID, resName1, resName2 string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_reservation" "res1" {
+  name               = "%s"
+  location           = "us-central1"
+  secondary_location = "us-east4"
+  slot_capacity      = 0
+  edition            = "ENTERPRISE_PLUS"
+  ignore_idle_slots  = true
+  concurrency        = 0
+  autoscale {
+    max_slots = 100
+  }
+}
+
+resource "google_bigquery_reservation" "res2" {
+  name               = "%s"
+  location           = "us-central1"
+  secondary_location = "us-east4"
+  slot_capacity      = 0
+  edition            = "ENTERPRISE_PLUS"
+  ignore_idle_slots  = true
+  concurrency        = 0
+  autoscale {
+    max_slots = 100
+  }
+}
+
+resource "google_bigquery_dataset" "test" {
+  dataset_id  = "%s"
+  description = "Managed DR dataset test"
+  location    = "us-central1"
+
+  replicas {
+    id       = "us-central1"
+    location = "us-central1"
+  }
+
+  replicas {
+    id       = "us-east4"
+    location = "us-east4"
+  }
+}
+`, resName1, resName2, datasetID)
+}
+
+func testAccBigQueryDataset_failoverReservationDisassociatedPrimaryOnly(datasetID, resName1, resName2 string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_reservation" "res1" {
+  name               = "%s"
+  location           = "us-central1"
+  secondary_location = "us-east4"
+  slot_capacity      = 0
+  edition            = "ENTERPRISE_PLUS"
+  ignore_idle_slots  = true
+  concurrency        = 0
+  autoscale {
+    max_slots = 100
+  }
+}
+
+resource "google_bigquery_reservation" "res2" {
+  name               = "%s"
+  location           = "us-central1"
+  secondary_location = "us-east4"
+  slot_capacity      = 0
+  edition            = "ENTERPRISE_PLUS"
+  ignore_idle_slots  = true
+  concurrency        = 0
+  autoscale {
+    max_slots = 100
+  }
+}
+
+resource "google_bigquery_dataset" "test" {
+  dataset_id  = "%s"
+  description = "Managed DR dataset test"
+  location    = "us-central1"
+
+  replicas {
+    id       = "us-central1"
+    location = "us-central1"
+  }
+}
+`, resName1, resName2, datasetID)
 }

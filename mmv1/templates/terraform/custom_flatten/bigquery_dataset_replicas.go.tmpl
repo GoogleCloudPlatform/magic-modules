@@ -1,0 +1,149 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2026 Google LLC. All Rights Reserved.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return v
+	}
+	l, ok := v.([]interface{})
+	if !ok {
+		return v
+	}
+
+	type replicaKey struct {
+		id       string
+		location string
+	}
+	type replicaConfigState struct {
+		location       string
+		replicaOptions interface{}
+	}
+	priorByKey := make(map[replicaKey]replicaConfigState)
+	if d != nil {
+		populateFromSet := func(sourceSet *schema.Set) {
+			if sourceSet == nil {
+				return
+			}
+			for _, rawExisting := range sourceSet.List() {
+				existingMap, ok := rawExisting.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				existingID, _ := existingMap["id"].(string)
+				existingLoc, _ := existingMap["location"].(string)
+				if existingID != "" && existingLoc != "" {
+					key := replicaKey{
+						id:       existingID,
+						location: strings.ToLower(existingLoc),
+					}
+					priorByKey[key] = replicaConfigState{
+						location:       existingLoc,
+						replicaOptions: existingMap["replica_options"],
+					}
+				}
+			}
+		}
+		if oldVal, _ := d.GetChange("replicas"); oldVal != nil {
+			// Load prior state first so write-only replica_options and user-configured
+			// location casing are preserved when SetNewComputed("replicas") blanks
+			// d.Get("replicas") during Update -> Read.
+			if oldSet, ok := oldVal.(*schema.Set); ok && oldSet != nil && oldSet.Len() > 0 {
+				populateFromSet(oldSet)
+			}
+		}
+		if existingSet, ok := d.Get("replicas").(*schema.Set); ok && existingSet != nil && existingSet.Len() > 0 {
+			populateFromSet(existingSet)
+		}
+{{- if not $.ResourceMetadata.IsTgcCompiler }}
+		if isBigQueryDatasetReplicasPlanUnknown(d) {
+			// When SetNewComputed("replicas") marks planned replicas unknown during a
+			// combined failover_reservation_id + replicas update, DiffFromValues can leave
+			// d.Get("replicas") empty or holding stale prior state. Overlay GetRawConfig()
+			// so newly added CMEK replicas retain their write-only default_kms_key_name
+			// and user-configured location casing.
+			if cfgReplicas, _, cfgOK := extractBigQueryDatasetReplicasFromCty(d.GetRawConfig()); cfgOK && len(cfgReplicas) > 0 {
+				for _, r := range cfgReplicas {
+					key := replicaKey{
+						id:       r.id,
+						location: strings.ToLower(r.location),
+					}
+					var opts interface{}
+					if r.kmsKey != "" {
+						opts = []interface{}{
+							map[string]interface{}{
+								"default_kms_key_name": r.kmsKey,
+							},
+						}
+					}
+					priorByKey[key] = replicaConfigState{
+						location:       r.location,
+						replicaOptions: opts,
+					}
+				}
+			}
+		}
+{{- end }}
+	}
+
+	transformed := schema.NewSet(resourceBigqueryDatasetReplicasHash, []interface{}{})
+	for _, raw := range l {
+		original, ok := raw.(map[string]interface{})
+		if !ok || len(original) < 1 {
+			// Do not include empty json objects coming back from the api
+			continue
+		}
+
+		replicaID, _ := original["id"].(string)
+		replicaLocation, _ := original["location"].(string)
+		lookupKey := replicaKey{
+			id:       replicaID,
+			location: strings.ToLower(replicaLocation),
+		}
+
+		var flattenedReplicaOptions interface{}
+		if rawOpts, ok := original["replicaOptions"].(map[string]interface{}); ok && len(rawOpts) > 0 {
+			if kmsKey, ok := rawOpts["defaultKmsKeyName"].(string); ok && kmsKey != "" {
+				flattenedReplicaOptions = []interface{}{
+					map[string]interface{}{
+						"default_kms_key_name": kmsKey,
+					},
+				}
+			}
+		}
+		if flattenedReplicaOptions == nil {
+			if prior, exists := priorByKey[lookupKey]; exists {
+				if priorOpts, ok := prior.replicaOptions.([]interface{}); ok && len(priorOpts) > 0 {
+					flattenedReplicaOptions = priorOpts
+				}
+			}
+		}
+
+		if prior, exists := priorByKey[lookupKey]; exists && prior.location != "" {
+			replicaLocation = prior.location
+		}
+
+		transformed.Add(map[string]interface{}{
+			"id":              original["id"],
+			"location":        replicaLocation,
+			"replica_options": flattenedReplicaOptions,
+{{- if not $.ResourceMetadata.IsTgcCompiler }}
+			"replica_state":                      original["replicaState"],
+			"creation_time":                      original["creationTime"],
+			"backfill_completion_time":           original["backfillCompletionTime"],
+			"primary_assignment_time":            original["primaryAssignmentTime"],
+			"primary_assignment_completion_time": original["primaryAssignmentCompletionTime"],
+			"failover_reservation_uri":           original["failoverReservationUri"],
+{{- end }}
+		})
+	}
+	return transformed
+}
