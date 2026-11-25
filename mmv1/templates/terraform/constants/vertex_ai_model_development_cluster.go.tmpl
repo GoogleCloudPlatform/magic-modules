@@ -195,6 +195,16 @@ func resourceVertexAIModelDevelopmentClusterCustomDiff(_ context.Context, diff *
 				}
 			}
 		}
+		if authRaw, okAuth := diff.GetOk("xmanager_config.0.auth_config"); okAuth && len(authRaw.([]interface{})) > 0 {
+			if diff.NewValueKnown("xmanager_config.0.auth_config.0.allowed_domains") &&
+				diff.NewValueKnown("xmanager_config.0.auth_config.0.allowed_emails") {
+				domains, _ := diff.Get("xmanager_config.0.auth_config.0.allowed_domains").([]interface{})
+				emails, _ := diff.Get("xmanager_config.0.auth_config.0.allowed_emails").([]interface{})
+				if len(domains) == 0 && len(emails) == 0 {
+					return fmt.Errorf("at least one of xmanager_config.0.auth_config.0.allowed_domains or xmanager_config.0.auth_config.0.allowed_emails must be specified")
+				}
+			}
+		}
 	}
 	if !vertexAiModelDevelopmentClusterNodePoolVersionsConfigured(diff) {
 		return nil
@@ -335,6 +345,30 @@ func vertexAiModelDevelopmentClusterUpdateXmanager(d *schema.ResourceData, confi
 					xprofObj["gcsBucketUri"] = uri
 				}
 				instance["xprofConfig"] = xprofObj
+			}
+		}
+		if auth, ok := configMap["auth_config"].([]interface{}); ok && len(auth) > 0 {
+			if authMap, ok := auth[0].(map[string]interface{}); ok {
+				authObj := make(map[string]interface{})
+				if domains, ok := authMap["allowed_domains"].([]interface{}); ok && len(domains) > 0 {
+					authObj["allowedDomains"] = tpgresource.ConvertStringArr(domains)
+				}
+				if emails, ok := authMap["allowed_emails"].([]interface{}); ok && len(emails) > 0 {
+					authObj["allowedEmails"] = tpgresource.ConvertStringArr(emails)
+				}
+				if oauth, ok := authMap["oauth_client"].([]interface{}); ok && len(oauth) > 0 {
+					if oauthMap, ok := oauth[0].(map[string]interface{}); ok {
+						oauthObj := make(map[string]interface{})
+						if id, ok := oauthMap["id"].(string); ok && id != "" {
+							oauthObj["id"] = id
+						}
+						if sv, ok := oauthMap["secret_version"].(string); ok && sv != "" {
+							oauthObj["secretVersion"] = sv
+						}
+						authObj["oauthClient"] = oauthObj
+					}
+				}
+				instance["authConfig"] = authObj
 			}
 		}
 		body = map[string]interface{}{"instance": instance}
