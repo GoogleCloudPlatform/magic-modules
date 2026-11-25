@@ -387,7 +387,8 @@ properties:
       - 'IF_MACSEC': Provisions the connection on hardware ports that support MACsec (Media Access Control Security). If not specified, the system may allocate non-MACsec capable ports if available.
       - 'IF_L2_FORWARDING': Provisions the connection for Layer 2 (L2) traffic forwarding. If not specified, the connection defaults to Layer 3 (L3) traffic forwarding.
       - 'IF_CROSS_SITE_NETWORK': Provisions the connection exclusively for Cross-Site Networking.
-            Note: 'MACSEC' is a legacy value for compatibility reasons. 'IF_MACSEC' should be used. Choosing 'MACSEC' can result in allocation of non-MACsec capable ports, if available.
+
+      Note: 'MACSEC' and 'CROSS_SITE_NETWORK' exist only for backwards compatibility and have no effect on the Compute API. 'IF_MACSEC' and 'IF_CROSS_SITE_NETWORK' should be used instead.
     immutable: true
     item_type:
       type: Enum
@@ -398,6 +399,7 @@ properties:
         - CROSS_SITE_NETWORK
         - IF_MACSEC
         - IF_L2_FORWARDING
+        - IF_CROSS_SITE_NETWORK
   - name: availableFeatures
     type: Array
     description: |
