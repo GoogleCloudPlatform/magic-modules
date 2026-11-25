@@ -165,6 +165,37 @@ func validateVertexAIModelDevelopmentClusterNodePoolVersions(d vertexAiModelDeve
 }
 
 func resourceVertexAIModelDevelopmentClusterCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	if v, ok := diff.GetOk("xmanager_config"); ok && len(v.([]interface{})) > 0 {
+		if v2, ok2 := diff.GetOk("orchestrator_spec.0.kubernetes_spec"); !ok2 || len(v2.([]interface{})) == 0 {
+			return fmt.Errorf("xmanager_config is only supported on clusters using the GKE orchestrator (orchestrator_spec.kubernetes_spec)")
+		}
+		if diff.NewValueKnown("xmanager_config.0.network") && diff.NewValueKnown("network.0.network") {
+			xNet, okX := diff.GetOk("xmanager_config.0.network")
+			cNet, okC := diff.GetOk("network.0.network")
+			if okX && okC && xNet.(string) != "" && cNet.(string) != "" {
+				normX := strings.TrimSpace(xNet.(string))
+				if rel, err := tpgresource.GetRelativePath(normX); err == nil {
+					normX = rel
+				}
+				normC := strings.TrimSpace(cNet.(string))
+				if rel, err := tpgresource.GetRelativePath(normC); err == nil {
+					normC = rel
+				}
+				if normX != normC {
+					return fmt.Errorf("xmanager_config.network must match the cluster network.network")
+				}
+			}
+		}
+		if diff.NewValueKnown("xmanager_config.0.subnetwork") && diff.NewValueKnown("region") {
+			xSub, okS := diff.GetOk("xmanager_config.0.subnetwork")
+			cReg, okR := diff.GetOk("region")
+			if okS && okR && xSub.(string) != "" && cReg.(string) != "" {
+				if subRegion := tpgresource.GetRegionFromRegionalSelfLink(xSub.(string)); subRegion != xSub.(string) && subRegion != cReg.(string) {
+					return fmt.Errorf("xmanager_config.subnetwork region %q must match the cluster region %q", subRegion, cReg.(string))
+				}
+			}
+		}
+	}
 	if !vertexAiModelDevelopmentClusterNodePoolVersionsConfigured(diff) {
 		return nil
 	}
@@ -182,5 +213,158 @@ func resourceVertexAIModelDevelopmentClusterCustomDiff(_ context.Context, diff *
 		}
 	}
 	return validateVertexAIModelDevelopmentClusterNodePoolVersions(diff)
+}
+
+func vertexAiModelDevelopmentClusterGetXmanagerStatus(d *schema.ResourceData, config *transport_tpg.Config, billingProject, userAgent, timeoutKey string) (clusterState string, xmState string, hasXm bool, err error) {
+	clusterURL, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}region{{"}}"}}/modelDevelopmentClusters/{{"{{"}}model_development_cluster_id{{"}}"}}")
+	if err != nil {
+		return "", "", false, err
+	}
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    clusterURL,
+		UserAgent: userAgent,
+		Timeout:   d.Timeout(timeoutKey),
+	})
+	if err != nil {
+		return "", "", false, err
+	}
+	if cs, ok := res["clusterStatus"].(map[string]interface{}); ok {
+		clusterState, _ = cs["state"].(string)
+	}
+	if runtime, ok := res["runtime"].(map[string]interface{}); ok {
+		if xm, ok := runtime["xmanager"].(map[string]interface{}); ok && xm != nil {
+			xmState, _ = xm["state"].(string)
+			if xmState != "DELETED" {
+				hasXm = true
+			}
+		}
+	}
+	return clusterState, xmState, hasXm, nil
+}
+
+func vertexAiModelDevelopmentClusterPrepareXmanagerTransition(d *schema.ResourceData, config *transport_tpg.Config, billingProject, userAgent, timeoutKey string, waitProvisioning bool) (clusterState string, xmState string, hasXm bool, err error) {
+	clusterState, xmState, hasXm, err = vertexAiModelDevelopmentClusterGetXmanagerStatus(d, config, billingProject, userAgent, timeoutKey)
+	if err != nil {
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+			return "", "", false, nil
+		}
+		return "", "", false, err
+	}
+	needsWait := func(cs, xs string, present bool) bool {
+		if cs == "PROVISIONING" || cs == "UPDATING" {
+			return true
+		}
+		if !present {
+			return false
+		}
+		if xs == "DELETING" || (waitProvisioning && xs == "PROVISIONING") {
+			return true
+		}
+		return false
+	}
+	if !needsWait(clusterState, xmState, hasXm) {
+		return clusterState, xmState, hasXm, nil
+	}
+	retryErr := tpgresource.Retry(d.Timeout(timeoutKey), config.SleepUnit, func() *retry.RetryError {
+		cs, xs, present, pollErr := vertexAiModelDevelopmentClusterGetXmanagerStatus(d, config, billingProject, userAgent, timeoutKey)
+		if pollErr != nil {
+			if transport_tpg.IsGoogleApiErrorWithCode(pollErr, 404) {
+				clusterState, xmState, hasXm = "", "", false
+				return nil
+			}
+			return retry.NonRetryableError(pollErr)
+		}
+		clusterState, xmState, hasXm = cs, xs, present
+		if needsWait(cs, xs, present) {
+			return retry.RetryableError(fmt.Errorf("ModelDevelopmentCluster %q is in clusterState=%q, xmanagerState=%q", d.Id(), cs, xs))
+		}
+		return nil
+	})
+	if retryErr != nil {
+		return clusterState, xmState, hasXm, retryErr
+	}
+	return clusterState, xmState, hasXm, nil
+}
+
+func vertexAiModelDevelopmentClusterUpdateXmanager(d *schema.ResourceData, config *transport_tpg.Config, billingProject, userAgent string, enable bool, timeoutKey string) error {
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return err
+	}
+	timeout := d.Timeout(timeoutKey)
+
+	verb := ":disableXmanager"
+	action := "Disabling Xmanager"
+	errVerb := "disable"
+	var body map[string]interface{}
+
+	if enable {
+		v, ok := d.GetOk("xmanager_config")
+		if !ok {
+			return nil
+		}
+		configList, ok := v.([]interface{})
+		if !ok || len(configList) == 0 {
+			return nil
+		}
+		configMap, ok := configList[0].(map[string]interface{})
+		if !ok {
+			return nil
+		}
+		instance := make(map[string]interface{})
+
+		if network, ok := configMap["network"].(string); ok && network != "" {
+			if rel, err := tpgresource.GetRelativePath(strings.TrimSpace(network)); err == nil {
+				network = rel
+			}
+			instance["network"] = network
+		}
+		if subnetwork, ok := configMap["subnetwork"].(string); ok && subnetwork != "" {
+			if rel, err := tpgresource.GetRelativePath(strings.TrimSpace(subnetwork)); err == nil {
+				subnetwork = rel
+			}
+			instance["subnetwork"] = subnetwork
+		}
+		if xprof, ok := configMap["xprof_config"].([]interface{}); ok && len(xprof) > 0 {
+			if xprofMap, ok := xprof[0].(map[string]interface{}); ok {
+				xprofObj := make(map[string]interface{})
+				if uri, ok := xprofMap["gcs_bucket_uri"].(string); ok && uri != "" {
+					xprofObj["gcsBucketUri"] = uri
+				}
+				instance["xprofConfig"] = xprofObj
+			}
+		}
+		body = map[string]interface{}{"instance": instance}
+		verb = ":enableXmanager"
+		action = "Enabling Xmanager"
+		errVerb = "enable"
+	}
+
+	url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}region{{"}}"}}/modelDevelopmentClusters/{{"{{"}}model_development_cluster_id{{"}}"}}"+verb)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("[DEBUG] %s on ModelDevelopmentCluster %q", action, d.Id())
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      body,
+		Timeout:   timeout,
+	})
+	if err != nil {
+		return fmt.Errorf("Error %s: %s", strings.ToLower(action), err)
+	}
+
+	if err := VertexAIOperationWaitTime(config, res, project, tpgresource.LocationFromId(d.Id()), action, userAgent, timeout); err != nil {
+		return fmt.Errorf("Error waiting to %s Xmanager: %s", errVerb, err)
+	}
+	return nil
 }
 {{- end }}
