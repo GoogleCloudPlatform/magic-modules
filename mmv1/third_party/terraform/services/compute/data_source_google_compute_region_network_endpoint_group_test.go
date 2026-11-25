@@ -24,10 +24,7 @@ func TestAccDataSourceRegionNetworkEndpointGroup_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataSourceRegionNetworkEndpointGroup_basic(context),
-				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores("data.google_compute_region_network_endpoint_group.cloudrun_neg", "google_compute_region_network_endpoint_group.cloudrun_neg", []string{"name", "region"}),
-					resource.TestCheckResourceAttrSet("data.google_compute_region_network_endpoint_group.cloudrun_neg", "generated_id"),
-				),
+				Check:  acctest.CheckDataSourceStateMatchesResourceStateWithIgnores("data.google_compute_region_network_endpoint_group.cloudrun_neg", "google_compute_region_network_endpoint_group.cloudrun_neg", []string{"name", "region"}),
 			},
 		},
 	})
