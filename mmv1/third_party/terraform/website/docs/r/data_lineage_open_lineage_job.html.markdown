@@ -375,8 +375,8 @@ The following arguments are supported:
   Structure is [documented below](#nested_output_column_lineage_field).
 
 * `dataset_input` -
-  (Required)
-  Input fields participating in output dataset lineage.
+  (Optional)
+  Input fields affecting the whole output dataset rather than a specific output field, e.g. columns used for filtering, joining or grouping.
   Structure is [documented below](#nested_output_column_lineage_dataset_input).
 
 
