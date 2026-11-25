@@ -687,6 +687,23 @@ func TestUnitVertexAIModelDevelopmentCluster_CustomDiff_XmanagerConfig(t *testin
 			},
 			wantErr: "xmanager_config.subnetwork region",
 		},
+		{
+			name: "auth_config requires allowed_domains or allowed_emails",
+			cfg: map[string]interface{}{
+				"model_development_cluster_id": "test-cluster",
+				"region":                       "us-central1",
+				"network":                      []interface{}{map[string]interface{}{"network": "projects/p/global/networks/n1"}},
+				"orchestrator_spec":            []interface{}{map[string]interface{}{"kubernetes_spec": []interface{}{map[string]interface{}{}}}},
+				"xmanager_config": []interface{}{map[string]interface{}{
+					"network":    "projects/p/global/networks/n1",
+					"subnetwork": "projects/p/regions/us-central1/subnetworks/s1",
+					"auth_config": []interface{}{map[string]interface{}{
+						"oauth_client": []interface{}{map[string]interface{}{"id": "12345.apps.googleusercontent.com", "secret_version": "projects/p/secrets/s/versions/1"}},
+					}},
+				}},
+			},
+			wantErr: "allowed_domains",
+		},
 	}
 
 	for _, tc := range cases {

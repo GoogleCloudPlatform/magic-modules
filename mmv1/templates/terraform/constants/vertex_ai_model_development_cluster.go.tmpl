@@ -206,6 +206,16 @@ func resourceVertexAIModelDevelopmentClusterCustomDiff(_ context.Context, diff *
 				}
 			}
 		}
+		if authRaw, okAuth := diff.GetOk("xmanager_config.0.auth_config"); okAuth && len(authRaw.([]interface{})) > 0 {
+			if diff.NewValueKnown("xmanager_config.0.auth_config.0.allowed_domains") &&
+				diff.NewValueKnown("xmanager_config.0.auth_config.0.allowed_emails") {
+				domains, _ := diff.Get("xmanager_config.0.auth_config.0.allowed_domains").([]interface{})
+				emails, _ := diff.Get("xmanager_config.0.auth_config.0.allowed_emails").([]interface{})
+				if len(domains) == 0 && len(emails) == 0 {
+					return fmt.Errorf("at least one of xmanager_config.0.auth_config.0.allowed_domains or xmanager_config.0.auth_config.0.allowed_emails must be specified")
+				}
+			}
+		}
 	}
 	if !vertexAiModelDevelopmentClusterNodePoolVersionsConfigured(diff) {
 		return nil
@@ -336,6 +346,50 @@ func vertexAiModelDevelopmentClusterUpdateXmanager(d *schema.ResourceData, confi
 					xprofObj["gcsBucketUri"] = uri
 				}
 				instance["xprofConfig"] = xprofObj
+			}
+		}
+		if auth, ok := configMap["auth_config"].([]interface{}); ok && len(auth) > 0 {
+			if authMap, ok := auth[0].(map[string]interface{}); ok {
+				authObj := make(map[string]interface{})
+				if domains, ok := authMap["allowed_domains"].(*schema.Set); ok && domains.Len() > 0 {
+					dList := make([]string, 0, domains.Len())
+					for _, dom := range domains.List() {
+						dList = append(dList, dom.(string))
+					}
+					authObj["allowedDomains"] = dList
+				} else if domains, ok := authMap["allowed_domains"].([]interface{}); ok && len(domains) > 0 {
+					dList := make([]string, 0, len(domains))
+					for _, dom := range domains {
+						dList = append(dList, dom.(string))
+					}
+					authObj["allowedDomains"] = dList
+				}
+				if emails, ok := authMap["allowed_emails"].(*schema.Set); ok && emails.Len() > 0 {
+					eList := make([]string, 0, emails.Len())
+					for _, email := range emails.List() {
+						eList = append(eList, email.(string))
+					}
+					authObj["allowedEmails"] = eList
+				} else if emails, ok := authMap["allowed_emails"].([]interface{}); ok && len(emails) > 0 {
+					eList := make([]string, 0, len(emails))
+					for _, email := range emails {
+						eList = append(eList, email.(string))
+					}
+					authObj["allowedEmails"] = eList
+				}
+				if oauth, ok := authMap["oauth_client"].([]interface{}); ok && len(oauth) > 0 {
+					if oauthMap, ok := oauth[0].(map[string]interface{}); ok {
+						oauthObj := make(map[string]interface{})
+						if id, ok := oauthMap["id"].(string); ok && id != "" {
+							oauthObj["id"] = id
+						}
+						if sv, ok := oauthMap["secret_version"].(string); ok && sv != "" {
+							oauthObj["secretVersion"] = sv
+						}
+						authObj["oauthClient"] = oauthObj
+					}
+				}
+				instance["authConfig"] = authObj
 			}
 		}
 		obj["instance"] = instance
