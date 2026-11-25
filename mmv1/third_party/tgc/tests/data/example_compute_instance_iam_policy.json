@@ -16,7 +16,7 @@
               "autoDelete": true,
               "boot": true,
               "initializeParams": {
-                "sourceImage": "projects/debian-cloud/global/images/debian-11"
+                "sourceImage": "projects/debian-cloud/global/images/debian-13"
               },
               "mode": "READ_WRITE"
             },

@@ -183,7 +183,7 @@ func TestFakeResourceDataWithMeta_getOkTypeObject(t *testing.T) {
 				"disk_encryption_key_raw": nil,
 				"initialize_params": []interface{}{
 					map[string]interface{}{
-						"image": "debian-cloud/debian-9",
+						"image": "debian-cloud/debian-13",
 					},
 				},
 				"mode": "READ_WRITE",
@@ -262,7 +262,7 @@ func TestFakeResourceDataWithMeta_getOknsetTypeObject(t *testing.T) {
 				"disk_encryption_key_raw": nil,
 				"initialize_params": []interface{}{
 					map[string]interface{}{
-						"image": "debian-cloud/debian-9",
+						"image": "debian-cloud/debian-13",
 					},
 				},
 				"mode": "READ_WRITE",

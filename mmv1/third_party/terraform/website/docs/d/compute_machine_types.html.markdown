@@ -52,7 +52,7 @@ resource "google_compute_instance_template" "example" {
   machine_type = each.value
 
   disk {
-    source_image = "debian-cloud/debian-11"
+    source_image = "debian-cloud/debian-13"
     auto_delete  = true
     boot         = true
   }
@@ -77,7 +77,7 @@ resource "google_compute_instance_template" "example" {
   )[0]
 
   disk {
-    source_image = "debian-cloud/debian-11"
+    source_image = "debian-cloud/debian-13"
     auto_delete  = true
     boot         = true
   }

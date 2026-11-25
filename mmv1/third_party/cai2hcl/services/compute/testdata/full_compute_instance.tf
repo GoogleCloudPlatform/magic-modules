@@ -17,7 +17,7 @@ resource "google_compute_instance" "test1" {
     disk_encryption_key_raw = "test-disk_encryption_key_raw"
 
     initialize_params {
-      image = "projects/debian-cloud/global/images/debian-9"
+      image = "projects/debian-cloud/global/images/debian-13"
       size  = 42
       type  = "pd-standard"
     }

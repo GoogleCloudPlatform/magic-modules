@@ -36,7 +36,7 @@ resource "google_compute_instance" "default" {
 
   boot_disk {
     initialize_params {
-      image = "projects/debian-cloud/global/images/debian-11"
+      image = "projects/debian-cloud/global/images/debian-13"
     }
   }
 
