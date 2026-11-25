@@ -1254,6 +1254,7 @@ properties:
           - 'outlier_detection.0.success_rate_stdev_factor'
       - name: 'enforcingSuccessRate'
         type: Integer
+        custom_expand: 'templates/terraform/custom_expand/compute_backend_service_outlier_detection_enforcing_success_rate.go.tmpl'
         description: |
           The percentage chance that a host will be actually ejected when an outlier
           status is detected through success rate statistics. This setting can be used to
