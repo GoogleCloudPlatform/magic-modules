@@ -98,6 +98,7 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 {{- else }}
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+{{- end }}
 	{{- if $sample.ExternalProviders }}
 		ExternalProviders: map[string]resource.ExternalProvider{
 		{{- range $provider := $sample.ExternalProviders }}
@@ -105,7 +106,6 @@ func TestAcc{{ $.ResourceName }}ListQuery_generated(t *testing.T) {
 		{{- end }}
 		},
 	{{- end }}
-{{- end }}
 {{- if not $.ExcludeDelete }}
 		CheckDestroy: testAccCheck{{ $.ResourceName }}DestroyProducer(t),
 {{- end }}
