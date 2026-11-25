@@ -20238,6 +20238,53 @@ func TestAccContainerCluster_withNodeCreationConfig(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_withControlPlaneEgress(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := tpgcompute.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := tpgcompute.BootstrapSubnetInRegion(t, "gke-cluster", networkName, "us-east1", "10.79.0.0/20")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withControlPlaneEgress(clusterName, networkName, subnetworkName, "NONE"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_egress.0.mode", "NONE"),
+				),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// deletion_protection is a Terraform-only field that the API doesn't return.
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withControlPlaneEgress(clusterName, networkName, subnetworkName, "VIA_CONTROL_PLANE"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_container_cluster.primary", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "control_plane_egress.0.mode", "VIA_CONTROL_PLANE"),
+				),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// deletion_protection is a Terraform-only field that the API doesn't return.
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 func TestAccContainerCluster_withCustomNodeInitGcs(t *testing.T) {
 	t.Parallel()
 
@@ -20349,6 +20396,23 @@ resource "google_container_cluster" "primary" {
   }
 }
  `, name, networkName, subnetworkName, mode)
+}
+
+func testAccContainerCluster_withControlPlaneEgress(name, networkName, subnetworkName, mode string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name                = "%s"
+  location            = "us-east1-b"
+  network             = "%s"
+  subnetwork          = "%s"
+  initial_node_count  = 1
+  deletion_protection = false
+
+  control_plane_egress {
+    mode = "%s"
+  }
+}
+`, name, networkName, subnetworkName, mode)
 }
 
 func testAccContainerCluster_withCustomNodeInitGcs(cluster, bucket, networkName, subnetworkName string) string {

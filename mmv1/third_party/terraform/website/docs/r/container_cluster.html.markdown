@@ -532,6 +532,9 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 * `node_creation_config` - (Optional)
   Configuration for [node creation config](https://cloud.google.com/kubernetes-engine/security/control-plane-node-creation). Structure is [documented below](#node_creation_config).
 
+* `control_plane_egress` - (Optional)
+  Configuration for [restricting egress traffic from the API server](https://cloud.google.com/kubernetes-engine/networking/docs/restrict-egress-control-plane). Structure is [documented below](#nested_control_plane_egress).
+
 * `rbac_binding_config` - (Optional)
   RBACBindingConfig allows user to restrict ClusterRoleBindings an RoleBindings that can be created. Structure is [documented below](#nested_rbac_binding_config).
 
@@ -2175,6 +2178,11 @@ registry_hosts {
 <a name="node_creation_config"></a>The `node_creation_config` block supports:
 
 * `node_creation_mode` - (Required) Sets the node creation mode. Available options include `VIA_KUBELET` and `VIA_CONTROL_PLANE`.
+
+<a name="nested_control_plane_egress"></a>The `control_plane_egress` block supports:
+
+* `mode` - (Required) Sets the level of restriction for egress traffic from the API server. Available options include `VIA_CONTROL_PLANE` and `NONE`. GKE uses `VIA_CONTROL_PLANE` when `control_plane_egress` isn't set at cluster creation. Removing the block doesn't change the current setting; to lift the restriction, set `mode` to `VIA_CONTROL_PLANE`.
+  `NONE` disables the external IP addresses of the control plane VM instances and blocks direct egress traffic from the API server. It requires GKE version `1.35.1-gke.1396000` or later. With `NONE`, GKE rejects admission webhook configurations that use `clientConfig.url`, and the cluster can't use privately used public IP (PUPI) addresses.
 
 <a name="nested_rbac_binding_config"></a>The `rbac_binding_config` block supports:
 
