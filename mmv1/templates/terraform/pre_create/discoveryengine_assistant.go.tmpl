@@ -1,0 +1,23 @@
+// An engine with app_type APP_TYPE_INTRANET is created with an assistant, and the API allows one assistant per
+// engine, so an assistant that already exists is updated instead of created.
+getUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/collections/{{"{{"}}collection_id{{"}}"}}/engines/{{"{{"}}engine_id{{"}}"}}/assistants/{{"{{"}}assistant_id{{"}}"}}")
+if err != nil {
+	return err
+}
+_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	Project:   billingProject,
+	RawURL:    getUrl,
+	UserAgent: userAgent,
+	Headers:   headers,
+})
+if err == nil {
+	log.Printf("[DEBUG] Assistant %q already exists, updating it", d.Get("assistant_id"))
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/collections/{{"{{"}}collection_id{{"}}"}}/engines/{{"{{"}}engine_id{{"}}"}}/assistants/{{"{{"}}assistant_id{{"}}"}}")
+	if err != nil {
+		return fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+	return resourceDiscoveryEngineAssistantUpdate(d, meta)
+}
