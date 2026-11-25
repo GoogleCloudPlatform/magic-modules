@@ -31,6 +31,634 @@ func validateDefaultTableExpirationMs(v interface{}, k string) (ws []string, err
 }
 
 {{- if ne $.ProductMetadata.Compiler "terraformgoogleconversion-codegen" }}
+// resourceBigqueryDatasetReplicasHash normalizes the 'location' field to lowercase
+// before hashing so case-insensitive BigQuery locations (e.g. "us" vs "US") hash identically.
+func resourceBigqueryDatasetReplicasHash(v interface{}) int {
+	m, ok := v.(map[string]interface{})
+	if !ok {
+		return 0
+	}
+	normalized := make(map[string]interface{}, len(m))
+	for k, val := range m {
+		normalized[k] = val
+	}
+	if loc, ok := normalized["location"].(string); ok && loc != "" {
+		normalized["location"] = strings.ToLower(loc)
+	}
+	return schema.HashResource(bigqueryDatasetReplicasSchema())(normalized)
+}
+{{- end }}
+
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
+type bigQueryDatasetReplicaIdentity struct {
+	id       string
+	location string
+}
+
+type bigQueryDatasetReplicaConfig struct {
+	id       string
+	location string
+	kmsKey   string
+	known    bool
+}
+
+func extractBigQueryDatasetReplicaKmsKeyKnown(rMap map[string]interface{}) (string, bool) {
+	optsRaw, ok := rMap["replica_options"].([]interface{})
+	if !ok || len(optsRaw) == 0 {
+		return "", true
+	}
+	// SDKv2's DiffFieldReader can return []interface{}{nil} for TypeList blocks
+	// nested inside TypeSet during CustomizeDiff when ConfigFieldReader mutates
+	// the address slice in place (see extractBigQueryDatasetReplicasFromCty).
+	if optsRaw[0] == nil {
+		return "", false
+	}
+	optsMap, ok := optsRaw[0].(map[string]interface{})
+	if !ok {
+		return "", false
+	}
+	kmsKey, _ := optsMap["default_kms_key_name"].(string)
+	return kmsKey, true
+}
+
+func unmarkBigQueryDatasetCtyValue(v cty.Value) cty.Value {
+	if v.IsMarked() {
+		v, _ = v.Unmark()
+	}
+	return v
+}
+
+// extractBigQueryDatasetReplicasFromCty reads replica identities, original
+// location casing, and KMS keys directly from raw protocol cty values,
+// bypassing SDKv2's DiffFieldReader/ConfigFieldReader bug where nested TypeList
+// blocks inside TypeSet read back as []interface{}{nil} during CustomizeDiff.
+func extractBigQueryDatasetReplicasFromCty(raw cty.Value) (map[bigQueryDatasetReplicaIdentity]bigQueryDatasetReplicaConfig, bool, bool) {
+	if raw.IsNull() || !raw.IsKnown() {
+		return nil, false, false
+	}
+	raw = unmarkBigQueryDatasetCtyValue(raw)
+	if !raw.Type().IsObjectType() || !raw.Type().HasAttribute("replicas") {
+		return nil, false, false
+	}
+	repVal := raw.GetAttr("replicas")
+	if !repVal.IsKnown() {
+		return nil, true, true
+	}
+	result := make(map[bigQueryDatasetReplicaIdentity]bigQueryDatasetReplicaConfig)
+	if repVal.IsNull() {
+		return result, false, true
+	}
+	repVal = unmarkBigQueryDatasetCtyValue(repVal)
+	if !repVal.CanIterateElements() {
+		return nil, false, false
+	}
+	hasUnknown := false
+	for it := repVal.ElementIterator(); it.Next(); {
+		_, elem := it.Element()
+		if !elem.IsKnown() {
+			hasUnknown = true
+			continue
+		}
+		if elem.IsNull() {
+			continue
+		}
+		elem = unmarkBigQueryDatasetCtyValue(elem)
+		if !elem.Type().IsObjectType() || !elem.Type().HasAttribute("id") || !elem.Type().HasAttribute("location") {
+			continue
+		}
+		idVal := elem.GetAttr("id")
+		locVal := elem.GetAttr("location")
+		if !idVal.IsKnown() || !locVal.IsKnown() {
+			hasUnknown = true
+			continue
+		}
+		if idVal.IsNull() || locVal.IsNull() {
+			continue
+		}
+		idVal = unmarkBigQueryDatasetCtyValue(idVal)
+		locVal = unmarkBigQueryDatasetCtyValue(locVal)
+		if idVal.Type() != cty.String || locVal.Type() != cty.String {
+			continue
+		}
+		id := idVal.AsString()
+		loc := locVal.AsString()
+		if id == "" || loc == "" {
+			continue
+		}
+		kmsKey := ""
+		kmsKnown := true
+		if elem.Type().HasAttribute("replica_options") {
+			optsVal := elem.GetAttr("replica_options")
+			if !optsVal.IsKnown() {
+				kmsKnown = false
+				hasUnknown = true
+			} else if !optsVal.IsNull() {
+				optsVal = unmarkBigQueryDatasetCtyValue(optsVal)
+				if optsVal.CanIterateElements() {
+					for optIt := optsVal.ElementIterator(); optIt.Next(); {
+						_, optElem := optIt.Element()
+						if !optElem.IsKnown() {
+							kmsKnown = false
+							hasUnknown = true
+							break
+						}
+						if optElem.IsNull() {
+							continue
+						}
+						optElem = unmarkBigQueryDatasetCtyValue(optElem)
+						if !optElem.Type().IsObjectType() || !optElem.Type().HasAttribute("default_kms_key_name") {
+							continue
+						}
+						kmsVal := optElem.GetAttr("default_kms_key_name")
+						if !kmsVal.IsKnown() {
+							kmsKnown = false
+							hasUnknown = true
+							break
+						}
+						if !kmsVal.IsNull() {
+							kmsVal = unmarkBigQueryDatasetCtyValue(kmsVal)
+							if kmsVal.Type() == cty.String {
+								kmsKey = kmsVal.AsString()
+							}
+						}
+					}
+				}
+			}
+		}
+		key := bigQueryDatasetReplicaIdentity{
+			id:       id,
+			location: strings.ToLower(loc),
+		}
+		result[key] = bigQueryDatasetReplicaConfig{
+			id:       id,
+			location: loc,
+			kmsKey:   kmsKey,
+			known:    kmsKnown,
+		}
+	}
+	return result, hasUnknown, true
+}
+
+func extractBigQueryDatasetReplicasFromSet(s *schema.Set) map[bigQueryDatasetReplicaIdentity]bigQueryDatasetReplicaConfig {
+	result := make(map[bigQueryDatasetReplicaIdentity]bigQueryDatasetReplicaConfig)
+	if s == nil {
+		return result
+	}
+	for _, raw := range s.List() {
+		rMap, ok := raw.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		id, _ := rMap["id"].(string)
+		loc, _ := rMap["location"].(string)
+		if id == "" || loc == "" {
+			continue
+		}
+		kmsKey, kmsKnown := extractBigQueryDatasetReplicaKmsKeyKnown(rMap)
+		key := bigQueryDatasetReplicaIdentity{
+			id:       id,
+			location: strings.ToLower(loc),
+		}
+		result[key] = bigQueryDatasetReplicaConfig{
+			id:       id,
+			location: loc,
+			kmsKey:   kmsKey,
+			known:    kmsKnown,
+		}
+	}
+	return result
+}
+
+func bigQueryDatasetReplicaMapsEqual(a, b map[bigQueryDatasetReplicaIdentity]bigQueryDatasetReplicaConfig) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for k, va := range a {
+		vb, exists := b[k]
+		if !exists || va.kmsKey != vb.kmsKey {
+			return false
+		}
+	}
+	return true
+}
+
+// forceNewBigQueryDatasetReplicas forces resource replacement when an immutable
+// replica KMS key changes. In SDKv2's diffSet, setting ForceNew only on the
+// top-level TypeSet schema ("replicas") only marks "replicas.#" as RequiresNew,
+// which is omitted whenever the set length does not change (e.g. 3 -> 3).
+// Flagging a changed child leaf attribute (such as "replicas.<hash>.id") sets
+// ForceNew on the child schema so RequiresNew is emitted even when oldLen == newLen;
+// hcl2shim.RequiresReplace maps any set member key back to the "replicas" path.
+func forceNewBigQueryDatasetReplicas(diff tpgresource.TerraformResourceDiff) error {
+	forcedLeaf := false
+	if p, ok := diff.(interface{ GetChangedKeysPrefix(string) []string }); ok {
+		changed := p.GetChangedKeysPrefix("replicas")
+		sort.Strings(changed)
+		for _, suffix := range []string{".id", ".location", ".default_kms_key_name"} {
+			for _, k := range changed {
+				if strings.HasSuffix(k, suffix) && diff.HasChange(k) {
+					if err := diff.ForceNew(k); err != nil {
+						return fmt.Errorf("ForceNew failed for %s: %s", k, err)
+					}
+					forcedLeaf = true
+					break
+				}
+			}
+			if forcedLeaf {
+				break
+			}
+		}
+	}
+	if !forcedLeaf || diff.HasChange("replicas") {
+		if err := diff.ForceNew("replicas"); err != nil {
+			if !forcedLeaf {
+				return fmt.Errorf("ForceNew failed for replicas: %s", err)
+			}
+		}
+	}
+	return nil
+}
+
+// ResourceBigQueryDatasetReplicasCustomDiffFunc handles CustomizeDiff checks for
+// BigQuery dataset replication and failover reservations:
+// 1) Replica KMS keys (replica_options.default_kms_key_name) are immutable after a
+//    replica is created and silently ignored on in-place API updates, so mutating
+//    default_kms_key_name on an existing (id, location) replica forces replacement.
+// 2) Updating failover_reservation_id updates each replica's computed
+//    failover_reservation_uri on the server. Marking replicas computed whenever
+//    failover_reservation_id changes prevents SDKv2's normalizeNullValues from
+//    discarding the post-apply Read result when surviving set elements would
+//    otherwise be wholly known in the plan (both for failover-only swaps and
+//    for simultaneous failover disassociation + replica removal).
+func ResourceBigQueryDatasetReplicasCustomDiffFunc(diff tpgresource.TerraformResourceDiff) error {
+	if sd, ok := diff.(interface{ Id() string }); ok && sd.Id() == "" {
+		return nil
+	}
+
+	newValueKnown := func(key string) bool {
+		if kd, ok := diff.(interface{ NewValueKnown(string) bool }); ok {
+			return kd.NewValueKnown(key)
+		}
+		return true
+	}
+
+	usedRawCty := false
+	if rd, ok := diff.(interface {
+		GetRawState() cty.Value
+		GetRawPlan() cty.Value
+	}); ok {
+		oldReplicas, oldUnknown, oldOK := extractBigQueryDatasetReplicasFromCty(rd.GetRawState())
+		newReplicas, _, newOK := extractBigQueryDatasetReplicasFromCty(rd.GetRawPlan())
+		if oldOK && newOK {
+			usedRawCty = true
+			if !oldUnknown && len(newReplicas) > 0 {
+				for key, newInfo := range newReplicas {
+					if !newInfo.known {
+						continue
+					}
+					if oldInfo, exists := oldReplicas[key]; exists && oldInfo.known {
+						if oldInfo.kmsKey != newInfo.kmsKey {
+							return forceNewBigQueryDatasetReplicas(diff)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if !usedRawCty {
+		if diff.HasChange("replicas") && newValueKnown("replicas") {
+			oldVal, newVal := diff.GetChange("replicas")
+			oldSet, okOld := oldVal.(*schema.Set)
+			newSet, okNew := newVal.(*schema.Set)
+			if okOld && okNew && oldSet != nil && newSet != nil {
+				oldKmsByReplica := extractBigQueryDatasetReplicasFromSet(oldSet)
+				for key, newInfo := range extractBigQueryDatasetReplicasFromSet(newSet) {
+					if !newInfo.known {
+						continue
+					}
+					if oldInfo, exists := oldKmsByReplica[key]; exists && oldInfo.known {
+						if oldInfo.kmsKey != newInfo.kmsKey {
+							return forceNewBigQueryDatasetReplicas(diff)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if diff.HasChange("failover_reservation_id") || !newValueKnown("failover_reservation_id") {
+		if cd, ok := diff.(interface{ SetNewComputed(string) error }); ok {
+			if err := cd.SetNewComputed("replicas"); err != nil {
+				return fmt.Errorf("Error re-setting replicas: %s", err)
+			}
+		}
+	}
+	return nil
+}
+
+func resourceBigQueryDatasetFailoverReplicasCustomizeDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	return ResourceBigQueryDatasetReplicasCustomDiffFunc(d)
+}
+
+// isBigQueryDatasetReplicasPlanUnknown returns true when CustomizeDiff marked
+// replicas as NewComputed (SetNewComputed("replicas")) because failover_reservation_id
+// changed. During ApplyResourceChange, SDKv2's DiffFromValues calls finalizeDiff
+// without CustomizeDiff (customized=false), which drops replicas.# when Old != ""
+// and New == "". As a result, d.HasChange("replicas") becomes false and d.Get("replicas")
+// returns stale prior state, while d.GetRawPlan().GetAttr("replicas") is unknown.
+func isBigQueryDatasetReplicasPlanUnknown(d *schema.ResourceData) bool {
+	if d == nil {
+		return false
+	}
+	rawPlan := d.GetRawPlan()
+	if !rawPlan.IsNull() && rawPlan.IsKnown() {
+		rawPlan = unmarkBigQueryDatasetCtyValue(rawPlan)
+		if rawPlan.Type().IsObjectType() && rawPlan.Type().HasAttribute("replicas") {
+			if !rawPlan.GetAttr("replicas").IsKnown() {
+				return true
+			}
+		}
+	}
+	if d.HasChange("replicas") {
+		if newSet, ok := d.Get("replicas").(*schema.Set); !ok || newSet == nil || newSet.Len() == 0 {
+			return true
+		}
+	}
+	return false
+}
+
+// bigQueryDatasetConfiguredReplicas returns the user-configured replicas sorted
+// deterministically by (id, lower(location)). When SetNewComputed("replicas")
+// made the planned replicas attribute unknown during Update, d.Get("replicas")
+// can either be blanked to empty or hold stale prior state (because DiffFromValues
+// drops replicas.# in finalizeDiff), so we read from d.GetRawConfig() first.
+func bigQueryDatasetConfiguredReplicas(d *schema.ResourceData) []bigQueryDatasetReplicaConfig {
+	if d == nil {
+		return nil
+	}
+	var repMap map[bigQueryDatasetReplicaIdentity]bigQueryDatasetReplicaConfig
+	if isBigQueryDatasetReplicasPlanUnknown(d) {
+		cfgReplicas, _, cfgOK := extractBigQueryDatasetReplicasFromCty(d.GetRawConfig())
+		if cfgOK && len(cfgReplicas) > 0 {
+			repMap = cfgReplicas
+		}
+	}
+	if len(repMap) == 0 {
+		if newSet, ok := d.Get("replicas").(*schema.Set); ok && newSet != nil && newSet.Len() > 0 {
+			repMap = extractBigQueryDatasetReplicasFromSet(newSet)
+		}
+	}
+	if len(repMap) == 0 {
+		return nil
+	}
+	replicas := make([]bigQueryDatasetReplicaConfig, 0, len(repMap))
+	for _, r := range repMap {
+		replicas = append(replicas, r)
+	}
+	sort.Slice(replicas, func(i, j int) bool {
+		if replicas[i].id != replicas[j].id {
+			return replicas[i].id < replicas[j].id
+		}
+		return strings.ToLower(replicas[i].location) < strings.ToLower(replicas[j].location)
+	})
+	return replicas
+}
+
+// buildBigQueryDatasetReplicasAPIPayload constructs the writable REST payload
+// for dataset replicas (id, location, and optional replicaOptions.defaultKmsKeyName),
+// omitting all output-only server fields.
+func buildBigQueryDatasetReplicasAPIPayload(d *schema.ResourceData) []interface{} {
+	replicas := bigQueryDatasetConfiguredReplicas(d)
+	if len(replicas) == 0 {
+		return nil
+	}
+	payload := make([]interface{}, 0, len(replicas))
+	for _, r := range replicas {
+		item := map[string]interface{}{
+			"id":       r.id,
+			"location": r.location,
+		}
+		if r.kmsKey != "" {
+			item["replicaOptions"] = map[string]interface{}{
+				"defaultKmsKeyName": r.kmsKey,
+			}
+		}
+		payload = append(payload, item)
+	}
+	return payload
+}
+
+// hasBigQueryDatasetReplicasChange distinguishes an actual user-requested
+// replicas change from a synthetic SetNewComputed("replicas") diff added by
+// ResourceBigQueryDatasetReplicasCustomDiffFunc when failover_reservation_id
+// changes. During ApplyResourceChange, DiffFromValues drops replicas.# via
+// finalizeDiff when planned replicas is unknown, making d.HasChange("replicas")
+// return false even when replicas was added/dropped alongside failover_reservation_id.
+func hasBigQueryDatasetReplicasChange(d *schema.ResourceData) bool {
+	if d == nil {
+		return false
+	}
+	if isBigQueryDatasetReplicasPlanUnknown(d) {
+		cfgReplicas, _, cfgOK := extractBigQueryDatasetReplicasFromCty(d.GetRawConfig())
+		if !cfgOK || len(cfgReplicas) == 0 {
+			// replicas is Optional+Computed (default_from_api); omitting replicas in HCL is a no-op.
+			return false
+		}
+		oldReplicas, _, oldOK := extractBigQueryDatasetReplicasFromCty(d.GetRawState())
+		if !oldOK {
+			oldVal, _ := d.GetChange("replicas")
+			oldSet, _ := oldVal.(*schema.Set)
+			oldReplicas = extractBigQueryDatasetReplicasFromSet(oldSet)
+		}
+		return !bigQueryDatasetReplicaMapsEqual(oldReplicas, cfgReplicas)
+	}
+	if !d.HasChange("replicas") {
+		return false
+	}
+	newSet, ok := d.Get("replicas").(*schema.Set)
+	return ok && newSet != nil && newSet.Len() > 0
+}
+
+// IsBigQueryDatasetBackfillError retries failover reservation association while
+// a newly added secondary dataset replica is still completing its initial backfill.
+func IsBigQueryDatasetBackfillError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 400 && strings.Contains(gerr.Message, "has not finished backfill") {
+		return true, "Waiting for BigQuery dataset replica backfill to complete"
+	}
+	return false, ""
+}
+
+// FindBigQueryDatasetPrimaryReplica locates the active primary replica from a raw API replicas slice.
+func FindBigQueryDatasetPrimaryReplica(rawReplicas []interface{}, datasetLocation string) (string, string, bool) {
+	for _, targetState := range []string{"PRIMARY", "ASSIGNED_PRIMARY"} {
+		for _, raw := range rawReplicas {
+			rMap, ok := raw.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			state, _ := rMap["replicaState"].(string)
+			id, _ := rMap["id"].(string)
+			loc, _ := rMap["location"].(string)
+			if state == targetState && id != "" && loc != "" {
+				return id, loc, true
+			}
+		}
+	}
+	if datasetLocation != "" {
+		for _, raw := range rawReplicas {
+			rMap, ok := raw.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			id, _ := rMap["id"].(string)
+			loc, _ := rMap["location"].(string)
+			if id != "" && loc != "" && strings.EqualFold(loc, datasetLocation) {
+				return id, loc, true
+			}
+		}
+	}
+	return "", "", false
+}
+
+func waitForBigQueryDatasetReplicasReady(d *schema.ResourceData, config *transport_tpg.Config, billingProject, userAgent, activity string, timeout time.Duration) error {
+	readURL, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{"projects/{{project}}/datasets/{{dataset_id}}?accessPolicyVersion=3&datasetView=BASIC_REPLICA_METADATA_VIEW"}}")
+	if err != nil {
+		return err
+	}
+	pollF := func() (map[string]interface{}, error) {
+		return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    readURL,
+			UserAgent: userAgent,
+		})
+	}
+	checkF := func(resp map[string]interface{}, respErr error) transport_tpg.PollResult {
+		if respErr != nil {
+			return transport_tpg.ErrorPollResult(respErr)
+		}
+		rawReplicas, ok := resp["replicas"].([]interface{})
+		if !ok {
+			return transport_tpg.SuccessPollResult()
+		}
+		for _, raw := range rawReplicas {
+			rMap, ok := raw.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			if state, _ := rMap["replicaState"].(string); state == "BACKFILLING" {
+				id, _ := rMap["id"].(string)
+				return transport_tpg.PendingStatusPollResult(fmt.Sprintf("dataset replica %q BACKFILLING", id))
+			}
+		}
+		return transport_tpg.SuccessPollResult()
+	}
+	return transport_tpg.PollingWaitTime(pollF, checkF, activity, timeout, 1, config.SleepUnit)
+}
+
+func patchBigQueryDatasetFailoverReservation(d *schema.ResourceData, config *transport_tpg.Config, billingProject, userAgent, failoverReservationId string, timeout time.Duration) error {
+	patchURL, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{"projects/{{project}}/datasets/{{dataset_id}}?accessPolicyVersion=3"}}")
+	if err != nil {
+		return err
+	}
+	body := map[string]interface{}{
+		"failoverReservationId": failoverReservationId,
+	}
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:               config,
+		Method:               "PATCH",
+		Project:              billingProject,
+		RawURL:               patchURL,
+		UserAgent:            userAgent,
+		Body:                 body,
+		Timeout:              timeout,
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{IsBigQueryDatasetBackfillError},
+	})
+	return err
+}
+
+func cleanupBigQueryDatasetReplicationBeforeDelete(d *schema.ResourceData, config *transport_tpg.Config, billingProject, userAgent string) error {
+	readURL, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{"projects/{{project}}/datasets/{{dataset_id}}?accessPolicyVersion=3&datasetView=BASIC_REPLICA_METADATA_VIEW"}}")
+	if err != nil {
+		return err
+	}
+	getRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    readURL,
+		UserAgent: userAgent,
+		Timeout:   d.Timeout(schema.TimeoutDelete),
+	})
+	if err != nil {
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) || transport_tpg.IsGoogleApiErrorWithCode(err, 403) {
+			return nil
+		}
+		return fmt.Errorf("Error reading Dataset %q before delete: %s", d.Id(), err)
+	}
+
+	hasFailover := false
+	if fid, ok := getRes["failoverReservationId"].(string); ok && fid != "" {
+		hasFailover = true
+	}
+	rawReplicas, _ := getRes["replicas"].([]interface{})
+	for _, raw := range rawReplicas {
+		if rMap, ok := raw.(map[string]interface{}); ok {
+			if uri, _ := rMap["failoverReservationUri"].(string); uri != "" {
+				hasFailover = true
+				break
+			}
+		}
+	}
+
+	if hasFailover {
+		if err := patchBigQueryDatasetFailoverReservation(d, config, billingProject, userAgent, "", d.Timeout(schema.TimeoutDelete)); err != nil {
+			return fmt.Errorf("Error disassociating failover reservation on Dataset %q before delete: %s", d.Id(), err)
+		}
+	}
+
+	if len(rawReplicas) > 1 {
+		datasetLocation, _ := getRes["location"].(string)
+		if datasetLocation == "" {
+			datasetLocation, _ = d.Get("location").(string)
+		}
+		primaryID, primaryLocation, found := FindBigQueryDatasetPrimaryReplica(rawReplicas, datasetLocation)
+		if !found {
+			return fmt.Errorf("Error finding primary replica on Dataset %q to drop secondary replicas before delete", d.Id())
+		}
+		patchURL, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{"projects/{{project}}/datasets/{{dataset_id}}?accessPolicyVersion=3"}}")
+		if err != nil {
+			return err
+		}
+		patchBody := map[string]interface{}{
+			"replicas": []interface{}{
+				map[string]interface{}{
+					"id":       primaryID,
+					"location": primaryLocation,
+				},
+			},
+		}
+		if _, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:               config,
+			Method:               "PATCH",
+			Project:              billingProject,
+			RawURL:               patchURL,
+			UserAgent:            userAgent,
+			Body:                 patchBody,
+			Timeout:              d.Timeout(schema.TimeoutDelete),
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{IsBigQueryDatasetBackfillError},
+		}); err != nil {
+			return fmt.Errorf("Error dropping secondary replicas on Dataset %q before delete: %s", d.Id(), err)
+		}
+	}
+
+	return nil
+}
+{{- end }}
+
+{{- if ne $.ProductMetadata.Compiler "terraformgoogleconversion-codegen" }}
 // bigqueryDatasetAccessHash is a custom hash function for the access block.
 // It normalizes
 // 1) the 'role' field before hashing, treating legacy roles
