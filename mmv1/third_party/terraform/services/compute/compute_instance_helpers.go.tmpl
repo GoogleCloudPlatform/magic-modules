@@ -1693,27 +1693,104 @@ func stripInitializeParams(instanceMap map[string]interface{}) {
 }
 
 
+// isWorkloadIdentityCertConfigured reports whether identity_certificate_enabled
+// was explicitly set in config. On compute_instance and region_instance_template,
+// expandWorkloadIdentityConfig builds a map marshaled directly to JSON, so putting
+// false in the map sends "identityCertificateEnabled": false and overrides GCE's
+// true default for AGENT_IDENTITY, while omitting false unconditionally would drop
+// an explicit identity_certificate_enabled = false with AGENT_IDENTITY.
+func isWorkloadIdentityCertConfigured(d tpgresource.TerraformResourceData) bool {
+	rawConfig, _ := d.GetRawConfig().Unmark()
+	if !rawConfig.IsNull() {
+		if !rawConfig.IsKnown() || !rawConfig.Type().IsObjectType() || !rawConfig.Type().HasAttribute("workload_identity_config") {
+			return false
+		}
+		wicConfig, _ := rawConfig.GetAttr("workload_identity_config").Unmark()
+		if !wicConfig.IsKnown() || wicConfig.IsNull() || !wicConfig.CanIterateElements() || wicConfig.LengthInt() == 0 {
+			return false
+		}
+		elem, _ := wicConfig.AsValueSlice()[0].Unmark()
+		if !elem.IsKnown() || elem.IsNull() || !elem.Type().IsObjectType() || !elem.Type().HasAttribute("identity_certificate_enabled") {
+			return false
+		}
+		attr, _ := elem.GetAttr("identity_certificate_enabled").Unmark()
+		return attr.IsKnown() && !attr.IsNull()
+	}
+	if rawProvider, ok := d.(interface{ RawValues() map[string]interface{} }); ok {
+		if rawValues := rawProvider.RawValues(); rawValues != nil {
+			if wicSlice, ok := rawValues["workload_identity_config"].([]interface{}); ok && len(wicSlice) > 0 {
+				if wicElem, ok := wicSlice[0].(map[string]interface{}); ok {
+					val, exists := wicElem["identity_certificate_enabled"]
+					return exists && val != nil
+				}
+			}
+			return false
+		}
+	}
+	return false
+}
+
 func expandWorkloadIdentityConfig(d tpgresource.TerraformResourceData) map[string]interface{} {
 	iek, ok := d.GetOk("workload_identity_config")
 	if !ok {
 		return nil
 	}
-
-	wicRes := iek.([]interface{})[0].(map[string]interface{})
-	return map[string]interface{}{
-		"identity":                   wicRes["identity"].(string),
-		"identityCertificateEnabled": wicRes["identity_certificate_enabled"].(bool),
+	s, ok := iek.([]interface{})
+	if !ok || len(s) == 0 || s[0] == nil {
+		return nil
 	}
+
+	wicRes, ok := s[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	identityType, _ := wicRes["identity_type"].(string)
+	_, hasRawValues := d.(interface{ RawValues() map[string]interface{} })
+	if identityType == "" && !hasRawValues {
+		return map[string]interface{}{
+			"identity":                   wicRes["identity"].(string),
+			"identityCertificateEnabled": wicRes["identity_certificate_enabled"].(bool),
+		}
+	}
+	wicMap := map[string]interface{}{}
+	if v, ok := wicRes["identity"].(string); ok && v != "" {
+		wicMap["identity"] = v
+	}
+	if isWorkloadIdentityCertConfigured(d) {
+		if v, ok := wicRes["identity_certificate_enabled"].(bool); ok {
+			wicMap["identityCertificateEnabled"] = v
+		}
+	}
+	if identityType != "" {
+		wicMap["identityType"] = identityType
+	}
+	if len(wicMap) == 0 {
+		return nil
+	}
+	return wicMap
 }
 
 func flattenWorkloadIdentityConfig(v map[string]interface{}) []map[string]interface{} {
-	if v == nil {
+	if len(v) == 0 {
 		return nil
 	}
 	return []map[string]interface{}{
 		{
 			"identity":                     v["identity"],
 			"identity_certificate_enabled": v["identityCertificateEnabled"],
+		},
+	}
+}
+
+func flattenInstanceWorkloadIdentityConfig(v map[string]interface{}) []map[string]interface{} {
+	if len(v) == 0 {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"identity":                     v["identity"],
+			"identity_certificate_enabled": v["identityCertificateEnabled"],
+			"identity_type":                v["identityType"],
 		},
 	}
 }

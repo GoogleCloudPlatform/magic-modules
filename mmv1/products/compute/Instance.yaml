@@ -1031,3 +1031,13 @@ properties:
       - name: 'identityCertificateEnabled'
         type: Boolean
         description: 'Specifies whether identity certificates are enabled.'
+      - name: 'identityType'
+        type: Enum
+        description: |
+          The type of identity to use.
+        default_from_api: true
+        is_missing_in_cai: true
+        enum_values:
+          - 'IDENTITY_TYPE_UNSPECIFIED'
+          - 'SERVICE_ACCOUNT'
+          - 'AGENT_IDENTITY'
