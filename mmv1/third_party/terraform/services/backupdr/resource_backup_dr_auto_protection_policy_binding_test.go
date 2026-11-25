@@ -80,6 +80,34 @@ func TestAccBackupDRAutoProtectionPolicyBinding_numericScope(t *testing.T) {
 				Config: testAccBackupDRAutoProtectionPolicyBinding_scopeProjectNumber(context),
 			},
 			{
+				// Simulates upgrading existing state holding projects/<number> when config uses projects/<project_id>.
+				Config: testAccBackupDRAutoProtectionPolicyBinding_scopeProjectIDWaitForDelete(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_backup_dr_auto_protection_policy_binding.my_binding", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				// Switching back to the same project's number also updates state in-place without replacement.
+				Config: testAccBackupDRAutoProtectionPolicyBinding_scopeProjectNumber(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_backup_dr_auto_protection_policy_binding.my_binding", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				Config:             testAccBackupDRAutoProtectionPolicyBinding_scopeDifferentProjectID(context),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: true,
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PostApplyPostRefresh: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_backup_dr_auto_protection_policy_binding.my_binding", plancheck.ResourceActionReplace),
+					},
+				},
+			},
+			{
 				Config:             testAccBackupDRAutoProtectionPolicyBinding_scopeDifferentProjectNumber(context),
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,

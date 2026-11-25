@@ -37,17 +37,29 @@ create_url: projects/{{project}}/locations/{{location}}/autoProtectionPolicies/{
 # initiateDelete method, followed by an optional wait in post_delete when wait_for_delete is true.
 delete_url: projects/{{project}}/locations/{{location}}/autoProtectionPolicies/{{auto_protection_policy_id}}/bindings/{{auto_protection_policy_binding_id}}:initiateDelete
 delete_verb: POST
-# The API has no Update method for bindings.
-immutable: true
+# The API has no Update method for bindings. Resource-level immutability is not set so
+# `scope` can use custom_diff to allow safe in-place state migration between
+# `projects/{number}` and `projects/{project_id}` for the same project (forcing
+# replacement whenever the project actually changes). All URL parameters remain immutable.
 import_format:
   - projects/{{project}}/locations/{{location}}/autoProtectionPolicies/{{auto_protection_policy_id}}/bindings/{{auto_protection_policy_binding_id}}
 timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 60
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions: [create, delete]
+  result:
+    resource_inside_response: true
 autogen_async: true
+custom_diff:
+  - backupDRAutoProtectionPolicyBindingScopeForceNewIfChanged
 custom_code:
   decoder: templates/terraform/decoders/backup_dr_auto_protection_policy_binding.go.tmpl
+  custom_update: templates/terraform/custom_update/backup_dr_auto_protection_policy_binding.go.tmpl
   post_delete: templates/terraform/post_delete/backup_dr_auto_protection_policy_binding.go.tmpl
   test_check_destroy: templates/terraform/custom_check_destroy/backup_dr_auto_protection_policy_binding.go.tmpl
 samples:

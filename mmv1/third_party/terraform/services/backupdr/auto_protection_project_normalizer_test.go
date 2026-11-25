@@ -1,11 +1,13 @@
 package backupdr
 
 import (
+	"context"
 	"errors"
 	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -159,6 +161,269 @@ func TestNormalizeBackupDRAutoProtectionPolicyBindingScope(t *testing.T) {
 		}
 		if got := res["scope"]; got != "projects/123456789012" {
 			t.Fatalf("scope = %q, want %q", got, "projects/123456789012")
+		}
+	})
+}
+
+func TestBackupDRAutoProtectionPolicyBindingScopeForceNewIfChanged(t *testing.T) {
+	baseState := func(scope string) *terraform.InstanceState {
+		return &terraform.InstanceState{
+			ID: "projects/mgmt-project/locations/us-central1/autoProtectionPolicies/p1/bindings/b1",
+			Attributes: map[string]string{
+				"project":                           "mgmt-project",
+				"location":                          "us-central1",
+				"auto_protection_policy_id":         "p1",
+				"auto_protection_policy_binding_id": "b1",
+				"scope":                             scope,
+				"wait_for_delete":                   "false",
+				"deletion_policy":                   "DELETE",
+			},
+		}
+	}
+
+	baseConfig := func(scope string, waitForDelete bool) *terraform.ResourceConfig {
+		return terraform.NewResourceConfigRaw(map[string]interface{}{
+			"project":                           "mgmt-project",
+			"location":                          "us-central1",
+			"auto_protection_policy_id":         "p1",
+			"auto_protection_policy_binding_id": "b1",
+			"scope":                             scope,
+			"wait_for_delete":                   waitForDelete,
+			"deletion_policy":                   "DELETE",
+		})
+	}
+
+	diffWithResolvers := func(
+		t *testing.T,
+		state *terraform.InstanceState,
+		cfg *terraform.ResourceConfig,
+		resolveIDFromNumber func(string) (string, error),
+		resolveNumberFromID func(string) (string, error),
+	) (*terraform.InstanceDiff, error) {
+		t.Helper()
+		res := ResourceBackupDRAutoProtectionPolicyBinding()
+		res.CustomizeDiff = func(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+			return backupDRAutoProtectionPolicyBindingScopeForceNewIfChangedWithResolvers(
+				diff,
+				resolveIDFromNumber,
+				resolveNumberFromID,
+			)
+		}
+		return res.Diff(context.Background(), state, cfg, nil)
+	}
+
+	t.Run("upgrade path: numeric state to matching project ID updates in-place without ForceNew", func(t *testing.T) {
+		numCalls := 0
+		diff, err := diffWithResolvers(
+			t,
+			baseState("projects/123456789012"),
+			baseConfig("projects/target-project-a", false),
+			func(projectNumber string) (string, error) {
+				numCalls++
+				if projectNumber != "123456789012" {
+					t.Fatalf("unexpected projectNumber = %q", projectNumber)
+				}
+				return "target-project-a", nil
+			},
+			func(string) (string, error) {
+				t.Fatal("resolveNumberFromID should not be called")
+				return "", nil
+			},
+		)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if numCalls != 1 {
+			t.Fatalf("expected 1 resolveIDFromNumber call, got %d", numCalls)
+		}
+		if diff.RequiresNew() {
+			t.Fatalf("expected in-place state update (RequiresNew == false), got RequiresNew == true: %#v", diff.Attributes["scope"])
+		}
+		if attr := diff.Attributes["scope"]; attr == nil || attr.Old != "projects/123456789012" || attr.New != "projects/target-project-a" {
+			t.Fatalf("unexpected scope diff attr: %#v", attr)
+		}
+	})
+
+	t.Run("numeric state to different project ID forces replacement", func(t *testing.T) {
+		diff, err := diffWithResolvers(
+			t,
+			baseState("projects/123456789012"),
+			baseConfig("projects/other-project", false),
+			func(string) (string, error) {
+				return "target-project-a", nil
+			},
+			nil,
+		)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if !diff.RequiresNew() {
+			t.Fatal("expected ForceNew replacement when numeric state and new project ID refer to different projects")
+		}
+		if attr := diff.Attributes["scope"]; attr == nil || !attr.RequiresNew {
+			t.Fatalf("expected scope.RequiresNew == true, got %#v", attr)
+		}
+	})
+
+	t.Run("project ID state to matching numeric project updates in-place without ForceNew", func(t *testing.T) {
+		idCalls := 0
+		diff, err := diffWithResolvers(
+			t,
+			baseState("projects/target-project-a"),
+			baseConfig("projects/123456789012", false),
+			func(string) (string, error) {
+				t.Fatal("resolveIDFromNumber should not be called")
+				return "", nil
+			},
+			func(projectID string) (string, error) {
+				idCalls++
+				if projectID != "target-project-a" {
+					t.Fatalf("unexpected projectID = %q", projectID)
+				}
+				return "123456789012", nil
+			},
+		)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if idCalls != 1 {
+			t.Fatalf("expected 1 resolveNumberFromID call, got %d", idCalls)
+		}
+		if diff.RequiresNew() {
+			t.Fatal("expected in-place update when switching project ID to its own project number")
+		}
+	})
+
+	t.Run("project ID state to different numeric project resolves existing state project and forces replacement", func(t *testing.T) {
+		diff, err := diffWithResolvers(
+			t,
+			baseState("projects/target-project-a"),
+			baseConfig("projects/999999999999", false),
+			func(string) (string, error) {
+				t.Fatal("should resolve old state project ID, not unverified new numeric project")
+				return "", nil
+			},
+			func(projectID string) (string, error) {
+				if projectID != "target-project-a" {
+					t.Fatalf("unexpected projectID = %q", projectID)
+				}
+				return "123456789012", nil
+			},
+		)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if !diff.RequiresNew() {
+			t.Fatal("expected ForceNew replacement when switching project ID to a different project number")
+		}
+	})
+
+	t.Run("different project IDs force replacement without CRM calls", func(t *testing.T) {
+		diff, err := diffWithResolvers(
+			t,
+			baseState("projects/target-project-a"),
+			baseConfig("projects/target-project-b", false),
+			func(string) (string, error) {
+				t.Fatal("resolver should not be called")
+				return "", nil
+			},
+			func(string) (string, error) {
+				t.Fatal("resolver should not be called")
+				return "", nil
+			},
+		)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if !diff.RequiresNew() {
+			t.Fatal("expected ForceNew replacement when changing between different project IDs")
+		}
+	})
+
+	t.Run("different numeric project numbers force replacement without CRM calls", func(t *testing.T) {
+		diff, err := diffWithResolvers(
+			t,
+			baseState("projects/111111111111"),
+			baseConfig("projects/222222222222", false),
+			func(string) (string, error) {
+				t.Fatal("resolver should not be called")
+				return "", nil
+			},
+			func(string) (string, error) {
+				t.Fatal("resolver should not be called")
+				return "", nil
+			},
+		)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if !diff.RequiresNew() {
+			t.Fatal("expected ForceNew replacement when changing between different project numbers")
+		}
+	})
+
+	t.Run("CRM lookup error fails diff instead of forcing destructive replacement", func(t *testing.T) {
+		_, err := diffWithResolvers(
+			t,
+			baseState("projects/123456789012"),
+			baseConfig("projects/target-project-a", false),
+			func(string) (string, error) {
+				return "", errors.New("403 permission denied")
+			},
+			nil,
+		)
+		if err == nil {
+			t.Fatal("expected error when CRM lookup fails during scope diff")
+		}
+		if !strings.Contains(err.Error(), "projects/123456789012") {
+			t.Fatalf("expected actionable error message, got: %v", err)
+		}
+	})
+
+	t.Run("unchanged scope with other field update skips CRM and does not ForceNew", func(t *testing.T) {
+		diff, err := diffWithResolvers(
+			t,
+			baseState("projects/target-project-a"),
+			baseConfig("projects/target-project-a", true),
+			func(string) (string, error) {
+				t.Fatal("resolver should not be called when scope is unchanged")
+				return "", nil
+			},
+			func(string) (string, error) {
+				t.Fatal("resolver should not be called when scope is unchanged")
+				return "", nil
+			},
+		)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if diff.RequiresNew() {
+			t.Fatal("expected in-place update for wait_for_delete change")
+		}
+		if _, hasScope := diff.Attributes["scope"]; hasScope {
+			t.Fatalf("expected no diff on scope, got %#v", diff.Attributes["scope"])
+		}
+	})
+
+	t.Run("new resource skips CRM and does not error", func(t *testing.T) {
+		diff, err := diffWithResolvers(
+			t,
+			nil,
+			baseConfig("projects/target-project-a", false),
+			func(string) (string, error) {
+				t.Fatal("resolver should not be called on create")
+				return "", nil
+			},
+			func(string) (string, error) {
+				t.Fatal("resolver should not be called on create")
+				return "", nil
+			},
+		)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if diff == nil {
+			t.Fatal("expected non-nil create diff")
 		}
 	})
 }
@@ -391,10 +656,18 @@ func TestBackupDRResourceManagerBillingProject(t *testing.T) {
 	}
 }
 
-func TestBackupDRAutoProtectionSchemaHasNoProjectNumberDiffSuppress(t *testing.T) {
-	bindingScope := ResourceBackupDRAutoProtectionPolicyBinding().Schema["scope"]
-	if bindingScope.DiffSuppressFunc != nil {
+func TestBackupDRAutoProtectionSchemaInvariants(t *testing.T) {
+	bindingSchema := ResourceBackupDRAutoProtectionPolicyBinding().Schema
+	if bindingSchema["scope"].DiffSuppressFunc != nil {
 		t.Error("expected AutoProtectionPolicyBinding.scope not to use DiffSuppressFunc")
+	}
+	if bindingSchema["scope"].ForceNew {
+		t.Error("expected AutoProtectionPolicyBinding.scope ForceNew to be managed via CustomizeDiff")
+	}
+	for _, field := range []string{"project", "location", "auto_protection_policy_id", "auto_protection_policy_binding_id"} {
+		if !bindingSchema[field].ForceNew {
+			t.Errorf("expected AutoProtectionPolicyBinding.%s to remain ForceNew: true", field)
+		}
 	}
 
 	policyBPD := ResourceBackupDRAutoProtectionPolicy().Schema["backup_plan_details"].Elem.(*schema.Resource).Schema["backup_plan"]

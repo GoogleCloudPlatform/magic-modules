@@ -1,11 +1,15 @@
 package backupdr
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanagerv3"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -54,6 +58,41 @@ func backupDRResourceManagerBillingProject(d *schema.ResourceData, config *trans
 	return billingProject
 }
 
+func backupDRResourceManagerBillingProjectFromDiff(diff *schema.ResourceDiff, config *transport_tpg.Config) string {
+	billingProject := ""
+	if project, err := tpgresource.GetProjectFromDiff(diff, config); err == nil && project != "" {
+		billingProject = project
+	}
+	if config != nil && config.BillingProject != "" {
+		billingProject = config.BillingProject
+	}
+	return billingProject
+}
+
+func sendBackupDRProjectGetRequest(
+	config *transport_tpg.Config,
+	product registry.Product,
+	billingProject string,
+	userAgent string,
+	timeout time.Duration,
+	projectPathSegment string,
+) (map[string]interface{}, error) {
+	if config == nil {
+		return nil, fmt.Errorf("provider config is nil")
+	}
+	baseURL := strings.TrimRight(transport_tpg.BaseUrl(product, config), "/")
+	url := fmt.Sprintf("%s/projects/%s", baseURL, projectPathSegment)
+
+	return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Timeout:   timeout,
+	})
+}
+
 // resolveBackupDRProjectIDFromNumber looks up a project number via Cloud
 // Resource Manager v3 using transport_tpg.SendRequest so retries, custom
 // endpoints, and user_project_override (X-Goog-User-Project) are handled
@@ -66,19 +105,8 @@ func resolveBackupDRProjectIDFromNumber(d *schema.ResourceData, config *transpor
 	if err != nil {
 		return "", err
 	}
-
 	billingProject := backupDRResourceManagerBillingProject(d, config)
-	baseURL := strings.TrimRight(transport_tpg.BaseUrl(resourcemanagerv3.Product, config), "/")
-	url := fmt.Sprintf("%s/projects/%s", baseURL, projectNumber)
-
-	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "GET",
-		Project:   billingProject,
-		RawURL:    url,
-		UserAgent: userAgent,
-		Timeout:   d.Timeout(schema.TimeoutRead),
-	})
+	res, err := sendBackupDRProjectGetRequest(config, resourcemanagerv3.Product, billingProject, userAgent, d.Timeout(schema.TimeoutRead), projectNumber)
 	if err != nil {
 		return "", err
 	}
@@ -87,6 +115,129 @@ func resolveBackupDRProjectIDFromNumber(d *schema.ResourceData, config *transpor
 		return "", fmt.Errorf("Resource Manager v3 response for projects/%s did not include projectId", projectNumber)
 	}
 	return projectID, nil
+}
+
+func resolveBackupDRProjectIDFromNumberForDiff(diff *schema.ResourceDiff, config *transport_tpg.Config, projectNumber string) (string, error) {
+	if config == nil {
+		return "", fmt.Errorf("provider config is nil")
+	}
+	billingProject := backupDRResourceManagerBillingProjectFromDiff(diff, config)
+	res, err := sendBackupDRProjectGetRequest(config, resourcemanagerv3.Product, billingProject, config.UserAgent, 0, projectNumber)
+	if err != nil {
+		return "", err
+	}
+	projectID, _ := res["projectId"].(string)
+	if projectID == "" {
+		return "", fmt.Errorf("Resource Manager v3 response for projects/%s did not include projectId", projectNumber)
+	}
+	return projectID, nil
+}
+
+func resolveBackupDRProjectNumberFromIDForDiff(diff *schema.ResourceDiff, config *transport_tpg.Config, projectID string) (string, error) {
+	if config == nil {
+		return "", fmt.Errorf("provider config is nil")
+	}
+	billingProject := backupDRResourceManagerBillingProjectFromDiff(diff, config)
+	res, err := sendBackupDRProjectGetRequest(config, resourcemanager.Product, billingProject, config.UserAgent, 0, projectID)
+	if err != nil {
+		return "", err
+	}
+	projectNumber, _ := res["projectNumber"].(string)
+	if projectNumber == "" || !isNumericProjectIdentifier(projectNumber) {
+		return "", fmt.Errorf("Resource Manager v1 response for projects/%s did not include numeric projectNumber", projectID)
+	}
+	return projectNumber, nil
+}
+
+// backupDRAutoProtectionPolicyBindingScopeForceNewIfChanged enforces
+// immutability of AutoProtectionPolicyBinding.scope while allowing a safe
+// in-place state-only update when transitioning between `projects/{number}`
+// and `projects/{project_id}` for the same project (such as upgrading state
+// written by earlier provider versions).
+func backupDRAutoProtectionPolicyBindingScopeForceNewIfChanged(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	config, _ := meta.(*transport_tpg.Config)
+	return backupDRAutoProtectionPolicyBindingScopeForceNewIfChangedWithResolvers(
+		diff,
+		func(projectNumber string) (string, error) {
+			return resolveBackupDRProjectIDFromNumberForDiff(diff, config, projectNumber)
+		},
+		func(projectID string) (string, error) {
+			return resolveBackupDRProjectNumberFromIDForDiff(diff, config, projectID)
+		},
+	)
+}
+
+func backupDRAutoProtectionPolicyBindingScopeForceNewIfChangedWithResolvers(
+	diff *schema.ResourceDiff,
+	resolveIDFromNumber func(projectNumber string) (string, error),
+	resolveNumberFromID func(projectID string) (string, error),
+) error {
+	if diff.Id() == "" || !diff.HasChange("scope") {
+		return nil
+	}
+	if !diff.NewValueKnown("scope") {
+		return diff.ForceNew("scope")
+	}
+
+	oldVal, newVal := diff.GetChange("scope")
+	oldScope, _ := oldVal.(string)
+	newScope, _ := newVal.(string)
+	if oldScope == newScope {
+		return nil
+	}
+
+	oldProj, oldRest, oldOK := parseBackupDRProjectPrefix(oldScope)
+	newProj, newRest, newOK := parseBackupDRProjectPrefix(newScope)
+	if !oldOK || !newOK || oldRest != "" || newRest != "" {
+		return diff.ForceNew("scope")
+	}
+
+	oldIsNum := isNumericProjectIdentifier(oldProj)
+	newIsNum := isNumericProjectIdentifier(newProj)
+	if oldIsNum == newIsNum {
+		// Both numeric (different project numbers) or both project IDs
+		// (different project IDs): force replacement without a CRM call.
+		return diff.ForceNew("scope")
+	}
+
+	// Always resolve the existing project in state (oldProj) rather than the
+	// incoming config value (newProj), since newProj may reference a different
+	// or inaccessible project.
+	if oldIsNum {
+		if resolveIDFromNumber == nil {
+			return fmt.Errorf("cannot resolve project number %q while diffing BackupDR AutoProtectionPolicyBinding scope: resolver is nil", oldProj)
+		}
+		resolvedID, err := resolveIDFromNumber(oldProj)
+		if err != nil {
+			return fmt.Errorf(
+				"error resolving project number %q while diffing BackupDR AutoProtectionPolicyBinding scope: %w "+
+					"(ensure cloudresourcemanager.googleapis.com is enabled and caller has resourcemanager.projects.get, "+
+					"or keep scope as \"projects/%s\")",
+				oldProj, err, oldProj,
+			)
+		}
+		if resolvedID == newProj {
+			return nil
+		}
+		return diff.ForceNew("scope")
+	}
+
+	if resolveNumberFromID == nil {
+		return fmt.Errorf("cannot resolve project ID %q while diffing BackupDR AutoProtectionPolicyBinding scope: resolver is nil", oldProj)
+	}
+	resolvedNumber, err := resolveNumberFromID(oldProj)
+	if err != nil {
+		return fmt.Errorf(
+			"error resolving project ID %q while diffing BackupDR AutoProtectionPolicyBinding scope: %w "+
+				"(ensure cloudresourcemanager.googleapis.com is enabled and caller has resourcemanager.projects.get, "+
+				"or keep scope as \"projects/%s\")",
+			oldProj, err, oldProj,
+		)
+	}
+	if resolvedNumber == newProj {
+		return nil
+	}
+	return diff.ForceNew("scope")
 }
 
 func normalizeBackupDRAutoProtectionPolicyBindingScope(d *schema.ResourceData, meta interface{}, res map[string]interface{}) error {
