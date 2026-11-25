@@ -79,7 +79,7 @@ if len(updateMask) > 0 {
 		Body:                 obj,
 		Timeout:              d.Timeout(schema.TimeoutUpdate),
 		Headers:              headers,
-		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.FirestoreField409RetryUnderlyingDataChanged},
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.FirestoreField409Retry},
 	})
 
 	if err != nil {
