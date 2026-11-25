@@ -1,0 +1,17 @@
+{{- if not $.ProductMetadata.IsTgcCompiler }}
+// alloydbClusterExpressConfigCustomizeDiff forces a new cluster when express_config.0.enabled
+// changes from false to true. AlloyDB can upgrade an Express cluster to a standard cluster in
+// place, but it can't convert a standard cluster to an Express cluster.
+func alloydbClusterExpressConfigCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+{{- if ne $.TargetVersionName "ga" }}
+	if diff.Id() == "" || !diff.HasChange("express_config.0.enabled") {
+		return nil
+	}
+	oldEnabled, newEnabled := diff.GetChange("express_config.0.enabled")
+	if !oldEnabled.(bool) && newEnabled.(bool) {
+		return diff.ForceNew("express_config.0.enabled")
+	}
+{{- end }}
+	return nil
+}
+{{- end }}
