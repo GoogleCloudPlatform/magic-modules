@@ -1353,26 +1353,17 @@ func TestAccContainerNodePool_withWindowsNodeConfig(t *testing.T) {
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerNodePool_withWindowsNodeConfig(cluster, np, "OS_VERSION_LTSC2019"),
-			},
-			{
-				ResourceName:      "google_container_node_pool.with_windows_node_config",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			// Perform an update.
-			{
 				Config: testAccContainerNodePool_withWindowsNodeConfig(cluster, np, "OS_VERSION_LTSC2022"),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_container_node_pool.with_windows_node_config", plancheck.ResourceActionUpdate),
-					},
-				},
 			},
 			{
 				ResourceName:      "google_container_node_pool.with_windows_node_config",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			// From GKE 1.37+, Windows Server 2019 is blocked; verify updating to LTSC2019 is rejected.
+			{
+				Config:      testAccContainerNodePool_withWindowsNodeConfig(cluster, np, "OS_VERSION_LTSC2019"),
+				ExpectError: regexp.MustCompile("Node pools using Windows Server 2019 are not supported"),
 			},
 		},
 	})
