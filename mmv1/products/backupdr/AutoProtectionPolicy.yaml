@@ -170,16 +170,19 @@ properties:
       - name: matchingResourceCount
         type: String
         output: true
+        custom_flatten: templates/terraform/custom_flatten/default_zero_string.go.tmpl
         description: |
           The number of resources that currently match the policy's criteria.
       - name: protectedResourceCount
         type: String
         output: true
+        custom_flatten: templates/terraform/custom_flatten/default_zero_string.go.tmpl
         description: |
           The number of matching resources that are successfully protected.
       - name: failedResourceCount
         type: String
         output: true
+        custom_flatten: templates/terraform/custom_flatten/default_zero_string.go.tmpl
         description: |
           The number of matching resources whose protection failed during the last job run.
   - name: bindingSummary
@@ -191,5 +194,6 @@ properties:
       - name: projectCount
         type: String
         output: true
+        custom_flatten: templates/terraform/custom_flatten/default_zero_string.go.tmpl
         description: |
           The total number of projects protected by the policy.
