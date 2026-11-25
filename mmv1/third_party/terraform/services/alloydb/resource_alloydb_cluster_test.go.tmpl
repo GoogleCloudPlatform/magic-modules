@@ -3,9 +3,6 @@ package alloydb_test
 import (
 	"regexp"
 	"testing"
-{{- if ne $.TargetVersionName "ga" }}
-	"time"
-{{- end }}
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 {{- if ne $.TargetVersionName "ga" }}
@@ -2198,21 +2195,10 @@ func TestAccAlloydbCluster_expressUpgrade(t *testing.T) {
 				),
 			},
 			{
-				// AlloyDB Express instant provisioning marks the primary instance READY within a few
-				// seconds while an internal post-create setup workflow continues asynchronously in
-				// the background (typically 3-4 minutes, not exposed as an LRO or status field).
-				// The provider already retries the synchronous HTTP 400 ("background setup in
-				// progress, retry in a few minutes") via IsAlloyDbInstanceUpdatingError so normal
-				// updates wait out that precondition. However, when this test relied only on that
-				// 400 retry, the PATCH succeeded (HTTP 200) right as the 400 cleared and the
-				// resulting async upgrade LRO then failed mid-run with a generic INTERNAL error
-				// (code 13), after HTTP retry predicates no longer apply. Per the AlloyDB team's
-				// test guidance, sleep 10 minutes before triggering the upgrade.
-				PreConfig: func() {
-					acctest.Sleep(10 * time.Minute)
-				},
 				// Upgrade the Express cluster to a standard cluster and update labels in the same apply.
-				// express_config has to be the only field in its update request.
+				// express_config has to be the only field in its update request. While Express post-create
+				// background setup is still running, the PATCH returns HTTP 400 ("background setup in
+				// progress") and is retried via IsAlloyDbInstanceUpdatingError until setup completes.
 				Config: testAccAlloydbCluster_expressConfig(upgradedContext),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
