@@ -2870,6 +2870,26 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+			"control_plane_egress": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Computed:    true,
+				Description: `Configuration for restricting egress traffic from the cluster's control plane.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"mode": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringInSlice([]string{"VIA_CONTROL_PLANE", "NONE"}, false),
+							Description: `The level of restriction for egress traffic from the control plane.
+ Accepted values are:
+* VIA_CONTROL_PLANE: The control plane VM instances keep their external IP addresses, and egress traffic from the API server is not restricted.
+* NONE: The control plane VM instances have no external IP addresses, and direct egress traffic from the API server is blocked.`,
+						},
+					},
+				},
+			},
 			"rbac_binding_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
