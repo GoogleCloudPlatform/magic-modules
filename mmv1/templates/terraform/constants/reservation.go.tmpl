@@ -58,3 +58,15 @@ func computeReservationProjectMapDiffSuppress(k, old, new string, d *schema.Reso
 	return false
 }
 {{- end }}
+
+{{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
+func computeReservationEnableEmergentMaintenanceForceNew(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	if d.Id() == "" || !d.HasChange("enable_emergent_maintenance") {
+		return nil
+	}
+	if dt, _ := d.Get("deployment_type").(string); dt == "" || dt == "DEPLOYMENT_TYPE_UNSPECIFIED" {
+		return d.ForceNew("enable_emergent_maintenance")
+	}
+	return nil
+}
+{{- end }}
