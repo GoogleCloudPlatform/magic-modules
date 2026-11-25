@@ -25,9 +25,25 @@ Get information about a {{$.ProductMetadata.DisplayName}} {{$.Name}}.
 ~> **Warning:** This datasource is in beta, and should be used with the terraform-provider-google-beta provider.
 See [Provider Versions](../guides/provider_versions.html.markdown) for more details on beta resources.
 {{- end }}
-{{ if and $.References.Api (index $.References.Guides "Official Documentation") }}
-For more information see the [official documentation]({{index $.References.Guides "Official Documentation"}}) and
+{{- $officialDoc := "" }}
+{{- if $.References.Guides }}
+  {{- $officialDoc = index $.References.Guides "Official Documentation" }}
+{{- end }}
+{{ if and $.References.Api $officialDoc }}
+For more information see the [official documentation]({{$officialDoc}}) and
 the [API]({{$.References.Api}}).
+{{- else if or $.References.Api $.References.Guides }}
+To get more information about {{$.Name}}, see:
+{{- if $.References.Api }}
+
+* [API documentation]({{$.References.Api}})
+{{- end }}
+{{- if $.References.Guides }}
+* How-to Guides
+{{- range $title, $link := $.References.Guides }}
+    * [{{$title}}]({{$link}})
+{{- end }}
+{{- end }}
 {{- end }}
 
 ## Example Usage
@@ -67,7 +83,13 @@ The following arguments are supported:
     {{- end }}
   {{- end }}
 {{- end }}
-{{- if or (contains $.BaseUrl "{{project}}") (contains $.CreateUrl "{{project}}")}}
+{{- $hasExplicitProject := false }}
+{{- range $p := $.AllUserProperties }}
+  {{- if eq (underscore $p.Name) "project" }}
+    {{- $hasExplicitProject = true }}
+  {{- end }}
+{{- end }}
+{{- if and (or (contains $.BaseUrl "{{project}}") (contains $.CreateUrl "{{project}}") (contains $.IdFormat "{{project}}")) (not $hasExplicitProject) }}
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 {{ "" }}
@@ -75,4 +97,4 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-See [{{$.TerraformName}}](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/{{replaceAll $.TerraformName "google_" ""}}#argument-reference) resource for details of the available attributes.
+See [{{$.TerraformName}}](https://registry.terraform.io/providers/hashicorp/{{ if eq $.MinVersionObj.Name "beta" }}google-beta{{ else }}google{{ end }}/latest/docs/resources/{{replaceAll $.TerraformName "google_" ""}}#argument-reference) resource for details of the available attributes.

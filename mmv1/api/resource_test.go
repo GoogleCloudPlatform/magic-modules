@@ -1849,3 +1849,90 @@ func TestResource_TestSampleSetUp_ZeroStepShorthandAndBetaValidateUnderGA(t *tes
 		t.Errorf("Validate() under GA returned unexpected errors: %v", errs)
 	}
 }
+
+func TestDatasourceCodegenHelpers(t *testing.T) {
+	t.Parallel()
+
+	p := &api.Product{
+		Name:     "OracleDatabase",
+		Versions: []*product.Version{{Name: "ga"}, {Name: "beta"}},
+	}
+
+	r := api.Resource{
+		Name:            "OdbDnsZone",
+		ProductMetadata: p,
+		BaseUrl:         "projects/{{project}}/locations/{{location}}/odbNetworks/{{odbnetwork}}/odbDnsZones",
+		IdFormat:        "projects/{{project}}/locations/{{location}}/odbNetworks/{{odbnetwork}}/odbDnsZones/{{odb_dns_zone_id}}",
+		Datasource: &resource.Datasource{
+			Generate: true,
+		},
+		Parameters: []*api.Type{
+			{Name: "location", Type: "String", UrlParamOnly: true, Required: true},
+			{Name: "odbnetwork", Type: "String", UrlParamOnly: true, Required: true},
+			{Name: "odbDnsZoneId", Type: "String", UrlParamOnly: true, Required: true},
+		},
+		Properties: []*api.Type{
+			{Name: "authString", Type: "String", Output: true, Sensitive: true},
+			{Name: "passwordWo", Type: "String", WriteOnly: true},
+			{Name: "reservedIpRange", Type: "String", IgnoreRead: true},
+			{Name: "effectiveReservedIpRange", Type: "String", Output: true},
+			{
+				Name: "clusterConfig",
+				Type: "NestedObject",
+				Properties: []*api.Type{
+					{Name: "adminPassword", Type: "String", Sensitive: true},
+					{Name: "secretWo", Type: "String", WriteOnly: true},
+				},
+			},
+		},
+		VirtualFields: []*api.Type{
+			{Name: "deletion_protection", Type: "Boolean", DefaultValue: true},
+			{Name: "deletion_policy", Type: "String", DefaultValue: "DELETE"},
+			{Name: "block_names", Type: "Array", Output: true, ItemType: &api.Type{Type: "String"}},
+		},
+	}
+
+	if got, want := r.DatasourceRequiredFields(), []string{"location", "odbnetwork", "odb_dns_zone_id"}; !slices.Equal(got, want) {
+		t.Errorf("DatasourceRequiredFields() = %v, want %v", got, want)
+	}
+	if got, want := r.DatasourceOptionalFields(), []string{"project"}; !slices.Equal(got, want) {
+		t.Errorf("DatasourceOptionalFields() = %v, want %v", got, want)
+	}
+	if got, want := r.DatasourceRemovedFields(), []string{"password_wo"}; !slices.Equal(got, want) {
+		t.Errorf("DatasourceRemovedFields() = %v, want %v", got, want)
+	}
+	wantNestedDeletes := []string{`delete(dsSchema["cluster_config"].Elem.(*schema.Resource).Schema, "secret_wo")`}
+	if got := r.DatasourceNestedRemovedFieldStmts(); !slices.Equal(got, wantNestedDeletes) {
+		t.Errorf("DatasourceNestedRemovedFieldStmts() = %v, want %v", got, wantNestedDeletes)
+	}
+	wantSensitive := []string{
+		`dsSchema["auth_string"]`,
+		`dsSchema["cluster_config"].Elem.(*schema.Resource).Schema["admin_password"]`,
+	}
+	if got := r.DatasourceSensitiveFieldPaths(); !slices.Equal(got, wantSensitive) {
+		t.Errorf("DatasourceSensitiveFieldPaths() = %v, want %v", got, wantSensitive)
+	}
+	wantVirtual := []string{"deletion_protection", "deletion_policy"}
+	if got := r.DatasourceClientVirtualFields(); !slices.Equal(got, wantVirtual) {
+		t.Errorf("DatasourceClientVirtualFields() = %v, want %v", got, wantVirtual)
+	}
+	wantBackfills := []api.EffectiveBackfill{{Target: "reserved_ip_range", Source: "effective_reserved_ip_range"}}
+	if got := r.DatasourceEffectiveBackfills(); !reflect.DeepEqual(got, wantBackfills) {
+		t.Errorf("DatasourceEffectiveBackfills() = %+v, want %+v", got, wantBackfills)
+	}
+
+	step := &resource.Step{}
+
+	// reserved_ip_range is backfilled from effective_reserved_ip_range so it should NOT be ignored,
+	// whereas client-side deletion_protection MUST be ignored (and block_names output virtual field kept).
+	gotIgnores := r.DatasourceIgnoreReadProperties(step)
+	if !slices.Contains(gotIgnores, "deletion_protection") {
+		t.Errorf("expected DatasourceIgnoreReadProperties to contain deletion_protection, got %v", gotIgnores)
+	}
+	if slices.Contains(gotIgnores, "block_names") {
+		t.Errorf("expected DatasourceIgnoreReadProperties not to contain output virtual field block_names, got %v", gotIgnores)
+	}
+	if slices.Contains(gotIgnores, "reserved_ip_range") {
+		t.Errorf("expected DatasourceIgnoreReadProperties not to contain backfilled reserved_ip_range, got %v", gotIgnores)
+	}
+}
