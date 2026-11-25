@@ -121,8 +121,7 @@ properties:
   - name: scope
     type: String
     required: true
-    # The API returns the scope with the project number, even when it was set with the project ID.
-    diff_suppress_func: backupDRAutoProtectionProjectDiffSuppress
+    # The API returns the scope with the project number; the decoder normalizes it back to the configured project ID.
     description: |
       The container that the policy is applied to, in the format `projects/{project}`.
   - name: state

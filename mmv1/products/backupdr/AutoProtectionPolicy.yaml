@@ -137,7 +137,6 @@ properties:
         - name: backupPlan
           type: String
           required: true
-          diff_suppress_func: backupDRAutoProtectionProjectDiffSuppress
           description: |
             The resource name of the backup plan to apply to the matching resources, in the format
             `projects/{project}/locations/{location}/backupPlans/{backup_plan_id}`. The backup plan

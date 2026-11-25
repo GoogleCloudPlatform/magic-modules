@@ -11,6 +11,8 @@
 	limitations under the License.
 */ -}}
 {{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
-recordBackupDRAutoProtectionPolicyProjectNumbers(d, meta, res)
+if err := normalizeBackupDRAutoProtectionPolicyProjectNumbers(d, meta, res); err != nil {
+	return nil, err
+}
 {{- end }}
 return res, nil

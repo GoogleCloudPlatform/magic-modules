@@ -5,7 +5,9 @@ if v := res["state"]; v == "DELETION_INITIATED" {
 }
 
 {{- if not (contains $.ProductMetadata.Compiler "terraformgoogleconversion") }}
-recordBackupDRAutoProtectionPolicyBindingScopeProjectNumber(d, meta, res)
+if err := normalizeBackupDRAutoProtectionPolicyBindingScope(d, meta, res); err != nil {
+	return nil, err
+}
 {{- end }}
 
 return res, nil
