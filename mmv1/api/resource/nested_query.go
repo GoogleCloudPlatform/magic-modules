@@ -43,11 +43,18 @@ type NestedQuery struct {
 	//  keys[-1] : list_of_objects
 	// }
 	ModifyByPatch bool `yaml:"modify_by_patch"`
+
+	// If true, use the parent resource ETag as an If-Match precondition and
+	// retry the full read-modify-write operation after a concurrent update.
+	UseEtag bool `yaml:"use_etag"`
 }
 
 func (q *NestedQuery) Validate(rName string) (es []error) {
 	if len(q.Keys) == 0 {
 		es = append(es, fmt.Errorf("missing `keys` for `nested_query` in resource %s", rName))
+	}
+	if q.UseEtag && !q.ModifyByPatch {
+		es = append(es, fmt.Errorf("`use_etag` requires `modify_by_patch` in resource %s", rName))
 	}
 
 	return es

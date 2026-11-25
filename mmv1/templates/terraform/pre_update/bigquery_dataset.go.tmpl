@@ -1,0 +1,3 @@
+if etag, ok := d.GetOk("etag"); ok {
+	setBigQueryDatasetEtagHeader(headers, etag.(string))
+}

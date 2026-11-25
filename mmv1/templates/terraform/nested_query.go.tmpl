@@ -81,22 +81,83 @@ func resource{{ $.ResourceName }}FindNestedObjectInList(d *schema.ResourceData, 
   return -1, nil, nil
 }
 {{- if $.NestedQuery.ModifyByPatch }}
+{{- if $.NestedQuery.UseEtag }}
+type resource{{ $.ResourceName }}PatchEncoder func(*schema.ResourceData, interface{}, map[string]interface{}) (map[string]interface{}, string, error)
+
+func resource{{ $.ResourceName }}PatchWithRetry(d *schema.ResourceData, meta interface{}, obj map[string]interface{}, userAgent, billingProject, url, method string, headers http.Header, timeout time.Duration, encoder resource{{ $.ResourceName }}PatchEncoder) (map[string]interface{}, error) {
+  config := meta.(*transport_tpg.Config)
+  var res map[string]interface{}
+  err := tpgresource.Retry(90*time.Second, config.SleepUnit, func() *retry.RetryError {
+    patch, etag, err := encoder(d, meta, obj)
+    if err != nil {
+      return retry.NonRetryableError(err)
+    }
+
+    attemptHeaders := headers.Clone()
+    setBigQueryDatasetEtagHeader(attemptHeaders, etag)
+    res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+      Config: config,
+      Method: method,
+      Project: billingProject,
+      RawURL: url,
+      UserAgent: userAgent,
+      Body: patch,
+      Timeout: timeout,
+      Headers: attemptHeaders,
+{{- if $.ErrorRetryPredicates }}
+      ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{- join $.ErrorRetryPredicates "," -}} },
+{{- end }}
+{{- if $.ErrorAbortPredicates }}
+      ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{- join $.ErrorAbortPredicates "," -}} },
+{{- end }}
+{{- if $.ApiVersion }}
+      ApiVersion: "{{ $.ApiVersion }}",
+{{- end }}
+    })
+    if err != nil {
+      if tpgresource.IsConflictError(err) {
+        return retry.RetryableError(fmt.Errorf("concurrent update to {{ $.Name }}; retrying with the latest ETag: %w", err))
+      }
+      return retry.NonRetryableError(err)
+    }
+    return nil
+  })
+  return res, err
+}
+{{- end }}
 // PatchCreateEncoder handles creating request data to PATCH parent resource
 // with list including new object.
+{{- if $.NestedQuery.UseEtag }}
+func resource{{ $.ResourceName }}PatchCreateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, string, error) {
+  currItems, etag, err := resource{{ $.ResourceName }}ListForPatch(d, meta)
+{{- else }}
 func resource{{ $.ResourceName }}PatchCreateEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
   currItems, err := resource{{ $.ResourceName }}ListForPatch(d, meta)
+{{- end }}
   if err != nil {
+{{- if $.NestedQuery.UseEtag }}
+    return nil, "", err
+{{- else }}
     return nil, err
+{{- end }}
   }
 
   _, found, err := resource{{ $.ResourceName }}FindNestedObjectInList(d, meta, currItems)
   if err != nil {
+{{- if $.NestedQuery.UseEtag }}
+    return nil, "", err
+{{- else }}
     return nil, err
+{{- end }}
   }
 
   // Return error if item already created.
   if found != nil {
+{{- if $.NestedQuery.UseEtag }}
+    return nil, "", fmt.Errorf("Unable to create {{ $.Name }}, existing object already found: %+v", found)
+{{- else }}
     return nil, fmt.Errorf("Unable to create {{ $.Name }}, existing object already found: %+v", found)
+{{- end }}
   }
 
   // Return list with the resource to create appended
@@ -118,7 +179,11 @@ func resource{{ $.ResourceName }}PatchCreateEncoder(d *schema.ResourceData, meta
   {{- end }}
 {{- end }}
 
+{{- if $.NestedQuery.UseEtag }}
+  return res, etag, nil
+{{- else }}
   return res, nil
+{{- end }}
 }
 
 {{- if $.Updatable }}
@@ -232,19 +297,36 @@ func resource{{ $.ResourceName }}PatchUpdateEncoder(d *schema.ResourceData, meta
 
 // PatchDeleteEncoder handles creating request data to PATCH parent resource
 // with list excluding object to delete.
+{{- if $.NestedQuery.UseEtag }}
+func resource{{ $.ResourceName }}PatchDeleteEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, string, error) {
+  currItems, etag, err := resource{{ $.ResourceName }}ListForPatch(d, meta)
+{{- else }}
 func resource{{ $.ResourceName }}PatchDeleteEncoder(d *schema.ResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
   currItems, err := resource{{ $.ResourceName }}ListForPatch(d, meta)
+{{- end }}
   if err != nil {
+{{- if $.NestedQuery.UseEtag }}
+    return nil, "", err
+{{- else }}
     return nil, err
+{{- end }}
   }
 
   idx, item, err := resource{{ $.ResourceName }}FindNestedObjectInList(d, meta, currItems)
   if err != nil {
+{{- if $.NestedQuery.UseEtag }}
+    return nil, "", err
+{{- else }}
     return nil, err
+{{- end }}
   }
   if item == nil {
     // Spoof 404 error for proper handling by Delete (i.e. no-op)
+{{- if $.NestedQuery.UseEtag }}
+    return nil, "", tpgresource.Fake404("nested", "{{ $.ResourceName }}")
+{{- else }}
     return nil, tpgresource.Fake404("nested", "{{ $.ResourceName }}")
+{{- end }}
   }
 
   updatedItems := append(currItems[:idx], currItems[idx+1:]...)
@@ -260,7 +342,11 @@ func resource{{ $.ResourceName }}PatchDeleteEncoder(d *schema.ResourceData, meta
   {{- end }}
 {{- end }}
 
+{{- if $.NestedQuery.UseEtag }}
+  return res, etag, nil
+{{- else }}
   return res, nil
+{{- end }}
 }
 
 // ListForPatch handles making API request to get parent resource and
@@ -272,22 +358,38 @@ func resource{{ $.ResourceName }}PatchDeleteEncoder(d *schema.ResourceData, meta
   # 2) returns the full list of other resources, rather than just the
   #    matching resource
 */}}
+{{- if $.NestedQuery.UseEtag }}
+func resource{{ $.ResourceName }}ListForPatch(d *schema.ResourceData, meta interface{}) ([]interface{}, string, error) {
+{{- else }}
 func resource{{ $.ResourceName }}ListForPatch(d *schema.ResourceData, meta interface{}) ([]interface{}, error) {
+{{- end }}
   config := meta.(*transport_tpg.Config)
   url, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{$.SelfLinkUri}}")
   if err != nil {
+{{- if $.NestedQuery.UseEtag }}
+      return nil, "", err
+{{- else }}
       return nil, err
+{{- end }}
   }
   {{- if $.HasProject }}
   project, err := tpgresource.GetProject(d, config)
   if err != nil {
+{{- if $.NestedQuery.UseEtag }}
+      return nil, "", err
+{{- else }}
       return nil, err
+{{- end }}
   }
   {{- end }}
 
   userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
   if err != nil {
+{{- if $.NestedQuery.UseEtag }}
+    return nil, "", err
+{{- else }}
     return nil, err
+{{- end }}
   }
 
   res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -309,8 +411,15 @@ func resource{{ $.ResourceName }}ListForPatch(d *schema.ResourceData, meta inter
     {{- end }}
   })
   if err != nil {
+{{- if $.NestedQuery.UseEtag }}
+    return nil, "", err
+{{- else }}
     return nil, err
+{{- end }}
   }
+{{- if $.NestedQuery.UseEtag }}
+  etag, _ := res["etag"].(string)
+{{- end }}
 
 {{- if $.CustomCode.PostRead }}
   {{ customTemplate $ $.CustomCode.PostRead false -}}
@@ -322,7 +431,11 @@ func resource{{ $.ResourceName }}ListForPatch(d *schema.ResourceData, meta inter
   if v, ok = res["{{ $k }}"]; ok && v != nil {
     res = v.(map[string]interface{})
   } else {
+{{- if $.NestedQuery.UseEtag }}
+    return nil, etag, nil
+{{- else }}
     return nil, nil
+{{- end }}
   }
   {{- end }}
 {{- end }}
@@ -331,11 +444,23 @@ func resource{{ $.ResourceName }}ListForPatch(d *schema.ResourceData, meta inter
   if ok && v != nil {
     ls, lsOk := v.([]interface{})
     if !lsOk {
+{{- if $.NestedQuery.UseEtag }}
+      return nil, "", fmt.Errorf(`expected list for nested field "{{ $.LastNestedQueryKey }}"`)
+{{- else }}
       return nil, fmt.Errorf(`expected list for nested field "{{ $.LastNestedQueryKey }}"`)
+{{- end }}
     }
+{{- if $.NestedQuery.UseEtag }}
+    return ls, etag, nil
+{{- else }}
     return ls, nil
+{{- end }}
   }
+{{- if $.NestedQuery.UseEtag }}
+  return nil, etag, nil
+{{- else }}
   return nil, nil
+{{- end }}
 }
 {{- end }}{{/* if $.NestedQuery.ModifyByPatch */}}
 {{- end }}
