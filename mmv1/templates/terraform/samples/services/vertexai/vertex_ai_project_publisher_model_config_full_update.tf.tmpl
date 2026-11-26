@@ -1,0 +1,36 @@
+resource "google_bigquery_dataset" "logs" {
+  provider                   = google-beta
+  dataset_id                 = "{{index $.ResourceIdVars "dataset_id"}}"
+  location                   = "US"
+  delete_contents_on_destroy = true
+}
+
+resource "google_vertex_ai_project_publisher_model_config" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+
+  inference_event_logging_config {
+    state = "DISABLED"
+  }
+
+  logging_config {
+    enabled       = false
+    sampling_rate = 0.25
+
+    bigquery_destination {
+      output_uri = "bq://${google_bigquery_dataset.logs.project}.${google_bigquery_dataset.logs.dataset_id}.request_response_logs_v2"
+    }
+  }
+}
+
+data "google_vertex_ai_project_publisher_model_config" "tf_test_check" {
+  provider   = google-beta
+  project    = google_vertex_ai_project_publisher_model_config.{{$.PrimaryResourceId}}.project
+  depends_on = [google_vertex_ai_project_publisher_model_config.{{$.PrimaryResourceId}}]
+
+  lifecycle {
+    postcondition {
+      condition     = self.id == google_vertex_ai_project_publisher_model_config.{{$.PrimaryResourceId}}.id && self.inference_event_logging_config == google_vertex_ai_project_publisher_model_config.{{$.PrimaryResourceId}}.inference_event_logging_config && self.logging_config == google_vertex_ai_project_publisher_model_config.{{$.PrimaryResourceId}}.logging_config
+      error_message = "Expected project publisher model config data source state to match resource state."
+    }
+  }
+}

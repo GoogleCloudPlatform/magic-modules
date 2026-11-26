@@ -1,0 +1,50 @@
+{{- if ne $.TargetVersionName "ga" -}}
+package vertexai
+
+import (
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/registry"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func DataSourceVertexAIProjectPublisherModelConfig() *schema.Resource {
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceVertexAIProjectPublisherModelConfig().Schema)
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
+
+	return &schema.Resource{
+		Read:   dataSourceVertexAIProjectPublisherModelConfigRead,
+		Schema: dsSchema,
+	}
+}
+
+func dataSourceVertexAIProjectPublisherModelConfigRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}")
+	if err != nil {
+		return fmt.Errorf("error constructing id: %w", err)
+	}
+	d.SetId(id)
+
+	if err := resourceVertexAIProjectPublisherModelConfigRead(d, meta); err != nil {
+		return fmt.Errorf("error reading ProjectPublisherModelConfig %q: %w", id, err)
+	}
+
+	if d.Id() == "" {
+		return fmt.Errorf("%s not found", id)
+	}
+	return nil
+}
+
+func init() {
+	registry.Schema{
+		Name:        "google_vertex_ai_project_publisher_model_config",
+		ProductName: "vertexai",
+		Type:        registry.SchemaTypeDataSource,
+		Schema:      DataSourceVertexAIProjectPublisherModelConfig(),
+	}.Register()
+}
+{{- end }}

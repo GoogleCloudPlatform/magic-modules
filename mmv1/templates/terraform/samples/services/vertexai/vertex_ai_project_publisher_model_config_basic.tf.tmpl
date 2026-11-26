@@ -1,0 +1,7 @@
+resource "google_vertex_ai_project_publisher_model_config" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+
+  inference_event_logging_config {
+    state = "ENABLED"
+  }
+}

@@ -1,0 +1,82 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2026 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+config := acctest.GoogleProviderConfig(t)
+
+url, err := tpgresource.ReplaceVarsForTest(config, rs, transport_tpg.BaseUrl(vertexai.Product, config)+"{{ $.SelfLinkUri }}")
+if err != nil {
+	return err
+}
+if config.CustomEndpoints[vertexai.Product.CustomEndpointField] == "" {
+	// ReplaceVarsForTest substitutes "" for {{"{{"}}region{{"}}"}} when the resource has no
+	// region/location attribute.
+	url = strings.Replace(url, "://-aiplatform.", "://aiplatform.", 1)
+}
+
+billingProject := rs.Primary.Attributes["project"]
+if config.BillingProject != "" {
+	billingProject = config.BillingProject
+}
+
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	Project:   billingProject,
+	RawURL:    url,
+	UserAgent: config.UserAgent,
+})
+if err != nil {
+	if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		continue
+	}
+	return fmt.Errorf("error checking whether VertexAIProjectPublisherModelConfig was destroyed at %s: %w", url, err)
+}
+
+if rawCfg, exists := res["inferenceEventLoggingConfig"]; exists && rawCfg != nil {
+	cfg, ok := rawCfg.(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("VertexAIProjectPublisherModelConfig still has unexpected inferenceEventLoggingConfig %#v at %s", rawCfg, url)
+	}
+	if rawState, hasState := cfg["state"]; hasState && rawState != nil {
+		state, ok := rawState.(string)
+		if !ok || (state != "" && state != "STATE_UNSPECIFIED") {
+			return fmt.Errorf("VertexAIProjectPublisherModelConfig inferenceEventLoggingConfig still exists (%#v) at %s", cfg, url)
+		}
+	}
+}
+if rawCfg, exists := res["loggingConfig"]; exists && rawCfg != nil {
+	cfg, ok := rawCfg.(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("VertexAIProjectPublisherModelConfig still has unexpected loggingConfig %#v at %s", rawCfg, url)
+	}
+	if rawEnabled, hasEnabled := cfg["enabled"]; hasEnabled && rawEnabled != nil {
+		if enabled, ok := rawEnabled.(bool); !ok || enabled {
+			return fmt.Errorf("VertexAIProjectPublisherModelConfig loggingConfig.enabled still set (%#v) at %s", cfg, url)
+		}
+	}
+	if rawRate, hasRate := cfg["samplingRate"]; hasRate && rawRate != nil {
+		if rate, ok := rawRate.(float64); !ok || rate != 0 {
+			return fmt.Errorf("VertexAIProjectPublisherModelConfig loggingConfig.samplingRate still set (%#v) at %s", cfg, url)
+		}
+	}
+	if rawBq, hasBq := cfg["bigqueryDestination"]; hasBq && rawBq != nil {
+		bq, ok := rawBq.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("VertexAIProjectPublisherModelConfig still has unexpected loggingConfig.bigqueryDestination %#v at %s", rawBq, url)
+		}
+		if rawURI, hasURI := bq["outputUri"]; hasURI && rawURI != nil {
+			if uri, ok := rawURI.(string); !ok || uri != "" {
+				return fmt.Errorf("VertexAIProjectPublisherModelConfig loggingConfig.bigqueryDestination.outputUri still set (%#v) at %s", cfg, url)
+			}
+		}
+	}
+}
