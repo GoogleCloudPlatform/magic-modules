@@ -28,6 +28,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 deprecation_message: '`google_parallelstore_instance` is deprecated and will be removed in a future major release. Use `google_lustre_instance` instead.'
+generate_list_resource: true
 exclude_sweeper: true
 async:
   type: OpAsync
