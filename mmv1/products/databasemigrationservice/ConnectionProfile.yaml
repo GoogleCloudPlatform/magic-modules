@@ -102,6 +102,27 @@ samples:
           sqldb_cert: my-cert
           sqldb_pass: my-password
           sqldb_user: my-username
+  - name: database_migration_service_connection_profile_postgres_ssl_flags
+    primary_resource_id: postgresprofile
+    steps:
+      - name: database_migration_service_connection_profile_postgres_ssl_flags
+        ignore_read_extra:
+          - postgresql.0.password
+        resource_id_vars:
+          profile: my-profileid
+          sqldb_pass: my-password
+          sqldb_user: my-username
+        vars:
+          ssl_hostname: example.com
+      - name: database_migration_service_connection_profile_postgres_ssl_flags
+        ignore_read_extra:
+          - postgresql.0.password
+        resource_id_vars:
+          profile: my-profileid
+          sqldb_pass: my-password
+          sqldb_user: my-username
+        vars:
+          ssl_hostname: updated.example.com
   - name: database_migration_service_connection_profile_oracle
     primary_resource_id: oracleprofile
     exclude_test: true
@@ -304,6 +325,12 @@ properties:
             immutable: true
             sensitive: true
             custom_flatten: templates/terraform/custom_flatten/database_migration_service_connection_profile_mysql_ssl_ca_certificate.go.tmpl
+          - name: sslFlags
+            type: KeyValuePairs
+            description: |
+              SSL flags used for establishing SSL connection to the source database. Only source specific flags are supported.
+              An object containing a list of "key": "value" pairs.
+              Examples: { "server_certificate_dn": "CN=server.com,OU=RDS,O=Amazon.com,C=US"} or { "server_certificate_hostname": "server.com"}.
       - name: cloudSqlId
         type: String
         description: |
@@ -395,6 +422,12 @@ properties:
             immutable: true
             sensitive: true
             custom_flatten: templates/terraform/custom_flatten/database_migration_service_connection_profile_postgresql_ssl_ca_certificate.go.tmpl
+          - name: sslFlags
+            type: KeyValuePairs
+            description: |
+              SSL flags used for establishing SSL connection to the source database. Only source specific flags are supported.
+              An object containing a list of "key": "value" pairs.
+              Examples: { "server_certificate_dn": "CN=server.com,OU=RDS,O=Amazon.com,C=US"} or { "server_certificate_hostname": "server.com"}.
       - name: cloudSqlId
         type: String
         description: |
@@ -497,6 +530,12 @@ properties:
             immutable: true
             sensitive: true
             custom_flatten: templates/terraform/custom_flatten/database_migration_service_connection_profile_oracle_ssl_ca_certificate.go.tmpl
+          - name: sslFlags
+            type: KeyValuePairs
+            description: |
+              SSL flags used for establishing SSL connection to the source database. Only source specific flags are supported.
+              An object containing a list of "key": "value" pairs.
+              Examples: { "server_certificate_dn": "CN=server.com,OU=RDS,O=Amazon.com,C=US"} or { "server_certificate_hostname": "server.com"}.
       - name: staticServiceIpConnectivity
         type: NestedObject
         description: |
