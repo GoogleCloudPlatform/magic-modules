@@ -35,6 +35,7 @@ async:
     base_url: '{{op_id}}'
 legacy_long_form_project: true
 api_resource_field: associations
+read_error_transform: 'transformSecurityPolicyAssociationReadError'
 samples:
   - name: region_network_firewall_policy_association
     primary_resource_id: default
