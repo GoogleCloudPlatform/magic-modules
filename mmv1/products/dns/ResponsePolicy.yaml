@@ -20,6 +20,7 @@ docs:
 base_url: projects/{{project}}/responsePolicies
 self_link: projects/{{project}}/responsePolicies/{{response_policy_name}}
 update_verb: PATCH
+generate_list_resource: true
 identity:
   - responsePolicyName
 kind: dns#responsePolicy
