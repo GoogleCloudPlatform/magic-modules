@@ -170,7 +170,7 @@ properties:
       you create the resource.
     send_empty_value: true
   - name: 'firewallId'
-    type: Integer
+    type: String
     description: |
       The unique identifier number for the resource. This identifier is defined by the server.
     api_name: id

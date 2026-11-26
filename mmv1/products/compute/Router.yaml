@@ -127,7 +127,7 @@ properties:
       An optional description of this resource.
     send_empty_value: true
   - name: 'routerId'
-    type: Integer
+    type: String
     description: |
       The unique identifier number for the resource. This identifier is defined by the server.
     api_name: id
