@@ -1,0 +1,260 @@
+// Why this custom_create exists:
+// In the Dialogflow Telephony API (v2beta1), PhoneNumber resources cannot be created directly
+// via a POST /phoneNumbers endpoint. Instead, provisioning a phone number is a two-service
+// workflow across PhoneNumberOrders and PhoneNumbers:
+//   1. Submit an order via POST /v2beta1/projects/{project}/locations/{location}/phoneNumberOrders
+//      with phoneNumberSpec (countryCode, preferredAreaCodes, and count = 1) and optional description.
+//   2. Wait for the PhoneNumberOrder's lifecycleState to reach "COMPLETED". When inventory for
+//      the requested country/area code is immediately available, the POST response may already
+//      be in state "COMPLETED"; otherwise it starts in "PENDING" and must be polled via
+//      GET /v2beta1/{orderName} until it reaches "COMPLETED" (or fails if "CANCELLED"/"FAILED").
+//   3. Once completed, the PhoneNumberOrder response populates a "phoneNumbers" map whose key
+//      is the newly provisioned PhoneNumber resource name:
+//      projects/{project}/locations/{location}/phoneNumbers/{phoneNumberId}
+//      and whose value is the E.164 phone number string (e.g. "+12565550100").
+//   4. Because CreatePhoneNumberOrder only provisions the raw number and does not accept
+//      runtime routing bindings (conversationProfile or allowedSipTrunks), if the user
+//      configured conversation_profile or allowed_sip_trunks in their Terraform block, we
+//      immediately follow up with PATCH /v2beta1/{phoneNumberName}?updateMask=... on the
+//      PhoneNumbers API so the resource is fully configured in a single `terraform apply`.
+//
+// How this works for the user:
+// The user declares a single `google_dialogflow_phone_number` resource with `phone_number_spec`
+// (and optional `conversation_profile` / `allowed_sip_trunks` bindings). Terraform handles
+// ordering the number, waiting for fulfillment, recording the PhoneNumber ID in state as soon
+// as the number is provisioned (so partial failures during step 4 do not leak untracked numbers),
+// applying initial bindings, and refreshing all computed attributes (`name`, `order_name`,
+// `phone_number`, `lifecycle_state`).
+
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+	return err
+}
+
+billingProject := ""
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+	return fmt.Errorf("Error fetching project for PhoneNumber: %s", err)
+}
+billingProject = project
+
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+	billingProject = bp
+}
+
+// Dialogflow regional endpoints follow the pattern https://{location}-dialogflow.googleapis.com
+// whenever location != "global". We qualify all PhoneNumberOrders and PhoneNumbers URLs
+// consistently with pre_create/dialogflow_set_endpoint.go.tmpl.
+location := d.Get("location").(string)
+universeDomain := config.UniverseDomain
+qualifyDialogflowUrl := func(rawUrl string) string {
+	if universeDomain != "" && universeDomain != "googleapis.com" {
+		rawUrl = strings.Replace(rawUrl, "googleapis.com", universeDomain, 1)
+	}
+	if strings.HasPrefix(rawUrl, "https://dialogflow") {
+		if location != "" && location != "global" {
+			rawUrl = strings.Replace(rawUrl, "https://dialogflow", fmt.Sprintf("https://%s-dialogflow", location), 1)
+		}
+	}
+	return rawUrl
+}
+
+// Step 1: Create a PhoneNumberOrder to provision a single phone number.
+// Each `google_dialogflow_phone_number` resource manages exactly one phone number, so we
+// always inject `count = 1` into the expanded `phoneNumberSpec` payload sent to the API.
+orderObj := make(map[string]interface{})
+phoneNumberSpecProp, err := expandNestedDialogflowPhoneNumberPhoneNumberSpec(d.Get("phone_number_spec"), d, config)
+if err != nil {
+	return err
+} else if !tpgresource.IsEmptyValue(reflect.ValueOf(phoneNumberSpecProp)) {
+	if specMap, ok := phoneNumberSpecProp.(map[string]interface{}); ok {
+		specMap["count"] = 1
+	}
+	orderObj["phoneNumberSpec"] = phoneNumberSpecProp
+}
+
+descriptionProp, err := expandNestedDialogflowPhoneNumberDescription(d.Get("description"), d, config)
+if err != nil {
+	return err
+} else if v, ok := d.GetOkExists("description"); !tpgresource.IsEmptyValue(reflect.ValueOf(descriptionProp)) && (ok || !reflect.DeepEqual(v, descriptionProp)) {
+	orderObj["description"] = descriptionProp
+}
+
+orderUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/phoneNumberOrders")
+if err != nil {
+	return err
+}
+orderUrl = qualifyDialogflowUrl(orderUrl)
+
+headers := make(http.Header)
+log.Printf("[DEBUG] Ordering new Dialogflow PhoneNumber via PhoneNumberOrders: %#v", orderObj)
+orderRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "POST",
+	Project:   billingProject,
+	RawURL:    orderUrl,
+	UserAgent: userAgent,
+	Body:      orderObj,
+	Timeout:   d.Timeout(schema.TimeoutCreate),
+	Headers:   headers,
+})
+if err != nil {
+	return fmt.Errorf("Error creating PhoneNumberOrder for PhoneNumber: %s", err)
+}
+
+orderName, _ := orderRes["name"].(string)
+if orderName == "" {
+	return fmt.Errorf("PhoneNumberOrder response missing name: %#v", orderRes)
+}
+if err := d.Set("order_name", orderName); err != nil {
+	return fmt.Errorf("Error setting order_name: %s", err)
+}
+
+// Step 2: Poll GetPhoneNumberOrder if the order was not fulfilled synchronously.
+// Expect `lifecycleState` to transition from "PENDING" -> "COMPLETED".
+// If polling fails or times out while the order is still "PENDING", we send a best-effort
+// POST /v2beta1/{orderName}:cancel request so the unfulfilled order does not remain
+// pending or consume project quota.
+lifecycleState, _ := orderRes["lifecycleState"].(string)
+if lifecycleState != "COMPLETED" {
+	getOrderUrl := qualifyDialogflowUrl(transport_tpg.BaseUrl(Product, config) + orderName)
+	err = retry.RetryContext(context.Background(), d.Timeout(schema.TimeoutCreate), func() *retry.RetryError {
+		pollRes, pollErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   billingProject,
+			RawURL:    getOrderUrl,
+			UserAgent: userAgent,
+			Timeout:   d.Timeout(schema.TimeoutCreate),
+			Headers:   headers,
+		})
+		if pollErr != nil {
+			return retry.NonRetryableError(pollErr)
+		}
+		orderRes = pollRes
+		state, _ := orderRes["lifecycleState"].(string)
+		switch state {
+		case "COMPLETED":
+			return nil
+		case "CANCELLED", "FAILED":
+			return retry.NonRetryableError(fmt.Errorf("PhoneNumberOrder %q entered terminal state %q: %#v", orderName, state, orderRes))
+		default:
+			return retry.RetryableError(fmt.Errorf("PhoneNumberOrder %q still in state %q", orderName, state))
+		}
+	})
+	if err != nil {
+		cancelUrl := qualifyDialogflowUrl(transport_tpg.BaseUrl(Product, config) + orderName + ":cancel")
+		_, _ = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   billingProject,
+			RawURL:    cancelUrl,
+			UserAgent: userAgent,
+			Body:      map[string]interface{}{},
+			Timeout:   d.Timeout(schema.TimeoutCreate),
+			Headers:   headers,
+		})
+		return fmt.Errorf("Error waiting for PhoneNumberOrder %q to complete: %s", orderName, err)
+	}
+}
+
+// Extract the provisioned PhoneNumber resource name from the completed order's `phoneNumbers` map.
+// The API returns `phoneNumbers` as map<string, string> where the key is the canonical
+// PhoneNumber resource name (`projects/{project}/locations/{location}/phoneNumbers/{id}`)
+// and the value is the E.164 phone number (`+1...`).
+var phoneNumberName string
+if pns, ok := orderRes["phoneNumbers"].(map[string]interface{}); ok {
+	for k := range pns {
+		phoneNumberName = k
+		break
+	}
+}
+if phoneNumberName == "" {
+	return fmt.Errorf("PhoneNumberOrder %q completed without any provisioned phoneNumbers: %#v", orderName, orderRes)
+}
+
+// Normalize the location segment in the resource name to match the user-configured `location`
+// (for example, orders placed against an EU sub-region endpoint may return `/locations/eu/`
+// in the resource name). Keeping the location segment aligned with `d.Get("location")` ensures
+// subsequent regional endpoint routing and list matching work without permadiffs.
+if location != "" && strings.Contains(phoneNumberName, "/locations/") {
+	re := regexp.MustCompile(`^projects/([^/]+)/locations/[^/]+/phoneNumbers/([^/]+)$`)
+	if m := re.FindStringSubmatch(phoneNumberName); m != nil {
+		phoneNumberName = fmt.Sprintf("projects/%s/locations/%s/phoneNumbers/%s", m[1], location, m[2])
+	}
+}
+
+// Record the PhoneNumber resource ID and identity in Terraform state immediately after
+// order completion—before attempting the optional Step 3 PATCH. Because the phone number
+// now exists in GCP, setting `d.SetId` here ensures Terraform tracks the resource in state
+// even if binding `conversation_profile` or `allowed_sip_trunks` fails in Step 3.
+if err := d.Set("project", project); err != nil {
+	return fmt.Errorf("Error setting project: %s", err)
+}
+if err := d.Set("name", phoneNumberName); err != nil {
+	return fmt.Errorf("Error setting name: %s", err)
+}
+d.SetId(phoneNumberName)
+
+identity, err := d.Identity()
+if err == nil && identity != nil {
+	if err = identity.Set("name", phoneNumberName); err != nil {
+		return fmt.Errorf("Error setting identity name: %s", err)
+	}
+} else {
+	log.Printf("[DEBUG] (Create) identity not set: %s", err)
+}
+
+// Step 3: If `conversation_profile` or `allowed_sip_trunks` is configured on creation,
+// issue a PATCH to `PhoneNumbers.UpdatePhoneNumber` (`PATCH /v2beta1/{name}?updateMask=...`).
+// `PhoneNumberOrders.CreatePhoneNumberOrder` does not accept these fields during ordering,
+// so this second API call binds the newly provisioned phone number to the user's
+// ConversationProfile and/or SIP trunks as part of the initial Create lifecycle.
+patchObj := make(map[string]interface{})
+var updateMask []string
+
+conversationProfileProp, err := expandNestedDialogflowPhoneNumberConversationProfile(d.Get("conversation_profile"), d, config)
+if err != nil {
+	return err
+} else if !tpgresource.IsEmptyValue(reflect.ValueOf(conversationProfileProp)) {
+	patchObj["conversationProfile"] = conversationProfileProp
+	updateMask = append(updateMask, "conversationProfile")
+}
+
+allowedSipTrunksProp, err := expandNestedDialogflowPhoneNumberAllowedSipTrunks(d.Get("allowed_sip_trunks"), d, config)
+if err != nil {
+	return err
+} else if !tpgresource.IsEmptyValue(reflect.ValueOf(allowedSipTrunksProp)) {
+	patchObj["allowedSipTrunks"] = allowedSipTrunksProp
+	updateMask = append(updateMask, "allowedSipTrunks")
+}
+
+if len(updateMask) > 0 {
+	patchUrl, err := tpgresource.ReplaceVars(d, config, transport_tpg.BaseUrl(Product, config)+"{{"{{"}}name{{"}}"}}")
+	if err != nil {
+		return err
+	}
+	patchUrl, err = transport_tpg.AddQueryParams(patchUrl, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+	if err != nil {
+		return err
+	}
+	patchUrl = qualifyDialogflowUrl(patchUrl)
+
+	log.Printf("[DEBUG] Configuring newly ordered PhoneNumber %q: %#v", phoneNumberName, patchObj)
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "PATCH",
+		Project:   billingProject,
+		RawURL:    patchUrl,
+		UserAgent: userAgent,
+		Body:      patchObj,
+		Timeout:   d.Timeout(schema.TimeoutCreate),
+		Headers:   headers,
+	})
+	if err != nil {
+		return fmt.Errorf("Error configuring PhoneNumber %q after ordering: %s", phoneNumberName, err)
+	}
+}
+
+log.Printf("[DEBUG] Finished creating PhoneNumber %q", d.Id())
+return resourceDialogflowPhoneNumberRead(d, meta)
