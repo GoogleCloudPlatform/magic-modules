@@ -25,6 +25,7 @@ create_url: '{{parent}}/contentPolicies'
 delete_url: '{{parent}}/contentPolicies/{{name}}'
 update_mask: true
 update_verb: PATCH
+generate_list_resource: true
 id_format: '{{parent}}/contentPolicies/{{name}}'
 import_format:
   - '{{parent}}/contentPolicies/{{name}}'
