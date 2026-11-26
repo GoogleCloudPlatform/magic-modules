@@ -1,0 +1,262 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Skill
+description: |-
+  A Skill represents a registered agentic capability.
+base_url: projects/{{project}}/locations/{{location}}/skills
+self_link: projects/{{project}}/locations/{{location}}/skills/{{name}}
+create_url: projects/{{project}}/locations/{{location}}/skills?skillId={{skill_id}}
+update_mask: true
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/skills/{{name}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/skills/{{name}}
+sweeper:
+  query_string: "?force=true"
+  prefixes:
+    - private-tf-test-
+  url_substitutions:
+    - location: global
+    - location: us
+    - location: eu
+async:
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - update
+    - delete
+  result:
+    resource_inside_response: true
+autogen_status: U2tpbGxBdXRvZ2VuVjJBZ2VudA==
+autogen_async: true
+custom_code:
+  pre_delete: templates/terraform/pre_delete/agentregistry_skill.go.tmpl
+samples:
+  - name: agentregistry_skill_update
+    primary_resource_id: default
+    steps:
+      - name: agentregistry_skill_basic
+        resource_id_vars:
+          skill_id: test-skill
+      - name: agentregistry_skill_update
+        resource_id_vars:
+          skill_id: test-skill
+  - name: agentregistry_skill_gcs
+    primary_resource_id: default
+    steps:
+      - name: agentregistry_skill_gcs
+        resource_id_vars:
+          skill_id: test-skill-gcs
+          bucket_name: test-skill-bucket
+parameters:
+  - name: location
+    type: String
+    required: true
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: skillId
+    type: String
+    required: true
+    description: |-
+      Custom, user-defined unique container identifier.
+      Must be unique within the parent project and location.
+      This value should be 4-64 characters, and valid characters
+      are `/a-z-/`.
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: Create time.
+    output: true
+  - name: defaultRevision
+    type: String
+    description: |-
+      The full resource name of the revision currently served by
+      default (floating track).
+      Format:
+      `projects/{project}/locations/{location}/skills/{skill}/revisions/{revision}`
+    default_from_api: true
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+  - name: description
+    type: String
+    description: |-
+      Brief summary describing the capabilities of the skill.
+      Maximum length is 2048 characters.
+  - name: displayName
+    type: String
+    description: |-
+      Human-readable display name of the skill.
+      Maximum length is 128 characters.
+  - name: frontmatter
+    type: NestedObject
+    description: |-
+      Structured metadata attributes extracted from the package's local SKILL.md
+      frontmatter.
+    output: true
+    properties:
+      - name: compatibility
+        type: String
+        description: Environmental dependencies or companion services.
+        output: true
+      - name: description
+        type: String
+        description: Functional description.
+        output: true
+      - name: license
+        type: String
+        description: License.
+        output: true
+      - name: metadata
+        type: KeyValuePairs
+        description: |-
+          Extensible flattened map mapping custom tags, authors, and
+          version parameters.
+        output: true
+      - name: name
+        type: String
+        description: The name of the skill.
+        output: true
+  - name: initialRevision
+    type: NestedObject
+    description: Represents an immutable, versioned snapshot of a Skill package.
+    immutable: true
+    ignore_read: true
+    properties:
+      - name: archiveUploadSource
+        type: NestedObject
+        description: Direct write-only raw archive payload upload.
+        exactly_one_of:
+          - initial_revision.0.archive_upload_source
+          - initial_revision.0.gcs_source
+        properties:
+          - name: archiveContent
+            type: String
+            required: true
+            description: |-
+              Input only. Write-only raw ZIP/TAR archive payload bytes containing the skill
+              package.
+      - name: gcsSource
+        type: NestedObject
+        description: Specifications for Cloud Storage objects.
+        exactly_one_of:
+          - initial_revision.0.archive_upload_source
+          - initial_revision.0.gcs_source
+        properties:
+          - name: generation
+            type: String
+            description: |-
+              Cloud Storage object generation ID. If not specified, the latest
+              generation is used.
+          - name: uri
+            type: String
+            required: true
+            description: |-
+              Cloud Storage object URI.
+              Format:
+              `gs://{bucket_name}/{object_name}`
+      - name: name
+        type: String
+        description: |-
+          Identifier. Resource name of the SkillRevision.
+          Format:
+          `projects/{project}/locations/{location}/skills/{skill}/revisions/{revision}`
+  - name: name
+    type: String
+    description: |-
+      Identifier. Resource name of the Skill.
+      Format: `projects/{project}/locations/{location}/skills/{skill}`
+      The `{skill}` segment acts as the resource ID. If the skill is associated
+      with a Publisher, this segment typically uses a hyphenated namespace prefix
+      corresponding to the publisher (e.g., `google-workspace-create-docs`).
+    output: true
+    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.tmpl
+  - name: publisher
+    type: String
+    description: |-
+      The publisher resource associated with this skill.
+      Format: `projects/{project}/locations/{location}/publishers/{publisher}`
+      The publisher dictates the allowed namespace prefixes for the skill's name
+      and logical `skill_id` (e.g., Publisher `google` authorizes the `google-*`
+      prefix).
+    output: true
+  - name: scanningConfig
+    type: NestedObject
+    description: Configuration for scanning of the skill.
+    default_from_api: true
+    properties:
+      - name: policy
+        type: String
+        description: |-
+          The security scanning policy.
+          Possible values:
+          DISABLED
+          ENABLED_BLOCKING
+          ENABLED_NONBLOCKING
+        default_from_api: true
+  - name: skill_urn
+    api_name: skillId
+    type: String
+    description: |-
+      A stable, globally unique logical identifier for the skill.
+      It is securely constructed by the backend by combining the associated
+      `publisher`'s verified namespace and the skill's resource ID to enforce
+      strict ownership. For example, the prefix `google-` is reserved exclusively
+      for first-party Google publishers to prevent namespace squatting.
+      Example: `urn:skill:google-workspace:create-docs`
+    output: true
+  - name: state
+    type: String
+    description: |-
+      The system-managed state of the skill.
+      Possible values:
+      STATE_CREATING
+      STATE_DRAFT
+      STATE_ACTIVE
+      STATE_DISABLED
+      STATE_DEPRECATED
+      STATE_DECOMMISSIONED
+      STATE_DELETING
+    output: true
+  - name: targetState
+    type: String
+    required: true
+    description: |-
+      User-managed target state of the skill.
+      Possible values:
+      TARGET_STATE_DRAFT
+      TARGET_STATE_ACTIVE
+      TARGET_STATE_DISABLED
+      TARGET_STATE_DEPRECATED
+      TARGET_STATE_DECOMMISSIONED
+  - name: type
+    type: String
+    required: true
+    description: |-
+      Structural deployment type (SIMPLE leaf vs COMPOSITE bundle).
+      Possible values:
+      SIMPLE
+  - name: uid
+    type: String
+    description: |-
+      Universally unique identifier (UUID4) for the logical
+      container.
+    output: true
+  - name: updateTime
+    type: String
+    description: Update time.
+    output: true
