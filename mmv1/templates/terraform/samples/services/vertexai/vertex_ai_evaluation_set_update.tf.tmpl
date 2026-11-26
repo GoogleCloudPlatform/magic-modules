@@ -1,0 +1,33 @@
+resource "google_vertex_ai_evaluation_item" "evaluation_item" {
+  region               = "us-central1"
+  display_name         = "{{index $.ResourceIdVars "item_display_name"}}"
+  evaluation_item_type = "REQUEST"
+  evaluation_request {
+    prompt {
+      text = "hello"
+    }
+  }
+}
+
+resource "google_vertex_ai_evaluation_item" "evaluation_item_2" {
+  region               = "us-central1"
+  display_name         = "{{index $.ResourceIdVars "item_2_display_name"}}"
+  evaluation_item_type = "REQUEST"
+  evaluation_request {
+    prompt {
+      text = "What is the largest planet in our solar system?"
+    }
+  }
+}
+
+resource "google_vertex_ai_evaluation_set" "{{$.PrimaryResourceId}}" {
+  region       = "us-central1"
+  display_name = "{{index $.ResourceIdVars "display_name"}}"
+  evaluation_items = [
+    google_vertex_ai_evaluation_item.evaluation_item.id,
+    google_vertex_ai_evaluation_item.evaluation_item_2.id,
+  ]
+  metadata = jsonencode({
+    "env" = "test"
+  })
+}
