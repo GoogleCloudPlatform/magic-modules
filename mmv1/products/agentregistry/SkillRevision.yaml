@@ -1,0 +1,218 @@
+# Copyright 2026 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: SkillRevision
+description: |
+  Represents an immutable, versioned snapshot of a Skill package.
+base_url: projects/{{project}}/locations/{{location}}/skills/{{skill}}/revisions
+self_link: projects/{{project}}/locations/{{location}}/skills/{{skill}}/revisions/{{skill_revision_id}}
+create_url: projects/{{project}}/locations/{{location}}/skills/{{skill}}/revisions?skillRevisionId={{skill_revision_id}}
+immutable: true
+update_mask: false
+id_format: projects/{{project}}/locations/{{location}}/skills/{{skill}}/revisions/{{skill_revision_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/skills/{{skill}}/revisions/{{skill_revision_id}}
+async:
+  type: OpAsync
+  operation:
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+  result:
+    resource_inside_response: true
+autogen_async: true
+custom_code:
+  test_constants: templates/terraform/test_constants/agent_registry_skill_revision.go.tmpl
+samples:
+  - name: agent_registry_skill_revision_basic
+    primary_resource_id: default
+    steps:
+      - name: agent_registry_skill_revision_basic
+        resource_id_vars:
+          revision: ar-rev
+        vars:
+          skill: private-tf-test-skill
+        test_vars_overrides:
+          skill: bootstrapAgentRegistrySkill(t)
+        ignore_read_extra:
+          - scan_result
+  - name: agent_registry_skill_revision_gcs_source
+    primary_resource_id: default
+    steps:
+      - name: agent_registry_skill_revision_gcs_source
+        resource_id_vars:
+          bucket: ar-skill-bucket
+          revision: ar-rev-gcs
+        vars:
+          skill: private-tf-test-skill
+        test_vars_overrides:
+          skill: bootstrapAgentRegistrySkill(t)
+        ignore_read_extra:
+          - scan_result
+
+parameters:
+  - name: location
+    type: String
+    description: |
+      The location of the resource.
+    required: true
+    url_param_only: true
+    immutable: true
+  - name: skill
+    type: String
+    description: |
+      The parent Skill identifier.
+    required: true
+    url_param_only: true
+    immutable: true
+  # Required in Terraform so that self_link, id_format, and import_format can
+  # deterministically resolve {{skill_revision_id}} without sending skillRevisionId
+  # in the JSON request body (url_param_only: true).
+  - name: skillRevisionId
+    type: String
+    description: |
+      Custom, user-defined unique revision identifier. In Terraform, this field is required. Format: 4-63 characters, matching regex `^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$`.
+    required: true
+    url_param_only: true
+    immutable: true
+
+properties:
+  - name: name
+    type: String
+    description: |
+      The resource name of the SkillRevision.
+      Format: `projects/{project}/locations/{location}/skills/{skill}/revisions/{revision}`
+    output: true
+  - name: archiveUploadSource
+    type: NestedObject
+    description: |
+      Direct write-only raw archive payload upload.
+    immutable: true
+    ignore_read: true
+    exactly_one_of:
+      - archive_upload_source
+      - gcs_source
+    properties:
+      - name: archiveContent
+        type: String
+        description: |
+          Write-only raw ZIP/TAR archive payload bytes (base64-encoded) containing the skill package.
+        required: true
+        immutable: true
+  - name: gcsSource
+    type: NestedObject
+    description: |
+      Specifications for Cloud Storage objects.
+    immutable: true
+    exactly_one_of:
+      - archive_upload_source
+      - gcs_source
+    properties:
+      - name: uri
+        type: String
+        description: |
+          Cloud Storage object URI. Format: `gs://{bucket_name}/{object_name}`
+        required: true
+        immutable: true
+      - name: generation
+        type: String
+        description: |
+          Cloud Storage object generation ID. If not specified, the latest generation is used.
+        default_from_api: true
+        immutable: true
+  - name: uid
+    type: String
+    description: |
+      Universally unique identifier (UUID4) for the skill revision.
+    output: true
+  - name: scanResult
+    type: NestedObject
+    description: |
+      Scan result of the skill revision.
+    output: true
+    properties:
+      - name: scanState
+        type: String
+        description: |
+          The state of the vulnerability check.
+        output: true
+      - name: scanTime
+        type: Time
+        description: |
+          The time when the scan was completed.
+        output: true
+      - name: errorMessage
+        type: String
+        description: |
+          The error message if the scan failed.
+        output: true
+      - name: findings
+        type: Array
+        description: |
+          The finding resource names for the skill revision.
+        output: true
+        item_type:
+          type: String
+  - name: sizeBytes
+    type: String
+    description: |
+      Size of the compiled zip payload in bytes (assists client download progress).
+    output: true
+  - name: state
+    type: String
+    description: |
+      The system-managed lifecycle state of this revision.
+    output: true
+  - name: sha256Hash
+    type: String
+    description: |
+      Cryptographic SHA-256 integrity and deduplication digest of the payload zip.
+    output: true
+  - name: createTime
+    type: Time
+    description: |
+      Revision creation timestamp.
+    output: true
+  - name: frontmatter
+    type: NestedObject
+    description: |
+      Extracted YAML frontmatter configuration snapshot.
+    output: true
+    properties:
+      - name: name
+        type: String
+        description: |
+          The name of the skill.
+        output: true
+      - name: description
+        type: String
+        description: |
+          Functional description.
+        output: true
+      - name: license
+        type: String
+        description: |
+          License.
+        output: true
+      - name: compatibility
+        type: String
+        description: |
+          Environmental dependencies or companion services.
+        output: true
+      - name: metadata
+        type: KeyValuePairs
+        description: |
+          Extensible flattened map mapping custom tags, authors, and version parameters.
+        output: true
