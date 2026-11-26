@@ -33,6 +33,7 @@ async:
     resource_inside_response: true
 autogen_status: Q29uZmlndXJhdGlvbg==
 autogen_async: true
+generate_list_resource: true
 custom_code:
   encoder: templates/terraform/encoders/licensemanager_configuration.go.tmpl
   post_read: templates/terraform/post_read/licensemanager_configuration.go.tmpl
