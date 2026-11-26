@@ -71,7 +71,7 @@ func DetectExhaustiveMissingTests(schemaDiff diff.SchemaDiff, resourceMap map[st
 		resourceDiff := schemaDiff[resourceName]
 		fullSchema := buildFullSchema(resourceDiff)
 		updatable := hasUpdate(resourceMap[resourceName], fullSchema)
-		targetFields := getExhaustiveTargetFields(resourceName, resourceDiff, updatable, includeChangedFields)
+		targetFields := getExhaustiveTargetFields(resourceName, resourceDiff, updatable, fullSchema, includeChangedFields)
 		if len(targetFields) == 0 {
 			continue
 		}
@@ -148,6 +148,7 @@ func getExhaustiveTargetFields(
 	resourceName string,
 	resourceDiff diff.ResourceDiff,
 	hasUpdate bool,
+	fullSchema map[string]*schema.Schema,
 	includeChangedFields bool,
 ) map[string]*ExhaustiveFieldStatus {
 	targets := make(map[string]*ExhaustiveFieldStatus)
@@ -176,7 +177,7 @@ func getExhaustiveTargetFields(
 			FieldPath:     fieldName,
 			IsNestedBlock: isNestedBlock,
 			Set:           TransitionResult{Status: StatusMissing},
-			Modify:        initialModifyStatus(newField, hasUpdate),
+			Modify:        initialFieldModifyStatus(fieldName, newField, hasUpdate, fullSchema),
 			Unset:         initialUnsetStatus(fieldName, newField),
 		}
 	}
@@ -209,7 +210,7 @@ func evaluateResourceTests(
 
 	omissionUnset := make(map[string]bool, len(sortedTargets))
 	for _, fieldPath := range sortedTargets {
-		omissionUnset[fieldPath] = usesOmissionUnset(fullSchema[fieldPath], hasUpdate)
+		omissionUnset[fieldPath] = usesOmissionUnset(fieldPath, fullSchema[fieldPath], hasUpdate, fullSchema)
 	}
 
 	var allResourceSteps []stepBlockRecord
