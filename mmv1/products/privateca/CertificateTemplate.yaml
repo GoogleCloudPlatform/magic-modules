@@ -27,6 +27,7 @@ self_link: projects/{{project}}/locations/{{location}}/certificateTemplates/{{na
 create_url: projects/{{project}}/locations/{{location}}/certificateTemplates?certificateTemplateId={{name}}
 update_mask: true
 update_verb: PATCH
+generate_list_resource: true
 iam_policy:
   method_name_separator: ':'
   allowed_iam_role: roles/privateca.templateUser
