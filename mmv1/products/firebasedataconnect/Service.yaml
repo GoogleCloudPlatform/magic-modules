@@ -50,6 +50,7 @@ deletion_policy_default: DEFAULT
 autogen_status: U2VydmljZQ==
 autogen_async: true
 include_in_tgc_next: true
+generate_list_resource: true
 custom_code:
   pre_delete: templates/terraform/pre_delete/firebasedataconnect_service.go.tmpl
 samples:
