@@ -22,6 +22,7 @@ self_link: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/clusters?clusterId={{cluster_id}}'
 update_verb: 'PATCH'
 update_mask: true
+generate_list_resource: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}'
 timeouts:
