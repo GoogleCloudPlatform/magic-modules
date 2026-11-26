@@ -431,6 +431,7 @@ properties:
             description: |
               If this field is set, the communication will be encrypted with TLS encryption
               and the server identity will be authenticated.
+            allow_empty_object: true
             properties:
               - name: caCertificate
                 type: String
@@ -439,12 +440,17 @@ properties:
                 immutable: true
                 sensitive: true
                 ignore_read: true
+              - name: serverCertificateHostname
+                type: String
+                description: |
+                  The hostname mentioned in the Subject or SAN extension of the server certificate.
+                  If this field is not provided, the hostname in the server certificate is not validated.
           - name: serverAndClientVerification
             type: NestedObject
             description: |
               If this field is set, the communication will be encrypted with TLS encryption
               and both the server identity and the client identity will be authenticated.
-            ignore_read: true
+            allow_empty_object: true
             properties:
               - name: clientCertificate
                 type: String
@@ -477,6 +483,11 @@ properties:
                 required: true
                 sensitive: true
                 ignore_read: true
+              - name: serverCertificateHostname
+                type: String
+                description: |
+                  The hostname mentioned in the Subject or SAN extension of the server certificate.
+                  If this field is not provided, the hostname in the server certificate is not validated.
   - name: salesforceProfile
     min_version: beta
     type: NestedObject
