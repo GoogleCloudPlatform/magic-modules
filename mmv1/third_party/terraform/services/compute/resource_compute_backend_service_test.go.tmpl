@@ -244,6 +244,18 @@ func TestAccComputeBackendService_withBackendAndPreferenceExternalManaged(t *tes
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				// Change only the preference (timeout stays the same) to check the
+				// update is detected and applied on its own.
+				Config: testAccComputeBackendService_withBackendAndPreference(em_suffix, "EXTERNAL_MANAGED", "DEFAULT", 20),
+				Check: resource.TestCheckTypeSetElemNestedAttrs(
+					"google_compute_backend_service.lipsum", "backend.*", map[string]string{"preference": "DEFAULT"}),
+			},
+			{
+				ResourceName:      "google_compute_backend_service.lipsum",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

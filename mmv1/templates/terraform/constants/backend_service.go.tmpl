@@ -84,6 +84,15 @@ func resourceGoogleComputeBackendServiceBackendHash(v interface{}) int {
 		// the hash function doesn't return something else.
 		buf.WriteString(fmt.Sprintf("%f-", v.(float64)))
 	}
+	// Only non-default preferences are added to the hash. An unset preference and
+	// "DEFAULT" mean the same thing to the API, so they must hash the same way to
+	// avoid a permanent diff, and leaving them out keeps the hash of existing
+	// backends unchanged.
+	if v, ok := m["preference"]; ok && v != nil {
+		if p := v.(string); p != "" && p != "DEFAULT" {
+			buf.WriteString(fmt.Sprintf("preference:%s-", p))
+		}
+	}
 	if v, ok := m["description"]; ok {
 		if v == nil {
 			v = ""
