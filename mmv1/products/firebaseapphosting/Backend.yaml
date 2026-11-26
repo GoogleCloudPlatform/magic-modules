@@ -21,6 +21,7 @@ create_url: projects/{{project}}/locations/{{location}}/backends?backendId={{bac
 delete_url: projects/{{project}}/locations/{{location}}/backends/{{backend_id}}?force=true
 update_mask: true
 update_verb: PATCH
+generate_list_resource: true
 id_format: projects/{{project}}/locations/{{location}}/backends/{{backend_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/backends/{{backend_id}}
