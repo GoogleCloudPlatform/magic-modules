@@ -1,0 +1,75 @@
+// Code to detach neg from any backend service
+backendsUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/regions/{{"{{"}}region{{"}}"}}/backendServices")
+if err != nil {
+    return err
+}
+
+backendServicesRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    Config:    config,
+    Method:    "GET",
+    Project:   project,
+    RawURL:    backendsUrl,
+    UserAgent: userAgent,
+})
+if err != nil {
+    return transport_tpg.HandleNotFoundError(err, d, "Error while trying to list available Backend Services")
+}
+
+if backendServices, ok := backendServicesRes["items"].([]interface{}); ok {
+    for _, backendServiceI := range backendServices {
+        log.Printf("Backend Service %+v\n", backendServiceI)
+        backendService := backendServiceI.(map[string]interface{})
+        if backends, ok := backendService["backends"].([]interface{}); ok {
+            obj := make(map[string]interface{})
+            backendSrvProject, backendSrvRegion, backendSrvName, err := tpgresource.GetLocationalResourcePropertiesFromSelfLinkString(backendService["selfLink"].(string))
+            if err != nil {
+                return err
+            }
+
+            filteredBackends := make([]interface{}, 0, len(backends))
+            for _, backendI := range backends {
+                backend := backendI.(map[string]interface{})
+                log.Printf("id %s   name %s  link %s      backend:%s", d.Id(), d.Get("name"), d.Get("self_link"), backend["group"].(string))
+
+                if !tpgresource.CompareSelfLinkRelativePaths("", d.Id(), backend["group"].(string), nil) {
+                    filteredBackends = append(filteredBackends, backendI)
+                }
+            }
+
+            obj["backends"] = filteredBackends
+
+            patchUrl := fmt.Sprintf("%sprojects/%s/regions/%s/backendServices/%s",
+                config.ComputeBasePath, backendSrvProject, backendSrvRegion, backendSrvName)
+
+            log.Println(patchUrl)
+
+            res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+                Config:    config,
+                Method:    "PATCH",
+                Project:   project,
+                RawURL:    patchUrl,
+                UserAgent: userAgent,
+                Timeout:   d.Timeout(schema.TimeoutDelete),
+                Headers:   headers,
+                Body:      obj,
+            })
+            if err != nil {
+                return fmt.Errorf("Error detaching regional NEG %s from backend service %s/%s/%s: %s", d.Get("name"), backendSrvProject, backendSrvRegion, backendSrvName, err.Error())
+            }
+
+            err = ComputeOperationWaitTime(
+                config, res, project, fmt.Sprintf("Detaching regional NEG from %s/%s/%s", backendSrvProject, backendSrvRegion, backendSrvName),
+                userAgent, d.Timeout(schema.TimeoutDelete))
+            if err != nil {
+                var opErr ComputeOperationError
+                if errors.As(err, &opErr) && len(opErr.Errors) == 1 && opErr.Errors[0].Code == "RESOURCE_NOT_FOUND" {
+                    log.Printf("[WARN] backend service %q was deleted while awaiting detach", backendSrvName)
+                    continue
+                }
+                return err
+            }
+        }
+    }
+}
+
+log.Print("ASDFASDFASDFASDFASDFASDFASDFASSDF=[]")
