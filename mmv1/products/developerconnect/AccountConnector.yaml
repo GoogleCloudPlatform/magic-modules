@@ -19,6 +19,7 @@ self_link: projects/{{project}}/locations/{{location}}/accountConnectors/{{accou
 create_url: projects/{{project}}/locations/{{location}}/accountConnectors?accountConnectorId={{account_connector_id}}
 update_mask: true
 update_verb: PATCH
+generate_list_resource: true
 import_format:
   - projects/{{project}}/locations/{{location}}/accountConnectors/{{account_connector_id}}
 async:
