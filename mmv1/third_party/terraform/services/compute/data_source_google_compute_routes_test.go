@@ -29,9 +29,10 @@ func TestAccDataSourceGoogleComputeRoutes_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("data.google_compute_routes.one", "routes.0.tags.0", "tf-test-tag"),
 					resource.TestCheckResourceAttr("data.google_compute_routes.one", "routes.0.route_type", "STATIC"),
 					resource.TestCheckResourceAttrSet("data.google_compute_routes.one", "routes.0.creation_timestamp"),
-					resource.TestCheckResourceAttrSet("data.google_compute_routes.one", "routes.0.network"),
+					resource.TestCheckResourceAttrPair("data.google_compute_routes.one", "routes.0.network", "google_compute_route.foobar", "network"),
+					// next_hop_gateway is only checked as set, because google_compute_route keeps the API's form of that link.
 					resource.TestCheckResourceAttrSet("data.google_compute_routes.one", "routes.0.next_hop_gateway"),
-					resource.TestCheckResourceAttrSet("data.google_compute_routes.one", "routes.0.self_link"),
+					resource.TestCheckResourceAttrPair("data.google_compute_routes.one", "routes.0.self_link", "google_compute_route.foobar", "self_link"),
 				),
 			},
 		},

@@ -208,27 +208,35 @@ func flattenComputeRoutesItem(route map[string]interface{}) map[string]interface
 	return map[string]interface{}{
 		"name":                             route["name"],
 		"description":                      route["description"],
-		"network":                          route["network"],
+		"network":                          flattenComputeRoutesLink(route["network"]),
 		"dest_range":                       route["destRange"],
 		"priority":                         route["priority"],
 		"tags":                             route["tags"],
-		"next_hop_gateway":                 route["nextHopGateway"],
-		"next_hop_instance":                route["nextHopInstance"],
+		"next_hop_gateway":                 flattenComputeRoutesLink(route["nextHopGateway"]),
+		"next_hop_instance":                flattenComputeRoutesLink(route["nextHopInstance"]),
 		"next_hop_ip":                      route["nextHopIp"],
-		"next_hop_vpn_tunnel":              route["nextHopVpnTunnel"],
-		"next_hop_ilb":                     route["nextHopIlb"],
-		"next_hop_network":                 route["nextHopNetwork"],
+		"next_hop_vpn_tunnel":              flattenComputeRoutesLink(route["nextHopVpnTunnel"]),
+		"next_hop_ilb":                     flattenComputeRoutesLink(route["nextHopIlb"]),
+		"next_hop_network":                 flattenComputeRoutesLink(route["nextHopNetwork"]),
 		"next_hop_peering":                 route["nextHopPeering"],
 		"next_hop_hub":                     route["nextHopHub"],
-		"next_hop_interconnect_attachment": route["nextHopInterconnectAttachment"],
+		"next_hop_interconnect_attachment": flattenComputeRoutesLink(route["nextHopInterconnectAttachment"]),
 		"next_hop_origin":                  route["nextHopOrigin"],
 		"next_hop_med":                     flattenComputeRoutesUint32(route["nextHopMed"]),
 		"next_hop_inter_region_cost":       flattenComputeRoutesUint32(route["nextHopInterRegionCost"]),
 		"route_type":                       route["routeType"],
 		"route_status":                     route["routeStatus"],
-		"self_link":                        route["selfLink"],
+		"self_link":                        flattenComputeRoutesLink(route["selfLink"]),
 		"creation_timestamp":               route["creationTimestamp"],
 	}
+}
+
+// flattenComputeRoutesLink returns a link to a Compute resource in its v1 form, whichever API version sent it.
+func flattenComputeRoutesLink(v interface{}) interface{} {
+	if s, ok := v.(string); ok {
+		return tpgresource.ConvertSelfLinkToV1(s)
+	}
+	return v
 }
 
 // flattenComputeRoutesUint32 returns a 32-bit unsigned value as decimal text, whether the API sent a number or a string.

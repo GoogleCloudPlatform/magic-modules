@@ -39,6 +39,8 @@ In addition to the arguments listed above, the following attributes are exported
 
 <a name="nested_routes"></a>The `routes` block supports:
 
+Links to Compute resources are returned in the `/compute/v1/` form in both the `google` and `google-beta` providers.
+
 * `name` - Name of the route.
 * `description` - Description of the route.
 * `network` - URL of the network that the route applies to.

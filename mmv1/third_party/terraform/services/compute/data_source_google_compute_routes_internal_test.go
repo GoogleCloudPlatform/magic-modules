@@ -17,7 +17,7 @@ import (
 func TestDataSourceGoogleComputeRoutesRead(t *testing.T) {
 	t.Parallel()
 
-	// The first route sets every field at once, which no real route does, so each mapping is checked.
+	// The first route sets every field at once, with links in the beta form, so each mapping and the conversion to v1 links are checked.
 	const page1JSON = `{
 		"kind": "compute#routeList",
 		"nextPageToken": "page-2",
@@ -26,32 +26,39 @@ func TestDataSourceGoogleComputeRoutesRead(t *testing.T) {
 			"id": "1001",
 			"name": "route-1",
 			"description": "first route",
-			"network": "https://www.googleapis.com/compute/v1/projects/test-project/global/networks/vpc-1",
+			"network": "https://www.googleapis.com/compute/beta/projects/test-project/global/networks/vpc-1",
 			"destRange": "10.10.0.0/16",
 			"priority": 900,
 			"tags": ["web", "db"],
-			"nextHopGateway": "https://www.googleapis.com/compute/v1/projects/test-project/global/gateways/default-internet-gateway",
-			"nextHopInstance": "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1-a/instances/vm-1",
+			"nextHopGateway": "https://www.googleapis.com/compute/beta/projects/test-project/global/gateways/default-internet-gateway",
+			"nextHopInstance": "https://www.googleapis.com/compute/beta/projects/test-project/zones/us-central1-a/instances/vm-1",
 			"nextHopIp": "10.0.0.5",
-			"nextHopVpnTunnel": "https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1/vpnTunnels/tunnel-1",
-			"nextHopIlb": "https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1/forwardingRules/ilb-1",
-			"nextHopNetwork": "https://www.googleapis.com/compute/v1/projects/test-project/global/networks/vpc-2",
+			"nextHopVpnTunnel": "https://www.googleapis.com/compute/beta/projects/test-project/regions/us-central1/vpnTunnels/tunnel-1",
+			"nextHopIlb": "https://www.googleapis.com/compute/beta/projects/test-project/regions/us-central1/forwardingRules/ilb-1",
+			"nextHopNetwork": "https://www.googleapis.com/compute/beta/projects/test-project/global/networks/vpc-2",
 			"nextHopPeering": "peering-1",
 			"nextHopHub": "projects/test-project/locations/global/hubs/hub-1",
-			"nextHopInterconnectAttachment": "https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1/interconnectAttachments/attachment-1",
+			"nextHopInterconnectAttachment": "https://www.googleapis.com/compute/beta/projects/test-project/regions/us-central1/interconnectAttachments/attachment-1",
 			"nextHopOrigin": "IGP",
 			"nextHopMed": 50,
 			"nextHopInterRegionCost": 200,
 			"routeType": "STATIC",
 			"routeStatus": "ACTIVE",
-			"selfLink": "https://www.googleapis.com/compute/v1/projects/test-project/global/routes/route-1",
+			"selfLink": "https://www.googleapis.com/compute/beta/projects/test-project/global/routes/route-1",
 			"creationTimestamp": "2026-11-10T00:00:00.000-08:00"
 		}]
 	}`
-	// The second route sends one metric as a string and the other as the largest 32-bit number.
+	// The second route sends a v1 link, an IP address as its load balancer, one metric as a string and the other as the largest 32-bit number.
 	const page2JSON = `{
 		"kind": "compute#routeList",
-		"items": [{"name": "route-2", "destRange": "10.20.0.0/16", "nextHopMed": "70", "nextHopInterRegionCost": 4294967295}]
+		"items": [{
+			"name": "route-2",
+			"network": "https://www.googleapis.com/compute/v1/projects/test-project/global/networks/vpc-1",
+			"destRange": "10.20.0.0/16",
+			"nextHopIlb": "10.0.0.9",
+			"nextHopMed": "70",
+			"nextHopInterRegionCost": 4294967295
+		}]
 	}`
 
 	var mu sync.Mutex
@@ -137,7 +144,16 @@ func TestDataSourceGoogleComputeRoutesRead(t *testing.T) {
 		t.Errorf("first route = %#v, want %#v", routes[0], wantFirst)
 	}
 	second := routes[1].(map[string]interface{})
-	for field, want := range map[string]string{"name": "route-2", "next_hop_med": "70", "next_hop_inter_region_cost": "4294967295"} {
+	wantSecond := map[string]string{
+		"name":                       "route-2",
+		"network":                    "https://www.googleapis.com/compute/v1/projects/test-project/global/networks/vpc-1",
+		"next_hop_gateway":           "",
+		"next_hop_ilb":               "10.0.0.9",
+		"next_hop_med":               "70",
+		"next_hop_inter_region_cost": "4294967295",
+		"self_link":                  "",
+	}
+	for field, want := range wantSecond {
 		if got := second[field]; got != want {
 			t.Errorf("second route %s = %q, want %q", field, got, want)
 		}
