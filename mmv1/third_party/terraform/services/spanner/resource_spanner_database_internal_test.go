@@ -122,7 +122,7 @@ func TestSpannerDatabase_resourceSpannerEncryptionConfigCustomDiffFuncForceNew(t
 				"encryption_config.0.kms_key_name":  "key1",
 				"encryption_config.0.kms_key_names": []interface{}{"key2"},
 			},
-			forcenew: true,
+			forcenew: false,
 		},
 	}
 
