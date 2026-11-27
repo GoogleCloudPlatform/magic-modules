@@ -21,6 +21,16 @@ func TestAccVertexAICacheConfig_basic(t *testing.T) {
 		"region":        "europe-west4",
 		"disable_cache": false,
 	}
+	contextRetentionEphemeral := map[string]interface{}{
+		"project":        envvar.GetTestProjectFromEnv(),
+		"region":         "europe-west4",
+		"retention_type": "EPHEMERAL",
+	}
+	contextRetentionDurable := map[string]interface{}{
+		"project":        envvar.GetTestProjectFromEnv(),
+		"region":         "europe-west4",
+		"retention_type": "DURABLE",
+	}
 	contextRegionUpdated := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
 		"region":        "asia-northeast1",
@@ -48,6 +58,34 @@ func TestAccVertexAICacheConfig_basic(t *testing.T) {
 			},
 			{
 				Config: testAccVertexAICacheConfig_region(contextRegion),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_vertex_ai_cache_config.cache_config", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_vertex_ai_cache_config.cache_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"region"},
+			},
+			{
+				Config: testAccVertexAICacheConfig_retention(contextRetentionEphemeral),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_vertex_ai_cache_config.cache_config", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_vertex_ai_cache_config.cache_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"region"},
+			},
+			{
+				Config: testAccVertexAICacheConfig_retention(contextRetentionDurable),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_vertex_ai_cache_config.cache_config", plancheck.ResourceActionUpdate),
@@ -95,6 +133,20 @@ resource "google_vertex_ai_cache_config" "cache_config" {
   project       = "%{project}"
   region        = "%{region}"
   disable_cache = %{disable_cache}
+}
+`, context)
+}
+
+func testAccVertexAICacheConfig_retention(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_cache_config" "cache_config" {
+  project       = "%{project}"
+  region        = "%{region}"
+  disable_cache = false
+
+  retention_config {
+    retention_type = "%{retention_type}"
+  }
 }
 `, context)
 }
