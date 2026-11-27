@@ -47,4 +47,4 @@ See [google_compute_interconnect_attachment](https://registry.terraform.io/provi
 * `region` is the name of the region, not a link to it.
 * `labels` holds every label of the attachment.
 * Links to Compute resources, such as `router` and `interconnect`, are returned in the `/compute/v1/` form in both the `google` and `google-beta` providers.
-* The `project`, `deletion_policy`, `params`, `candidate_subnets`, `subnet_length`, `terraform_labels` and `effective_labels` arguments and attributes of that resource are not part of each attachment.
+* The `id`, `project`, `deletion_policy`, `params`, `candidate_subnets`, `subnet_length`, `terraform_labels` and `effective_labels` arguments and attributes of that resource are not part of each attachment.

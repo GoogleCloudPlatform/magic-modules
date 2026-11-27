@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/registry"
@@ -16,6 +17,8 @@ func DataSourceGoogleComputeInterconnectAttachments() *schema.Resource {
 	attachmentSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceComputeInterconnectAttachment().Schema)
 	// These are arguments of the resource that the API does not return, or that only describe its own configuration.
 	tpgresource.DeleteFieldsFromSchema(attachmentSchema, "project", "deletion_policy", "params", "candidate_subnets", "subnet_length", "terraform_labels", "effective_labels")
+	// The description of the resource sends the reader to effective_labels, which is not kept here.
+	attachmentSchema["labels"].Description = `The labels of the attachment.`
 
 	return &schema.Resource{
 		Read: dataSourceGoogleComputeInterconnectAttachmentsRead,
@@ -86,6 +89,11 @@ func dataSourceGoogleComputeInterconnectAttachmentsRead(d *schema.ResourceData, 
 			return fmt.Errorf("Error retrieving list of interconnect attachments: %w", err)
 		}
 
+		// A region the API could not reach must fail the read: otherwise it looks like a region with no attachments.
+		if unreachables, _ := res["unreachables"].([]interface{}); len(unreachables) > 0 {
+			return fmt.Errorf("Error retrieving list of interconnect attachments: these could not be reached: %v", unreachables)
+		}
+
 		items, err := computeInterconnectAttachmentsPageItems(res["items"])
 		if err != nil {
 			return err
@@ -133,6 +141,9 @@ func computeInterconnectAttachmentsPageItems(items interface{}) ([]map[string]in
 			scoped, ok := entry.(map[string]interface{})
 			if !ok {
 				return nil, fmt.Errorf("Error reading list of interconnect attachments: expected an object for %s, got %T", scope, entry)
+			}
+			if warning, _ := scoped["warning"].(map[string]interface{}); warning["code"] == "UNREACHABLE" {
+				return nil, fmt.Errorf("Error reading list of interconnect attachments: %s could not be reached: %v", scope, warning["message"])
 			}
 			// A region with no attachments carries a warning and no list.
 			switch list := scoped["interconnectAttachments"].(type) {
@@ -211,7 +222,7 @@ func flattenComputeInterconnectAttachmentsLink(v interface{}) interface{} {
 	return v
 }
 
-// sortComputeInterconnectAttachmentsApplianceMappings orders the appliance mappings by VLAN id: the API returns them as an object, which has no order.
+// sortComputeInterconnectAttachmentsApplianceMappings orders the appliance mappings by VLAN: the API returns them as an object, which has no order.
 func sortComputeInterconnectAttachmentsApplianceMappings(l2Forwarding interface{}) {
 	blocks, _ := l2Forwarding.([]interface{})
 	for _, block := range blocks {
@@ -220,9 +231,12 @@ func sortComputeInterconnectAttachmentsApplianceMappings(l2Forwarding interface{
 		sort.Slice(mappings, func(i, j int) bool {
 			a, _ := mappings[i].(map[string]interface{})["vlan_id"].(string)
 			b, _ := mappings[j].(map[string]interface{})["vlan_id"].(string)
-			aTag, aErr := strconv.Atoi(a)
-			bTag, bErr := strconv.Atoi(b)
-			if aErr == nil && bErr == nil {
+			// A key is one VLAN tag or a range such as 4001-4094, so its first tag orders it and the text breaks a tie.
+			aFirst, _, _ := strings.Cut(a, "-")
+			bFirst, _, _ := strings.Cut(b, "-")
+			aTag, _ := strconv.Atoi(aFirst)
+			bTag, _ := strconv.Atoi(bFirst)
+			if aTag != bTag {
 				return aTag < bTag
 			}
 			return a < b

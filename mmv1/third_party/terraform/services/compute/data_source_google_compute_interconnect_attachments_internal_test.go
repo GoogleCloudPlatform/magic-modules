@@ -60,6 +60,7 @@ func TestDataSourceGoogleComputeInterconnectAttachmentsRead(t *testing.T) {
 				"applianceMappings": {
 					"1000": {"name": "appliance-1000", "applianceIpAddress": "10.0.0.4"},
 					"30": {"name": "appliance-30"},
+					"4-5": {"name": "appliance-4-5"},
 					"200": {
 						"name": "appliance-200",
 						"applianceIpAddress": "10.0.0.3",
@@ -146,6 +147,19 @@ func TestDataSourceGoogleComputeInterconnectAttachmentsRead(t *testing.T) {
 			_, _ = w.Write([]byte(`{"items": ["not-an-object"]}`))
 		case "/compute/v1/projects/bad-scope/aggregated/interconnectAttachments":
 			_, _ = w.Write([]byte(`{"items": {"regions/europe-west1": "not-an-object"}}`))
+		case "/compute/v1/projects/empty-project/regions/europe-west1/interconnectAttachments":
+			_, _ = w.Write([]byte(`{"kind": "compute#interconnectAttachmentList"}`))
+		case "/compute/v1/projects/bad-items/aggregated/interconnectAttachments":
+			_, _ = w.Write([]byte(`{"items": "not-a-list"}`))
+		case "/compute/v1/projects/bad-scope-list/aggregated/interconnectAttachments":
+			_, _ = w.Write([]byte(`{"items": {"regions/europe-west1": {"interconnectAttachments": "not-a-list"}}}`))
+		case "/compute/v1/projects/unreachable-scope/aggregated/interconnectAttachments":
+			_, _ = w.Write([]byte(`{"items": {
+				"regions/europe-west1": {"interconnectAttachments": [{"name": "eu-a"}]},
+				"regions/us-central1": {"warning": {"code": "UNREACHABLE", "message": "Scope regions/us-central1 is unreachable."}}
+			}}`))
+		case "/compute/v1/projects/unreachable-list/aggregated/interconnectAttachments":
+			_, _ = w.Write([]byte(`{"items": {"regions/europe-west1": {"interconnectAttachments": [{"name": "eu-a"}]}}, "unreachables": ["regions/us-central1"]}`))
 		case "/compute/v1/projects/bad-scope-item/aggregated/interconnectAttachments":
 			_, _ = w.Write([]byte(`{"items": {"regions/europe-west1": {"interconnectAttachments": ["not-an-object"]}}}`))
 		default:
@@ -229,8 +243,14 @@ func TestDataSourceGoogleComputeInterconnectAttachmentsRead(t *testing.T) {
 			"tunnel_endpoint_ip_address":   "10.0.0.1",
 			"default_appliance_ip_address": "10.0.0.2",
 			"geneve_header":                []interface{}{map[string]interface{}{"vni": 42}},
-			// The VLAN ids are ordered as numbers: as text, 1000 would come before 200 and 30.
+			// The keys are ordered by their first VLAN tag as a number: a key can be a range, and as text 1000 would come first.
 			"appliance_mappings": []interface{}{
+				map[string]interface{}{
+					"vlan_id":                          "4-5",
+					"name":                             "appliance-4-5",
+					"appliance_ip_address":             "",
+					"inner_vlan_to_appliance_mappings": []interface{}{},
+				},
 				map[string]interface{}{
 					"vlan_id":                          "30",
 					"name":                             "appliance-30",
@@ -257,6 +277,13 @@ func TestDataSourceGoogleComputeInterconnectAttachmentsRead(t *testing.T) {
 	}
 	if !reflect.DeepEqual(first, wantFirst) {
 		t.Errorf("first attachment = %#v, want %#v", first, wantFirst)
+	}
+	// This names the field when the exact comparison above fails because the schema gained one.
+	mapped := flattenComputeInterconnectAttachmentsItem(map[string]interface{}{}, d, cfg)
+	for field := range ds.Schema["interconnect_attachments"].Elem.(*schema.Resource).Schema {
+		if _, ok := mapped[field]; !ok {
+			t.Errorf("flattenComputeInterconnectAttachmentsItem does not set %q: map it there or remove it from the schema", field)
+		}
 	}
 
 	second := d.Get("interconnect_attachments").([]interface{})[1].(map[string]interface{})
@@ -311,6 +338,15 @@ func TestDataSourceGoogleComputeInterconnectAttachmentsRead(t *testing.T) {
 		t.Errorf("project = %q, want the project argument %q", got, want)
 	}
 
+	// The list of one region has no items key at all when the region is empty.
+	d = schema.TestResourceDataRaw(t, ds.Schema, map[string]interface{}{"project": "empty-project", "region": "europe-west1"})
+	if err := ds.Read(d, cfg); err != nil {
+		t.Fatalf("Read of a region with no attachments returned an error: %s", err)
+	}
+	if got := d.Get("interconnect_attachments").([]interface{}); len(got) != 0 {
+		t.Errorf("empty region returned %#v, want no attachments", got)
+	}
+
 	for _, tc := range []struct {
 		name   string
 		config map[string]interface{}
@@ -318,6 +354,10 @@ func TestDataSourceGoogleComputeInterconnectAttachmentsRead(t *testing.T) {
 		{"a list item that is not an object", map[string]interface{}{"project": "bad-item", "region": "europe-west1"}},
 		{"a region entry that is not an object", map[string]interface{}{"project": "bad-scope"}},
 		{"an item of a region that is not an object", map[string]interface{}{"project": "bad-scope-item"}},
+		{"items that are neither a list nor an object", map[string]interface{}{"project": "bad-items"}},
+		{"attachments of a region that are not a list", map[string]interface{}{"project": "bad-scope-list"}},
+		{"a region the API marks as unreachable", map[string]interface{}{"project": "unreachable-scope"}},
+		{"a list of unreachable regions", map[string]interface{}{"project": "unreachable-list"}},
 		{"a project the API does not know", map[string]interface{}{"project": "missing-project"}},
 	} {
 		d = schema.TestResourceDataRaw(t, ds.Schema, tc.config)
