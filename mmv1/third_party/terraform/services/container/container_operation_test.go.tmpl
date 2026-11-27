@@ -1,0 +1,84 @@
+package container
+
+import (
+	"context"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+	"time"
+
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+
+{{ if eq $.TargetVersionName `ga` }}
+	"google.golang.org/api/container/v1"
+{{- else }}
+	container "google.golang.org/api/container/v1beta1"
+{{- end }}
+)
+
+func TestContainerOperationWait(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		op      map[string]interface{}
+		wantErr string
+	}{
+		"structured error": {
+			op: map[string]interface{}{
+				"error": map[string]interface{}{"code": 9, "message": "failed update"},
+			},
+			wantErr: "Error waiting for updating GKE cluster: Error code 9, message: failed update",
+		},
+		"structured error and status message": {
+			op: map[string]interface{}{
+				"statusMessage": "failed update",
+				"error":         map[string]interface{}{"code": 9, "message": "failed update"},
+			},
+			wantErr: "Error waiting for updating GKE cluster: Error code 9, message: failed update",
+		},
+		"status message only": {
+			op: map[string]interface{}{
+				"statusMessage": "failed update",
+			},
+			wantErr: "Error waiting for updating GKE cluster: failed update",
+		},
+		"no error": {
+			op: map[string]interface{}{},
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			op := map[string]interface{}{"name": "operation-1", "status": "DONE"}
+			for k, v := range tc.op {
+				op[k] = v
+			}
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				_ = json.NewEncoder(w).Encode(op)
+			}))
+			defer server.Close()
+
+			config := &transport_tpg.Config{
+				Context:         context.Background(),
+				Client:          server.Client(),
+				CustomEndpoints: map[string]string{Product.CustomEndpointField: server.URL + "/v1/"},
+			}
+			err := ContainerOperationWait(config, &container.Operation{Name: "operation-1", Status: "RUNNING"}, "test-project", "us-central1", "updating GKE cluster", "test-user-agent", time.Minute)
+
+			if tc.wantErr == "" {
+				if err != nil {
+					t.Fatalf("expected no error, got %q", err)
+				}
+				return
+			}
+			if err == nil {
+				t.Fatalf("expected error %q, got nil", tc.wantErr)
+			}
+			if err.Error() != tc.wantErr {
+				t.Errorf("expected error %q, got %q", tc.wantErr, err.Error())
+			}
+		})
+	}
+}
