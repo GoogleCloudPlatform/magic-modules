@@ -1592,7 +1592,7 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 			if len(matches) < 4 {
 				return nil, fmt.Errorf("Error reading instance group manage URL '%q'", url)
 			}
-			if strings.HasPrefix("gk3", matches[3]) {
+			if strings.HasPrefix(matches[3], "gk3") {
 				// IGM is autopilot so we know it will not be found, skip it
 				continue
 			}

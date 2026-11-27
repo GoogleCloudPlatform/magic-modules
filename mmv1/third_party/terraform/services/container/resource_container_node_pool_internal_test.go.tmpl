@@ -210,6 +210,21 @@ func TestUnitFlattenNodePool(t *testing.T) {
 			},
 			expectedManagedIgmUrls: []string{},
 		},
+		{
+			name: "Autopilot (gk3) IGMs are skipped without fetching",
+			d:    schema.TestResourceDataRaw(t, resourceSchema, map[string]interface{}{}),
+			np: &container.NodePool{
+				Name: "pool-1",
+				InstanceGroupUrls: []string{
+					"https://www.googleapis.com/compute/v1/projects/ci-project/zones/us-central1-a/instanceGroupManagers/gk3-pool-1-grp",
+				},
+				Locations: []string{"us-central1-a"},
+			},
+			prepopulateCache:       false, // Cache is empty, proving we skipped the API fetch
+			expectedNodeCount:      0,
+			expectedIgmUrls:        []string{},
+			expectedManagedIgmUrls: []string{},
+		},
 	}
 
 	for _, tc := range cases {
