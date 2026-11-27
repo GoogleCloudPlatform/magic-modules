@@ -65,3 +65,21 @@ properties:
     description: |
       If set to true, disables GenAI caching. Otherwise caching is enabled.
     required: true
+  - name: retentionConfig
+    type: NestedObject
+    description: |
+      Project-level retention for implicit caching. Retention only applies while caching is
+      enabled (`disable_cache = false`). If not set, the project's current retention is left
+      unchanged (`DURABLE` unless it was changed).
+    default_from_api: true
+    properties:
+      - name: retentionType
+        type: Enum
+        description: |
+          Retention type applied to implicit cache traffic for this project. `EPHEMERAL` restricts
+          implicit caching to in-memory retention only. `DURABLE` also allows cached data to be
+          kept in durable storage.
+        required: true
+        enum_values:
+          - EPHEMERAL
+          - DURABLE
