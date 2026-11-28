@@ -16,14 +16,15 @@ import (
 
 func TestAccMonitoringAlertPolicy(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
-		"basic":    testAccMonitoringAlertPolicy_basic,
-		"full":     testAccMonitoringAlertPolicy_full,
-		"update":   testAccMonitoringAlertPolicy_update,
-		"mql":      testAccMonitoringAlertPolicy_mql,
-		"log":      testAccMonitoringAlertPolicy_log,
-		"forecast": testAccMonitoringAlertPolicy_forecast,
-		"promql":   testAccMonitoringAlertPolicy_promql,
-		"sql":      testAccMonitoringAlertPolicy_sql,
+		"basic":             testAccMonitoringAlertPolicy_basic,
+		"full":              testAccMonitoringAlertPolicy_full,
+		"update":            testAccMonitoringAlertPolicy_update,
+		"mql":               testAccMonitoringAlertPolicy_mql,
+		"log":               testAccMonitoringAlertPolicy_log,
+		"forecast":          testAccMonitoringAlertPolicy_forecast,
+		"promql":            testAccMonitoringAlertPolicy_promql,
+		"sql":               testAccMonitoringAlertPolicy_sql,
+		"data_source_basic": testAccDataSourceGoogleMonitoringAlertPolicies_basic,
 	}
 
 	for name, tc := range testCases {
